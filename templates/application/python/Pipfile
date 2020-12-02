@@ -9,6 +9,7 @@ flask = "*"
 flask-migrate = "*"
 gunicorn = "*"
 flask-sqlalchemy = "*"
+psycopg2-binary = "*"
 
 [dev-packages]
 ipython = "*"

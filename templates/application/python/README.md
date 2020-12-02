@@ -3,8 +3,9 @@ Development
 - Create db:
   - `brew install postgresql`
   - `psql postgres` and then run in psql console
-    - `create role postgres login createdb;`
-    - `create database main;`
+    - `create role app login createdb;`
+    - `GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO app;`
+    - `create database app;`
 
 - Setup env:
   - Set up python properly via https://opensource.com/article/19/5/python-3-default-mac#what-to-do
