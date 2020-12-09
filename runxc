@@ -1,3 +1,4 @@
+#! python
 import click
 from PyInquirer import prompt, print_json
 import sys
