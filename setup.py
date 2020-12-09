@@ -5,15 +5,15 @@ https://github.com/pypa/sampleproject
 Modified by Madoshakalaka@Github (dependency links added)
 """
 
-# Always prefer setuptools over distutils
-from setuptools import setup, find_packages
-from os import path
-
 # io.open is needed for projects that support Python 2.7
 # It ensures open() defaults to text mode with universal newlines,
 # and accepts an argument to specify the text encoding
 # Python 3 only projects can skip this import
 from io import open
+from os import path
+
+# Always prefer setuptools over distutils
+from setuptools import find_packages, setup
 
 here = path.abspath(path.dirname(__file__))
 
@@ -118,8 +118,7 @@ setup(
     #
     #   py_modules=["my_module"],
     #
-    # packages=find_packages(exclude=["contrib", "docs", "tests"]),  # Required
-    packages=["runxc"],  # Required
+    packages=find_packages(exclude=["contrib", "docs", "tests"]),  # Required
     # Specify which Python versions you support. In contrast to the
     # 'Programming Language' classifiers above, 'pip install' will check this
     # and refuse to install the project if the version does not match. If you
@@ -158,8 +157,8 @@ setup(
     # a list of one or more dependency_links URLs where the package can
     # be downloaded, along with some additional hints, and setuptools
     # will find and install the package correctly.
-    # see https://python-packaging.readthedocs.io/en/latest/dependencies.html#packages-not-on-pypi
-    #
+    # see https://python-packaging.readthedocs.io/en/latest/dependencies.html\
+    # #packages-not-on-pypi
     dependency_links=[],
     # If using Python 2.6 or earlier, then these have to be included in
     # MANIFEST.in as well.

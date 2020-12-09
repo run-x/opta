@@ -5,6 +5,10 @@ verify_ssl = true
 
 [dev-packages]
 pipenv-setup = "*"
+isort = "*"
+flake8 = "*"
+mypy = "*"
+black = "*"
 
 [packages]
 pyinquirer = "*"
@@ -12,3 +16,6 @@ click = "*"
 
 [requires]
 python_version = "3.8"
+
+[pipenv]
+allow_prereleases = true

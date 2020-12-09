@@ -1,0 +1,18 @@
+[tool.black]
+line-length = 90
+target-version = ['py38']
+exclude = '''
+(
+    .*\/migrations\/.*
+    | env\/.*
+    | .*\/node_modules\/.*
+)
+'''
+
+[tool.isort]
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+line_length = 90
+skip_glob = ['**/migrations/**', '**/node_modules**']
