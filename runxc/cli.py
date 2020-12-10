@@ -3,17 +3,21 @@ import shutil
 from typing import Any, Mapping
 
 import click
+import yaml
 from PyInquirer import prompt
 
 TEMPLATE_DIR = os.environ.get("RUNXC_TEMPLATE_DIR")
 
 
 @click.command()
-def main() -> int:
+@click.option(
+    "--overwrite", is_flag=True, default=False, help="Overwrite existing output dir"
+)
+def main(overwrite: bool) -> int:
     """Microservice Generator"""
     print(
-        "Welcome to runxc. Please answer the following \
-          questions to generate your service."
+        "Welcome to runxc. Please answer the following "
+        "questions to generate your service."
     )
 
     questions = [
@@ -57,16 +61,19 @@ def main() -> int:
 
     answers = prompt(questions)
     print(answers)
-    generate(answers)
+    generate(answers, overwrite)
 
     print("Generated!")
 
     return 0
 
 
-def generate(answers: Mapping[str, Any]) -> None:
+def generate(answers: Mapping[str, Any], overwrite: bool) -> None:
     if os.path.exists(answers["outputDir"]):
-        raise Exception("Output dir already exists!")
+        if not overwrite:
+            raise Exception("Output dir already exists!")
+        else:
+            shutil.rmtree(answers["outputDir"])
 
     # Copy application
     shutil.copytree(
@@ -84,6 +91,20 @@ def generate(answers: Mapping[str, Any]) -> None:
     if answers["infra"]:
         # Copy infra
         shutil.copytree(f"{TEMPLATE_DIR}/infra", f"{answers['outputDir']}/infra")
+
+    # Generate config
+    with open(f"{answers['outputDir']}/runxcconfig.yaml", "w") as f:
+        f.write(
+            yaml.dump(
+                {
+                    "service_name": answers["name"],
+                    "language": answers["language"],
+                    "gen_config": answers,
+                }
+            )
+        )
+
+    # TODO README, wrapper
 
 
 if __name__ == "__main__":
