@@ -1,6 +1,11 @@
+import os
+import shutil
+from typing import Any, Mapping
+
 import click
-import pkg_resources
 from PyInquirer import prompt
+
+TEMPLATE_DIR = os.environ.get("RUNXC_TEMPLATE_DIR")
 
 
 @click.command()
@@ -19,25 +24,66 @@ def main() -> int:
             "default": "myservice",
         },
         {
+            "type": "input",
+            "name": "outputDir",
+            "message": "Output directory",
+            "default": lambda x: f"./{x['name']}",
+        },
+        {
             "type": "list",
             "name": "language",
             "message": "Language",
             "choices": ["python"],
         },
         {
-            "type": "input",
-            "name": "outputDir",
-            "message": "Output directory",
-            "default": lambda x: f"./{x['name']}",
+            "type": "confirm",
+            "name": "build",
+            "message": "Docker build template",
+            "default": True,
+        },
+        {
+            "type": "confirm",
+            "name": "deploy",
+            "message": "Kubernetes deploy template",
+            "default": True,
+        },
+        {
+            "type": "confirm",
+            "name": "infra",
+            "message": "Terraform infra template",
+            "default": True,
         },
     ]
 
     answers = prompt(questions)
-    print(answers["language"])
-    print(answers["outputDir"])
+    print(answers)
+    generate(answers)
 
-    print(pkg_resources.resource_filename(__name__, "templates/application/meow.py"))
+    print("Generated!")
+
     return 0
+
+
+def generate(answers: Mapping[str, Any]) -> None:
+    if os.path.exists(answers["outputDir"]):
+        raise Exception("Output dir already exists!")
+
+    # Copy application
+    shutil.copytree(
+        f"{TEMPLATE_DIR}/application/{answers['language']}", f"{answers['outputDir']}/"
+    )
+
+    if answers["build"]:
+        # Copy build
+        shutil.copytree(f"{TEMPLATE_DIR}/build", f"{answers['outputDir']}/build")
+
+    if answers["deploy"]:
+        # Copy deploy
+        shutil.copytree(f"{TEMPLATE_DIR}/deploy", f"{answers['outputDir']}/deploy")
+
+    if answers["infra"]:
+        # Copy infra
+        shutil.copytree(f"{TEMPLATE_DIR}/infra", f"{answers['outputDir']}/infra")
 
 
 if __name__ == "__main__":
