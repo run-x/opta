@@ -46,12 +46,6 @@ def gen(overwrite: bool) -> int:
         },
         {
             "type": "confirm",
-            "name": "build",
-            "message": "Docker build template",
-            "default": True,
-        },
-        {
-            "type": "confirm",
             "name": "deploy",
             "message": "Kubernetes deploy template",
             "default": True,
@@ -62,6 +56,7 @@ def gen(overwrite: bool) -> int:
             "message": "Terraform infra template",
             "default": True,
         },
+        {"type": "input", "name": "gcp_project", "message": "GCP project"},
     ]
 
     answers = prompt(questions)
@@ -85,10 +80,6 @@ def _generate(answers: Mapping[str, Any], overwrite: bool) -> None:
         f"{TEMPLATE_DIR}/application/{answers['language']}", f"{answers['outputDir']}/"
     )
 
-    if answers["build"]:
-        # Copy build
-        shutil.copytree(f"{TEMPLATE_DIR}/build", f"{answers['outputDir']}/build")
-
     if answers["deploy"]:
         # Copy deploy
         shutil.copytree(f"{TEMPLATE_DIR}/deploy", f"{answers['outputDir']}/deploy")
@@ -105,6 +96,8 @@ def _generate(answers: Mapping[str, Any], overwrite: bool) -> None:
                     "service_name": answers["name"],
                     "language": answers["language"],
                     "gen_config": answers,
+                    "cloud": "gcp",
+                    "gcp_project": answers["gcp_project"],
                 },
                 indent=2,
             )
