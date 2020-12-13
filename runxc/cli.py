@@ -75,6 +75,9 @@ def _generate(answers: Mapping[str, Any], overwrite: bool) -> None:
         else:
             shutil.rmtree(answers["outputDir"])
 
+    if TEMPLATE_DIR is None or not os.path.exists(TEMPLATE_DIR):
+        raise Exception("Template dir doesn't exist!")
+
     # Copy application
     shutil.copytree(
         f"{TEMPLATE_DIR}/application/{answers['language']}", f"{answers['outputDir']}/"
