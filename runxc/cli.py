@@ -57,6 +57,9 @@ def gen(overwrite: bool) -> int:
             "default": True,
         },
         {"type": "input", "name": "gcp_project", "message": "GCP project"},
+        {"type": "input", "name": "gcp_network", "message": "GCP network"},
+        {"type": "input", "name": "terraform_bucket", "message": "Terraform bucket"},
+        {"type": "input", "name": "terraform_prefix", "message": "Terraform prefix"},
     ]
 
     answers = prompt(questions)
@@ -101,6 +104,11 @@ def _generate(answers: Mapping[str, Any], overwrite: bool) -> None:
                     "gen_config": answers,
                     "cloud": "gcp",
                     "gcp_project": answers["gcp_project"],
+                    "gcp_network": answers["gcp_network"],
+                    "terraform": {
+                        "bucket": answers["terraform_bucket"],
+                        "prefix": answers["terraform_prefix"],
+                    },
                 },
                 indent=2,
             )
