@@ -42,7 +42,13 @@ def gen(overwrite: bool) -> int:
             "type": "list",
             "name": "language",
             "message": "Language",
-            "choices": ["python"],
+            "choices": ["python", "java", "go"],
+        },
+        {
+            "type": "list",
+            "name": "framework",
+            "message": "Framework",
+            "choices": ["flask", "django", "grpc"],
         },
         {
             "type": "confirm",
@@ -56,10 +62,39 @@ def gen(overwrite: bool) -> int:
             "message": "Terraform infra template",
             "default": True,
         },
-        {"type": "input", "name": "gcp_project", "message": "GCP project"},
-        {"type": "input", "name": "gcp_network", "message": "GCP network"},
-        {"type": "input", "name": "terraform_bucket", "message": "Terraform bucket"},
-        {"type": "input", "name": "terraform_prefix", "message": "Terraform prefix"},
+        {
+            "type": "checkbox",
+            "name": "infra_config",
+            "message": "Terraform infra resources",
+            "choices": [
+                {"name": "K8s cluster"},
+                {"name": "Postgres database", "checked": True},
+            ],
+        },
+        {
+            "type": "input",
+            "name": "gcp_project",
+            "message": "GCP project",
+            "default": "catalog-289423",
+        },
+        {
+            "type": "input",
+            "name": "gcp_network",
+            "message": "GCP network",
+            "default": "projects/catalog-289423/global/networks/pg-private-network",
+        },
+        {
+            "type": "input",
+            "name": "terraform_bucket",
+            "message": "Terraform bucket",
+            "default": "runx_terraform_state",
+        },
+        {
+            "type": "input",
+            "name": "terraform_prefix",
+            "message": "Terraform prefix",
+            "default": lambda x: x["name"],
+        },
     ]
 
     answers = prompt(questions)
@@ -72,6 +107,14 @@ def gen(overwrite: bool) -> int:
 
 
 def _generate(answers: Mapping[str, Any], overwrite: bool) -> None:
+    if (
+        answers["language"] != "python"
+        or answers["framework"] != "flask"
+        or len(answers["infra_config"]) != 1
+        or answers["infra_config"][0] != "Postgres database"
+    ):
+        raise Exception("Not supported")
+
     if os.path.exists(answers["outputDir"]):
         if not overwrite:
             raise Exception("Output dir already exists!")
