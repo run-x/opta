@@ -55,10 +55,7 @@ class Module:
 
         if os.path.exists(f"{self.path}/README.md"):
             with open(f"{outputDir}/README.md", "a") as f:
-                f.write(self.config["description"])
-                f.write("\n")
-                f.write("====")
-                f.write("\n")
+                f.write(f"# {self.config['description']}\n")
                 f.write(open(f"{self.path}/README.md").read())
                 f.write("\n\n")
 
