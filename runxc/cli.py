@@ -128,7 +128,6 @@ def hydrate(outputs: Dict[str, str], args: Dict[str, str]) -> Dict[str, str]:
         new_v = v
         subs = re.findall(r"\{([a-z_]+)\}", v)
         for sub in subs:
-            print(new_v)
             new_v = re.sub(r"\{[a-z_]+\}", args[sub], new_v, count=1)
         new_out[k] = new_v
 
