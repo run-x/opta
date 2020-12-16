@@ -9,6 +9,7 @@ isort = "*"
 flake8 = "*"
 mypy = "*"
 black = "*"
+pytest = "*"
 
 [packages]
 pyinquirer = "*"
