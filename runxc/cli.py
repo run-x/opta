@@ -23,6 +23,12 @@ class Module:
             .strip()
         )
 
+    def __str__(self) -> str:
+        return self.config["description"]
+
+    def description(self) -> str:
+        return self.config["description"]
+
     def execute(self, outputDir: str, root: bool = True) -> Mapping[str, Any]:
         """
             Print name
@@ -49,29 +55,39 @@ class Module:
 
         if os.path.exists(f"{self.path}/README.md"):
             with open(f"{outputDir}/README.md", "a") as f:
-                f.write("\n\n")
                 f.write(self.config["description"])
+                f.write("\n")
+                f.write("=============")
+                f.write("\n")
                 f.write(open(f"{self.path}/README.md").read())
+                f.write("\n\n")
 
-        submodules = []
-        if "submodules" in self.config:
+        submodules = list(
+            map(
+                lambda x: Module(f"{self.path}/{x}"),
+                self.config["submodules"] if "submodules" in self.config else [],
+            )
+        )
+        submodules_out = []
+        if len(submodules) > 0:
             enabled = prompt(
                 {
                     "name": "enabled",
                     "message": "Submodules",
                     "type": "checkbox",
-                    # TODO: need to show submodule description here
-                    "choices": map(lambda x: {"name": x}, self.config["submodules"]),
+                    "choices": map(
+                        lambda x: {"name": x.description(), "value": x}, submodules
+                    ),
                 }
             )["enabled"]
 
             for s in enabled:
-                submodules.append(Module(f"{self.path}/{s}").execute(outputDir, False))
+                submodules_out.append(s.execute(outputDir, False))
 
         out = {
             "name": self.config["name"],
             "arguments": arguments,
-            "submodules": submodules,
+            "submodules": submodules_out,
             "files": self.config["files"] if "files" in self.config else [],
             "outputs": self.config["outputs"] if "outputs" in self.config else [],
             "version": self.version,
