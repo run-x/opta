@@ -1,8 +1,9 @@
 import json
 import os
+import re
 import shutil
 import subprocess
-from typing import Any, Mapping
+from typing import Any, Dict, Mapping
 
 import click
 from PyInquirer import prompt
@@ -101,21 +102,37 @@ class Module:
                         .strip()
                     ),
                     "module": out,
-                    "outputs": collect_outputs(out),
+                    "outputs": collect_outputs(out, {}),
                 }
                 f.write(json.dumps(root_out, indent=2))
 
         return out
 
 
-def collect_outputs(module: Mapping[str, Any]) -> Mapping[str, Any]:
-    out = module["outputs"] if "outputs" in module else {}
+def collect_outputs(module: Dict[str, Any], args: Dict[str, str]) -> Dict[str, str]:
+    args = args.copy()
+    args.update(module["arguments"] if "arguments" in module else {})
+
+    out = hydrate(module["outputs"] if "outputs" in module else {}, args)
+
     if "submodules" in module:
         for s in module["submodules"]:
-            print(s)
-            out.update(collect_outputs(s))
+            out.update(collect_outputs(s, args))
 
     return out
+
+
+def hydrate(outputs: Dict[str, str], args: Dict[str, str]) -> Dict[str, str]:
+    new_out = {}
+    for (k, v) in outputs.items():
+        new_v = v
+        subs = re.findall(r"\{([a-z_]+)\}", v)
+        for sub in subs:
+            print(new_v)
+            new_v = re.sub(r"\{[a-z_]+\}", args[sub], new_v, count=1)
+        new_out[k] = new_v
+
+    return new_out
 
 
 @click.group()
