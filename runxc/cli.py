@@ -57,7 +57,7 @@ class Module:
             with open(f"{outputDir}/README.md", "a") as f:
                 f.write(self.config["description"])
                 f.write("\n")
-                f.write("=============")
+                f.write("====")
                 f.write("\n")
                 f.write(open(f"{self.path}/README.md").read())
                 f.write("\n\n")
