@@ -86,15 +86,36 @@ class Module:
             "arguments": arguments,
             "submodules": submodules_out,
             "files": self.config["files"] if "files" in self.config else [],
-            "outputs": self.config["outputs"] if "outputs" in self.config else [],
+            "outputs": self.config["outputs"] if "outputs" in self.config else {},
             "version": self.version,
         }
 
         if root:
             with open(f"{outputDir}/.runxc.json", "a") as f:
-                f.write(json.dumps(out, indent=2))
+                root_out = {
+                    "version": (
+                        subprocess.run(
+                            ["git", "rev-parse", "HEAD"], capture_output=True, check=True
+                        )
+                        .stdout.decode("utf-8")
+                        .strip()
+                    ),
+                    "module": out,
+                    "outputs": collect_outputs(out),
+                }
+                f.write(json.dumps(root_out, indent=2))
 
         return out
+
+
+def collect_outputs(module: Mapping[str, Any]) -> Mapping[str, Any]:
+    out = module["outputs"] if "outputs" in module else {}
+    if "submodules" in module:
+        for s in module["submodules"]:
+            print(s)
+            out.update(collect_outputs(s))
+
+    return out
 
 
 @click.group()
