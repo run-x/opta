@@ -157,6 +157,11 @@ def gen(overwrite: bool) -> int:
         [{"type": "input", "name": "outputDir", "message": "Output directory"}]
     )["outputDir"]
 
+    if os.path.exists(outputDir):
+        raise Exception("Output dir exists")
+    else:
+        os.mkdir(outputDir)
+
     Module(TEMPLATE_DIR).execute(outputDir)
     print("Generated!")
 
