@@ -9,12 +9,22 @@ import click
 from PyInquirer import prompt
 
 TEMPLATE_DIR = os.environ.get("RUNXC_TEMPLATE_DIR")
+DEFAULT_ARGUMENTS = (
+    json.loads(open(".defaults").read()) if os.path.exists(".defaults") else {}
+)
 
 
 class Module:
     def __init__(self, path: str):
         self.path = path
         self.config = json.loads(open(f"{path}/module.json").read())
+
+        if "arguments" in self.config:
+            for a in self.config["arguments"]:
+                default = DEFAULT_ARGUMENTS.get(self.config["name"], {}).get(a["name"])
+                if default is not None:
+                    a["default"] = default
+
         # TODO should do better than just gitsha
         self.version = (
             subprocess.run(
