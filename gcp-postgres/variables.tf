@@ -3,11 +3,6 @@ variable "name" {
   type = string
 }
 
-variable "gcp_project" {
-  description = "GCP project where the db should be created"
-  type = string
-}
-
 variable "tier" {
   description = "DB tier/size"
   type = string

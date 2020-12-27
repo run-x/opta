@@ -1,7 +1,3 @@
-terraform {
-  required_version = ">= 0.13"
-}
-
 resource "google_sql_database_instance" "main" {
   database_version = "POSTGRES_12"
   name             = var.name
