@@ -1,0 +1,8 @@
+env:
+  type: init
+  name: dev1
+  provider: 
+    name: google
+    project: runxc-test
+    region: us-central1
+    zone: us-central1-a

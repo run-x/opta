@@ -1,0 +1,11 @@
+env: 
+  - dev1.yml
+services:
+  http:
+    port: 5000
+    env:
+      APPENV: "${env}"
+      DD_KEY: "${secret}"
+resources:
+  postgres-db:
+    size: "db-f1-macro"
