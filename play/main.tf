@@ -12,3 +12,7 @@ module "init" {
 output "gcp-network" {
   value = module.init.gcp-network
 }
+
+output "k8s-cluster" {
+  value = module.init.k8s-cluster
+}

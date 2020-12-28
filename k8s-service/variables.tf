@@ -17,6 +17,7 @@ variable "target_port" {
 variable "public_ip_name" {
   description = "IP address name to attach to this service"
   type = string
+  default = ""
 }
 
 variable "replicas" {
@@ -32,6 +33,8 @@ variable "image" {
 
 variable "env_vars" {
   description = "Environment variables to pass to the container"
-  sensitive = true
-  type = map
+  type = list(object({
+    name = string
+    value = string
+  }))
 }

@@ -23,9 +23,9 @@ resource "kubernetes_service" "prod-main-service" {
 
 resource "kubernetes_ingress" "main-ingress" {
   metadata {
-    annotations = {
+    annotations = (var.public_ip_name == "" ? {} : {
       "kubernetes.io/ingress.global-static-ip-name" = var.public_ip_name
-    }
+    })
     name      = var.name
     namespace = var.namespace
   }
@@ -74,7 +74,14 @@ resource "kubernetes_deployment" "main" {
             container_port = var.target_port
           }
 
-          // TODO: ENV
+          dynamic "env" {
+            for_each = var.env_vars
+
+            content {
+              name = env.value.name
+              value = env.value.value
+            }
+          }
 
           readiness_probe {
             http_get {
