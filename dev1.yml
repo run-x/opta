@@ -1,6 +1,6 @@
-env:
-  type: init
-  name: dev1
+meta:
+  create-env: dev1
+init:
   provider: 
     name: google
     project: runxc-test
