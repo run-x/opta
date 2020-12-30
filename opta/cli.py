@@ -4,6 +4,7 @@ import click
 import gen_tf
 import yaml
 from module import Env, Module
+from utils import deep_merge
 
 
 @click.group()
@@ -16,8 +17,9 @@ def cli() -> None:
 # [x] k8s provider hackx
 # [ ] Linking post processor
 # [ ] Handle db password
-# [ ] Convert to tf format
+# [x] Convert to tf format
 # [ ] How would deployment work
+# [ ] Create tf state for env
 
 
 @cli.command()
@@ -35,7 +37,7 @@ def gen(inp: str, out: str) -> None:
     if "create-env" in meta:
         env = Env(meta, conf)
 
-        gen_tf.gen(env.gen_providers() + env.gen_blocks(), out)
+        gen_tf.gen(deep_merge(env.gen_blocks(), env.gen_providers()), out)
     else:
         if not os.path.exists(meta["env"]):
             raise Exception(f"Env {meta['env']} not found")
@@ -45,15 +47,14 @@ def gen(inp: str, out: str) -> None:
 
         env = Env(env_meta, env_conf)
 
-        gen_tf.gen(
-            env.gen_providers(include_derived=True)
-            + [
-                blk
-                for module_key in conf.keys()
-                for blk in Module(meta, module_key, conf[module_key], env).gen_blocks()
-            ],
-            out,
-        )
+        ret = env.gen_providers(include_derived=True)
+
+        for module_key in conf.keys():
+            ret = deep_merge(
+                Module(meta, module_key, conf[module_key], env).gen_blocks(), ret
+            )
+
+        gen_tf.gen(ret, out)
 
 
 if __name__ == "__main__":

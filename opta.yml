@@ -4,8 +4,9 @@ meta:
 app:
   type: k8s-service
   target_port: 5000
-  # image: 
-  # env: APPENV: "${env}" DD_KEY: "${secret}"
+  image: ""
+  env_vars:
+  #: APPENV: "${env}" DD_KEY: "${secret}"
 db:
   type: gcp-postgres
   tier: "db-f1-macro"

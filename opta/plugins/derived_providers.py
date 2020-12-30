@@ -1,6 +1,8 @@
 import json
 import os
-from typing import Any, Iterable, Mapping
+from typing import Any, Mapping
+
+from utils import deep_merge
 
 
 class DerivedProviders:
@@ -8,12 +10,12 @@ class DerivedProviders:
         self.env = env
         self.modules_dir = modules_dir
 
-    def gen_blocks(self) -> Iterable[Mapping[Any, Any]]:
-        ret = []
+    def gen_blocks(self) -> Mapping[Any, Any]:
+        ret: Mapping[Any, Any] = {}
         for m in self.env.modules:
             providers_file = f"{self.modules_dir}/{m.data['type']}/providers.json"
             if os.path.exists(providers_file):
                 data = json.loads(open(providers_file).read())
-                ret.extend(data["items"])
+                ret = deep_merge(data, ret)
 
         return ret

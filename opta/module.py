@@ -1,8 +1,9 @@
 import os
-from typing import Any, Iterable, List, Mapping
+from typing import Any, Iterable, Mapping
 
 import yaml
 from plugins.derived_providers import DerivedProviders
+from utils import deep_merge
 
 MODULES_DIR = os.environ.get("OPTA_MODULES_DIR")
 
@@ -20,33 +21,33 @@ class BaseModule:
         self.env = env
         self.data = data
 
-    def gen_blocks(self) -> Iterable[Mapping[Any, Any]]:
+    def gen_blocks(self) -> Mapping[Any, Any]:
         module_blk = {
-            "type": "module",
-            "key": self.key,
-            "source": f"{MODULES_DIR}/{self.data['type']}",
+            "module": {self.key: {"source": f"{MODULES_DIR}/{self.data['type']}"}}
         }
         for k, v in self.desc["variables"].items():
             if k in self.data:
-                module_blk[k] = self.data[k]
+                module_blk["module"][self.key][k] = self.data[k]
             elif v == "optional":
                 continue
             elif k == "name":
-                module_blk[k] = self.name
+                module_blk["module"][self.key][k] = self.name
             elif self.env is not None and k in self.env.outputs():
-                module_blk[k] = f"${{data.terraform_remote_state.env.outputs.{k}}}"
+                module_blk["module"][self.key][
+                    k
+                ] = f"${{data.terraform_remote_state.env.outputs.{k}}}"
             else:
                 raise Exception(f"Unable to hydrate {k}")
 
-        ret = [module_blk]
         if "outputs" in self.desc:
             for k, v in self.desc["outputs"].items():
                 if v == "export":
-                    ret.append(
-                        {"type": "output", "key": k, "value": f"module.{self.key}.{k}"}
-                    )
+                    if "output" not in module_blk:
+                        module_blk["output"] = {}
 
-        return ret
+                    module_blk["output"].update({k: {"value": f"module.{self.key}.{k}"}})
+
+        return module_blk
 
 
 class Env:
@@ -68,23 +69,21 @@ class Env:
 
         return ret
 
-    def gen_blocks(self) -> Iterable[Mapping[Any, Any]]:
-        ret: List[Mapping[Any, Any]] = []
+    def gen_blocks(self) -> Mapping[Any, Any]:
+        ret: Mapping[Any, Any] = {}
         for m in self.modules:
-            ret.extend(m.gen_blocks())
+            ret = deep_merge(m.gen_blocks(), ret)
 
         return ret
 
-    def gen_providers(self, include_derived: bool = False) -> Iterable[Mapping[Any, Any]]:
-        ret = []
+    def gen_providers(self, include_derived: bool = False) -> Mapping[Any, Any]:
+        ret: Mapping[Any, Any] = {"provider": {}}
 
         for k, v in self.meta["providers"].items():
-            blk = {"type": "provider", "key": k}
-            blk.update(v)
-            ret.append(blk)
+            ret["provider"][k] = v
 
         if include_derived:
-            ret.extend(DerivedProviders(self, MODULES_DIR).gen_blocks())
+            ret = deep_merge(ret, DerivedProviders(self, MODULES_DIR).gen_blocks())
 
         return ret
 
