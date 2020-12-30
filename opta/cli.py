@@ -4,6 +4,7 @@ import click
 import gen_tf
 import yaml
 from module import Env, Module
+from plugins.link_processor import LinkProcessor
 from utils import deep_merge
 
 
@@ -49,11 +50,11 @@ def gen(inp: str, out: str) -> None:
         env = Env(env_meta, env_conf, path=meta["env"])
 
         ret = deep_merge(env.gen_providers(include_derived=True), env.gen_remote_state())
+        modules = list(map(lambda key: Module(meta, key, conf[key], env), conf.keys()))
+        LinkProcessor().process(modules)
 
-        for module_key in conf.keys():
-            ret = deep_merge(
-                Module(meta, module_key, conf[module_key], env).gen_blocks(), ret
-            )
+        for module in modules:
+            ret = deep_merge(module.gen_blocks(), ret)
 
         gen_tf.gen(ret, out)
 

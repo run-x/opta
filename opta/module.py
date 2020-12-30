@@ -41,7 +41,7 @@ class BaseModule:
 
         if "outputs" in self.desc:
             for k, v in self.desc["outputs"].items():
-                if v == "export":
+                if "export" in v and v["export"]:
                     if "output" not in module_blk:
                         module_blk["output"] = {}
 
@@ -67,7 +67,7 @@ class Env:
         for m in self.modules:
             if "outputs" in m.desc:
                 for k, v in m.desc["outputs"].items():
-                    if v == "export":
+                    if "export" in v and v["export"]:
                         ret.append(k)
 
         return ret

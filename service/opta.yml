@@ -8,7 +8,7 @@ app:
   env_vars:
     - name: APPENV
       value: prod
-  #   - link: db
+    - _link: db
 db:
   type: gcp-postgres
   tier: "db-f1-micro"
