@@ -54,6 +54,5 @@ module "gcp-postgres" {
   source = "../gcp-postgres"
   name = "github-app"
   tier = "db-f1-micro"
-  gcp_network = data.terraform_remote_state.init.outputs.gcp-network
-  db_password = "ankur123"
+  gcp-network = data.terraform_remote_state.init.outputs.gcp-network
 }
