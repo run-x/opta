@@ -15,11 +15,11 @@ def cli() -> None:
 # TODO
 # [x] Generate provider from env
 # [x] k8s provider hackx
-# [ ] Linking post processor
-# [ ] Handle db password
 # [x] Convert to tf format
-# [ ] How would deployment work
 # [x] Create tf state for env
+# [x] Handle db password
+# [x] How would deployment work
+# [ ] Linking post processor
 # [ ] Support remote state
 
 
