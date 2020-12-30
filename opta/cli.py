@@ -20,7 +20,7 @@ def cli() -> None:
 # [x] Create tf state for env
 # [x] Handle db password
 # [x] How would deployment work
-# [ ] Linking post processor
+# [x] Linking post processor
 # [ ] Support remote state
 
 

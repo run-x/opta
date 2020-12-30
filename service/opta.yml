@@ -4,7 +4,7 @@ meta:
 app:
   type: k8s-service
   target_port: 5000
-  image: "gcr.io/runxc-test/github-app:latest"
+  image: "gcr.io/runxc-test/github-app:ankur-1"
   env_vars:
     - name: APPENV
       value: prod
