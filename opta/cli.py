@@ -11,6 +11,14 @@ def cli() -> None:
     pass
 
 
+# TODO
+# Generate provider from env for root module and for services
+# Linking post processor
+# How would deployment work
+# Handle db password
+# Convert to tf format
+
+
 @cli.command()
 @click.option("--inp", default="opta.yml", help="Opta config file")
 @click.option("--out", default="main.tf.json", help="Generated tf file")
@@ -20,12 +28,6 @@ def gen(inp: str, out: str) -> None:
         raise Exception(f"File {inp} not found")
 
     conf = yaml.load(open(inp), Loader=yaml.Loader)
-    # Top level objects are resources. Each will lead to a module block
-    # Providers are provided by env module (via a providers.tfx file).
-    # For env, they're defined in the yaml
-    # Backend should be hardcoded based on name
-    # Re-export all env outputs. Any module can re-use them as input with the same name
-    # TODO Add dependancy
 
     meta = conf.pop("meta")
 
