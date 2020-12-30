@@ -12,11 +12,12 @@ def cli() -> None:
 
 
 # TODO
-# Generate provider from env for root module and for services
-# Linking post processor
-# How would deployment work
-# Handle db password
-# Convert to tf format
+# [x] Generate provider from env
+# [ ] k8s provider hackx
+# [ ] Linking post processor
+# [ ] Handle db password
+# [ ] Convert to tf format
+# [ ] How would deployment work
 
 
 @cli.command()
@@ -34,16 +35,18 @@ def gen(inp: str, out: str) -> None:
     if "create-env" in meta:
         env = Env(meta, conf)
 
-        gen_tf(env.gen_blocks(), out)
+        gen_tf(env.gen_providers() + env.gen_blocks(), out)
     else:
         if not os.path.exists(meta["env"]):
             raise Exception(f"Env {meta['env']} not found")
 
         env_conf = yaml.load(open(meta["env"]), Loader=yaml.Loader)
-        env = Env(env_conf)
+        env_meta = env_conf.pop("meta")
+
+        env = Env(env_meta, env_conf)
 
         gen_tf(
-            env.gen_env_blocks()
+            env.gen_providers()
             + [
                 blk
                 for module_key in conf.keys()

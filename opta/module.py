@@ -50,6 +50,7 @@ class BaseModule:
 
 class Env:
     def __init__(self, meta: Mapping[Any, Any], data: Mapping[Any, Any]):
+        self.meta = meta
         self.modules = []
 
         for k, v in data.items():
@@ -70,6 +71,16 @@ class Env:
         ret: List[Mapping[Any, Any]] = []
         for m in self.modules:
             ret.extend(m.gen_blocks())
+
+        return ret
+
+    def gen_providers(self) -> Iterable[Mapping[Any, Any]]:
+        ret = []
+
+        for k, v in self.meta["providers"].items():
+            blk = {"type": "provider", "key": k}
+            blk.update(v)
+            ret.append(blk)
 
         return ret
 
