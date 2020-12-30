@@ -1,5 +1,5 @@
 import os
-from typing import Any, Iterable, Mapping
+from typing import Any, Iterable, List, Mapping
 
 import yaml
 
@@ -49,14 +49,11 @@ class BaseModule:
 
 
 class Env:
-    def __init__(self, data: Mapping[Any, Any]):
+    def __init__(self, meta: Mapping[Any, Any], data: Mapping[Any, Any]):
         self.modules = []
 
         for k, v in data.items():
-            if k == "meta":
-                continue
-
-            self.modules.append(Module(data["meta"], k, v))
+            self.modules.append(Module(meta, k, v))
 
     def outputs(self) -> Iterable[str]:
         ret = []
@@ -69,8 +66,12 @@ class Env:
 
         return ret
 
-    def gen_env_blocks(self) -> Iterable[Mapping[Any, Any]]:
-        return []
+    def gen_blocks(self) -> Iterable[Mapping[Any, Any]]:
+        ret: List[Mapping[Any, Any]] = []
+        for m in self.modules:
+            ret.extend(m.gen_blocks())
+
+        return ret
 
 
 class Module(BaseModule):

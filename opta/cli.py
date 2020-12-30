@@ -30,13 +30,9 @@ def gen(inp: str, out: str) -> None:
     meta = conf.pop("meta")
 
     if "create-env" in meta:
-        if len(conf.keys()) != 1:
-            raise Exception("Multiple environments in file")
+        env = Env(meta, conf)
 
-        # key = list(conf.keys())[0]
-        # env = EnvModule(meta, key, conf[key])
-
-        # gen_tf(env.gen_blocks(), out)
+        gen_tf(env.gen_blocks(), out)
     else:
         if not os.path.exists(meta["env"]):
             raise Exception(f"Env {meta['env']} not found")
