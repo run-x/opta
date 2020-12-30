@@ -45,7 +45,9 @@ class BaseModule:
                     if "output" not in module_blk:
                         module_blk["output"] = {}
 
-                    module_blk["output"].update({k: {"value": f"module.{self.key}.{k}"}})
+                    module_blk["output"].update(
+                        {k: {"value": f"${{module.{self.key}.{k}}}"}}
+                    )
 
         return module_blk
 

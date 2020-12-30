@@ -1,0 +1,14 @@
+meta:
+  env: ../env/dev1.yml
+  name: github-app
+app:
+  type: k8s-service
+  target_port: 5000
+  image: "gcr.io/runxc-test/github-app:latest"
+  env_vars:
+    - name: APPENV
+      value: prod
+  #   - link: db
+db:
+  type: gcp-postgres
+  tier: "db-f1-micro"
