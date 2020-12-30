@@ -1,7 +1,7 @@
 import os
-from typing import Any, Iterable, Mapping
 
 import click
+import gen_tf
 import yaml
 from module import Env, Module
 
@@ -35,7 +35,7 @@ def gen(inp: str, out: str) -> None:
     if "create-env" in meta:
         env = Env(meta, conf)
 
-        gen_tf(env.gen_providers() + env.gen_blocks(), out)
+        gen_tf.gen(env.gen_providers() + env.gen_blocks(), out)
     else:
         if not os.path.exists(meta["env"]):
             raise Exception(f"Env {meta['env']} not found")
@@ -45,7 +45,7 @@ def gen(inp: str, out: str) -> None:
 
         env = Env(env_meta, env_conf)
 
-        gen_tf(
+        gen_tf.gen(
             env.gen_providers(include_derived=True)
             + [
                 blk
@@ -54,11 +54,6 @@ def gen(inp: str, out: str) -> None:
             ],
             out,
         )
-
-
-def gen_tf(blocks: Iterable[Mapping[Any, Any]], out_file: str) -> None:
-    print(blocks)
-    print(f"Output written to {out_file}")
 
 
 if __name__ == "__main__":
