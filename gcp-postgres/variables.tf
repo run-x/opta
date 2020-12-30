@@ -8,13 +8,7 @@ variable "tier" {
   type = string
 }
 
-variable "gcp_network" {
+variable "gcp-network" {
   description = "Network where the db should be created"
   type = string
-}
-
-variable "db_password" {
-  description = "Password for the primary db"
-  type = string
-  sensitive = true
 }

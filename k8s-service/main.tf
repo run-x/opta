@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    kubernetes = {
+      source = "hashicorp/kubernetes"
+      version = ">= 1.13.3"
+    }
+  }
+}
+
 resource "kubernetes_service" "prod-main-service" {
   metadata {
     labels = {
@@ -39,6 +48,7 @@ resource "kubernetes_ingress" "main-ingress" {
 }
 
 resource "kubernetes_deployment" "main" {
+  count = var.image == "" ? 0 : 1
   metadata {
     name = var.name
   }

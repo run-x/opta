@@ -1,0 +1,5 @@
+variables:
+  name: str
+outputs:
+  gcp-network: export
+  k8s-cluster: export

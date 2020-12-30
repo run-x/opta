@@ -29,6 +29,7 @@ variable "replicas" {
 variable "image" {
   description = "Image to be deployed"
   type = string
+  default = ""
 }
 
 variable "env_vars" {
@@ -37,4 +38,5 @@ variable "env_vars" {
     name = string
     value = string
   }))
+  default = []
 }

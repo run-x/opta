@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 3.51.0"
+    }
+  }
+}
+
 // TODO: These need to be enabled in a separate step
 resource "google_project_service" "service-networking" {
   service = "servicenetworking.googleapis.com"

@@ -1,0 +1,9 @@
+variables:
+  name: str
+  tier: str
+  gcp-network: str
+outputs:
+  db_user: str
+  db_password: str
+  db_host: str
+  db_name: str

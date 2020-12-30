@@ -1,3 +1,20 @@
+terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 3.51.0"
+    }
+    random = {
+      source = "hashicorp/random"
+      version = ">= 3.0.0"
+    }
+  }
+}
+
+resource "random_password" "pg_password" {
+  length = 20
+}
+
 resource "google_sql_database_instance" "main" {
   database_version = "POSTGRES_12"
   name             = var.name
@@ -10,7 +27,7 @@ resource "google_sql_database_instance" "main" {
     tier            = var.tier
     ip_configuration {
       ipv4_enabled    = false
-      private_network = var.gcp_network
+      private_network = var.gcp-network
     }
     backup_configuration {
       binary_log_enabled = false
@@ -28,5 +45,5 @@ resource "google_sql_database" "main" {
 resource "google_sql_user" "main-user" {
   instance = google_sql_database_instance.main.name
   name     = "postgres"
-  password = var.db_password
+  password = random_password.pg_password.result
 }
