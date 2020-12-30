@@ -1,5 +1,7 @@
 variables:
   name: str
 outputs:
-  gcp-network: export
-  k8s-cluster: export
+  gcp-network:
+    export: true
+  k8s-cluster:
+    export: true
