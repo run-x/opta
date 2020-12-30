@@ -1,8 +1,11 @@
 meta:
   create-env: dev1
-init:
-  provider: 
+  name: dev1
+  provider:
+    type: provider
     name: google
     project: runxc-test
     region: us-central1
     zone: us-central1-a
+core:
+  type: init

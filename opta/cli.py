@@ -3,9 +3,7 @@ from typing import Any, Iterable, Mapping
 
 import click
 import yaml
-from module import EnvModule, Module
-
-MODULES_DIR = os.environ.get("OPTA_MODULES_DIR")
+from module import Env, Module
 
 
 @click.group()
@@ -35,24 +33,23 @@ def gen(inp: str, out: str) -> None:
         if len(conf.keys()) != 1:
             raise Exception("Multiple environments in file")
 
-        key = list(conf.keys())[0]
-        env = EnvModule(meta, key, conf[key])
+        # key = list(conf.keys())[0]
+        # env = EnvModule(meta, key, conf[key])
 
-        gen_tf(env.gen_blocks(), out)
+        # gen_tf(env.gen_blocks(), out)
     else:
         if not os.path.exists(meta["env"]):
             raise Exception(f"Env {meta['env']} not found")
 
         env_conf = yaml.load(open(meta["env"]), Loader=yaml.Loader)
-        key = list(env_conf.keys())[1]
-        env = EnvModule(env_conf["meta"], key, env_conf[key])
+        env = Env(env_conf)
 
         gen_tf(
             env.gen_env_blocks()
             + [
                 blk
                 for module_key in conf.keys()
-                for blk in Module(meta, module_key, conf[module_key]).gen_blocks()
+                for blk in Module(meta, module_key, conf[module_key], env).gen_blocks()
             ],
             out,
         )
