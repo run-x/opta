@@ -51,8 +51,9 @@ class BaseModule:
 
 
 class Env:
-    def __init__(self, meta: Mapping[Any, Any], data: Mapping[Any, Any]):
+    def __init__(self, meta: Mapping[Any, Any], data: Mapping[Any, Any], path: str = "."):
         self.meta = meta
+        self.path = path
         self.modules = []
 
         for k, v in data.items():
@@ -86,6 +87,19 @@ class Env:
             ret = deep_merge(ret, DerivedProviders(self, MODULES_DIR).gen_blocks())
 
         return ret
+
+    def gen_remote_state(self) -> Mapping[Any, Any]:
+        state_path = "." if "/" not in self.path else os.path.dirname(self.path)
+        return {
+            "data": {
+                "terraform_remote_state": {
+                    "env": {
+                        "backend": "local",
+                        "config": {"path": f"{state_path}/terraform.tfstate"},
+                    }
+                }
+            }
+        }
 
 
 class Module(BaseModule):

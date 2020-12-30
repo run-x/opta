@@ -1,11 +1,13 @@
 meta:
-  env: dev1.yml
+  env: ../runxc-tf-modules/play/dev1.yml
   name: github-app
 app:
   type: k8s-service
   target_port: 5000
   image: ""
   env_vars:
+    - name: A
+      value: B
   #: APPENV: "${env}" DD_KEY: "${secret}"
 db:
   type: gcp-postgres

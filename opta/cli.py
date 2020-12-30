@@ -19,7 +19,8 @@ def cli() -> None:
 # [ ] Handle db password
 # [x] Convert to tf format
 # [ ] How would deployment work
-# [ ] Create tf state for env
+# [x] Create tf state for env
+# [ ] Support remote state
 
 
 @cli.command()
@@ -45,9 +46,9 @@ def gen(inp: str, out: str) -> None:
         env_conf = yaml.load(open(meta["env"]), Loader=yaml.Loader)
         env_meta = env_conf.pop("meta")
 
-        env = Env(env_meta, env_conf)
+        env = Env(env_meta, env_conf, path=meta["env"])
 
-        ret = env.gen_providers(include_derived=True)
+        ret = deep_merge(env.gen_providers(include_derived=True), env.gen_remote_state())
 
         for module_key in conf.keys():
             ret = deep_merge(
