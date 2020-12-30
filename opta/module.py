@@ -8,7 +8,7 @@ MODULES_DIR = os.environ.get("OPTA_MODULES_DIR")
 
 class BaseModule:
     def __init__(
-        self, meta: Mapping[Any, Any], key: str, data: Mapping[Any, Any], env: Any,
+        self, meta: Mapping[Any, Any], key: str, data: Mapping[Any, Any], env: Any = None,
     ):
         self.meta = meta
         self.key = key
@@ -20,9 +20,6 @@ class BaseModule:
         self.data = data
 
     def gen_blocks(self) -> Iterable[Mapping[Any, Any]]:
-        print(self.data)
-        print(self.desc)
-        print(self.env.outputs)
         module_blk = {
             "type": "module",
             "key": self.key,
@@ -35,7 +32,7 @@ class BaseModule:
                 continue
             elif k == "name":
                 module_blk[k] = self.name
-            elif k in self.env.outputs:
+            elif self.env is not None and k in self.env.outputs():
                 module_blk[k] = f"${{data.terraform_remote_state.env.outputs.{k}}}"
             else:
                 raise Exception(f"Unable to hydrate {k}")
@@ -53,17 +50,24 @@ class BaseModule:
 
 class Env:
     def __init__(self, data: Mapping[Any, Any]):
-        self.outputs = []
+        self.modules = []
 
         for k, v in data.items():
             if k == "meta":
                 continue
 
-            desc = yaml.load(
-                open(f"{MODULES_DIR}/{v['type']}/module.yaml"), Loader=yaml.Loader
-            )
-            if "outputs" in desc:
-                self.outputs.extend(desc["outputs"])
+            self.modules.append(Module(data["meta"], k, v))
+
+    def outputs(self) -> Iterable[str]:
+        ret = []
+
+        for m in self.modules:
+            if "outputs" in m.desc:
+                for k, v in m.desc["outputs"].items():
+                    if v == "export":
+                        ret.append(k)
+
+        return ret
 
     def gen_env_blocks(self) -> Iterable[Mapping[Any, Any]]:
         return []
