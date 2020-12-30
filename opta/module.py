@@ -2,6 +2,7 @@ import os
 from typing import Any, Iterable, List, Mapping
 
 import yaml
+from plugins.derived_providers import DerivedProviders
 
 MODULES_DIR = os.environ.get("OPTA_MODULES_DIR")
 
@@ -74,13 +75,16 @@ class Env:
 
         return ret
 
-    def gen_providers(self) -> Iterable[Mapping[Any, Any]]:
+    def gen_providers(self, include_derived: bool = False) -> Iterable[Mapping[Any, Any]]:
         ret = []
 
         for k, v in self.meta["providers"].items():
             blk = {"type": "provider", "key": k}
             blk.update(v)
             ret.append(blk)
+
+        if include_derived:
+            ret.extend(DerivedProviders(self, MODULES_DIR).gen_blocks())
 
         return ret
 

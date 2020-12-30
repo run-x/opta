@@ -13,7 +13,7 @@ def cli() -> None:
 
 # TODO
 # [x] Generate provider from env
-# [ ] k8s provider hackx
+# [x] k8s provider hackx
 # [ ] Linking post processor
 # [ ] Handle db password
 # [ ] Convert to tf format
@@ -46,7 +46,7 @@ def gen(inp: str, out: str) -> None:
         env = Env(env_meta, env_conf)
 
         gen_tf(
-            env.gen_providers()
+            env.gen_providers(include_derived=True)
             + [
                 blk
                 for module_key in conf.keys()
