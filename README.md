@@ -1,3 +1,6 @@
+DEPRECATED - Talk to ankur before using
+======
+
 How to use
 ==========
 - Clone runxc and runxc-templates repo
