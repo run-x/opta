@@ -13,17 +13,6 @@ def cli() -> None:
     pass
 
 
-# TODO
-# [x] Generate provider from env
-# [x] k8s provider hackx
-# [x] Convert to tf format
-# [x] Create tf state for env
-# [x] Handle db password
-# [x] How would deployment work
-# [x] Linking post processor
-# [ ] Support remote state
-
-
 @cli.command()
 @click.option("--inp", default="opta.yml", help="Opta config file")
 @click.option("--out", default="main.tf.json", help="Generated tf file")
