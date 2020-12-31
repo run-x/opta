@@ -13,3 +13,15 @@ def deep_merge(a: Mapping[Any, Any], b: Dict[Any, Any]) -> Mapping[Any, Any]:
             b[key] = value
 
     return b
+
+
+def hydrate(target: Dict[Any, Any], hydration: Dict[Any, Any]) -> Dict[Any, Any]:
+    target = target.copy()
+
+    for k, v in target.items():
+        if isinstance(v, str):
+            target[k] = v.format(**hydration)
+        elif isinstance(v, dict):
+            target[k] = hydrate(v, hydration)
+
+    return target

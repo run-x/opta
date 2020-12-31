@@ -1,11 +1,14 @@
 import os
-from typing import Any, Iterable, Mapping
+from typing import Any, Dict, Iterable, Mapping
 
 import yaml
 from plugins.derived_providers import DerivedProviders
-from utils import deep_merge
+from utils import deep_merge, hydrate
 
 MODULES_DIR = os.environ.get("OPTA_MODULES_DIR")
+REGISTRY = yaml.load(
+    open(f"{os.path.dirname(__file__)}/../registry.yaml"), Loader=yaml.Loader
+)
 
 
 class BaseModule:
@@ -53,9 +56,14 @@ class BaseModule:
 
 
 class Env:
-    def __init__(self, meta: Mapping[Any, Any], data: Mapping[Any, Any], path: str = "."):
+    def __init__(
+        self,
+        meta: Mapping[Any, Any],
+        data: Mapping[Any, Any],
+        child_meta: Mapping[Any, Any] = {},
+    ):
         self.meta = meta
-        self.path = path
+        self.child_meta = child_meta
         self.modules = []
 
         for k, v in data.items():
@@ -79,29 +87,56 @@ class Env:
 
         return ret
 
-    def gen_providers(self, include_derived: bool = False) -> Mapping[Any, Any]:
-        ret: Mapping[Any, Any] = {"provider": {}}
+    def for_child(self) -> bool:
+        return "env" in self.child_meta
+
+    def gen_providers(self, init: bool) -> Mapping[Any, Any]:
+        ret: Dict[Any, Any] = {"provider": {}}
 
         for k, v in self.meta["providers"].items():
             ret["provider"][k] = v
+            if k in REGISTRY["backends"]:
+                hydration = {
+                    "env_name": self.meta["name"],
+                    "child_name": self.child_meta["name"]
+                    if "name" in self.child_meta
+                    else "env",
+                }
 
-        if include_derived:
-            ret = deep_merge(ret, DerivedProviders(self, MODULES_DIR).gen_blocks())
+                # Add the backend
+                if not init:
+                    ret["terraform"] = hydrate(
+                        REGISTRY["backends"][k]["terraform"], hydration
+                    )
+
+                if not self.for_child():
+                    # Add the state bucket
+                    ret["resource"] = hydrate(
+                        REGISTRY["backends"][k]["resource"], hydration
+                    )
+                else:
+                    # Add remote state
+                    backend, config = list(
+                        REGISTRY["backends"][k]["terraform"]["backend"].items()
+                    )[0]
+                    ret["data"] = {
+                        "terraform_remote_state": {
+                            "env": {
+                                "backend": backend,
+                                "config": hydrate(
+                                    config,
+                                    {"env_name": self.meta["name"], "child_name": "env"},
+                                ),
+                            }
+                        }
+                    }
+
+                    # Add derived providers like k8s
+                    ret = deep_merge(
+                        ret, DerivedProviders(self, MODULES_DIR).gen_blocks()
+                    )
 
         return ret
-
-    def gen_remote_state(self) -> Mapping[Any, Any]:
-        state_path = "." if "/" not in self.path else os.path.dirname(self.path)
-        return {
-            "data": {
-                "terraform_remote_state": {
-                    "env": {
-                        "backend": "local",
-                        "config": {"path": f"{state_path}/terraform.tfstate"},
-                    }
-                }
-            }
-        }
 
 
 class Module(BaseModule):

@@ -16,7 +16,8 @@ def cli() -> None:
 @cli.command()
 @click.option("--inp", default="opta.yml", help="Opta config file")
 @click.option("--out", default="main.tf.json", help="Generated tf file")
-def gen(inp: str, out: str) -> None:
+@click.option("--init", is_flag=True, default=False, help="Generate init tf file")
+def gen(inp: str, out: str, init: bool) -> None:
     """ Generate TF file based on opta config file """
     if not os.path.exists(inp):
         raise Exception(f"File {inp} not found")
@@ -28,7 +29,10 @@ def gen(inp: str, out: str) -> None:
     if "create-env" in meta:
         env = Env(meta, conf)
 
-        gen_tf.gen(deep_merge(env.gen_blocks(), env.gen_providers()), out)
+        if init:
+            gen_tf.gen(env.gen_providers(init), out)
+        else:
+            gen_tf.gen(deep_merge(env.gen_blocks(), env.gen_providers(init)), out)
     else:
         if not os.path.exists(meta["env"]):
             raise Exception(f"Env {meta['env']} not found")
@@ -36,9 +40,9 @@ def gen(inp: str, out: str) -> None:
         env_conf = yaml.load(open(meta["env"]), Loader=yaml.Loader)
         env_meta = env_conf.pop("meta")
 
-        env = Env(env_meta, env_conf, path=meta["env"])
+        env = Env(env_meta, env_conf, child_meta=meta)
 
-        ret = deep_merge(env.gen_providers(include_derived=True), env.gen_remote_state())
+        ret = env.gen_providers(init)
         modules = list(map(lambda key: Module(meta, key, conf[key], env), conf.keys()))
         LinkProcessor().process(modules)
 
