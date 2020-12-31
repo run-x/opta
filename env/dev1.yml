@@ -1,0 +1,10 @@
+meta:
+  create-env: dev1
+  name: dev1
+  providers:
+    google:
+      project: runxc-test
+      region: us-central1
+      zone: us-central1-a
+core:
+  type: init
