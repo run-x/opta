@@ -1,0 +1,13 @@
+backends:
+  google: 
+    terraform:
+      backend: 
+        gcs:
+          bucket: "opta_tf_state_{env_name}"
+          prefix: "{child_name}"
+    resource:
+      google_storage_bucket:
+        tf_state:
+          name: "opta_tf_state_{env_name}"
+          versioning:
+            enabled: true
