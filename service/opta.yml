@@ -1,5 +1,5 @@
 meta:
-  env: ../env/dev1.yml
+  env: ../env/opta.yml
   name: github-app
 app:
   type: k8s-service

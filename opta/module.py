@@ -5,7 +5,6 @@ import yaml
 from plugins.derived_providers import DerivedProviders
 from utils import deep_merge, hydrate
 
-MODULES_DIR = os.environ.get("OPTA_MODULES_DIR")
 REGISTRY = yaml.load(
     open(f"{os.path.dirname(__file__)}/../registry.yaml"), Loader=yaml.Loader
 )
@@ -17,17 +16,13 @@ class BaseModule:
     ):
         self.meta = meta
         self.key = key
-        self.desc = yaml.load(
-            open(f"{MODULES_DIR}/{data['type']}/module.yaml"), Loader=yaml.Loader
-        )
+        self.desc = REGISTRY["modules"][data["type"]]
         self.name = f"{self.meta['name']}-{self.key}"
         self.env = env
         self.data = data
 
     def gen_blocks(self) -> Mapping[Any, Any]:
-        module_blk = {
-            "module": {self.key: {"source": f"{MODULES_DIR}/{self.data['type']}"}}
-        }
+        module_blk = {"module": {self.key: {"source": self.desc["location"]}}}
         for k, v in self.desc["variables"].items():
             if k in self.data:
                 module_blk["module"][self.key][k] = self.data[k]
@@ -132,9 +127,7 @@ class Env:
                     }
 
                     # Add derived providers like k8s
-                    ret = deep_merge(
-                        ret, DerivedProviders(self, MODULES_DIR).gen_blocks()
-                    )
+                    ret = deep_merge(ret, DerivedProviders(self).gen_blocks())
 
         return ret
 
