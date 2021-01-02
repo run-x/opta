@@ -1,8 +1,0 @@
-variables:
-  name: str
-  namespace: optional
-  target_port: number
-  public_ip_name: optional
-  replicas: optional
-  image: optional
-  env_vars: optional
