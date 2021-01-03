@@ -1,9 +1,10 @@
 import os
-from typing import Any, Dict, Iterable, Mapping
+from typing import Any, Dict, Iterable
 
 import yaml
-from plugins.derived_providers import DerivedProviders
-from utils import deep_merge, hydrate
+
+from opta.plugins.derived_providers import DerivedProviders
+from opta.utils import deep_merge, hydrate
 
 REGISTRY = yaml.load(
     open(f"{os.path.dirname(__file__)}/../registry.yaml"), Loader=yaml.Loader
@@ -12,7 +13,7 @@ REGISTRY = yaml.load(
 
 class BaseModule:
     def __init__(
-        self, meta: Mapping[Any, Any], key: str, data: Mapping[Any, Any], env: Any = None,
+        self, meta: Dict[Any, Any], key: str, data: Dict[Any, Any], env: Any = None,
     ):
         self.meta = meta
         self.key = key
@@ -21,7 +22,7 @@ class BaseModule:
         self.env = env
         self.data = data
 
-    def gen_blocks(self) -> Mapping[Any, Any]:
+    def gen_blocks(self) -> Dict[Any, Any]:
         module_blk = {"module": {self.key: {"source": self.desc["location"]}}}
         for k, v in self.desc["variables"].items():
             if k in self.data:
@@ -52,10 +53,7 @@ class BaseModule:
 
 class Env:
     def __init__(
-        self,
-        meta: Mapping[Any, Any],
-        data: Mapping[Any, Any],
-        child_meta: Mapping[Any, Any] = {},
+        self, meta: Dict[Any, Any], data: Dict[Any, Any], child_meta: Dict[Any, Any] = {},
     ):
         self.meta = meta
         self.child_meta = child_meta
@@ -75,8 +73,8 @@ class Env:
 
         return ret
 
-    def gen_blocks(self) -> Mapping[Any, Any]:
-        ret: Mapping[Any, Any] = {}
+    def gen_blocks(self) -> Dict[Any, Any]:
+        ret: Dict[Any, Any] = {}
         for m in self.modules:
             ret = deep_merge(m.gen_blocks(), ret)
 
@@ -85,7 +83,7 @@ class Env:
     def for_child(self) -> bool:
         return "env" in self.child_meta
 
-    def gen_providers(self, init: bool) -> Mapping[Any, Any]:
+    def gen_providers(self, init: bool) -> Dict[Any, Any]:
         ret: Dict[Any, Any] = {"provider": {}}
 
         for k, v in self.meta["providers"].items():

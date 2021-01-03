@@ -1,7 +1,7 @@
-from typing import Any, Dict, Mapping
+from typing import Any, Dict
 
 
-def deep_merge(a: Mapping[Any, Any], b: Dict[Any, Any]) -> Mapping[Any, Any]:
+def deep_merge(a: Dict[Any, Any], b: Dict[Any, Any]) -> Dict[Any, Any]:
     b = b.copy()
     for key, value in a.items():
         if key in b:
