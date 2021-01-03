@@ -25,3 +25,21 @@ jobs:
           source $(pipenv --venv)/bin/activate
       - name: Lint
         run: ./lint.py
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install dependencies
+        run: |
+          pip install pipenv
+          pipenv install --deploy --dev
+          source $(pipenv --venv)/bin/activate
+      - name: Test with pytest
+        run: |
+          pipenv run coverage run
+        env:
+          PYTHONPATH: $(pwd)
