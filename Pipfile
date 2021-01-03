@@ -10,6 +10,7 @@ flake8 = "*"
 mypy = "*"
 black = "*"
 pytest = "*"
+coverage = "*"
 
 [packages]
 pyinquirer = "*"

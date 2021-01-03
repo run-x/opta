@@ -1,11 +1,12 @@
 import os
 
 import click
-import gen_tf
 import yaml
-from module import Env, Module
-from plugins.link_processor import LinkProcessor
-from utils import deep_merge
+
+from opta import gen_tf
+from opta.module import Env, Module
+from opta.plugins.link_processor import LinkProcessor
+from opta.utils import deep_merge
 
 
 @click.group()
