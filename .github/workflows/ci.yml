@@ -40,6 +40,6 @@ jobs:
           source $(pipenv --venv)/bin/activate
       - name: Test with pytest
         run: |
-          pipenv run coverage run
+          pipenv run pytest
         env:
           PYTHONPATH: $(pwd)
