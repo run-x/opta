@@ -9,6 +9,9 @@ app:
     - name: APPENV
       value: prod
     - _link: database
+    - _link: dd-key
 database:
   type: gcp-postgres
   tier: "db-f1-micro"
+dd-key:
+  type: k8s-secret
