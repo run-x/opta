@@ -48,11 +48,13 @@ modules:
       tier: str
       gcp-network: str
     outputs:
-      db_user: 
-        link: PG_USER
-      db_password:
-        link: PG_PASSWORD
-      db_host:
-        link: PG_HOST
-      db_name:
-        link: PG_NAME
+      db_user: str
+      db_password: str
+      db_host: str
+      db_name: str
+  k8s-secret:
+    location: git@github.com:run-x/runxc-tf-modules.git//k8s-secret?ref=ankur/secrets
+    variables:
+      name: str
+    outputs:
+      value: str

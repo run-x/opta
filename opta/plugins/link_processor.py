@@ -34,9 +34,11 @@ class LinkProcessor:
             return []
 
         for k, v in target_module.desc["outputs"].items():
-            if "link" in v:
-                new_items.append(
-                    {"name": v["link"], "value": f"${{module.{target_module.key}.{k}}}"}
-                )
+            new_items.append(
+                {
+                    "name": f"{target_module.key}.{k}",
+                    "value": f"${{module.{target_module.key}.{k}}}",
+                }
+            )
 
         return new_items
