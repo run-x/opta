@@ -1,4 +1,6 @@
 import os
+import subprocess
+from typing import Any
 
 import click
 import yaml
@@ -12,6 +14,17 @@ from opta.utils import deep_merge
 @click.group()
 def cli() -> None:
     pass
+
+
+@cli.command()
+@click.pass_context
+@click.option("--inp", default="opta.yml", help="Opta config file")
+@click.option("--out", default="main.tf.json", help="Generated tf file")
+@click.option("--init", is_flag=True, default=False, help="Generate init tf file")
+def apply(ctx: Any, inp: str, out: str, init: bool) -> None:
+    ctx.forward(gen)
+    subprocess.run(["terraform", "init"], check=True)
+    subprocess.run(["terraform", "apply"], check=True)
 
 
 @cli.command()
