@@ -53,7 +53,7 @@ modules:
       db_host: str
       db_name: str
   k8s-secret:
-    location: git@github.com:run-x/runxc-tf-modules.git//k8s-secret?ref=ankur/secrets
+    location: git@github.com:run-x/runxc-tf-modules.git//k8s-secret
     variables:
       name: str
     outputs:
