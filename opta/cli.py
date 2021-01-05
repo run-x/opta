@@ -5,6 +5,7 @@ from typing import Any
 import click
 import yaml
 
+from os import path
 from opta import gen_tf
 from opta.module import Env, Module
 from opta.plugins.link_processor import LinkProcessor
@@ -28,15 +29,19 @@ def apply(ctx: Any, inp: str, out: str, init: bool) -> None:
 
 
 @cli.command()
-@click.option("--inp", default="opta.yml", help="Opta config file")
+@click.option("--configfile", default="opta.yml", help="Opta config file")
+@click.option("--lockfile", default="opta.lock", help="Opta config file")
 @click.option("--out", default="main.tf.json", help="Generated tf file")
 @click.option("--init", is_flag=True, default=False, help="Generate init tf file")
-def gen(inp: str, out: str, init: bool) -> None:
+def gen(configfile: str, lockfile: str, out: str, init: bool) -> None:
     """ Generate TF file based on opta config file """
-    if not os.path.exists(inp):
-        raise Exception(f"File {inp} not found")
+    if not os.path.exists(configfile):
+        raise Exception(f"File {configfile} not found")
 
-    conf = yaml.load(open(inp), Loader=yaml.Loader)
+    conf = yaml.load(open(configfile), Loader=yaml.Loader)
+    lockdata = (
+        yaml.load(open(lockfile), Loader=yaml.Loader) if path.exists(lockfile) else dict()
+    )
 
     meta = conf.pop("meta")
 
@@ -64,6 +69,10 @@ def gen(inp: str, out: str, init: bool) -> None:
             ret = deep_merge(module.gen_blocks(), ret)
 
         gen_tf.gen(ret, out)
+
+    print("Writing lockfile...")
+    with open(lockfile, "w") as f:
+        f.write(yaml.dump(lockdata))
 
 
 if __name__ == "__main__":
