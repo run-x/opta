@@ -1,4 +1,5 @@
 from typing import Any, Dict
+from shutil import which
 
 
 def deep_merge(a: Dict[Any, Any], b: Dict[Any, Any]) -> Dict[Any, Any]:
@@ -7,7 +8,7 @@ def deep_merge(a: Dict[Any, Any], b: Dict[Any, Any]) -> Dict[Any, Any]:
         if key in b:
             if isinstance(value, dict) and isinstance(b[key], dict):
                 b[key] = deep_merge(value, b[key])
-            else:
+            elif value != b[key]:
                 raise Exception("Cant merge dict with non dict")
         else:
             b[key] = value
@@ -25,3 +26,8 @@ def hydrate(target: Dict[Any, Any], hydration: Dict[Any, Any]) -> Dict[Any, Any]
             target[k] = hydrate(v, hydration)
 
     return target
+
+
+def is_tool(name: str):
+    """Check whether `name` is on PATH and marked as executable."""
+    return which(name) is not None

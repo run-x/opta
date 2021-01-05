@@ -3,17 +3,22 @@ backends:
     terraform:
       backend: 
         gcs:
-          bucket: "opta_tf_state_{env_name}"
+          bucket: "opta_tf_state_{parent_name}"
           prefix: "{child_name}"
-    resource:
-      google_storage_bucket:
-        tf_state:
-          name: "opta_tf_state_{env_name}"
-          versioning:
-            enabled: true
 modules:
-  init: 
-    location: git@github.com:run-x/runxc-tf-modules.git//init
+  state-init:
+    location: git@github.com:run-x/runxc-tf-modules.git//state-init
+    variables:
+      name: str
+    outputs:
+      state-bucket-name:
+        export: true
+    providers:
+      data:
+        google_client_config:
+          provider: {}
+  compute-init:
+    location: git@github.com:run-x/runxc-tf-modules.git//compute-init
     variables:
       name: str
     outputs:
@@ -22,9 +27,6 @@ modules:
       k8s-cluster:
         export: true
     providers:
-      data:
-        google_client_config:
-          provider: {}
       provider:
         kubernetes:
           load_config_file: false

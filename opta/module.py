@@ -9,17 +9,24 @@ from opta.utils import deep_merge, hydrate
 REGISTRY = yaml.load(
     open(f"{os.path.dirname(__file__)}/../registry.yaml"), Loader=yaml.Loader
 )
+BACKEND_ENABLED = "enable-backend"
+BACKEND_DISABLED = "disable-backend"
+WAIT = "wait"
 
 
 class BaseModule:
     def __init__(
-        self, meta: Dict[Any, Any], key: str, data: Dict[Any, Any], env: Any = None,
+        self,
+        meta: Dict[Any, Any],
+        key: str,
+        data: Dict[Any, Any],
+        layer: Any = None,
     ):
         self.meta = meta
         self.key = key
         self.desc = REGISTRY["modules"][data["type"]]
         self.name = f"{self.meta['name']}-{self.key}"
-        self.env = env
+        self.layer = layer
         self.data = data
 
     def gen_blocks(self) -> Dict[Any, Any]:
@@ -31,10 +38,10 @@ class BaseModule:
                 continue
             elif k == "name":
                 module_blk["module"][self.key][k] = self.name
-            elif self.env is not None and k in self.env.outputs():
+            elif self.layer is not None and k in self.layer.outputs():
                 module_blk["module"][self.key][
                     k
-                ] = f"${{data.terraform_remote_state.env.outputs.{k}}}"
+                ] = f"${{data.terraform_remote_state.parent.outputs.{k}}}"
             else:
                 raise Exception(f"Unable to hydrate {k}")
 
@@ -51,16 +58,24 @@ class BaseModule:
         return module_blk
 
 
-class Env:
+class Layer:
     def __init__(
-        self, meta: Dict[Any, Any], data: Dict[Any, Any], child_meta: Dict[Any, Any] = {},
+        self,
+        meta: Dict[Any, Any],
+        data: Dict[Any, Any],
+        child_meta: Dict[Any, Any] = {},
     ):
         self.meta = meta
         self.child_meta = child_meta
         self.modules = []
 
-        for k, v in data.items():
-            self.modules.append(Module(meta, k, v))
+        for module_data in data["modules"]:
+            if type(module_data) is dict:
+                self.modules.append(
+                    Module(
+                        meta, list(module_data.keys())[0], list(module_data.values())[0]
+                    )
+                )
 
     def outputs(self) -> Iterable[str]:
         ret = []
@@ -81,50 +96,49 @@ class Env:
         return ret
 
     def for_child(self) -> bool:
-        return "env" in self.child_meta
+        return "parent" in self.child_meta
 
-    def gen_providers(self, init: bool) -> Dict[Any, Any]:
+    def gen_providers(self, backend_enabled: bool) -> Dict[Any, Any]:
         ret: Dict[Any, Any] = {"provider": {}}
 
         for k, v in self.meta["providers"].items():
             ret["provider"][k] = v
             if k in REGISTRY["backends"]:
                 hydration = {
-                    "env_name": self.meta["name"],
+                    "parent_name": self.meta["name"],
                     "child_name": self.child_meta["name"]
                     if "name" in self.child_meta
-                    else "env",
+                    else "parent",
                 }
 
                 # Add the backend
-                if not init:
+                if backend_enabled:
                     ret["terraform"] = hydrate(
                         REGISTRY["backends"][k]["terraform"], hydration
                     )
 
-                if not self.for_child():
-                    # Add the state bucket
-                    ret["resource"] = hydrate(
-                        REGISTRY["backends"][k]["resource"], hydration
-                    )
-                else:
+                if self.for_child():
                     # Add remote state
                     backend, config = list(
                         REGISTRY["backends"][k]["terraform"]["backend"].items()
                     )[0]
                     ret["data"] = {
                         "terraform_remote_state": {
-                            "env": {
+                            "parent": {
                                 "backend": backend,
                                 "config": hydrate(
                                     config,
-                                    {"env_name": self.meta["name"], "child_name": "env"},
+                                    {
+                                        "parent_name": self.meta["name"],
+                                        "child_name": "parent",
+                                    },
                                 ),
                             }
                         }
                     }
 
                     # Add derived providers like k8s
+
                     ret = deep_merge(ret, DerivedProviders(self).gen_blocks())
 
         return ret

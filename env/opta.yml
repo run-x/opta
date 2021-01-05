@@ -1,10 +1,18 @@
 meta:
-  create-env: dev1
   name: dev1
   providers:
     google:
       project: runxc-test
       region: us-central1
       zone: us-central1-a
-core:
-  type: init
+modules:
+  - disable-backend
+  - state-init:
+      type: state-init
+  - wait
+  - enable-backend
+  - compute-init:
+      type: compute-init
+  - wait
+  - k8s-init:
+      type: compute-init
