@@ -14,22 +14,68 @@ variable "target_port" {
   type = number
 }
 
-variable "public_ip_name" {
-  description = "IP address name to attach to this service"
-  type = string
-  default = ""
-}
-
-variable "replicas" {
-  description = "Number of replicas to run"
-  type = number
-  default = 1
-}
-
 variable "image" {
   description = "Image to be deployed"
   type = string
-  default = ""
+  default = "nginx"
+}
+
+variable "tag" {
+  description = "Tag of image to be deployed"
+  type = string
+  default = "latest"
+}
+
+variable "min_autoscaling" {
+  description = "Min value for HPA autoscaling"
+  type = string
+  default = 1
+}
+
+variable "max_autoscaling" {
+  description = "Max value for HPA autoscaling"
+  type = string
+  default = 3
+}
+
+variable "autoscaling_cpu_percentage_threshold" {
+  description = "Percentage of requested cpu after which autoscaling kicks in"
+  default = 80
+}
+
+variable "autoscaling_mem_percentage_threshold" {
+  description = "Percentage of requested memory after which autoscaling kicks in"
+  default = 80
+}
+
+variable "liveness_probe_path" {
+  description = "Url path for liveness probe"
+  type = string
+  default = "/healthcheck"
+}
+
+variable "readiness_probe_path" {
+  description = "Url path for readiness probe"
+  type = string
+  default = "/healthcheck"
+}
+
+variable "pod_resource_limits" {
+  description = "Resource limits for pod"
+  default = {
+    cpu = "200m"
+    memory = "256Mi"
+  }
+  type = map
+}
+
+variable "pod_resource_requests" {
+  description = "Request requests for pod"
+  default = {
+    cpu = "100m"
+    memory = "128Mi"
+  }
+  type = map
 }
 
 variable "env_vars" {

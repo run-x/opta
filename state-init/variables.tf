@@ -1,4 +1,4 @@
-variable "name" {
-  description = "Name of the environment"
+variable "bucket_name" {
+  description = "Name of the bucket"
   type = string
 }

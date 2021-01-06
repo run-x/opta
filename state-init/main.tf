@@ -7,7 +7,6 @@ terraform {
   }
 }
 
-// TODO: These need to be enabled in a separate step
 resource "google_project_service" "service-networking" {
   service = "servicenetworking.googleapis.com"
 }
@@ -21,5 +20,5 @@ resource "google_project_service" "container" {
 }
 
 resource "google_storage_bucket" "tf_state" {
-  name = "opta_tf_state_${var.name}"
+  name = var.bucket_name
 }
