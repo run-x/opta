@@ -2,6 +2,7 @@ import os
 from typing import Any, Dict, Iterable
 
 import yaml
+import re
 
 from opta.plugins.derived_providers import DerivedProviders
 from opta.utils import deep_merge, hydrate
@@ -67,6 +68,10 @@ class Layer:
     ):
         self.meta = meta
         self.child_meta = child_meta
+        if not Layer.valid_name(self.meta["name"]):
+            raise Exception(
+                "Invalid layer, can only contain lowercase letters, numbers and hyphens!"
+            )
         self.modules = []
 
         for module_data in data["modules"]:
@@ -76,6 +81,11 @@ class Layer:
                         meta, list(module_data.keys())[0], list(module_data.values())[0]
                     )
                 )
+
+    @staticmethod
+    def valid_name(name: str) -> bool:
+        pattern = "^[A-Za-z0-9-]*$"
+        return bool(re.match(pattern, name))
 
     def outputs(self) -> Iterable[str]:
         ret = []
@@ -106,9 +116,9 @@ class Layer:
             if k in REGISTRY["backends"]:
                 hydration = {
                     "parent_name": self.meta["name"],
-                    "child_name": self.child_meta["name"]
+                    "layer_name": self.child_meta["name"]
                     if "name" in self.child_meta
-                    else "parent",
+                    else "root",
                 }
 
                 # Add the backend
@@ -130,7 +140,7 @@ class Layer:
                                     config,
                                     {
                                         "parent_name": self.meta["name"],
-                                        "child_name": "parent",
+                                        "layer_name": "root",
                                     },
                                 ),
                             }

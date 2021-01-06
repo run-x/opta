@@ -3,13 +3,13 @@ backends:
     terraform:
       backend: 
         gcs:
-          bucket: "opta_tf_state_{parent_name}"
-          prefix: "{child_name}"
+          bucket: "opta_tf_state_jd_test_1"
+          prefix: "{layer_name}"
 modules:
   state-init:
-    location: git@github.com:run-x/runxc-tf-modules.git//state-init
+    location: /Users/juandiegopalomino/runx/runxc-tf-modules/state-init
     variables:
-      name: str
+      bucket_name: str
     outputs:
       state-bucket-name:
         export: true
@@ -18,7 +18,7 @@ modules:
         google_client_config:
           provider: {}
   compute-init:
-    location: git@github.com:run-x/runxc-tf-modules.git//compute-init
+    location: /Users/juandiegopalomino/runx/runxc-tf-modules/compute-init
     variables:
       name: str
     outputs:
@@ -30,19 +30,25 @@ modules:
       provider:
         kubernetes:
           load_config_file: false
-          host: "https://${data.terraform_remote_state.env.outputs.k8s-cluster.endpoint}"
+          host: "https://${data.terraform_remote_state.parent.outputs.k8s-cluster.endpoint}"
           token: "${data.google_client_config.provider.access_token}"
-          cluster_ca_certificate: "${base64decode(data.terraform_remote_state.env.outputs.k8s-cluster.master_auth[0].cluster_ca_certificate)}"
+          cluster_ca_certificate: "${base64decode(data.terraform_remote_state.parent.outputs.k8s-cluster.master_auth[0].cluster_ca_certificate)}"
   k8s-service: 
-    location: git@github.com:run-x/runxc-tf-modules.git//k8s-service
+    location: /Users/juandiegopalomino/runx/runxc-tf-modules/k8s-service
     variables:
       name: str
       namespace: optional
-      target_port: number
-      public_ip_name: optional
+      target_port: optional
       replicas: optional
       image: optional
+      tag: optional
       env_vars: optional
+      autoscaling_cpu_percentage_threshold: optional
+      autoscaling_mem_percentage_threshold: optional
+      liveness_probe_path: optional
+      readiness_probe_path: optional
+      pod_resource_limits: optional
+      pod_resource_requests: optional
   gcp-postgres: 
     location: git@github.com:run-x/runxc-tf-modules.git//gcp-postgres
     variables:

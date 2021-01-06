@@ -61,18 +61,19 @@ def gen(configfile: str, lockfile: str, out: str) -> None:
     print("Loading infra blocks")
     current_modules_data = []
     block_idx = 1
-    for module_data in modules_data:
+    for idx, module_data in enumerate(modules_data):
         if module_data == WAIT:
-            print(current_modules_data)
             current_module_names = list(
                 map(lambda x: list(x.keys())[0], current_modules_data)
             )
-            if len(current_modules_data) == 0 or current_module_names == lockdata.get(
+            if len(current_modules_data) == 0:
+                continue
+            if current_module_names == lockdata.get(
                 "modules_processed"
-            ):
+            ) and idx + 1 != len(modules_data):
                 block_idx += 1
                 continue
-            print(f"Generating block {block_idx}...")
+            print(f"Generating block {block_idx} for modules {current_module_names}...")
             ret = layer.gen_providers(backend_enabled)
             modules = list(
                 map(
@@ -95,14 +96,15 @@ def gen(configfile: str, lockfile: str, out: str) -> None:
                 "Will now initialize generate terraform plan for block {block_idx}. Sounds good?",
                 abort=True,
             )
+            targets = list(map(lambda x: f"-target=module.{x}", current_module_names))
             subprocess.run(["terraform", "init"], check=True)
-            subprocess.run(["terraform", "apply"], check=True)
+            subprocess.run(["terraform", "plan", "-out=tf.plan"] + targets, check=True)
 
             click.confirm(
                 "Terraform plan generation successful, would you like to apply?",
                 abort=True,
             )
-            subprocess.run(["terraform", "apply"], check=True)
+            subprocess.run(["terraform", "apply"] + targets + ["tf.plan"], check=True)
             lockdata["modules_processed"] = current_module_names
 
             print("Writing lockfile...")

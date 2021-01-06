@@ -1,18 +1,16 @@
 meta:
-  name: dev1
+  name: jd-test-1
   providers:
     google:
-      project: runxc-test
+      project: runx-test-2
       region: us-central1
       zone: us-central1-a
 modules:
   - disable-backend
   - state-init:
       type: state-init
+      bucket_name: opta_tf_state_jd_test_1
   - wait
   - enable-backend
   - compute-init:
-      type: compute-init
-  - wait
-  - k8s-init:
       type: compute-init
