@@ -40,6 +40,10 @@ class Layer:
             raise Exception(f"File {configfile} not found")
         conf = yaml.load(open(configfile), Loader=yaml.Loader)
         meta = conf.pop("meta")
+        for macro_name, macro_value in REGISTRY["macros"].items():
+            if macro_name in conf:
+                conf.pop(macro_name)
+                conf = deep_merge(conf, macro_value)
         blocks_data = conf.get("blocks", [])
         modules_data = conf.get("modules")
         if modules_data is not None:
@@ -70,11 +74,23 @@ class Layer:
         LinkProcessor().process(current_modules)
         for block in self.blocks[0:block_idx]:
             ret = deep_merge(block.gen_tf(), ret)
+        hydration = {
+            "parent_name": self.parent.meta["name"] if self.parent is not None else "nil",
+            "layer_name": self.meta["name"],
+            "state_storage": self.state_storage(),
+        }
 
-        return ret
+        return hydrate(ret, hydration)
 
     def for_child(self) -> bool:
         return self.parent is not None
+
+    def state_storage(self) -> str:
+        if "state_storage" in self.meta:
+            return self.meta["state_storage"]
+        elif self.parent is not None:
+            return self.parent.state_storage()
+        return f"opta-tf-state-{self.meta['name']}"
 
     def gen_providers(self, backend_enabled: bool) -> Dict[Any, Any]:
         ret: Dict[Any, Any] = {"provider": {}}
@@ -89,6 +105,7 @@ class Layer:
                     if self.parent is not None
                     else "nil",
                     "layer_name": self.meta["name"],
+                    "state_storage": self.state_storage(),
                 }
 
                 # Add the backend

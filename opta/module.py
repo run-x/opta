@@ -28,7 +28,7 @@ class BaseModule:
             elif self.parent_layer is not None and k in self.parent_layer.outputs():
                 module_blk["module"][self.key][
                     k
-                ] = f"${{data.terraform_remote_state.parent.outputs.{k}}}"
+                ] = f"${{{{data.terraform_remote_state.parent.outputs.{k} }}}}"
             else:
                 raise Exception(f"Unable to hydrate {k}")
 
@@ -39,7 +39,7 @@ class BaseModule:
                         module_blk["output"] = {}
 
                     module_blk["output"].update(
-                        {k: {"value": f"${{module.{self.key}.{k}}}"}}
+                        {k: {"value": f"${{{{module.{self.key}.{k} }}}}"}}
                     )
 
         return module_blk

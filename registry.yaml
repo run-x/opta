@@ -3,16 +3,16 @@ backends:
     terraform:
       backend: 
         gcs:
-          bucket: "opta_tf_state_jd_test_1"
+          bucket: "{state_storage}"
           prefix: "{layer_name}"
-base_macros:
+macros:
   _init:
     blocks:
       - backend: disabled
         modules:
           - state-init:
               type: state-init
-              bucket_name: @opta_tf_state_jd_test_1
+              bucket_name: "{state_storage}"
       - backend: enabled
         modules:
           - compute-init:
@@ -43,13 +43,13 @@ modules:
         helm:
           kubernetes:
             host: "https://${data.terraform_remote_state.parent.outputs.k8s-cluster.endpoint}"
-            token: "${data.google_client_config.provider.access_token}"
-            cluster_ca_certificate: "${base64decode(data.terraform_remote_state.parent.outputs.k8s-cluster.master_auth[0].cluster_ca_certificate)}"
+            token: "${{data.google_client_config.provider.access_token}}"
+            cluster_ca_certificate: "${{base64decode(data.terraform_remote_state.parent.outputs.k8s-cluster.master_auth[0].cluster_ca_certificate)}}"
         kubernetes:
           load_config_file: false
           host: "https://${data.terraform_remote_state.parent.outputs.k8s-cluster.endpoint}"
-          token: "${data.google_client_config.provider.access_token}"
-          cluster_ca_certificate: "${base64decode(data.terraform_remote_state.parent.outputs.k8s-cluster.master_auth[0].cluster_ca_certificate)}"
+          token: "${{data.google_client_config.provider.access_token}}"
+          cluster_ca_certificate: "${{base64decode(data.terraform_remote_state.parent.outputs.k8s-cluster.master_auth[0].cluster_ca_certificate)}}"
   k8s-service: 
     location: /Users/juandiegopalomino/runx/runxc-tf-modules/k8s-service
     variables:
