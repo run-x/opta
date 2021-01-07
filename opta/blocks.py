@@ -8,7 +8,7 @@ class Blocks:
     def __init__(
         self,
         layer_name: str,
-        module_data: Iterable[Any],
+        module_data: Dict[Any, Any],
         backend_enabled: bool = True,
         parent_layer: Any = None,
     ):

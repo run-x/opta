@@ -1,7 +1,6 @@
 import os
 import subprocess
 from os import path
-from typing import Any
 
 import click
 import yaml
@@ -51,7 +50,8 @@ def gen(configfile: str, lockfile: str, out: str) -> None:
 
         gen_tf.gen(ret, out)
         click.confirm(
-            "Will now initialize generate terraform plan for block {block_idx}. Sounds good?",
+            "Will now initialize generate terraform plan for block {block_idx}. "
+            "Sounds good?",
             abort=True,
         )
         targets = list(map(lambda x: f"-target=module.{x}", current_module_names))

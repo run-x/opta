@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import re
 from os import path
-from typing import Any, Dict, Iterable, List
+from typing import Any, Dict, Iterable, List, Optional
 
 import yaml
 
@@ -36,7 +38,7 @@ class Layer:
             )
 
     @classmethod
-    def load_from_yaml(cls, configfile):
+    def load_from_yaml(cls, configfile: str) -> Layer:
         if not path.exists(configfile):
             raise Exception(f"File {configfile} not found")
         conf = yaml.load(open(configfile), Loader=yaml.Loader)
@@ -59,14 +61,14 @@ class Layer:
         pattern = "^[A-Za-z0-9-]*$"
         return bool(re.match(pattern, name))
 
-    def outputs(self, block_idx: int = None) -> Iterable[str]:
-        ret = []
+    def outputs(self, block_idx: Optional[int] = None) -> Iterable[str]:
+        ret: List[str] = []
         block_idx = block_idx or len(self.blocks) - 1
         for block in self.blocks[0 : block_idx + 1]:
             ret += block.outputs()
         return ret
 
-    def gen_tf(self, block_idx: int = None) -> Dict[Any, Any]:
+    def gen_tf(self, block_idx: Optional[int] = None) -> Dict[Any, Any]:
         ret: Dict[Any, Any] = {}
         block_idx = block_idx or len(self.blocks) - 1
         current_modules = []

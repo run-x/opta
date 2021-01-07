@@ -28,6 +28,6 @@ def hydrate(target: Dict[Any, Any], hydration: Dict[Any, Any]) -> Dict[Any, Any]
     return target
 
 
-def is_tool(name: str):
+def is_tool(name: str) -> bool:
     """Check whether `name` is on PATH and marked as executable."""
     return which(name) is not None
