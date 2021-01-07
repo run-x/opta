@@ -1,6 +1,0 @@
-blocks_processed:
-- modules:
-  - jd-test-1-state-init
-- modules:
-  - jd-test-1-state-init
-  - jd-test-1-compute-init
