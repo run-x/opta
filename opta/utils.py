@@ -1,5 +1,5 @@
-from typing import Any, Dict
 from shutil import which
+from typing import Any, Dict
 
 
 def deep_merge(a: Dict[Any, Any], b: Dict[Any, Any]) -> Dict[Any, Any]:

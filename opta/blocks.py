@@ -1,4 +1,5 @@
 from typing import Any, Dict, Iterable
+
 from opta.module import Module
 from opta.utils import deep_merge
 

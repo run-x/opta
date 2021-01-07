@@ -1,11 +1,11 @@
 import os
 import subprocess
+from os import path
 from typing import Any
 
 import click
 import yaml
 
-from os import path
 from opta import gen_tf
 from opta.layer import Layer
 from opta.utils import deep_merge, is_tool

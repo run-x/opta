@@ -1,13 +1,14 @@
 import re
-import yaml
 from os import path
 from typing import Any, Dict, Iterable, List
 
-from opta.plugins.derived_providers import DerivedProviders
-from opta.constants import REGISTRY
-from opta.utils import deep_merge, hydrate
-from opta.plugins.link_processor import LinkProcessor
+import yaml
+
 from opta.blocks import Blocks
+from opta.constants import REGISTRY
+from opta.plugins.derived_providers import DerivedProviders
+from opta.plugins.link_processor import LinkProcessor
+from opta.utils import deep_merge, hydrate
 
 
 class Layer:

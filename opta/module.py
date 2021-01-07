@@ -1,4 +1,5 @@
 from typing import Any, Dict
+
 from opta.constants import REGISTRY
 
 
