@@ -7,104 +7,33 @@ terraform {
   }
 }
 
-resource "kubernetes_service" "prod-main-service" {
-  metadata {
-    labels = {
-      "app" = var.name
-    }
-    name      = var.name
-    namespace = var.namespace
-  }
-
-  spec {
-    selector = {
-      "app" = var.name
-    }
-    type = "NodePort"
-
-    port {
-      port        = 80
-      protocol    = "TCP"
-      target_port = var.target_port
-    }
-  }
+resource "helm_release" "k8s-service" {
+  chart = "${path.module}/k8s-service"
+  name = var.name
+  namespace = var.namespace
+  values = [
+    file(local_file.values.filename)
+  ]
 }
 
-resource "kubernetes_ingress" "main-ingress" {
-  metadata {
-    annotations = (var.public_ip_name == "" ? {} : {
-      "kubernetes.io/ingress.global-static-ip-name" = var.public_ip_name
-    })
-    name      = var.name
-    namespace = var.namespace
-  }
-
-  spec {
-    backend {
-      service_name = kubernetes_service.prod-main-service.metadata[0].name
-      service_port = kubernetes_service.prod-main-service.spec[0].port[0].port
-    }
-  }
-}
-
-resource "kubernetes_deployment" "main" {
-  count = var.image == "" ? 0 : 1
-  metadata {
-    name = var.name
-  }
-
-  spec {
-    replicas = var.replicas
-
-    selector {
-      match_labels = {
-        app = var.name
-      }
-    }
-
-    template {
-      metadata {
-        labels = {
-          app = var.name
-        }
-      }
-
-      spec {
-        container {
-          image = var.image
-          name  = "app"
-
-          resources {
-            requests {
-              cpu    = "50m"
-            }
-          }
-          
-          port {
-            container_port = var.target_port
-          }
-
-          dynamic "env" {
-            for_each = var.env_vars
-
-            content {
-              name = env.value.name
-              value = env.value.value
-            }
-          }
-
-          readiness_probe {
-            http_get {
-              path = "/healthcheck"
-              port = var.target_port
-            }
-
-            initial_delay_seconds = 10
-            period_seconds        = 10
-          }
-        }
-      }
-    }
-  }
+resource "local_file" "values" {
+  content     = yamlencode({
+    autoscaling: {
+      minReplicas: var.min_autoscaling,
+      maxReplicas: var.max_autoscaling,
+      targetCPUUtilizationPercentage: var.autoscaling_cpu_percentage_threshold
+      targetMemoryUtilizationPercentage: var.autoscaling_mem_percentage_threshold
+    },
+    port: var.target_port,
+    podResourceLimits: var.pod_resource_limits,
+    podResourceRequests: var.pod_resource_requests,
+    image: {
+      repository: var.image
+      tag: var.tag
+    },
+    livenessProbePath: var.liveness_probe_path,
+    readinessProbePath: var.readiness_probe_path
+  })
+  filename = "${path.cwd}/k8s-service-values.yaml"
 }
 

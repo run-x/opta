@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "k8s-service.fullname" . }}
+  labels:
+    {{- include "k8s-service.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "k8s-service.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "k8s-service.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "k8s-service.serviceAccountName" . }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.livenessProbePath }}
+              port: http
+          readinessProbe:
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            httpGet:
+              path: {{ .Values.readinessProbePath }}
+              port: http
+          resources:
+            limits:
+              {{- toYaml .Values.podResourceLimits | nindent 14 }}
+            requests:
+              {{- toYaml .Values.podResourceRequests | nindent 14 }}
