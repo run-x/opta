@@ -1,9 +1,8 @@
 import os
 import subprocess
-from os import path
+from typing import Set
 
 import click
-import yaml
 
 from opta import gen_tf
 from opta.layer import Layer
@@ -17,44 +16,60 @@ def cli() -> None:
 
 @cli.command()
 @click.option("--configfile", default="opta.yml", help="Opta config file")
-@click.option("--lockfile", default="opta.lock", help="Opta config file")
 @click.option("--out", default="main.tf.json", help="Generated tf file")
-def gen(configfile: str, lockfile: str, out: str) -> None:
+@click.option(
+    "--no-apply",
+    is_flag=True,
+    default=False,
+    help="Do not run terraform, just write the json",
+)
+def gen(configfile: str, out: str, no_apply: bool) -> None:
     """ Generate TF file based on opta config file """
     if not is_tool("terraform"):
         raise Exception("Please install terraform on your machine")
     if not os.path.exists(configfile):
         raise Exception(f"File {configfile} not found")
 
-    lockdata = (
-        yaml.load(open(lockfile), Loader=yaml.Loader) if path.exists(lockfile) else dict()
-    )
-    lockdata["blocks_processed"] = lockdata.get("blocks_processed", [])
-
     layer = Layer.load_from_yaml(configfile)
     block_idx = 1
-    current_module_names = []
+    current_module_keys: Set[str] = set()
     print("Loading infra blocks")
     for idx, block in enumerate(layer.blocks):
-        current_module_names += list(map(lambda x: x.name, block.modules))
-        if len(lockdata["blocks_processed"]) <= idx:
-            lockdata["blocks_processed"].append({"modules": []})
-        if current_module_names == lockdata["blocks_processed"][idx][
-            "modules"
-        ] and idx + 1 != len(layer.blocks):
+        current_module_keys = current_module_keys.union(
+            set(list(map(lambda x: x.key, block.modules)))
+        )
+        total_modules_applied = set()
+        try:
+            current_state = (
+                subprocess.run(
+                    ["terraform", "state", "list"], check=True, capture_output=True
+                )
+                .stdout.decode("utf-8")
+                .split("\n")
+            )
+            for resource in current_state:
+                if resource.startswith("module"):
+                    total_modules_applied.add(resource.split(".")[1])
+        except Exception:
+            print("Couldn't find terraform state, assuming new build.")
+        if current_module_keys.issubset(total_modules_applied) and idx + 1 != len(
+            layer.blocks
+        ):
             block_idx += 1
             continue
-        print(f"Generating block {block_idx} for modules {current_module_names}...")
+        print(f"Generating block {block_idx} for modules {current_module_keys}...")
         ret = layer.gen_providers(block.backend_enabled)
         ret = deep_merge(layer.gen_tf(block_idx), ret)
 
         gen_tf.gen(ret, out)
+        if no_apply:
+            continue
         click.confirm(
             "Will now initialize generate terraform plan for block {block_idx}. "
             "Sounds good?",
             abort=True,
         )
-        targets = list(map(lambda x: f"-target=module.{x}", current_module_names))
+        targets = list(map(lambda x: f"-target=module.{x}", current_module_keys))
         subprocess.run(["terraform", "init"], check=True)
         subprocess.run(["terraform", "plan", "-out=tf.plan"] + targets, check=True)
 
@@ -63,11 +78,6 @@ def gen(configfile: str, lockfile: str, out: str) -> None:
             abort=True,
         )
         subprocess.run(["terraform", "apply"] + targets + ["tf.plan"], check=True)
-
-        lockdata["blocks_processed"][idx]["modules"] = current_module_names
-        print("Writing lockfile...")
-        with open(lockfile, "w") as f:
-            f.write(yaml.dump(lockdata))
         block_idx += 1
 
 
