@@ -12,28 +12,23 @@ resource "helm_release" "k8s-service" {
   name = var.name
   namespace = var.namespace
   values = [
-    file(local_file.values.filename)
+    yamlencode({
+      autoscaling: {
+        minReplicas: var.min_autoscaling,
+        maxReplicas: var.max_autoscaling,
+        targetCPUUtilizationPercentage: var.autoscaling_cpu_percentage_threshold
+        targetMemoryUtilizationPercentage: var.autoscaling_mem_percentage_threshold
+      },
+      port: var.target_port,
+      podResourceLimits: var.pod_resource_limits,
+      podResourceRequests: var.pod_resource_requests,
+      image: {
+        repository: var.image
+        tag: var.tag
+      },
+      livenessProbePath: var.liveness_probe_path,
+      readinessProbePath: var.readiness_probe_path
+    })
   ]
-}
-
-resource "local_file" "values" {
-  content     = yamlencode({
-    autoscaling: {
-      minReplicas: var.min_autoscaling,
-      maxReplicas: var.max_autoscaling,
-      targetCPUUtilizationPercentage: var.autoscaling_cpu_percentage_threshold
-      targetMemoryUtilizationPercentage: var.autoscaling_mem_percentage_threshold
-    },
-    port: var.target_port,
-    podResourceLimits: var.pod_resource_limits,
-    podResourceRequests: var.pod_resource_requests,
-    image: {
-      repository: var.image
-      tag: var.tag
-    },
-    livenessProbePath: var.liveness_probe_path,
-    readinessProbePath: var.readiness_probe_path
-  })
-  filename = "${path.cwd}/k8s-service-values.yaml"
 }
 
