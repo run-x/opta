@@ -1,10 +1,10 @@
 meta:
-  create-env: dev1
-  name: dev1
+  name: jd-test-1
   providers:
     google:
-      project: runxc-test
+      project: runx-test-2
       region: us-central1
       zone: us-central1-a
-core:
-  type: init
+
+_init: {}
+

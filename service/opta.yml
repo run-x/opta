@@ -1,17 +1,19 @@
 meta:
-  env: ../env/opta.yml
+  parent: "../env/opta.yml"
   name: github-app
-app:
-  type: k8s-service
-  target_port: 5000
-  image: "gcr.io/runxc-test/github-app:ankur-1"
-  env_vars:
-    - name: APPENV
-      value: prod
-    - _link: database
-    - _link: dd-key
-database:
-  type: gcp-postgres
-  tier: "db-f1-micro"
-dd-key:
-  type: k8s-secret
+modules:
+  - app:
+      type: k8s-service
+      target_port: 5000
+      image: "gcr.io/runxc-test/github-app"
+      tag: "ankur-1"
+      env_vars:
+        - name: APPENV
+          value: prod
+        - _link: database
+        - _link: dd-key
+  - database:
+      type: gcp-postgres
+      tier: "db-f1-micro"
+  - dd-key:
+      type: k8s-secret

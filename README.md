@@ -37,3 +37,11 @@ When you're creating a new env, you should do `pipenv run python ./opta/cli.py
 
 Then you can do `pipenv run python ./opta/cli.py gen --inp <file> && terraform
 init && terraform apply` to generate the full env and move everything to s3/gcs.
+
+Terminology
+-----------
+*Module* - A module is a reusable piece of infrastructure currently described as a terraform module
+
+*Block* - A block is a group of modules to be deployed in parallel, depending only on previous blocks
+
+*Layer* - A layer is a set of blocks managed by the same IAM permissions/team (i.e. 1 opta yaml)

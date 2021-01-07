@@ -3,17 +3,34 @@ backends:
     terraform:
       backend: 
         gcs:
-          bucket: "opta_tf_state_{env_name}"
-          prefix: "{child_name}"
-    resource:
-      google_storage_bucket:
-        tf_state:
-          name: "opta_tf_state_{env_name}"
-          versioning:
-            enabled: true
+          bucket: "{state_storage}"
+          prefix: "{layer_name}"
+macros:
+  _init:
+    blocks:
+      - backend: disabled
+        modules:
+          - state-init:
+              type: state-init
+              bucket_name: "{state_storage}"
+      - backend: enabled
+        modules:
+          - compute-init:
+              type: compute-init
 modules:
-  init: 
-    location: git@github.com:run-x/runxc-tf-modules.git//init
+  state-init:
+    location: git@github.com:run-x/runxc-tf-modules.git//state-init
+    variables:
+      bucket_name: str
+    outputs:
+      state-bucket-name:
+        export: true
+    providers:
+      data:
+        google_client_config:
+          provider: {}
+  compute-init:
+    location: git@github.com:run-x/runxc-tf-modules.git//compute-init
     variables:
       name: str
     outputs:
@@ -22,25 +39,28 @@ modules:
       k8s-cluster:
         export: true
     providers:
-      data:
-        google_client_config:
-          provider: {}
       provider:
-        kubernetes:
-          load_config_file: false
-          host: "https://${data.terraform_remote_state.env.outputs.k8s-cluster.endpoint}"
-          token: "${data.google_client_config.provider.access_token}"
-          cluster_ca_certificate: "${base64decode(data.terraform_remote_state.env.outputs.k8s-cluster.master_auth[0].cluster_ca_certificate)}"
+        helm:
+          kubernetes:
+            host: "https://${{data.terraform_remote_state.parent.outputs.k8s-cluster.endpoint}}"
+            token: "${{data.google_client_config.provider.access_token}}"
+            cluster_ca_certificate: "${{base64decode(data.terraform_remote_state.parent.outputs.k8s-cluster.master_auth[0].cluster_ca_certificate)}}"
   k8s-service: 
     location: git@github.com:run-x/runxc-tf-modules.git//k8s-service
     variables:
       name: str
       namespace: optional
-      target_port: number
-      public_ip_name: optional
+      target_port: optional
       replicas: optional
       image: optional
+      tag: optional
       env_vars: optional
+      autoscaling_cpu_percentage_threshold: optional
+      autoscaling_mem_percentage_threshold: optional
+      liveness_probe_path: optional
+      readiness_probe_path: optional
+      pod_resource_limits: optional
+      pod_resource_requests: optional
   gcp-postgres: 
     location: git@github.com:run-x/runxc-tf-modules.git//gcp-postgres
     variables:
