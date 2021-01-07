@@ -1,6 +1,6 @@
 from typing import Any, Dict
 
-from opta.utils import deep_merge
+from opta.utils import deep_merge, hydrate
 
 
 class DerivedProviders:
@@ -15,4 +15,8 @@ class DerivedProviders:
             for m in b.modules:
                 if "providers" in m.desc:
                     ret = deep_merge(m.desc["providers"], ret)
-        return ret
+        hydration = {
+            "layer_name": self.layer.meta["name"],
+            "state_storage": self.layer.state_storage(),
+        }
+        return hydrate(ret, hydration)

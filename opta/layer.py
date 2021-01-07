@@ -130,6 +130,7 @@ class Layer:
                                     config,
                                     {
                                         "layer_name": self.parent.meta["name"],
+                                        "state_storage": self.state_storage(),
                                     },
                                 ),
                             }
