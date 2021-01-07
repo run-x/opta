@@ -1,0 +1,5 @@
+blocks_processed:
+- modules:
+  - github-app-app
+  - github-app-database
+  - github-app-dd-key

@@ -5,6 +5,18 @@ backends:
         gcs:
           bucket: "opta_tf_state_jd_test_1"
           prefix: "{layer_name}"
+base_macros:
+  _init:
+    blocks:
+      - backend: disabled
+        modules:
+          - state-init:
+              type: state-init
+              bucket_name: @opta_tf_state_jd_test_1
+      - backend: enabled
+        modules:
+          - compute-init:
+              type: compute-init
 modules:
   state-init:
     location: /Users/juandiegopalomino/runx/runxc-tf-modules/state-init
@@ -28,6 +40,11 @@ modules:
         export: true
     providers:
       provider:
+        helm:
+          kubernetes:
+            host: "https://${data.terraform_remote_state.parent.outputs.k8s-cluster.endpoint}"
+            token: "${data.google_client_config.provider.access_token}"
+            cluster_ca_certificate: "${base64decode(data.terraform_remote_state.parent.outputs.k8s-cluster.master_auth[0].cluster_ca_certificate)}"
         kubernetes:
           load_config_file: false
           host: "https://${data.terraform_remote_state.parent.outputs.k8s-cluster.endpoint}"

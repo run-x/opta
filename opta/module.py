@@ -1,36 +1,22 @@
-import os
-from typing import Any, Dict, Iterable
-
-import yaml
-import re
-
-from opta.plugins.derived_providers import DerivedProviders
-from opta.utils import deep_merge, hydrate
-
-REGISTRY = yaml.load(
-    open(f"{os.path.dirname(__file__)}/../registry.yaml"), Loader=yaml.Loader
-)
-BACKEND_ENABLED = "enable-backend"
-BACKEND_DISABLED = "disable-backend"
-WAIT = "wait"
+from typing import Any, Dict
+from opta.constants import REGISTRY
 
 
 class BaseModule:
     def __init__(
         self,
-        meta: Dict[Any, Any],
+        layer_name: str,
         key: str,
         data: Dict[Any, Any],
-        layer: Any = None,
+        parent_layer: Any = None,
     ):
-        self.meta = meta
         self.key = key
         self.desc = REGISTRY["modules"][data["type"]]
-        self.name = f"{self.meta['name']}-{self.key}"
-        self.layer = layer
+        self.name = f"{layer_name}-{self.key}"
+        self.parent_layer = parent_layer
         self.data = data
 
-    def gen_blocks(self) -> Dict[Any, Any]:
+    def gen_tf(self) -> Dict[Any, Any]:
         module_blk = {"module": {self.key: {"source": self.desc["location"]}}}
         for k, v in self.desc["variables"].items():
             if k in self.data:
@@ -39,7 +25,7 @@ class BaseModule:
                 continue
             elif k == "name":
                 module_blk["module"][self.key][k] = self.name
-            elif self.layer is not None and k in self.layer.outputs():
+            elif self.parent_layer is not None and k in self.parent_layer.outputs():
                 module_blk["module"][self.key][
                     k
                 ] = f"${{data.terraform_remote_state.parent.outputs.{k}}}"
@@ -57,101 +43,6 @@ class BaseModule:
                     )
 
         return module_blk
-
-
-class Layer:
-    def __init__(
-        self,
-        meta: Dict[Any, Any],
-        data: Dict[Any, Any],
-        child_meta: Dict[Any, Any] = {},
-    ):
-        self.meta = meta
-        self.child_meta = child_meta
-        if not Layer.valid_name(self.meta["name"]):
-            raise Exception(
-                "Invalid layer, can only contain lowercase letters, numbers and hyphens!"
-            )
-        self.modules = []
-
-        for module_data in data["modules"]:
-            if type(module_data) is dict:
-                self.modules.append(
-                    Module(
-                        meta, list(module_data.keys())[0], list(module_data.values())[0]
-                    )
-                )
-
-    @staticmethod
-    def valid_name(name: str) -> bool:
-        pattern = "^[A-Za-z0-9-]*$"
-        return bool(re.match(pattern, name))
-
-    def outputs(self) -> Iterable[str]:
-        ret = []
-
-        for m in self.modules:
-            if "outputs" in m.desc:
-                for k, v in m.desc["outputs"].items():
-                    if "export" in v and v["export"]:
-                        ret.append(k)
-
-        return ret
-
-    def gen_blocks(self) -> Dict[Any, Any]:
-        ret: Dict[Any, Any] = {}
-        for m in self.modules:
-            ret = deep_merge(m.gen_blocks(), ret)
-
-        return ret
-
-    def for_child(self) -> bool:
-        return "parent" in self.child_meta
-
-    def gen_providers(self, backend_enabled: bool) -> Dict[Any, Any]:
-        ret: Dict[Any, Any] = {"provider": {}}
-
-        for k, v in self.meta["providers"].items():
-            ret["provider"][k] = v
-            if k in REGISTRY["backends"]:
-                hydration = {
-                    "parent_name": self.meta["name"],
-                    "layer_name": self.child_meta["name"]
-                    if "name" in self.child_meta
-                    else "root",
-                }
-
-                # Add the backend
-                if backend_enabled:
-                    ret["terraform"] = hydrate(
-                        REGISTRY["backends"][k]["terraform"], hydration
-                    )
-
-                if self.for_child():
-                    # Add remote state
-                    backend, config = list(
-                        REGISTRY["backends"][k]["terraform"]["backend"].items()
-                    )[0]
-                    ret["data"] = {
-                        "terraform_remote_state": {
-                            "parent": {
-                                "backend": backend,
-                                "config": hydrate(
-                                    config,
-                                    {
-                                        "parent_name": self.meta["name"],
-                                        "layer_name": "root",
-                                    },
-                                ),
-                            }
-                        }
-                    }
-
-                    # Add derived providers like k8s
-
-                    ret = deep_merge(ret, DerivedProviders(self).gen_blocks())
-
-        return ret
 
 
 class Module(BaseModule):

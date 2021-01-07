@@ -1,3 +1,6 @@
 .terraform
 .terraform.lock.hcl
 .idea
+tf.plan
+terraform.tfstate
+terraform.tfstate.backup
