@@ -12,7 +12,7 @@ resource "helm_release" "k8s-service" {
   name = var.name
   namespace = var.namespace
   values = [
-    local_file.values.filename
+    file(local_file.values.filename)
   ]
 }
 
