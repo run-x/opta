@@ -1,6 +1,5 @@
 meta:
   name: jd-test-1
-  state_storage: opta_tf_state_jd_test_1
   providers:
     google:
       project: runx-test-2

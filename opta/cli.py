@@ -23,7 +23,13 @@ def cli() -> None:
     default=False,
     help="Do not run terraform, just write the json",
 )
-def gen(configfile: str, out: str, no_apply: bool) -> None:
+@click.option(
+    "--refresh",
+    is_flag=True,
+    default=False,
+    help="Run from first block, regardless of current state",
+)
+def gen(configfile: str, out: str, no_apply: bool, refresh: bool) -> None:
     """ Generate TF file based on opta config file """
     if not is_tool("terraform"):
         raise Exception("Please install terraform on your machine")
@@ -52,8 +58,10 @@ def gen(configfile: str, out: str, no_apply: bool) -> None:
                     total_modules_applied.add(resource.split(".")[1])
         except Exception:
             print("Couldn't find terraform state, assuming new build.")
-        if current_module_keys.issubset(total_modules_applied) and idx + 1 != len(
-            layer.blocks
+        if (
+            current_module_keys.issubset(total_modules_applied)
+            and idx + 1 != len(layer.blocks)
+            and not refresh
         ):
             block_idx += 1
             continue
