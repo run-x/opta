@@ -2,14 +2,11 @@ import json
 from typing import Any
 from unittest.mock import mock_open, patch
 
-import pytest
 import yaml
-from click.testing import CliRunner
 
-from opta.cli import cli
+from opta.cli import _gen
 
 
-@pytest.mark.skip(reason="Can't seem to be able to debug this, Ankur will take a look")
 @patch("os.path.exists")
 def test_basic_gen(_: Any) -> None:
     test_cases: Any = [
@@ -22,32 +19,25 @@ def test_basic_gen(_: Any) -> None:
                         "google": {"project": "xyz", "region": "xyz", "zone": "xyz"}
                     },
                 },
-                "core": {"type": "init"},
+                "modules": [
+                    {"core": {"type": "state-init", "bucket_name": "{state_storage}"}}
+                ],
             },
             {
                 "provider": {
                     "google": {"project": "xyz", "region": "xyz", "zone": "xyz"}
                 },
                 "terraform": {
-                    "backend": {"gcs": {"bucket": "opta_tf_state_dev1", "prefix": "env"}}
-                },
-                "resource": {
-                    "google_storage_bucket": {
-                        "tf_state": {
-                            "name": "opta_tf_state_dev1",
-                            "versioning": {"enabled": True},
-                        }
-                    }
+                    "backend": {"gcs": {"bucket": "opta-tf-state-dev1", "prefix": "dev1"}}
                 },
                 "module": {
                     "core": {
-                        "source": "git@github.com:run-x/runxc-tf-modules.git//init",
-                        "name": "dev1-core",
+                        "source": "git@github.com:run-x/runxc-tf-modules.git//state-init",
+                        "bucket_name": "opta-tf-state-dev1",
                     }
                 },
                 "output": {
-                    "gcp-network": {"value": "${module.core.gcp-network}"},
-                    "k8s-cluster": {"value": "${module.core.k8s-cluster}"},
+                    "state-bucket-name": {"value": "${module.core.state-bucket-name }"}
                 },
             },
         )
@@ -57,7 +47,7 @@ def test_basic_gen(_: Any) -> None:
         old_open = open
         write_open = mock_open()
 
-        def new_open(a: str, b: Any = None) -> Any:
+        def new_open(a: str, b: Any = "r") -> Any:
             if a == "opta.yml":
                 return mock_open(read_data=yaml.dump(i)).return_value
             elif a == "main.tf.json":
@@ -67,6 +57,7 @@ def test_basic_gen(_: Any) -> None:
 
         with patch("builtins.open") as mocked_open:
             mocked_open.side_effect = new_open
-            CliRunner().invoke(cli, ["gen", "--no-apply"])
+
+            _gen("opta.yml", "main.tf.json", True, False)
 
             write_open().write.assert_called_once_with(json.dumps(o, indent=2))

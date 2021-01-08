@@ -30,6 +30,10 @@ def cli() -> None:
     help="Run from first block, regardless of current state",
 )
 def gen(configfile: str, out: str, no_apply: bool, refresh: bool) -> None:
+    _gen(configfile, out, no_apply, refresh)
+
+
+def _gen(configfile: str, out: str, no_apply: bool, refresh: bool) -> None:
     """ Generate TF file based on opta config file """
     if not is_tool("terraform"):
         raise Exception("Please install terraform on your machine")
@@ -73,7 +77,7 @@ def gen(configfile: str, out: str, no_apply: bool, refresh: bool) -> None:
         if no_apply:
             continue
         click.confirm(
-            "Will now initialize generate terraform plan for block {block_idx}. "
+            f"Will now initialize generate terraform plan for block {block_idx}. "
             "Sounds good?",
             abort=True,
         )
@@ -82,8 +86,7 @@ def gen(configfile: str, out: str, no_apply: bool, refresh: bool) -> None:
         subprocess.run(["terraform", "plan", "-out=tf.plan"] + targets, check=True)
 
         click.confirm(
-            "Terraform plan generation successful, would you like to apply?",
-            abort=True,
+            "Terraform plan generation successful, would you like to apply?", abort=True,
         )
         subprocess.run(["terraform", "apply"] + targets + ["tf.plan"], check=True)
         block_idx += 1
