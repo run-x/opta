@@ -17,6 +17,9 @@ macros:
         modules:
           - compute-init:
               type: compute-init
+          - k8s-node-pool:
+              type: k8s-node-pool
+              k8s-cluster-name: "${{module.compute-init.k8s-cluster-name}}"
 modules:
   state-init:
     location: git@github.com:run-x/runxc-tf-modules.git//state-init
@@ -38,6 +41,8 @@ modules:
         export: true
       k8s-cluster:
         export: true
+      k8s-cluster-name:
+        export: true
     providers:
       provider:
         helm:
@@ -45,7 +50,15 @@ modules:
             host: "https://${{data.terraform_remote_state.parent.outputs.k8s-cluster.endpoint}}"
             token: "${{data.google_client_config.provider.access_token}}"
             cluster_ca_certificate: "${{base64decode(data.terraform_remote_state.parent.outputs.k8s-cluster.master_auth[0].cluster_ca_certificate)}}"
-  k8s-service: 
+  k8s-node-pool:
+    location: git@github.com:run-x/runxc-tf-modules.git//k8s-node-pool
+    variables:
+      node-pool-name: optional
+      machine-type: optional
+      max-node-count: optional
+      min-node-count: optional
+      k8s-cluster-name: str
+  k8s-service:
     location: git@github.com:run-x/runxc-tf-modules.git//k8s-service
     variables:
       name: str
