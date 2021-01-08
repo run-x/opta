@@ -23,6 +23,9 @@ resource "google_container_cluster" "prod-main" {
   cluster_autoscaling {
     enabled = false
   }
+  workload_identity_config {
+    identity_namespace = "${data.google_project.caller.project_id}.svc.id.goog"
+  }
   master_auth {
     username = ""
     password = ""
