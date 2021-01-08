@@ -5,3 +5,7 @@ output "gcp-network" {
 output "k8s-cluster" {
   value = google_container_cluster.prod-main
 }
+
+output "k8s-cluster-name" {
+  value = google_container_cluster.prod-main.name
+}
