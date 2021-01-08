@@ -86,7 +86,8 @@ def _gen(configfile: str, out: str, no_apply: bool, refresh: bool) -> None:
         subprocess.run(["terraform", "plan", "-out=tf.plan"] + targets, check=True)
 
         click.confirm(
-            "Terraform plan generation successful, would you like to apply?", abort=True,
+            "Terraform plan generation successful, would you like to apply?",
+            abort=True,
         )
         subprocess.run(["terraform", "apply"] + targets + ["tf.plan"], check=True)
         block_idx += 1

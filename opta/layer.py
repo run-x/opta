@@ -137,7 +137,9 @@ class Layer:
                         }
                     }
 
-                    # Add derived providers like k8s
-                    ret = deep_merge(ret, DerivedProviders(self.parent).gen_tf())
+        # Add derived providers like k8s from parent
+        ret = deep_merge(ret, DerivedProviders(self.parent, is_parent=True).gen_tf())
+        # Add derived providers like k8s from own blocks
+        ret = deep_merge(ret, DerivedProviders(self, is_parent=False).gen_tf())
 
         return ret
