@@ -15,7 +15,9 @@ def test_basic_gen(_: Any) -> None:
                 "meta": {
                     "create-env": "dev1",
                     "name": "dev1",
-                    "providers": {"aws": {"region": "us-east-1"}},
+                    "providers": {
+                        "aws": {"allowed_account_ids": ["abc"], "region": "us-east-1"}
+                    },
                 },
                 "modules": [
                     {
@@ -28,7 +30,9 @@ def test_basic_gen(_: Any) -> None:
                 ],
             },
             {
-                "provider": {"aws": {"region": "us-east-1"}},
+                "provider": {
+                    "aws": {"allowed_account_ids": ["abc"], "region": "us-east-1"}
+                },
                 "terraform": {
                     "backend": {
                         "s3": {
