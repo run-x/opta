@@ -44,6 +44,13 @@ macros:
       - modules:
           - istio-init:
               type: istio-init
+          - k8s-metric-server:
+              type: k8s-metric-server
+          - k8s-cluster-autoscaler:
+              type: k8s-cluster-autoscaler
+              cluster_name: "${{module.aws-eks-init.k8s_cluster_name}}"
+              openid_provider_url: "${{module.aws-eks-init.k8s_openid_provider_url}}"
+              openid_provider_arn: "${{module.aws-eks-init.k8s_openid_provider_arn}}"
 modules:
   aws-state-init:
     location: git@github.com:run-x/runxc-tf-modules.git//aws-state-init
@@ -161,3 +168,14 @@ modules:
       name: str
     outputs:
       value: str
+  k8s-metric-server:
+    location: /Users/juandiegopalomino/runx/runxc-tf-modules/k8s-metric-server
+    variables: {}
+    outputs: {}
+  k8s-cluster-autoscaler:
+    location: /Users/juandiegopalomino/runx/runxc-tf-modules/k8s-cluster-autoscaler
+    variables:
+      cluster_name: str
+      openid_provider_url: str
+      openid_provider_arn: str
+    outputs: {}
