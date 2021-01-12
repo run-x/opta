@@ -169,11 +169,11 @@ modules:
     outputs:
       value: str
   k8s-metric-server:
-    location: /Users/juandiegopalomino/runx/runxc-tf-modules/k8s-metric-server
+    location: git@github.com:run-x/runxc-tf-modules.git//k8s-metric-server
     variables: {}
     outputs: {}
   k8s-cluster-autoscaler:
-    location: /Users/juandiegopalomino/runx/runxc-tf-modules/k8s-cluster-autoscaler
+    location: git@github.com:run-x/runxc-tf-modules.git//k8s-cluster-autoscaler
     variables:
       cluster_name: str
       openid_provider_url: str
