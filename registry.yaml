@@ -46,7 +46,7 @@ macros:
               type: istio-init
 modules:
   aws-state-init:
-    location: /Users/juandiegopalomino/runx/runxc-tf-modules/aws-state-init
+    location: git@github.com:run-x/runxc-tf-modules.git//aws-state-init
     variables:
       bucket_name: str
       dynamodb_lock_table_name: str
@@ -66,7 +66,7 @@ modules:
         aws_region:
           provider: {}
   aws-network-init:
-    location: /Users/juandiegopalomino/runx/runxc-tf-modules/aws-network-init
+    location: git@github.com:run-x/runxc-tf-modules.git//aws-network-init
     variables:
       name: str
       total_ipv4_cidr_block: optional
@@ -81,7 +81,7 @@ modules:
       public_subnets_ids:
         export: true
   aws-eks-init:
-    location: /Users/juandiegopalomino/runx/runxc-tf-modules/aws-eks-init
+    location: git@github.com:run-x/runxc-tf-modules.git//aws-eks-init
     variables:
       cluster_name: str
       k8s_version: optional
@@ -111,11 +111,11 @@ modules:
             token: "${{{module_source}.k8s_cluster_auth_token}}"
             cluster_ca_certificate: "${{base64decode({module_source}.k8s_ca_data)}}"
   istio-init:
-    location: /Users/juandiegopalomino/runx/runxc-tf-modules/istio-init
+    location: git@github.com:run-x/runxc-tf-modules.git//istio-init
     variables: {}
     outputs: {}
   aws-eks-nodegroup:
-    location: /Users/juandiegopalomino/runx/runxc-tf-modules/aws-eks-nodegroup
+    location: git@github.com:run-x/runxc-tf-modules.git//aws-eks-nodegroup
     variables:
       cluster_name: str
       node_group_name: str
