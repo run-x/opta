@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from os import path
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List
 
 import yaml
 
@@ -61,21 +61,20 @@ class Layer:
         pattern = "^[A-Za-z0-9-]*$"
         return bool(re.match(pattern, name))
 
-    def outputs(self, block_idx: Optional[int] = None) -> Iterable[str]:
+    def outputs(self, block_idx: int) -> Iterable[str]:
         ret: List[str] = []
         block_idx = block_idx or len(self.blocks) - 1
         for block in self.blocks[0 : block_idx + 1]:
             ret += block.outputs()
         return ret
 
-    def gen_tf(self, block_idx: Optional[int] = None) -> Dict[Any, Any]:
+    def gen_tf(self, block_idx: int) -> Dict[Any, Any]:
         ret: Dict[Any, Any] = {}
-        block_idx = block_idx or len(self.blocks) - 1
         current_modules = []
         for block in self.blocks[0 : block_idx + 1]:
             current_modules += block.modules
         LinkProcessor().process(current_modules)
-        for block in self.blocks[0:block_idx]:
+        for block in self.blocks[0 : block_idx + 1]:
             ret = deep_merge(block.gen_tf(), ret)
         hydration = {
             "parent_name": self.parent.meta["name"] if self.parent is not None else "nil",
@@ -95,7 +94,7 @@ class Layer:
             return self.parent.state_storage()
         return f"opta-tf-state-{self.meta['name']}"
 
-    def gen_providers(self, backend_enabled: bool) -> Dict[Any, Any]:
+    def gen_providers(self, block_idx: int, backend_enabled: bool) -> Dict[Any, Any]:
         ret: Dict[Any, Any] = {"provider": {}}
         providers = self.meta.get("providers", {})
         if self.parent is not None:
@@ -109,6 +108,7 @@ class Layer:
                     else "nil",
                     "layer_name": self.meta["name"],
                     "state_storage": self.state_storage(),
+                    "provider": v,
                 }
 
                 # Add the backend
@@ -140,6 +140,8 @@ class Layer:
         # Add derived providers like k8s from parent
         ret = deep_merge(ret, DerivedProviders(self.parent, is_parent=True).gen_tf())
         # Add derived providers like k8s from own blocks
-        ret = deep_merge(ret, DerivedProviders(self, is_parent=False).gen_tf())
+        ret = deep_merge(
+            ret, DerivedProviders(self, is_parent=False).gen_tf(block_idx=block_idx)
+        )
 
         return ret

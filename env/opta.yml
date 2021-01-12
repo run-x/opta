@@ -1,10 +1,8 @@
 meta:
   name: jd-test-1
   providers:
-    google:
-      project: runx-test-2
-      region: us-central1
-      zone: us-central1-a
+    aws:
+      region: us-east-1
 
 _init: {}
 

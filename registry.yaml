@@ -1,63 +1,133 @@
 backends:
-  google: 
+  aws:
     terraform:
-      backend: 
-        gcs:
+      backend:
+        s3:
           bucket: "{state_storage}"
-          prefix: "{layer_name}"
+          key: "{layer_name}"
+          dynamodb_table: "{state_storage}"
+          region: "{provider[region]}"
 macros:
   _init:
     blocks:
       - backend: disabled
         modules:
-          - state-init:
-              type: state-init
+          - aws-state-init:
+              type: aws-state-init
               bucket_name: "{state_storage}"
+              dynamodb_lock_table_name: "{state_storage}"
       - backend: enabled
         modules:
-          - compute-init:
-              type: compute-init
-          - k8s-node-pool:
-              type: k8s-node-pool
-              k8s-cluster-name: "${{module.compute-init.k8s-cluster-name}}"
+          - aws-network-init:
+              type: aws-network-init
+              total_ipv4_cidr_block: "10.0.0.0/16"
+              public_ipv4_cidr_blocks:
+                - "10.0.0.0/21"
+                - "10.0.8.0/21"
+                - "10.0.16.0/21"
+              private_ipv4_cidr_blocks:
+                - "10.0.128.0/21"
+                - "10.0.136.0/21"
+                - "10.0.144.0/21"
+              subnet_tags:
+                "kubernetes.io/cluster/main": "shared"
+          - aws-eks-init:
+              type: aws-eks-init
+              cluster_name: main
+              subnet_ids: "${{module.aws-network-init.private_subnet_ids}}"
+              key_arn: "${{module.aws-state-init.kms_account_key_arn}}"
+      - modules:
+          - aws-eks-nodegroup:
+              type: aws-eks-nodegroup
+              cluster_name: "${{module.aws-eks-init.k8s_cluster_name}}"
+              node_group_name: default
+      - modules:
+          - istio-init:
+              type: istio-init
 modules:
-  state-init:
-    location: git@github.com:run-x/runxc-tf-modules.git//state-init
+  aws-state-init:
+    location: /Users/juandiegopalomino/runx/runxc-tf-modules/aws-state-init
     variables:
       bucket_name: str
+      dynamodb_lock_table_name: str
     outputs:
-      state-bucket-name:
+      state_bucket_id:
+        export: true
+      state_bucket_arn:
+        export: true
+      kms_account_key_arn:
+        export: true
+      kms_account_key_id:
         export: true
     providers:
       data:
-        google_client_config:
+        aws_caller_identity:
           provider: {}
-  compute-init:
-    location: git@github.com:run-x/runxc-tf-modules.git//compute-init
+        aws_region:
+          provider: {}
+  aws-network-init:
+    location: /Users/juandiegopalomino/runx/runxc-tf-modules/aws-network-init
     variables:
       name: str
+      total_ipv4_cidr_block: optional
+      private_ipv4_cidr_blocks: optional
+      public_ipv4_cidr_blocks: optional
+      subnet_tags: optional
     outputs:
-      gcp-network:
+      vpc_id:
         export: true
-      k8s-cluster:
+      private_subnet_ids:
         export: true
-      k8s-cluster-name:
+      public_subnets_ids:
+        export: true
+  aws-eks-init:
+    location: /Users/juandiegopalomino/runx/runxc-tf-modules/aws-eks-init
+    variables:
+      cluster_name: str
+      k8s_version: optional
+      subnet_ids: list
+      key_arn: str
+      control_plane_security_groups: optional
+    outputs:
+      k8s_endpoint:
+        export: true
+      k8s_ca_data:
+        export: true
+      k8s_cluster_auth_token:
+        export: true
+      k8s_cluster_name:
+        export: true
+      k8s_openid_provider_url:
+        export: true
+      k8s_openid_provider_arn:
+        export: true
+      k8s_node_group_security_id:
         export: true
     providers:
       provider:
         helm:
           kubernetes:
-            host: "https://${{{module_source}.k8s-cluster.endpoint}}"
-            token: "${{data.google_client_config.provider.access_token}}"
-            cluster_ca_certificate: "${{base64decode({module_source}.k8s-cluster.master_auth[0].cluster_ca_certificate)}}"
-  k8s-node-pool:
-    location: git@github.com:run-x/runxc-tf-modules.git//k8s-node-pool
+            host: "${{{module_source}.k8s_endpoint}}"
+            token: "${{{module_source}.k8s_cluster_auth_token}}"
+            cluster_ca_certificate: "${{base64decode({module_source}.k8s_ca_data)}}"
+  istio-init:
+    location: /Users/juandiegopalomino/runx/runxc-tf-modules/istio-init
+    variables: {}
+    outputs: {}
+  aws-eks-nodegroup:
+    location: /Users/juandiegopalomino/runx/runxc-tf-modules/aws-eks-nodegroup
     variables:
-      node-pool-name: optional
-      machine-type: optional
-      max-node-count: optional
-      min-node-count: optional
-      k8s-cluster-name: str
+      cluster_name: str
+      node_group_name: str
+      disk_sizet: optional
+      instance_type: optional
+      use_gpu: optional
+      node_labels: optional
+      max_size: optional
+      min_size: optional
+      desired_size: optional
+      ssh_key: optional
+      ssh_security_group_ids: optional
   k8s-service:
     location: git@github.com:run-x/runxc-tf-modules.git//k8s-service
     variables:
