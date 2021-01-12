@@ -16,28 +16,48 @@ def test_basic_gen(_: Any) -> None:
                     "create-env": "dev1",
                     "name": "dev1",
                     "providers": {
-                        "google": {"project": "xyz", "region": "xyz", "zone": "xyz"}
+                        "aws": {"allowed_account_ids": ["abc"], "region": "us-east-1"}
                     },
                 },
                 "modules": [
-                    {"core": {"type": "state-init", "bucket_name": "{state_storage}"}}
+                    {
+                        "core": {
+                            "type": "aws-state-init",
+                            "bucket_name": "{state_storage}",
+                            "dynamodb_lock_table_name": "{state_storage}",
+                        }
+                    }
                 ],
             },
             {
                 "provider": {
-                    "google": {"project": "xyz", "region": "xyz", "zone": "xyz"}
+                    "aws": {"allowed_account_ids": ["abc"], "region": "us-east-1"}
                 },
                 "terraform": {
-                    "backend": {"gcs": {"bucket": "opta-tf-state-dev1", "prefix": "dev1"}}
+                    "backend": {
+                        "s3": {
+                            "bucket": "opta-tf-state-dev1",
+                            "key": "dev1",
+                            "dynamodb_table": "opta-tf-state-dev1",
+                            "region": "us-east-1",
+                        }
+                    }
                 },
                 "module": {
                     "core": {
-                        "source": "git@github.com:run-x/runxc-tf-modules.git//state-init",
+                        "source": "git@github.com:run-x/"
+                        "runxc-tf-modules.git//aws-state-init",
                         "bucket_name": "opta-tf-state-dev1",
+                        "dynamodb_lock_table_name": "opta-tf-state-dev1",
                     }
                 },
                 "output": {
-                    "state-bucket-name": {"value": "${module.core.state-bucket-name }"}
+                    "state_bucket_id": {"value": "${module.core.state_bucket_id }"},
+                    "state_bucket_arn": {"value": "${module.core.state_bucket_arn }"},
+                    "kms_account_key_arn": {
+                        "value": "${module.core.kms_account_key_arn }"
+                    },
+                    "kms_account_key_id": {"value": "${module.core.kms_account_key_id }"},
                 },
             },
         )
@@ -58,6 +78,6 @@ def test_basic_gen(_: Any) -> None:
         with patch("builtins.open") as mocked_open:
             mocked_open.side_effect = new_open
 
-            _gen("opta.yml", "main.tf.json", True, False)
+            _gen("opta.yml", "main.tf.json", True, False, None)
 
             write_open().write.assert_called_once_with(json.dumps(o, indent=2))

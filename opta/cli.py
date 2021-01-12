@@ -1,6 +1,6 @@
 import os
 import subprocess
-from typing import Set
+from typing import Optional, Set
 
 import click
 
@@ -29,11 +29,16 @@ def cli() -> None:
     default=False,
     help="Run from first block, regardless of current state",
 )
-def gen(configfile: str, out: str, no_apply: bool, refresh: bool) -> None:
-    _gen(configfile, out, no_apply, refresh)
+@click.option("--max-block", default=None, type=int, help="Max block to process")
+def gen(
+    configfile: str, out: str, no_apply: bool, refresh: bool, max_block: Optional[int]
+) -> None:
+    _gen(configfile, out, no_apply, refresh, max_block)
 
 
-def _gen(configfile: str, out: str, no_apply: bool, refresh: bool) -> None:
+def _gen(
+    configfile: str, out: str, no_apply: bool, refresh: bool, max_block: Optional[int]
+) -> None:
     """ Generate TF file based on opta config file """
     if not is_tool("terraform"):
         raise Exception("Please install terraform on your machine")
@@ -41,10 +46,12 @@ def _gen(configfile: str, out: str, no_apply: bool, refresh: bool) -> None:
         raise Exception(f"File {configfile} not found")
 
     layer = Layer.load_from_yaml(configfile)
-    block_idx = 1
     current_module_keys: Set[str] = set()
     print("Loading infra blocks")
-    for idx, block in enumerate(layer.blocks):
+    blocks_to_process = layer.blocks
+    if max_block is not None:
+        blocks_to_process = layer.blocks[: max_block + 1]
+    for block_idx, block in enumerate(blocks_to_process):
         current_module_keys = current_module_keys.union(
             set(list(map(lambda x: x.key, block.modules)))
         )
@@ -64,13 +71,12 @@ def _gen(configfile: str, out: str, no_apply: bool, refresh: bool) -> None:
             print("Couldn't find terraform state, assuming new build.")
         if (
             current_module_keys.issubset(total_modules_applied)
-            and idx + 1 != len(layer.blocks)
+            and block_idx + 1 != len(blocks_to_process)
             and not refresh
         ):
-            block_idx += 1
             continue
         print(f"Generating block {block_idx} for modules {current_module_keys}...")
-        ret = layer.gen_providers(block.backend_enabled)
+        ret = layer.gen_providers(block_idx, block.backend_enabled)
         ret = deep_merge(layer.gen_tf(block_idx), ret)
 
         gen_tf.gen(ret, out)

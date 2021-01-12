@@ -1,6 +1,7 @@
 .terraform
 .terraform.lock.hcl
 .idea
+.DS_Store
 tf.plan
 terraform.tfstate
 terraform.tfstate.backup
