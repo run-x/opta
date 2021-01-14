@@ -76,11 +76,16 @@ class Layer:
         LinkProcessor().process(current_modules)
         for block in self.blocks[0 : block_idx + 1]:
             ret = deep_merge(block.gen_tf(), ret)
-        hydration = {
-            "parent_name": self.parent.meta["name"] if self.parent is not None else "nil",
-            "layer_name": self.meta["name"],
-            "state_storage": self.state_storage(),
-        }
+        hydration = deep_merge(
+            self.meta["variables"],
+            {
+                "parent_name": self.parent.meta["name"]
+                if self.parent is not None
+                else "nil",
+                "layer_name": self.meta["name"],
+                "state_storage": self.state_storage(),
+            },
+        )
 
         return hydrate(ret, hydration)
 
@@ -102,14 +107,17 @@ class Layer:
         for k, v in providers.items():
             ret["provider"][k] = v
             if k in REGISTRY["backends"]:
-                hydration = {
-                    "parent_name": self.parent.meta["name"]
-                    if self.parent is not None
-                    else "nil",
-                    "layer_name": self.meta["name"],
-                    "state_storage": self.state_storage(),
-                    "provider": v,
-                }
+                hydration = deep_merge(
+                    self.meta["variables"],
+                    {
+                        "parent_name": self.parent.meta["name"]
+                        if self.parent is not None
+                        else "nil",
+                        "layer_name": self.meta["name"],
+                        "state_storage": self.state_storage(),
+                        "provider": v,
+                    },
+                )
 
                 # Add the backend
                 if backend_enabled:

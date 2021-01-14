@@ -16,14 +16,15 @@ def deep_merge(a: Dict[Any, Any], b: Dict[Any, Any]) -> Dict[Any, Any]:
     return b
 
 
-def hydrate(target: Dict[Any, Any], hydration: Dict[Any, Any]) -> Dict[Any, Any]:
-    target = target.copy()
-
-    for k, v in target.items():
-        if isinstance(v, str):
-            target[k] = v.format(**hydration)
-        elif isinstance(v, dict):
+def hydrate(target: Any, hydration: Dict[Any, Any]) -> Dict[Any, Any]:
+    if isinstance(target, dict):
+        target = target.copy()
+        for k, v in target.items():
             target[k] = hydrate(v, hydration)
+    elif isinstance(target, list):
+        target = [hydrate(x, hydration) for x in target]
+    elif isinstance(target, str):
+        target = target.format(**hydration)
 
     return target
 
