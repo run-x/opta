@@ -1,0 +1,24 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ include "hello-world.fullname" . }}
+  namespace: {{ .Values.namespace }}
+spec:
+  hosts:
+    - {{ .Values.domain }}
+    - {{ include "hello-world.fullname" . }}
+  gateways:
+    - istio-system/main-gateway
+    - mesh
+  http:
+    - match:
+        - port: 80
+        - port: 443
+      route:
+        - destination:
+            host:  httpbin-{{ include "hello-world.fullname" . }}.{{ .Values.namespace }}.svc.cluster.local
+    - match:
+        - port: 50051
+      route:
+        - destination:
+            host:  grpcbin-{{ include "hello-world.fullname" . }}.{{ .Values.namespace }}.svc.cluster.local

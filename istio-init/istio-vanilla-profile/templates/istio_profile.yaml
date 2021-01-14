@@ -2,8 +2,54 @@ apiVersion: install.istio.io/v1alpha1
 kind: IstioOperator
 metadata:
   namespace: istio-system
-  name: example-istiocontrolplane
+  name: istiocontrolplane
   labels:
   {{- include "istio-vanilla-profile.labels" . | nindent 4 }}
 spec:
   profile: demo
+  components:
+    ingressGateways:
+      - name: istio-ingressgateway
+        enabled: true
+        k8s:
+          service:
+            externalTrafficPolicy: Local
+            ports:
+            - name: status-port
+              port: 15021
+              protocol: TCP
+              targetPort: 15021
+            - name: http2
+              port: 80
+              protocol: TCP
+              targetPort: 8080
+            - name: https
+              port: 443
+              protocol: TCP
+              targetPort: 8443
+            - name: tcp
+              port: 31400
+              protocol: TCP
+              targetPort: 31400
+            - name: grpc
+              port: 50051
+              protocol: TCP
+              targetPort: 50051
+            - name: tls
+              port: 15443
+              protocol: TCP
+              targetPort: 15443
+  values:
+    gateways:
+      istio-ingressgateway:
+        loadBalancerSourceRanges:
+          - 0.0.0.0/0
+        serviceAnnotations:
+          service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+          service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "https,grpc"
+          {{- if .Values.ssl_cert_arn }}
+          service.beta.kubernetes.io/aws-load-balancer-ssl-cert: {{ .Values.ssl_cert_arn }}
+          {{- end }}
+          {{- if .Values.domain_names }}
+          external-dns.alpha.kubernetes.io/hostname: {{ join "," .Values.domain_names }}
+          {{- end }}

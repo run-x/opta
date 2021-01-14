@@ -27,4 +27,26 @@ resource "helm_release" "istio-vanilla-profile" {
   atomic = true
   depends_on = [helm_release.istio-operator]
   create_namespace = true
+  values = [
+    yamlencode({
+      domain_names: var.domain_names
+      ssl_cert_arn: var.acm_cert_arn
+    })
+  ]
+}
+
+resource "helm_release" "istio-extras" {
+  chart = "${path.module}/istio-extras"
+  name = "istio-extras"
+  namespace = "istio-system"
+  cleanup_on_fail = true
+  atomic = true
+  values = [
+    yamlencode({
+      main_gateway: {
+        domain_names: var.domain_names
+      }
+    })
+  ]
+  depends_on = [helm_release.istio-vanilla-profile]
 }

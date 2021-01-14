@@ -1,0 +1,91 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: httpbin-hello-world
+  namespace: {{ .Values.namespace }}
+  labels:
+  {{- include "hello-world.labels" . | nindent 4 }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpbin-{{ include "hello-world.fullname" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "hello-world.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "hello-world.selectorLabels" . | nindent 6 }}
+      app: httpbin
+  template:
+    metadata:
+      labels:
+        {{- include "hello-world.selectorLabels" . | nindent 8 }}
+        app: httpbin
+    spec:
+      serviceAccountName: httpbin-hello-world
+      containers:
+        - name: httpbin
+          image: "kennethreitz/httpbin:latest"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /get
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /get
+              port: http
+          resources:
+            limits:
+              cpu: 200m
+              memory: 256Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: httpbin-{{ include "hello-world.fullname" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+  {{- include "hello-world.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: httpbin-{{ include "hello-world.fullname" . }}
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        targetAverageUtilization: 80
+    - type: Resource
+      resource:
+        name: memory
+        targetAverageUtilization: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: httpbin-{{ include "hello-world.fullname" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+  {{- include "hello-world.labels" . | nindent 4 }}
+spec:
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "hello-world.selectorLabels" . | nindent 4 }}
+    app: httpbin
