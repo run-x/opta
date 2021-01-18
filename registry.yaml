@@ -178,12 +178,17 @@ modules:
       readiness_probe_path: optional
       pod_resource_limits: optional
       pod_resource_requests: optional
-  gcp-postgres: 
-    location: /Users/juandiegopalomino/runx/runxc-tf-modules/aws-acm-certgcp-postgres
+      domain: optional
+      uri_prefix: optional
+  aws-rds:
+    location: git@github.com:run-x/runxc-tf-modules.git//aws-rds
     variables:
       name: str
-      tier: str
-      gcp-network: str
+      subnet_group_name: optional
+      engine: optional
+      engine_version: optional
+      security_group: optional
+      instance_class: optional
     outputs:
       db_user: str
       db_password: str
