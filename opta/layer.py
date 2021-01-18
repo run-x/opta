@@ -133,7 +133,7 @@ class Layer:
                         REGISTRY["backends"][k]["terraform"], hydration
                     )
 
-                if self.for_child():
+                if self.parent is not None:
                     # Add remote state
                     backend, config = list(
                         REGISTRY["backends"][k]["terraform"]["backend"].items()
