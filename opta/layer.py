@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from os import path
-from typing import Any, Dict, Iterable, List
+from typing import Any, Dict, Iterable, List, Optional
 
 import yaml
 
@@ -18,7 +18,7 @@ class Layer:
         self,
         meta: Dict[Any, Any],
         blocks_data: List[Any],
-        parent: Any = None,
+        parent: Optional[Layer] = None,
     ):
         self.meta = meta
         self.parent = parent
@@ -77,7 +77,7 @@ class Layer:
         for block in self.blocks[0 : block_idx + 1]:
             ret = deep_merge(block.gen_tf(), ret)
         hydration = deep_merge(
-            self.meta["variables"],
+            self.meta.get("variables", {}),
             {
                 "parent_name": self.parent.meta["name"]
                 if self.parent is not None
@@ -86,6 +86,10 @@ class Layer:
                 "state_storage": self.state_storage(),
             },
         )
+        if self.parent is not None:
+            hydration = deep_merge(
+                hydration, {"parent": self.parent.meta.get("variables", {})}
+            )
 
         return hydrate(ret, hydration)
 
@@ -108,7 +112,7 @@ class Layer:
             ret["provider"][k] = v
             if k in REGISTRY["backends"]:
                 hydration = deep_merge(
-                    self.meta["variables"],
+                    self.meta.get("variables", {}),
                     {
                         "parent_name": self.parent.meta["name"]
                         if self.parent is not None
@@ -118,6 +122,10 @@ class Layer:
                         "provider": v,
                     },
                 )
+                if self.parent is not None:
+                    hydration = deep_merge(
+                        hydration, {"parent": self.parent.meta.get("variables", {})}
+                    )
 
                 # Add the backend
                 if backend_enabled:
@@ -139,6 +147,9 @@ class Layer:
                                     {
                                         "layer_name": self.parent.meta["name"],
                                         "state_storage": self.state_storage(),
+                                        "provider": self.parent.meta.get(
+                                            "providers", {}
+                                        ).get(k, {}),
                                     },
                                 ),
                             }

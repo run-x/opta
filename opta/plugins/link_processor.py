@@ -37,7 +37,7 @@ class LinkProcessor:
             new_items.append(
                 {
                     "name": f"{target_module.key}.{k}",
-                    "value": f"${{module.{target_module.key}.{k}}}",
+                    "value": f"${{{{module.{target_module.key}.{k}}}}}",
                 }
             )
 

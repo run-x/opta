@@ -74,7 +74,7 @@ macros:
               hello_world_domain: "hello-world.{domain}"
 modules:
   aws-state-init:
-    location: /Users/juandiegopalomino/runx/runxc-tf-modules/aws-acm-certaws-state-init
+    location: git@github.com:run-x/runxc-tf-modules.git//aws-state-init
     variables:
       bucket_name: str
       dynamodb_lock_table_name: str
@@ -94,7 +94,7 @@ modules:
         aws_region:
           provider: {}
   aws-network-init:
-    location: /Users/juandiegopalomino/runx/runxc-tf-modules/aws-acm-certaws-network-init
+    location: git@github.com:run-x/runxc-tf-modules.git//aws-network-init
     variables:
       name: str
       total_ipv4_cidr_block: optional
@@ -109,7 +109,7 @@ modules:
       public_subnets_ids:
         export: true
   aws-eks-init:
-    location: /Users/juandiegopalomino/runx/runxc-tf-modules/aws-acm-certaws-eks-init
+    location: git@github.com:run-x/runxc-tf-modules.git//aws-eks-init
     variables:
       cluster_name: str
       k8s_version: optional
@@ -132,20 +132,24 @@ modules:
       k8s_node_group_security_id:
         export: true
     providers:
+      data:
+        aws_eks_cluster_auth:
+          k8s:
+            name: "${{{module_source}.k8s_cluster_name}}"
       provider:
         helm:
           kubernetes:
             host: "${{{module_source}.k8s_endpoint}}"
-            token: "${{{module_source}.k8s_cluster_auth_token}}"
+            token: "${{data.aws_eks_cluster_auth.k8s.token}}"
             cluster_ca_certificate: "${{base64decode({module_source}.k8s_ca_data)}}"
   istio-init:
-    location: /Users/juandiegopalomino/runx/runxc-tf-modules/istio-init
+    location: git@github.com:run-x/runxc-tf-modules.git//istio-init
     variables:
       domain_names: optional
       acm_cert_arn: optional
     outputs: {}
   aws-eks-nodegroup:
-    location: /Users/juandiegopalomino/runx/runxc-tf-modules/aws-acm-certaws-eks-nodegroup
+    location: git@github.com:run-x/runxc-tf-modules.git//aws-eks-nodegroup
     variables:
       cluster_name: str
       node_group_name: str
@@ -159,7 +163,7 @@ modules:
       ssh_key: optional
       ssh_security_group_ids: optional
   k8s-service:
-    location: /Users/juandiegopalomino/runx/runxc-tf-modules/aws-acm-certk8s-service
+    location: git@github.com:run-x/runxc-tf-modules.git//k8s-service
     variables:
       name: str
       namespace: optional
@@ -186,24 +190,24 @@ modules:
       db_host: str
       db_name: str
   k8s-secret:
-    location: /Users/juandiegopalomino/runx/runxc-tf-modules/aws-acm-certk8s-secret
+    location: git@github.com:run-x/runxc-tf-modules.git//k8s-secret
     variables:
       name: str
     outputs:
       value: str
   k8s-metric-server:
-    location: /Users/juandiegopalomino/runx/runxc-tf-modules/aws-acm-certk8s-metric-server
+    location: git@github.com:run-x/runxc-tf-modules.git//k8s-metric-server
     variables: {}
     outputs: {}
   k8s-cluster-autoscaler:
-    location: /Users/juandiegopalomino/runx/runxc-tf-modules/aws-acm-certk8s-cluster-autoscaler
+    location: git@github.com:run-x/runxc-tf-modules.git//k8s-cluster-autoscaler
     variables:
       cluster_name: str
       openid_provider_url: str
       openid_provider_arn: str
     outputs: {}
   aws-dns:
-    location: /Users/juandiegopalomino/runx/runxc-tf-modules/aws-dns
+    location: git@github.com:run-x/runxc-tf-modules.git//aws-dns
     variables:
       domain_name: str
       is_private: optional
@@ -214,7 +218,7 @@ modules:
       name_servers:
         export: true
   k8s-external-dns:
-    location: /Users/juandiegopalomino/runx/runxc-tf-modules/k8s-external-dns
+    location: git@github.com:run-x/runxc-tf-modules.git//k8s-external-dns
     variables:
       openid_provider_url: str
       openid_provider_arn: str
@@ -223,12 +227,12 @@ modules:
       zone_type: optional
     outputs: { }
   aws-acm-cert:
-    location: /Users/juandiegopalomino/runx/runxc-tf-modules/aws-acm-cert
+    location: git@github.com:run-x/runxc-tf-modules.git//aws-acm-cert
     variables:
       hosted_zone_id: str
       primary_domain: str
       secondary_domains: optional
   k8s-hello-world-service:
-    location: /Users/juandiegopalomino/runx/runxc-tf-modules/k8s-hello-world-service
+    location: git@github.com:run-x/runxc-tf-modules.git//k8s-hello-world-service
     variables:
       hello_world_domain: str
