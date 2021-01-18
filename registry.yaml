@@ -36,14 +36,20 @@ macros:
               cluster_name: main
               subnet_ids: "${{module.aws-network-init.private_subnet_ids}}"
               key_arn: "${{module.aws-state-init.kms_account_key_arn}}"
+          - aws-dns:
+              type: aws-dns
+              domain_name: "{domain}"
       - modules:
+          - aws-acm-cert:
+              type: aws-acm-cert
+              hosted_zone_id: "${{module.aws-dns.zone_id}}"
+              primary_domain: "{domain}"
+              secondary_domains: ["*.{domain}"]
           - aws-eks-nodegroup:
               type: aws-eks-nodegroup
               cluster_name: "${{module.aws-eks-init.k8s_cluster_name}}"
               node_group_name: default
       - modules:
-          - istio-init:
-              type: istio-init
           - k8s-metric-server:
               type: k8s-metric-server
           - k8s-cluster-autoscaler:
@@ -51,6 +57,21 @@ macros:
               cluster_name: "${{module.aws-eks-init.k8s_cluster_name}}"
               openid_provider_url: "${{module.aws-eks-init.k8s_openid_provider_url}}"
               openid_provider_arn: "${{module.aws-eks-init.k8s_openid_provider_arn}}"
+          - k8s-external-dns:
+              type: k8s-external-dns
+              openid_provider_url: "${{module.aws-eks-init.k8s_openid_provider_url}}"
+              openid_provider_arn: "${{module.aws-eks-init.k8s_openid_provider_arn}}"
+              domain: "{domain}"
+              hosted_zone_id: "${{module.aws-dns.zone_id}}"
+      - modules:
+          - istio-init:
+              type: istio-init
+              domain_names: [ "{domain}", "*.{domain}" ]
+              acm_cert_arn: "${{module.aws-acm-cert.cert_arn}}"
+      - modules:
+          - k8s-hello-world-service:
+              type: k8s-hello-world-service
+              hello_world_domain: "hello-world.{domain}"
 modules:
   aws-state-init:
     location: git@github.com:run-x/runxc-tf-modules.git//aws-state-init
@@ -111,15 +132,21 @@ modules:
       k8s_node_group_security_id:
         export: true
     providers:
+      data:
+        aws_eks_cluster_auth:
+          k8s:
+            name: "${{{module_source}.k8s_cluster_name}}"
       provider:
         helm:
           kubernetes:
             host: "${{{module_source}.k8s_endpoint}}"
-            token: "${{{module_source}.k8s_cluster_auth_token}}"
+            token: "${{data.aws_eks_cluster_auth.k8s.token}}"
             cluster_ca_certificate: "${{base64decode({module_source}.k8s_ca_data)}}"
   istio-init:
     location: git@github.com:run-x/runxc-tf-modules.git//istio-init
-    variables: {}
+    variables:
+      domain_names: optional
+      acm_cert_arn: optional
     outputs: {}
   aws-eks-nodegroup:
     location: git@github.com:run-x/runxc-tf-modules.git//aws-eks-nodegroup
@@ -152,7 +179,7 @@ modules:
       pod_resource_limits: optional
       pod_resource_requests: optional
   gcp-postgres: 
-    location: git@github.com:run-x/runxc-tf-modules.git//gcp-postgres
+    location: /Users/juandiegopalomino/runx/runxc-tf-modules/aws-acm-certgcp-postgres
     variables:
       name: str
       tier: str
@@ -179,3 +206,33 @@ modules:
       openid_provider_url: str
       openid_provider_arn: str
     outputs: {}
+  aws-dns:
+    location: git@github.com:run-x/runxc-tf-modules.git//aws-dns
+    variables:
+      domain_name: str
+      is_private: optional
+      vpc_id: optional
+    outputs:
+      zone_id:
+        export: true
+      name_servers:
+        export: true
+  k8s-external-dns:
+    location: git@github.com:run-x/runxc-tf-modules.git//k8s-external-dns
+    variables:
+      openid_provider_url: str
+      openid_provider_arn: str
+      hosted_zone_id: str
+      domain: str
+      zone_type: optional
+    outputs: { }
+  aws-acm-cert:
+    location: git@github.com:run-x/runxc-tf-modules.git//aws-acm-cert
+    variables:
+      hosted_zone_id: str
+      primary_domain: str
+      secondary_domains: optional
+  k8s-hello-world-service:
+    location: git@github.com:run-x/runxc-tf-modules.git//k8s-hello-world-service
+    variables:
+      hello_world_domain: str
