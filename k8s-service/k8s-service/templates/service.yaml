@@ -4,10 +4,10 @@ metadata:
   name: {{ include "k8s-service.fullname" . }}
   labels:
     {{- include "k8s-service.labels" . | nindent 4 }}
+  namespace: {{ .Release.Name }}
 spec:
-  type: {{ .Values.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
+    - port: 80
       targetPort: http
       protocol: TCP
       name: http

@@ -27,8 +27,15 @@ resource "helm_release" "k8s-service" {
         tag: var.tag
       },
       livenessProbePath: var.liveness_probe_path,
-      readinessProbePath: var.readiness_probe_path
+      readinessProbePath: var.readiness_probe_path,
+      envVars: var.env_vars,
+      domain: var.domain,
+      uriPrefix: var.uri_prefix
+      blah: 2
     })
   ]
+  atomic          = true
+  cleanup_on_fail = true
+  recreate_pods   = true
 }
 

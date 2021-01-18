@@ -86,3 +86,13 @@ variable "env_vars" {
   }))
   default = []
 }
+
+variable "domain" {
+  type = string
+  default = ""
+}
+
+variable "uri_prefix" {
+  type = string
+  default = ""
+}

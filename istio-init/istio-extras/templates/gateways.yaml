@@ -13,8 +13,8 @@ spec:
         protocol: HTTP
       hosts:
       {{- range .Values.main_gateway.domain_names }}
-      - "{{ . }}"
-      {{ end -}}
+      - {{ . | quote }}
+      {{- end }}
       tls:
         httpsRedirect: true
     - port:
@@ -23,13 +23,13 @@ spec:
         protocol: HTTP
       hosts:
         {{- range .Values.main_gateway.domain_names }}
-        - "{{ . }}"
-        {{ end -}}
+        - {{ . | quote }}
+        {{- end }}
     - port:
         number: 50051
         name: grpc
         protocol: GRPC
       hosts:
         {{- range .Values.main_gateway.domain_names }}
-        - "{{ . }}"
-        {{ end -}}
+        - {{ . | quote }}
+        {{- end }}

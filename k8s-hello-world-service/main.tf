@@ -4,7 +4,6 @@ resource "helm_release" "hello-world" {
   values = [
     yamlencode({
       domain: var.hello_world_domain
-      blah: 5
     })
   ]
   namespace = "default"

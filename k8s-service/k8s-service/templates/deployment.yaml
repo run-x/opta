@@ -4,6 +4,7 @@ metadata:
   name: {{ include "k8s-service.fullname" . }}
   labels:
     {{- include "k8s-service.labels" . | nindent 4 }}
+  namespace: {{ .Release.Name }}
 spec:
   selector:
     matchLabels:
@@ -13,7 +14,7 @@ spec:
       labels:
         {{- include "k8s-service.selectorLabels" . | nindent 8 }}
     spec:
-      serviceAccountName: {{ include "k8s-service.serviceAccountName" . }}
+      serviceAccountName: {{ include "k8s-service.fullname" . }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -26,6 +27,13 @@ spec:
             httpGet:
               path: {{ .Values.livenessProbePath }}
               port: http
+          {{- if .Values.envVars }}
+          env:
+            {{- range .Values.envVars }}
+            - name: {{ .name }}
+              value: {{ .value }}
+            {{ end -}}
+          {{- end }}
           readinessProbe:
             initialDelaySeconds: 10
             periodSeconds: 10

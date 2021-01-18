@@ -4,6 +4,7 @@ metadata:
   name: {{ include "k8s-service.fullname" . }}
   labels:
     {{- include "k8s-service.labels" . | nindent 4 }}
+  namespace: {{ .Release.Name }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1

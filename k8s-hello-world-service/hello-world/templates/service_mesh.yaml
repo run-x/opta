@@ -12,13 +12,23 @@ spec:
     - mesh
   http:
     - match:
-        - port: 80
-        - port: 443
+      - port: 80
+      - port: 443
       route:
         - destination:
-            host:  httpbin-{{ include "hello-world.fullname" . }}.{{ .Values.namespace }}.svc.cluster.local
-    - match:
-        - port: 50051
-      route:
-        - destination:
-            host:  grpcbin-{{ include "hello-world.fullname" . }}.{{ .Values.namespace }}.svc.cluster.local
+            host:  {{ include "hello-world.fullname" . }}.{{ .Values.namespace }}.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+  name: {{ include "hello-world.fullname" . }}
+  namespace: istio-system
+spec:
+  addresses:
+    - 10.1.1.1
+  hosts:
+    - "{{ include "hello-world.fullname" . }}.internal"
+  ports:
+    - name: http
+      number: 80
+      protocol: HTTP
