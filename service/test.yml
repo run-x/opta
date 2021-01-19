@@ -1,5 +1,5 @@
 meta:
-  parent: "../env/opta.yml"
+  parent: "../env/ankur-test.yml"
   name: test
 modules:
   - app:
