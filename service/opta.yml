@@ -11,6 +11,7 @@ modules:
       liveness_probe_path: "/get"
       readiness_probe_path: "/get"
       uri_prefix: "/showoff"
+      external_image: true
       env_vars:
         - name: APPENV
           value: prod
