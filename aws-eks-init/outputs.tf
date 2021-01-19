@@ -6,10 +6,6 @@ output "k8s_ca_data" {
   value = aws_eks_cluster.cluster.certificate_authority[0].data
 }
 
-output "k8s_cluster_auth_token" {
-  value = data.aws_eks_cluster_auth.cluster.token
-}
-
 output "k8s_cluster_name" {
   value = aws_eks_cluster.cluster.name
 }
