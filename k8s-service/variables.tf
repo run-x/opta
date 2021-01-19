@@ -94,5 +94,5 @@ variable "domain" {
 
 variable "uri_prefix" {
   type = string
-  default = ""
+  default = "/"
 }
