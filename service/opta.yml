@@ -10,6 +10,7 @@ modules:
       domain: "dummy.{parent[domain]}"
       liveness_probe_path: "/get"
       readiness_probe_path: "/get"
+      uri_prefix: "/showoff"
       env_vars:
         - name: APPENV
           value: prod
