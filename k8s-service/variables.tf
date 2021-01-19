@@ -1,3 +1,11 @@
+data "aws_caller_identity" "current" {}
+
+variable "external_image" {
+  description = "Using an external image, or do we need to create an ecr repository?"
+  type = bool
+  default = false
+}
+
 variable "name" {
   description = "Name of the k8s service"
   type = string
