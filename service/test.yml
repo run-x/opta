@@ -1,0 +1,18 @@
+meta:
+  parent: "../env/opta.yml"
+  name: test
+modules:
+  - app:
+      type: k8s-service
+      target_port: 80
+      image: "kennethreitz/httpbin"
+      tag: "latest"
+      domain: "dummy.{parent[domain]}"
+      liveness_probe_path: "/get"
+      readiness_probe_path: "/get"
+      secrets:
+        - DATADOG_KEY
+        - STRIPE_KEY
+      env_vars:
+        - name: APPENV
+          value: prod
