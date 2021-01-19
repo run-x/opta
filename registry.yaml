@@ -172,6 +172,7 @@ modules:
       image: optional
       tag: optional
       env_vars: optional
+      secrets: optional
       autoscaling_cpu_percentage_threshold: optional
       autoscaling_mem_percentage_threshold: optional
       liveness_probe_path: optional
