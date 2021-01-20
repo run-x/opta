@@ -78,6 +78,6 @@ def test_basic_gen(_: Any) -> None:
         with patch("builtins.open") as mocked_open:
             mocked_open.side_effect = new_open
 
-            _gen("opta.yml", "main.tf.json", True, False, None, None)
+            _gen("opta.yml", "main.tf.json", True, False, None, ())
 
             write_open().write.assert_called_once_with(json.dumps(o, indent=2))

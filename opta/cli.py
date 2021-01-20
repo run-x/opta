@@ -1,6 +1,6 @@
 import os
 import subprocess
-from typing import Optional, Set
+from typing import Any, Optional, Set
 
 import click
 import yaml
@@ -32,14 +32,14 @@ def cli() -> None:
     help="Run from first block, regardless of current state",
 )
 @click.option("--max-block", default=None, type=int, help="Max block to process")
-@click.option("--var", default=None, type=str, help="Variable to update")
+@click.option("--var", multiple=True, default=(), type=str, help="Variable to update")
 def gen(
     configfile: str,
     out: str,
     no_apply: bool,
     refresh: bool,
     max_block: Optional[int],
-    var: Optional[str],
+    var: Any,
 ) -> None:
     _gen(configfile, out, no_apply, refresh, max_block, var)
 
@@ -50,7 +50,7 @@ def _gen(
     no_apply: bool,
     refresh: bool,
     max_block: Optional[int],
-    var: Optional[str],
+    var: Any,
 ) -> None:
     """ Generate TF file based on opta config file """
     if not is_tool("terraform"):
@@ -59,9 +59,9 @@ def _gen(
         raise Exception(f"File {configfile} not found")
 
     conf = yaml.load(open(configfile), Loader=yaml.Loader)
-    if var is not None:
-        k, v = var.split("=")
-        conf["meta"]["variables"][k] = v
+    for v in var:
+        key, value = v.split("=")
+        conf["meta"]["variables"][key] = value
 
     layer = Layer.load_from_dict(conf)
     current_module_keys: Set[str] = set()
