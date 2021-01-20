@@ -195,7 +195,8 @@ modules:
       uri_prefix: optional
       external_image: optional
     outputs:
-      docker_repo_url: str
+      docker_repo_url:
+        export: true
   aws-rds:
     location: git@github.com:run-x/runxc-tf-modules.git//aws-rds
     variables:
