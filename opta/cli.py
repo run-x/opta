@@ -1,6 +1,6 @@
 import os
 import subprocess
-from typing import Any, Optional, Set
+from typing import List, Optional, Set
 
 import click
 import yaml
@@ -32,14 +32,14 @@ def cli() -> None:
     help="Run from first block, regardless of current state",
 )
 @click.option("--max-block", default=None, type=int, help="Max block to process")
-@click.option("--var", multiple=True, default=(), type=str, help="Variable to update")
+@click.option("--var", multiple=True, default=[], type=str, help="Variable to update")
 def gen(
     configfile: str,
     out: str,
     no_apply: bool,
     refresh: bool,
     max_block: Optional[int],
-    var: Any,
+    var: List[str],
 ) -> None:
     _gen(configfile, out, no_apply, refresh, max_block, var)
 
@@ -50,7 +50,7 @@ def _gen(
     no_apply: bool,
     refresh: bool,
     max_block: Optional[int],
-    var: Any,
+    var: List[str],
 ) -> None:
     """ Generate TF file based on opta config file """
     if not is_tool("terraform"):
