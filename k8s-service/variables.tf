@@ -104,3 +104,8 @@ variable "uri_prefix" {
   type = string
   default = "/"
 }
+
+variable "secrets" {
+  type = list(string)
+  default = []
+}

@@ -6,6 +6,7 @@ fullnameOverride: ""
 domain: ""
 uriPrefix: "/"
 envVars: []
+secrets: []
 
 serviceAccount:
   # Annotations to add to the service account

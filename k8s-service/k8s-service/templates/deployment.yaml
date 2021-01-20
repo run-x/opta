@@ -33,6 +33,13 @@ spec:
             - name: {{ .name }}
               value: {{ .value }}
             {{ end -}}
+            {{- range $val := .Values.secrets }}
+            - name: {{ $val }}
+              valueFrom:
+                secretKeyRef:
+                  name: secret
+                  key: {{ $val }}
+            {{ end -}}
           {{- end }}
           readinessProbe:
             initialDelaySeconds: 10

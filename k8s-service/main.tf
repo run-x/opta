@@ -29,6 +29,7 @@ resource "helm_release" "k8s-service" {
       livenessProbePath: var.liveness_probe_path,
       readinessProbePath: var.readiness_probe_path,
       envVars: var.env_vars,
+      secrets: var.secrets,
       domain: var.domain,
       uriPrefix: var.uri_prefix
       blah: 2
