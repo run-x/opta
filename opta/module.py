@@ -14,6 +14,7 @@ class BaseModule:
         self.key = key
         self.desc = REGISTRY["modules"][data["type"]]
         self.name = f"{layer_name}-{self.key}"
+        self.layer_name = layer_name
         self.parent_layer = parent_layer
         self.data = data
 
@@ -26,6 +27,10 @@ class BaseModule:
                 continue
             elif k == "name":
                 module_blk["module"][self.key][k] = self.name
+            elif k == "module_name":
+                module_blk["module"][self.key][k] = self.key
+            elif k == "layer_name":
+                module_blk["module"][self.key][k] = self.layer_name
             elif self.parent_layer is not None and k in self.parent_layer.outputs():
                 module_blk["module"][self.key][
                     k

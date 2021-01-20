@@ -177,7 +177,8 @@ modules:
     location: git@github.com:run-x/runxc-tf-modules.git//k8s-service
     variables:
       name: str
-      namespace: optional
+      layer_name: str
+      module_name: str
       target_port: optional
       replicas: optional
       image: optional
