@@ -193,7 +193,6 @@ modules:
       pod_resource_requests: optional
       domain: optional
       uri_prefix: optional
-      external_image: optional
     outputs:
       docker_repo_url:
         export: true
