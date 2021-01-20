@@ -3,6 +3,7 @@ import subprocess
 from typing import Optional, Set
 
 import click
+import yaml
 
 from opta import gen_tf
 from opta.layer import Layer
@@ -31,14 +32,25 @@ def cli() -> None:
     help="Run from first block, regardless of current state",
 )
 @click.option("--max-block", default=None, type=int, help="Max block to process")
+@click.option("--var", default=None, type=str, help="Variable to update")
 def gen(
-    configfile: str, out: str, no_apply: bool, refresh: bool, max_block: Optional[int]
+    configfile: str,
+    out: str,
+    no_apply: bool,
+    refresh: bool,
+    max_block: Optional[int],
+    var: Optional[str],
 ) -> None:
-    _gen(configfile, out, no_apply, refresh, max_block)
+    _gen(configfile, out, no_apply, refresh, max_block, var)
 
 
 def _gen(
-    configfile: str, out: str, no_apply: bool, refresh: bool, max_block: Optional[int]
+    configfile: str,
+    out: str,
+    no_apply: bool,
+    refresh: bool,
+    max_block: Optional[int],
+    var: Optional[str],
 ) -> None:
     """ Generate TF file based on opta config file """
     if not is_tool("terraform"):
@@ -46,7 +58,12 @@ def _gen(
     if not os.path.exists(configfile):
         raise Exception(f"File {configfile} not found")
 
-    layer = Layer.load_from_yaml(configfile)
+    conf = yaml.load(open(configfile), Loader=yaml.Loader)
+    if var is not None:
+        k, v = var.split("=")
+        conf["meta"]["variables"][k] = v
+
+    layer = Layer.load_from_dict(conf)
     current_module_keys: Set[str] = set()
     print("Loading infra blocks")
     blocks_to_process = layer.blocks

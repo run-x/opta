@@ -42,6 +42,10 @@ class Layer:
         if not path.exists(configfile):
             raise Exception(f"File {configfile} not found")
         conf = yaml.load(open(configfile), Loader=yaml.Loader)
+        return cls.load_from_dict(conf)
+
+    @classmethod
+    def load_from_dict(cls, conf: Dict[Any, Any]) -> Layer:
         meta = conf.pop("meta")
         for macro_name, macro_value in REGISTRY["macros"].items():
             if macro_name in conf:

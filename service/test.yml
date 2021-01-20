@@ -1,15 +1,14 @@
 meta:
   parent: "../env/ankur-test.yml"
   name: test
+  variables:
+    tag: ""
 modules:
   - app:
       type: k8s-service
-      target_port: 80
-      image: "kennethreitz/httpbin"
-      tag: "latest"
+      target_port: 5000
+      tag: "{tag}"
       domain: "dummy.{parent[domain]}"
-      liveness_probe_path: "/get"
-      readiness_probe_path: "/get"
       secrets:
         - DATADOG_KEY
         - STRIPE_KEY
