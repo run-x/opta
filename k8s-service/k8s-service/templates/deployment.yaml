@@ -1,3 +1,4 @@
+{{- if .Values.image.tag }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -52,3 +53,4 @@ spec:
               {{- toYaml .Values.podResourceLimits | nindent 14 }}
             requests:
               {{- toYaml .Values.podResourceRequests | nindent 14 }}
+{{- end }}

@@ -23,7 +23,7 @@ resource "helm_release" "k8s-service" {
       podResourceLimits: var.pod_resource_limits,
       podResourceRequests: var.pod_resource_requests,
       image: {
-        repository: var.external_image ? var.image : "${aws_ecr_repository.repo[0].repository_url}/${var.image}"
+        repository: var.image == null ? "${aws_ecr_repository.repo[0].repository_url}" : var.image
         tag: var.tag
       },
       livenessProbePath: var.liveness_probe_path,

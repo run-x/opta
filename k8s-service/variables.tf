@@ -1,11 +1,5 @@
 data "aws_caller_identity" "current" {}
 
-variable "external_image" {
-  description = "Using an external image, or do we need to create an ecr repository?"
-  type = bool
-  default = false
-}
-
 variable "name" {
   description = "Name of the k8s service"
   type = string
@@ -23,15 +17,15 @@ variable "target_port" {
 }
 
 variable "image" {
-  description = "Image to be deployed"
+  description = "External Image to be deployed"
   type = string
-  default = "nginx"
+  default = null
 }
 
 variable "tag" {
   description = "Tag of image to be deployed"
   type = string
-  default = "latest"
+  default = null
 }
 
 variable "min_autoscaling" {
