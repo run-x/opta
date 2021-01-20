@@ -3,7 +3,7 @@ apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
   name:  {{ include "k8s-service.fullname" . }}
-  namespace: {{ .Release.Name }}
+  namespace: {{ include "k8s-service.namespaceName" . }}
   annotations:
     {{- if not (eq .Values.uriPrefix "/") }}
     nginx.ingress.kubernetes.io/rewrite-target: /$2
@@ -19,6 +19,6 @@ spec:
         paths:
           - path: {{ .Values.uriPrefix }}{{ if not (eq .Values.uriPrefix "/") }}(/|$)(.*){{ end }}
             backend:
-              serviceName: {{ include "k8s-service.fullname" . }}
+              serviceName: {{ include "k8s-service.serviceName" . }}
               servicePort: 80
 {{- end }}

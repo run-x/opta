@@ -50,3 +50,12 @@ app.kubernetes.io/name: {{ include "k8s-service.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
+{{/*Namespace name*/}}
+{{- define "k8s-service.namespaceName" -}}
+{{- .Values.layerName }}
+{{- end }}
+{{/*Service name*/}}
+{{- define "k8s-service.serviceName" -}}
+{{- .Values.moduleName }}
+{{- end }}
+

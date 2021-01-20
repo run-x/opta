@@ -10,7 +10,6 @@ terraform {
 resource "helm_release" "k8s-service" {
   chart = "${path.module}/k8s-service"
   name = var.name
-  namespace = var.namespace
   values = [
     yamlencode({
       autoscaling: {
@@ -31,8 +30,9 @@ resource "helm_release" "k8s-service" {
       envVars: var.env_vars,
       secrets: var.secrets,
       domain: var.domain,
-      uriPrefix: var.uri_prefix
-      blah: 2
+      uriPrefix: var.uri_prefix,
+      layerName: var.layer_name,
+      moduleName: var.module_name
     })
   ]
   atomic          = true

@@ -5,10 +5,12 @@ variable "name" {
   type = string
 }
 
-variable "namespace" {
-  description = "Namespace for these resources"
+variable "layer_name" {
   type = string
-  default = "default"
+}
+
+variable "module_name" {
+  type = string
 }
 
 variable "target_port" {
