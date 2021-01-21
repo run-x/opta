@@ -71,9 +71,6 @@ macros:
               acm_cert_arn: "${{module.aws-acm-cert.cert_arn}}"
           - linkerd-init:
               type: linkerd-init
-          - datadog:
-              type: datadog
-              api_key: "{datadog_api_key}"
       - modules:
           - k8s-hello-world-service:
               type: k8s-hello-world-service
@@ -176,11 +173,6 @@ modules:
       desired_size: optional
       ssh_key: optional
       ssh_security_group_ids: optional
-  datadog:
-    location: /Users/ankurdahiya/ws/runxc-tf-modules/datadog
-    variables:
-      api_key: str
-      name: str
   k8s-service:
     location: git@github.com:run-x/runxc-tf-modules.git//k8s-service
     variables:
