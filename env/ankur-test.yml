@@ -6,6 +6,7 @@ meta:
       allowed_account_ids: [ 788676777599 ] # TODO: make this field required
   variables:
     domain: "dev.opta.dev"
+    datadog_api_key: ""
 
 _init: {}
 
