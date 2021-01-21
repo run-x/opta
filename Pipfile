@@ -16,6 +16,8 @@ coverage = "*"
 pyinquirer = "*"
 click = "*"
 pyyaml = "*"
+rich = "*"
+pick = "*"
 
 [requires]
 python_version = "3.8"

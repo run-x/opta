@@ -6,6 +6,7 @@ import click
 import yaml
 
 from opta import gen_tf
+from opta.debugger import Debugger
 from opta.layer import Layer
 from opta.plugins.secret_manager import secret
 from opta.utils import deep_merge, is_tool
@@ -14,6 +15,13 @@ from opta.utils import deep_merge, is_tool
 @click.group()
 def cli() -> None:
     pass
+
+
+@cli.command()
+def debugger() -> None:
+    """The opta debugger -- to help you debug"""
+    dbg = Debugger()
+    dbg.run()
 
 
 @cli.command()

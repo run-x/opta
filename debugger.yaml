@@ -1,0 +1,26 @@
+name: Hi debugger!
+textfile: "debugger/hello_world.md"
+children:
+  - name: Trouble setting up environment
+    textfile: "debugger/env_setup_root.md"
+    children:
+      - name: It got stuck with something called ACM certificates
+        textfile: "debugger/env_setup_cert.md"
+        children: []
+      - &OTHER
+        name: None of these options seem to work
+        textfile: "debugger/issue_unknown.md"
+  - name: Trouble setting up a microservice
+    textfile: "debugger/microservice_setup_root.md"
+    children:
+      - name: The opta helm release deployment failed
+        textfile: "debugger/microservice_helm_failed.md"
+        children:
+          - name: Try viewing the kubernetes events
+            textfile: "debugger/microservice_helm_failed_k8s_events.md"
+            chilcren: []
+          - name: Try viewing the kubernetes logs
+            textfile: "debugger/microservice_helm_failed_k8s_logs.md"
+            chilcren: [ ]
+          - *OTHER
+
