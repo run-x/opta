@@ -180,6 +180,7 @@ modules:
     location: /Users/ankurdahiya/ws/runxc-tf-modules/datadog
     variables:
       api_key: str
+      name: str
   k8s-service:
     location: git@github.com:run-x/runxc-tf-modules.git//k8s-service
     variables:

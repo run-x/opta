@@ -5,7 +5,7 @@ meta:
       region: us-east-1
       allowed_account_ids: [ 788676777599 ] # TODO: make this field required
   variables:
-    domain: "dev.opta.dev"
+    domain: "ankur-test.opta.dev"
     datadog_api_key: ""
 
 _init: {}
