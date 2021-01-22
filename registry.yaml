@@ -177,9 +177,9 @@ modules:
       ssh_key: optional
       ssh_security_group_ids: optional
   datadog:
-    location: /Users/ankurdahiya/ws/runxc-tf-modules/datadog
+    location: git@github.com:run-x/runxc-tf-modules.git//datadog
     variables:
-      api_key: str
+      api_key: optional
       name: str
   k8s-service:
     location: git@github.com:run-x/runxc-tf-modules.git//k8s-service
