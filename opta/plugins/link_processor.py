@@ -36,7 +36,7 @@ class LinkProcessor:
         for k, v in target_module.desc["outputs"].items():
             new_items.append(
                 {
-                    "name": f"{target_module.key}.{k}",
+                    "name": v.get("link_rename", None) or f"{target_module.key}.{k}",
                     "value": f"${{{{module.{target_module.key}.{k}}}}}",
                 }
             )
