@@ -49,7 +49,7 @@ def view(app: str, secret: str, configfile: str) -> None:
             "kubectl",
             "get",
             "secrets/secret",
-            f"--namespace={target_module.name}",
+            f"--namespace={target_module.layer_name}",
             f"--template={{{{.data.{secret}}}}}",
         ],
         capture_output=True,
@@ -77,7 +77,7 @@ def update(app: str, secret: str, value: str, configfile: str) -> None:
             "patch",
             "secret",
             "secret",
-            f"--namespace={target_module.name}",
+            f"--namespace={target_module.layer_name}",
             "--type=json",
             f"-p={json.dumps(patch)}",
         ]
