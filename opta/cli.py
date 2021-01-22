@@ -114,12 +114,15 @@ def _gen(
             abort=True,
         )
         targets = list(map(lambda x: f"-target=module.{x}", current_module_keys))
+
+        # Always fetch the latest modules while we're still in active development
+        subprocess.run(["terraform", "get", "--update"], check=True)
+
         subprocess.run(["terraform", "init"], check=True)
         subprocess.run(["terraform", "plan", "-out=tf.plan"] + targets, check=True)
 
         click.confirm(
-            "Terraform plan generation successful, would you like to apply?",
-            abort=True,
+            "Terraform plan generation successful, would you like to apply?", abort=True,
         )
         subprocess.run(["terraform", "apply"] + targets + ["tf.plan"], check=True)
         block_idx += 1
