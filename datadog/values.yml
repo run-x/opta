@@ -1,3 +1,0 @@
-datadog:
-  apm:
-    enabled: true
