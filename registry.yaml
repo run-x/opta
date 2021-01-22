@@ -227,7 +227,7 @@ modules:
     variables:
       name: str
     outputs:
-      value: str
+      value: {}
   k8s-metric-server:
     location: git@github.com:run-x/runxc-tf-modules.git//k8s-metric-server
     variables: {}
