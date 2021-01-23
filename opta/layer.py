@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import os
 import re
+import shutil
+import tempfile
 from os import path
 from typing import Any, Dict, Iterable, List, Optional
 
+import git
 import yaml
 
 from opta.blocks import Blocks
@@ -39,9 +43,18 @@ class Layer:
 
     @classmethod
     def load_from_yaml(cls, configfile: str) -> Layer:
-        if not path.exists(configfile):
+        if configfile.startswith("git@"):
+            print("Loading layer from git...")
+            git_url, file_path = configfile.split("//")
+            t = tempfile.mkdtemp()
+            # Clone into temporary dir
+            git.Repo.clone_from(git_url, t, branch="main", depth=1)
+            conf = yaml.load(open(os.path.join(t, file_path)), Loader=yaml.Loader)
+            shutil.rmtree(t)
+        elif path.exists(configfile):
+            conf = yaml.load(open(configfile), Loader=yaml.Loader)
+        else:
             raise Exception(f"File {configfile} not found")
-        conf = yaml.load(open(configfile), Loader=yaml.Loader)
         return cls.load_from_dict(conf)
 
     @classmethod

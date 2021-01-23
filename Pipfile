@@ -18,6 +18,7 @@ click = "*"
 pyyaml = "*"
 rich = "*"
 pick = "*"
+GitPython = "*"
 
 [requires]
 python_version = "3.8"
