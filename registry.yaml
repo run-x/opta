@@ -56,7 +56,7 @@ macros:
           - k8s-cluster-autoscaler:
               type: k8s-cluster-autoscaler
               cluster_name: "${{module.aws-eks-init.k8s_cluster_name}}"
-              openid_provider_url: "${{module.aws-eks-init.k8s_openid_provider_url}}"
+              openid_provider_url: "${{module.aws-eks-init.k8s_openid_provider_url}}"  # TODO: maybe put in parameter store for easy pickup by k8s services?
               openid_provider_arn: "${{module.aws-eks-init.k8s_openid_provider_arn}}"
           - k8s-external-dns:
               type: k8s-external-dns
