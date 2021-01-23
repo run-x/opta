@@ -19,6 +19,7 @@ pyyaml = "*"
 rich = "*"
 pick = "*"
 GitPython = "*"
+boto3 = "*"
 
 [requires]
 python_version = "3.8"

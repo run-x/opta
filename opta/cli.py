@@ -1,8 +1,10 @@
 import os
+import os.path
 import subprocess
 from importlib.util import find_spec
 from typing import List, Optional, Set
 
+import boto3
 import click
 import yaml
 
@@ -96,6 +98,23 @@ def _gen(
         )
         total_modules_applied = set()
         try:
+            if not os.path.isdir("./.terraform") and not os.path.isfile(
+                "./terraform.tfstate"
+            ):
+                print(
+                    "Couldn't find terraform state locally, gonna check to see if remote "
+                    "state is available"
+                )
+                providers = layer.gen_providers(0, True)
+                if "s3" in providers.get("terraform", {}).get("backend", {}):
+                    bucket = providers["terraform"]["backend"]["s3"]["bucket"]
+                    key = providers["terraform"]["backend"]["s3"]["key"]
+                    print(
+                        f"Found an s3 backend in bucket {bucket} and key {key}, "
+                        "gonna try to download the statefile from there"
+                    )
+                    s3 = boto3.client("s3")
+                    s3.download_file(bucket, key, "./terraform.tfstate")
             current_state = (
                 subprocess.run(
                     ["terraform", "state", "list"], check=True, capture_output=True
@@ -107,7 +126,8 @@ def _gen(
                 if resource.startswith("module"):
                     total_modules_applied.add(resource.split(".")[1])
         except Exception:
-            print("Couldn't find terraform state, assuming new build.")
+            print("Terraform state was unavailable, will assume a new build.")
+
         if (
             current_module_keys.issubset(total_modules_applied)
             and block_idx + 1 != len(blocks_to_process)

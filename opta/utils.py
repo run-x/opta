@@ -1,6 +1,10 @@
 from shutil import which
 from typing import Any, Dict
 
+from opta.special_formatter import PartialFormatter
+
+fmt = PartialFormatter("")
+
 
 def deep_merge(a: Dict[Any, Any], b: Dict[Any, Any]) -> Dict[Any, Any]:
     b = b.copy()
@@ -24,7 +28,7 @@ def hydrate(target: Any, hydration: Dict[Any, Any]) -> Dict[Any, Any]:
     elif isinstance(target, list):
         target = [hydrate(x, hydration) for x in target]
     elif isinstance(target, str):
-        target = target.format(**hydration)
+        target = fmt.format(target, **hydration)
 
     return target
 
