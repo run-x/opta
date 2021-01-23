@@ -46,9 +46,18 @@ class Layer:
         if configfile.startswith("git@"):
             print("Loading layer from git...")
             git_url, file_path = configfile.split("//")
+            branch = "main"
+            if "?" in file_path:
+                file_path, file_vars = file_path.split("?")
+                res = dict(
+                    map(
+                        lambda x: (x.split("=")[0], x.split("=")[1]), file_vars.split(",")
+                    )
+                )
+                branch = res.get("ref", branch)
             t = tempfile.mkdtemp()
             # Clone into temporary dir
-            git.Repo.clone_from(git_url, t, branch="main", depth=1)
+            git.Repo.clone_from(git_url, t, branch=branch, depth=1)
             conf = yaml.load(open(os.path.join(t, file_path)), Loader=yaml.Loader)
             shutil.rmtree(t)
         elif path.exists(configfile):
