@@ -1,12 +1,14 @@
 import os
+import os.path
 import subprocess
+from importlib.util import find_spec
 from typing import List, Optional, Set
 
+import boto3
 import click
 import yaml
 
 from opta import gen_tf
-from opta.debugger import Debugger
 from opta.layer import Layer
 from opta.plugins.secret_manager import secret
 from opta.utils import deep_merge, is_tool
@@ -20,8 +22,21 @@ def cli() -> None:
 @cli.command()
 def debugger() -> None:
     """The opta debugger -- to help you debug"""
-    dbg = Debugger()
-    dbg.run()
+    curses_spec = find_spec("_curses")
+    curses_found = curses_spec is not None
+
+    if curses_found:
+        from opta.debugger import Debugger
+
+        dbg = Debugger()
+        dbg.run()
+    else:
+        print(
+            "We're very sorry but it seems like your python installation does not "
+            "support curses for advanced cli ui experience. This is a known issue if you "
+            "have pyenv + Big Sur-- pls look at this issue documentations: "
+            "https://github.com/pyenv/pyenv/issues/1755"
+        )
 
 
 @cli.command()
@@ -83,6 +98,23 @@ def _gen(
         )
         total_modules_applied = set()
         try:
+            if not os.path.isdir("./.terraform") and not os.path.isfile(
+                "./terraform.tfstate"
+            ):
+                print(
+                    "Couldn't find terraform state locally, gonna check to see if remote "
+                    "state is available"
+                )
+                providers = layer.gen_providers(0, True)
+                if "s3" in providers.get("terraform", {}).get("backend", {}):
+                    bucket = providers["terraform"]["backend"]["s3"]["bucket"]
+                    key = providers["terraform"]["backend"]["s3"]["key"]
+                    print(
+                        f"Found an s3 backend in bucket {bucket} and key {key}, "
+                        "gonna try to download the statefile from there"
+                    )
+                    s3 = boto3.client("s3")
+                    s3.download_file(bucket, key, "./terraform.tfstate")
             current_state = (
                 subprocess.run(
                     ["terraform", "state", "list"], check=True, capture_output=True
@@ -94,7 +126,8 @@ def _gen(
                 if resource.startswith("module"):
                     total_modules_applied.add(resource.split(".")[1])
         except Exception:
-            print("Couldn't find terraform state, assuming new build.")
+            print("Terraform state was unavailable, will assume a new build.")
+
         if (
             current_module_keys.issubset(total_modules_applied)
             and block_idx + 1 != len(blocks_to_process)
@@ -122,7 +155,8 @@ def _gen(
         subprocess.run(["terraform", "plan", "-out=tf.plan"] + targets, check=True)
 
         click.confirm(
-            "Terraform plan generation successful, would you like to apply?", abort=True,
+            "Terraform plan generation successful, would you like to apply?",
+            abort=True,
         )
         subprocess.run(["terraform", "apply"] + targets + ["tf.plan"], check=True)
         block_idx += 1
