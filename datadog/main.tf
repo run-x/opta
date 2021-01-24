@@ -8,7 +8,7 @@ terraform {
 }
 
 resource "random_password" "cluster_agent_token" {
-  length = 16
+  length = 32
   special = false
 }
 
@@ -20,17 +20,24 @@ resource "helm_release" "datadog" {
 
   values = [
     yamlencode({
-      rbac: {
-        create: true
-      }
       datadog: {
-        leaderElection: true
         collectEvents: true
-
+        leaderElection: true
+        env: [
+          {
+            name: "DD_ENV"
+            value: var.layer_name
+          }
+        ]
+        dogstatsd: {
+          useHostPort: true
+          nonLocalTraffic: true
+        }
         logs: {
           enabled: true
           containerCollectAll: true
         }
+        clusterName: var.layer_name
 
         apm: {
           enabled: true
@@ -41,6 +48,7 @@ resource "helm_release" "datadog" {
         }
       }
       clusterAgent: {
+        useHostNetwork: true
         enabled: true
         token: random_password.cluster_agent_token.result
         metricsProvider: {

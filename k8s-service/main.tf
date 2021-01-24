@@ -12,6 +12,7 @@ resource "helm_release" "k8s-service" {
   name = var.name
   values = [
     yamlencode({
+      deployment_timestamp: timestamp()
       autoscaling: {
         minReplicas: var.min_autoscaling,
         maxReplicas: var.max_autoscaling,

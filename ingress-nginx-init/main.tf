@@ -9,6 +9,9 @@ resource "helm_release" "ingress-nginx" {
   values = [
     yamlencode({
       controller: {
+        config: {
+          "use-proxy-protocol": false  # TODO: set this to true and figure out how to play nicely w/ NLB
+        }
         podAnnotations: {
           "linkerd.io/inject": "enabled"
         }

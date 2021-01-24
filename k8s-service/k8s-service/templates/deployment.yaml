@@ -4,6 +4,8 @@ kind: Deployment
 metadata:
   name: {{ include "k8s-service.fullname" . }}
   labels:
+    tags.datadoghq.com/service: {{ include "k8s-service.serviceName" . }}-{{ include "k8s-service.namespaceName" . }}
+    tags.datadoghq.com/version: {{ .Values.image.tag | quote }}
     {{- include "k8s-service.labels" . | nindent 4 }}
   namespace: {{ include "k8s-service.namespaceName" . }}
 spec:
@@ -14,12 +16,16 @@ spec:
     metadata:
       labels:
         {{- include "k8s-service.selectorLabels" . | nindent 8 }}
+        tags.datadoghq.com/service: {{ include "k8s-service.serviceName" . }}-{{ include "k8s-service.namespaceName" . }}
+        tags.datadoghq.com/version: {{ .Values.image.tag | quote }}
+      annotations:
+        config.linkerd.io/skip-outbound-ports: "8126,5432"
     spec:
       serviceAccountName: {{ include "k8s-service.fullname" . }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: {{ .Values.port }}
@@ -28,19 +34,19 @@ spec:
             httpGet:
               path: {{ .Values.livenessProbePath }}
               port: http
-          {{- if .Values.envVars }}
+          {{- if or (.Values.envVars) (.Values.secrets) }}
           env:
-            {{- range .Values.envVars }}
-            - name: {{ .name }}
-              value: {{ .value }}
-            {{ end -}}
-            {{- range $val := .Values.secrets }}
-            - name: {{ $val }}
+            {{ range .Values.envVars }}
+            - name: {{ .name | quote }}
+              value: {{ .value | quote }}
+            {{ end }}
+            {{ range $val := .Values.secrets }}
+            - name: {{ $val | quote }}
               valueFrom:
                 secretKeyRef:
                   name: secret
-                  key: {{ $val }}
-            {{ end -}}
+                  key: {{ $val | quote }}
+            {{ end }}
           {{- end }}
           readinessProbe:
             initialDelaySeconds: 10

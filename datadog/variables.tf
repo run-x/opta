@@ -8,3 +8,7 @@ variable "api_key" {
   type = string
   default = null
 }
+
+variable "layer_name" {
+  type = string
+}
