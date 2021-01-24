@@ -214,14 +214,10 @@ modules:
       security_group: optional
       instance_class: optional
     outputs:
-      db_user:
-        link_rename: DB_USER
-      db_password:
-        link_rename: DB_PWD
-      db_host:
-        link_rename: DB_HOST
-      db_name:
-        link_rename: DB_NAME
+      db_user: str
+      db_password: str
+      db_host: str
+      db_name: str
   k8s-secret:
     location: git@github.com:run-x/runxc-tf-modules.git//k8s-secret
     variables:
