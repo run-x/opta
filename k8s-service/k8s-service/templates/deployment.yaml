@@ -20,6 +20,9 @@ spec:
         tags.datadoghq.com/version: {{ .Values.image.tag | quote }}
       annotations:
         config.linkerd.io/skip-outbound-ports: "8126,5432"
+        ad.datadoghq.com/linkerd-proxy.check_names: '["linkerd"]'
+        ad.datadoghq.com/linkerd-proxy.init_configs: '[{}]'
+        ad.datadoghq.com/linkerd-proxy.instances: '[{"prometheus_url": "http://%%host%%:4191/metrics"}]'
     spec:
       serviceAccountName: {{ include "k8s-service.fullname" . }}
       containers:
