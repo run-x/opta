@@ -24,7 +24,7 @@ spec:
         ad.datadoghq.com/linkerd-proxy.init_configs: '[{}]'
         ad.datadoghq.com/linkerd-proxy.instances: '[{"prometheus_url": "http://%%host%%:4191/metrics"}]'
     spec:
-      serviceAccountName: {{ include "k8s-service.fullname" . }}
+      serviceAccountName: {{ include "k8s-service.serviceName" . }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"

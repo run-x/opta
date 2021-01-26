@@ -1,5 +1,14 @@
 data "aws_caller_identity" "current" {}
 
+variable "k8s_openid_provider_url" {
+  type = string
+}
+
+variable "k8s_openid_provider_arn" {
+  type = string
+}
+
+
 variable "name" {
   description = "Name of the k8s service"
   type = string

@@ -7,7 +7,7 @@ resource "aws_ecr_repository" "repo" {
 }
 
 data "aws_ecr_image" "service_image" {
-  count =  var.image == null && var.tag != null? 1 : 0
+  count =  var.image == null && var.tag != "" && var.tag != null? 1 : 0
   repository_name = aws_ecr_repository.repo[0].name
   image_tag       = var.tag
 }
