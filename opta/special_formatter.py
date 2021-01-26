@@ -13,7 +13,7 @@ class PartialFormatter(string.Formatter):
         except (KeyError, AttributeError):
             print(
                 f"Did not find field {field_name} whent trying to format. Odds are "
-                "this isj ust setting it to an empty default and you can ignore this"
+                "this is just setting it to an empty default and you can ignore this"
             )
             val = None, field_name
         return val
