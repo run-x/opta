@@ -87,7 +87,7 @@ class Layer:
         pattern = "^[A-Za-z0-9-]*$"
         return bool(re.match(pattern, name))
 
-    def outputs(self, block_idx: int) -> Iterable[str]:
+    def outputs(self, block_idx: Optional[int] = None) -> Iterable[str]:
         ret: List[str] = []
         block_idx = block_idx or len(self.blocks) - 1
         for block in self.blocks[0 : block_idx + 1]:

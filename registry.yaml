@@ -180,6 +180,7 @@ modules:
     location: git@github.com:run-x/runxc-tf-modules.git//datadog
     variables:
       api_key: optional
+      layer_name: str
       name: str
   k8s-service:
     location: git@github.com:run-x/runxc-tf-modules.git//k8s-service
@@ -201,6 +202,8 @@ modules:
       pod_resource_requests: optional
       domain: optional
       uri_prefix: optional
+      k8s_openid_provider_url: str
+      k8s_openid_provider_arn: str
     outputs:
       docker_repo_url:
         export: true

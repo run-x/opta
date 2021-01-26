@@ -11,6 +11,7 @@ mypy = "*"
 black = "*"
 pytest = "*"
 coverage = "*"
+argparse = "*"
 
 [packages]
 pyinquirer = "*"
@@ -20,6 +21,8 @@ rich = "*"
 pick = "*"
 GitPython = "*"
 boto3 = "*"
+amplitude-python = "*"
+sentry-sdk = "*"
 
 [requires]
 python_version = "3.8"
