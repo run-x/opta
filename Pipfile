@@ -24,6 +24,8 @@ GitPython = "*"
 boto3 = "*"
 amplitude-python = "*"
 sentry-sdk = "*"
+getmac = "*"
+requests = "*"
 
 [requires]
 python_version = "3.8"

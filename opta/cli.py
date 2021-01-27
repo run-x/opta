@@ -6,13 +6,20 @@ from typing import List, Optional, Set
 
 import boto3
 import click
+import sentry_sdk
 import yaml
 
 from opta import gen_tf
+from opta.amplitude import amplitude_client
 from opta.layer import Layer
 from opta.plugins.secret_manager import secret
 from opta.utils import deep_merge, is_tool
 from opta.version import version
+
+sentry_sdk.init(
+    "https://aab05facf13049368d749e1b30a08b32@o511457.ingest.sentry.io/5610510",
+    traces_sample_rate=1.0,
+)
 
 
 @click.group()
@@ -25,6 +32,7 @@ def debugger() -> None:
     """The opta debugger -- to help you debug"""
     curses_spec = find_spec("_curses")
     curses_found = curses_spec is not None
+    amplitude_client.send_event(amplitude_client.DEBUGGER_EVENT)
 
     if curses_found:
         from opta.debugger import Debugger
@@ -81,6 +89,7 @@ def _gen(
         raise Exception("Please install terraform on your machine")
     if not os.path.exists(configfile):
         raise Exception(f"File {configfile} not found")
+    amplitude_client.send_event(amplitude_client.START_GEN_EVENT)
 
     conf = yaml.load(open(configfile), Loader=yaml.Loader)
     for v in var:
@@ -147,6 +156,9 @@ def _gen(
             "Sounds good?",
             abort=True,
         )
+        amplitude_client.send_event(
+            amplitude_client.PLAN_EVENT, event_properties={"block_idx": block_idx}
+        )
         targets = list(map(lambda x: f"-target=module.{x}", current_module_keys))
 
         # Always fetch the latest modules while we're still in active development
@@ -156,7 +168,11 @@ def _gen(
         subprocess.run(["terraform", "plan", "-out=tf.plan"] + targets, check=True)
 
         click.confirm(
-            "Terraform plan generation successful, would you like to apply?", abort=True,
+            "Terraform plan generation successful, would you like to apply?",
+            abort=True,
+        )
+        amplitude_client.send_event(
+            amplitude_client.APPLY_EVENT, event_properties={"block_idx": block_idx}
         )
         subprocess.run(["terraform", "apply"] + targets + ["tf.plan"], check=True)
         block_idx += 1
