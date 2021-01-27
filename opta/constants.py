@@ -1,11 +1,12 @@
-import os
+import pkgutil
 
 import yaml
 
-REGISTRY = yaml.load(
-    open(f"{os.path.dirname(__file__)}/../registry.yaml"), Loader=yaml.Loader
-)
+registry_data = pkgutil.get_data("opta", "registry.yaml")
+debugger_data = pkgutil.get_data("opta", "debugger.yaml")
 
-DEBUG_TREE = yaml.load(
-    open(f"{os.path.dirname(__file__)}/../debugger.yaml"), Loader=yaml.Loader
-)
+if not registry_data or not debugger_data:
+    raise Exception("Data missing")
+
+REGISTRY = yaml.load(registry_data, Loader=yaml.Loader)
+DEBUG_TREE = yaml.load(debugger_data, Loader=yaml.Loader)

@@ -12,6 +12,7 @@ black = "*"
 pytest = "*"
 coverage = "*"
 argparse = "*"
+pyinstaller = "*"
 
 [packages]
 pyinquirer = "*"
