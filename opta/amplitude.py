@@ -29,7 +29,7 @@ class AmplitudeClient:
 
     def __init__(self) -> None:
         self.api_key = "751db5fc75ff34f08a83381f4d54ead6"
-        self.user_id = GitConfigParser().get_value("user", "email")
+        self.user_id = GitConfigParser().get_value("user", "email", "no_user")
         self.device_id = get_mac_address()
         self.session_id = int(time.time() * 1000)
         self.os_name = os.name
