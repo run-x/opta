@@ -1,0 +1,35 @@
+# https://istio.io/latest/docs/reference/config/networking/gateway/
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: main-gateway
+spec:
+  selector:
+    istio: ingressgateway # use Istio default gateway implementation
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+      {{- range .Values.main_gateway.domain_names }}
+      - {{ . | quote }}
+      {{- end }}
+      tls:
+        httpsRedirect: true
+    - port:
+        number: 443
+        name: https
+        protocol: HTTP
+      hosts:
+        {{- range .Values.main_gateway.domain_names }}
+        - {{ . | quote }}
+        {{- end }}
+    - port:
+        number: 50051
+        name: grpc
+        protocol: GRPC
+      hosts:
+        {{- range .Values.main_gateway.domain_names }}
+        - {{ . | quote }}
+        {{- end }}
