@@ -1,17 +1,12 @@
-import os
+import pkgutil
 
 import yaml
 
-registry_path = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)), "config", "registry.yaml"
-)
-debugger_path = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)), "config", "debugger.yaml"
-)
-version_path = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)), "config", "version.txt"
-)
+registry_data = pkgutil.get_data("opta", "registry.yaml")
+debugger_data = pkgutil.get_data("opta", "debugger.yaml")
 
-REGISTRY = yaml.load(open(registry_path), Loader=yaml.Loader)
-DEBUG_TREE = yaml.load(open(debugger_path), Loader=yaml.Loader)
-VERSION = open(version_path).read()
+if not registry_data or not debugger_data:
+    raise Exception("Data missing")
+
+REGISTRY = yaml.load(registry_data, Loader=yaml.Loader)
+DEBUG_TREE = yaml.load(debugger_data, Loader=yaml.Loader)
