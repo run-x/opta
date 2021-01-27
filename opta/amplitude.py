@@ -11,6 +11,7 @@ from getmac import get_mac_address
 from git.config import GitConfigParser
 
 from opta.constants import VERSION
+from opta.utils import safe_run
 
 
 class AmplitudeClient:
@@ -37,6 +38,7 @@ class AmplitudeClient:
         self.platform = platform.system()
         self.os_version = platform.version()
 
+    @safe_run
     def send_event(
         self,
         event_type: str,
