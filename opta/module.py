@@ -52,7 +52,6 @@ class BaseModule:
         return module_blk
 
     def translate_location(self, loc: str) -> str:
-        # TODO: allow overriding this with a cli flag
         return os.path.relpath(
             os.path.join(
                 os.path.dirname(os.path.dirname(__file__)), "config", "tf_modules", loc
