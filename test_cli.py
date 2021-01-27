@@ -45,7 +45,8 @@ def test_basic_gen(_: Any) -> None:
                 },
                 "module": {
                     "core": {
-                        "source": "config/tf_modules/aws-state-init",
+                        "source": "git@github.com:run-x/"
+                        "runxc-tf-modules.git//aws-state-init",
                         "bucket_name": "opta-tf-state-dev1",
                         "dynamodb_lock_table_name": "opta-tf-state-dev1",
                     }
