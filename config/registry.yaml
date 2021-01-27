@@ -80,7 +80,7 @@ macros:
               hello_world_domain: "hello-world.{domain}"
 modules:
   aws-state-init:
-    location: git@github.com:run-x/runxc-tf-modules.git//aws-state-init
+    location: aws-state-init
     variables:
       bucket_name: str
       dynamodb_lock_table_name: str
@@ -100,7 +100,7 @@ modules:
         aws_region:
           provider: {}
   aws-network-init:
-    location: git@github.com:run-x/runxc-tf-modules.git//aws-network-init
+    location: aws-network-init
     variables:
       name: str
       total_ipv4_cidr_block: optional
@@ -115,7 +115,7 @@ modules:
       public_subnets_ids:
         export: true
   aws-eks-init:
-    location: git@github.com:run-x/runxc-tf-modules.git//aws-eks-init
+    location: aws-eks-init
     variables:
       cluster_name: str
       k8s_version: optional
@@ -147,23 +147,23 @@ modules:
             token: "${{data.aws_eks_cluster_auth.k8s.token}}"
             cluster_ca_certificate: "${{base64decode({module_source}.k8s_ca_data)}}"
   istio-init:
-    location: git@github.com:run-x/runxc-tf-modules.git//istio-init
+    location: istio-init
     variables:
       domain_names: optional
       acm_cert_arn: optional
     outputs: {}
   ingress-nginx-init:
-    location: git@github.com:run-x/runxc-tf-modules.git//ingress-nginx-init
+    location: ingress-nginx-init
     variables:
       domain_names: optional
       acm_cert_arn: optional
     outputs: { }
   linkerd-init:
-    location: git@github.com:run-x/runxc-tf-modules.git//linkerd-init
+    location: linkerd-init
     variables: {}
     outputs: { }
   aws-eks-nodegroup:
-    location: git@github.com:run-x/runxc-tf-modules.git//aws-eks-nodegroup
+    location: aws-eks-nodegroup
     variables:
       cluster_name: str
       node_group_name: str
@@ -177,13 +177,13 @@ modules:
       ssh_key: optional
       ssh_security_group_ids: optional
   datadog:
-    location: git@github.com:run-x/runxc-tf-modules.git//datadog
+    location: datadog
     variables:
       api_key: optional
       layer_name: str
       name: str
   k8s-service:
-    location: git@github.com:run-x/runxc-tf-modules.git//k8s-service
+    location: k8s-service
     variables:
       name: str
       layer_name: str
@@ -208,7 +208,7 @@ modules:
       docker_repo_url:
         export: true
   aws-rds:
-    location: git@github.com:run-x/runxc-tf-modules.git//aws-rds
+    location: aws-rds
     variables:
       name: str
       subnet_group_name: optional
@@ -222,24 +222,24 @@ modules:
       db_host: str
       db_name: str
   k8s-secret:
-    location: git@github.com:run-x/runxc-tf-modules.git//k8s-secret
+    location: k8s-secret
     variables:
       name: str
     outputs:
       value: {}
   k8s-metric-server:
-    location: git@github.com:run-x/runxc-tf-modules.git//k8s-metric-server
+    location: k8s-metric-server
     variables: {}
     outputs: {}
   k8s-cluster-autoscaler:
-    location: git@github.com:run-x/runxc-tf-modules.git//k8s-cluster-autoscaler
+    location: k8s-cluster-autoscaler
     variables:
       cluster_name: str
       openid_provider_url: str
       openid_provider_arn: str
     outputs: {}
   aws-dns:
-    location: git@github.com:run-x/runxc-tf-modules.git//aws-dns
+    location: aws-dns
     variables:
       domain_name: str
       is_private: optional
@@ -250,7 +250,7 @@ modules:
       name_servers:
         export: true
   k8s-external-dns:
-    location: git@github.com:run-x/runxc-tf-modules.git//k8s-external-dns
+    location: k8s-external-dns
     variables:
       openid_provider_url: str
       openid_provider_arn: str
@@ -259,12 +259,12 @@ modules:
       zone_type: optional
     outputs: { }
   aws-acm-cert:
-    location: git@github.com:run-x/runxc-tf-modules.git//aws-acm-cert
+    location: aws-acm-cert
     variables:
       hosted_zone_id: str
       primary_domain: str
       secondary_domains: optional
   k8s-hello-world-service:
-    location: git@github.com:run-x/runxc-tf-modules.git//k8s-hello-world-service
+    location: k8s-hello-world-service
     variables:
       hello_world_domain: str

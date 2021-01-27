@@ -1,0 +1,65 @@
+{{- if .Values.image.tag }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "k8s-service.fullname" . }}
+  labels:
+    tags.datadoghq.com/service: {{ include "k8s-service.serviceName" . }}-{{ include "k8s-service.namespaceName" . }}
+    tags.datadoghq.com/version: {{ .Values.image.tag | quote }}
+    {{- include "k8s-service.labels" . | nindent 4 }}
+  namespace: {{ include "k8s-service.namespaceName" . }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "k8s-service.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "k8s-service.selectorLabels" . | nindent 8 }}
+        tags.datadoghq.com/service: {{ include "k8s-service.serviceName" . }}-{{ include "k8s-service.namespaceName" . }}
+        tags.datadoghq.com/version: {{ .Values.image.tag | quote }}
+      annotations:
+        config.linkerd.io/skip-outbound-ports: "8126,5432"
+        ad.datadoghq.com/linkerd-proxy.check_names: '["linkerd"]'
+        ad.datadoghq.com/linkerd-proxy.init_configs: '[{}]'
+        ad.datadoghq.com/linkerd-proxy.instances: '[{"prometheus_url": "http://%%host%%:4191/metrics"}]'
+    spec:
+      serviceAccountName: {{ include "k8s-service.serviceName" . }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: {{ .Values.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.livenessProbePath }}
+              port: http
+          {{- if or (.Values.envVars) (.Values.secrets) }}
+          env:
+            {{ range .Values.envVars }}
+            - name: {{ .name | quote }}
+              value: {{ .value | quote }}
+            {{ end }}
+            {{ range $val := .Values.secrets }}
+            - name: {{ $val | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: secret
+                  key: {{ $val | quote }}
+            {{ end }}
+          {{- end }}
+          readinessProbe:
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            httpGet:
+              path: {{ .Values.readinessProbePath }}
+              port: http
+          resources:
+            limits:
+              {{- toYaml .Values.podResourceLimits | nindent 14 }}
+            requests:
+              {{- toYaml .Values.podResourceRequests | nindent 14 }}
+{{- end }}
