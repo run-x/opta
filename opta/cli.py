@@ -1,25 +1,26 @@
-import os
-import os.path
-import subprocess
-from importlib.util import find_spec
-from typing import List, Optional, Set
-
-import boto3
-import click
 import sentry_sdk
-import yaml
-
-from opta import gen_tf
-from opta.amplitude import amplitude_client
-from opta.layer import Layer
-from opta.plugins.secret_manager import secret
-from opta.utils import deep_merge, is_tool
-from opta.version import version
 
 sentry_sdk.init(
     "https://aab05facf13049368d749e1b30a08b32@o511457.ingest.sentry.io/5610510",
     traces_sample_rate=1.0,
 )
+
+import os  # noqa: E402
+import os.path  # noqa: E402
+import subprocess  # noqa: E402
+from importlib.util import find_spec  # noqa: E402
+from typing import List, Optional, Set  # noqa: E402
+
+import boto3  # noqa: E402
+import click  # noqa: E402
+import yaml  # noqa: E402
+
+from opta import gen_tf  # noqa: E402
+from opta.amplitude import amplitude_client  # noqa: E402
+from opta.layer import Layer  # noqa: E402
+from opta.plugins.secret_manager import secret  # noqa: E402
+from opta.utils import deep_merge, is_tool  # noqa: E402
+from opta.version import version  # noqa: E402
 
 
 @click.group()
