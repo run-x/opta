@@ -2,6 +2,7 @@ import os
 import platform
 import random
 import string
+import sys
 import time
 from typing import Optional
 
@@ -42,6 +43,9 @@ class AmplitudeClient:
         event_properties: Optional[dict] = None,
         user_properties: Optional[dict] = None,
     ) -> None:
+        if hasattr(sys, "_called_from_test"):
+            print("Not sending amplitude cause we think we're in a pytest")
+            return
         event_properties = event_properties or {}
         user_properties = user_properties or {}
         insert_id = "".join(random.choices(string.ascii_letters + string.digits, k=16))

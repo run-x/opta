@@ -1,3 +1,4 @@
+import sys
 from shutil import which
 from typing import Any, Dict
 
@@ -36,3 +37,17 @@ def hydrate(target: Any, hydration: Dict[Any, Any]) -> Dict[Any, Any]:
 def is_tool(name: str) -> bool:
     """Check whether `name` is on PATH and marked as executable."""
     return which(name) is not None
+
+
+def safe_run(func):  # type: ignore
+    def func_wrapper(*args, **kwargs):  # type: ignore
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            if hasattr(sys, "_called_from_test"):
+                raise e
+            else:
+                print(e)
+                return None
+
+    return func_wrapper

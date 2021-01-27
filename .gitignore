@@ -7,3 +7,4 @@ terraform.tfstate
 terraform.tfstate.backup
 main.tf.json
 .idea
+__pycache__

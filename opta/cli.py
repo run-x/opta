@@ -1,9 +1,15 @@
+import sys
+
 import sentry_sdk
 
-sentry_sdk.init(
-    "https://aab05facf13049368d749e1b30a08b32@o511457.ingest.sentry.io/5610510",
-    traces_sample_rate=1.0,
-)
+if hasattr(sys, "_called_from_test"):
+    print("Not sending sentry cause we think we're in a pytest")
+else:
+    sentry_sdk.init(
+        "https://aab05facf13049368d749e1b30a08b32@o511457.ingest.sentry.io/5610510",
+        traces_sample_rate=1.0,
+    )
+
 
 import os  # noqa: E402
 import os.path  # noqa: E402
