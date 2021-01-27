@@ -1,3 +1,4 @@
+import os
 from typing import Any, Dict
 
 from opta.constants import REGISTRY
@@ -5,11 +6,7 @@ from opta.constants import REGISTRY
 
 class BaseModule:
     def __init__(
-        self,
-        layer_name: str,
-        key: str,
-        data: Dict[Any, Any],
-        parent_layer: Any = None,
+        self, layer_name: str, key: str, data: Dict[Any, Any], parent_layer: Any = None,
     ):
         self.key = key
         self.desc = REGISTRY["modules"][data["type"]]
@@ -19,7 +16,11 @@ class BaseModule:
         self.data = data
 
     def gen_tf(self) -> Dict[Any, Any]:
-        module_blk = {"module": {self.key: {"source": self.desc["location"]}}}
+        module_blk = {
+            "module": {
+                self.key: {"source": self.translate_location(self.desc["location"])}
+            }
+        }
         for k, v in self.desc["variables"].items():
             if k in self.data:
                 module_blk["module"][self.key][k] = self.data[k]
@@ -49,6 +50,15 @@ class BaseModule:
                     )
 
         return module_blk
+
+    def translate_location(self, loc: str) -> str:
+        # TODO: allow overriding this with a cli flag
+        return os.path.relpath(
+            os.path.join(
+                os.path.dirname(os.path.dirname(__file__)), "config", "tf_modules", loc
+            ),
+            os.getcwd(),
+        )
 
 
 class Module(BaseModule):
