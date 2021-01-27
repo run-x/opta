@@ -12,6 +12,7 @@ from opta import gen_tf
 from opta.layer import Layer
 from opta.plugins.secret_manager import secret
 from opta.utils import deep_merge, is_tool
+from opta.version import version
 
 
 @click.group()
@@ -155,8 +156,7 @@ def _gen(
         subprocess.run(["terraform", "plan", "-out=tf.plan"] + targets, check=True)
 
         click.confirm(
-            "Terraform plan generation successful, would you like to apply?",
-            abort=True,
+            "Terraform plan generation successful, would you like to apply?", abort=True,
         )
         subprocess.run(["terraform", "apply"] + targets + ["tf.plan"], check=True)
         block_idx += 1
@@ -164,6 +164,9 @@ def _gen(
 
 # Initialize secret manager
 cli.add_command(secret)
+
+# Version command
+cli.add_command(version)
 
 if __name__ == "__main__":
     cli()
