@@ -6,11 +6,7 @@ from opta.constants import REGISTRY
 
 class BaseModule:
     def __init__(
-        self,
-        layer_name: str,
-        key: str,
-        data: Dict[Any, Any],
-        parent_layer: Any = None,
+        self, layer_name: str, key: str, data: Dict[Any, Any], parent_layer: Any = None,
     ):
         self.key = key
         self.desc = REGISTRY["modules"][data["type"]]
@@ -62,11 +58,12 @@ class BaseModule:
             ),
             os.getcwd(),
         )
-        # Note: This breaks should runxc ever be prefixed with '.'
-        if '.' != relative_path[0]:
+        # Note: This breaks should runxc ever be prefixed with "."
+        if "." != relative_path[0]:
             relative_path = f"./{relative_path}"
 
         return relative_path
+
 
 class Module(BaseModule):
     pass
