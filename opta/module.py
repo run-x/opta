@@ -58,7 +58,7 @@ class BaseModule:
             ),
             os.getcwd(),
         )
-        # Note: This breaks if runxc is ever prefixed with '.'
+        # Note: This breaks should runxc ever be prefixed with '.'
         if '.' != relative_path[0]:
             relative_path = f"./{relative_path}"
 
