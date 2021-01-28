@@ -42,7 +42,7 @@ class Layer:
             )
 
     @classmethod
-    def load_from_yaml(cls, configfile: str) -> Layer:
+    def load_from_yaml(cls, configfile: str, env: Optional[str]) -> Layer:
         if configfile.startswith("git@"):
             print("Loading layer from git...")
             git_url, file_path = configfile.split("//")
@@ -64,10 +64,10 @@ class Layer:
             conf = yaml.load(open(configfile), Loader=yaml.Loader)
         else:
             raise Exception(f"File {configfile} not found")
-        return cls.load_from_dict(conf)
+        return cls.load_from_dict(conf, env)
 
     @classmethod
-    def load_from_dict(cls, conf: Dict[Any, Any]) -> Layer:
+    def load_from_dict(cls, conf: Dict[Any, Any], env: Optional[str]) -> Layer:
         meta = conf.pop("meta")
         for macro_name, macro_value in REGISTRY["macros"].items():
             if macro_name in conf:
@@ -78,14 +78,37 @@ class Layer:
         if modules_data is not None:
             blocks_data.append({"modules": modules_data})
         parent = None
+        if "envs" in meta:
+            envs = meta.pop("envs")
+            if env is None:
+                raise Exception(
+                    "configfile has multiple environments, but you did not specify one"
+                )
+            potential_envs = []
+            for env_meta in envs:
+                current_parent = cls.load_from_yaml(env_meta["parent"], env)
+                current_variables = env_meta.get("variables", {})
+                potential_envs.append(current_parent.get_env())
+                if current_parent.get_env() == env:
+                    meta["parent"] = env_meta["parent"]
+                    meta["variables"] = deep_merge(
+                        meta.get("variables", {}), current_variables
+                    )
+                    return cls(meta, blocks_data, current_parent)
+            raise Exception(f"Invalid env of {env}, valid ones are {potential_envs}")
         if "parent" in meta:
-            parent = cls.load_from_yaml(meta["parent"])
+            parent = cls.load_from_yaml(meta["parent"], env)
         return cls(meta, blocks_data, parent)
 
     @staticmethod
     def valid_name(name: str) -> bool:
         pattern = "^[A-Za-z0-9-]*$"
         return bool(re.match(pattern, name))
+
+    def get_env(self) -> str:
+        if self.parent is not None:
+            return self.parent.get_env()
+        return self.meta["name"]
 
     def outputs(self, block_idx: Optional[int] = None) -> Iterable[str]:
         ret: List[str] = []
@@ -110,6 +133,7 @@ class Layer:
                 else "nil",
                 "layer_name": self.meta["name"],
                 "state_storage": self.state_storage(),
+                "env": self.get_env(),
             },
         )
         if self.parent is not None:
@@ -145,6 +169,7 @@ class Layer:
                         else "nil",
                         "layer_name": self.meta["name"],
                         "state_storage": self.state_storage(),
+                        "env": self.get_env(),
                         "provider": v,
                     },
                 )

@@ -1,13 +1,27 @@
 import sys
 
 import sentry_sdk
+from sentry_sdk.integrations.atexit import AtexitIntegration
 
 if hasattr(sys, "_called_from_test"):
     print("Not sending sentry cause we think we're in a pytest")
 else:
+
+    def at_exit_callback(pending, timeout):  # type: ignore
+        def echo(msg):
+            # type: (str) -> None
+            sys.stderr.write(msg + "\n")
+
+        if pending > 0:
+            echo("Sentry is attempting to send %i pending error messages" % pending)
+            echo("Waiting up to %s seconds" % timeout)
+            echo("Press Ctrl-%s to quit" % (os.name == "nt" and "Break" or "C"))
+        sys.stderr.flush()
+
     sentry_sdk.init(
         "https://aab05facf13049368d749e1b30a08b32@o511457.ingest.sentry.io/5610510",
         traces_sample_rate=1.0,
+        integrations=[AtexitIntegration(at_exit_callback)],
     )
 
 
@@ -61,6 +75,7 @@ def debugger() -> None:
 @cli.command()
 @click.option("--configfile", default="opta.yml", help="Opta config file")
 @click.option("--out", default=DEFAULT_GENERATED_TF_FILE, help="Generated tf file")
+@click.option("--env", default=None, help="The env to use when loading the config file")
 @click.option(
     "--no-apply",
     is_flag=True,
@@ -78,18 +93,56 @@ def debugger() -> None:
 def gen(
     configfile: str,
     out: str,
+    env: Optional[str],
     no_apply: bool,
     refresh: bool,
     max_block: Optional[int],
     var: List[str],
 ) -> None:
-    _gen(configfile, out, no_apply, refresh, max_block, var)
-    _cleanup()
+    print("The gen command is being deprecated in favor of the apply command")
+    try:
+        _apply(configfile, out, env, no_apply, refresh, max_block, var)
+    finally:
+        _cleanup()
 
 
-def _gen(
+@cli.command()
+@click.option("--configfile", default="opta.yml", help="Opta config file")
+@click.option("--out", default=DEFAULT_GENERATED_TF_FILE, help="Generated tf file")
+@click.option("--env", default=None, help="The env to use when loading the config file")
+@click.option(
+    "--no-apply",
+    is_flag=True,
+    default=False,
+    help="Do not run terraform, just write the json",
+)
+@click.option(
+    "--refresh",
+    is_flag=True,
+    default=False,
+    help="Run from first block, regardless of current state",
+)
+@click.option("--max-block", default=None, type=int, help="Max block to process")
+@click.option("--var", multiple=True, default=[], type=str, help="Variable to update")
+def apply(
     configfile: str,
     out: str,
+    env: Optional[str],
+    no_apply: bool,
+    refresh: bool,
+    max_block: Optional[int],
+    var: List[str],
+) -> None:
+    try:
+        _apply(configfile, out, env, no_apply, refresh, max_block, var)
+    finally:
+        _cleanup()
+
+
+def _apply(
+    configfile: str,
+    out: str,
+    env: Optional[str],
     no_apply: bool,
     refresh: bool,
     max_block: Optional[int],
@@ -107,7 +160,7 @@ def _gen(
         key, value = v.split("=")
         conf["meta"]["variables"][key] = value
 
-    layer = Layer.load_from_dict(conf)
+    layer = Layer.load_from_dict(conf, env)
     current_module_keys: Set[str] = set()
     print("Loading infra blocks")
     blocks_to_process = layer.blocks
@@ -179,7 +232,8 @@ def _gen(
         subprocess.run(["terraform", "plan", "-out=tf.plan"] + targets, check=True)
 
         click.confirm(
-            "Terraform plan generation successful, would you like to apply?", abort=True,
+            "Terraform plan generation successful, would you like to apply?",
+            abort=True,
         )
         amplitude_client.send_event(
             amplitude_client.APPLY_EVENT, event_properties={"block_idx": block_idx}
