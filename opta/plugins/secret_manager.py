@@ -5,6 +5,7 @@ import subprocess
 
 import click
 
+from opta.amplitude import amplitude_client
 from opta.layer import Layer
 from opta.module import Module
 from opta.utils import is_tool
@@ -43,6 +44,7 @@ def get_module(app: str, secret: str, configfile: str) -> Module:
 @click.option("--configfile", default="opta.yml", help="Opta config file")
 def view(app: str, secret: str, configfile: str) -> None:
     target_module = get_module(app, secret, configfile)
+    amplitude_client.send_event(amplitude_client.VIEW_SECRET_EVENT)
 
     output = subprocess.run(
         [
@@ -68,6 +70,7 @@ def view(app: str, secret: str, configfile: str) -> None:
 @click.option("--configfile", default="opta.yml", help="Opta config file")
 def update(app: str, secret: str, value: str, configfile: str) -> None:
     target_module = get_module(app, secret, configfile)
+    amplitude_client.send_event(amplitude_client.UPDATE_SECRET_EVENT)
     secret_value = base64.b64encode(value.encode("utf-8")).decode("utf-8")
     patch = [{"op": "replace", "path": f"/data/{secret}", "value": secret_value}]
 
