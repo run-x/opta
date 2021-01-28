@@ -52,13 +52,17 @@ class BaseModule:
         return module_blk
 
     def translate_location(self, loc: str) -> str:
-        return os.path.relpath(
+        relative_path = os.path.relpath(
             os.path.join(
                 os.path.dirname(os.path.dirname(__file__)), "config", "tf_modules", loc
             ),
             os.getcwd(),
         )
+        # Note: This breaks if runxc is ever prefixed with '.'
+        if '.' != relative_path[0]:
+            relative_path = f"./{relative_path}"
 
+        return relative_path
 
 class Module(BaseModule):
     pass
