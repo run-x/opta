@@ -232,8 +232,7 @@ def _apply(
         subprocess.run(["terraform", "plan", "-out=tf.plan"] + targets, check=True)
 
         click.confirm(
-            "Terraform plan generation successful, would you like to apply?",
-            abort=True,
+            "Terraform plan generation successful, would you like to apply?", abort=True
         )
         amplitude_client.send_event(
             amplitude_client.APPLY_EVENT, event_properties={"block_idx": block_idx}
