@@ -1,0 +1,6 @@
+#!/bin/bash
+
+set -e
+
+# Run lint
+./scripts/lint.py --precommit
