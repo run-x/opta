@@ -4,7 +4,7 @@ from unittest.mock import mock_open, patch
 
 import yaml
 
-from opta.cli import _gen
+from opta.cli import DEFAULT_GENERATED_TF_FILE, _gen
 
 
 @patch("os.path.exists")
@@ -69,7 +69,7 @@ def test_basic_gen(_: Any) -> None:
         def new_open(a: str, b: Any = "r") -> Any:
             if a == "opta.yml":
                 return mock_open(read_data=yaml.dump(i)).return_value
-            elif a == "main.tf.json":
+            elif a == DEFAULT_GENERATED_TF_FILE:
                 return write_open.return_value
             else:
                 return old_open(a, b)
@@ -77,6 +77,6 @@ def test_basic_gen(_: Any) -> None:
         with patch("builtins.open") as mocked_open:
             mocked_open.side_effect = new_open
 
-            _gen("opta.yml", "main.tf.json", True, False, None, [])
+            _gen("opta.yml", DEFAULT_GENERATED_TF_FILE, True, False, None, [])
 
             write_open().write.assert_called_once_with(json.dumps(o, indent=2))

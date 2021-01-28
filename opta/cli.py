@@ -28,6 +28,9 @@ from opta.plugins.secret_manager import secret  # noqa: E402
 from opta.utils import deep_merge, is_tool  # noqa: E402
 from opta.version import version  # noqa: E402
 
+DEFAULT_GENERATED_TF_FILE = "tmp-main.tf.json"
+TERRAFORM_PLAN_FILE = "tf.plan"
+
 
 @click.group()
 def cli() -> None:
@@ -57,7 +60,7 @@ def debugger() -> None:
 
 @cli.command()
 @click.option("--configfile", default="opta.yml", help="Opta config file")
-@click.option("--out", default="main.tf.json", help="Generated tf file")
+@click.option("--out", default=DEFAULT_GENERATED_TF_FILE, help="Generated tf file")
 @click.option(
     "--no-apply",
     is_flag=True,
@@ -81,6 +84,7 @@ def gen(
     var: List[str],
 ) -> None:
     _gen(configfile, out, no_apply, refresh, max_block, var)
+    _cleanup()
 
 
 def _gen(
@@ -175,14 +179,23 @@ def _gen(
         subprocess.run(["terraform", "plan", "-out=tf.plan"] + targets, check=True)
 
         click.confirm(
-            "Terraform plan generation successful, would you like to apply?",
-            abort=True,
+            "Terraform plan generation successful, would you like to apply?", abort=True,
         )
         amplitude_client.send_event(
             amplitude_client.APPLY_EVENT, event_properties={"block_idx": block_idx}
         )
-        subprocess.run(["terraform", "apply"] + targets + ["tf.plan"], check=True)
+        subprocess.run(
+            ["terraform", "apply"] + targets + [TERRAFORM_PLAN_FILE], check=True
+        )
         block_idx += 1
+
+
+def _cleanup() -> None:
+    try:
+        os.remove(DEFAULT_GENERATED_TF_FILE)
+        os.remove(TERRAFORM_PLAN_FILE)
+    except FileNotFoundError:
+        pass
 
 
 # Initialize secret manager

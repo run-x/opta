@@ -1,4 +1,4 @@
-How to use
+How to use (out of date)
 ==========
 - Clone the runxc repo
 - `cd runxc`
