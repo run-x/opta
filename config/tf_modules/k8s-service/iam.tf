@@ -6,6 +6,32 @@ data "aws_iam_policy_document" "k8s_service" {
     resources = ["*"]
     sid = "describeCluster"
   }
+
+  dynamic "statement" {
+    for_each = length(var.read_buckets) == 1 ? ["allow_read"] : []
+    content {
+      sid = "ReadBuckets"
+      actions = [
+        "s3:GetObject*",
+        "s3:ListBucket",
+      ]
+      resources = concat(formatlist("arn:aws:s3:::%s", var.read_buckets), formatlist("arn:aws:s3:::%s/*", var.read_buckets))
+    }
+  }
+
+  dynamic "statement" {
+    for_each = length(var.write_buckets) == 1 ? ["allow_write"] : []
+    content {
+      sid = "WriteBuckets"
+      actions = [
+        "s3:GetObject*",
+        "s3:PutObject*",
+        "s3:DeleteObject*",
+        "s3:ListBucket",
+      ]
+      resources = concat(formatlist("arn:aws:s3:::%s", var.write_buckets), formatlist("arn:aws:s3:::%s/*", var.write_buckets))
+    }
+  }
 }
 
 resource "aws_iam_policy" "k8s_service" {
