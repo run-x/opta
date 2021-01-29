@@ -114,3 +114,13 @@ variable "secrets" {
   type = list(string)
   default = []
 }
+
+variable "read_buckets" {
+  type = list(string)
+  default = []
+}
+
+variable "write_buckets" {
+  type = list(string)
+  default = []
+}

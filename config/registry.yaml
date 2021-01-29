@@ -204,6 +204,8 @@ modules:
       uri_prefix: optional
       k8s_openid_provider_url: str
       k8s_openid_provider_arn: str
+      read_buckets: optional
+      write_buckets: optional
     outputs:
       docker_repo_url:
         export: true
@@ -258,6 +260,17 @@ modules:
       domain: str
       zone_type: optional
     outputs: { }
+  aws-s3-bucket:
+    location: aws-s3-bucket
+    variables:
+      bucket_name: str
+      block_public: optional
+      bucket_policy: optional
+    outputs:
+      bucket_id:
+        export: true
+      bucket_arn:
+        export: true
   aws-acm-cert:
     location: aws-acm-cert
     variables:
