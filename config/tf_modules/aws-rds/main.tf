@@ -22,6 +22,7 @@ resource "aws_rds_cluster" "db_cluster" {
   master_username = "postgres"
   master_password = random_password.pg_password.result
   vpc_security_group_ids = var.security_group == "" ? [data.aws_security_group.security_group[0].id] : [var.security_group]
+  apply_immediately = true
 }
 
 resource "aws_rds_cluster_instance" "db_instance" {
@@ -31,4 +32,5 @@ resource "aws_rds_cluster_instance" "db_instance" {
   instance_class     = var.instance_class
   engine             = aws_rds_cluster.db_cluster.engine
   engine_version     = aws_rds_cluster.db_cluster.engine_version
+  apply_immediately = true
 }
