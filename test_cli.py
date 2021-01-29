@@ -45,7 +45,7 @@ def test_basic_apply(_: Any) -> None:
                 },
                 "module": {
                     "core": {
-                        "source": "config/tf_modules/aws-state-init",
+                        "source": "./config/tf_modules/aws-state-init",
                         "bucket_name": "opta-tf-state-dev1",
                         "dynamodb_lock_table_name": "opta-tf-state-dev1",
                     }
