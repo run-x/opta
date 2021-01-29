@@ -6,7 +6,7 @@ from opta.constants import REGISTRY
 
 class BaseModule:
     def __init__(
-        self, layer_name: str, key: str, data: Dict[Any, Any], parent_layer: Any = None,
+        self, layer_name: str, key: str, data: Dict[Any, Any], parent_layer: Any = None
     ):
         self.key = key
         self.desc = REGISTRY["modules"][data["type"]]

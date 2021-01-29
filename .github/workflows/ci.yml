@@ -24,7 +24,7 @@ jobs:
           pipenv install --deploy --dev
           source $(pipenv --venv)/bin/activate
       - name: Lint
-        run: ./lint.py
+        run: ./scripts/lint.py
   python:
     runs-on: ubuntu-latest
     steps:
