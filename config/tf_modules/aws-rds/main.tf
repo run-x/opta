@@ -1,5 +1,6 @@
 resource "random_password" "pg_password" {
   length = 20
+  special = false
 }
 
 data "aws_db_subnet_group" "subnet_group" {
