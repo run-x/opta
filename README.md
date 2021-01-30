@@ -1,3 +1,5 @@
+[![codecov](https://codecov.io/gh/run-x/runxc/branch/main/graph/badge.svg?token=OA3PXV0HYX)](https://codecov.io/gh/run-x/runxc)
+
 How to use (out of date)
 ==========
 - Clone the runxc repo
