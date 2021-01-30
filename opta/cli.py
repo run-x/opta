@@ -27,7 +27,6 @@ else:
 
 import os  # noqa: E402
 import os.path  # noqa: E402
-import subprocess  # noqa: E402
 from importlib.util import find_spec  # noqa: E402
 from typing import List, Optional, Set  # noqa: E402
 
@@ -38,6 +37,7 @@ import yaml  # noqa: E402
 from opta import gen_tf  # noqa: E402
 from opta.amplitude import amplitude_client  # noqa: E402
 from opta.layer import Layer  # noqa: E402
+from opta.nice_subprocess import nice_run  # noqa: E402
 from opta.plugins.secret_manager import secret  # noqa: E402
 from opta.utils import deep_merge, is_tool  # noqa: E402
 from opta.version import version  # noqa: E402
@@ -190,9 +190,7 @@ def _apply(
                     s3 = boto3.client("s3")
                     s3.download_file(bucket, key, "./terraform.tfstate")
             current_state = (
-                subprocess.run(
-                    ["terraform", "state", "list"], check=True, capture_output=True
-                )
+                nice_run(["terraform", "state", "list"], check=True, capture_output=True)
                 .stdout.decode("utf-8")
                 .split("\n")
             )
@@ -226,10 +224,13 @@ def _apply(
         targets = list(map(lambda x: f"-target=module.{x}", current_module_keys))
 
         # Always fetch the latest modules while we're still in active development
-        subprocess.run(["terraform", "get", "--update"], check=True)
+        nice_run(["terraform", "get", "--update"], check=True)
 
-        subprocess.run(["terraform", "init"], check=True)
-        subprocess.run(["terraform", "plan", "-out=tf.plan"] + targets, check=True)
+        nice_run(["terraform", "init"], check=True)
+        nice_run(
+            ["terraform", "plan", "-out=tf.plan", "-lock-timeout=60s"] + targets,
+            check=True,
+        )
 
         click.confirm(
             "Terraform plan generation successful, would you like to apply?", abort=True
@@ -237,8 +238,9 @@ def _apply(
         amplitude_client.send_event(
             amplitude_client.APPLY_EVENT, event_properties={"block_idx": block_idx}
         )
-        subprocess.run(
-            ["terraform", "apply"] + targets + [TERRAFORM_PLAN_FILE], check=True
+        nice_run(
+            ["terraform", "apply", "-lock-timeout=60s"] + targets + [TERRAFORM_PLAN_FILE],
+            check=True,
         )
         block_idx += 1
 
