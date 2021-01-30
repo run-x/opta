@@ -10,7 +10,7 @@ data "aws_security_group" "security_group" {
 
 resource "aws_elasticache_replication_group" "redis_cluster" {
   automatic_failover_enabled    = true
-  security_group_ids = [data.aws_security_group.security_group.id]
+  security_group_ids = var.security_group == "" ? [data.aws_security_group.security_group[0].id] : [var.security_group]
   subnet_group_name = var.subnet_group_name
   replication_group_id          = var.name
   replication_group_description = "Elasticache ${var.name}"
@@ -21,4 +21,7 @@ resource "aws_elasticache_replication_group" "redis_cluster" {
   apply_immediately = true
   multi_az_enabled = true
   auth_token = random_password.redis_auth.result
+  transit_encryption_enabled = true
+  at_rest_encryption_enabled = true
+  kms_key_id = var.kms_account_key_id
 }

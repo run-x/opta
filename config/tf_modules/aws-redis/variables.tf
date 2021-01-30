@@ -4,7 +4,7 @@ variable "name" {
 
 variable "node_type" {
   type = string
-  default = "cache.m4.large	"
+  default = "cache.m4.large"
 }
 
 variable "security_group" {
@@ -20,4 +20,8 @@ variable "subnet_group_name" {
 variable "redis_version" {
   type = string
   default = "6.x"
+}
+
+variable "kms_account_key_id" {
+  type = string
 }

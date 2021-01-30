@@ -227,6 +227,7 @@ modules:
     location: aws-redis
     variables:
       name: str
+      kms_account_key_id: str
       node_type: optional
       redis_version: optional
       security_group: optional
