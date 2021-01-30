@@ -8,3 +8,5 @@ terraform.tfstate.backup
 main.tf.json
 .idea
 __pycache__
+.coverage
+coverage.xml
