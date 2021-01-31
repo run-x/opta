@@ -223,6 +223,18 @@ modules:
       db_password: str
       db_host: str
       db_name: str
+  aws-redis:
+    location: aws-redis
+    variables:
+      name: str
+      kms_account_key_id: str
+      node_type: optional
+      redis_version: optional
+      security_group: optional
+      subnet_group_name: optional
+    outputs:
+      cache_host: str
+      cache_auth_token: str
   k8s-secret:
     location: k8s-secret
     variables:
