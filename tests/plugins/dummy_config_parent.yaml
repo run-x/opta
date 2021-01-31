@@ -1,0 +1,11 @@
+meta:
+  name: dummy-env
+  providers:
+    aws:
+      region: us-east-1
+      allowed_account_ids: [ silly_value ]
+  variables:
+    domain: "baloney.dev"
+    datadog_api_key: ""
+
+_init: {}

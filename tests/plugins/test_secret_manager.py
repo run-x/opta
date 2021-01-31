@@ -1,4 +1,6 @@
 # type: ignore
+import os
+
 import pytest
 from pytest_mock import MockFixture, mocker  # noqa
 
@@ -22,3 +24,31 @@ class TestSecretManager:
             get_module("a", "b", "c", "d")
         mocked_is_tool.assert_called_once_with("kubectl")
         mocked_path_exists.assert_called_once_with("d")
+
+    def test_get_module_all_good(self):
+
+        target_module = get_module(
+            "app",
+            "BALONEY",
+            "dummy-env",
+            os.path.join(
+                os.path.dirname(os.path.dirname(__file__)),
+                "plugins",
+                "dummy_config1.yaml",
+            ),
+        )
+
+        assert target_module.key == "app"
+
+    def test_get_module_no_secret(self):
+        with pytest.raises(Exception):
+            get_module(
+                "app",
+                "BALONEY",
+                "dummy-env",
+                os.path.join(
+                    os.path.dirname(os.path.dirname(__file__)),
+                    "plugins",
+                    "dummy_config2.yaml",
+                ),
+            )
