@@ -41,7 +41,7 @@ class TestSecretManager:
         assert target_module.key == "app"
 
     def test_get_module_no_secret(self):
-        with pytest.raises(Exception):
+        with pytest.raises(Exception) as excinfo:
             get_module(
                 "app",
                 "BALONEY",
@@ -52,3 +52,4 @@ class TestSecretManager:
                     "dummy_config2.yaml",
                 ),
             )
+            assert "Secret not found" in str(excinfo.value)
