@@ -1,7 +1,6 @@
 import base64
 import json
 import os
-import subprocess
 from typing import Optional
 
 import click
@@ -9,6 +8,7 @@ import click
 from opta.amplitude import amplitude_client
 from opta.layer import Layer
 from opta.module import Module
+from opta.nice_subprocess import nice_run
 from opta.utils import is_tool
 
 
@@ -48,7 +48,7 @@ def view(app: str, secret: str, env: Optional[str], configfile: str) -> None:
     target_module = get_module(app, secret, env, configfile)
     amplitude_client.send_event(amplitude_client.VIEW_SECRET_EVENT)
 
-    output = subprocess.run(
+    output = nice_run(
         [
             "kubectl",
             "get",
@@ -79,7 +79,7 @@ def update(
     secret_value = base64.b64encode(value.encode("utf-8")).decode("utf-8")
     patch = [{"op": "replace", "path": f"/data/{secret}", "value": secret_value}]
 
-    ret = subprocess.run(
+    ret = nice_run(
         [
             "kubectl",
             "patch",
