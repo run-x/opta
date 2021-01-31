@@ -15,31 +15,32 @@ class Debugger:
 
     def run(self) -> None:
         while True:
-            cur_context = self.current_context()
-            with open(
-                f"{os.path.dirname(__file__)}/../{cur_context['textfile']}"
-            ) as text:
-                markdown = Markdown(text.read())
-            with self.console.capture() as capture:
-                self.console.print(markdown)
-            helper_text = capture.get()
-            children_paths: List = cur_context.get("children", [])
+            self._run_loop()
 
-            options = [child["name"] for child in children_paths]
-            if not self.path:
-                options.append("I'm gonna go now")
+    def _run_loop(self) -> None:
+        cur_context = self.current_context()
+        with open(f"{os.path.dirname(__file__)}/../{cur_context['textfile']}") as text:
+            markdown = Markdown(text.read())
+        with self.console.capture() as capture:
+            self.console.print(markdown)
+        helper_text = capture.get()
+        children_paths: List = cur_context.get("children", [])
+
+        options = [child["name"] for child in children_paths]
+        if not self.path:
+            options.append("I'm gonna go now")
+        else:
+            options.append("Take me back to the last screen")
+        picker = Picker(options, helper_text + "\nWhat's on your mind?")
+        _, index = picker.start()
+        if index == len(children_paths):
+            if self.path:
+                self.path.pop()
             else:
-                options.append("Take me back to the last screen")
-            picker = Picker(options, helper_text + "\nWhat's on your mind?")
-            _, index = picker.start()
-            if index == len(children_paths):
-                if self.path:
-                    self.path.pop()
-                else:
-                    self.console.print("Stay awesome, buddy.")
-                    exit(0)
-            else:
-                self.path.append(index)
+                self.console.print("Stay awesome, buddy.")
+                exit(0)
+        else:
+            self.path.append(index)
 
     def current_context(self) -> Dict:
         cur_context = DEBUG_TREE.copy()
