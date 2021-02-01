@@ -6,9 +6,9 @@ import sys
 import time
 from typing import Optional
 
-import requests
 from getmac import get_mac_address
 from git.config import GitConfigParser
+from requests import codes, post
 
 from opta.constants import VERSION
 from opta.utils import safe_run
@@ -72,10 +72,10 @@ class AmplitudeClient:
             ],
         }
         headers = {"Content-Type": "application/json", "Accept": "*/*"}
-        r = requests.post(
+        r = post(
             "https://api2.amplitude.com/2/httpapi", params={}, headers=headers, json=body
         )
-        if r.status_code != requests.codes.ok:
+        if r.status_code != codes.ok:
             raise Exception(
                 "Hey, we're trying to send some analytics over to our devs for the "
                 f"product usage and we got a {r.status_code} response back. Could "
