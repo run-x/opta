@@ -1,0 +1,22 @@
+meta:
+  envs:
+    - parent: "./tests/plugins/dummy_config_parent.yaml"
+      variables: {}
+  name: with-secrets
+  variables:
+    tag: ""
+modules:
+  - app:
+      type: k8s-service
+      env_vars:
+        - name: APPENV
+          value: "{env}"
+      secrets:
+        - BALONEY
+  - database:
+      type: aws-rds
+  - redis:
+      type: aws-redis
+  - bucket:
+      type: aws-s3-bucket
+      bucket_name: "runx-k8s-events-{env}"
