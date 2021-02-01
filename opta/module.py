@@ -4,7 +4,7 @@ from typing import Any, Dict
 from opta.constants import REGISTRY
 
 
-class BaseModule:
+class Module:
     def __init__(
         self, layer_name: str, key: str, data: Dict[Any, Any], parent_layer: Any = None
     ):
@@ -63,7 +63,3 @@ class BaseModule:
             relative_path = f"./{relative_path}"
 
         return relative_path
-
-
-class Module(BaseModule):
-    pass

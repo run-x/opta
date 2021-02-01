@@ -1,8 +1,10 @@
 from typing import Any, Iterable, List, Mapping
 
+from opta.module import Module
+
 
 class LinkProcessor:
-    def process(self, modules: Iterable[Any]) -> None:
+    def process(self, modules: Iterable[Module]) -> None:
         for m in modules:
             for k, v in m.data.items():
                 if not isinstance(v, list):
@@ -21,7 +23,9 @@ class LinkProcessor:
                 for i in new_items:
                     v.append(i)
 
-    def find_items(self, modules: Any, target: str) -> Iterable[Mapping[Any, Any]]:
+    def find_items(
+        self, modules: Iterable[Module], target: str
+    ) -> Iterable[Mapping[Any, Any]]:
         target_module = None
         new_items: List[Mapping[Any, Any]] = []
 
