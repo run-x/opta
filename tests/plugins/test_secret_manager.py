@@ -7,6 +7,7 @@ import pytest
 from click.testing import CliRunner
 from pytest_mock import MockFixture, mocker  # noqa
 
+from opta.amplitude import AmplitudeClient, amplitude_client
 from opta.module import Module
 from opta.plugins.secret_manager import get_module, view
 
@@ -58,16 +59,23 @@ class TestSecretManager:
             )
             assert "Secret not found" in str(excinfo.value)
 
-    def test_view(self, mocker: MockFixture):
+    def test_view(self, mocker: MockFixture):  # noqa
         mocked_get_module = mocker.patch("opta.plugins.secret_manager.get_module")
         mocked_module = mocker.Mock(spec=Module)
         mocked_module.layer_name = "dummy_layer"
         mocked_get_module.return_value = mocked_module
+
         mocked_nice_run = mocker.patch("opta.plugins.secret_manager.nice_run")
         mocked_completed_process = mocker.Mock(spec=CompletedProcess)
         mocked_completed_process.returncode = 0
         mocked_completed_process.stdout = base64.b64encode(bytes("supersecret", "utf-8"))
         mocked_nice_run.return_value = mocked_completed_process
+
+        mocked_amplitude_client = mocker.patch(
+            "opta.plugins.secret_manager.amplitude_client", spec=AmplitudeClient
+        )
+        mocked_amplitude_client.VIEW_SECRET_EVENT = amplitude_client.VIEW_SECRET_EVENT
+
         runner = CliRunner()
         result = runner.invoke(
             view,
@@ -93,4 +101,7 @@ class TestSecretManager:
         )
         mocked_get_module.assert_called_once_with(
             "dummyapp", "dummysecret", "dummyenv", "dummyconfigfile"
+        )
+        mocked_amplitude_client.send_event.assert_called_once_with(
+            amplitude_client.VIEW_SECRET_EVENT
         )
