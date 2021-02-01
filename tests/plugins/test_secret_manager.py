@@ -1,10 +1,14 @@
 # type: ignore
+import base64
 import os
+from subprocess import CompletedProcess
 
 import pytest
+from click.testing import CliRunner
 from pytest_mock import MockFixture, mocker  # noqa
 
-from opta.plugins.secret_manager import get_module
+from opta.module import Module
+from opta.plugins.secret_manager import get_module, view
 
 
 class TestSecretManager:
@@ -53,3 +57,40 @@ class TestSecretManager:
                 ),
             )
             assert "Secret not found" in str(excinfo.value)
+
+    def test_view(self, mocker: MockFixture):
+        mocked_get_module = mocker.patch("opta.plugins.secret_manager.get_module")
+        mocked_module = mocker.Mock(spec=Module)
+        mocked_module.layer_name = "dummy_layer"
+        mocked_get_module.return_value = mocked_module
+        mocked_nice_run = mocker.patch("opta.plugins.secret_manager.nice_run")
+        mocked_completed_process = mocker.Mock(spec=CompletedProcess)
+        mocked_completed_process.returncode = 0
+        mocked_completed_process.stdout = base64.b64encode(bytes("supersecret", "utf-8"))
+        mocked_nice_run.return_value = mocked_completed_process
+        runner = CliRunner()
+        result = runner.invoke(
+            view,
+            [
+                "dummyapp",
+                "dummysecret",
+                "--env",
+                "dummyenv",
+                "--configfile",
+                "dummyconfigfile",
+            ],
+        )
+        assert result.exit_code == 0
+        mocked_nice_run.assert_called_once_with(
+            [
+                "kubectl",
+                "get",
+                "secrets/secret",
+                "--namespace=dummy_layer",
+                "--template={{.data.dummysecret}}",
+            ],
+            capture_output=True,
+        )
+        mocked_get_module.assert_called_once_with(
+            "dummyapp", "dummysecret", "dummyenv", "dummyconfigfile"
+        )
