@@ -1,3 +1,4 @@
+import signal
 from subprocess import PIPE, CalledProcessError, CompletedProcess, Popen, TimeoutExpired
 from typing import Optional
 
@@ -62,6 +63,9 @@ def nice_run(  # type: ignore
         try:
             stdout, stderr = process.communicate(input, timeout=timeout)
         except TimeoutExpired as exc:
+            process.send_signal(signal.SIGINT)
+            # Wait again, now that the child has received SIGINT, too.
+            process.wait(timeout=exit_timeout)
             process.kill()
             if _mswindows:
                 # Windows accumulates the output in a single blocking

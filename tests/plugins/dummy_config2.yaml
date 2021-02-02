@@ -2,7 +2,7 @@ meta:
   envs:
     - parent: "./tests/plugins/dummy_config_parent.yaml"
       variables: {}
-  name: no-secrets
+  name: no-secrets-no-link
   variables:
     tag: ""
 modules:

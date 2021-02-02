@@ -2,7 +2,7 @@ meta:
   envs:
     - parent: "./tests/plugins/dummy_config_parent.yaml"
       variables: {}
-  name: with-secrets
+  name: with-secrets-with-link
   variables:
     tag: ""
 modules:
@@ -11,6 +11,7 @@ modules:
       env_vars:
         - name: APPENV
           value: "{env}"
+        - _link: database
       secrets:
         - BALONEY
   - database:

@@ -3,21 +3,22 @@ import sys
 import sentry_sdk
 from sentry_sdk.integrations.atexit import AtexitIntegration
 
+
+def at_exit_callback(pending: int, timeout: float) -> None:
+    def echo(msg):
+        # type: (str) -> None
+        sys.stderr.write(msg + "\n")
+
+    if pending > 0:
+        echo("Sentry is attempting to send %i pending error messages" % pending)
+        echo("Waiting up to %s seconds" % timeout)
+        echo("Press Ctrl-%s to quit" % (os.name == "nt" and "Break" or "C"))
+    sys.stderr.flush()
+
+
 if hasattr(sys, "_called_from_test"):
     print("Not sending sentry cause we think we're in a pytest")
 else:
-
-    def at_exit_callback(pending, timeout):  # type: ignore
-        def echo(msg):
-            # type: (str) -> None
-            sys.stderr.write(msg + "\n")
-
-        if pending > 0:
-            echo("Sentry is attempting to send %i pending error messages" % pending)
-            echo("Waiting up to %s seconds" % timeout)
-            echo("Press Ctrl-%s to quit" % (os.name == "nt" and "Break" or "C"))
-        sys.stderr.flush()
-
     sentry_sdk.init(
         "https://aab05facf13049368d749e1b30a08b32@o511457.ingest.sentry.io/5610510",
         traces_sample_rate=1.0,
