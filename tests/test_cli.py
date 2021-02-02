@@ -1,14 +1,46 @@
 import json
+import os
 from typing import Any
 from unittest.mock import call, mock_open, patch
 
 import yaml
 from pytest_mock import MockFixture, mocker  # noqa
 
-from opta.cli import DEFAULT_GENERATED_TF_FILE, _apply
+from opta.cli import (
+    DEFAULT_GENERATED_TF_FILE,
+    TERRAFORM_PLAN_FILE,
+    _apply,
+    _cleanup,
+    at_exit_callback,
+)
 
 
 class TestCLI:
+    def test_cleanup(self) -> None:
+        with open(DEFAULT_GENERATED_TF_FILE, "w") as f:
+            f.write("blah")
+        with open(TERRAFORM_PLAN_FILE, "w") as f:
+            f.write("blah")
+        _cleanup()
+        assert not os.path.exists(DEFAULT_GENERATED_TF_FILE)
+        assert not os.path.exists(TERRAFORM_PLAN_FILE)
+
+    def test_at_exit_callback_with_pending(self, mocker: MockFixture) -> None:  # noqa
+        mocked_write = mocker.patch("opta.cli.sys.stderr.write")
+        mocked_flush = mocker.patch("opta.cli.sys.stderr.flush")
+        at_exit_callback(1, 1)
+        mocked_write.assert_has_calls(
+            [call(mocker.ANY), call(mocker.ANY), call(mocker.ANY)]
+        )
+        mocked_flush.assert_called_once_with()
+
+    def test_at_exit_callback_without_pending(self, mocker: MockFixture) -> None:  # noqa
+        mocked_write = mocker.patch("opta.cli.sys.stderr.write")
+        mocked_flush = mocker.patch("opta.cli.sys.stderr.flush")
+        at_exit_callback(0, 1)
+        mocked_write.assert_not_called()
+        mocked_flush.assert_called_once_with()
+
     def test_basic_apply(self, mocker: MockFixture) -> None:  # noqa
         mocked_exists = mocker.patch("os.path.exists")
         mocked_exists.return_value = True
