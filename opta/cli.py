@@ -109,6 +109,40 @@ def gen(
 
 @cli.command()
 @click.option("--configfile", default="opta.yml", help="Opta config file")
+@click.option("--env", default=None, help="The env to use when loading the config file")
+@click.option(
+    "--no-init",
+    is_flag=True,
+    default=False,
+    help="Assume terraform is already initialized and do not run terraform init",
+)
+def output(configfile: str, env: Optional[str], no_init: bool,) -> None:
+    """ Print TF outputs """
+    temp_tf_file = "tmp-output.tf.json"
+    nice_run(
+        [
+            "python",
+            __file__,
+            "apply",
+            "--configfile",
+            configfile,
+            "--env",
+            env,
+            "--out",
+            temp_tf_file,
+            "--no-apply",
+        ],
+        check=True,
+    )
+    if not no_init:
+        nice_run(["terraform", "init"], check=True)
+    nice_run(["terraform", "get", "--update"], check=True)
+    nice_run(["terraform", "output", "-json"], check=True)
+    os.remove(temp_tf_file)
+
+
+@cli.command()
+@click.option("--configfile", default="opta.yml", help="Opta config file")
 @click.option("--out", default=DEFAULT_GENERATED_TF_FILE, help="Generated tf file")
 @click.option("--env", default=None, help="The env to use when loading the config file")
 @click.option(
