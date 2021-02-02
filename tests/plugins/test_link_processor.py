@@ -1,8 +1,6 @@
 # type: ignore
 import os
 
-import pytest
-
 from opta.layer import Layer
 from opta.plugins.link_processor import LinkProcessor
 
