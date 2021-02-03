@@ -26,16 +26,10 @@ class LinkProcessor:
     def find_items(
         self, modules: Iterable[Module], target: str
     ) -> Iterable[Mapping[Any, Any]]:
-        target_module = None
+        target_module: Any = None
         new_items: List[Mapping[Any, Any]] = []
 
-        for module in modules:
-            if module.key == target:
-                target_module = module
-                break
-
-        if target_module is None:
-            return []
+        target_module = next((module for module in modules if module.key == target), {})
 
         for k, v in target_module.desc["outputs"].items():
             new_items.append(
