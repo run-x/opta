@@ -4,6 +4,7 @@ from typing import Any
 from unittest.mock import call, mock_open, patch
 
 import yaml
+from click.testing import CliRunner
 from pytest_mock import MockFixture, mocker  # noqa
 
 from opta.cli import (
@@ -12,6 +13,7 @@ from opta.cli import (
     _apply,
     _cleanup,
     at_exit_callback,
+    output,
 )
 
 
@@ -24,6 +26,21 @@ class TestCLI:
         _cleanup()
         assert not os.path.exists(DEFAULT_GENERATED_TF_FILE)
         assert not os.path.exists(TERRAFORM_PLAN_FILE)
+
+    def test_output(self, mocker: MockFixture) -> None:  # noqa
+        mocker.patch("opta.cli.os.remove")
+        mocked_cmds = mocker.patch("opta.cli.nice_run")
+
+        runner = CliRunner()
+        result = runner.invoke(output, [])
+        assert result.exit_code == 0
+        assert mocked_cmds.call_count == 4
+
+        # Don't run terraform init if the --no-init flag is passed
+        mocked_cmds = mocker.patch("opta.cli.nice_run")
+        result = runner.invoke(output, ["--no-init"])
+        assert result.exit_code == 0
+        assert mocked_cmds.call_count == 3
 
     def test_at_exit_callback_with_pending(self, mocker: MockFixture) -> None:  # noqa
         mocked_write = mocker.patch("opta.cli.sys.stderr.write")
