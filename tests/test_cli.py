@@ -5,7 +5,7 @@ from unittest.mock import call, mock_open, patch
 
 import yaml
 from click.testing import CliRunner
-from pytest_mock import MockFixture, mocker  # noqa
+from pytest_mock import MockFixture
 
 from opta.cli import (
     DEFAULT_GENERATED_TF_FILE,
@@ -27,7 +27,7 @@ class TestCLI:
         assert not os.path.exists(DEFAULT_GENERATED_TF_FILE)
         assert not os.path.exists(TERRAFORM_PLAN_FILE)
 
-    def test_output(self, mocker: MockFixture) -> None:  # noqa
+    def test_output(self, mocker: MockFixture) -> None:
         mocker.patch("opta.cli.os.remove")
         mocked_cmds = mocker.patch("opta.cli.nice_run")
 
@@ -42,7 +42,7 @@ class TestCLI:
         assert result.exit_code == 0
         assert mocked_cmds.call_count == 3
 
-    def test_at_exit_callback_with_pending(self, mocker: MockFixture) -> None:  # noqa
+    def test_at_exit_callback_with_pending(self, mocker: MockFixture) -> None:
         mocked_write = mocker.patch("opta.cli.sys.stderr.write")
         mocked_flush = mocker.patch("opta.cli.sys.stderr.flush")
         at_exit_callback(1, 1)
@@ -51,14 +51,14 @@ class TestCLI:
         )
         mocked_flush.assert_called_once_with()
 
-    def test_at_exit_callback_without_pending(self, mocker: MockFixture) -> None:  # noqa
+    def test_at_exit_callback_without_pending(self, mocker: MockFixture) -> None:
         mocked_write = mocker.patch("opta.cli.sys.stderr.write")
         mocked_flush = mocker.patch("opta.cli.sys.stderr.flush")
         at_exit_callback(0, 1)
         mocked_write.assert_not_called()
         mocked_flush.assert_called_once_with()
 
-    def test_basic_apply(self, mocker: MockFixture) -> None:  # noqa
+    def test_basic_apply(self, mocker: MockFixture) -> None:
         mocked_exists = mocker.patch("os.path.exists")
         mocked_exists.return_value = True
         test_cases: Any = [
