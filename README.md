@@ -7,16 +7,17 @@ How to use (out of date)
 - `pipenv install`
 - Create your env or service yaml
     - Check out env/opta.yml and service/opta.yml for examples
-- To generate main.tf.json: `pipenv run python ./opta/cli.py gen --inp <file>`
-- Now you can run `terraform init && terraform apply`
+- Now you can run: `pipenv run python ./opta/cli.py apply --inp <file>`
 
-Goals
-=====
-- Simplicity over customizability
-- Try to keep the opta wrapper thin for now. Eventually we'll build plugins to
-    wrap terraform cli - so you only need to remember one commmand AND plugins
-    to provide a lot more syntactic sugar. But for now, when we're focussed on
-    quick iteration, we should keep it simple.
+Packaging
+=========
+- Trigger a new action here and supply a new version number (0.<n>): https://github.com/run-x/runxc/actions?query=workflow%3APackage
+- For now version numbers are 0.<n> where n goes up with each release
+- This action will build both a macos and linux binary
+- Upload the binaries to this s3 bucket with appropriate names (/platform/0.<n>/opta): https://s3.console.aws.amazon.com/s3/buckets/dev-runx-opta-binaries It's in the "runx" aws account. Make sure to mark both binaries public and note down their url.
+- Create a new release on github for the sha that the action was run with and set tag=v0.<n>
+- In the release, provide the s3 urls and also write a changelog based on the commits since the last release
+- Update the docs website to point to this latest release
 
 Concepts
 ========
@@ -30,15 +31,6 @@ Env outputs
 -----------
 If a module has an input variable with the same name as an env output, it'll
   automatically be connected to the env value
-
-Env creation
-------------
-When you're creating a new env, you should do `pipenv run python ./opta/cli.py
-  gen --inp <file> --init && terraform init && terraform apply`. This will 
-  create the tf bucket and store state locally.
-
-Then you can do `pipenv run python ./opta/cli.py gen --inp <file> && terraform
-init && terraform apply` to generate the full env and move everything to s3/gcs.
 
 Terminology
 -----------
