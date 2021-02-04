@@ -1,8 +1,8 @@
-resource "aws_db_subnet_group" "main" {
-  name       = "main"
+resource "aws_docdb_subnet_group" "main" {
+  name       = "main-docdb"
   subnet_ids = aws_subnet.private_subnets[*].id
   tags = {
-    "purpose": "postgres"
+    "purpose": "docdb"
     "ignore-if-seemingly-out-of-place": "yup"
   }
 }
