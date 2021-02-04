@@ -14,10 +14,13 @@ from opta.utils import is_tool
 
 @click.group()
 def secret() -> None:
+    """Commands for manipulating secrets for a k8s service"""
     pass
 
 
-def get_module(app: str, secret: str, env: Optional[str], configfile: str) -> Module:
+def get_module(
+    module_name: str, secret: Optional[str], env: Optional[str], configfile: str
+) -> Module:
     if not is_tool("kubectl"):
         raise Exception("Please install kubectl on your machine")
     if not os.path.exists(configfile):
@@ -28,8 +31,10 @@ def get_module(app: str, secret: str, env: Optional[str], configfile: str) -> Mo
     target_module = None
     for block in layer.blocks:
         for module in block.modules:
-            if module.key == app:
-                if "secrets" in module.data and secret in module.data["secrets"]:
+            if module.key == module_name:
+                if "secrets" in module.data and (
+                    secret is None or secret in module.data["secrets"]
+                ):
                     target_module = module
                     break
 
@@ -40,12 +45,13 @@ def get_module(app: str, secret: str, env: Optional[str], configfile: str) -> Mo
 
 
 @secret.command()
-@click.argument("app")
+@click.argument("module_name")
 @click.argument("secret")
 @click.option("--env", default=None, help="The env to use when loading the config file")
 @click.option("--configfile", default="opta.yml", help="Opta config file")
-def view(app: str, secret: str, env: Optional[str], configfile: str) -> None:
-    target_module = get_module(app, secret, env, configfile)
+def view(module_name: str, secret: str, env: Optional[str], configfile: str) -> None:
+    """View a given secret of a k8s service"""
+    target_module = get_module(module_name, secret, env, configfile)
     amplitude_client.send_event(amplitude_client.VIEW_SECRET_EVENT)
 
     output = nice_run(
@@ -65,16 +71,47 @@ def view(app: str, secret: str, env: Optional[str], configfile: str) -> None:
     print(base64.b64decode(output.stdout).decode("utf-8"))
 
 
+@secret.command(name="list")
+@click.argument("module_name")
+@click.option("--env", default=None, help="The env to use when loading the config file")
+@click.option("--configfile", default="opta.yml", help="Opta config file")
+def list_command(module_name: str, env: Optional[str], configfile: str) -> None:
+    """List the secrets setup for the given k8s service module"""
+    target_module = get_module(module_name, None, env, configfile)
+    amplitude_client.send_event(amplitude_client.LIST_SECRETS_EVENT)
+
+    output = nice_run(
+        [
+            "kubectl",
+            "get",
+            "secrets/secret",
+            f"--namespace={target_module.layer_name}",
+            "-o",
+            "jsonpath='{.data}'",
+        ],
+        capture_output=True,
+    )
+
+    if output.returncode != 0:
+        print(output.stdout)
+        print(output.returncode)
+        raise Exception(f"Something went wrong, got exit code of {output.returncode}")
+
+    for key in json.loads(output.stdout.decode("utf-8").strip("'")).keys():
+        print(key)
+
+
 @secret.command()
-@click.argument("app")
+@click.argument("module_name")
 @click.argument("secret")
 @click.argument("value")
 @click.option("--env", default=None, help="The env to use when loading the config file")
 @click.option("--configfile", default="opta.yml", help="Opta config file")
 def update(
-    app: str, secret: str, value: str, env: Optional[str], configfile: str
+    module_name: str, secret: str, value: str, env: Optional[str], configfile: str
 ) -> None:
-    target_module = get_module(app, secret, env, configfile)
+    """Update a given secret of a k8s service with a new value"""
+    target_module = get_module(module_name, secret, env, configfile)
     amplitude_client.send_event(amplitude_client.UPDATE_SECRET_EVENT)
     secret_value = base64.b64encode(value.encode("utf-8")).decode("utf-8")
     patch = [{"op": "replace", "path": f"/data/{secret}", "value": secret_value}]

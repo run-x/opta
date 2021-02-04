@@ -17,6 +17,7 @@ from opta.utils import safe_run
 class AmplitudeClient:
     UPDATE_SECRET_EVENT = "UPDATE_SECRET"
     VIEW_SECRET_EVENT = "VIEW_SECRET"
+    LIST_SECRETS_EVENT = "LIST_SECRETS"
     START_GEN_EVENT = "START_GEN"
     PLAN_EVENT = "PLAN"
     APPLY_EVENT = "APPLY"
@@ -27,6 +28,7 @@ class AmplitudeClient:
         APPLY_EVENT,
         PLAN_EVENT,
         DEBUGGER_EVENT,
+        LIST_SECRETS_EVENT,
     ]
 
     def __init__(self) -> None:
