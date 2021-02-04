@@ -29,18 +29,25 @@ class TestCLI:
 
     def test_output(self, mocker: MockFixture) -> None:
         mocker.patch("opta.cli.os.remove")
-        mocked_cmds = mocker.patch("opta.cli.nice_run")
+        mocked_apply = mocker.patch("opta.cli.apply")
+        mocked_shell_cmds = mocker.patch("opta.cli.nice_run")
 
         runner = CliRunner()
         result = runner.invoke(output, [])
         assert result.exit_code == 0
-        assert mocked_cmds.call_count == 4
+        assert mocked_apply.call_count == 1
+        assert mocked_shell_cmds.call_count == 3
 
-        # Don't run terraform init if the --no-init flag is passed
-        mocked_cmds = mocker.patch("opta.cli.nice_run")
-        result = runner.invoke(output, ["--no-init"])
+        # Don't run terraform init if .terraform/ exists.
+        os.mkdir(".terraform")
+        mocked_shell_cmds.call_count = 0
+
+        result = runner.invoke(output)
         assert result.exit_code == 0
-        assert mocked_cmds.call_count == 3
+        assert mocked_shell_cmds.call_count == 2
+
+        # Clean up
+        os.rmdir(".terraform")
 
     def test_at_exit_callback_with_pending(self, mocker: MockFixture) -> None:
         mocked_write = mocker.patch("opta.cli.sys.stderr.write")

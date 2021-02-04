@@ -1,4 +1,5 @@
 import sys
+from typing import Any
 
 import sentry_sdk
 from sentry_sdk.integrations.atexit import AtexitIntegration
@@ -111,30 +112,17 @@ def gen(
 @click.option("--configfile", default="opta.yml", help="Opta config file")
 @click.option("--env", default=None, help="The env to use when loading the config file")
 @click.option(
-    "--no-init",
+    "--force-init",
     is_flag=True,
     default=False,
-    help="Assume terraform is already initialized and do not run terraform init",
+    help="Force regenerate opta setup files, instead of using cache",
 )
-def output(configfile: str, env: Optional[str], no_init: bool,) -> None:
+@click.pass_context
+def output(ctx: Any, configfile: str, env: Optional[str], force_init: bool,) -> None:
     """ Print TF outputs """
     temp_tf_file = "tmp-output.tf.json"
-    nice_run(
-        [
-            "python",
-            __file__,
-            "apply",
-            "--configfile",
-            configfile,
-            "--env",
-            env,
-            "--out",
-            temp_tf_file,
-            "--no-apply",
-        ],
-        check=True,
-    )
-    if not no_init:
+    ctx.invoke(apply, configfile=configfile, env=env, out=temp_tf_file, no_apply=True)
+    if force_init or not os.path.isdir(".terraform"):
         nice_run(["terraform", "init"], check=True)
     nice_run(["terraform", "get", "--update"], check=True)
     nice_run(["terraform", "output", "-json"], check=True)
