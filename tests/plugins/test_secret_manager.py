@@ -10,7 +10,7 @@ from pytest_mock import MockFixture, mocker  # noqa
 
 from opta.amplitude import AmplitudeClient, amplitude_client
 from opta.module import Module
-from opta.plugins.secret_manager import get_module, update, view
+from opta.plugins.secret_manager import get_module, list_command, update, view
 
 
 class TestSecretManager:
@@ -106,6 +106,59 @@ class TestSecretManager:
         mocked_amplitude_client.send_event.assert_called_once_with(
             amplitude_client.VIEW_SECRET_EVENT
         )
+
+    def test_list_secrets(self, mocker: MockFixture):  # noqa
+        mocked_print = mocker.patch("builtins.print")
+
+        mocked_get_module = mocker.patch("opta.plugins.secret_manager.get_module")
+        mocked_module = mocker.Mock(spec=Module)
+        mocked_module.layer_name = "dummy_layer"
+        mocked_get_module.return_value = mocked_module
+
+        mocked_nice_run = mocker.patch("opta.plugins.secret_manager.nice_run")
+        mocked_completed_process = mocker.Mock(spec=CompletedProcess)
+        mocked_completed_process.returncode = 0
+        mocked_completed_process.stdout = bytes(
+            '{"ALGOLIA_WRITE_KEY":"NmVhNjlmOGM4YjM5NjRjYjZlZmExZTk4MzdjN2Q2OTE="}',
+            "utf-8",
+        )
+        mocked_nice_run.return_value = mocked_completed_process
+
+        mocked_amplitude_client = mocker.patch(
+            "opta.plugins.secret_manager.amplitude_client", spec=AmplitudeClient
+        )
+        mocked_amplitude_client.LIST_SECRETS_EVENT = amplitude_client.LIST_SECRETS_EVENT
+
+        runner = CliRunner()
+        result = runner.invoke(
+            list_command,
+            [
+                "dummyapp",
+                "--env",
+                "dummyenv",
+                "--configfile",
+                "dummyconfigfile",
+            ],
+        )
+        assert result.exit_code == 0
+        mocked_nice_run.assert_called_once_with(
+            [
+                "kubectl",
+                "get",
+                "secrets/secret",
+                "--namespace=dummy_layer",
+                "-o",
+                "jsonpath='{.data}'",
+            ],
+            capture_output=True,
+        )
+        mocked_get_module.assert_called_once_with(
+            "dummyapp", None, "dummyenv", "dummyconfigfile"
+        )
+        mocked_amplitude_client.send_event.assert_called_once_with(
+            amplitude_client.LIST_SECRETS_EVENT
+        )
+        mocked_print.assert_has_calls([mocker.call("ALGOLIA_WRITE_KEY")])
 
     def test_update(self, mocker: MockFixture):  # noqa
         mocked_get_module = mocker.patch("opta.plugins.secret_manager.get_module")
