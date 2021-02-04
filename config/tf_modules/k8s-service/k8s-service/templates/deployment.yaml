@@ -42,7 +42,7 @@ spec:
               path: {{ .Values.livenessProbePath }}
               port: http
           env:
-            - name: RDS_CA_PATH
+            - name: RDS_CA_PATH # This is the path to the public key for the docdb tls
               value: "/config/rds_ca.pem"
             {{- if or (.Values.envVars) (.Values.secrets) }}
             {{ range .Values.envVars }}
@@ -69,12 +69,9 @@ spec:
             requests:
               {{- toYaml .Values.podResourceRequests | nindent 14 }}
       volumes:
-        # You set volumes at the Pod level, then mount them into containers inside that Pod
         - name: config
           configMap:
-            # Provide the name of the ConfigMap you want to mount.
             name: {{ include "k8s-service.fullname" . }}
-            # An array of keys from the ConfigMap to create as files
             items:
               - key: "rds_ca.pem"
                 path: "rds_ca.pem"

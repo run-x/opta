@@ -6,6 +6,8 @@ metadata:
     {{- include "k8s-service.labels" . | nindent 4 }}
   namespace: {{ include "k8s-service.namespaceName" . }}
 data:
+  # This is the public key for the AWS rds sll used by documentdb. It needs to be present for tls encryption
+  # https://docs.aws.amazon.com/documentdb/latest/developerguide/security.encryption.ssl.html
   rds_ca.pem: |
     -----BEGIN CERTIFICATE-----
     MIIEBzCCAu+gAwIBAgICEAAwDQYJKoZIhvcNAQELBQAwgZQxCzAJBgNVBAYTAlVT
