@@ -9,7 +9,7 @@ on:
 
 jobs:
   package-linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-16.04
     env:
       VERSION: ${{ github.event.inputs.version }}
     steps:
@@ -27,5 +27,27 @@ jobs:
         run: make build-binary
       - uses: actions/upload-artifact@v2
         with:
-          name: opta
+          name: opta_linux
+          path: dist/opta
+
+  package-macos:
+    runs-on: macos-10.15
+    env:
+      VERSION: ${{ github.event.inputs.version }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install python dependencies
+        run: |
+          pip install pipenv
+          pipenv install --deploy --dev
+          source $(pipenv --venv)/bin/activate
+      - name: Package
+        run: make build-binary
+      - uses: actions/upload-artifact@v2
+        with:
+          name: opta_macos
           path: dist/opta
