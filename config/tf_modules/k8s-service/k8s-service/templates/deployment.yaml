@@ -29,6 +29,10 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: Always
+          volumeMounts:
+            - name: config
+              mountPath: "/config"
+              readOnly: true
           ports:
             - name: http
               containerPort: {{ .Values.port }}
@@ -37,8 +41,10 @@ spec:
             httpGet:
               path: {{ .Values.livenessProbePath }}
               port: http
-          {{- if or (.Values.envVars) (.Values.secrets) }}
           env:
+            - name: RDS_CA_PATH
+              value: "/config/rds_ca.pem"
+            {{- if or (.Values.envVars) (.Values.secrets) }}
             {{ range .Values.envVars }}
             - name: {{ .name | quote }}
               value: {{ .value | quote }}
@@ -50,7 +56,7 @@ spec:
                   name: secret
                   key: {{ $val | quote }}
             {{ end }}
-          {{- end }}
+            {{- end }}
           readinessProbe:
             initialDelaySeconds: 10
             periodSeconds: 10
@@ -62,4 +68,14 @@ spec:
               {{- toYaml .Values.podResourceLimits | nindent 14 }}
             requests:
               {{- toYaml .Values.podResourceRequests | nindent 14 }}
+      volumes:
+        # You set volumes at the Pod level, then mount them into containers inside that Pod
+        - name: config
+          configMap:
+            # Provide the name of the ConfigMap you want to mount.
+            name: {{ include "k8s-service.fullname" . }}
+            # An array of keys from the ConfigMap to create as files
+            items:
+              - key: "rds_ca.pem"
+                path: "rds_ca.pem"
 {{- end }}

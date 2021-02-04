@@ -209,6 +209,19 @@ modules:
     outputs:
       docker_repo_url:
         export: true
+  aws-documentdb:
+    location: aws-documentdb
+    variables:
+      name: str
+      kms_account_key_arn: str
+      subnet_group_name: optional
+      engine_version: optional
+      security_group: optional
+      instance_class: optional
+    outputs:
+      db_user: str
+      db_password: str
+      db_host: str
   aws-rds:
     location: aws-rds
     variables:

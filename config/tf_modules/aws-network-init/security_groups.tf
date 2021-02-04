@@ -47,3 +47,24 @@ resource "aws_security_group" "elasticache" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+
+resource "aws_security_group" "documentdb" {
+  name        = "documentdb-sg"
+  description = "For usage by documentdb to give access to resources in the vpc"
+  vpc_id      = aws_vpc.vpc.id
+
+  ingress {
+    description = "documentdb"
+    from_port   = 27017
+    to_port     = 27017
+    protocol    = "tcp"
+    cidr_blocks = [aws_vpc.vpc.cidr_block]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
