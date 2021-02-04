@@ -4,7 +4,8 @@ from typing import Any
 from unittest.mock import call, mock_open, patch
 
 import yaml
-from pytest_mock import MockFixture, mocker  # noqa
+from click.testing import CliRunner
+from pytest_mock import MockFixture
 
 from opta.cli import (
     DEFAULT_GENERATED_TF_FILE,
@@ -12,6 +13,7 @@ from opta.cli import (
     _apply,
     _cleanup,
     at_exit_callback,
+    output,
 )
 
 
@@ -25,7 +27,29 @@ class TestCLI:
         assert not os.path.exists(DEFAULT_GENERATED_TF_FILE)
         assert not os.path.exists(TERRAFORM_PLAN_FILE)
 
-    def test_at_exit_callback_with_pending(self, mocker: MockFixture) -> None:  # noqa
+    def test_output(self, mocker: MockFixture) -> None:
+        mocker.patch("opta.cli.os.remove")
+        mocked_apply = mocker.patch("opta.cli.apply")
+        mocked_shell_cmds = mocker.patch("opta.cli.nice_run")
+
+        runner = CliRunner()
+        result = runner.invoke(output, [])
+        assert result.exit_code == 0
+        assert mocked_apply.call_count == 1
+        assert mocked_shell_cmds.call_count == 3
+
+        # Don't run terraform init if .terraform/ exists.
+        os.mkdir(".terraform")
+        mocked_shell_cmds.call_count = 0
+
+        result = runner.invoke(output)
+        assert result.exit_code == 0
+        assert mocked_shell_cmds.call_count == 2
+
+        # Clean up
+        os.rmdir(".terraform")
+
+    def test_at_exit_callback_with_pending(self, mocker: MockFixture) -> None:
         mocked_write = mocker.patch("opta.cli.sys.stderr.write")
         mocked_flush = mocker.patch("opta.cli.sys.stderr.flush")
         at_exit_callback(1, 1)
@@ -34,14 +58,14 @@ class TestCLI:
         )
         mocked_flush.assert_called_once_with()
 
-    def test_at_exit_callback_without_pending(self, mocker: MockFixture) -> None:  # noqa
+    def test_at_exit_callback_without_pending(self, mocker: MockFixture) -> None:
         mocked_write = mocker.patch("opta.cli.sys.stderr.write")
         mocked_flush = mocker.patch("opta.cli.sys.stderr.flush")
         at_exit_callback(0, 1)
         mocked_write.assert_not_called()
         mocked_flush.assert_called_once_with()
 
-    def test_basic_apply(self, mocker: MockFixture) -> None:  # noqa
+    def test_basic_apply(self, mocker: MockFixture) -> None:
         mocked_exists = mocker.patch("os.path.exists")
         mocked_exists.return_value = True
         test_cases: Any = [
