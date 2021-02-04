@@ -102,8 +102,10 @@ def gen(
     var: List[str],
 ) -> None:
     print("The gen command is being deprecated in favor of the apply command")
-    _apply(configfile, out, env, no_apply, refresh, max_block, var)
-    _cleanup()
+    try:
+        _apply(configfile, out, env, no_apply, refresh, max_block, var)
+    finally:
+        _cleanup()
 
 
 @cli.command()
@@ -154,8 +156,10 @@ def apply(
     max_block: Optional[int],
     var: List[str],
 ) -> None:
-    _apply(configfile, out, env, no_apply, refresh, max_block, var)
-    _cleanup()
+    try:
+        _apply(configfile, out, env, no_apply, refresh, max_block, var)
+    finally:
+        _cleanup()
 
 
 def _apply(
@@ -182,12 +186,12 @@ def _apply(
     layer = Layer.load_from_dict(conf, env)
     current_module_keys: Set[str] = set()
     print("Loading infra blocks")
-    blocks_to_process = (
-        layer.blocks[: max_block + 1] if max_block is not None else layer.blocks
-    )
+    blocks_to_process = layer.blocks
+    if max_block is not None:
+        blocks_to_process = layer.blocks[: max_block + 1]
     for block_idx, block in enumerate(blocks_to_process):
         current_module_keys = current_module_keys.union(
-            set(map(lambda x: x.key, block.modules))
+            set(list(map(lambda x: x.key, block.modules)))
         )
         total_modules_applied = set()
         try:
@@ -247,8 +251,7 @@ def _apply(
 
         nice_run(["terraform", "init"], check=True)
         nice_run(
-            ["terraform", "plan", f"-out={TERRAFORM_PLAN_FILE}", "-lock-timeout=60s"]
-            + targets,
+            ["terraform", "plan", "-out=tf.plan", "-lock-timeout=60s"] + targets,
             check=True,
         )
 

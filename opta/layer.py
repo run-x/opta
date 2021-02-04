@@ -125,24 +125,26 @@ class Layer:
         LinkProcessor().process(current_modules)
         for block in self.blocks[0 : block_idx + 1]:
             ret = deep_merge(block.gen_tf(), ret)
-
-        return hydrate(ret, self.metadata_hydration())
-
-    def metadata_hydration(self) -> Dict[Any, Any]:
-        parent_name = self.parent.meta["name"] if self.parent is not None else "nil"
-        parent = (
-            self.parent.meta.get("variables", {}) if self.parent is not None else "nil"
-        )
-        return deep_merge(
+        hydration = deep_merge(
             self.meta.get("variables", {}),
             {
-                "parent": parent,
-                "parent_name": parent_name,
+                "parent_name": self.parent.meta["name"]
+                if self.parent is not None
+                else "nil",
                 "layer_name": self.meta["name"],
                 "state_storage": self.state_storage(),
                 "env": self.get_env(),
             },
         )
+        if self.parent is not None:
+            hydration = deep_merge(
+                hydration, {"parent": self.parent.meta.get("variables", {})}
+            )
+
+        return hydrate(ret, hydration)
+
+    def for_child(self) -> bool:
+        return self.parent is not None
 
     def state_storage(self) -> str:
         if "state_storage" in self.meta:
@@ -159,8 +161,25 @@ class Layer:
         for k, v in providers.items():
             ret["provider"][k] = v
             if k in REGISTRY["backends"]:
+                hydration = deep_merge(
+                    self.meta.get("variables", {}),
+                    {
+                        "parent_name": self.parent.meta["name"]
+                        if self.parent is not None
+                        else "nil",
+                        "layer_name": self.meta["name"],
+                        "state_storage": self.state_storage(),
+                        "env": self.get_env(),
+                        "provider": v,
+                    },
+                )
+                if self.parent is not None:
+                    hydration = deep_merge(
+                        hydration, {"parent": self.parent.meta.get("variables", {})}
+                    )
+
+                # Add the backend
                 if backend_enabled:
-                    hydration = deep_merge(self.metadata_hydration(), {"provider": v})
                     ret["terraform"] = hydrate(
                         REGISTRY["backends"][k]["terraform"], hydration
                     )
@@ -174,7 +193,16 @@ class Layer:
                         "terraform_remote_state": {
                             "parent": {
                                 "backend": backend,
-                                "config": hydrate(config, hydration),
+                                "config": hydrate(
+                                    config,
+                                    {
+                                        "layer_name": self.parent.meta["name"],
+                                        "state_storage": self.state_storage(),
+                                        "provider": self.parent.meta.get(
+                                            "providers", {}
+                                        ).get(k, {}),
+                                    },
+                                ),
                             }
                         }
                     }
