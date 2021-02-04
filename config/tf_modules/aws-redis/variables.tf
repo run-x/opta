@@ -22,6 +22,6 @@ variable "redis_version" {
   default = "6.x"
 }
 
-variable "kms_account_key_id" {
+variable "kms_account_key_arn" {
   type = string
 }

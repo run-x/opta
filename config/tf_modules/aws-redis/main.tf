@@ -23,5 +23,5 @@ resource "aws_elasticache_replication_group" "redis_cluster" {
   auth_token = random_password.redis_auth.result
   transit_encryption_enabled = true
   at_rest_encryption_enabled = true
-  kms_key_id = var.kms_account_key_id
+  kms_key_id = var.kms_account_key_arn
 }
