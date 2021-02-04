@@ -14,7 +14,7 @@ def deep_merge(a: Dict[Any, Any], b: Dict[Any, Any]) -> Dict[Any, Any]:
             if isinstance(value, dict) and isinstance(b[key], dict):
                 b[key] = deep_merge(value, b[key])
             elif value != b[key]:
-                raise Exception("Cant merge dict with non dict")
+                raise Exception(f"Cant merge conflicting non-dict values (key: {key})")
         else:
             b[key] = value
 
