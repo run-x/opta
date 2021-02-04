@@ -6,22 +6,30 @@ from opta.module import Module
 class LinkProcessor:
     def process(self, modules: Iterable[Module]) -> None:
         for m in modules:
-            for k, v in m.data.items():
-                if not isinstance(v, list):
-                    continue
+            new_items: List[Mapping[Any, Any]] = []
+            if "link" in m.data:
+                for target in m.data["link"]:
+                    new_items.extend(self.find_items(modules, target))
 
-                new_items: List[Mapping[Any, Any]] = []
-                to_remove = []
-                for item in v:
+                if "env_vars" not in m.data:
+                    m.data["env_vars"] = []
+
+                for i in new_items:
+                    m.data["env_vars"].append(i)
+
+            # Look at _link for backwards compatibility
+            if "env_vars" in m.data:
+                new_items = []
+                to_remove: List[Mapping[Any, Any]] = []
+                for item in m.data["env_vars"]:
                     if "_link" in item:
                         to_remove.append(item)
                         new_items.extend(self.find_items(modules, item["_link"]))
 
                 for r in to_remove:
-                    v.remove(r)
-
+                    m.data["env_vars"].remove(r)
                 for i in new_items:
-                    v.append(i)
+                    m.data["env_vars"].append(i)
 
     def find_items(
         self, modules: Iterable[Module], target: str
