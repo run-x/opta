@@ -1,4 +1,5 @@
 import sys
+import json
 from typing import Any
 
 import sentry_sdk
@@ -128,6 +129,30 @@ def output(ctx: Any, configfile: str, env: Optional[str], force_init: bool,) -> 
     nice_run(["terraform", "output", "-json"], check=True)
     os.remove(temp_tf_file)
 
+@cli.command()
+@click.option("--configfile", default="opta.yml", help="Opta config file")
+@click.option("--env", default=None, help="The env to use when loading the config file")
+@click.argument("tag")
+@click.pass_context
+def push(
+    ctx: Any,
+    configfile,
+    env,
+    tag,
+):
+    pass
+    temp_tf_file = "tmp-output.tf.json"
+    # 1. figure out ecr repo from opta output
+    ctx.invoke(apply, configfile=configfile, env=env, out=temp_tf_file, no_apply=True)
+    if not os.path.isdir(".terraform"):
+        nice_run(["terraform", "init"], check=True)
+    nice_run(["terraform", "get", "--update"], check=True)
+    tf_output = nice_run(["terraform", "output", "-json"], check=True, capture_output=True)
+    output_json = json.loads(tf_output.stdout)
+    docker_repo_url = output_json["docker_repo_url"]["value"]
+    
+    # 2. ecr login
+    # 3. docker push
 
 @cli.command()
 @click.option("--configfile", default="opta.yml", help="Opta config file")
