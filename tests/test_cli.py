@@ -1,6 +1,5 @@
 import json
 import os
-from subprocess import CompletedProcess
 from typing import Any
 from unittest.mock import call, mock_open, patch
 
@@ -14,7 +13,6 @@ from opta.cli import (
     _apply,
     _cleanup,
     at_exit_callback,
-    configure_kubectl,
     output,
 )
 
@@ -50,57 +48,6 @@ class TestCLI:
 
         # Clean up
         os.rmdir(".terraform")
-
-    def test_configure_kubectl(self, mocker: MockFixture) -> None:
-        # Mock that the kubectl and aws comamnds exist in the env.
-        mocker.patch("opta.kubectl.is_tool", return_value=True)
-
-        # Mock aws commands, including fetching the current aws account id.
-        fake_aws_account_id = 1234567890123
-        mocked_caller_identity = json.dumps(
-            {
-                "UserId": "bla",
-                "Account": f"{fake_aws_account_id}",
-                "Arn": "arn:aws:iam::979926061731:user/test",
-            }
-        )
-        mocked_update_kubeconfig = "Updated context arn... in ../.kube/config"
-        mocker.patch(
-            "opta.kubectl.nice_run",
-            side_effect=[
-                CompletedProcess(None, 0, mocked_caller_identity.encode("utf-8")),  # type: ignore
-                CompletedProcess(None, 0, mocked_update_kubeconfig.encode("utf-8")),  # type: ignore
-            ],
-        )
-
-        # Mock fetching the opta env aws account id.
-        mocker.patch(
-            "opta.kubectl._get_cluster_env",
-            return_value=("us-east-1", [fake_aws_account_id]),
-        )
-        runner = CliRunner()
-        result = runner.invoke(configure_kubectl, [])
-        assert result.exit_code == 0
-
-        # If the current aws account id does not match the specified opta env's, then
-        # raise an exception.
-        mocked_caller_identity = json.dumps(
-            {
-                "UserId": "bla",
-                "Account": "999999999999",
-                "Arn": "arn:aws:iam::979926061731:user/test",
-            }
-        )
-        mocker.patch(
-            "opta.kubectl.nice_run",
-            side_effect=[
-                CompletedProcess(None, 0, mocked_caller_identity.encode("utf-8")),  # type: ignore
-                CompletedProcess(None, 0, mocked_update_kubeconfig.encode("utf-8")),  # type: ignore
-            ],
-        )
-        result = runner.invoke(configure_kubectl, [])
-        assert result.exit_code == 1
-        assert "is not configured with the right credentials" in str(result.exception)
 
     def test_at_exit_callback_with_pending(self, mocker: MockFixture) -> None:
         mocked_write = mocker.patch("opta.cli.sys.stderr.write")
