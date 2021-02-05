@@ -38,6 +38,7 @@ import yaml  # noqa: E402
 
 from opta import gen_tf  # noqa: E402
 from opta.amplitude import amplitude_client  # noqa: E402
+from opta.kubectl import setup_kubectl  # noqa: E402
 from opta.layer import Layer  # noqa: E402
 from opta.nice_subprocess import nice_run  # noqa: E402
 from opta.plugins.secret_manager import secret  # noqa: E402
@@ -127,6 +128,15 @@ def output(ctx: Any, configfile: str, env: Optional[str], force_init: bool,) -> 
     nice_run(["terraform", "get", "--update"], check=True)
     nice_run(["terraform", "output", "-json"], check=True)
     os.remove(temp_tf_file)
+
+
+@cli.command()
+@click.option("--configfile", default="opta.yml", help="Opta config file")
+@click.option("--env", default=None, help="The env to use when loading the config file")
+def configure_kubectl(configfile: str, env: Optional[str]) -> None:
+    """ Configure the kubectl CLI tool for the given cluster """
+    # Also switches the current kubectl context to the cluster.
+    setup_kubectl(configfile, env)
 
 
 @cli.command()

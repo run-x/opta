@@ -51,3 +51,13 @@ def safe_run(func):  # type: ignore
                 return None
 
     return func_wrapper
+
+
+def fmt_msg(message: str) -> str:
+    """Format triple quote python strings"""
+    # TODO: Replace with better message formatting
+    message = message.replace("\n", " ")
+    while "  " in message:
+        message = message.replace("  ", " ")
+    message = message.replace("~", "\n")
+    return message
