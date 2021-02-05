@@ -2,7 +2,7 @@ import sys
 from typing import Any
 
 import sentry_sdk
-from kubectl import configure_kubeconfig
+from kubectl import setup_kubectl
 from sentry_sdk.integrations.atexit import AtexitIntegration
 
 
@@ -131,9 +131,9 @@ def output(ctx: Any, configfile: str, env: Optional[str], force_init: bool,) -> 
 @cli.command()
 @click.option("--configfile", default="opta.yml", help="Opta config file")
 @click.option("--env", default=None, help="The env to use when loading the config file")
-def setup_kubectl(configfile: str, env: Optional[str]) -> None:
+def configure_kubectl(configfile: str, env: Optional[str]) -> None:
     """ Setup the kubectl CLI tool for the given cluster """
-    configure_kubeconfig(configfile, env)
+    setup_kubectl(configfile, env)
 
 
 @cli.command()

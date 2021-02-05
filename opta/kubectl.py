@@ -16,7 +16,7 @@ AWS_CLI_INSTALL_URL = (
 EKS_CLUSTER_NAME = "main"
 
 
-def configure_kubeconfig(configfile: str, env: Optional[str]) -> None:
+def setup_kubectl(configfile: str, env: Optional[str]) -> None:
     """ Configure kubeconfig file with cluster details """
     # Make sure the user has the prerequisite CLI tools installed
     if not is_tool("kubectl"):
