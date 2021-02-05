@@ -15,6 +15,7 @@ pytest-mock = "*"
 coverage = "*"
 argparse = "*"
 pyinstaller = "*"
+macholib = "*"
 
 [packages]
 pyinquirer = "*"
