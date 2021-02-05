@@ -2,7 +2,6 @@ import sys
 from typing import Any
 
 import sentry_sdk
-from kubectl import setup_kubectl
 from sentry_sdk.integrations.atexit import AtexitIntegration
 
 
@@ -39,6 +38,7 @@ import yaml  # noqa: E402
 
 from opta import gen_tf  # noqa: E402
 from opta.amplitude import amplitude_client  # noqa: E402
+from opta.kubectl import setup_kubectl  # noqa: E402
 from opta.layer import Layer  # noqa: E402
 from opta.nice_subprocess import nice_run  # noqa: E402
 from opta.plugins.secret_manager import secret  # noqa: E402
