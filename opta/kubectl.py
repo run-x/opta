@@ -19,6 +19,9 @@ EKS_CLUSTER_NAME = "main"
 def setup_kubectl(configfile: str, env: Optional[str]) -> None:
     """ Configure kubeconfig file with cluster details """
     # Make sure the user has the prerequisite CLI tools installed
+
+    # kubectl may not *technically* be required for this opta command to run, but require
+    # it anyways since user must install it to access the cluster.
     if not is_tool("kubectl"):
         raise Exception(
             f"Please visit this link to install kubectl first: {KUBECTL_INSTALL_URL}"
@@ -48,9 +51,7 @@ def setup_kubectl(configfile: str, env: Optional[str]) -> None:
     current_aws_account_id = aws_caller_identity["Account"]
 
     # Get the environment's account details from the opta config
-    conf = yaml.load(open(configfile), Loader=yaml.Loader)
-    layer = Layer.load_from_dict(conf, env)
-    env_aws_region, env_aws_account_ids = _get_cluster_env(layer)
+    env_aws_region, env_aws_account_ids = _get_cluster_env(configfile, env)
 
     # Make sure the current account points to the cluster environment
     if int(current_aws_account_id) not in env_aws_account_ids:
@@ -77,7 +78,10 @@ def setup_kubectl(configfile: str, env: Optional[str]) -> None:
     )
 
 
-def _get_cluster_env(layer: Layer) -> Tuple[str, List[int]]:
+def _get_cluster_env(configfile: str, env: Optional[str]) -> Tuple[str, List[int]]:
+    conf = yaml.load(open(configfile), Loader=yaml.Loader)
+    layer = Layer.load_from_dict(conf, env)
+
     # Get the root environment layer
     while layer.parent is not None:
         layer = layer.parent
