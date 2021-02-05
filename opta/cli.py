@@ -133,9 +133,7 @@ def output(ctx: Any, configfile: str, env: Optional[str], force_init: bool,) -> 
 @click.option("--env", default=None, help="The env to use when loading the config file")
 def setup_kubectl(configfile: str, env: Optional[str]) -> None:
     """ Setup the kubectl CLI tool for the given cluster """
-    conf = yaml.load(open(configfile), Loader=yaml.Loader)
-    layer = Layer.load_from_dict(conf, env)
-    configure_kubeconfig(layer, env)
+    configure_kubeconfig(configfile, env)
 
 
 @cli.command()

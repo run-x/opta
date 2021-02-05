@@ -1,6 +1,8 @@
 import json
 from typing import List, Optional, Tuple
 
+import yaml
+
 from opta.layer import Layer
 from opta.nice_subprocess import nice_run
 from opta.utils import fmt_msg, is_tool
@@ -14,8 +16,9 @@ AWS_CLI_INSTALL_URL = (
 EKS_CLUSTER_NAME = "main"
 
 
-def configure_kubeconfig(layer: Layer, env: Optional[str]) -> None:
+def configure_kubeconfig(configfile: str, env: Optional[str]) -> None:
     """ Configure kubeconfig file with cluster details """
+    # Make sure the user has the prerequisite CLI tools installed
     if not is_tool("kubectl"):
         raise Exception(
             f"Please visit this link to install kubectl first: {KUBECTL_INSTALL_URL}"
@@ -26,6 +29,7 @@ def configure_kubeconfig(layer: Layer, env: Optional[str]) -> None:
             f"Please visit the link to install the AWS CLI first: {AWS_CLI_INSTALL_URL}"
         )
 
+    # Get the current account details from the AWS CLI.
     try:
         out = nice_run(
             ["aws", "sts", "get-caller-identity"], check=True, capture_output=True
@@ -43,7 +47,12 @@ def configure_kubeconfig(layer: Layer, env: Optional[str]) -> None:
     aws_caller_identity = json.loads(out)
     current_aws_account_id = aws_caller_identity["Account"]
 
+    # Get the environment's account details from the opta config
+    conf = yaml.load(open(configfile), Loader=yaml.Loader)
+    layer = Layer.load_from_dict(conf, env)
     env_aws_region, env_aws_account_ids = _get_cluster_env(layer)
+
+    # Make sure the current account points to the cluster environment
     if int(current_aws_account_id) not in env_aws_account_ids:
         raise Exception(
             fmt_msg(
@@ -54,6 +63,7 @@ def configure_kubeconfig(layer: Layer, env: Optional[str]) -> None:
             )
         )
 
+    # Update kubeconfig with the cluster details, and also switches context
     nice_run(
         [
             "aws",
