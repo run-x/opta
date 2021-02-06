@@ -174,7 +174,16 @@ class Layer:
                         "terraform_remote_state": {
                             "parent": {
                                 "backend": backend,
-                                "config": hydrate(config, hydration),
+                                "config": hydrate(
+                                    config,
+                                    {
+                                        "layer_name": self.parent.meta["name"],
+                                        "state_storage": self.state_storage(),
+                                        "provider": self.parent.meta.get(
+                                            "providers", {}
+                                        ).get(k, {}),
+                                    },
+                                ),
                             }
                         }
                     }
