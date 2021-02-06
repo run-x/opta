@@ -41,6 +41,7 @@ from opta.amplitude import amplitude_client  # noqa: E402
 from opta.kubectl import setup_kubectl  # noqa: E402
 from opta.layer import Layer  # noqa: E402
 from opta.nice_subprocess import nice_run  # noqa: E402
+from opta.output import get_terraform_outputs  # noqa: E402
 from opta.plugins.secret_manager import secret  # noqa: E402
 from opta.utils import deep_merge, is_tool  # noqa: E402
 from opta.version import version  # noqa: E402
@@ -123,10 +124,7 @@ def output(ctx: Any, configfile: str, env: Optional[str], force_init: bool,) -> 
     """ Print TF outputs """
     temp_tf_file = "tmp-output.tf.json"
     ctx.invoke(apply, configfile=configfile, env=env, out=temp_tf_file, no_apply=True)
-    if force_init or not os.path.isdir(".terraform"):
-        nice_run(["terraform", "init"], check=True)
-    nice_run(["terraform", "get", "--update"], check=True)
-    nice_run(["terraform", "output", "-json"], check=True)
+    print(get_terraform_outputs(force_init))
     os.remove(temp_tf_file)
 
 

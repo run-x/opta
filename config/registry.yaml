@@ -127,6 +127,7 @@ modules:
         export: true
       k8s_ca_data:
         export: true
+      # This output is used by the configure-kubectl cmd
       k8s_cluster_name:
         export: true
       k8s_openid_provider_url:

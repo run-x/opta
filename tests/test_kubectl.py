@@ -31,10 +31,16 @@ class TestKubectl:
         )
 
         # Mock fetching the opta env aws account id.
+        mocker.patch("opta.kubectl._get_root_layer")
         mocker.patch(
             "opta.kubectl._get_cluster_env",
             return_value=("us-east-1", [fake_aws_account_id]),
         )
+        # Mock fetching the cluster name
+        mocker.patch(
+            "opta.kubectl._get_eks_cluster_name", return_value="main",
+        )
+
         runner = CliRunner()
         result = runner.invoke(configure_kubectl, [])
         assert result.exit_code == 0
