@@ -1,6 +1,8 @@
 import sys
 import json
 from typing import Any
+import base64
+from io import StringIO
 
 import sentry_sdk
 from sentry_sdk.integrations.atexit import AtexitIntegration
@@ -32,6 +34,7 @@ import os  # noqa: E402
 import os.path  # noqa: E402
 from importlib.util import find_spec  # noqa: E402
 from typing import List, Optional, Set  # noqa: E402
+from botocore.config import Config
 
 import boto3  # noqa: E402
 import click  # noqa: E402
@@ -130,17 +133,21 @@ def output(ctx: Any, configfile: str, env: Optional[str], force_init: bool,) -> 
     os.remove(temp_tf_file)
 
 @cli.command()
+@click.argument("image-name")
 @click.option("--configfile", default="opta.yml", help="Opta config file")
 @click.option("--env", default=None, help="The env to use when loading the config file")
-@click.argument("tag")
+@click.option("--image-tag", default=None, help="The env to use when loading the config file")
 @click.pass_context
 def push(
     ctx: Any,
+    image_name,
     configfile,
     env,
-    tag,
+    image_tag=None,
 ):
-    pass
+    if not is_tool("docker"):
+        raise Exception("Please install docker on your machine")
+
     temp_tf_file = "tmp-output.tf.json"
     # 1. figure out ecr repo from opta output
     ctx.invoke(apply, configfile=configfile, env=env, out=temp_tf_file, no_apply=True)
@@ -150,9 +157,38 @@ def push(
     tf_output = nice_run(["terraform", "output", "-json"], check=True, capture_output=True)
     output_json = json.loads(tf_output.stdout)
     docker_repo_url = output_json["docker_repo_url"]["value"]
-    
+    os.remove(temp_tf_file)
+
     # 2. ecr login
+    conf = yaml.load(open(configfile), Loader=yaml.Loader)
+    layer = Layer.load_from_dict(conf, env)
+    providers = layer.gen_providers(0, True)
+    account_id = providers["provider"]["aws"]["allowed_account_ids"][0]
+    region = providers["provider"]["aws"]["region"]
+    ecr = boto3.client("ecr", config=Config(
+        region_name=region
+    ))
+    response = ecr.get_authorization_token(
+        registryIds=[
+            str(account_id)
+        ],
+    )
+
+    ecr_registry=response["authorizationData"][0]["proxyEndpoint"]
+    auth_info=response["authorizationData"][0]["authorizationToken"]
+    decoded_auth = base64.b64decode(auth_info, altchars=None, validate=False).decode("ascii")
+    username, password = decoded_auth.split(":")
+    print("username", username)
+    print("password", password)
+    nice_run(["docker", "login", "--username", username, "--password-stdin"], input=password.encode())
+
+    args = ["docker", "push", f"{ecr_registry}/{image_name}"]
+    if image_tag:
+        args.push("--image-tag")
+        args.push(image_tag)
+
     # 3. docker push
+    nice_run(args)
 
 @cli.command()
 @click.option("--configfile", default="opta.yml", help="Opta config file")
