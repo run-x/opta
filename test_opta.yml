@@ -1,0 +1,29 @@
+# This opta config file is copied to and tested with the test-service.
+# Whenever a new feature is added to opta, it should also be added here.
+#
+# The opta.yml file in the test-service repo should not change, to test backwards compatability.
+# **Only** update the opta.yml file in the test-service repo when we are intentionally adding
+# a breaking change.
+meta:
+  envs:
+    - parent: "git@github.com:run-x/runx-infra.git//staging/opta.yml?ref=main"
+      variables: {}
+    - parent: "git@github.com:run-x/runx-infra.git//production/opta.yml?ref=main"
+      variables: {}
+  name: test-service-runx
+  variables:
+    appenv: staging
+    tag: ""
+modules:
+  - app:
+      type: k8s-service
+      target_port: 5000
+      tag: "{tag}"
+      env_vars:
+        - name: APPENV
+          value: "{appenv}"
+        - _link: database
+      secrets:
+        - ALGOLIA_ADMIN_KEY
+  - database:
+      type: aws-rds
