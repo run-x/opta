@@ -88,10 +88,10 @@ jobs:
           source $(pipenv --venv)/bin/activate
           export PYTHONPATH=$(pwd)
           cd test-service
-          yes | python ./opta/cli.py apply --env runx-staging --test
+          yes | python ../opta/cli.py apply --env runx-staging --test
       - name: Test output command
         run: |
           source $(pipenv --venv)/bin/activate
           export PYTHONPATH=$(pwd)
           cd test-service
-          yes | python ./opta/cli.py output --env runx-staging
+          yes | python ../opta/cli.py output --env runx-staging
