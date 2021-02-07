@@ -57,7 +57,7 @@ jobs:
           path_to_write_report: ./coverage/codecov_report.txt
           verbose: true
 
-  test_commands:
+  test_cli:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
