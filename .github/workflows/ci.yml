@@ -99,3 +99,15 @@ jobs:
           export PYTHONPATH=$(pwd)
           cd test-service
           yes | python ../opta/cli.py output --env runx-staging
+
+  deploy_test_service:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy test-service
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.ALL_GITHUB_TOKEN }}
+          repository: run-x/test-service
+          # The test service's workflow listens to this
+          # event and triggers a new deploy with opta.
+          event-type: runxc-updated
