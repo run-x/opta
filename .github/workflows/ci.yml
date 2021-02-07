@@ -87,15 +87,15 @@ jobs:
           aws-access-key-id: ${{ secrets.DEPLOYER_AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.DEPLOYER_AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
-      - name: Test backwards-compatibility
+      - name: Test apply command
         run: |
           source $(pipenv --venv)/bin/activate
           export PYTHONPATH=$(pwd)
           cd test-service
           yes | python ../opta/cli.py apply --env runx-staging --test
-      - name: Test new changes (using test_opta.yml)
+      - name: Test output command
         run: |
           source $(pipenv --venv)/bin/activate
           export PYTHONPATH=$(pwd)
           cd test-service
-          yes | python ../opta/cli.py apply --env runx-staging --test --configfile ../test_opta.yml
+          yes | python ../opta/cli.py output --env runx-staging
