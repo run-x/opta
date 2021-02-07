@@ -35,6 +35,7 @@ modules:
       type: aws-rds
   - doc_db:
       type: aws-documentdb
+      name: test-docdb
   - redis:
       type: aws-redis
   - bucket:
