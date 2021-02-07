@@ -10,8 +10,8 @@ from pytest_mock import MockFixture
 from opta.cli import (
     DEFAULT_GENERATED_TF_FILE,
     TERRAFORM_PLAN_FILE,
-    _apply,
     _cleanup,
+    apply,
     at_exit_callback,
     output,
 )
@@ -123,6 +123,7 @@ class TestCLI:
             )
         ]
 
+        runner = CliRunner()
         for (i, o) in test_cases:
             old_open = open
             write_open = mock_open()
@@ -138,7 +139,7 @@ class TestCLI:
             with patch("builtins.open") as mocked_open:
                 mocked_open.side_effect = new_open
 
-                _apply("opta.yml", DEFAULT_GENERATED_TF_FILE, None, True, False, None, [])
+                runner.invoke(apply, ["--no-apply"])
 
                 mocked_exists.assert_has_calls(
                     [
