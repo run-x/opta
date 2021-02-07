@@ -141,31 +141,39 @@ def configure_kubectl(configfile: str, env: Optional[str]) -> None:
 @click.option("--configfile", default="opta.yml", help="Opta config file")
 @click.option("--out", default=DEFAULT_GENERATED_TF_FILE, help="Generated tf file")
 @click.option("--env", default=None, help="The env to use when loading the config file")
+@click.option("--var", multiple=True, default=[], type=str, help="Variable to update")
 @click.option(
     "--no-apply",
     is_flag=True,
     default=False,
     help="Do not run terraform, just write the json",
+    hidden=True,
 )
 @click.option(
     "--refresh",
     is_flag=True,
     default=False,
     help="Run from first block, regardless of current state",
+    hidden=True,
 )
-@click.option("--max-block", default=None, type=int, help="Max block to process")
-@click.option("--var", multiple=True, default=[], type=str, help="Variable to update")
 @click.option(
-    "--test", is_flag=True, default=False, help="Run tf plan, but don't lock state file"
+    "--max-block", default=None, type=int, help="Max block to process", hidden=True,
+)
+@click.option(
+    "--test",
+    is_flag=True,
+    default=False,
+    help="Run tf plan, but don't lock state file",
+    hidden=True,
 )
 def apply(
     configfile: str,
     out: str,
     env: Optional[str],
+    var: List[str],
     no_apply: bool,
     refresh: bool,
     max_block: Optional[int],
-    var: List[str],
     test: bool,
 ) -> None:
     _apply(configfile, out, env, no_apply, refresh, max_block, var, test)
@@ -270,7 +278,8 @@ def _apply(
             continue
         else:
             nice_run(
-                ["terraform", "plan", f"-out={TERRAFORM_PLAN_FILE}", "-lock-timeout=60s"] + targets,
+                ["terraform", "plan", f"-out={TERRAFORM_PLAN_FILE}", "-lock-timeout=60s"]
+                + targets,
                 check=True,
             )
 
