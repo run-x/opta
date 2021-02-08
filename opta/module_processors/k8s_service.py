@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 from opta.module_processors.base import ModuleProcessor
 
@@ -110,7 +110,7 @@ class K8sServiceProcessor(ModuleProcessor):
         }
 
     def handle_rds_link(
-        self, linked_module: "Module", link_permissions: list[str]
+        self, linked_module: "Module", link_permissions: List[str]
     ) -> None:
         for key in ["db_user", "db_name", "db_password", "db_host"]:
             self.module.data["secrets"].append(
@@ -129,7 +129,7 @@ class K8sServiceProcessor(ModuleProcessor):
             )
 
     def handle_redis_link(
-        self, linked_module: "Module", link_permissions: list[str]
+        self, linked_module: "Module", link_permissions: List[str]
     ) -> None:
         for key in ["cache_host", "cache_auth_token"]:
             self.module.data["secrets"].append(
@@ -148,7 +148,7 @@ class K8sServiceProcessor(ModuleProcessor):
             )
 
     def handle_docdb_link(
-        self, linked_module: "Module", link_permissions: list[str]
+        self, linked_module: "Module", link_permissions: List[str]
     ) -> None:
         for key in ["db_user", "db_host", "db_password"]:
             self.module.data["secrets"].append(
@@ -167,7 +167,7 @@ class K8sServiceProcessor(ModuleProcessor):
             )
 
     def handle_s3_link(
-        self, linked_module: "Module", link_permissions: list[str]
+        self, linked_module: "Module", link_permissions: List[str]
     ) -> None:
         bucket_name = linked_module.data["bucket_name"]
         for permission in link_permissions:
