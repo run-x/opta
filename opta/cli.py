@@ -42,6 +42,7 @@ import yaml  # noqa: E402
 
 from opta import gen_tf  # noqa: E402
 from opta.amplitude import amplitude_client  # noqa: E402
+from opta.kubectl import setup_kubectl  # noqa: E402
 from opta.layer import Layer  # noqa: E402
 from opta.nice_subprocess import nice_run  # noqa: E402
 from opta.plugins.secret_manager import secret  # noqa: E402
@@ -106,10 +107,8 @@ def gen(
     var: List[str],
 ) -> None:
     print("The gen command is being deprecated in favor of the apply command")
-    try:
-        _apply(configfile, out, env, no_apply, refresh, max_block, var)
-    finally:
-        _cleanup()
+    _apply(configfile, out, env, no_apply, refresh, max_block, var)
+    _cleanup()
 
 
 @cli.command()
@@ -189,6 +188,15 @@ def push(
 
 @cli.command()
 @click.option("--configfile", default="opta.yml", help="Opta config file")
+@click.option("--env", default=None, help="The env to use when loading the config file")
+def configure_kubectl(configfile: str, env: Optional[str]) -> None:
+    """ Configure the kubectl CLI tool for the given cluster """
+    # Also switches the current kubectl context to the cluster.
+    setup_kubectl(configfile, env)
+
+
+@cli.command()
+@click.option("--configfile", default="opta.yml", help="Opta config file")
 @click.option("--out", default=DEFAULT_GENERATED_TF_FILE, help="Generated tf file")
 @click.option("--env", default=None, help="The env to use when loading the config file")
 @click.option(
@@ -214,10 +222,8 @@ def apply(
     max_block: Optional[int],
     var: List[str],
 ) -> None:
-    try:
-        _apply(configfile, out, env, no_apply, refresh, max_block, var)
-    finally:
-        _cleanup()
+    _apply(configfile, out, env, no_apply, refresh, max_block, var)
+    _cleanup()
 
 
 def _apply(
@@ -244,12 +250,12 @@ def _apply(
     layer = Layer.load_from_dict(conf, env)
     current_module_keys: Set[str] = set()
     print("Loading infra blocks")
-    blocks_to_process = layer.blocks
-    if max_block is not None:
-        blocks_to_process = layer.blocks[: max_block + 1]
+    blocks_to_process = (
+        layer.blocks[: max_block + 1] if max_block is not None else layer.blocks
+    )
     for block_idx, block in enumerate(blocks_to_process):
         current_module_keys = current_module_keys.union(
-            set(list(map(lambda x: x.key, block.modules)))
+            set(map(lambda x: x.key, block.modules))
         )
         total_modules_applied = set()
         try:
@@ -309,7 +315,8 @@ def _apply(
 
         nice_run(["terraform", "init"], check=True)
         nice_run(
-            ["terraform", "plan", "-out=tf.plan", "-lock-timeout=60s"] + targets,
+            ["terraform", "plan", f"-out={TERRAFORM_PLAN_FILE}", "-lock-timeout=60s"]
+            + targets,
             check=True,
         )
 
