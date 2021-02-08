@@ -149,6 +149,7 @@ def push(
         raise Exception("Please install docker on your machine")
 
     temp_tf_file = "tmp-output.tf.json"
+
     # 1. figure out ecr repo from opta output
     ctx.invoke(apply, configfile=configfile, env=env, out=temp_tf_file, no_apply=True)
     if not os.path.isdir(".terraform"):
@@ -156,8 +157,7 @@ def push(
     nice_run(["terraform", "get", "--update"], check=True)
     tf_output = nice_run(["terraform", "output", "-json"], check=True, capture_output=True)
     output_json = json.loads(tf_output.stdout)
-    docker_repo_url = output_json["docker_repo_url"]["value"]
-    os.remove(temp_tf_file)
+    registry_url = output_json["docker_repo_url"]["value"]
 
     # 2. ecr login
     conf = yaml.load(open(configfile), Loader=yaml.Loader)
@@ -174,20 +174,17 @@ def push(
         ],
     )
 
-    ecr_registry=response["authorizationData"][0]["proxyEndpoint"]
+    # 3. docker push
     auth_info=response["authorizationData"][0]["authorizationToken"]
     decoded_auth = base64.b64decode(auth_info, altchars=None, validate=False).decode("ascii")
     username, password = decoded_auth.split(":")
-    print("username", username)
-    print("password", password)
-    nice_run(["docker", "login", "--username", username, "--password-stdin"], input=password.encode())
+    nice_run(["docker", "login", registry_url, "--username", username, "--password-stdin"], input=password.encode())
 
-    args = ["docker", "push", f"{ecr_registry}/{image_name}"]
+    args = ["docker", "push", image_name]
     if image_tag:
         args.push("--image-tag")
         args.push(image_tag)
 
-    # 3. docker push
     nice_run(args)
 
 @cli.command()
