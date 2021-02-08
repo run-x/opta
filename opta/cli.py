@@ -117,7 +117,12 @@ def gen(
     help="Force regenerate opta setup files, instead of using cache",
 )
 @click.pass_context
-def output(ctx: Any, configfile: str, env: Optional[str], force_init: bool,) -> None:
+def output(
+    ctx: Any,
+    configfile: str,
+    env: Optional[str],
+    force_init: bool,
+) -> None:
     """ Print TF outputs """
     temp_tf_file = "tmp-output.tf.json"
     ctx.invoke(apply, configfile=configfile, env=env, out=temp_tf_file, no_apply=True)

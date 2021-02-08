@@ -15,16 +15,15 @@ class Blocks:
         self.backend_enabled = backend_enabled
         self.modules = []
         self.parent_layer = parent_layer
-        for module_data in module_data:
-            if type(module_data) is dict:
-                self.modules.append(
-                    Module(
-                        layer_name,
-                        list(module_data.keys())[0],
-                        list(module_data.values())[0],
-                        self.parent_layer,
-                    )
+        for module_key, module_data in module_data.items():
+            self.modules.append(
+                Module(
+                    layer_name,
+                    module_key,
+                    module_data,
+                    self.parent_layer,
                 )
+            )
 
     def outputs(self) -> Iterable[str]:
         ret = []

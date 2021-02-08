@@ -1,0 +1,33 @@
+meta:
+  envs:
+    - parent: "../runx-infra/staging/opta.yml"
+      variables: {}
+    - parent: "git@github.com:run-x/runx-infra.git//production/opta.yml?ref=main"
+      variables: {}
+  name: datadog-runx
+  linked_layers:
+    other: "git@github.com..."
+  variables:
+    appenv: staging
+    tag: ""
+modules:
+  app:
+    type: k8s-service
+    target_port: 5000
+    tag: "{tag}"
+    env_vars:
+      - name: APPENV
+        value: "{appenv}"
+    additional_iam_roles: []
+    link:
+      database: []
+      dynamodb:
+        - "read"
+      kafka:
+        - "read"
+      bucket:
+        - "read"
+    secrets:
+      - ALGOLIA_ADMIN_KEY
+  database:
+    type: aws-rds
