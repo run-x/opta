@@ -32,11 +32,8 @@ def get_module(
     for block in layer.blocks:
         for module in block.modules:
             if module.key == module_name:
-                if "secrets" in module.data and (
-                    secret is None or secret in module.data["secrets"]
-                ):
-                    target_module = module
-                    break
+                target_module = module
+                break
 
     if not target_module:
         raise Exception("Secret not found")

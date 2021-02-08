@@ -78,15 +78,13 @@ class TestCLI:
                             "aws": {"allowed_account_ids": ["abc"], "region": "us-east-1"}
                         },
                     },
-                    "modules": [
-                        {
-                            "core": {
-                                "type": "aws-state-init",
-                                "bucket_name": "{state_storage}",
-                                "dynamodb_lock_table_name": "{state_storage}",
-                            }
+                    "modules": {
+                        "core": {
+                            "type": "aws-state-init",
+                            "bucket_name": "{state_storage}",
+                            "dynamodb_lock_table_name": "{state_storage}",
                         }
-                    ],
+                    },
                 },
                 {
                     "provider": {

@@ -6,15 +6,15 @@ meta:
   variables:
     tag: ""
 modules:
-  - app:
-      type: k8s-service
-      env_vars:
-        - name: APPENV
-          value: "{env}"
-  - database:
-      type: aws-rds
-  - redis:
-      type: aws-redis
-  - bucket:
-      type: aws-s3-bucket
-      bucket_name: "runx-k8s-events-{env}"
+  app:
+    type: k8s-service
+    env_vars:
+      - name: APPENV
+        value: "{env}"
+  database:
+    type: aws-rds
+  redis:
+    type: aws-redis
+  bucket:
+    type: aws-s3-bucket
+    bucket_name: "runx-k8s-events-{env}"
