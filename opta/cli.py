@@ -4,8 +4,12 @@ from typing import Any
 import sentry_sdk
 from sentry_sdk.integrations.atexit import AtexitIntegration
 
+from opta.exceptions import UserErrors
+
 
 def at_exit_callback(pending: int, timeout: float) -> None:
+    """Don't be loud about sentry, our customer doesn't care about it."""
+
     def echo(msg):
         # type: (str) -> None
         sys.stderr.write(msg + "\n")
@@ -17,6 +21,15 @@ def at_exit_callback(pending: int, timeout: float) -> None:
     sys.stderr.flush()
 
 
+def before_send(event: Any, hint: Any) -> Any:
+    """Don't send us events caused by user errors"""
+    if "exc_info" in hint:
+        exc_type, exc_value, tb = hint["exc_info"]
+        if isinstance(exc_value, UserErrors):
+            return None
+    return event
+
+
 if hasattr(sys, "_called_from_test"):
     print("Not sending sentry cause we think we're in a pytest")
 else:
@@ -24,6 +37,7 @@ else:
         "https://aab05facf13049368d749e1b30a08b32@o511457.ingest.sentry.io/5610510",
         traces_sample_rate=1.0,
         integrations=[AtexitIntegration(at_exit_callback)],
+        before_send=before_send,
     )
 
 
@@ -184,9 +198,9 @@ def _apply(
 ) -> None:
     """ Generate TF file based on opta config file """
     if not is_tool("terraform"):
-        raise Exception("Please install terraform on your machine")
+        raise UserErrors("Please install terraform on your machine")
     if not os.path.exists(configfile):
-        raise Exception(f"File {configfile} not found")
+        raise UserErrors(f"File {configfile} not found")
     amplitude_client.send_event(amplitude_client.START_GEN_EVENT)
 
     conf = yaml.load(open(configfile), Loader=yaml.Loader)
