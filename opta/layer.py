@@ -12,6 +12,7 @@ import yaml
 
 from opta.blocks import Blocks
 from opta.constants import REGISTRY
+from opta.exceptions import UserErrors
 from opta.module import Module
 from opta.module_processors.k8s_service import K8sServiceProcessor
 from opta.plugins.derived_providers import DerivedProviders
@@ -28,7 +29,7 @@ class Layer:
         self.meta = meta
         self.parent = parent
         if not Layer.valid_name(self.meta["name"]):
-            raise Exception(
+            raise UserErrors(
                 "Invalid layer, can only contain lowercase letters, numbers and hyphens!"
             )
         self.name = self.meta["name"]
@@ -46,7 +47,7 @@ class Layer:
         for block in self.blocks:
             for module in block.modules:
                 if module.key in module_names:
-                    raise Exception(
+                    raise UserErrors(
                         f"The module name {module.key} is used multiple time in the "
                         "layer. Module names must be unique per layer"
                     )
@@ -73,7 +74,7 @@ class Layer:
         elif path.exists(configfile):
             conf = yaml.load(open(configfile), Loader=yaml.Loader)
         else:
-            raise Exception(f"File {configfile} not found")
+            raise UserErrors(f"File {configfile} not found")
         return cls.load_from_dict(conf, env)
 
     @classmethod
@@ -91,7 +92,7 @@ class Layer:
         if "envs" in meta:
             envs = meta.pop("envs")
             if env is None:
-                raise Exception(
+                raise UserErrors(
                     "configfile has multiple environments, but you did not specify one"
                 )
             potential_envs = []
@@ -105,7 +106,7 @@ class Layer:
                         meta.get("variables", {}), current_variables
                     )
                     return cls(meta, blocks_data, current_parent)
-            raise Exception(f"Invalid env of {env}, valid ones are {potential_envs}")
+            raise UserErrors(f"Invalid env of {env}, valid ones are {potential_envs}")
         if "parent" in meta:
             parent = cls.load_from_yaml(meta["parent"], env)
         return cls(meta, blocks_data, parent)

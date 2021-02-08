@@ -3,6 +3,7 @@ from typing import List, Optional, Tuple
 
 import yaml
 
+from opta.exceptions import UserErrors
 from opta.layer import Layer
 from opta.nice_subprocess import nice_run
 from opta.utils import fmt_msg, is_tool
@@ -23,12 +24,12 @@ def setup_kubectl(configfile: str, env: Optional[str]) -> None:
     # kubectl may not *technically* be required for this opta command to run, but require
     # it anyways since user must install it to access the cluster.
     if not is_tool("kubectl"):
-        raise Exception(
+        raise UserErrors(
             f"Please visit this link to install kubectl first: {KUBECTL_INSTALL_URL}"
         )
 
     if not is_tool("aws"):
-        raise Exception(
+        raise UserErrors(
             f"Please visit the link to install the AWS CLI first: {AWS_CLI_INSTALL_URL}"
         )
 
@@ -38,7 +39,7 @@ def setup_kubectl(configfile: str, env: Optional[str]) -> None:
             ["aws", "sts", "get-caller-identity"], check=True, capture_output=True
         ).stdout.decode("utf-8")
     except Exception as err:
-        raise Exception(
+        raise UserErrors(
             fmt_msg(
                 f"""Running the AWS CLI failed.
             Please make sure you've properly configured your AWS credentials,
@@ -55,7 +56,7 @@ def setup_kubectl(configfile: str, env: Optional[str]) -> None:
 
     # Make sure the current account points to the cluster environment
     if int(current_aws_account_id) not in env_aws_account_ids:
-        raise Exception(
+        raise UserErrors(
             fmt_msg(
                 f"""The AWS CLI is not configured with
             the right credentials to access the {env or ""} cluster.
