@@ -1,0 +1,7 @@
+coverage:
+  status:
+    project:
+      default: # This can be anything, but it needs to exist as the name
+        # basic settings
+        target: 75
+        threshold: 5% # Raise exception if it drops lower by 5% (e.g. 97% coverage to 92%)
