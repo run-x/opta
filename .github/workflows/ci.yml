@@ -56,3 +56,59 @@ jobs:
           fail_ci_if_error: true
           path_to_write_report: ./coverage/codecov_report.txt
           verbose: true
+
+  test_cli:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Checkout test-service repo
+        uses: actions/checkout@v2
+        with:
+          repository: "run-x/test-service"
+          path: "test-service"
+          ssh-key: ${{ secrets.SSH_KEY }}
+      - name: Setup ssh
+        uses: webfactory/ssh-agent@v0.4.1
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install dependencies
+        run: |
+          pip install pipenv
+          pipenv install --deploy --dev
+          source $(pipenv --venv)/bin/activate
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.DEPLOYER_AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.DEPLOYER_AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      - name: Test apply command
+        run: |
+          source $(pipenv --venv)/bin/activate
+          export PYTHONPATH=$(pwd)
+          cd test-service
+          yes | python ../opta/cli.py apply --env runx-staging --test
+      - name: Test output command
+        run: |
+          source $(pipenv --venv)/bin/activate
+          export PYTHONPATH=$(pwd)
+          cd test-service
+          yes | python ../opta/cli.py output --env runx-staging
+
+  deploy_test_service:
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy test-service
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.ALL_GITHUB_TOKEN }}
+          repository: run-x/test-service
+          # The test-service's workflow listens to this
+          # event and triggers a new deploy with opta.
+          event-type: runxc-updated
