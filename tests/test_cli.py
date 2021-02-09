@@ -5,6 +5,7 @@ from typing import Any
 from unittest.mock import call, mock_open, patch
 
 import yaml
+from click.testing import CliRunner
 from pytest_mock import MockFixture
 
 from opta.cli import (
