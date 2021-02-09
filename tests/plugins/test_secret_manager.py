@@ -1,11 +1,10 @@
 # type: ignore
 import base64
-import json
 import os
-from subprocess import CompletedProcess
 
 import pytest
 from click.testing import CliRunner
+from kubernetes.client import CoreV1Api, V1Secret
 from pytest_mock import MockFixture, mocker  # noqa
 
 from opta.amplitude import AmplitudeClient, amplitude_client
@@ -14,28 +13,17 @@ from opta.plugins.secret_manager import get_module, list_command, update, view
 
 
 class TestSecretManager:
-    def test_get_module_no_kubectl(self, mocker: MockFixture):  # noqa
-        mocked_is_tool = mocker.patch("opta.plugins.secret_manager.is_tool")
-        mocked_is_tool.return_value = False
-        with pytest.raises(Exception):
-            get_module("a", "b", "c", "d")
-        mocked_is_tool.assert_called_once_with("kubectl")
-
     def test_get_module_no_configfile(self, mocker: MockFixture):  # noqa
-        mocked_is_tool = mocker.patch("opta.plugins.secret_manager.is_tool")
-        mocked_is_tool.return_value = True
         mocked_path_exists = mocker.patch("os.path.exists")
         mocked_path_exists.return_value = False
         with pytest.raises(Exception):
-            get_module("a", "b", "c", "d")
-        mocked_is_tool.assert_called_once_with("kubectl")
+            get_module("a", "c", "d")
         mocked_path_exists.assert_called_once_with("d")
 
     def test_get_module_all_good(self):
 
         target_module = get_module(
             "app",
-            "BALONEY",
             "dummy-env",
             os.path.join(
                 os.path.dirname(os.path.dirname(__file__)),
@@ -50,7 +38,6 @@ class TestSecretManager:
         with pytest.raises(Exception) as excinfo:
             get_module(
                 "app",
-                "BALONEY",
                 "dummy-env",
                 os.path.join(
                     os.path.dirname(os.path.dirname(__file__)),
@@ -66,11 +53,19 @@ class TestSecretManager:
         mocked_module.layer_name = "dummy_layer"
         mocked_get_module.return_value = mocked_module
 
-        mocked_nice_run = mocker.patch("opta.plugins.secret_manager.nice_run")
-        mocked_completed_process = mocker.Mock(spec=CompletedProcess)
-        mocked_completed_process.returncode = 0
-        mocked_completed_process.stdout = base64.b64encode(bytes("supersecret", "utf-8"))
-        mocked_nice_run.return_value = mocked_completed_process
+        mocked_kube_load_config = mocker.patch(
+            "opta.plugins.secret_manager.load_kube_config"
+        )
+
+        mocked_kube_client = mocker.patch("opta.plugins.secret_manager.CoreV1Api")
+        mocked_client = mocker.Mock(spec=CoreV1Api)
+        mocked_kube_client.return_value = mocked_client
+
+        mocked_response = mocker.Mock(spec=V1Secret)
+        mocked_response.data = {
+            "dummysecret": base64.b64encode(bytes("supersecret", "utf-8"))
+        }
+        mocked_client.read_namespaced_secret.return_value = mocked_response
 
         mocked_amplitude_client = mocker.patch(
             "opta.plugins.secret_manager.amplitude_client", spec=AmplitudeClient
@@ -90,18 +85,12 @@ class TestSecretManager:
             ],
         )
         assert result.exit_code == 0
-        mocked_nice_run.assert_called_once_with(
-            [
-                "kubectl",
-                "get",
-                "secrets/secret",
-                "--namespace=dummy_layer",
-                "--template={{.data.dummysecret}}",
-            ],
-            capture_output=True,
+        mocked_kube_load_config.assert_called_once_with()
+        mocked_client.read_namespaced_secret.assert_called_once_with(
+            "secret", "dummy_layer"
         )
         mocked_get_module.assert_called_once_with(
-            "dummyapp", "dummysecret", "dummyenv", "dummyconfigfile"
+            "dummyapp", "dummyenv", "dummyconfigfile"
         )
         mocked_amplitude_client.send_event.assert_called_once_with(
             amplitude_client.VIEW_SECRET_EVENT
@@ -115,14 +104,19 @@ class TestSecretManager:
         mocked_module.layer_name = "dummy_layer"
         mocked_get_module.return_value = mocked_module
 
-        mocked_nice_run = mocker.patch("opta.plugins.secret_manager.nice_run")
-        mocked_completed_process = mocker.Mock(spec=CompletedProcess)
-        mocked_completed_process.returncode = 0
-        mocked_completed_process.stdout = bytes(
-            '{"ALGOLIA_WRITE_KEY":"NmVhNjlmOGM4YjM5NjRjYjZlZmExZTk4MzdjN2Q2OTE="}',
-            "utf-8",
+        mocked_kube_load_config = mocker.patch(
+            "opta.plugins.secret_manager.load_kube_config"
         )
-        mocked_nice_run.return_value = mocked_completed_process
+
+        mocked_kube_client = mocker.patch("opta.plugins.secret_manager.CoreV1Api")
+        mocked_client = mocker.Mock(spec=CoreV1Api)
+        mocked_kube_client.return_value = mocked_client
+
+        mocked_response = mocker.Mock(spec=V1Secret)
+        mocked_response.data = {
+            "ALGOLIA_WRITE_KEY": "NmVhNjlmOGM4YjM5NjRjYjZlZmExZTk4MzdjN2Q2OTE="
+        }
+        mocked_client.read_namespaced_secret.return_value = mocked_response
 
         mocked_amplitude_client = mocker.patch(
             "opta.plugins.secret_manager.amplitude_client", spec=AmplitudeClient
@@ -141,19 +135,12 @@ class TestSecretManager:
             ],
         )
         assert result.exit_code == 0
-        mocked_nice_run.assert_called_once_with(
-            [
-                "kubectl",
-                "get",
-                "secrets/secret",
-                "--namespace=dummy_layer",
-                "-o",
-                "jsonpath='{.data}'",
-            ],
-            capture_output=True,
+        mocked_kube_load_config.assert_called_once_with()
+        mocked_client.read_namespaced_secret.assert_called_once_with(
+            "secret", "dummy_layer"
         )
         mocked_get_module.assert_called_once_with(
-            "dummyapp", None, "dummyenv", "dummyconfigfile"
+            "dummyapp", "dummyenv", "dummyconfigfile"
         )
         mocked_amplitude_client.send_event.assert_called_once_with(
             amplitude_client.LIST_SECRETS_EVENT
@@ -166,11 +153,13 @@ class TestSecretManager:
         mocked_module.layer_name = "dummy_layer"
         mocked_get_module.return_value = mocked_module
 
-        mocked_nice_run = mocker.patch("opta.plugins.secret_manager.nice_run")
-        mocked_completed_process = mocker.Mock(spec=CompletedProcess)
-        mocked_completed_process.returncode = 0
-        mocked_completed_process.stdout = base64.b64encode(bytes("supersecret", "utf-8"))
-        mocked_nice_run.return_value = mocked_completed_process
+        mocked_kube_load_config = mocker.patch(
+            "opta.plugins.secret_manager.load_kube_config"
+        )
+
+        mocked_kube_client = mocker.patch("opta.plugins.secret_manager.CoreV1Api")
+        mocked_client = mocker.Mock(spec=CoreV1Api)
+        mocked_kube_client.return_value = mocked_client
 
         mocked_amplitude_client = mocker.patch(
             "opta.plugins.secret_manager.amplitude_client", spec=AmplitudeClient
@@ -195,19 +184,12 @@ class TestSecretManager:
             "utf-8"
         )
         patch = [{"op": "replace", "path": "/data/dummysecret", "value": secret_value}]
-        mocked_nice_run.assert_called_once_with(
-            [
-                "kubectl",
-                "patch",
-                "secret",
-                "secret",
-                "--namespace=dummy_layer",
-                "--type=json",
-                f"-p={json.dumps(patch)}",
-            ]
+        mocked_kube_load_config.assert_called_once_with()
+        mocked_client.patch_namespaced_secret.assert_called_once_with(
+            "secret", "dummy_layer", patch
         )
         mocked_get_module.assert_called_once_with(
-            "dummyapp", "dummysecret", "dummyenv", "dummyconfigfile"
+            "dummyapp", "dummyenv", "dummyconfigfile"
         )
         mocked_amplitude_client.send_event.assert_called_once_with(
             amplitude_client.UPDATE_SECRET_EVENT

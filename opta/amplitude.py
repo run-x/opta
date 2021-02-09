@@ -24,6 +24,7 @@ class AmplitudeClient:
     DEBUGGER_EVENT = "DEBUGGER_START"
     VALID_EVENTS = [
         UPDATE_SECRET_EVENT,
+        VIEW_SECRET_EVENT,
         START_GEN_EVENT,
         APPLY_EVENT,
         PLAN_EVENT,
