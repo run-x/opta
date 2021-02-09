@@ -126,7 +126,7 @@ class TestSecretManager:
         runner = CliRunner()
         result = runner.invoke(
             list_command,
-            ["dummyapp", "--env", "dummyenv", "--configfile", "dummyconfigfile",],
+            ["dummyapp", "--env", "dummyenv", "--configfile", "dummyconfigfile"],
         )
         assert result.exit_code == 0
         mocked_kube_load_config.assert_called_once_with()

@@ -31,8 +31,8 @@ class TestK8sServiceProcessor:
                 "value": "${{module.redis.cache_auth_token}}",
             },
             {"name": "docdb_db_user", "value": "${{module.docdb.db_user}}"},
-            {"name": "docdb_db_host", "value": "${{module.docdb.db_host}}",},
-            {"name": "docdb_db_password", "value": "${{module.docdb.db_password}}",},
+            {"name": "docdb_db_host", "value": "${{module.docdb.db_host}}"},
+            {"name": "docdb_db_password", "value": "${{module.docdb.db_password}}"},
         ]
         assert app_module.data["iam_policy"] == {
             "Version": "2012-10-17",
