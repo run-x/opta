@@ -314,7 +314,7 @@ def _apply(
 
         targets = list(map(lambda x: f"-target=module.{x}", target_modules))
 
-        # Always fetch the latest modules while we're still in active development
+        # Always fetch the latest modules while we're still in active development.
         nice_run(["terraform", "get", "--update"], check=True)
 
         nice_run(["terraform", "init"], check=True)
