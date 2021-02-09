@@ -94,12 +94,7 @@ def debugger() -> None:
 @click.option(
     "--configfile", default="opta.yml", help="Opta config file", show_default=True
 )
-@click.option(
-    "--out",
-    default=DEFAULT_GENERATED_TF_FILE,
-    help="Generated tf file",
-    show_default=True,
-)
+@click.option("--out", default=DEFAULT_GENERATED_TF_FILE, help="Generated tf file")
 @click.option("--env", default=None, help="The env to use when loading the config file")
 @click.option(
     "--no-apply",
@@ -171,12 +166,7 @@ def configure_kubectl(configfile: str, env: Optional[str]) -> None:
 @click.option(
     "--configfile", default="opta.yml", help="Opta config file", show_default=True
 )
-@click.option(
-    "--out",
-    default=DEFAULT_GENERATED_TF_FILE,
-    help="Generated tf file",
-    show_default=True,
-)
+@click.option("--out", default=DEFAULT_GENERATED_TF_FILE, help="Generated tf file")
 @click.option(
     "--env",
     default=None,
