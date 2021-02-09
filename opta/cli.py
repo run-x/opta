@@ -144,11 +144,7 @@ def gen(
 )
 @click.pass_context
 def output(
-    ctx: Any,
-    configfile: str,
-    env: Optional[str],
-    include_parent: bool,
-    force_init: bool,
+    ctx: Any, configfile: str, env: Optional[str], include_parent: bool, force_init: bool,
 ) -> None:
     """ Print TF outputs """
     temp_tf_file = "tmp-output.tf.json"
@@ -174,11 +170,13 @@ def configure_kubectl(ctx: Any, configfile: str, env: Optional[str]) -> None:
     os.remove(temp_tf_file)
 
 
-
+@cli.command()
 @click.option(
     "--configfile", default="opta.yml", help="Opta config file", show_default=True
 )
-@click.option("--out", default=DEFAULT_GENERATED_TF_FILE, help="Generated tf file", hidden=True)
+@click.option(
+    "--out", default=DEFAULT_GENERATED_TF_FILE, help="Generated tf file", hidden=True
+)
 @click.option(
     "--env",
     default=None,
@@ -190,7 +188,7 @@ def configure_kubectl(ctx: Any, configfile: str, env: Optional[str]) -> None:
     is_flag=True,
     default=False,
     help="Do not run terraform, just write the json",
-    hidden=True
+    hidden=True,
 )
 @click.option(
     "--refresh",
@@ -198,7 +196,9 @@ def configure_kubectl(ctx: Any, configfile: str, env: Optional[str]) -> None:
     default=False,
     help="Run from first block, regardless of current state",
 )
-@click.option("--max-block", default=None, type=int, help="Max block to process", hidden=True)
+@click.option(
+    "--max-block", default=None, type=int, help="Max block to process", hidden=True
+)
 @click.option("--var", multiple=True, default=[], type=str, help="Variable to update")
 @click.option(
     "--test",
