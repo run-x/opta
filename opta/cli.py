@@ -4,8 +4,12 @@ from typing import Any
 import sentry_sdk
 from sentry_sdk.integrations.atexit import AtexitIntegration
 
+from opta.exceptions import UserErrors
+
 
 def at_exit_callback(pending: int, timeout: float) -> None:
+    """Don't be loud about sentry, our customer doesn't care about it."""
+
     def echo(msg):
         # type: (str) -> None
         sys.stderr.write(msg + "\n")
@@ -17,6 +21,15 @@ def at_exit_callback(pending: int, timeout: float) -> None:
     sys.stderr.flush()
 
 
+def before_send(event: Any, hint: Any) -> Any:
+    """Don't send us events caused by user errors"""
+    if "exc_info" in hint:
+        exc_type, exc_value, tb = hint["exc_info"]
+        if isinstance(exc_value, UserErrors):
+            return None
+    return event
+
+
 if hasattr(sys, "_called_from_test"):
     print("Not sending sentry cause we think we're in a pytest")
 else:
@@ -24,6 +37,7 @@ else:
         "https://aab05facf13049368d749e1b30a08b32@o511457.ingest.sentry.io/5610510",
         traces_sample_rate=1.0,
         integrations=[AtexitIntegration(at_exit_callback)],
+        before_send=before_send,
     )
 
 
@@ -53,10 +67,11 @@ TERRAFORM_PLAN_FILE = "tf.plan"
 
 @click.group()
 def cli() -> None:
+    """Welcome to opta, runx's cli!"""
     pass
 
 
-@cli.command()
+@cli.command(hidden=True)
 def debugger() -> None:
     """The opta debugger -- to help you debug"""
     curses_spec = find_spec("_curses")
@@ -77,8 +92,10 @@ def debugger() -> None:
         )
 
 
-@cli.command()
-@click.option("--configfile", default="opta.yml", help="Opta config file")
+@cli.command(hidden=True)
+@click.option(
+    "--configfile", default="opta.yml", help="Opta config file", show_default=True
+)
 @click.option("--out", default=DEFAULT_GENERATED_TF_FILE, help="Generated tf file")
 @click.option("--env", default=None, help="The env to use when loading the config file")
 @click.option(
@@ -104,14 +121,13 @@ def gen(
     max_block: Optional[int],
     var: List[str],
 ) -> None:
+    """Deprecated-- pls use apply it's exactly the same"""
     print("The gen command is being deprecated in favor of the apply command")
-    try:
-        _apply(configfile, out, env, no_apply, refresh, max_block, var)
-    finally:
-        _cleanup()
+    _apply(configfile, out, env, no_apply, refresh, max_block, var)
+    _cleanup()
 
 
-@cli.command()
+@cli.command(hidden=True)
 @click.option("--configfile", default="opta.yml", help="Opta config file")
 @click.option("--env", default=None, help="The env to use when loading the config file")
 @click.option(
@@ -128,7 +144,11 @@ def gen(
 )
 @click.pass_context
 def output(
-    ctx: Any, configfile: str, env: Optional[str], include_parent: bool, force_init: bool,
+    ctx: Any,
+    configfile: str,
+    env: Optional[str],
+    include_parent: bool,
+    force_init: bool,
 ) -> None:
     """ Print TF outputs """
     temp_tf_file = "tmp-output.tf.json"
@@ -140,7 +160,9 @@ def output(
 
 
 @cli.command()
-@click.option("--configfile", default="opta.yml", help="Opta config file")
+@click.option(
+    "--configfile", default="opta.yml", help="Opta config file", show_default=True
+)
 @click.option("--env", default=None, help="The env to use when loading the config file")
 @click.pass_context
 def configure_kubectl(ctx: Any, configfile: str, env: Optional[str]) -> None:
@@ -153,22 +175,31 @@ def configure_kubectl(ctx: Any, configfile: str, env: Optional[str]) -> None:
 
 
 @cli.command()
-@click.option("--configfile", default="opta.yml", help="Opta config file")
-@click.option("--out", default=DEFAULT_GENERATED_TF_FILE, help="Generated tf file")
-@click.option("--env", default=None, help="The env to use when loading the config file")
+@click.option(
+    "--configfile", default="opta.yml", help="Opta config file", show_default=True
+)
+@click.option("--out", default=DEFAULT_GENERATED_TF_FILE, help="Generated tf file", hidden=True)
+@click.option(
+    "--env",
+    default=None,
+    help="The env to use when loading the config file",
+    show_default=True,
+)
 @click.option(
     "--no-apply",
     is_flag=True,
     default=False,
     help="Do not run terraform, just write the json",
+    hidden=True
 )
 @click.option(
     "--refresh",
     is_flag=True,
     default=False,
     help="Run from first block, regardless of current state",
+    hidden=True
 )
-@click.option("--max-block", default=None, type=int, help="Max block to process")
+@click.option("--max-block", default=None, type=int, help="Max block to process", hidden=True)
 @click.option("--var", multiple=True, default=[], type=str, help="Variable to update")
 def apply(
     configfile: str,
@@ -179,10 +210,9 @@ def apply(
     max_block: Optional[int],
     var: List[str],
 ) -> None:
-    try:
-        _apply(configfile, out, env, no_apply, refresh, max_block, var)
-    finally:
-        _cleanup()
+    """Apply your opta config file to your infrastructure!"""
+    _apply(configfile, out, env, no_apply, refresh, max_block, var)
+    _cleanup()
 
 
 def _apply(
@@ -196,9 +226,9 @@ def _apply(
 ) -> None:
     """ Generate TF file based on opta config file """
     if not is_tool("terraform"):
-        raise Exception("Please install terraform on your machine")
+        raise UserErrors("Please install terraform on your machine")
     if not os.path.exists(configfile):
-        raise Exception(f"File {configfile} not found")
+        raise UserErrors(f"File {configfile} not found")
     amplitude_client.send_event(amplitude_client.START_GEN_EVENT)
 
     conf = yaml.load(open(configfile), Loader=yaml.Loader)
@@ -208,15 +238,15 @@ def _apply(
 
     layer = Layer.load_from_dict(conf, env)
     current_module_keys: Set[str] = set()
+    total_modules_applied: Set[str] = set()
     print("Loading infra blocks")
-    blocks_to_process = layer.blocks
-    if max_block is not None:
-        blocks_to_process = layer.blocks[: max_block + 1]
+    blocks_to_process = (
+        layer.blocks[: max_block + 1] if max_block is not None else layer.blocks
+    )
     for block_idx, block in enumerate(blocks_to_process):
         current_module_keys = current_module_keys.union(
-            set(list(map(lambda x: x.key, block.modules)))
+            set(map(lambda x: x.key, block.modules))
         )
-        total_modules_applied = set()
         try:
             if not os.path.isdir("./.terraform") and not os.path.isfile(
                 "./terraform.tfstate"
@@ -259,22 +289,30 @@ def _apply(
         gen_tf.gen(ret, out)
         if no_apply:
             continue
-        click.confirm(
-            f"Will now initialize generate terraform plan for block {block_idx}. "
-            "Sounds good?",
-            abort=True,
-        )
+        print(f"Will now initialize generate terraform plan for block {block_idx}.")
         amplitude_client.send_event(
             amplitude_client.PLAN_EVENT, event_properties={"block_idx": block_idx}
         )
-        targets = list(map(lambda x: f"-target=module.{x}", current_module_keys))
+
+        target_modules = list(current_module_keys)
+        # On the last block run, destroy all modules that are in the remote state,
+        # but have not been touched by any block.
+        # Modules are untouched if the customer deletes or renames them in the
+        # opta config file.
+        # TODO: Warn user when things are getting deleted (when we have opta diffs)
+        if block_idx + 1 == len(blocks_to_process):
+            untouched_modules = list(total_modules_applied - current_module_keys)
+            target_modules += untouched_modules
+
+        targets = list(map(lambda x: f"-target=module.{x}", target_modules))
 
         # Always fetch the latest modules while we're still in active development
         nice_run(["terraform", "get", "--update"], check=True)
 
         nice_run(["terraform", "init"], check=True)
         nice_run(
-            ["terraform", "plan", "-out=tf.plan", "-lock-timeout=60s"] + targets,
+            ["terraform", "plan", f"-out={TERRAFORM_PLAN_FILE}", "-lock-timeout=60s"]
+            + targets,
             check=True,
         )
 

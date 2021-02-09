@@ -8,18 +8,19 @@ class Module:
     def __init__(
         self, layer_name: str, key: str, data: Dict[Any, Any], parent_layer: Any = None
     ):
+        self.layer_name = layer_name
         self.key = key
+        self.data = data
+        self.parent_layer = parent_layer
         self.desc = REGISTRY["modules"][data["type"]]
         self.name = f"{layer_name}-{self.key}"
-        self.layer_name = layer_name
-        self.parent_layer = parent_layer
-        self.data = data
 
     def gen_tf(self) -> Dict[Any, Any]:
-        module_blk = {
+        module_blk: Dict[Any, Any] = {
             "module": {
                 self.key: {"source": self.translate_location(self.desc["location"])}
-            }
+            },
+            "output": {},
         }
         for k, v in self.desc["variables"].items():
             if k in self.data:
@@ -42,9 +43,6 @@ class Module:
         if "outputs" in self.desc:
             for k, v in self.desc["outputs"].items():
                 if "export" in v and v["export"]:
-                    if "output" not in module_blk:
-                        module_blk["output"] = {}
-
                     module_blk["output"].update(
                         {k: {"value": f"${{{{module.{self.key}.{k} }}}}"}}
                     )

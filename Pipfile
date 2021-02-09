@@ -29,6 +29,7 @@ amplitude-python = "*"
 sentry-sdk = "*"
 getmac = "*"
 requests = "*"
+kubernetes = "*"
 
 [requires]
 python_version = "3.8"

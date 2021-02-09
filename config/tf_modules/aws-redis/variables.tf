@@ -19,7 +19,7 @@ variable "subnet_group_name" {
 
 variable "redis_version" {
   type = string
-  default = "6.x"
+  default = "6.0.5"
 }
 
 variable "kms_account_key_arn" {
