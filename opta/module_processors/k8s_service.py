@@ -69,10 +69,7 @@ class K8sServiceProcessor(ModuleProcessor):
             iam_statements.append(
                 {
                     "Sid": "ReadBuckets",
-                    "Action": [
-                        "s3:GetObject*",
-                        "s3:ListBucket",
-                    ],
+                    "Action": ["s3:GetObject*", "s3:ListBucket",],
                     "Effect": "Allow",
                     "Resource": [
                         f"arn:aws:s3:::{bucket_name}" for bucket_name in self.read_buckets

@@ -50,7 +50,6 @@ from typing import List, Optional, Set  # noqa: E402
 import boto3  # noqa: E402
 import click  # noqa: E402
 import yaml  # noqa: E402
-from botocore.config import Config
 
 from opta import gen_tf  # noqa: E402
 from opta.amplitude import amplitude_client  # noqa: E402
@@ -137,12 +136,7 @@ def gen(
     help="Force regenerate opta setup files, instead of using cache",
 )
 @click.pass_context
-def output(
-    ctx: Any,
-    configfile: str,
-    env: Optional[str],
-    force_init: bool,
-) -> None:
+def output(ctx: Any, configfile: str, env: Optional[str], force_init: bool,) -> None:
     """ Print TF outputs """
     temp_tf_file = "tmp-output.tf.json"
     ctx.invoke(apply, configfile=configfile, env=env, out=temp_tf_file, no_apply=True)
@@ -157,14 +151,14 @@ def output(
 @click.argument("image")
 @click.option("--configfile", default="opta.yml", help="Opta config file.")
 @click.option("--env", default=None, help="The env to use when loading the config file.")
-@click.option("--image-tag", default=None, help="The image tag associated with your docker container. Defaults to your local image tag.")
+@click.option(
+    "--image-tag",
+    default=None,
+    help="The image tag associated with your docker container. Defaults to your local image tag.",
+)
 @click.pass_context
 def push(
-    ctx: Any,
-    image: str,
-    configfile: str,
-    env: str,
-    image_tag: Optional[str] = None,
+    ctx: Any, image: str, configfile: str, env: str, image_tag: Optional[str] = None,
 ) -> None:
     if not is_tool("docker"):
         raise Exception("Please install docker on your machine")
@@ -175,12 +169,13 @@ def push(
     finally:
         if os.path.exists(temp_tf_file):
             os.remove(temp_tf_file)
-        
+
     registry_url = get_registry_url()
     username, password = get_ecr_auth_info(configfile, env)
     push_to_docker(username, password, image, registry_url, image_tag)
 
 
+@cli.command()
 @click.option(
     "--configfile", default="opta.yml", help="Opta config file", show_default=True
 )
@@ -195,7 +190,9 @@ def configure_kubectl(configfile: str, env: Optional[str]) -> None:
 @click.option(
     "--configfile", default="opta.yml", help="Opta config file", show_default=True
 )
-@click.option("--out", default=DEFAULT_GENERATED_TF_FILE, help="Generated tf file", hidden=True)
+@click.option(
+    "--out", default=DEFAULT_GENERATED_TF_FILE, help="Generated tf file", hidden=True
+)
 @click.option(
     "--env",
     default=None,
@@ -207,16 +204,18 @@ def configure_kubectl(configfile: str, env: Optional[str]) -> None:
     is_flag=True,
     default=False,
     help="Do not run terraform, just write the json",
-    hidden=True
+    hidden=True,
 )
 @click.option(
     "--refresh",
     is_flag=True,
     default=False,
     help="Run from first block, regardless of current state",
-    hidden=True
+    hidden=True,
 )
-@click.option("--max-block", default=None, type=int, help="Max block to process", hidden=True)
+@click.option(
+    "--max-block", default=None, type=int, help="Max block to process", hidden=True
+)
 @click.option("--var", multiple=True, default=[], type=str, help="Variable to update")
 def apply(
     configfile: str,
