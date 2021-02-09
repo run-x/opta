@@ -1,8 +1,7 @@
 import sys
-import json
 from typing import Any
-import base64
-from io import StringIO
+
+from opta.helpers.cli.push import get_registry_url, get_ecr_auth_info, push_to_docker
 
 import sentry_sdk
 from sentry_sdk.integrations.atexit import AtexitIntegration
@@ -131,60 +130,34 @@ def output(ctx: Any, configfile: str, env: Optional[str], force_init: bool,) -> 
     nice_run(["terraform", "output", "-json"], check=True)
     os.remove(temp_tf_file)
 
+
 @cli.command()
 @click.argument("image-name")
 @click.option("--configfile", default="opta.yml", help="Opta config file")
 @click.option("--env", default=None, help="The env to use when loading the config file")
-@click.option("--image-tag", default=None, help="The env to use when loading the config file")
+@click.option("--image-tag", default=None, help="The image tag associated with your docker container")
 @click.pass_context
 def push(
     ctx: Any,
-    image_name,
-    configfile,
-    env,
-    image_tag=None,
-):
+    image: str,
+    configfile: str,
+    env: str,
+    image_tag: Optional[str] = None,
+) -> None:
     if not is_tool("docker"):
         raise Exception("Please install docker on your machine")
 
     temp_tf_file = "tmp-output.tf.json"
+    try:
+        ctx.invoke(apply, configfile=configfile, env=env, out=temp_tf_file, no_apply=True)
+    finally:
+        if os.path.exists(temp_tf_file):
+            os.remove(temp_tf_file)
+        
+    registry_url = get_registry_url()
+    username, password = get_ecr_auth_info(configfile, env)
+    push_to_docker(username, password, image, registry_url, image_tag)
 
-    # 1. figure out ecr repo from opta output
-    ctx.invoke(apply, configfile=configfile, env=env, out=temp_tf_file, no_apply=True)
-    if not os.path.isdir(".terraform"):
-        nice_run(["terraform", "init"], check=True)
-    nice_run(["terraform", "get", "--update"], check=True)
-    tf_output = nice_run(["terraform", "output", "-json"], check=True, capture_output=True)
-    output_json = json.loads(tf_output.stdout)
-    registry_url = output_json["docker_repo_url"]["value"]
-
-    # 2. ecr login
-    conf = yaml.load(open(configfile), Loader=yaml.Loader)
-    layer = Layer.load_from_dict(conf, env)
-    providers = layer.gen_providers(0, True)
-    account_id = providers["provider"]["aws"]["allowed_account_ids"][0]
-    region = providers["provider"]["aws"]["region"]
-    ecr = boto3.client("ecr", config=Config(
-        region_name=region
-    ))
-    response = ecr.get_authorization_token(
-        registryIds=[
-            str(account_id)
-        ],
-    )
-
-    # 3. docker push
-    auth_info=response["authorizationData"][0]["authorizationToken"]
-    decoded_auth = base64.b64decode(auth_info, altchars=None, validate=False).decode("ascii")
-    username, password = decoded_auth.split(":")
-    nice_run(["docker", "login", registry_url, "--username", username, "--password-stdin"], input=password.encode())
-
-    args = ["docker", "push", image_name]
-    if image_tag:
-        args.push("--image-tag")
-        args.push(image_tag)
-
-    nice_run(args)
 
 @cli.command()
 @click.option("--configfile", default="opta.yml", help="Opta config file")
