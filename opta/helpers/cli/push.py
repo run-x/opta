@@ -19,6 +19,15 @@ def get_registry_url() -> None:
         ["terraform", "output", "-json"], check=True, capture_output=True
     )
     output_json = json.loads(tf_output.stdout)
+
+    if (
+        "docker_repo_url" not in output_json
+        or "value" not in output_json["docker_repo_url"]
+    ):
+        raise Exception(
+            "Unable to determine docker repository url. There is likely something wrong with your opta configuration."
+        )
+
     return output_json["docker_repo_url"]["value"]
 
 

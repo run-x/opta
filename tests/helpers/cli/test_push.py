@@ -95,6 +95,29 @@ class TestGetRegistryUrl:
 
         assert docker_repo_url == REGISTRY_URL
 
+    def test_no_docker_repo_url_in_output(self, mocker: MockFixture) -> None:
+        mocked_isdir = mocker.patch("os.path.isdir")
+        mocked_isdir.return_value = True
+
+        mocked_terraform_get = mocker.Mock(spec=CompletedProcess)
+        mocked_terraform_output = mocker.Mock(spec=CompletedProcess)
+        mocked_terraform_output.stdout = json.dumps({})
+
+        def nice_run_results(args_array: List[str], **kwargs: Any) -> Any:
+            if args_array == ["terraform", "get", "--update"]:
+                return mocked_terraform_get
+            if args_array == ["terraform", "output", "-json"]:
+                return mocked_terraform_output
+            raise Exception("Unexpected test input")
+
+        mocker.patch("opta.helpers.cli.push.nice_run", side_effect=nice_run_results)
+
+        with pytest.raises(Exception) as e_info:
+            get_registry_url()
+
+        expected_error_output = "Unable to determine docker repository url. There is likely something wrong with your opta configuration."
+        assert expected_error_output in str(e_info)
+
 
 class TestGetEcrAuthInfo:
     def test_get_ecr_auth_info(self, mocker: MockFixture) -> None:
