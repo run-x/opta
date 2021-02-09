@@ -5,6 +5,7 @@ from typing import Any
 from unittest.mock import call, mock_open, patch
 
 import yaml
+from click.testing import CliRunner
 from pytest_mock import MockFixture
 
 from opta.cli import (
@@ -14,7 +15,6 @@ from opta.cli import (
     _cleanup,
     at_exit_callback,
     cli,
-    output,
 )
 from tests.fixtures.apply import BASIC_APPLY
 
