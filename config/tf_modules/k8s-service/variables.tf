@@ -120,6 +120,16 @@ variable "read_buckets" {
   default = []
 }
 
+variable "tcp_health_check" {
+  type = bool
+  default = false
+}
+
+variable "websockets" {
+  type = bool
+  default = false
+}
+
 variable "write_buckets" {
   type = list(string)
   default = []

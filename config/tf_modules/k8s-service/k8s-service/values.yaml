@@ -5,6 +5,8 @@ uriPrefix: "/"
 iamRoleArn: ""
 envVars: []
 secrets: []
+tcpHealthCheck: false
+websockets: false
 
 serviceAccount:
   # The name of the service account to use.

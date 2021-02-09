@@ -207,6 +207,8 @@ modules:
       k8s_openid_provider_arn: str
       iam_policy: optional
       additional_iam_roles: optional
+      tcp_health_check: optional
+      websockets: optional
     outputs:
       docker_repo_url:
         export: true

@@ -38,9 +38,14 @@ spec:
               containerPort: {{ .Values.port }}
               protocol: TCP
           livenessProbe:
+            {{ if .Values.tcpHealthCheck }}
+            tcpSocket:
+              port: http
+            {{ else }}
             httpGet:
               path: {{ .Values.livenessProbePath }}
               port: http
+            {{ end }}
           env:
             - name: RDS_CA_PATH # This is the path to the public key for the docdb tls
               value: "/config/rds_ca.pem"
@@ -60,9 +65,14 @@ spec:
           readinessProbe:
             initialDelaySeconds: 10
             periodSeconds: 10
+            {{ if .Values.tcpHealthCheck }}
+            tcpSocket:
+              port: http
+            {{ else }}
             httpGet:
               path: {{ .Values.readinessProbePath }}
               port: http
+            {{ end }}
           resources:
             limits:
               {{- toYaml .Values.podResourceLimits | nindent 14 }}
