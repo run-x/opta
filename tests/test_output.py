@@ -83,21 +83,9 @@ class TestOutput:
             "parent.k8s_endpoint": "https://bla.bla.bla.eks.amazonaws.com",
             "parent.state_bucket_arn": "arn:aws:s3:::opta-tf-state-runx-staging",
             "parent.state_bucket_id": "opta-tf-state-runx-staging",
-            "bucket_arn": {
-                "sensitive": False,
-                "type": "string",
-                "value": "arn:aws:s3:::runx-test-bucket-runx-staging",
-            },
-            "bucket_id": {
-                "sensitive": False,
-                "type": "string",
-                "value": "runx-test-bucket-runx-staging",
-            },
-            "docker_repo_url": {
-                "sensitive": False,
-                "type": "string",
-                "value": "889760294590.dkr.ecr.us-east-1.amazonaws.com/test-service-runx-app",
-            },
+            "bucket_arn": "arn:aws:s3:::runx-test-bucket-runx-staging",
+            "bucket_id": "runx-test-bucket-runx-staging",
+            "docker_repo_url": "889760294590.dkr.ecr.us-east-1.amazonaws.com/test-service-runx-app",
         }
 
     def test_terraform_init(self, mocker: MockFixture) -> None:

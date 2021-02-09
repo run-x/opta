@@ -1,14 +1,12 @@
 import json
-import os
 from typing import List, Optional, Tuple
 
 import yaml
 
-from opta import gen_tf  # noqa: E402
 from opta.layer import Layer
 from opta.nice_subprocess import nice_run
 from opta.output import get_terraform_outputs
-from opta.utils import deep_merge, fmt_msg, is_tool
+from opta.utils import fmt_msg, is_tool
 
 KUBECTL_INSTALL_URL = (
     "https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html"
@@ -72,7 +70,11 @@ def setup_kubectl(configfile: str, env: Optional[str]) -> None:
             )
         )
 
-    cluster_name = _get_eks_cluster_name(root_layer)
+    # Get the cluster name from the outputs.
+    outputs = get_terraform_outputs(include_parent=True)
+    # Use unsafe key accessing so fails loudly if the cluster name is not exported.
+    cluster_name = outputs["parent.k8s_cluster_name"]
+
     # Update kubeconfig with the cluster details, and also switches context
     nice_run(
         [
@@ -90,40 +92,6 @@ def setup_kubectl(configfile: str, env: Optional[str]) -> None:
 def _get_cluster_env(root_layer: Layer) -> Tuple[str, List[int]]:
     aws_provider = root_layer.meta["providers"]["aws"]
     return aws_provider["region"], aws_provider["allowed_account_ids"]
-
-
-def _get_eks_cluster_name(root_layer: Layer) -> str:
-    # Find the block that contains the aws-eks-init module, which has the
-    # cluster name as an output
-    eks_module_block = None
-    eks_module_block_idx = None
-    for block_idx, block in enumerate(root_layer.blocks):
-        for module in block.modules:
-            if module.key == "aws-eks-init":
-                eks_module_block = block
-                eks_module_block_idx = block_idx
-                break
-
-    if eks_module_block is None:
-        print(
-            f'Cannot find EKS cluster name, defaulting to "{DEFAULT_EKS_CLUSTER_NAME}"...'
-        )
-        return DEFAULT_EKS_CLUSTER_NAME
-
-    # Generate the terraform file so outputs can be fetched.
-    ret = root_layer.gen_providers(eks_module_block_idx, block.backend_enabled)  # type: ignore
-    ret = deep_merge(root_layer.gen_tf(eks_module_block_idx), ret)  # type: ignore
-
-    tmp_tf_file = "tmp.tf.json"
-    gen_tf.gen(ret, tmp_tf_file)
-
-    # Get the cluster name from the outputs.
-    outputs = get_terraform_outputs(True, True)
-    # Use unsafe key accessing so fails loudly if the cluster name is not exported.
-    cluster_name = outputs["k8s_cluster_name"]["value"]
-
-    os.remove(tmp_tf_file)
-    return cluster_name
 
 
 def _get_root_layer(configfile: str, env: Optional[str]) -> Layer:

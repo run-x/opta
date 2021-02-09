@@ -24,10 +24,14 @@ def _terraform_dir_exists() -> bool:
 
 
 def _fetch_current_outputs() -> dict:
-    current_state_outputs_raw = nice_run(
+    outputs_raw = nice_run(
         ["terraform", "output", "-json"], check=True, capture_output=True
     ).stdout.decode("utf-8")
-    return json.loads(current_state_outputs_raw)
+    outputs = json.loads(outputs_raw)
+    cleaned_outputs = {}
+    for k, v in outputs.items():
+        cleaned_outputs[k] = v.get("value")
+    return cleaned_outputs
 
 
 def _fetch_parent_outputs() -> dict:

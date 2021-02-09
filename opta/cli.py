@@ -142,10 +142,14 @@ def output(
 @cli.command()
 @click.option("--configfile", default="opta.yml", help="Opta config file")
 @click.option("--env", default=None, help="The env to use when loading the config file")
-def configure_kubectl(configfile: str, env: Optional[str]) -> None:
+@click.pass_context
+def configure_kubectl(ctx: Any, configfile: str, env: Optional[str]) -> None:
     """ Configure the kubectl CLI tool for the given cluster """
+    temp_tf_file = "tmp-configure-kubectl.tf.json"
+    ctx.invoke(apply, configfile=configfile, env=env, out=temp_tf_file, no_apply=True)
     # Also switches the current kubectl context to the cluster.
     setup_kubectl(configfile, env)
+    os.remove(temp_tf_file)
 
 
 @cli.command()
