@@ -27,4 +27,5 @@ resource "aws_docdb_cluster" "cluster" {
   kms_key_id = var.kms_account_key_arn
   vpc_security_group_ids = var.security_group == "" ? [data.aws_security_group.security_group[0].id] : [var.security_group]
   apply_immediately = true
+  skip_final_snapshot = true
 }

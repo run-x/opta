@@ -23,6 +23,7 @@ resource "aws_rds_cluster" "db_cluster" {
   master_password = random_password.pg_password.result
   vpc_security_group_ids = var.security_group == "" ? [data.aws_security_group.security_group[0].id] : [var.security_group]
   apply_immediately = true
+  skip_final_snapshot = true
 }
 
 resource "aws_rds_cluster_instance" "db_instance" {
