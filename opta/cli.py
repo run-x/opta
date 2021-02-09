@@ -226,6 +226,7 @@ def _apply(
 
     layer = Layer.load_from_dict(conf, env)
     current_module_keys: Set[str] = set()
+    total_modules_applied: Set[str] = set()
     print("Loading infra blocks")
     blocks_to_process = (
         layer.blocks[: max_block + 1] if max_block is not None else layer.blocks
@@ -234,7 +235,6 @@ def _apply(
         current_module_keys = current_module_keys.union(
             set(map(lambda x: x.key, block.modules))
         )
-        total_modules_applied = set()
         try:
             if not os.path.isdir("./.terraform") and not os.path.isfile(
                 "./terraform.tfstate"
@@ -281,7 +281,18 @@ def _apply(
         amplitude_client.send_event(
             amplitude_client.PLAN_EVENT, event_properties={"block_idx": block_idx}
         )
-        targets = list(map(lambda x: f"-target=module.{x}", current_module_keys))
+
+        target_modules = list(current_module_keys)
+        # On the last block run, destroy all modules that are in the remote state,
+        # but have not been touched by any block.
+        # Modules are untouched if the customer deletes or renames them in the
+        # opta config file.
+        # TODO: Warn user when things are getting deleted (when we have opta diffs)
+        if block_idx + 1 == len(blocks_to_process):
+            untouched_modules = list(total_modules_applied - current_module_keys)
+            target_modules += untouched_modules
+
+        targets = list(map(lambda x: f"-target=module.{x}", target_modules))
 
         # Always fetch the latest modules while we're still in active development
         nice_run(["terraform", "get", "--update"], check=True)
