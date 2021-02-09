@@ -142,7 +142,7 @@ class TestPush:
 
         runner = CliRunner()
         result = runner.invoke(
-            cli, ["push", "local_image:local_tag", "--image-tag", "tag-override"]
+            cli, ["push", "local_image:local_tag", "--tag", "tag-override"]
         )
 
         assert result.exit_code == 0
@@ -190,7 +190,7 @@ class TestPush:
 
         runner = CliRunner()
         result = runner.invoke(
-            cli, ["push", "local_image", "--image-tag", "tag-override"]
+            cli, ["push", "local_image", "--tag", "tag-override"]
         )
 
         assert result.exit_code == 1

@@ -165,13 +165,13 @@ def output(
 @click.option("--configfile", default="opta.yml", help="Opta config file.")
 @click.option("--env", default=None, help="The env to use when loading the config file.")
 @click.option(
-    "--image-tag",
+    "--tag",
     default=None,
     help="The image tag associated with your docker container. Defaults to your local image tag.",
 )
 @click.pass_context
 def push(
-    ctx: Any, image: str, configfile: str, env: str, image_tag: Optional[str] = None,
+    ctx: Any, image: str, configfile: str, env: str, tag: Optional[str] = None,
 ) -> None:
     if not is_tool("docker"):
         raise Exception("Please install docker on your machine")
@@ -185,7 +185,7 @@ def push(
 
     registry_url = get_registry_url()
     username, password = get_ecr_auth_info(configfile, env)
-    push_to_docker(username, password, image, registry_url, image_tag)
+    push_to_docker(username, password, image, registry_url, tag)
 
 
 @cli.command()
