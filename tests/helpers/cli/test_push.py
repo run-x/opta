@@ -9,25 +9,33 @@ from pytest_mock import MockFixture
 from opta.helpers.cli.push import get_ecr_auth_info, get_registry_url, push_to_docker
 from opta.layer import Layer
 from tests.fixtures.apply import BASIC_APPLY
-from tests.test_output import TERRAFORM_OUTPUT_JSON
+from tests.test_output import TERRAFORM_OUTPUT_JSON, MockedCmdOut
 
 REGISTRY_URL = TERRAFORM_OUTPUT_JSON["docker_repo_url"]["value"]
 
 
 class TestGetRegistryUrl:
+    def get_mocked_shell_cmds(self, mocker: MockFixture, tf_output_dict: dict) -> Any:
+        def mocked_shell_cmds(args_array: List[str], **kwargs: Any) -> mocker.Mock:
+            mocked_terraform_init = mocker.Mock(spec=CompletedProcess)
+            mocked_terraform_output = mocker.Mock(spec=CompletedProcess)
+            mocked_terraform_output.stdout = json.dumps(tf_output_dict).encode("utf-8")
+
+            if args_array == ["terraform", "init"]:
+                return mocked_terraform_init
+            if args_array == ["terraform", "output", "-json"]:
+                return mocked_terraform_output
+            raise Exception("Unexpected test input")
+        return mocked_shell_cmds
+    
     def test_terrform_directory_already_exists(self, mocker: MockFixture) -> None:  # noqa
         mocked_isdir = mocker.patch("os.path.isdir")
         mocked_isdir.return_value = True
 
-        mocked_terraform_output = mocker.Mock(spec=CompletedProcess)
-        mocked_terraform_output.stdout = json.dumps(TERRAFORM_OUTPUT_JSON).encode("utf-8")
-
-        def nice_run_results(args_array: List[str], **kwargs: Any) -> Any:
-            if args_array == ["terraform", "output", "-json"]:
-                return mocked_terraform_output
-            raise Exception("Unexpected test input")
-
-        nice_run_mock = mocker.patch("opta.output.nice_run", side_effect=nice_run_results)
+        nice_run_mock = mocker.patch("opta.output.nice_run", side_effect=self.get_mocked_shell_cmds(
+            mocker,
+            TERRAFORM_OUTPUT_JSON,
+        ))
 
         docker_repo_url = get_registry_url()
         nice_run_mock.assert_has_calls(
@@ -43,19 +51,8 @@ class TestGetRegistryUrl:
         mocked_isdir = mocker.patch("os.path.isdir")
         mocked_isdir.return_value = False
 
-        mocked_terraform_init = mocker.Mock(spec=CompletedProcess)
-        mocked_terraform_output = mocker.Mock(spec=CompletedProcess)
-        mocked_terraform_output.stdout = json.dumps(TERRAFORM_OUTPUT_JSON).encode("utf-8")
-
-        def nice_run_results(args_array: List[str], **kwargs: Any) -> Any:
-            if args_array == ["terraform", "init"]:
-                return mocked_terraform_init
-            if args_array == ["terraform", "output", "-json"]:
-                return mocked_terraform_output
-            raise Exception("Unexpected test input")
-
         nice_run_mock = mocker.patch(
-            "opta.output.nice_run", side_effect=nice_run_results
+            "opta.output.nice_run", side_effect=self.get_mocked_shell_cmds(mocker, TERRAFORM_OUTPUT_JSON)
         )
 
         docker_repo_url = get_registry_url()
@@ -74,18 +71,10 @@ class TestGetRegistryUrl:
         mocked_isdir = mocker.patch("os.path.isdir")
         mocked_isdir.return_value = True
 
-        mocked_terraform_get = mocker.Mock(spec=CompletedProcess)
-        mocked_terraform_output = mocker.Mock(spec=CompletedProcess)
-        mocked_terraform_output.stdout = json.dumps({})
-
-        def nice_run_results(args_array: List[str], **kwargs: Any) -> Any:
-            if args_array == ["terraform", "get", "--update"]:
-                return mocked_terraform_get
-            if args_array == ["terraform", "output", "-json"]:
-                return mocked_terraform_output
-            raise Exception("Unexpected test input")
-
-        mocker.patch("opta.helpers.cli.push.nice_run", side_effect=nice_run_results)
+        mocker.patch("opta.helpers.cli.push.nice_run", side_effect=self.get_mocked_shell_cmds(
+            mocker,
+            {},
+        ))
 
         with pytest.raises(Exception) as e_info:
             get_registry_url()
