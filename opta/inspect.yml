@@ -1,0 +1,18 @@
+resources:
+  helm_release.k8s-service:
+    name: K8s service
+    # TODO: This is wrong, it should be app-
+    url: https://app.datadoghq.com/apm/service/{name}/
+    desc: Secure and scalable Kubernetes service packaged into a helm chart
+  aws_docdb_cluster:
+    name: DocDB
+    url: https://console.aws.amazon.com/docdb/home?region={aws_region}#cluster-details/{cluster_identifier}
+    desc: DocumentDB is a NoSQL database that exposes a similar API to MongoDB.
+  aws_rds_cluster:
+    name: RDS
+    url: https://console.aws.amazon.com/rds/home?region={aws_region}#database:id={id};is-cluster=true
+    desc: Distributed relational database with support for popular SQL engines (Postgres, MySQL, SQL Server, ...)
+  aws_s3_bucket:
+    name: S3 Bucket
+    url: https://s3.console.aws.amazon.com/s3/buckets/{id}?region={aws_region}&tab=objects
+    desc: Distributed object storage

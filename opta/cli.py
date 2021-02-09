@@ -56,6 +56,7 @@ import yaml  # noqa: E402
 
 from opta import gen_tf  # noqa: E402
 from opta.amplitude import amplitude_client  # noqa: E402
+from opta.inspect_cmd import inspect_cmd  # noqa: E402
 from opta.kubectl import setup_kubectl  # noqa: E402
 from opta.layer import Layer  # noqa: E402
 from opta.nice_subprocess import nice_run  # noqa: E402
@@ -147,6 +148,14 @@ def push(
 @click.option(
     "--configfile", default="opta.yml", help="Opta config file", show_default=True
 )
+@click.option("--env", default=None, help="The env to use when loading the config file")
+def inspect(configfile: str, env: Optional[str]) -> None:
+    """ Displays important resources and AWS/Datadog links to them """
+    inspect_cmd(configfile, env)
+
+
+@cli.command()
+@click.option("--configfile", default="opta.yml", help="Opta config file", show_default=True)
 @click.option("--env", default=None, help="The env to use when loading the config file")
 @click.pass_context
 def configure_kubectl(ctx: Any, configfile: str, env: Optional[str]) -> None:
