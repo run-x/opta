@@ -256,6 +256,7 @@ def _apply(
         # but have not been touched by any block.
         # Modules are untouched if the customer deletes or renames them in the
         # opta config file.
+        # TODO: Warn user when things are getting deleted (when we have opta diffs)
         if block_idx + 1 == len(blocks_to_process):
             untouched_modules = list(total_modules_applied - current_module_keys)
             target_modules += untouched_modules
