@@ -31,7 +31,9 @@ def get_module(module_name: str, env: Optional[str], configfile: str) -> Module:
 @click.argument("module_name")
 @click.argument("secret")
 @click.option("--env", default=None, help="The env to use when loading the config file")
-@click.option("--configfile", default="opta.yml", help="Opta config file")
+@click.option(
+    "--configfile", default="opta.yml", help="Opta config file", show_default=True
+)
 def view(module_name: str, secret: str, env: Optional[str], configfile: str) -> None:
     """View a given secret of a k8s service"""
     target_module = get_module(module_name, env, configfile)
@@ -50,7 +52,9 @@ def view(module_name: str, secret: str, env: Optional[str], configfile: str) -> 
 @secret.command(name="list")
 @click.argument("module_name")
 @click.option("--env", default=None, help="The env to use when loading the config file")
-@click.option("--configfile", default="opta.yml", help="Opta config file")
+@click.option(
+    "--configfile", default="opta.yml", help="Opta config file", show_default=True
+)
 def list_command(module_name: str, env: Optional[str], configfile: str) -> None:
     """List the secrets setup for the given k8s service module"""
     target_module = get_module(module_name, env, configfile)
@@ -69,7 +73,9 @@ def list_command(module_name: str, env: Optional[str], configfile: str) -> None:
 @click.argument("secret")
 @click.argument("value")
 @click.option("--env", default=None, help="The env to use when loading the config file")
-@click.option("--configfile", default="opta.yml", help="Opta config file")
+@click.option(
+    "--configfile", default="opta.yml", help="Opta config file", show_default=True
+)
 def update(
     module_name: str, secret: str, value: str, env: Optional[str], configfile: str
 ) -> None:
