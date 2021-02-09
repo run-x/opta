@@ -123,7 +123,7 @@ def gen(
 ) -> None:
     """Deprecated-- pls use apply it's exactly the same"""
     print("The gen command is being deprecated in favor of the apply command")
-    _apply(configfile, out, env, no_apply, refresh, max_block, var)
+    _apply(configfile, out, env, no_apply, refresh, max_block, var, False)
     _cleanup()
 
 
@@ -144,11 +144,7 @@ def gen(
 )
 @click.pass_context
 def output(
-    ctx: Any,
-    configfile: str,
-    env: Optional[str],
-    include_parent: bool,
-    force_init: bool,
+    ctx: Any, configfile: str, env: Optional[str], include_parent: bool, force_init: bool,
 ) -> None:
     """ Print TF outputs """
     temp_tf_file = "tmp-output.tf.json"
@@ -178,7 +174,9 @@ def configure_kubectl(ctx: Any, configfile: str, env: Optional[str]) -> None:
 @click.option(
     "--configfile", default="opta.yml", help="Opta config file", show_default=True
 )
-@click.option("--out", default=DEFAULT_GENERATED_TF_FILE, help="Generated tf file", hidden=True)
+@click.option(
+    "--out", default=DEFAULT_GENERATED_TF_FILE, help="Generated tf file", hidden=True
+)
 @click.option(
     "--env",
     default=None,
@@ -190,17 +188,25 @@ def configure_kubectl(ctx: Any, configfile: str, env: Optional[str]) -> None:
     is_flag=True,
     default=False,
     help="Do not run terraform, just write the json",
-    hidden=True
+    hidden=True,
 )
 @click.option(
     "--refresh",
     is_flag=True,
     default=False,
     help="Run from first block, regardless of current state",
-    hidden=True
 )
-@click.option("--max-block", default=None, type=int, help="Max block to process", hidden=True)
+@click.option(
+    "--max-block", default=None, type=int, help="Max block to process", hidden=True
+)
 @click.option("--var", multiple=True, default=[], type=str, help="Variable to update")
+@click.option(
+    "--test",
+    is_flag=True,
+    default=False,
+    help="Run tf plan, but don't lock state file",
+    hidden=True,
+)
 def apply(
     configfile: str,
     out: str,
@@ -209,9 +215,10 @@ def apply(
     refresh: bool,
     max_block: Optional[int],
     var: List[str],
+    test: bool,
 ) -> None:
     """Apply your opta config file to your infrastructure!"""
-    _apply(configfile, out, env, no_apply, refresh, max_block, var)
+    _apply(configfile, out, env, no_apply, refresh, max_block, var, test)
     _cleanup()
 
 
@@ -223,6 +230,7 @@ def _apply(
     refresh: bool,
     max_block: Optional[int],
     var: List[str],
+    test: bool,
 ) -> None:
     """ Generate TF file based on opta config file """
     if not is_tool("terraform"):
@@ -306,15 +314,23 @@ def _apply(
 
         targets = list(map(lambda x: f"-target=module.{x}", target_modules))
 
-        # Always fetch the latest modules while we're still in active development
+        # Always fetch the latest modules while we're still in active development.
         nice_run(["terraform", "get", "--update"], check=True)
 
         nice_run(["terraform", "init"], check=True)
-        nice_run(
-            ["terraform", "plan", f"-out={TERRAFORM_PLAN_FILE}", "-lock-timeout=60s"]
-            + targets,
-            check=True,
-        )
+
+        # When the test flag is passed, verify that terraform plan runs without issues,
+        # but don't lock the state.
+        if test:
+            nice_run(["terraform", "plan", "-lock=false"] + targets, check=True)
+            print("Plan ran successfully, skipping apply..")
+            continue
+        else:
+            nice_run(
+                ["terraform", "plan", f"-out={TERRAFORM_PLAN_FILE}", "-lock-timeout=60s"]
+                + targets,
+                check=True,
+            )
 
         click.confirm(
             "Terraform plan generation successful, would you like to apply?", abort=True
