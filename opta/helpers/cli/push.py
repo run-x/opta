@@ -1,6 +1,4 @@
 import base64
-import json
-import os
 from typing import Optional, Tuple
 
 import boto3
@@ -10,11 +8,10 @@ from opta.layer import Layer
 from opta.nice_subprocess import nice_run  # noqa: E402
 from opta.output import get_terraform_outputs
 
+
 def get_registry_url() -> None:
     outputs = get_terraform_outputs()
-    if (
-        "docker_repo_url" not in outputs
-    ):
+    if "docker_repo_url" not in outputs:
         raise Exception(
             "Unable to determine docker repository url. There is likely something wrong with your opta configuration."
         )

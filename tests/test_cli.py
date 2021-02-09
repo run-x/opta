@@ -190,9 +190,7 @@ class TestPush:
         mocker.patch("opta.cli.get_ecr_auth_info").return_value = "username", "password"
 
         runner = CliRunner()
-        result = runner.invoke(
-            cli, ["push", "local_image", "--tag", "tag-override"]
-        )
+        result = runner.invoke(cli, ["push", "local_image", "--tag", "tag-override"])
 
         assert result.exit_code == 1
         assert (
