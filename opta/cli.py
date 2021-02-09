@@ -65,6 +65,7 @@ TERRAFORM_PLAN_FILE = "tf.plan"
 
 @click.group()
 def cli() -> None:
+    """Welcome to opta, runx's cli!"""
     pass
 
 
@@ -90,7 +91,9 @@ def debugger() -> None:
 
 
 @cli.command()
-@click.option("--configfile", default="opta.yml", help="Opta config file")
+@click.option(
+    "--configfile", default="opta.yml", help="Opta config file", show_default=True
+)
 @click.option("--out", default=DEFAULT_GENERATED_TF_FILE, help="Generated tf file")
 @click.option("--env", default=None, help="The env to use when loading the config file")
 @click.option(
@@ -116,6 +119,7 @@ def gen(
     max_block: Optional[int],
     var: List[str],
 ) -> None:
+    """Deprecated-- pls use apply it's exactly the same"""
     print("The gen command is being deprecated in favor of the apply command")
     _apply(configfile, out, env, no_apply, refresh, max_block, var)
     _cleanup()
@@ -148,7 +152,9 @@ def output(
 
 
 @cli.command()
-@click.option("--configfile", default="opta.yml", help="Opta config file")
+@click.option(
+    "--configfile", default="opta.yml", help="Opta config file", show_default=True
+)
 @click.option("--env", default=None, help="The env to use when loading the config file")
 def configure_kubectl(configfile: str, env: Optional[str]) -> None:
     """ Configure the kubectl CLI tool for the given cluster """
@@ -157,9 +163,16 @@ def configure_kubectl(configfile: str, env: Optional[str]) -> None:
 
 
 @cli.command()
-@click.option("--configfile", default="opta.yml", help="Opta config file")
+@click.option(
+    "--configfile", default="opta.yml", help="Opta config file", show_default=True
+)
 @click.option("--out", default=DEFAULT_GENERATED_TF_FILE, help="Generated tf file")
-@click.option("--env", default=None, help="The env to use when loading the config file")
+@click.option(
+    "--env",
+    default=None,
+    help="The env to use when loading the config file",
+    show_default=True,
+)
 @click.option(
     "--no-apply",
     is_flag=True,
@@ -183,6 +196,7 @@ def apply(
     max_block: Optional[int],
     var: List[str],
 ) -> None:
+    """Apply your opta config file to your infrastructure!"""
     _apply(configfile, out, env, no_apply, refresh, max_block, var)
     _cleanup()
 
@@ -261,11 +275,7 @@ def _apply(
         gen_tf.gen(ret, out)
         if no_apply:
             continue
-        click.confirm(
-            f"Will now initialize generate terraform plan for block {block_idx}. "
-            "Sounds good?",
-            abort=True,
-        )
+        print(f"Will now initialize generate terraform plan for block {block_idx}.")
         amplitude_client.send_event(
             amplitude_client.PLAN_EVENT, event_properties={"block_idx": block_idx}
         )
