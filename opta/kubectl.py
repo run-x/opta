@@ -72,8 +72,12 @@ def setup_kubectl(configfile: str, env: Optional[str]) -> None:
 
     # Get the cluster name from the outputs.
     outputs = get_terraform_outputs(include_parent=True)
-    # Use unsafe key accessing so fails loudly if the cluster name is not exported.
-    cluster_name = outputs["parent.k8s_cluster_name"]
+    cluster_name = outputs.get("parent.k8s_cluster_name") or outputs.get(
+        "k8s_cluster_name"
+    )
+
+    if cluster_name is None:
+        raise Exception("The EKS cluster name could not be determined.")
 
     # Update kubeconfig with the cluster details, and also switches context
     nice_run(
