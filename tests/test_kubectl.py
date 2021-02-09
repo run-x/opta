@@ -9,6 +9,10 @@ from opta.cli import configure_kubectl
 
 class TestKubectl:
     def test_configure_kubectl(self, mocker: MockFixture) -> None:
+        # Mock the apply command that generates the tf file at the beginning.
+        mocker.patch("opta.cli.apply")
+        mocker.patch("opta.cli.os.remove")
+
         # Mock that the kubectl and aws comamnds exist in the env.
         mocker.patch("opta.kubectl.is_tool", return_value=True)
 
@@ -31,12 +35,20 @@ class TestKubectl:
         )
 
         # Mock fetching the opta env aws account id.
+        mocker.patch("opta.kubectl._get_root_layer")
         mocker.patch(
             "opta.kubectl._get_cluster_env",
             return_value=("us-east-1", [fake_aws_account_id]),
         )
+        # Mock fetching the cluster name
+        mocker.patch(
+            "opta.kubectl.get_terraform_outputs",
+            return_value={"parent.k8s_cluster_name": "main"},
+        )
+
         runner = CliRunner()
         result = runner.invoke(configure_kubectl, [])
+        print(result.exception)
         assert result.exit_code == 0
 
         # If the current aws account id does not match the specified opta env's, then
