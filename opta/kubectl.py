@@ -118,8 +118,7 @@ def _get_eks_cluster_name(root_layer: Layer) -> str:
     gen_tf.gen(ret, tmp_tf_file)
 
     # Get the cluster name from the outputs.
-    outputs_raw = get_terraform_outputs(True)
-    outputs = json.loads(outputs_raw)
+    outputs = get_terraform_outputs(True, True)
     # Use unsafe key accessing so fails loudly if the cluster name is not exported.
     cluster_name = outputs["k8s_cluster_name"]["value"]
 

@@ -27,6 +27,7 @@ else:
     )
 
 
+import json  # noqa: E402
 import os  # noqa: E402
 import os.path  # noqa: E402
 from importlib.util import find_spec  # noqa: E402
@@ -114,17 +115,27 @@ def gen(
 @click.option("--configfile", default="opta.yml", help="Opta config file")
 @click.option("--env", default=None, help="The env to use when loading the config file")
 @click.option(
+    "--include-parent",
+    is_flag=True,
+    default=False,
+    help="Also fetch outputs from the env (parent) layer",
+)
+@click.option(
     "--force-init",
     is_flag=True,
     default=False,
     help="Force regenerate opta setup files, instead of using cache",
 )
 @click.pass_context
-def output(ctx: Any, configfile: str, env: Optional[str], force_init: bool,) -> None:
+def output(
+    ctx: Any, configfile: str, env: Optional[str], include_parent: bool, force_init: bool,
+) -> None:
     """ Print TF outputs """
     temp_tf_file = "tmp-output.tf.json"
     ctx.invoke(apply, configfile=configfile, env=env, out=temp_tf_file, no_apply=True)
-    print(get_terraform_outputs(force_init))
+    outputs = get_terraform_outputs(force_init, include_parent)
+    outputs_formatted = json.dumps(outputs, indent=4)
+    print(outputs_formatted)
     os.remove(temp_tf_file)
 
 
