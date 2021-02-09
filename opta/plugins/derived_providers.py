@@ -19,7 +19,7 @@ class DerivedProviders:
             for m in b.modules:
                 if "providers" in m.desc:
                     hydration = {
-                        "layer_name": self.layer.meta["name"],
+                        "layer_name": self.layer.name,
                         "state_storage": self.layer.state_storage(),
                         "module_source": "data.terraform_remote_state.parent.outputs"
                         if self.is_parent

@@ -111,7 +111,7 @@ variable "uri_prefix" {
 }
 
 variable "secrets" {
-  type = list(string)
+  type = list(map(string))
   default = []
 }
 
@@ -123,4 +123,7 @@ variable "read_buckets" {
 variable "write_buckets" {
   type = list(string)
   default = []
+}
+
+variable "iam_policy" {
 }

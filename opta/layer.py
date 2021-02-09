@@ -12,8 +12,10 @@ import yaml
 
 from opta.blocks import Blocks
 from opta.constants import REGISTRY
+from opta.exceptions import UserErrors
+from opta.module import Module
+from opta.module_processors.k8s_service import K8sServiceProcessor
 from opta.plugins.derived_providers import DerivedProviders
-from opta.plugins.link_processor import LinkProcessor
 from opta.utils import deep_merge, hydrate
 
 
@@ -27,19 +29,28 @@ class Layer:
         self.meta = meta
         self.parent = parent
         if not Layer.valid_name(self.meta["name"]):
-            raise Exception(
+            raise UserErrors(
                 "Invalid layer, can only contain lowercase letters, numbers and hyphens!"
             )
+        self.name = self.meta["name"]
         self.blocks = []
         for block_data in blocks_data:
             self.blocks.append(
                 Blocks(
-                    self.meta["name"],
+                    self.name,
                     block_data["modules"],
                     block_data.get("backend", "enabled") == "enabled",
                     self.parent,
                 )
             )
+        module_names: set = set()
+        for block in self.blocks:
+            for module in block.modules:
+                if module.key in module_names:
+                    raise UserErrors(
+                        f"The module name {module.key} is used multiple time in the "
+                        "layer. Module names must be unique per layer"
+                    )
 
     @classmethod
     def load_from_yaml(cls, configfile: str, env: Optional[str]) -> Layer:
@@ -63,7 +74,7 @@ class Layer:
         elif path.exists(configfile):
             conf = yaml.load(open(configfile), Loader=yaml.Loader)
         else:
-            raise Exception(f"File {configfile} not found")
+            raise UserErrors(f"File {configfile} not found")
         return cls.load_from_dict(conf, env)
 
     @classmethod
@@ -81,7 +92,7 @@ class Layer:
         if "envs" in meta:
             envs = meta.pop("envs")
             if env is None:
-                raise Exception(
+                raise UserErrors(
                     "configfile has multiple environments, but you did not specify one"
                 )
             potential_envs = []
@@ -95,7 +106,7 @@ class Layer:
                         meta.get("variables", {}), current_variables
                     )
                     return cls(meta, blocks_data, current_parent)
-            raise Exception(f"Invalid env of {env}, valid ones are {potential_envs}")
+            raise UserErrors(f"Invalid env of {env}, valid ones are {potential_envs}")
         if "parent" in meta:
             parent = cls.load_from_yaml(meta["parent"], env)
         return cls(meta, blocks_data, parent)
@@ -108,7 +119,17 @@ class Layer:
     def get_env(self) -> str:
         if self.parent is not None:
             return self.parent.get_env()
-        return self.meta["name"]
+        return self.name
+
+    def get_module(
+        self, module_name: str, block_idx: Optional[int] = None
+    ) -> Optional[Module]:
+        block_idx = block_idx or len(self.blocks) - 1
+        for block in self.blocks[0 : block_idx + 1]:
+            for module in block.modules:
+                if module.key == module_name:
+                    return module
+        return None
 
     def outputs(self, block_idx: Optional[int] = None) -> Iterable[str]:
         ret: List[str] = []
@@ -119,10 +140,11 @@ class Layer:
 
     def gen_tf(self, block_idx: int) -> Dict[Any, Any]:
         ret: Dict[Any, Any] = {}
-        current_modules = []
         for block in self.blocks[0 : block_idx + 1]:
-            current_modules += block.modules
-        LinkProcessor().process(current_modules)
+            for module in block.modules:
+                module_type = module.data["type"]
+                if module_type == "k8s-service":
+                    K8sServiceProcessor(module, self).process(block_idx)
         for block in self.blocks[0 : block_idx + 1]:
             ret = deep_merge(block.gen_tf(), ret)
 
@@ -177,7 +199,7 @@ class Layer:
                                 "config": hydrate(
                                     config,
                                     {
-                                        "layer_name": self.parent.meta["name"],
+                                        "layer_name": self.parent.name,
                                         "state_storage": self.state_storage(),
                                         "provider": self.parent.meta.get(
                                             "providers", {}
