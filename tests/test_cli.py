@@ -14,6 +14,7 @@ from opta.cli import (
     _cleanup,
     at_exit_callback,
     output,
+    cli,
 )
 from tests.fixtures.apply import BASIC_APPLY
 
@@ -102,23 +103,60 @@ class TestCLI:
 
                 write_open().write.assert_called_once_with(json.dumps(o, indent=2))
 
-    def test_push(self, mocker: MockFixture) -> None:
-        mocked_exists = mocker.patch("os.path.exists")
-        mocked_exists.return_value = True
-        input, output = BASIC_APPLY
+class TestPush:
+    def test_no_docker(self, mocker: MockFixture) -> None:
+        is_tool_mock = mocker.patch("opta.cli.is_tool")
+        is_tool_mock.return_value = False
+
+        runner = CliRunner()
+        result = runner.invoke(cli, ["push", "local_image:local_tag"])
+        print(result.exception)
+        assert str(result.exception) == "Please install docker on your machine"
+    
+    def test_no_tag_override(self, mocker: MockFixture) -> None:
+        nice_run_mock = mocker.patch("opta.helpers.cli.push.nice_run")
+        apply_mock = mocker.patch("opta.cli.apply")
+        mocker.patch("opta.cli.get_registry_url").return_value = "889760294590.dkr.ecr.us-east-1.amazonaws.com/github-runx-app"
+        mocker.patch("opta.cli.get_ecr_auth_info").return_value = "username", "password"
+
+        runner = CliRunner()
+        result = runner.invoke(cli, ["push", "local_image:local_tag"])
         
-        old_open = open
-        write_open = mock_open()
+        assert result.exit_code == 0
+        apply_mock.assert_called_once_with(configfile="opta.yml", env=None, no_apply=True, out="tmp-output.tf.json")
 
-        def new_open(a: str, b: Any = "r") -> Any:
-            if a == "opta.yml":
-                return mock_open(read_data=yaml.dump(input)).return_value
-            elif a == DEFAULT_GENERATED_TF_FILE:
-                return write_open.return_value
-            else:
-                return old_open(a, b)
+        nice_run_mock.assert_has_calls([
+            mocker.call(["docker", "login", "889760294590.dkr.ecr.us-east-1.amazonaws.com/github-runx-app", "--username", "username", "--password-stdin"], input="password"),
+            mocker.call(["docker", "tag", "local_image:local_tag", "889760294590.dkr.ecr.us-east-1.amazonaws.com/github-runx-app:local_tag"]),
+        ])
 
-        with patch("builtins.open") as mocked_open:
-            mocked_open.side_effect = new_open
-            
-        pass
+    def test_with_tag_override(self, mocker: MockFixture) -> None:
+        nice_run_mock = mocker.patch("opta.helpers.cli.push.nice_run")
+        apply_mock = mocker.patch("opta.cli.apply")
+        mocker.patch("opta.cli.get_registry_url").return_value = "889760294590.dkr.ecr.us-east-1.amazonaws.com/github-runx-app"
+        mocker.patch("opta.cli.get_ecr_auth_info").return_value = "username", "password"
+
+        runner = CliRunner()
+        result = runner.invoke(cli, ["push", "local_image:local_tag", "--image-tag", "tag-override"])
+        
+        assert result.exit_code == 0
+        apply_mock.assert_called_once_with(configfile="opta.yml", env=None, no_apply=True, out="tmp-output.tf.json")
+
+        nice_run_mock.assert_has_calls([
+            mocker.call(["docker", "login", "889760294590.dkr.ecr.us-east-1.amazonaws.com/github-runx-app", "--username", "username", "--password-stdin"], input="password"),
+            mocker.call(["docker", "tag", "local_image:local_tag", "889760294590.dkr.ecr.us-east-1.amazonaws.com/github-runx-app:tag-override"]),
+            mocker.call(["docker", "push", "889760294590.dkr.ecr.us-east-1.amazonaws.com/github-runx-app:tag-override"]),
+        ])
+        
+    def test_bad_image_name(self, mocker: MockFixture) -> None:
+        apply_mock = mocker.patch("opta.cli.apply")
+        mocker.patch("opta.cli.get_registry_url").return_value = "889760294590.dkr.ecr.us-east-1.amazonaws.com/github-runx-app"
+        mocker.patch("opta.cli.get_ecr_auth_info").return_value = "username", "password"
+
+        runner = CliRunner()
+        result = runner.invoke(cli, ["push", "local_image", "--image-tag", "tag-override"])
+        
+        assert result.exit_code == 1
+        assert str(result.exception) == "Unexpected image name local_image: your image_name must be of the format <IMAGE>:<TAG>."
+        apply_mock.assert_called_once_with(configfile="opta.yml", env=None, no_apply=True, out="tmp-output.tf.json")
+        

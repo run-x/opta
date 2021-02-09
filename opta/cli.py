@@ -132,10 +132,10 @@ def output(ctx: Any, configfile: str, env: Optional[str], force_init: bool,) -> 
 
 
 @cli.command()
-@click.argument("image-name")
-@click.option("--configfile", default="opta.yml", help="Opta config file")
-@click.option("--env", default=None, help="The env to use when loading the config file")
-@click.option("--image-tag", default=None, help="The image tag associated with your docker container")
+@click.argument("image")
+@click.option("--configfile", default="opta.yml", help="Opta config file.")
+@click.option("--env", default=None, help="The env to use when loading the config file.")
+@click.option("--image-tag", default=None, help="The image tag associated with your docker container. Defaults to your local image tag.")
 @click.pass_context
 def push(
     ctx: Any,
