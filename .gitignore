@@ -10,3 +10,5 @@ main.tf.json
 __pycache__
 .coverage
 coverage.xml
+
+.vscode

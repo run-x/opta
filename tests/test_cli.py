@@ -14,7 +14,9 @@ from opta.cli import (
     _cleanup,
     apply,
     at_exit_callback,
+    cli,
 )
+from tests.fixtures.apply import BASIC_APPLY
 
 
 class TestCLI:
@@ -46,58 +48,7 @@ class TestCLI:
     def test_basic_apply(self, mocker: MockFixture) -> None:
         mocked_exists = mocker.patch("os.path.exists")
         mocked_exists.return_value = True
-        test_cases: Any = [
-            (
-                {
-                    "meta": {
-                        "create-env": "dev1",
-                        "name": "dev1",
-                        "providers": {
-                            "aws": {"allowed_account_ids": ["abc"], "region": "us-east-1"}
-                        },
-                    },
-                    "modules": {
-                        "core": {
-                            "type": "aws-state-init",
-                            "bucket_name": "{state_storage}",
-                            "dynamodb_lock_table_name": "{state_storage}",
-                        }
-                    },
-                },
-                {
-                    "provider": {
-                        "aws": {"allowed_account_ids": ["abc"], "region": "us-east-1"}
-                    },
-                    "terraform": {
-                        "backend": {
-                            "s3": {
-                                "bucket": "opta-tf-state-dev1",
-                                "key": "dev1",
-                                "dynamodb_table": "opta-tf-state-dev1",
-                                "region": "us-east-1",
-                            }
-                        }
-                    },
-                    "module": {
-                        "core": {
-                            "source": "./config/tf_modules/aws-state-init",
-                            "bucket_name": "opta-tf-state-dev1",
-                            "dynamodb_lock_table_name": "opta-tf-state-dev1",
-                        }
-                    },
-                    "output": {
-                        "state_bucket_id": {"value": "${module.core.state_bucket_id }"},
-                        "state_bucket_arn": {"value": "${module.core.state_bucket_arn }"},
-                        "kms_account_key_arn": {
-                            "value": "${module.core.kms_account_key_arn }"
-                        },
-                        "kms_account_key_id": {
-                            "value": "${module.core.kms_account_key_id }"
-                        },
-                    },
-                },
-            )
-        ]
+        test_cases: Any = [BASIC_APPLY]
 
         runner = CliRunner()
         for (i, o) in test_cases:
@@ -130,3 +81,122 @@ class TestCLI:
                 )
 
                 write_open().write.assert_called_once_with(json.dumps(o, indent=2))
+
+
+class TestPush:
+    def test_no_docker(self, mocker: MockFixture) -> None:
+        is_tool_mock = mocker.patch("opta.cli.is_tool")
+        is_tool_mock.return_value = False
+
+        runner = CliRunner()
+        result = runner.invoke(cli, ["push", "local_image:local_tag"])
+        print(result.exception)
+        assert str(result.exception) == "Please install docker on your machine"
+
+    def test_no_tag_override(self, mocker: MockFixture) -> None:
+        nice_run_mock = mocker.patch("opta.helpers.cli.push.nice_run")
+        apply_mock = mocker.patch("opta.cli.apply")
+        mocker.patch(
+            "opta.cli.get_registry_url"
+        ).return_value = "889760294590.dkr.ecr.us-east-1.amazonaws.com/github-runx-app"
+        mocker.patch("opta.cli.get_ecr_auth_info").return_value = "username", "password"
+
+        runner = CliRunner()
+        result = runner.invoke(cli, ["push", "local_image:local_tag"])
+
+        assert result.exit_code == 0
+        apply_mock.assert_called_once_with(
+            configfile="opta.yml", env=None, no_apply=True, out="tmp-output.tf.json"
+        )
+
+        nice_run_mock.assert_has_calls(
+            [
+                mocker.call(
+                    [
+                        "docker",
+                        "login",
+                        "889760294590.dkr.ecr.us-east-1.amazonaws.com/github-runx-app",
+                        "--username",
+                        "username",
+                        "--password-stdin",
+                    ],
+                    input=b"password",
+                ),
+                mocker.call(
+                    [
+                        "docker",
+                        "tag",
+                        "local_image:local_tag",
+                        "889760294590.dkr.ecr.us-east-1.amazonaws.com/github-runx-app:local_tag",
+                    ]
+                ),
+            ]
+        )
+
+    def test_with_tag_override(self, mocker: MockFixture) -> None:
+        nice_run_mock = mocker.patch("opta.helpers.cli.push.nice_run")
+        apply_mock = mocker.patch("opta.cli.apply")
+        mocker.patch(
+            "opta.cli.get_registry_url"
+        ).return_value = "889760294590.dkr.ecr.us-east-1.amazonaws.com/github-runx-app"
+        mocker.patch("opta.cli.get_ecr_auth_info").return_value = "username", "password"
+
+        runner = CliRunner()
+        result = runner.invoke(
+            cli, ["push", "local_image:local_tag", "--tag", "tag-override"]
+        )
+
+        assert result.exit_code == 0
+        apply_mock.assert_called_once_with(
+            configfile="opta.yml", env=None, no_apply=True, out="tmp-output.tf.json"
+        )
+
+        nice_run_mock.assert_has_calls(
+            [
+                mocker.call(
+                    [
+                        "docker",
+                        "login",
+                        "889760294590.dkr.ecr.us-east-1.amazonaws.com/github-runx-app",
+                        "--username",
+                        "username",
+                        "--password-stdin",
+                    ],
+                    input=b"password",
+                ),
+                mocker.call(
+                    [
+                        "docker",
+                        "tag",
+                        "local_image:local_tag",
+                        "889760294590.dkr.ecr.us-east-1.amazonaws.com/github-runx-app:tag-override",
+                    ]
+                ),
+                mocker.call(
+                    [
+                        "docker",
+                        "push",
+                        "889760294590.dkr.ecr.us-east-1.amazonaws.com/github-runx-app:tag-override",
+                    ]
+                ),
+            ]
+        )
+
+    def test_bad_image_name(self, mocker: MockFixture) -> None:
+        apply_mock = mocker.patch("opta.cli.apply")
+        mocker.patch(
+            "opta.cli.get_registry_url"
+        ).return_value = "889760294590.dkr.ecr.us-east-1.amazonaws.com/github-runx-app"
+        mocker.patch("opta.cli.get_ecr_auth_info").return_value = "username", "password"
+
+        runner = CliRunner()
+        result = runner.invoke(cli, ["push", "local_image", "--tag", "tag-override"])
+
+        assert result.exit_code == 1
+        assert (
+            str(result.exception)
+            == "Unexpected image name local_image: your image_name must be of the format <IMAGE>:<TAG>."
+        )
+        apply_mock.assert_called_once_with(
+            configfile="opta.yml", env=None, no_apply=True, out="tmp-output.tf.json"
+        )

@@ -5,6 +5,7 @@ import sentry_sdk
 from sentry_sdk.integrations.atexit import AtexitIntegration
 
 from opta.exceptions import UserErrors
+from opta.helpers.cli.push import get_ecr_auth_info, get_registry_url, push_to_docker
 
 
 def at_exit_callback(pending: int, timeout: float) -> None:
@@ -156,6 +157,34 @@ def output(
 
 
 @cli.command()
+@click.argument("image")
+@click.option("--configfile", default="opta.yml", help="Opta config file.")
+@click.option("--env", default=None, help="The env to use when loading the config file.")
+@click.option(
+    "--tag",
+    default=None,
+    help="The image tag associated with your docker container. Defaults to your local image tag.",
+)
+@click.pass_context
+def push(
+    ctx: Any, image: str, configfile: str, env: str, tag: Optional[str] = None,
+) -> None:
+    if not is_tool("docker"):
+        raise Exception("Please install docker on your machine")
+
+    temp_tf_file = "tmp-output.tf.json"
+    try:
+        ctx.invoke(apply, configfile=configfile, env=env, out=temp_tf_file, no_apply=True)
+    finally:
+        if os.path.exists(temp_tf_file):
+            os.remove(temp_tf_file)
+
+    registry_url = get_registry_url()
+    username, password = get_ecr_auth_info(configfile, env)
+    push_to_docker(username, password, image, registry_url, tag)
+
+
+@cli.command()
 @click.option(
     "--configfile", default="opta.yml", help="Opta config file", show_default=True
 )
@@ -195,6 +224,7 @@ def configure_kubectl(ctx: Any, configfile: str, env: Optional[str]) -> None:
     is_flag=True,
     default=False,
     help="Run from first block, regardless of current state",
+    hidden=True,
 )
 @click.option(
     "--max-block", default=None, type=int, help="Max block to process", hidden=True

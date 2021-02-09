@@ -1,6 +1,6 @@
 import signal
 from subprocess import PIPE, CalledProcessError, CompletedProcess, Popen, TimeoutExpired
-from typing import Optional
+from typing import Optional, Union
 
 try:
     import _winapi  # noqa
@@ -12,7 +12,7 @@ except ModuleNotFoundError:
 
 def nice_run(  # type: ignore
     *popenargs,
-    input: Optional[str] = None,
+    input: Optional[Union[str, bytes]] = None,
     capture_output: bool = False,
     timeout: Optional[float] = None,
     exit_timeout: Optional[float] = None,
