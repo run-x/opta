@@ -1,5 +1,6 @@
 import sys
 from shutil import which
+from textwrap import dedent
 from typing import Any, Dict
 
 from opta.special_formatter import PartialFormatter
@@ -56,8 +57,7 @@ def safe_run(func):  # type: ignore
 def fmt_msg(message: str) -> str:
     """Format triple quote python strings"""
     # TODO: Replace with better message formatting
+    message = dedent(message)
     message = message.replace("\n", " ")
-    while "  " in message:
-        message = message.replace("  ", " ")
     message = message.replace("~", "\n")
     return message
