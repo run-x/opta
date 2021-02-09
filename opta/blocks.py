@@ -17,7 +17,12 @@ class Blocks:
         self.parent_layer = parent_layer
         for module_key, module_data in module_data.items():
             self.modules.append(
-                Module(layer_name, module_key, module_data, self.parent_layer,)
+                Module(
+                    layer_name,
+                    module_key,
+                    module_data,
+                    self.parent_layer,
+                )
             )
 
     def outputs(self) -> Iterable[str]:

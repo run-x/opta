@@ -22,9 +22,9 @@ variable "module_name" {
   type = string
 }
 
-variable "target_port" {
+variable "port" {
   description = "Port to be exposed as :80"
-  type = number
+  type = map(number)
 }
 
 variable "image" {
@@ -118,16 +118,6 @@ variable "secrets" {
 variable "read_buckets" {
   type = list(string)
   default = []
-}
-
-variable "tcp_health_check" {
-  type = bool
-  default = false
-}
-
-variable "websockets" {
-  type = bool
-  default = false
 }
 
 variable "write_buckets" {

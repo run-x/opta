@@ -19,7 +19,7 @@ resource "helm_release" "k8s-service" {
         targetCPUUtilizationPercentage: var.autoscaling_cpu_percentage_threshold
         targetMemoryUtilizationPercentage: var.autoscaling_mem_percentage_threshold
       },
-      port: var.target_port,
+      port: var.port,
       podResourceLimits: var.pod_resource_limits,
       podResourceRequests: var.pod_resource_requests,
       image: {
@@ -35,12 +35,9 @@ resource "helm_release" "k8s-service" {
       layerName: var.layer_name,
       moduleName: var.module_name
       iamRoleArn: aws_iam_role.k8s_service.arn
-      tcpHealthCheck: var.tcp_health_check
-      websockets: var.websockets
     })
   ]
   atomic          = true
   cleanup_on_fail = true
-  recreate_pods   = true
 }
 

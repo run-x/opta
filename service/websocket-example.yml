@@ -4,7 +4,8 @@ meta:
 modules:
   app:
     type: k8s-service
-    target_port: 8010
+    port:
+      tcp: 8010
     image: "ksdn117/web-socket-test"
     tag: "latest"
     domain: "dummy.{parent[domain]}"

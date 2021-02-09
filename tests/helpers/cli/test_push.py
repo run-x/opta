@@ -35,7 +35,10 @@ class TestGetRegistryUrl:
 
         nice_run_mock = mocker.patch(
             "opta.output.nice_run",
-            side_effect=self.get_mocked_shell_cmds(mocker, TERRAFORM_OUTPUT_JSON,),
+            side_effect=self.get_mocked_shell_cmds(
+                mocker,
+                TERRAFORM_OUTPUT_JSON,
+            ),
         )
 
         docker_repo_url = get_registry_url()
@@ -75,7 +78,10 @@ class TestGetRegistryUrl:
 
         mocker.patch(
             "opta.helpers.cli.push.nice_run",
-            side_effect=self.get_mocked_shell_cmds(mocker, {},),
+            side_effect=self.get_mocked_shell_cmds(
+                mocker,
+                {},
+            ),
         )
 
         with pytest.raises(Exception) as e_info:

@@ -8,8 +8,8 @@ metadata:
 spec:
   ports:
     - port: 80
-      targetPort: http
+      targetPort: main
       protocol: TCP
-      name: http
+      name: main
   selector:
     {{- include "k8s-service.selectorLabels" . | nindent 4 }}

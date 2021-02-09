@@ -12,7 +12,8 @@ metadata:
     nginx.ingress.kubernetes.io/configuration-snippet: |
       proxy_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;
       grpc_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;
-    {{- if .Values.websockets }}
+    {{/* For websockets */}}
+    {{ if hasKey .Values.port "tcp" }}
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
     {{- end }}

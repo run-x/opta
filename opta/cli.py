@@ -145,7 +145,11 @@ def gen(
 )
 @click.pass_context
 def output(
-    ctx: Any, configfile: str, env: Optional[str], include_parent: bool, force_init: bool,
+    ctx: Any,
+    configfile: str,
+    env: Optional[str],
+    include_parent: bool,
+    force_init: bool,
 ) -> None:
     """ Print TF outputs """
     temp_tf_file = "tmp-output.tf.json"
@@ -167,7 +171,11 @@ def output(
 )
 @click.pass_context
 def push(
-    ctx: Any, image: str, configfile: str, env: str, tag: Optional[str] = None,
+    ctx: Any,
+    image: str,
+    configfile: str,
+    env: str,
+    tag: Optional[str] = None,
 ) -> None:
     if not is_tool("docker"):
         raise Exception("Please install docker on your machine")

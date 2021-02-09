@@ -189,7 +189,7 @@ modules:
       name: str
       layer_name: str
       module_name: str
-      target_port: optional
+      port: optional
       replicas: optional
       image: optional
       tag: optional
@@ -207,8 +207,6 @@ modules:
       k8s_openid_provider_arn: str
       iam_policy: optional
       additional_iam_roles: optional
-      tcp_health_check: optional
-      websockets: optional
     outputs:
       docker_repo_url:
         export: true
