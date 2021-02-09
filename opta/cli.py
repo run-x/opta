@@ -1,12 +1,11 @@
 import sys
 from typing import Any
 
-from opta.helpers.cli.push import get_registry_url, get_ecr_auth_info, push_to_docker
-
 import sentry_sdk
 from sentry_sdk.integrations.atexit import AtexitIntegration
 
 from opta.exceptions import UserErrors
+from opta.helpers.cli.push import get_ecr_auth_info, get_registry_url, push_to_docker
 
 
 def at_exit_callback(pending: int, timeout: float) -> None:
@@ -47,11 +46,11 @@ import os  # noqa: E402
 import os.path  # noqa: E402
 from importlib.util import find_spec  # noqa: E402
 from typing import List, Optional, Set  # noqa: E402
-from botocore.config import Config
 
 import boto3  # noqa: E402
 import click  # noqa: E402
 import yaml  # noqa: E402
+from botocore.config import Config
 
 from opta import gen_tf  # noqa: E402
 from opta.amplitude import amplitude_client  # noqa: E402

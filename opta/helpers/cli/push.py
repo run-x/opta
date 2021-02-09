@@ -1,12 +1,13 @@
-import os
-import json
-from typing import Optional, Tuple
-from opta.nice_subprocess import nice_run  # noqa: E402
-from opta.layer import Layer
-
 import base64
+import json
+import os
+from typing import Optional, Tuple
+
 import boto3
 from botocore.config import Config
+
+from opta.layer import Layer
+from opta.nice_subprocess import nice_run  # noqa: E402
 
 
 def get_registry_url() -> None:

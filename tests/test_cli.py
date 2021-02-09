@@ -13,8 +13,8 @@ from opta.cli import (
     _apply,
     _cleanup,
     at_exit_callback,
-    output,
     cli,
+    output,
 )
 from tests.fixtures.apply import BASIC_APPLY
 

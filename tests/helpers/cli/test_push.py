@@ -1,14 +1,14 @@
 import base64
-from typing import Any, Dict, List, Optional
-from pytest_mock import MockFixture
+import json
 from subprocess import CompletedProcess
+from typing import Any, Dict, List, Optional
+
+import pytest
+from pytest_mock import MockFixture
+
+from opta.helpers.cli.push import get_ecr_auth_info, get_registry_url, push_to_docker
 from opta.layer import Layer
 from tests.fixtures.apply import BASIC_APPLY
-import pytest
-
-import json
-
-from opta.helpers.cli.push import get_registry_url, get_ecr_auth_info, push_to_docker
 
 REGISTRY_URL = "889760294590.dkr.ecr.us-east-1.amazonaws.com/github-runx-app"
 
