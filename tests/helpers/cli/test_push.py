@@ -9,8 +9,9 @@ from pytest_mock import MockFixture
 from opta.helpers.cli.push import get_ecr_auth_info, get_registry_url, push_to_docker
 from opta.layer import Layer
 from tests.fixtures.apply import BASIC_APPLY
+from tests.test_output import TERRAFORM_OUTPUT_JSON
 
-REGISTRY_URL = "889760294590.dkr.ecr.us-east-1.amazonaws.com/github-runx-app"
+REGISTRY_URL = TERRAFORM_OUTPUT_JSON["docker_repo_url"]["value"]
 
 
 class TestGetRegistryUrl:
@@ -18,33 +19,19 @@ class TestGetRegistryUrl:
         mocked_isdir = mocker.patch("os.path.isdir")
         mocked_isdir.return_value = True
 
-        mocked_terraform_get = mocker.Mock(spec=CompletedProcess)
         mocked_terraform_output = mocker.Mock(spec=CompletedProcess)
-        mocked_terraform_output.stdout = json.dumps(
-            {
-                "docker_repo_url": {
-                    "sensitive": False,
-                    "type": "string",
-                    "value": REGISTRY_URL,
-                }
-            }
-        )
+        mocked_terraform_output.stdout = json.dumps(TERRAFORM_OUTPUT_JSON).encode("utf-8")
 
         def nice_run_results(args_array: List[str], **kwargs: Any) -> Any:
-            if args_array == ["terraform", "get", "--update"]:
-                return mocked_terraform_get
             if args_array == ["terraform", "output", "-json"]:
                 return mocked_terraform_output
             raise Exception("Unexpected test input")
 
-        nice_run_mock = mocker.patch(
-            "opta.helpers.cli.push.nice_run", side_effect=nice_run_results
-        )
+        nice_run_mock = mocker.patch("opta.output.nice_run", side_effect=nice_run_results)
 
         docker_repo_url = get_registry_url()
         nice_run_mock.assert_has_calls(
             [
-                mocker.call(["terraform", "get", "--update"], check=True),
                 mocker.call(
                     ["terraform", "output", "-json"], check=True, capture_output=True
                 ),
@@ -57,36 +44,24 @@ class TestGetRegistryUrl:
         mocked_isdir.return_value = False
 
         mocked_terraform_init = mocker.Mock(spec=CompletedProcess)
-        mocked_terraform_get = mocker.Mock(spec=CompletedProcess)
         mocked_terraform_output = mocker.Mock(spec=CompletedProcess)
-        mocked_terraform_output.stdout = json.dumps(
-            {
-                "docker_repo_url": {
-                    "sensitive": False,
-                    "type": "string",
-                    "value": REGISTRY_URL,
-                }
-            }
-        )
+        mocked_terraform_output.stdout = json.dumps(TERRAFORM_OUTPUT_JSON).encode("utf-8")
 
         def nice_run_results(args_array: List[str], **kwargs: Any) -> Any:
             if args_array == ["terraform", "init"]:
                 return mocked_terraform_init
-            if args_array == ["terraform", "get", "--update"]:
-                return mocked_terraform_get
             if args_array == ["terraform", "output", "-json"]:
                 return mocked_terraform_output
             raise Exception("Unexpected test input")
 
         nice_run_mock = mocker.patch(
-            "opta.helpers.cli.push.nice_run", side_effect=nice_run_results
+            "opta.output.nice_run", side_effect=nice_run_results
         )
 
         docker_repo_url = get_registry_url()
         nice_run_mock.assert_has_calls(
             [
                 mocker.call(["terraform", "init"], check=True),
-                mocker.call(["terraform", "get", "--update"], check=True),
                 mocker.call(
                     ["terraform", "output", "-json"], check=True, capture_output=True
                 ),
@@ -167,21 +142,21 @@ class TestPushToDocker:
                         "username",
                         "--password-stdin",
                     ],
-                    input="password",
+                    input=b"password",
                 ),
                 mocker.call(
                     [
                         "docker",
                         "tag",
                         "local_image:local_tag",
-                        "889760294590.dkr.ecr.us-east-1.amazonaws.com/github-runx-app:image_tag_override",
+                        f"{REGISTRY_URL}:image_tag_override",
                     ]
                 ),
                 mocker.call(
                     [
                         "docker",
                         "push",
-                        "889760294590.dkr.ecr.us-east-1.amazonaws.com/github-runx-app:image_tag_override",
+                        f"{REGISTRY_URL}:image_tag_override",
                     ]
                 ),
             ]

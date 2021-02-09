@@ -8,27 +8,18 @@ from botocore.config import Config
 
 from opta.layer import Layer
 from opta.nice_subprocess import nice_run  # noqa: E402
-
+from opta.output import get_terraform_outputs
 
 def get_registry_url() -> None:
-    if not os.path.isdir(".terraform"):
-        nice_run(["terraform", "init"], check=True)
-
-    nice_run(["terraform", "get", "--update"], check=True)
-    tf_output = nice_run(
-        ["terraform", "output", "-json"], check=True, capture_output=True
-    )
-    output_json = json.loads(tf_output.stdout)
-
+    outputs = get_terraform_outputs()
     if (
-        "docker_repo_url" not in output_json
-        or "value" not in output_json["docker_repo_url"]
+        "docker_repo_url" not in outputs
     ):
         raise Exception(
             "Unable to determine docker repository url. There is likely something wrong with your opta configuration."
         )
 
-    return output_json["docker_repo_url"]["value"]
+    return outputs["docker_repo_url"]
 
 
 def get_ecr_auth_info(configfile: str, env: str) -> Tuple[str, str]:
@@ -69,7 +60,7 @@ def push_to_docker(
     remote_image_name = f"{registry_url}:{image_tag}"
     nice_run(
         ["docker", "login", registry_url, "--username", username, "--password-stdin"],
-        input=password,
+        input=password.encode(),
     )
     nice_run(["docker", "tag", local_image, remote_image_name])
     nice_run(["docker", "push", remote_image_name])

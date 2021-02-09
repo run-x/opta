@@ -119,7 +119,7 @@ class TestPush:
                         "username",
                         "--password-stdin",
                     ],
-                    input="password",
+                    input=b"password",
                 ),
                 mocker.call(
                     [
@@ -161,7 +161,7 @@ class TestPush:
                         "username",
                         "--password-stdin",
                     ],
-                    input="password",
+                    input=b"password",
                 ),
                 mocker.call(
                     [
