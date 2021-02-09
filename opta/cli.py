@@ -175,13 +175,12 @@ def push(
     temp_tf_file = "tmp-output.tf.json"
     try:
         ctx.invoke(apply, configfile=configfile, env=env, out=temp_tf_file, no_apply=True)
+        registry_url = get_registry_url()
+        username, password = get_ecr_auth_info(configfile, env)
+        push_to_docker(username, password, image, registry_url, tag)
     finally:
         if os.path.exists(temp_tf_file):
             os.remove(temp_tf_file)
-
-    registry_url = get_registry_url()
-    username, password = get_ecr_auth_info(configfile, env)
-    push_to_docker(username, password, image, registry_url, tag)
 
 
 @cli.command()
