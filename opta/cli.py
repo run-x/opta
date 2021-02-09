@@ -69,7 +69,7 @@ def cli() -> None:
     pass
 
 
-@cli.command()
+@cli.command(hidden=True)
 def debugger() -> None:
     """The opta debugger -- to help you debug"""
     curses_spec = find_spec("_curses")
@@ -90,7 +90,7 @@ def debugger() -> None:
         )
 
 
-@cli.command()
+@cli.command(hidden=True)
 @click.option(
     "--configfile", default="opta.yml", help="Opta config file", show_default=True
 )
@@ -125,7 +125,7 @@ def gen(
     _cleanup()
 
 
-@cli.command()
+@cli.command(hidden=True)
 @click.option("--configfile", default="opta.yml", help="Opta config file")
 @click.option("--env", default=None, help="The env to use when loading the config file")
 @click.option(
@@ -166,7 +166,7 @@ def configure_kubectl(configfile: str, env: Optional[str]) -> None:
 @click.option(
     "--configfile", default="opta.yml", help="Opta config file", show_default=True
 )
-@click.option("--out", default=DEFAULT_GENERATED_TF_FILE, help="Generated tf file")
+@click.option("--out", default=DEFAULT_GENERATED_TF_FILE, help="Generated tf file", hidden=True)
 @click.option(
     "--env",
     default=None,
@@ -178,14 +178,16 @@ def configure_kubectl(configfile: str, env: Optional[str]) -> None:
     is_flag=True,
     default=False,
     help="Do not run terraform, just write the json",
+    hidden=True
 )
 @click.option(
     "--refresh",
     is_flag=True,
     default=False,
     help="Run from first block, regardless of current state",
+    hidden=True
 )
-@click.option("--max-block", default=None, type=int, help="Max block to process")
+@click.option("--max-block", default=None, type=int, help="Max block to process", hidden=True)
 @click.option("--var", multiple=True, default=[], type=str, help="Variable to update")
 def apply(
     configfile: str,
