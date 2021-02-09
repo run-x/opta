@@ -272,6 +272,7 @@ def _apply(
     conf = yaml.load(open(configfile), Loader=yaml.Loader)
     for v in var:
         key, value = v.split("=")
+        conf["meta"]["variables"] = conf["meta"].get("variables", {})
         conf["meta"]["variables"][key] = value
 
     layer = Layer.load_from_dict(conf, env)
