@@ -135,15 +135,10 @@ def push(
     if not is_tool("docker"):
         raise Exception("Please install docker on your machine")
 
-    temp_tf_file = "tmp-output.tf.json"
-    try:
-        ctx.invoke(apply, configfile=configfile, env=env, out=temp_tf_file, no_apply=True)
-        registry_url = get_registry_url()
-        username, password = get_ecr_auth_info(configfile, env)
-        push_to_docker(username, password, image, registry_url, tag)
-    finally:
-        if os.path.exists(temp_tf_file):
-            os.remove(temp_tf_file)
+    ctx.invoke(apply, configfile=configfile, env=env, no_apply=True)
+    registry_url = get_registry_url()
+    username, password = get_ecr_auth_info(configfile, env)
+    push_to_docker(username, password, image, registry_url, tag)
 
 
 @cli.command()
@@ -154,11 +149,9 @@ def push(
 @click.pass_context
 def configure_kubectl(ctx: Any, configfile: str, env: Optional[str]) -> None:
     """ Configure the kubectl CLI tool for the given cluster """
-    temp_tf_file = "tmp-configure-kubectl.tf.json"
-    ctx.invoke(apply, configfile=configfile, env=env, out=temp_tf_file, no_apply=True)
+    ctx.invoke(apply, configfile=configfile, env=env, no_apply=True)
     # Also switches the current kubectl context to the cluster.
     setup_kubectl(configfile, env)
-    os.remove(temp_tf_file)
 
 
 @cli.command()
