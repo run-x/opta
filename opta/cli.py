@@ -395,4 +395,4 @@ if __name__ == "__main__":
         cli()
     except CalledProcessError as e:
         logging.exception(e)
-        print(e.stderr.decode("utf-8"))
+        logging.error(e.stderr.decode("utf-8"))
