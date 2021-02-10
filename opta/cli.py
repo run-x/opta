@@ -1,3 +1,4 @@
+import logging
 import sys
 from typing import Any
 
@@ -46,6 +47,7 @@ import json  # noqa: E402
 import os  # noqa: E402
 import os.path  # noqa: E402
 from importlib.util import find_spec  # noqa: E402
+from subprocess import CalledProcessError  # noqa: E402
 from typing import List, Optional, Set  # noqa: E402
 
 import boto3  # noqa: E402
@@ -341,6 +343,9 @@ cli.add_command(version)
 if __name__ == "__main__":
     try:
         cli()
+    except CalledProcessError as e:
+        logging.exception(e)
+        logging.error(e.stderr.decode("utf-8"))
     finally:
         if os.environ.get("DEBUG") is None:
             _cleanup()
