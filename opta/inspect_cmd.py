@@ -42,8 +42,12 @@ def inspect_cmd() -> None:
             # resource address is "module.app.helm_release.k8s-service".
             if inspect_key in resource_address:
                 resource_name = inspected_resource_mappings[inspect_key].get("name") or ""
-                resource_description = inspected_resource_mappings[inspect_key].get("desc") or ""
-                resource_template_url = inspected_resource_mappings[inspect_key].get("url") or ""
+                resource_description = (
+                    inspected_resource_mappings[inspect_key].get("desc") or ""
+                )
+                resource_template_url = (
+                    inspected_resource_mappings[inspect_key].get("url") or ""
+                )
 
                 resource_values = {"aws_region": aws_region}
 
@@ -51,9 +55,15 @@ def inspect_cmd() -> None:
 
                 # Inspect key-specific logic
                 print(inspect_key, terraform_resource_values.keys())
-                if inspect_key == "helm_release.k8s-service" and "metadata" in terraform_resource_values:
+                if (
+                    inspect_key == "helm_release.k8s-service"
+                    and "metadata" in terraform_resource_values
+                ):
                     k8s_metadata = terraform_resource_values["metadata"]
-                    resource_values = {**resource_values, **_get_k8s_metadata_values(k8s_metadata)}
+                    resource_values = {
+                        **resource_values,
+                        **_get_k8s_metadata_values(k8s_metadata),
+                    }
                     del terraform_resource_values["metadata"]
 
                 for k, v in terraform_resource_values.items():
