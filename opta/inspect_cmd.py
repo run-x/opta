@@ -17,9 +17,8 @@ def inspect_cmd() -> None:
     if not is_tool("terraform"):
         raise Exception("Please install terraform on your machine")
 
-    # Fetch the inspect config template
-    inspect_config_file_path = os.path.join(os.path.dirname(__file__), INSPECT_CONFIG)
-    inspect_config = yaml.load(open(inspect_config_file_path), Loader=yaml.Loader)
+    # Read the inspect config template
+    inspect_config = _read_inspect_config_file()
     inspected_resource_mappings = inspect_config["resources"]
 
     # Fetch the terraform state
@@ -32,7 +31,8 @@ def inspect_cmd() -> None:
         resource_address = resource.get("address", "")
 
         # If the terraform resource address has "[0]" or "[#]" appending it, then
-        # it's an instance of a cluster, in which case, skip.
+        # it's probably a generated resource of something else (such as a db instance
+        # of a db cluster), in which case, skip.
         if re.match(r".*\[[0-9]+\]", resource_address):
             continue
 
@@ -100,25 +100,6 @@ def _get_k8s_metadata_values(resource_properties: dict) -> dict:
     return values
 
 
-# Example resource fetched from terraform:
-# {
-#    "address":"module.app.aws_ecr_lifecycle_policy.repo_policy[0]",
-#    "mode":"managed",
-#    "type":"aws_ecr_lifecycle_policy",
-#    "name":"repo_policy",
-#    "index":0,
-#    "provider_name":"registry.terraform.io/hashicorp/aws",
-#    "schema_version":0,
-#    "values":{
-#       "id":"test-service-runx-app",
-#       "policy":"{}",
-#       "registry_id":"889760294590",
-#       "repository":"test-service-runx-app"
-#    },
-#    "depends_on":[
-#       "module.app.aws_ecr_repository.repo"
-#    ]
-# }
 def _fetch_terraform_resources() -> List[Any]:
     out = nice_run(["terraform", "show", "-json"], check=True, capture_output=True)
     raw_data = out.stdout.decode("utf-8")
@@ -133,6 +114,11 @@ def _fetch_terraform_resources() -> List[Any]:
         resources += child_module.get("resources", [])
 
     return resources
+
+
+def _read_inspect_config_file() -> dict:
+    inspect_config_file_path = os.path.join(os.path.dirname(__file__), INSPECT_CONFIG)
+    return yaml.load(open(inspect_config_file_path), Loader=yaml.Loader)
 
 
 def _get_aws_region() -> str:
