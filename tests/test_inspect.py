@@ -4,8 +4,8 @@ from pytest_mock import MockFixture
 from opta.cli import inspect
 from tests.test_output import MockedCmdOut
 
-FAKE_INSPECT_CONFIG = {
-    "resources": {
+FAKE_REGISTRY = {
+    "inspected_resources": {
         "test_resource.test": {
             "name": "Test resource",
             "url": "https://console.aws.amazon.com/test/{test_value}?region={aws_region}",
@@ -41,9 +41,7 @@ class TestInspect:
         # Mock that the terraform CLI tool exists.
         mocker.patch("opta.inspect_cmd.is_tool", return_value=True)
         # Mock the inspect config
-        mocker.patch(
-            "opta.inspect_cmd._read_inspect_config_file", return_value=FAKE_INSPECT_CONFIG
-        )
+        mocker.patch("opta.inspect_cmd.REGISTRY", FAKE_REGISTRY)
         # Mock fetching the terraform state
         mocker.patch(
             "opta.inspect_cmd.nice_run", return_value=MockedCmdOut(FAKE_TF_STATE)
@@ -53,7 +51,6 @@ class TestInspect:
 
         runner = CliRunner()
         result = runner.invoke(inspect, [])
-        print(result.exception)
         assert result.exit_code == 0
         # Using split to compare without whitespaces
         assert (

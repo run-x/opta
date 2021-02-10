@@ -56,6 +56,7 @@ import yaml  # noqa: E402
 
 from opta import gen_tf  # noqa: E402
 from opta.amplitude import amplitude_client  # noqa: E402
+from opta.constants import TF_FILE_PATH  # noqa: E402
 from opta.inspect_cmd import inspect_cmd  # noqa: E402
 from opta.kubectl import setup_kubectl  # noqa: E402
 from opta.layer import Layer  # noqa: E402
@@ -63,7 +64,6 @@ from opta.nice_subprocess import nice_run  # noqa: E402
 from opta.output import get_terraform_outputs  # noqa: E402
 from opta.plugins.secret_manager import secret  # noqa: E402
 from opta.utils import deep_merge, is_tool  # noqa: E402
-from opta.var import TF_FILE_PATH  # noqa: E402
 from opta.version import version  # noqa: E402
 
 TERRAFORM_PLAN_FILE_PATH = "tf.plan"

@@ -1,15 +1,10 @@
 import json
-import os
 import re
 from typing import Any, List
 
-import yaml
-
+from opta.constants import REGISTRY, TF_FILE_PATH
 from opta.nice_subprocess import nice_run
-from opta.utils import deep_merge, is_tool
-from opta.var import TF_FILE_PATH
-
-INSPECT_CONFIG = "inspect.yml"
+from opta.utils import column_print, deep_merge, is_tool
 
 
 def inspect_cmd() -> None:
@@ -17,9 +12,8 @@ def inspect_cmd() -> None:
     if not is_tool("terraform"):
         raise Exception("Please install terraform on your machine")
 
-    # Read the inspect config template
-    inspect_config = _read_inspect_config_file()
-    inspected_resource_mappings = inspect_config["resources"]
+    # Read the registry for the inspected resources
+    inspected_resource_mappings = REGISTRY["inspected_resources"]
 
     # Fetch the terraform state
     resources = _fetch_terraform_resources()
@@ -116,32 +110,6 @@ def _fetch_terraform_resources() -> List[Any]:
     return resources
 
 
-def _read_inspect_config_file() -> dict:
-    inspect_config_file_path = os.path.join(os.path.dirname(__file__), INSPECT_CONFIG)
-    return yaml.load(open(inspect_config_file_path), Loader=yaml.Loader)
-
-
 def _get_aws_region() -> str:
     tf_config = json.load(open(TF_FILE_PATH))
     return tf_config["provider"]["aws"]["region"]
-
-
-def column_print(inspect_details: List[Any]) -> None:
-    # Determine the width of each column (the length of the longest word + 1)
-    longest_char_len_by_column = [0] * len(inspect_details[0])
-    for resource_details in inspect_details:
-        for column_idx, word in enumerate(resource_details):
-            longest_char_len_by_column[column_idx] = max(
-                len(word), longest_char_len_by_column[column_idx]
-            )
-
-    # Create each line of output one at a time.
-    lines = []
-    for resource_details in inspect_details:
-        line = []
-        for column_idx, word in enumerate(resource_details):
-            line.append(word.ljust(longest_char_len_by_column[column_idx]))
-        line_out = " ".join(line)
-        lines.append(line_out)
-
-    print("\n".join(lines))

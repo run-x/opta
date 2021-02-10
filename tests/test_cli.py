@@ -9,7 +9,7 @@ from click.testing import CliRunner
 from pytest_mock import MockFixture
 
 from opta.cli import TERRAFORM_PLAN_FILE_PATH, _cleanup, apply, at_exit_callback, cli
-from opta.var import TF_FILE_PATH
+from opta.constants import TF_FILE_PATH
 from tests.fixtures.apply import BASIC_APPLY
 
 
