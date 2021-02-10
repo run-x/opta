@@ -149,9 +149,13 @@ def push(
     "--configfile", default="opta.yml", help="Opta config file", show_default=True
 )
 @click.option("--env", default=None, help="The env to use when loading the config file")
-def inspect(configfile: str, env: Optional[str]) -> None:
+@click.pass_context
+def inspect(ctx: Any, configfile: str, env: Optional[str]) -> None:
     """ Displays important resources and AWS/Datadog links to them """
-    inspect_cmd(configfile, env)
+    temp_tf_file = "tmp-inspect.tf.json"
+    ctx.invoke(apply, configfile=configfile, env=env, out=temp_tf_file, no_apply=True)
+    inspect_cmd(temp_tf_file)
+    os.remove(temp_tf_file)
 
 
 @cli.command()

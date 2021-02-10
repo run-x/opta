@@ -1,7 +1,7 @@
 import json
 import os
 import re
-from typing import Any, List, Optional
+from typing import Any, List
 
 import yaml
 
@@ -11,12 +11,12 @@ from opta.utils import is_tool
 INSPECT_CONFIG = "inspect.yml"
 
 
-def inspect_cmd(configfile: str, env: Optional[str]) -> None:
+def inspect_cmd(tf_file_path: str) -> None:
     # Make sure the user has the prerequisite CLI tools installed
     if not is_tool("terraform"):
         raise Exception("Please install terraform on your machine")
 
-    aws_region = _get_aws_region()
+    aws_region = _get_aws_region(tf_file_path)
 
     inspect_config_file_path = os.path.join(os.path.dirname(__file__), INSPECT_CONFIG)
     inspect_config = yaml.load(open(inspect_config_file_path), Loader=yaml.Loader)
@@ -89,8 +89,8 @@ def _fetch_terraform_resources() -> List[Any]:
     return resources
 
 
-def _get_aws_region() -> str:
-    tf_config = json.load(open("tmp.tf.json"))
+def _get_aws_region(tf_file_path: str) -> str:
+    tf_config = json.load(open(tf_file_path))
     return tf_config["provider"]["aws"]["region"]
 
 
