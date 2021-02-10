@@ -91,7 +91,7 @@ class Layer:
         parent = None
         if "envs" in meta:
             envs = meta.pop("envs")
-            if env is None:
+            if len(envs) > 1 and env is None:
                 raise UserErrors(
                     "configfile has multiple environments, but you did not specify one"
                 )
