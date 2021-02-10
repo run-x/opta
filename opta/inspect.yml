@@ -1,7 +1,6 @@
 resources:
   helm_release.k8s-service:
     name: K8s service
-    # TODO: This is wrong, it should be app-
     url: https://app.datadoghq.com/apm/service/{k8s-moduleName}-{k8s-layerName}/
     desc: Secure and scalable Kubernetes service packaged into a helm chart
   aws_docdb_cluster:
