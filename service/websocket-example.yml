@@ -1,0 +1,12 @@
+meta:
+  parent: "git@github.com:run-x/runx-infra.git//staging/opta.yml?ref=main"
+  name: baloney
+modules:
+  app:
+    type: k8s-service
+    port:
+      tcp: 8010
+    image: "ksdn117/web-socket-test"
+    tag: "latest"
+    domain: "dummy.{parent[domain]}"
+    external_image: true

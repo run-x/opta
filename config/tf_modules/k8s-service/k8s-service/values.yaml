@@ -5,6 +5,7 @@ uriPrefix: "/"
 iamRoleArn: ""
 envVars: []
 secrets: []
+port: {}
 
 serviceAccount:
   # The name of the service account to use.

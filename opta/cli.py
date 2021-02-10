@@ -112,7 +112,11 @@ def debugger() -> None:
 )
 @click.pass_context
 def output(
-    ctx: Any, configfile: str, env: Optional[str], include_parent: bool, force_init: bool,
+    ctx: Any,
+    configfile: str,
+    env: Optional[str],
+    include_parent: bool,
+    force_init: bool,
 ) -> None:
     """ Print TF outputs """
     ctx.invoke(apply, configfile=configfile, env=env, no_apply=True)
@@ -132,7 +136,11 @@ def output(
 )
 @click.pass_context
 def push(
-    ctx: Any, image: str, configfile: str, env: str, tag: Optional[str] = None,
+    ctx: Any,
+    image: str,
+    configfile: str,
+    env: str,
+    tag: Optional[str] = None,
 ) -> None:
     if not is_tool("docker"):
         raise Exception("Please install docker on your machine")
@@ -223,6 +231,7 @@ def _apply(
     conf = yaml.load(open(configfile), Loader=yaml.Loader)
     for v in var:
         key, value = v.split("=")
+        conf["meta"]["variables"] = conf["meta"].get("variables", {})
         conf["meta"]["variables"][key] = value
 
     layer = Layer.load_from_dict(conf, env)

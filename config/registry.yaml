@@ -189,7 +189,7 @@ modules:
       name: str
       layer_name: str
       module_name: str
-      target_port: optional
+      port: optional
       replicas: optional
       image: optional
       tag: optional

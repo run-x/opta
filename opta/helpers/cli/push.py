@@ -27,7 +27,9 @@ def get_ecr_auth_info(configfile: str, env: str) -> Tuple[str, str]:
 
     try:
         ecr = boto3.client("ecr", config=Config(region_name=region))
-        response = ecr.get_authorization_token(registryIds=[str(account_id)],)
+        response = ecr.get_authorization_token(
+            registryIds=[str(account_id)],
+        )
     except Exception:
         raise Exception(
             f"Error getting authorization token for accountId {account_id} in region {region}"

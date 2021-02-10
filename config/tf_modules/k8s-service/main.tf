@@ -19,7 +19,7 @@ resource "helm_release" "k8s-service" {
         targetCPUUtilizationPercentage: var.autoscaling_cpu_percentage_threshold
         targetMemoryUtilizationPercentage: var.autoscaling_mem_percentage_threshold
       },
-      port: var.target_port,
+      port: var.port,
       podResourceLimits: var.pod_resource_limits,
       podResourceRequests: var.pod_resource_requests,
       image: {
@@ -39,6 +39,5 @@ resource "helm_release" "k8s-service" {
   ]
   atomic          = true
   cleanup_on_fail = true
-  recreate_pods   = true
 }
 

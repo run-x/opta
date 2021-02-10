@@ -22,9 +22,9 @@ variable "module_name" {
   type = string
 }
 
-variable "target_port" {
+variable "port" {
   description = "Port to be exposed as :80"
-  type = number
+  type = map(number)
 }
 
 variable "image" {

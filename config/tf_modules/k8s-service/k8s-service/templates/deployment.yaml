@@ -1,3 +1,9 @@
+{{- if ne ((keys .Values.port) | len) 1 }}
+  {{- fail "Port must specify either a single tcp port (for websockets) or a single http port" }}
+{{- end }}
+{{- if not (or (hasKey .Values.port "tcp") (hasKey .Values.port "http")) }}
+  {{- fail "Port must specify either a single tcp port (for websockets) or a single http port" }}
+{{- end }}
 {{- if .Values.image.tag }}
 apiVersion: apps/v1
 kind: Deployment
@@ -34,13 +40,14 @@ spec:
               mountPath: "/config"
               readOnly: true
           ports:
-            - name: http
-              containerPort: {{ .Values.port }}
+            - name: main
               protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: {{ .Values.livenessProbePath }}
-              port: http
+            {{- if hasKey .Values.port "http" }}
+              containerPort: {{ .Values.port.http }}
+            {{- end }}
+            {{- if hasKey .Values.port "tcp" }}
+              containerPort: {{ .Values.port.tcp }}
+            {{- end }}
           env:
             - name: RDS_CA_PATH # This is the path to the public key for the docdb tls
               value: "/config/rds_ca.pem"
@@ -57,12 +64,26 @@ spec:
                   key: {{ $val.name | quote }}
             {{ end }}
             {{- end }}
+          livenessProbe:
+            {{ if hasKey .Values.port "tcp" }}
+            tcpSocket:
+            {{ end }}
+            {{- if hasKey .Values.port "http" }}
+            httpGet:
+              path: {{ .Values.livenessProbePath }}
+            {{ end }}
+              port: main
           readinessProbe:
             initialDelaySeconds: 10
             periodSeconds: 10
+            {{ if hasKey .Values.port "tcp" }}
+            tcpSocket:
+            {{ end }}
+            {{- if hasKey .Values.port "http" }}
             httpGet:
               path: {{ .Values.readinessProbePath }}
-              port: http
+            {{ end }}
+              port: main
           resources:
             limits:
               {{- toYaml .Values.podResourceLimits | nindent 14 }}
