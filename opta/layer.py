@@ -100,6 +100,8 @@ class Layer:
                 current_parent = cls.load_from_yaml(env_meta["parent"], env)
                 current_variables = env_meta.get("variables", {})
                 potential_envs.append(current_parent.get_env())
+                if len(envs) == 1:
+                    env = current_parent.get_env()
                 if current_parent.get_env() == env:
                     meta["parent"] = env_meta["parent"]
                     meta["variables"] = deep_merge(
