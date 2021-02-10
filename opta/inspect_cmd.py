@@ -7,16 +7,17 @@ import yaml
 
 from opta.nice_subprocess import nice_run
 from opta.utils import is_tool
+from opta.var import TF_FILE_PATH
 
 INSPECT_CONFIG = "inspect.yml"
 
 
-def inspect_cmd(tf_file_path: str) -> None:
+def inspect_cmd() -> None:
     # Make sure the user has the prerequisite CLI tools installed
     if not is_tool("terraform"):
         raise Exception("Please install terraform on your machine")
 
-    aws_region = _get_aws_region(tf_file_path)
+    aws_region = _get_aws_region()
 
     inspect_config_file_path = os.path.join(os.path.dirname(__file__), INSPECT_CONFIG)
     inspect_config = yaml.load(open(inspect_config_file_path), Loader=yaml.Loader)
@@ -89,8 +90,8 @@ def _fetch_terraform_resources() -> List[Any]:
     return resources
 
 
-def _get_aws_region(tf_file_path: str) -> str:
-    tf_config = json.load(open(tf_file_path))
+def _get_aws_region() -> str:
+    tf_config = json.load(open(TF_FILE_PATH))
     return tf_config["provider"]["aws"]["region"]
 
 

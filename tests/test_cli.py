@@ -8,26 +8,20 @@ import yaml
 from click.testing import CliRunner
 from pytest_mock import MockFixture
 
-from opta.cli import (
-    DEFAULT_GENERATED_TF_FILE,
-    TERRAFORM_PLAN_FILE,
-    _cleanup,
-    apply,
-    at_exit_callback,
-    cli,
-)
+from opta.cli import TERRAFORM_PLAN_FILE_PATH, _cleanup, apply, at_exit_callback, cli
+from opta.var import TF_FILE_PATH
 from tests.fixtures.apply import BASIC_APPLY
 
 
 class TestCLI:
     def test_cleanup(self) -> None:
-        with open(DEFAULT_GENERATED_TF_FILE, "w") as f:
+        with open(TF_FILE_PATH, "w") as f:
             f.write("blah")
-        with open(TERRAFORM_PLAN_FILE, "w") as f:
+        with open(TERRAFORM_PLAN_FILE_PATH, "w") as f:
             f.write("blah")
         _cleanup()
-        assert not os.path.exists(DEFAULT_GENERATED_TF_FILE)
-        assert not os.path.exists(TERRAFORM_PLAN_FILE)
+        assert not os.path.exists(TF_FILE_PATH)
+        assert not os.path.exists(TERRAFORM_PLAN_FILE_PATH)
 
     def test_at_exit_callback_with_pending(self, mocker: MockFixture) -> None:
         mocked_write = mocker.patch("opta.cli.sys.stderr.write")
@@ -58,7 +52,7 @@ class TestCLI:
             def new_open(a: str, b: Any = "r") -> Any:
                 if a == "opta.yml":
                     return mock_open(read_data=yaml.dump(i)).return_value
-                elif a == DEFAULT_GENERATED_TF_FILE:
+                elif a == TF_FILE_PATH:
                     return write_open.return_value
                 else:
                     return old_open(a, b)

@@ -63,10 +63,10 @@ from opta.nice_subprocess import nice_run  # noqa: E402
 from opta.output import get_terraform_outputs  # noqa: E402
 from opta.plugins.secret_manager import secret  # noqa: E402
 from opta.utils import deep_merge, is_tool  # noqa: E402
+from opta.var import TF_FILE_PATH  # noqa: E402
 from opta.version import version  # noqa: E402
 
-DEFAULT_GENERATED_TF_FILE = "main.tf.json"
-TERRAFORM_PLAN_FILE = "tf.plan"
+TERRAFORM_PLAN_FILE_PATH = "tf.plan"
 
 
 @click.group()
@@ -152,14 +152,14 @@ def push(
 @click.pass_context
 def inspect(ctx: Any, configfile: str, env: Optional[str]) -> None:
     """ Displays important resources and AWS/Datadog links to them """
-    temp_tf_file = "tmp-inspect.tf.json"
-    ctx.invoke(apply, configfile=configfile, env=env, out=temp_tf_file, no_apply=True)
-    inspect_cmd(temp_tf_file)
-    os.remove(temp_tf_file)
+    ctx.invoke(apply, configfile=configfile, env=env, no_apply=True)
+    inspect_cmd()
 
 
 @cli.command()
-@click.option("--configfile", default="opta.yml", help="Opta config file", show_default=True)
+@click.option(
+    "--configfile", default="opta.yml", help="Opta config file", show_default=True
+)
 @click.option("--env", default=None, help="The env to use when loading the config file")
 @click.pass_context
 def configure_kubectl(ctx: Any, configfile: str, env: Optional[str]) -> None:
@@ -289,7 +289,7 @@ def _apply(
         ret = layer.gen_providers(block_idx, block.backend_enabled)
         ret = deep_merge(layer.gen_tf(block_idx), ret)
 
-        gen_tf.gen(ret, DEFAULT_GENERATED_TF_FILE)
+        gen_tf.gen(ret, TF_FILE_PATH)
         if no_apply:
             continue
         print(f"Will now initialize generate terraform plan for block {block_idx}.")
@@ -322,7 +322,12 @@ def _apply(
             continue
         else:
             nice_run(
-                ["terraform", "plan", f"-out={TERRAFORM_PLAN_FILE}", "-lock-timeout=60s"]
+                [
+                    "terraform",
+                    "plan",
+                    f"-out={TERRAFORM_PLAN_FILE_PATH}",
+                    "-lock-timeout=60s",
+                ]
                 + targets,
                 check=True,
             )
@@ -334,7 +339,9 @@ def _apply(
             amplitude_client.APPLY_EVENT, event_properties={"block_idx": block_idx}
         )
         nice_run(
-            ["terraform", "apply", "-lock-timeout=60s"] + targets + [TERRAFORM_PLAN_FILE],
+            ["terraform", "apply", "-lock-timeout=60s"]
+            + targets
+            + [TERRAFORM_PLAN_FILE_PATH],
             check=True,
         )
         block_idx += 1
@@ -342,8 +349,8 @@ def _apply(
 
 def _cleanup() -> None:
     try:
-        os.remove(DEFAULT_GENERATED_TF_FILE)
-        os.remove(TERRAFORM_PLAN_FILE)
+        os.remove(TF_FILE_PATH)
+        os.remove(TERRAFORM_PLAN_FILE_PATH)
     except FileNotFoundError:
         pass
 
