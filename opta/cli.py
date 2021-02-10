@@ -64,7 +64,7 @@ from opta.plugins.secret_manager import secret  # noqa: E402
 from opta.utils import deep_merge, is_tool  # noqa: E402
 from opta.version import version  # noqa: E402
 
-DEFAULT_GENERATED_TF_FILE = "tmp-main.tf.json"
+DEFAULT_GENERATED_TF_FILE = "main.tf.json"
 TERRAFORM_PLAN_FILE = "tf.plan"
 
 
@@ -96,41 +96,6 @@ def debugger() -> None:
 
 
 @cli.command(hidden=True)
-@click.option(
-    "--configfile", default="opta.yml", help="Opta config file", show_default=True
-)
-@click.option("--out", default=DEFAULT_GENERATED_TF_FILE, help="Generated tf file")
-@click.option("--env", default=None, help="The env to use when loading the config file")
-@click.option(
-    "--no-apply",
-    is_flag=True,
-    default=False,
-    help="Do not run terraform, just write the json",
-)
-@click.option(
-    "--refresh",
-    is_flag=True,
-    default=False,
-    help="Run from first block, regardless of current state",
-)
-@click.option("--max-block", default=None, type=int, help="Max block to process")
-@click.option("--var", multiple=True, default=[], type=str, help="Variable to update")
-def gen(
-    configfile: str,
-    out: str,
-    env: Optional[str],
-    no_apply: bool,
-    refresh: bool,
-    max_block: Optional[int],
-    var: List[str],
-) -> None:
-    """Deprecated-- pls use apply it's exactly the same"""
-    print("The gen command is being deprecated in favor of the apply command")
-    _apply(configfile, out, env, no_apply, refresh, max_block, var, False)
-    _cleanup()
-
-
-@cli.command(hidden=True)
 @click.option("--configfile", default="opta.yml", help="Opta config file")
 @click.option("--env", default=None, help="The env to use when loading the config file")
 @click.option(
@@ -150,12 +115,10 @@ def output(
     ctx: Any, configfile: str, env: Optional[str], include_parent: bool, force_init: bool,
 ) -> None:
     """ Print TF outputs """
-    temp_tf_file = "tmp-output.tf.json"
-    ctx.invoke(apply, configfile=configfile, env=env, out=temp_tf_file, no_apply=True)
+    ctx.invoke(apply, configfile=configfile, env=env, no_apply=True)
     outputs = get_terraform_outputs(force_init, include_parent)
     outputs_formatted = json.dumps(outputs, indent=4)
     print(outputs_formatted)
-    os.remove(temp_tf_file)
 
 
 @cli.command()
@@ -174,15 +137,10 @@ def push(
     if not is_tool("docker"):
         raise Exception("Please install docker on your machine")
 
-    temp_tf_file = "tmp-output.tf.json"
-    try:
-        ctx.invoke(apply, configfile=configfile, env=env, out=temp_tf_file, no_apply=True)
-        registry_url = get_registry_url()
-        username, password = get_ecr_auth_info(configfile, env)
-        push_to_docker(username, password, image, registry_url, tag)
-    finally:
-        if os.path.exists(temp_tf_file):
-            os.remove(temp_tf_file)
+    ctx.invoke(apply, configfile=configfile, env=env, no_apply=True)
+    registry_url = get_registry_url()
+    username, password = get_ecr_auth_info(configfile, env)
+    push_to_docker(username, password, image, registry_url, tag)
 
 
 @cli.command()
@@ -193,19 +151,14 @@ def push(
 @click.pass_context
 def configure_kubectl(ctx: Any, configfile: str, env: Optional[str]) -> None:
     """ Configure the kubectl CLI tool for the given cluster """
-    temp_tf_file = "tmp-configure-kubectl.tf.json"
-    ctx.invoke(apply, configfile=configfile, env=env, out=temp_tf_file, no_apply=True)
+    ctx.invoke(apply, configfile=configfile, env=env, no_apply=True)
     # Also switches the current kubectl context to the cluster.
     setup_kubectl(configfile, env)
-    os.remove(temp_tf_file)
 
 
 @cli.command()
 @click.option(
     "--configfile", default="opta.yml", help="Opta config file", show_default=True
-)
-@click.option(
-    "--out", default=DEFAULT_GENERATED_TF_FILE, help="Generated tf file", hidden=True
 )
 @click.option(
     "--env",
@@ -240,7 +193,6 @@ def configure_kubectl(ctx: Any, configfile: str, env: Optional[str]) -> None:
 )
 def apply(
     configfile: str,
-    out: str,
     env: Optional[str],
     no_apply: bool,
     refresh: bool,
@@ -249,13 +201,11 @@ def apply(
     test: bool,
 ) -> None:
     """Apply your opta config file to your infrastructure!"""
-    _apply(configfile, out, env, no_apply, refresh, max_block, var, test)
-    _cleanup()
+    _apply(configfile, env, no_apply, refresh, max_block, var, test)
 
 
 def _apply(
     configfile: str,
-    out: str,
     env: Optional[str],
     no_apply: bool,
     refresh: bool,
@@ -325,7 +275,7 @@ def _apply(
         ret = layer.gen_providers(block_idx, block.backend_enabled)
         ret = deep_merge(layer.gen_tf(block_idx), ret)
 
-        gen_tf.gen(ret, out)
+        gen_tf.gen(ret, DEFAULT_GENERATED_TF_FILE)
         if no_apply:
             continue
         print(f"Will now initialize generate terraform plan for block {block_idx}.")
@@ -396,3 +346,6 @@ if __name__ == "__main__":
     except CalledProcessError as e:
         logging.exception(e)
         logging.error(e.stderr.decode("utf-8"))
+    finally:
+        if os.environ.get("DEBUG") is None:
+            _cleanup()
