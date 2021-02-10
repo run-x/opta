@@ -9,6 +9,4 @@ modules:
     image: "ksdn117/web-socket-test"
     tag: "latest"
     domain: "dummy.{parent[domain]}"
-    tcp_health_check: true
-    websockets: true
     external_image: true
