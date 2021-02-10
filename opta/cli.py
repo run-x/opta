@@ -349,7 +349,7 @@ if __name__ == "__main__":
         logging.exception(e)
         if e.stderr is not None:
             logging.error(e.stderr.decode("utf-8"))
-        raise e
+        sys.exit(1)
     finally:
         if os.environ.get("OPTA_DEBUG") is None:
             _cleanup()
