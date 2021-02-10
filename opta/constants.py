@@ -14,4 +14,4 @@ version_path = os.path.join(
 
 REGISTRY = yaml.load(open(registry_path), Loader=yaml.Loader)
 DEBUG_TREE = yaml.load(open(debugger_path), Loader=yaml.Loader)
-VERSION = open(version_path).read()
+VERSION = open(version_path).read().strip()

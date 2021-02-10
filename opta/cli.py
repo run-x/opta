@@ -5,6 +5,7 @@ from typing import Any
 import sentry_sdk
 from sentry_sdk.integrations.atexit import AtexitIntegration
 
+from opta.constants import VERSION
 from opta.exceptions import UserErrors
 from opta.helpers.cli.push import get_ecr_auth_info, get_registry_url, push_to_docker
 
@@ -32,8 +33,8 @@ def before_send(event: Any, hint: Any) -> Any:
     return event
 
 
-if hasattr(sys, "_called_from_test"):
-    print("Not sending sentry cause we think we're in a pytest")
+if hasattr(sys, "_called_from_test") or VERSION == "dev":
+    print("Not sending sentry cause we're in test or dev")
 else:
     sentry_sdk.init(
         "https://aab05facf13049368d749e1b30a08b32@o511457.ingest.sentry.io/5610510",
@@ -348,6 +349,7 @@ if __name__ == "__main__":
         logging.exception(e)
         if e.stderr is not None:
             logging.error(e.stderr.decode("utf-8"))
+        sys.exit(1)
     finally:
         if os.environ.get("OPTA_DEBUG") is None:
             _cleanup()
