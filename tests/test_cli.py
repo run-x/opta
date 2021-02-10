@@ -105,9 +105,7 @@ class TestPush:
         result = runner.invoke(cli, ["push", "local_image:local_tag"])
 
         assert result.exit_code == 0
-        apply_mock.assert_called_once_with(
-            configfile="opta.yml", env=None, no_apply=True, out="tmp-output.tf.json"
-        )
+        apply_mock.assert_called_once_with(configfile="opta.yml", env=None, no_apply=True)
 
         nice_run_mock.assert_has_calls(
             [
@@ -147,9 +145,7 @@ class TestPush:
         )
 
         assert result.exit_code == 0
-        apply_mock.assert_called_once_with(
-            configfile="opta.yml", env=None, no_apply=True, out="tmp-output.tf.json"
-        )
+        apply_mock.assert_called_once_with(configfile="opta.yml", env=None, no_apply=True)
 
         nice_run_mock.assert_has_calls(
             [
@@ -197,6 +193,4 @@ class TestPush:
             str(result.exception)
             == "Unexpected image name local_image: your image_name must be of the format <IMAGE>:<TAG>."
         )
-        apply_mock.assert_called_once_with(
-            configfile="opta.yml", env=None, no_apply=True, out="tmp-output.tf.json"
-        )
+        apply_mock.assert_called_once_with(configfile="opta.yml", env=None, no_apply=True)
