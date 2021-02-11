@@ -72,7 +72,7 @@ def setup_kubectl(configfile: str, env: Optional[str]) -> None:
         )
 
     # Get the cluster name from the outputs.
-    outputs = get_terraform_outputs(include_parent=True)
+    outputs = get_terraform_outputs(force_init=True, include_parent=True)
     cluster_name = outputs.get("parent.k8s_cluster_name") or outputs.get(
         "k8s_cluster_name"
     )

@@ -10,7 +10,7 @@ from pytest_mock import MockFixture
 
 from opta.cli import TERRAFORM_PLAN_FILE_PATH, _cleanup, apply, at_exit_callback, cli
 from opta.constants import TF_FILE_PATH
-from tests.fixtures.apply import BASIC_APPLY
+from tests.fixtures.apply import APPLY_WITHOUT_ORG_ID, BASIC_APPLY
 
 
 class TestCLI:
@@ -42,7 +42,7 @@ class TestCLI:
     def test_basic_apply(self, mocker: MockFixture) -> None:
         mocked_exists = mocker.patch("os.path.exists")
         mocked_exists.return_value = True
-        test_cases: Any = [BASIC_APPLY]
+        test_cases: Any = [BASIC_APPLY, APPLY_WITHOUT_ORG_ID]
 
         runner = CliRunner()
         for (i, o) in test_cases:
