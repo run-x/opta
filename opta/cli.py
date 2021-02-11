@@ -113,11 +113,7 @@ def debugger() -> None:
 )
 @click.pass_context
 def output(
-    ctx: Any,
-    configfile: str,
-    env: Optional[str],
-    include_parent: bool,
-    force_init: bool,
+    ctx: Any, configfile: str, env: Optional[str], include_parent: bool, force_init: bool,
 ) -> None:
     """ Print TF outputs """
     ctx.invoke(apply, configfile=configfile, env=env, no_apply=True)
@@ -137,11 +133,7 @@ def output(
 )
 @click.pass_context
 def push(
-    ctx: Any,
-    image: str,
-    configfile: str,
-    env: str,
-    tag: Optional[str] = None,
+    ctx: Any, image: str, configfile: str, env: str, tag: Optional[str] = None,
 ) -> None:
     if not is_tool("docker"):
         raise Exception("Please install docker on your machine")
@@ -242,6 +234,11 @@ def _apply(
     blocks_to_process = (
         layer.blocks[: max_block + 1] if max_block is not None else layer.blocks
     )
+
+    # When --no-apply is set, only the generated tf file from the last block matters.
+    if no_apply:
+        blocks_to_process = [blocks_to_process[-1]]
+
     for block_idx, block in enumerate(blocks_to_process):
         current_module_keys = current_module_keys.union(
             set(map(lambda x: x.key, block.modules))
