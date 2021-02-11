@@ -1,5 +1,6 @@
 coverage:
   status:
+    patch: off
     project:
       default: # This can be anything, but it needs to exist as the name
         # basic settings
