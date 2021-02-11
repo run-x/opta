@@ -40,6 +40,8 @@ def inspect_cmd() -> None:
             if inspect_key in all_substrings(resource_address, "."):
                 resource_name = inspected_resource_mappings[inspect_key].get("name") or ""
                 resource_desc = inspected_resource_mappings[inspect_key].get("desc") or ""
+                resource_desc = resource_desc.replace("\n", " ")
+
                 resource_template_url = (
                     inspected_resource_mappings[inspect_key].get("url") or ""
                 )
