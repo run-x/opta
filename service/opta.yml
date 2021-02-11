@@ -7,10 +7,9 @@ modules:
     target_port: 80
     image: "kennethreitz/httpbin"
     tag: "latest"
-    domain: "dummy.{parent[domain]}"
+    public_uri: "dummy.{parent[domain]}/showoff"
     liveness_probe_path: "/get"
     readiness_probe_path: "/get"
-    path_prefix: "/showoff"
     external_image: true
     env_vars:
       - name: APPENV
