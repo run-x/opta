@@ -15,3 +15,6 @@ version_path = os.path.join(
 REGISTRY = yaml.load(open(registry_path), Loader=yaml.Loader)
 DEBUG_TREE = yaml.load(open(debugger_path), Loader=yaml.Loader)
 VERSION = open(version_path).read().strip()
+
+# Path of the generated tf file.
+TF_FILE_PATH = "main.tf.json"

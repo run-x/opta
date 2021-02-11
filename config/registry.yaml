@@ -293,3 +293,38 @@ modules:
     location: k8s-hello-world-service
     variables:
       hello_world_domain: str
+inspected_resources:
+  aws_vpc:
+    name: VPC
+    desc: Like your own local network, but hosted on the cloud.
+    url: https://console.aws.amazon.com/vpc/home?region={aws_region}#VpcDetails:VpcId={id}
+  aws_subnet.public_subnets:
+    name: Public Subnet
+    desc: Servers in this subnet can have public IP addresses and direct access to the Internet.
+    url: https://console.aws.amazon.com/vpc/home?region={aws_region}#SubnetDetails:subnetId={id}
+  aws_subnet.private_subnets:
+    name: Private Subnet
+    desc: Servers in this subnet do not have direct access to the Internet (must use a proxy).
+    url: https://console.aws.amazon.com/vpc/home?region={aws_region}#SubnetDetails:subnetId={id}
+  aws_eks_cluster:
+    name: EKS
+    desc: Managed Kubernetes service.
+    url: https://console.aws.amazon.com/eks/home?region={aws_region}#/clusters/{name}
+  helm_release.k8s-service:
+    name: K8s Service
+    desc: Secure and scalable Kubernetes service packaged into a helm chart
+    url: https://app.datadoghq.com/apm/service/{k8s-moduleName}-{k8s-layerName}/
+  aws_docdb_cluster:
+    name: DocDB
+    desc: DocumentDB is a NoSQL database that exposes a similar API to MongoDB.
+    url: https://console.aws.amazon.com/docdb/home?region={aws_region}#cluster-details/{cluster_identifier}
+  aws_rds_cluster:
+    name: RDS
+    desc: |
+      Distributed relational database with support for popular SQL engines
+      (Postgres, MySQL, SQL Server, ...)
+    url: https://console.aws.amazon.com/rds/home?region={aws_region}#database:id={id};is-cluster=true
+  aws_s3_bucket:
+    name: S3 Bucket
+    desc: Distributed object storage
+    url: https://s3.console.aws.amazon.com/s3/buckets/{id}?region={aws_region}&tab=objects
