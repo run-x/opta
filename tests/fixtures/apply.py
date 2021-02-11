@@ -3,7 +3,7 @@ BASIC_APPLY = (
         "meta": {
             "name": "dev1",
             "org_id": "test",
-            "providers": {"aws": {"allowed_account_ids": ["abc"], "region": "us-east-1"}},
+            "providers": {"aws": {"account_id": "abc", "region": "us-east-1"}},
         },
         "modules": {
             "core": {
@@ -14,7 +14,7 @@ BASIC_APPLY = (
         },
     },
     {
-        "provider": {"aws": {"allowed_account_ids": ["abc"], "region": "us-east-1"}},
+        "provider": {"aws": {"account_id": "abc", "region": "us-east-1"}},
         "terraform": {
             "backend": {
                 "s3": {
@@ -45,7 +45,7 @@ APPLY_WITHOUT_ORG_ID = (
     {
         "meta": {
             "name": "dev1",
-            "providers": {"aws": {"allowed_account_ids": ["abc"], "region": "us-east-1"}},
+            "providers": {"aws": {"account_id": "abc", "region": "us-east-1"}},
         },
         "modules": {
             "core": {
@@ -56,7 +56,7 @@ APPLY_WITHOUT_ORG_ID = (
         },
     },
     {
-        "provider": {"aws": {"allowed_account_ids": ["abc"], "region": "us-east-1"}},
+        "provider": {"aws": {"account_id": "abc", "region": "us-east-1"}},
         "terraform": {
             "backend": {
                 "s3": {

@@ -56,17 +56,17 @@ def setup_kubectl(configfile: str, env: Optional[str]) -> None:
 
     # Get the environment's account details from the opta config
     root_layer = _get_root_layer(configfile, env)
-    env_aws_region, env_aws_account_ids = _get_cluster_env(root_layer)
+    env_aws_region, env_aws_account_id = _get_cluster_env(root_layer)
 
     # Make sure the current account points to the cluster environment
-    if int(current_aws_account_id) not in env_aws_account_ids:
+    if int(current_aws_account_id) != env_aws_account_id:
         raise UserErrors(
             fmt_msg(
                 f"""
                 The AWS CLI is not configured with the right credentials to
                 access the {env or ""} cluster.
                 ~Current AWS Account ID: {current_aws_account_id}
-                ~Valid AWS Account IDs: {env_aws_account_ids}
+                ~Valid AWS Account ID: {env_aws_account_id}
                 """
             )
         )
@@ -96,7 +96,7 @@ def setup_kubectl(configfile: str, env: Optional[str]) -> None:
 
 def _get_cluster_env(root_layer: Layer) -> Tuple[str, List[int]]:
     aws_provider = root_layer.meta["providers"]["aws"]
-    return aws_provider["region"], aws_provider["allowed_account_ids"]
+    return aws_provider["region"], aws_provider["account_id"]
 
 
 def _get_root_layer(configfile: str, env: Optional[str]) -> Layer:

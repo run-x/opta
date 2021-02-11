@@ -22,7 +22,7 @@ def get_registry_url() -> None:
 def get_ecr_auth_info(configfile: str, env: str) -> Tuple[str, str]:
     layer = Layer.load_from_yaml(configfile, env)
     providers = layer.gen_providers(0, True)
-    account_id = providers["provider"]["aws"]["allowed_account_ids"][0]
+    account_id = providers["provider"]["aws"]["account_id"]
     region = providers["provider"]["aws"]["region"]
 
     try:
