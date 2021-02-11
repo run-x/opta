@@ -1,5 +1,11 @@
 data "aws_caller_identity" "current" {}
 
+locals {
+  public_uri_parts = split("/", var.public_uri)
+  domain = public_uri_parts[0]
+  path_prefix = length(public_uri_parts) > 1? join("/",slice(public_uri_parts, 1, length(public_uri_parts)-1)) : "/"
+}
+
 variable "k8s_openid_provider_url" {
   type = string
 }
@@ -100,14 +106,9 @@ variable "env_vars" {
   default = []
 }
 
-variable "domain" {
+variable "public_uri" {
   type = string
   default = ""
-}
-
-variable "path_prefix" {
-  type = string
-  default = "/"
 }
 
 variable "secrets" {

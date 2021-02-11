@@ -30,8 +30,8 @@ resource "helm_release" "k8s-service" {
       readinessProbePath: var.readiness_probe_path,
       envVars: var.env_vars,
       secrets: var.secrets,
-      domain: var.domain,
-      pathPrefix: var.path_prefix,
+      domain: local.domain,
+      pathPrefix: local.path_prefix,
       layerName: var.layer_name,
       moduleName: var.module_name
       iamRoleArn: aws_iam_role.k8s_service.arn
