@@ -91,26 +91,31 @@ class Layer:
         parent = None
         if "envs" in meta:
             envs = meta.pop("envs")
-            if len(envs) > 1 and env is None:
-                raise UserErrors(
-                    "configfile has multiple environments, but you did not specify one"
-                )
-            potential_envs = []
+            potential_envs = {}
             for env_meta in envs:
                 current_parent = cls.load_from_yaml(env_meta["parent"], env)
-                current_variables = env_meta.get("variables", {})
-                potential_envs.append(current_parent.get_env())
-                if len(envs) == 1:
-                    env = current_parent.get_env()
-                if current_parent.get_env() == env:
-                    meta["parent"] = env_meta["parent"]
-                    meta["variables"] = deep_merge(
-                        meta.get("variables", {}), current_variables
+                current_env = current_parent.get_env()
+                if current_env in potential_envs.keys():
+                    raise UserErrors(
+                       f"Same environment: {current_env} is imported twice as parent"
                     )
-                    return cls(meta, blocks_data, current_parent)
-            raise UserErrors(f"Invalid env of {env}, valid ones are {potential_envs}")
-        if "parent" in meta:
-            parent = cls.load_from_yaml(meta["parent"], env)
+                potential_envs[current_env] = (current_parent, env_meta)
+
+            if (len(potential_envs) > 1 and env is None) or env not in potential_envs:
+                raise UserErrors(
+                    f"Invalid env of {env}, valid ones are {list(potential_envs.keys())}"
+                )
+
+            if env is None:
+                current_parent, env_meta = list(potential_envs.values())[0]
+            else:
+                current_parent, env_meta = potential_envs[env]
+            current_variables = env_meta.get("variables", {})
+            meta["parent"] = env_meta["parent"]
+            meta["variables"] = deep_merge(
+                meta.get("variables", {}), current_variables
+            )
+            return cls(meta, blocks_data, current_parent)
         return cls(meta, blocks_data, parent)
 
     @staticmethod
