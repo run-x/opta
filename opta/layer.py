@@ -97,7 +97,7 @@ class Layer:
                 current_env = current_parent.get_env()
                 if current_env in potential_envs.keys():
                     raise UserErrors(
-                       f"Same environment: {current_env} is imported twice as parent"
+                        f"Same environment: {current_env} is imported twice as parent"
                     )
                 potential_envs[current_env] = (current_parent, env_meta)
 
@@ -112,9 +112,7 @@ class Layer:
                 current_parent, env_meta = potential_envs[env]
             current_variables = env_meta.get("variables", {})
             meta["parent"] = env_meta["parent"]
-            meta["variables"] = deep_merge(
-                meta.get("variables", {}), current_variables
-            )
+            meta["variables"] = deep_merge(meta.get("variables", {}), current_variables)
             return cls(meta, blocks_data, current_parent)
         return cls(meta, blocks_data, parent)
 

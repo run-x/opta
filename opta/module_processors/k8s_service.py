@@ -36,6 +36,13 @@ class K8sServiceProcessor(ModuleProcessor):
                 raise Exception("Secret must be string or dict")
         self.module.data["secrets"] = transformed_secrets
 
+        # Handle the public_uri
+        if "public_uri" in self.module.data:
+            uri_components = self.module.data["public_uri"].split("/", 1)
+            self.module.data["domain"] = uri_components[0]
+            if len(uri_components) == 2:
+                self.module.data["path_prefix"] = uri_components[1]
+
         # Handle links
         for target_module_name, link_permissions in self.module.data.get(
             "links", {}

@@ -74,10 +74,7 @@ macros:
           datadog:
             type: datadog
             api_key: "{datadog_api_key}"
-      - modules:
-          k8s-hello-world-service:
-            type: k8s-hello-world-service
-            hello_world_domain: "hello-world.{domain}"
+
 modules:
   aws-state-init:
     location: aws-state-init
@@ -147,12 +144,6 @@ modules:
             host: "${{{module_source}.k8s_endpoint}}"
             token: "${{data.aws_eks_cluster_auth.k8s.token}}"
             cluster_ca_certificate: "${{base64decode({module_source}.k8s_ca_data)}}"
-  istio-init:
-    location: istio-init
-    variables:
-      domain_names: optional
-      acm_cert_arn: optional
-    outputs: {}
   ingress-nginx-init:
     location: ingress-nginx-init
     variables:
@@ -200,6 +191,7 @@ modules:
       readiness_probe_path: optional
       container_resource_limits: optional
       container_resource_requests: optional
+      public_uri: optional
       domain: optional
       path_prefix: optional
       k8s_openid_provider_url: str
@@ -250,12 +242,6 @@ modules:
     outputs:
       cache_host: str
       cache_auth_token: str
-  k8s-secret:
-    location: k8s-secret
-    variables:
-      name: str
-    outputs:
-      value: {}
   k8s-metric-server:
     location: k8s-metric-server
     variables: {}
