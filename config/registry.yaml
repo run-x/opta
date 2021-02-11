@@ -192,6 +192,7 @@ modules:
       container_resource_limits: optional
       container_resource_requests: optional
       public_uri: optional
+      domain: optional
       k8s_openid_provider_url: str
       k8s_openid_provider_arn: str
       iam_policy: optional

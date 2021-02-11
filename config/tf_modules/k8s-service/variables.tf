@@ -2,7 +2,7 @@ data "aws_caller_identity" "current" {}
 
 locals {
   public_uri_parts = split("/", var.public_uri)
-  domain = public_uri_parts[0]
+  domain = var.domain == ""? public_uri_parts[0] : var.domain
   path_prefix = length(public_uri_parts) > 1? join("/",slice(public_uri_parts, 1, length(public_uri_parts)-1)) : "/"
 }
 
@@ -107,6 +107,11 @@ variable "env_vars" {
 }
 
 variable "public_uri" {
+  type = string
+  default = ""
+}
+
+variable "domain" {
   type = string
   default = ""
 }
