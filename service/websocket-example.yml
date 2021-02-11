@@ -8,5 +8,5 @@ modules:
       tcp: 8010
     image: "ksdn117/web-socket-test"
     tag: "latest"
-    domain: "dummy.{parent[domain]}"
+    public_uri: "dummy.{parent[domain]}"
     external_image: true

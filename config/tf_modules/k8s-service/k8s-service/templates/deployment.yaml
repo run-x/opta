@@ -86,9 +86,9 @@ spec:
               port: main
           resources:
             limits:
-              {{- toYaml .Values.podResourceLimits | nindent 14 }}
+              {{- toYaml .Values.containerResourceLimits | nindent 14 }}
             requests:
-              {{- toYaml .Values.podResourceRequests | nindent 14 }}
+              {{- toYaml .Values.containerResourceRequests | nindent 14 }}
       volumes:
         - name: config
           configMap:

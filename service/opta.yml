@@ -1,21 +1,19 @@
 meta:
-  parent: "../env/opta.yml"
-  name: github
+  envs:
+    - parent: "git@github.com:run-x/runx-infra.git//staging/opta.yml?ref=main"
+  name: httpbin
 modules:
   app:
     type: k8s-service
-    target_port: 80
+    port:
+      http: 80
     image: "kennethreitz/httpbin"
     tag: "latest"
-    domain: "dummy.{parent[domain]}"
+    public_uri: "httpbin.{parent[domain]}/showoff/part2"
     liveness_probe_path: "/get"
     readiness_probe_path: "/get"
-    uri_prefix: "/showoff"
     external_image: true
     env_vars:
       - name: APPENV
-        value: prod
-    links:
-      database: []
-  database:
-    type: aws-rds
+        value: "{env}"
+

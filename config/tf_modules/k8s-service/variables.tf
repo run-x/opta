@@ -1,5 +1,11 @@
 data "aws_caller_identity" "current" {}
 
+locals {
+  public_uri_parts = split("/", var.public_uri)
+  domain = var.domain == ""? local.public_uri_parts[0] : var.domain
+  path_prefix = length(local.public_uri_parts) > 1 ? "/${join("/",slice(local.public_uri_parts, 1, length(local.public_uri_parts)))}" : "/"
+}
+
 variable "k8s_openid_provider_url" {
   type = string
 }
@@ -51,12 +57,12 @@ variable "max_autoscaling" {
   default = 3
 }
 
-variable "autoscaling_cpu_percentage_threshold" {
+variable "autoscaling_target_cpu_percentage" {
   description = "Percentage of requested cpu after which autoscaling kicks in"
   default = 80
 }
 
-variable "autoscaling_mem_percentage_threshold" {
+variable "autoscaling_target_mem_percentage" {
   description = "Percentage of requested memory after which autoscaling kicks in"
   default = 80
 }
@@ -73,7 +79,7 @@ variable "readiness_probe_path" {
   default = "/healthcheck"
 }
 
-variable "pod_resource_limits" {
+variable "container_resource_limits" {
   description = "Resource limits for pod"
   default = {
     cpu = "200m"
@@ -82,7 +88,7 @@ variable "pod_resource_limits" {
   type = map
 }
 
-variable "pod_resource_requests" {
+variable "container_resource_requests" {
   description = "Request requests for pod"
   default = {
     cpu = "100m"
@@ -100,14 +106,14 @@ variable "env_vars" {
   default = []
 }
 
-variable "domain" {
+variable "public_uri" {
   type = string
   default = ""
 }
 
-variable "uri_prefix" {
+variable "domain" {
   type = string
-  default = "/"
+  default = ""
 }
 
 variable "secrets" {
@@ -115,15 +121,10 @@ variable "secrets" {
   default = []
 }
 
-variable "read_buckets" {
-  type = list(string)
-  default = []
-}
-
-variable "write_buckets" {
-  type = list(string)
-  default = []
-}
-
 variable "iam_policy" {
+}
+
+variable "additional_iam_roles" {
+  type = list(string)
+  default = []
 }
