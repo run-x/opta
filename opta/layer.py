@@ -171,7 +171,15 @@ class Layer:
             return self.meta["state_storage"]
         elif self.parent is not None:
             return self.parent.state_storage()
-        return f"opta-tf-state-{self.meta['name']}"
+        elif "org_id" not in self.meta:
+            # TODO: Remove this once everyone is updated
+            print(
+                "\nWARNING: You should specify a unique org_id in environment yml files\
+                   \nWARNING: This will break in future releases\n"
+            )
+            return f"opta-tf-state-{self.meta['name']}"
+        else:
+            return f"opta-tf-state-{self.meta['org_id']}-{self.meta['name']}"
 
     def gen_providers(self, block_idx: int, backend_enabled: bool) -> Dict[Any, Any]:
         ret: Dict[Any, Any] = {"provider": {}}
