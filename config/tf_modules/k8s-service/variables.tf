@@ -51,12 +51,12 @@ variable "max_autoscaling" {
   default = 3
 }
 
-variable "autoscaling_cpu_percentage_threshold" {
+variable "autoscaling_target_cpu_percentage" {
   description = "Percentage of requested cpu after which autoscaling kicks in"
   default = 80
 }
 
-variable "autoscaling_mem_percentage_threshold" {
+variable "autoscaling_target_mem_percentage" {
   description = "Percentage of requested memory after which autoscaling kicks in"
   default = 80
 }
@@ -73,7 +73,7 @@ variable "readiness_probe_path" {
   default = "/healthcheck"
 }
 
-variable "pod_resource_limits" {
+variable "container_resource_limits" {
   description = "Resource limits for pod"
   default = {
     cpu = "200m"
@@ -82,7 +82,7 @@ variable "pod_resource_limits" {
   type = map
 }
 
-variable "pod_resource_requests" {
+variable "container_resource_requests" {
   description = "Request requests for pod"
   default = {
     cpu = "100m"
@@ -105,7 +105,7 @@ variable "domain" {
   default = ""
 }
 
-variable "uri_prefix" {
+variable "path_prefix" {
   type = string
   default = "/"
 }
@@ -115,15 +115,10 @@ variable "secrets" {
   default = []
 }
 
-variable "read_buckets" {
-  type = list(string)
-  default = []
-}
-
-variable "write_buckets" {
-  type = list(string)
-  default = []
-}
-
 variable "iam_policy" {
+}
+
+variable "additional_iam_roles" {
+  type = list(string)
+  default = []
 }

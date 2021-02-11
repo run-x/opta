@@ -29,5 +29,5 @@ resource "aws_iam_role" "k8s_service" {
 resource "aws_iam_policy_attachment" "k8s_service" {
   name = "${var.layer_name}-${var.module_name}"
   policy_arn = aws_iam_policy.k8s_service.arn
-  roles = [aws_iam_role.k8s_service.name]
+  roles = concat([aws_iam_role.k8s_service.name], var.additional_iam_roles)
 }

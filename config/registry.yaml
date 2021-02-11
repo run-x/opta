@@ -190,23 +190,24 @@ modules:
       layer_name: str
       module_name: str
       port: optional
-      replicas: optional
       image: optional
       tag: optional
       env_vars: optional
       secrets: optional
-      autoscaling_cpu_percentage_threshold: optional
-      autoscaling_mem_percentage_threshold: optional
+      autoscaling_target_cpu_percentage: optional
+      autoscaling_target_mem_percentage: optional
       liveness_probe_path: optional
       readiness_probe_path: optional
-      pod_resource_limits: optional
-      pod_resource_requests: optional
+      container_resource_limits: optional
+      container_resource_requests: optional
       domain: optional
-      uri_prefix: optional
+      path_prefix: optional
       k8s_openid_provider_url: str
       k8s_openid_provider_arn: str
       iam_policy: optional
       additional_iam_roles: optional
+      min_autoscaling: optional
+      max_autoscaling: optional
     outputs:
       docker_repo_url:
         export: true

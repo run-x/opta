@@ -16,12 +16,12 @@ resource "helm_release" "k8s-service" {
       autoscaling: {
         minReplicas: var.min_autoscaling,
         maxReplicas: var.max_autoscaling,
-        targetCPUUtilizationPercentage: var.autoscaling_cpu_percentage_threshold
-        targetMemoryUtilizationPercentage: var.autoscaling_mem_percentage_threshold
+        targetCPUUtilizationPercentage: var.autoscaling_target_cpu_percentage
+        targetMemoryUtilizationPercentage: var.autoscaling_target_mem_percentage
       },
       port: var.port,
-      podResourceLimits: var.pod_resource_limits,
-      podResourceRequests: var.pod_resource_requests,
+      containerResourceLimits: var.container_resource_limits,
+      containerResourceRequests: var.container_resource_requests,
       image: {
         repository: var.image == null ? aws_ecr_repository.repo[0].repository_url : var.image
         tag: var.tag
@@ -31,7 +31,7 @@ resource "helm_release" "k8s-service" {
       envVars: var.env_vars,
       secrets: var.secrets,
       domain: var.domain,
-      uriPrefix: var.uri_prefix,
+      pathPrefix: var.path_prefix,
       layerName: var.layer_name,
       moduleName: var.module_name
       iamRoleArn: aws_iam_role.k8s_service.arn
