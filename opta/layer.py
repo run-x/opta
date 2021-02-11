@@ -5,7 +5,7 @@ import re
 import shutil
 import tempfile
 from os import path
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 import git
 import yaml
@@ -91,7 +91,7 @@ class Layer:
         parent = None
         if "envs" in meta:
             envs = meta.pop("envs")
-            potential_envs = {}
+            potential_envs: Dict[str, Tuple] = {}
             for env_meta in envs:
                 current_parent = cls.load_from_yaml(env_meta["parent"], env)
                 current_env = current_parent.get_env()
@@ -101,9 +101,9 @@ class Layer:
                     )
                 potential_envs[current_env] = (current_parent, env_meta)
 
-            if (len(potential_envs) > 1 and env is None) or env not in potential_envs:
+            if len(potential_envs) > 1 and env not in potential_envs:
                 raise UserErrors(
-                    f"Invalid env of {env}, valid ones are {list(potential_envs.keys())}"
+                    f"Invalid --env flag, valid ones are {list(potential_envs.keys())}"
                 )
 
             if env is None:
