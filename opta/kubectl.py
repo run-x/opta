@@ -94,7 +94,7 @@ def setup_kubectl(configfile: str, env: Optional[str]) -> None:
     )
 
 
-def _get_cluster_env(root_layer: Layer) -> Tuple[str, List[int]]:
+def _get_cluster_env(root_layer: Layer) -> Tuple[str, int]:
     aws_provider = root_layer.meta["providers"]["aws"]
     return aws_provider["region"], aws_provider["account_id"]
 

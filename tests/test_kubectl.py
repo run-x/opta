@@ -38,7 +38,7 @@ class TestKubectl:
         mocker.patch("opta.kubectl._get_root_layer")
         mocker.patch(
             "opta.kubectl._get_cluster_env",
-            return_value=("us-east-1", [fake_aws_account_id]),
+            return_value=("us-east-1", fake_aws_account_id),
         )
         # Mock fetching the cluster name
         mocker.patch(
