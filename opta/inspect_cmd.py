@@ -1,10 +1,9 @@
 import json
-import re
 from typing import Any, List
 
 from opta.constants import REGISTRY, TF_FILE_PATH
 from opta.nice_subprocess import nice_run
-from opta.utils import column_print, deep_merge, is_tool
+from opta.utils import all_substrings, column_print, deep_merge, is_tool
 
 
 def inspect_cmd() -> None:
@@ -24,16 +23,21 @@ def inspect_cmd() -> None:
         # Ex. "module.app.helm_release.k8s-service"
         resource_address = resource.get("address", "")
 
-        # If the terraform resource address has "[0]" or "[#]" appending it, then
-        # it's probably a generated resource of something else (such as a db instance
-        # of a db cluster), in which case, skip.
-        if re.match(r".*\[[0-9]+\]", resource_address):
+        # If the terraform resource address has ".data." in it, then
+        # it's not the actual ref to the created resource, in which case, skip.
+        if ".data." in resource_address:
             continue
 
+        # The terraform resource address may have "[0]" or "[#]" appending it, in
+        # which case strip it out, so it's easier to match against the inspect key later.
+        if "[" in resource_address:
+            resource_address = resource_address[0 : resource_address.find("[")]
+
         for inspect_key in inspected_resource_mappings:
-            # The inspect key should be a substring of the full resource address
+            # The inspect key should be a substring of the full resource address.
             # Ex. "helm_release.k8s-service" or "aws_docdb_cluster"
-            if inspect_key in resource_address:
+            # Using all_substrings() to match only on full, not partial, words.
+            if inspect_key in all_substrings(resource_address, "."):
                 resource_name = inspected_resource_mappings[inspect_key].get("name") or ""
                 resource_desc = inspected_resource_mappings[inspect_key].get("desc") or ""
                 resource_template_url = (
@@ -42,6 +46,7 @@ def inspect_cmd() -> None:
 
                 # Generate the resource url from the template.
                 template_url_values = _get_template_url_values(resource, inspect_key)
+                # print(template_url_values)
                 resource_url = resource_template_url.format(**template_url_values)
 
                 inspect_details.append((resource_name, resource_desc, resource_url))
@@ -51,6 +56,7 @@ def inspect_cmd() -> None:
 
     # Sort the inspected resources alphabetically
     inspect_details.sort()
+    # TODO: Dedupe name and description of similar resources.
     # Add columm headers to the displayed output
     inspect_details.insert(0, ("NAME", "DESCRIPTION", "LINK"))
     column_print(inspect_details)

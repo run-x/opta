@@ -63,6 +63,7 @@ def fmt_msg(message: str) -> str:
     return message
 
 
+# TODO: Support max-width.
 # The data should be a 2D array of the shape rows x columns.
 def column_print(data: List[Any]) -> None:
     # Determine the width of each column (the length of the longest word + 1)
@@ -83,3 +84,22 @@ def column_print(data: List[Any]) -> None:
         lines.append(line_out)
 
     print("\n".join(lines))
+
+
+# Get all substrings separated by the delimiter.
+# Ex: "foo.bar.baz", delimiter = "."
+# -> ['foo', 'foo.bar', 'foo.bar.baz', 'bar.baz', 'bar', 'bar.baz', 'baz']
+def all_substrings(string: str, delimiter: str = "") -> List[str]:
+    all_substrings = []
+    words = string.split(delimiter) if len(delimiter) else list(string)
+
+    def add_words(i: int, j: int) -> None:
+        if j > len(words):
+            return
+        substring = delimiter.join(words[i:j])
+        all_substrings.append(substring)
+        add_words(i, j + 1)
+        add_words(i + 1, j + 1)
+
+    add_words(0, 1)
+    return all_substrings
