@@ -2,8 +2,8 @@ data "aws_caller_identity" "current" {}
 
 locals {
   public_uri_parts = split("/", var.public_uri)
-  domain = var.domain == ""? public_uri_parts[0] : var.domain
-  path_prefix = length(public_uri_parts) > 1? join("/",slice(public_uri_parts, 1, length(public_uri_parts)-1)) : "/"
+  domain = var.domain == ""? local.public_uri_parts[0] : var.domain
+  path_prefix = length(local.public_uri_parts) > 1 ? "/${join("/",slice(local.public_uri_parts, 1, length(local.public_uri_parts)))}" : "/"
 }
 
 variable "k8s_openid_provider_url" {

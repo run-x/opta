@@ -105,7 +105,6 @@ class Layer:
                 raise UserErrors(
                     f"Invalid --env flag, valid ones are {list(potential_envs.keys())}"
                 )
-
             if env is None:
                 current_parent, env_meta = list(potential_envs.values())[0]
             else:
@@ -114,6 +113,8 @@ class Layer:
             meta["parent"] = env_meta["parent"]
             meta["variables"] = deep_merge(meta.get("variables", {}), current_variables)
             return cls(meta, blocks_data, current_parent)
+        if "parent" in meta:
+            parent = cls.load_from_yaml(meta["parent"], env)
         return cls(meta, blocks_data, parent)
 
     @staticmethod

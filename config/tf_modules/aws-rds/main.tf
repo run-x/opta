@@ -34,5 +34,5 @@ resource "aws_rds_cluster_instance" "db_instance" {
   engine             = aws_rds_cluster.db_cluster.engine
   engine_version     = aws_rds_cluster.db_cluster.engine_version
   apply_immediately = true
-  auto_minor_version_upgrade = False
+  auto_minor_version_upgrade = false
 }

@@ -5,7 +5,7 @@ metadata:
   name:  {{ include "k8s-service.fullname" . }}
   namespace: {{ include "k8s-service.namespaceName" . }}
   annotations:
-    {{- if not (eq .Values.uriPrefix "/") }}
+    {{- if not (eq .Values.pathPrefix "/") }}
     nginx.ingress.kubernetes.io/rewrite-target: /$2
     {{- end }}
     kubernetes.io/ingress.class: "nginx"
