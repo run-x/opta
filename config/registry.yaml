@@ -97,10 +97,18 @@ modules:
         aws_region:
           provider: {}
     inspect:
+      aws_kms_key:
+        name: KMS Key
+        desc: General key used for encryption of infra
+        url: https://console.aws.amazon.com/kms/home?region=us-east-1#/kms/keys/{key_id}
+      aws_dynamodb_table.tfstate:
+        name: Terraform state lock
+        desc: DO NOT MODIFY. The Terraform state lock is saved here.
+        url: https://console.aws.amazon.com/dynamodb/home?region={aws_region}#tables:selected={id};tab=overview
       aws_s3_bucket.tf-state-bucket:
         name: Terraform state bucket
         desc: DO NOT MODIFY. Terraform state is stored here.
-        url: https://www.terraform.io/docs/language/settings/backends/s3.html
+        url: https://s3.console.aws.amazon.com/s3/buckets/{id}?region={aws_region}&tab=objects
   aws-network-init:
     location: aws-network-init
     variables:

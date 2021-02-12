@@ -154,6 +154,7 @@ def push(
 def inspect(ctx: Any, configfile: str, env: Optional[str]) -> None:
     """ Displays important resources and AWS/Datadog links to them """
     ctx.invoke(apply, configfile=configfile, env=env, no_apply=True)
+    nice_run(["terraform", "init"], check=True)
     InspectCommand(configfile, env).run()
 
 
