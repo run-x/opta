@@ -70,7 +70,6 @@ class TestInspect:
 
         runner = CliRunner()
         result = runner.invoke(inspect)
-        print(result.exception)
         assert result.exit_code == 0
         # Using split to compare without whitespaces
         assert (

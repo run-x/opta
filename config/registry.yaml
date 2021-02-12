@@ -31,29 +31,11 @@ macros:
               - "10.0.144.0/21"
             subnet_tags:
               "kubernetes.io/cluster/main": "shared"
-            inspect:
-              aws_vpc:
-                name: VPC
-                desc: Like your own local network, but hosted on the cloud.
-                url: https://console.aws.amazon.com/vpc/home?region={aws_region}#VpcDetails:VpcId={id}
-              aws_subnet.public_subnets:
-                name: Public Subnet
-                desc: Servers in this subnet can have public IP addresses and direct access to the Internet.
-                url: https://console.aws.amazon.com/vpc/home?region={aws_region}#SubnetDetails:subnetId={id}
-              aws_subnet.private_subnets:
-                name: Private Subnet
-                desc: Servers in this subnet do not have direct access to the Internet (must use a proxy).
-                url: https://console.aws.amazon.com/vpc/home?region={aws_region}#SubnetDetails:subnetId={id}
           aws-eks-init:
             type: aws-eks-init
             cluster_name: main
             subnet_ids: "${{module.aws-network-init.private_subnet_ids}}"
             key_arn: "${{module.aws-state-init.kms_account_key_arn}}"
-            inspect:
-              aws_eks_cluster:
-                name: EKS
-                desc: Managed Kubernetes service.
-                url: https://console.aws.amazon.com/eks/home?region={aws_region}#/clusters/{name}
           aws-dns:
             type: aws-dns
             domain_name: "{domain}"
@@ -114,6 +96,11 @@ modules:
           provider: {}
         aws_region:
           provider: {}
+    inspect:
+      aws_s3_bucket.tf-state-bucket:
+        name: Terraform state bucket
+        desc: DO NOT MODIFY. Terraform state is stored here.
+        url: https://www.terraform.io/docs/language/settings/backends/s3.html
   aws-network-init:
     location: aws-network-init
     variables:
@@ -129,6 +116,19 @@ modules:
         export: true
       public_subnets_ids:
         export: true
+    inspect:
+      aws_vpc:
+        name: VPC
+        desc: Like your own local network, but hosted on the cloud.
+        url: https://console.aws.amazon.com/vpc/home?region={aws_region}#VpcDetails:VpcId={id}
+      aws_subnet.public_subnets:
+        name: Public Subnet
+        desc: Servers in this subnet can have public IP addresses and direct access to the Internet.
+        url: https://console.aws.amazon.com/vpc/home?region={aws_region}#SubnetDetails:subnetId={id}
+      aws_subnet.private_subnets:
+        name: Private Subnet
+        desc: Servers in this subnet do not have direct access to the Internet (must use a proxy).
+        url: https://console.aws.amazon.com/vpc/home?region={aws_region}#SubnetDetails:subnetId={id}
   aws-eks-init:
     location: aws-eks-init
     variables:
@@ -151,6 +151,11 @@ modules:
         export: true
       k8s_node_group_security_id:
         export: true
+    inspect:
+      aws_eks_cluster:
+        name: EKS
+        desc: Managed Kubernetes service.
+        url: https://console.aws.amazon.com/eks/home?region={aws_region}#/clusters/{name}
     providers:
       data:
         aws_eks_cluster_auth:

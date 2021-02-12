@@ -22,11 +22,13 @@ class InspectCommand:
         if not is_tool("terraform"):
             raise Exception("Please install terraform on your machine")
 
+        print(self.terraform_state.keys())
         inspect_details = []
         target_resources = self._get_opta_config_terraform_resources()
         for resource in target_resources:
             if resource.inspect is None:
                 continue
+            print(resource.address)
             if resource.address not in self.terraform_state:
                 continue
 

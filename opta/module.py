@@ -87,6 +87,6 @@ class Module:
                 resource_type = list(resource.keys())[0]
                 resource_name = list(resource[resource_type].keys())[0]
                 resource = Resource(self, resource_type, resource_name)
-                self.terraform_resources.append(resource)
+                terraform_resources.append(resource)
 
         return terraform_resources
