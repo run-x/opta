@@ -58,7 +58,7 @@ import yaml  # noqa: E402
 from opta import gen_tf  # noqa: E402
 from opta.amplitude import amplitude_client  # noqa: E402
 from opta.constants import TF_FILE_PATH  # noqa: E402
-from opta.inspect_cmd import inspect_cmd  # noqa: E402
+from opta.inspect_cmd import InspectCommand  # noqa: E402
 from opta.kubectl import setup_kubectl  # noqa: E402
 from opta.layer import Layer  # noqa: E402
 from opta.nice_subprocess import nice_run  # noqa: E402
@@ -114,11 +114,7 @@ def debugger() -> None:
 )
 @click.pass_context
 def output(
-    ctx: Any,
-    configfile: str,
-    env: Optional[str],
-    include_parent: bool,
-    force_init: bool,
+    ctx: Any, configfile: str, env: Optional[str], include_parent: bool, force_init: bool,
 ) -> None:
     """ Print TF outputs """
     ctx.invoke(apply, configfile=configfile, env=env, no_apply=True)
@@ -138,11 +134,7 @@ def output(
 )
 @click.pass_context
 def push(
-    ctx: Any,
-    image: str,
-    configfile: str,
-    env: str,
-    tag: Optional[str] = None,
+    ctx: Any, image: str, configfile: str, env: str, tag: Optional[str] = None,
 ) -> None:
     if not is_tool("docker"):
         raise Exception("Please install docker on your machine")
@@ -162,7 +154,8 @@ def push(
 def inspect(ctx: Any, configfile: str, env: Optional[str]) -> None:
     """ Displays important resources and AWS/Datadog links to them """
     ctx.invoke(apply, configfile=configfile, env=env, no_apply=True)
-    inspect_cmd()
+    nice_run(["terraform", "init"], check=True)
+    InspectCommand(configfile, env).run()
 
 
 @cli.command()

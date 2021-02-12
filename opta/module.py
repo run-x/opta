@@ -1,7 +1,10 @@
 import os
-from typing import Any, Dict
+from typing import Any, Dict, List
+
+import hcl2
 
 from opta.constants import REGISTRY
+from opta.resource import Resource
 
 
 class Module:
@@ -14,6 +17,7 @@ class Module:
         self.parent_layer = parent_layer
         self.desc = REGISTRY["modules"][data["type"]]
         self.name = f"{layer_name}-{self.key}"
+        self.terraform_resources: Any = None
 
     def gen_tf(self) -> Dict[Any, Any]:
         module_blk: Dict[Any, Any] = {
@@ -61,3 +65,32 @@ class Module:
             relative_path = f"./{relative_path}"
 
         return relative_path
+
+    def get_terraform_resources(self) -> List[Resource]:
+        # Reading and extracting resources from terraform HCL files can be
+        # time-consuming, so only do it once if necessary (for the inspect command).
+        if self.terraform_resources is not None:
+            return self.terraform_resources
+
+        self.terraform_resources = self._read_terraform_resources()
+        return self.terraform_resources
+
+    def _read_terraform_resources(self) -> List[Resource]:
+        tf_module_dir = self.translate_location(self.desc["location"])
+        # Get all of the (non-nested) terraform files in the current module.
+        tf_files = [
+            entry for entry in os.scandir(tf_module_dir) if entry.path.endswith(".tf")
+        ]
+
+        terraform_resources: List[Resource] = []
+        # Read and extract the resources from each current terraform file.
+        for tf_file in tf_files:
+            tf_config = hcl2.load(open(tf_file))
+            tf_resources = tf_config.get("resource", [])
+            for resource in tf_resources:
+                resource_type = list(resource.keys())[0]
+                resource_name = list(resource[resource_type].keys())[0]
+                resource = Resource(self, resource_type, resource_name)
+                terraform_resources.append(resource)
+
+        return terraform_resources
