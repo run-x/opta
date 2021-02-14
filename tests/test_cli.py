@@ -7,8 +7,9 @@ from unittest.mock import call, mock_open, patch
 import yaml
 from pytest_mock import MockFixture
 
-from opta.cli import TERRAFORM_PLAN_FILE_PATH, _apply, _cleanup, at_exit_callback
+from opta.cli import TERRAFORM_PLAN_FILE_PATH, _cleanup, at_exit_callback
 from opta.constants import TF_FILE_PATH
+from opta.core.generator import gen
 from tests.fixtures.apply import APPLY_WITHOUT_ORG_ID, BASIC_APPLY
 
 
@@ -58,18 +59,6 @@ class TestCLI:
             with patch("builtins.open") as mocked_open:
                 mocked_open.side_effect = new_open
 
-                _apply("opta.yml", None, True, False, None, [], False)
-
-                mocked_exists.assert_has_calls(
-                    [
-                        call("opta.yml"),
-                        call(mocker.ANY),
-                        call(mocker.ANY),
-                        call(mocker.ANY),
-                        call(mocker.ANY),
-                        call(mocker.ANY),
-                    ],
-                    any_order=True,
-                )
+                gen("opta.yml", None)
 
                 write_open().write.assert_called_once_with(json.dumps(o, indent=2))
