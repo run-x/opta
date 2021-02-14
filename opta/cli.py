@@ -6,6 +6,7 @@ import sentry_sdk
 from sentry_sdk.integrations.atexit import AtexitIntegration
 
 from opta.constants import VERSION
+from opta.core.generator import gen
 from opta.exceptions import UserErrors
 from opta.helpers.cli.push import get_ecr_auth_info, get_registry_url, push_to_docker
 
@@ -49,13 +50,12 @@ import os  # noqa: E402
 import os.path  # noqa: E402
 from importlib.util import find_spec  # noqa: E402
 from subprocess import CalledProcessError  # noqa: E402
-from typing import List, Optional, Set  # noqa: E402
+from typing import List, Optional  # noqa: E402
 
 import boto3  # noqa: E402
 import click  # noqa: E402
 import yaml  # noqa: E402
 
-from opta import gen_tf  # noqa: E402
 from opta.amplitude import amplitude_client  # noqa: E402
 from opta.constants import TF_FILE_PATH  # noqa: E402
 from opta.inspect_cmd import InspectCommand  # noqa: E402
@@ -64,7 +64,7 @@ from opta.layer import Layer  # noqa: E402
 from opta.nice_subprocess import nice_run  # noqa: E402
 from opta.output import get_terraform_outputs  # noqa: E402
 from opta.plugins.secret_manager import secret  # noqa: E402
-from opta.utils import deep_merge, is_tool  # noqa: E402
+from opta.utils import is_tool  # noqa: E402
 from opta.version import version  # noqa: E402
 
 TERRAFORM_PLAN_FILE_PATH = "tf.plan"
@@ -231,122 +231,68 @@ def _apply(
     """ Generate TF file based on opta config file """
     if not is_tool("terraform"):
         raise UserErrors("Please install terraform on your machine")
-    if not os.path.exists(configfile):
-        raise UserErrors(f"File {configfile} not found")
     amplitude_client.send_event(amplitude_client.START_GEN_EVENT)
 
     conf = yaml.load(open(configfile), Loader=yaml.Loader)
-    for v in var:
-        key, value = v.split("=")
-        conf["meta"]["variables"] = conf["meta"].get("variables", {})
-        conf["meta"]["variables"][key] = value
 
     layer = Layer.load_from_dict(conf, env)
-    current_module_keys: Set[str] = set()
-    total_modules_applied: Set[str] = set()
-    print("Loading infra blocks")
     blocks_to_process = (
         layer.blocks[: max_block + 1] if max_block is not None else layer.blocks
     )
-    for block_idx, block in enumerate(blocks_to_process):
-        current_module_keys = current_module_keys.union(
-            set(map(lambda x: x.key, block.modules))
-        )
-        try:
-            if not os.path.isdir("./.terraform") and not os.path.isfile(
-                "./terraform.tfstate"
-            ):
-                print(
-                    "Couldn't find terraform state locally, gonna check to see if remote "
-                    "state is available"
-                )
-                providers = layer.gen_providers(0, True)
-                if "s3" in providers.get("terraform", {}).get("backend", {}):
-                    bucket = providers["terraform"]["backend"]["s3"]["bucket"]
-                    key = providers["terraform"]["backend"]["s3"]["key"]
-                    print(
-                        f"Found an s3 backend in bucket {bucket} and key {key}, "
-                        "gonna try to download the statefile from there"
-                    )
-                    s3 = boto3.client("s3")
-                    s3.download_file(bucket, key, "./terraform.tfstate")
-            current_state = (
-                nice_run(["terraform", "state", "list"], check=True, capture_output=True)
-                .stdout.decode("utf-8")
-                .split("\n")
-            )
-            for resource in current_state:
-                if resource.startswith("module"):
-                    total_modules_applied.add(resource.split(".")[1])
-        except Exception:
-            print("Terraform state was unavailable, will assume a new build.")
 
-        if (
-            current_module_keys.issubset(total_modules_applied)
-            and block_idx + 1 != len(blocks_to_process)
-            and not refresh
+    try:
+        if not os.path.isdir("./.terraform") and not os.path.isfile(
+            "./terraform.tfstate"
         ):
-            continue
-        print(f"Generating block {block_idx} for modules {current_module_keys}...")
-        ret = layer.gen_providers(block_idx, block.backend_enabled)
-        ret = deep_merge(layer.gen_tf(block_idx), ret)
+            print(
+                "Couldn't find terraform state locally, gonna check to see if remote "
+                "state is available"
+            )
+            providers = layer.gen_providers(0, True)
+            if "s3" in providers.get("terraform", {}).get("backend", {}):
+                bucket = providers["terraform"]["backend"]["s3"]["bucket"]
+                key = providers["terraform"]["backend"]["s3"]["key"]
+                print(
+                    f"Found an s3 backend in bucket {bucket} and key {key}, "
+                    "gonna try to download the statefile from there"
+                )
+                s3 = boto3.client("s3")
+                s3.download_file(bucket, key, "./terraform.tfstate")
+    except Exception:
+        print("Terraform state was unavailable, will assume a new build.")
 
-        gen_tf.gen(ret, TF_FILE_PATH)
+    for i in range(len(blocks_to_process)):
+        gen(configfile, env, var, i)
+
         if no_apply:
             continue
-        print(f"Will now initialize generate terraform plan for block {block_idx}.")
+        logging.debug(f"Will now initialize generate terraform plan for block {i}.")
         amplitude_client.send_event(
-            amplitude_client.PLAN_EVENT, event_properties={"block_idx": block_idx}
+            amplitude_client.PLAN_EVENT, event_properties={"block_idx": i}
         )
-
-        target_modules = list(current_module_keys)
-        # On the last block run, destroy all modules that are in the remote state,
-        # but have not been touched by any block.
-        # Modules are untouched if the customer deletes or renames them in the
-        # opta config file.
-        # TODO: Warn user when things are getting deleted (when we have opta diffs)
-        if block_idx + 1 == len(blocks_to_process):
-            untouched_modules = list(total_modules_applied - current_module_keys)
-            target_modules += untouched_modules
-
-        targets = list(map(lambda x: f"-target=module.{x}", target_modules))
-
-        # Always fetch the latest modules while we're still in active development.
-        nice_run(["terraform", "get", "--update"], check=True)
 
         nice_run(["terraform", "init"], check=True)
 
-        # When the test flag is passed, verify that terraform plan runs without issues,
-        # but don't lock the state.
-        if test:
-            nice_run(["terraform", "plan", "-lock=false"] + targets, check=True)
-            print("Plan ran successfully, skipping apply..")
-            continue
-        else:
-            nice_run(
-                [
-                    "terraform",
-                    "plan",
-                    f"-out={TERRAFORM_PLAN_FILE_PATH}",
-                    "-lock-timeout=60s",
-                ]
-                + targets,
-                check=True,
-            )
+        nice_run(
+            [
+                "terraform",
+                "plan",
+                f"-out={TERRAFORM_PLAN_FILE_PATH}",
+                "-lock-timeout=60s",
+            ],
+            check=True,
+        )
 
         click.confirm(
             "Terraform plan generation successful, would you like to apply?", abort=True
         )
         amplitude_client.send_event(
-            amplitude_client.APPLY_EVENT, event_properties={"block_idx": block_idx}
+            amplitude_client.APPLY_EVENT, event_properties={"block_idx": i}
         )
         nice_run(
-            ["terraform", "apply", "-lock-timeout=60s"]
-            + targets
-            + [TERRAFORM_PLAN_FILE_PATH],
+            ["terraform", "apply", "-lock-timeout=60s"] + [TERRAFORM_PLAN_FILE_PATH],
             check=True,
         )
-        block_idx += 1
 
 
 def _cleanup() -> None:

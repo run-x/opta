@@ -8,7 +8,7 @@ import yaml
 from click.testing import CliRunner
 from pytest_mock import MockFixture
 
-from opta.cli import TERRAFORM_PLAN_FILE_PATH, _cleanup, apply, at_exit_callback, cli
+from opta.cli import TERRAFORM_PLAN_FILE_PATH, _apply, _cleanup, at_exit_callback, cli
 from opta.constants import TF_FILE_PATH
 from tests.fixtures.apply import APPLY_WITHOUT_ORG_ID, BASIC_APPLY
 
@@ -44,7 +44,6 @@ class TestCLI:
         mocked_exists.return_value = True
         test_cases: Any = [BASIC_APPLY, APPLY_WITHOUT_ORG_ID]
 
-        runner = CliRunner()
         for (i, o) in test_cases:
             old_open = open
             write_open = mock_open()
@@ -60,7 +59,7 @@ class TestCLI:
             with patch("builtins.open") as mocked_open:
                 mocked_open.side_effect = new_open
 
-                runner.invoke(apply, ["--no-apply"])
+                _apply("opta.yml", None, True, False, None, [], False)
 
                 mocked_exists.assert_has_calls(
                     [
