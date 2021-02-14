@@ -1,4 +1,3 @@
-import logging
 import sys
 from typing import Any
 
@@ -6,9 +5,11 @@ import sentry_sdk
 from sentry_sdk.integrations.atexit import AtexitIntegration
 
 from opta.constants import VERSION
+from opta.core import terraform
 from opta.core.generator import gen
 from opta.exceptions import UserErrors
 from opta.helpers.cli.push import get_ecr_auth_info, get_registry_url, push_to_docker
+from opta.utils import is_tool, logger  # noqa: E402
 
 
 def at_exit_callback(pending: int, timeout: float) -> None:
@@ -35,7 +36,7 @@ def before_send(event: Any, hint: Any) -> Any:
 
 
 if hasattr(sys, "_called_from_test") or VERSION == "dev":
-    print("Not sending sentry cause we're in test or dev")
+    logger.debug("Not sending sentry cause we're in test or dev")
 else:
     sentry_sdk.init(
         "https://aab05facf13049368d749e1b30a08b32@o511457.ingest.sentry.io/5610510",
@@ -52,9 +53,7 @@ from importlib.util import find_spec  # noqa: E402
 from subprocess import CalledProcessError  # noqa: E402
 from typing import List, Optional  # noqa: E402
 
-import boto3  # noqa: E402
 import click  # noqa: E402
-import yaml  # noqa: E402
 
 from opta.amplitude import amplitude_client  # noqa: E402
 from opta.constants import TF_FILE_PATH  # noqa: E402
@@ -64,10 +63,11 @@ from opta.layer import Layer  # noqa: E402
 from opta.nice_subprocess import nice_run  # noqa: E402
 from opta.output import get_terraform_outputs  # noqa: E402
 from opta.plugins.secret_manager import secret  # noqa: E402
-from opta.utils import is_tool  # noqa: E402
 from opta.version import version  # noqa: E402
 
 TERRAFORM_PLAN_FILE_PATH = "tf.plan"
+TF_STATE_FILE = "terraform.tfstate"
+TF_STATE_BACKUP_FILE = "terraform.tfstate.backup"
 
 
 @click.group()
@@ -233,40 +233,24 @@ def _apply(
         raise UserErrors("Please install terraform on your machine")
     amplitude_client.send_event(amplitude_client.START_GEN_EVENT)
 
-    conf = yaml.load(open(configfile), Loader=yaml.Loader)
+    logger.info("Found existing state")
+    if not os.path.isdir("./.terraform") and not os.path.isfile("./terraform.tfstate"):
+        if terraform.download_state(configfile, env):
+            logger.info("Found existing state")
+        else:
+            logger.info("No existing state found. Assuming new build")
 
-    layer = Layer.load_from_dict(conf, env)
+    layer = Layer.load_from_yaml(configfile, env)
     blocks_to_process = (
         layer.blocks[: max_block + 1] if max_block is not None else layer.blocks
     )
-
-    try:
-        if not os.path.isdir("./.terraform") and not os.path.isfile(
-            "./terraform.tfstate"
-        ):
-            print(
-                "Couldn't find terraform state locally, gonna check to see if remote "
-                "state is available"
-            )
-            providers = layer.gen_providers(0, True)
-            if "s3" in providers.get("terraform", {}).get("backend", {}):
-                bucket = providers["terraform"]["backend"]["s3"]["bucket"]
-                key = providers["terraform"]["backend"]["s3"]["key"]
-                print(
-                    f"Found an s3 backend in bucket {bucket} and key {key}, "
-                    "gonna try to download the statefile from there"
-                )
-                s3 = boto3.client("s3")
-                s3.download_file(bucket, key, "./terraform.tfstate")
-    except Exception:
-        print("Terraform state was unavailable, will assume a new build.")
 
     for i in range(len(blocks_to_process)):
         gen(configfile, env, var, i)
 
         if no_apply:
             continue
-        logging.debug(f"Will now initialize generate terraform plan for block {i}.")
+        logger.debug(f"Will now initialize generate terraform plan for block {i}.")
         amplitude_client.send_event(
             amplitude_client.PLAN_EVENT, event_properties={"block_idx": i}
         )
@@ -299,6 +283,8 @@ def _cleanup() -> None:
     try:
         os.remove(TF_FILE_PATH)
         os.remove(TERRAFORM_PLAN_FILE_PATH)
+        os.remove(TF_STATE_FILE)
+        os.remove(TF_STATE_BACKUP_FILE)
     except FileNotFoundError:
         pass
 
@@ -313,9 +299,9 @@ if __name__ == "__main__":
     try:
         cli()
     except CalledProcessError as e:
-        logging.exception(e)
+        logger.exception(e)
         if e.stderr is not None:
-            logging.error(e.stderr.decode("utf-8"))
+            logger.error(e.stderr.decode("utf-8"))
         sys.exit(1)
     finally:
         if os.environ.get("OPTA_DEBUG") is None:

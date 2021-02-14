@@ -4,10 +4,10 @@ from typing import List, Optional, Set
 
 import yaml
 
-from opta import gen_tf  # noqa: E402
-from opta.constants import TF_FILE_PATH  # noqa: E402
+from opta import gen_tf
+from opta.constants import TF_FILE_PATH
 from opta.exceptions import UserErrors
-from opta.layer import Layer  # noqa: E402
+from opta.layer import Layer
 from opta.utils import deep_merge
 
 
@@ -15,7 +15,6 @@ def gen(
     configfile: str, env: Optional[str], var: List[str], max_block: Optional[int]
 ) -> None:
     """ Generate TF file based on opta config file """
-    print("HERE")
     if not os.path.exists(configfile):
         raise UserErrors(f"File {configfile} not found")
 

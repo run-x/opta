@@ -1,9 +1,18 @@
+import logging
 import sys
 from shutil import which
 from textwrap import dedent
 from typing import Any, Dict, List
 
 from opta.special_formatter import PartialFormatter
+
+logger = logging.getLogger("opta")
+logger.setLevel(logging.INFO)
+ch = logging.StreamHandler(sys.stdout)
+formatter = logging.Formatter("%(levelname)s: %(message)s")
+ch.setFormatter(formatter)
+logger.addHandler(ch)
+
 
 fmt = PartialFormatter("")
 
