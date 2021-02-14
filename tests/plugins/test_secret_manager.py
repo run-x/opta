@@ -8,8 +8,8 @@ from kubernetes.client import CoreV1Api, V1Secret
 from pytest_mock import MockFixture, mocker  # noqa
 
 from opta.amplitude import AmplitudeClient, amplitude_client
+from opta.commands.secret import get_module, list_command, update, view
 from opta.module import Module
-from opta.plugins.secret_manager import get_module, list_command, update, view
 
 
 class TestSecretManager:
@@ -48,16 +48,14 @@ class TestSecretManager:
             assert "Secret not found" in str(excinfo.value)
 
     def test_view(self, mocker: MockFixture):  # noqa
-        mocked_get_module = mocker.patch("opta.plugins.secret_manager.get_module")
+        mocked_get_module = mocker.patch("opta.commands.secret.get_module")
         mocked_module = mocker.Mock(spec=Module)
         mocked_module.layer_name = "dummy_layer"
         mocked_get_module.return_value = mocked_module
 
-        mocked_kube_load_config = mocker.patch(
-            "opta.plugins.secret_manager.load_kube_config"
-        )
+        mocked_kube_load_config = mocker.patch("opta.commands.secret.load_kube_config")
 
-        mocked_kube_client = mocker.patch("opta.plugins.secret_manager.CoreV1Api")
+        mocked_kube_client = mocker.patch("opta.commands.secret.CoreV1Api")
         mocked_client = mocker.Mock(spec=CoreV1Api)
         mocked_kube_client.return_value = mocked_client
 
@@ -68,7 +66,7 @@ class TestSecretManager:
         mocked_client.read_namespaced_secret.return_value = mocked_response
 
         mocked_amplitude_client = mocker.patch(
-            "opta.plugins.secret_manager.amplitude_client", spec=AmplitudeClient
+            "opta.commands.secret.amplitude_client", spec=AmplitudeClient
         )
         mocked_amplitude_client.VIEW_SECRET_EVENT = amplitude_client.VIEW_SECRET_EVENT
 
@@ -99,16 +97,14 @@ class TestSecretManager:
     def test_list_secrets(self, mocker: MockFixture):  # noqa
         mocked_print = mocker.patch("builtins.print")
 
-        mocked_get_module = mocker.patch("opta.plugins.secret_manager.get_module")
+        mocked_get_module = mocker.patch("opta.commands.secret.get_module")
         mocked_module = mocker.Mock(spec=Module)
         mocked_module.layer_name = "dummy_layer"
         mocked_get_module.return_value = mocked_module
 
-        mocked_kube_load_config = mocker.patch(
-            "opta.plugins.secret_manager.load_kube_config"
-        )
+        mocked_kube_load_config = mocker.patch("opta.commands.secret.load_kube_config")
 
-        mocked_kube_client = mocker.patch("opta.plugins.secret_manager.CoreV1Api")
+        mocked_kube_client = mocker.patch("opta.commands.secret.CoreV1Api")
         mocked_client = mocker.Mock(spec=CoreV1Api)
         mocked_kube_client.return_value = mocked_client
 
@@ -119,7 +115,7 @@ class TestSecretManager:
         mocked_client.read_namespaced_secret.return_value = mocked_response
 
         mocked_amplitude_client = mocker.patch(
-            "opta.plugins.secret_manager.amplitude_client", spec=AmplitudeClient
+            "opta.commands.secret.amplitude_client", spec=AmplitudeClient
         )
         mocked_amplitude_client.LIST_SECRETS_EVENT = amplitude_client.LIST_SECRETS_EVENT
 
@@ -142,21 +138,19 @@ class TestSecretManager:
         mocked_print.assert_has_calls([mocker.call("ALGOLIA_WRITE_KEY")])
 
     def test_update(self, mocker: MockFixture):  # noqa
-        mocked_get_module = mocker.patch("opta.plugins.secret_manager.get_module")
+        mocked_get_module = mocker.patch("opta.commands.secret.get_module")
         mocked_module = mocker.Mock(spec=Module)
         mocked_module.layer_name = "dummy_layer"
         mocked_get_module.return_value = mocked_module
 
-        mocked_kube_load_config = mocker.patch(
-            "opta.plugins.secret_manager.load_kube_config"
-        )
+        mocked_kube_load_config = mocker.patch("opta.commands.secret.load_kube_config")
 
-        mocked_kube_client = mocker.patch("opta.plugins.secret_manager.CoreV1Api")
+        mocked_kube_client = mocker.patch("opta.commands.secret.CoreV1Api")
         mocked_client = mocker.Mock(spec=CoreV1Api)
         mocked_kube_client.return_value = mocked_client
 
         mocked_amplitude_client = mocker.patch(
-            "opta.plugins.secret_manager.amplitude_client", spec=AmplitudeClient
+            "opta.commands.secret.amplitude_client", spec=AmplitudeClient
         )
         mocked_amplitude_client.UPDATE_SECRET_EVENT = amplitude_client.UPDATE_SECRET_EVENT
 
