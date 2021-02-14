@@ -12,7 +12,10 @@ from opta.utils import deep_merge
 
 
 def gen(
-    configfile: str, env: Optional[str], var: List[str], max_block: Optional[int]
+    configfile: str,
+    env: Optional[str],
+    var: List[str] = [],
+    max_block: Optional[int] = None,
 ) -> None:
     """ Generate TF file based on opta config file """
     if not os.path.exists(configfile):

@@ -4,11 +4,11 @@ from typing import Any
 import sentry_sdk
 from sentry_sdk.integrations.atexit import AtexitIntegration
 
+from opta.commands.push import push
 from opta.constants import VERSION
 from opta.core import terraform
 from opta.core.generator import gen
 from opta.exceptions import UserErrors
-from opta.helpers.cli.push import get_ecr_auth_info, get_registry_url, push_to_docker
 from opta.utils import is_tool, logger  # noqa: E402
 
 
@@ -121,28 +121,6 @@ def output(
     outputs = get_terraform_outputs(force_init, include_parent)
     outputs_formatted = json.dumps(outputs, indent=4)
     print(outputs_formatted)
-
-
-@cli.command()
-@click.argument("image")
-@click.option("--configfile", default="opta.yml", help="Opta config file.")
-@click.option("--env", default=None, help="The env to use when loading the config file.")
-@click.option(
-    "--tag",
-    default=None,
-    help="The image tag associated with your docker container. Defaults to your local image tag.",
-)
-@click.pass_context
-def push(
-    ctx: Any, image: str, configfile: str, env: str, tag: Optional[str] = None,
-) -> None:
-    if not is_tool("docker"):
-        raise Exception("Please install docker on your machine")
-
-    ctx.invoke(apply, configfile=configfile, env=env, no_apply=True)
-    registry_url = get_registry_url()
-    username, password = get_ecr_auth_info(configfile, env)
-    push_to_docker(username, password, image, registry_url, tag)
 
 
 @cli.command()
@@ -289,11 +267,10 @@ def _cleanup() -> None:
         pass
 
 
-# Initialize secret manager
+# Add commands
 cli.add_command(secret)
-
-# Version command
 cli.add_command(version)
+cli.add_command(push)
 
 if __name__ == "__main__":
     try:
