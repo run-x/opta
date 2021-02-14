@@ -89,7 +89,7 @@ def debugger() -> None:
         dbg = Debugger()
         dbg.run()
     else:
-        print(
+        logger.warning(
             "We're very sorry but it seems like your python installation does not "
             "support curses for advanced cli ui experience. This is a known issue if you "
             "have pyenv + Big Sur-- pls look at this issue documentations: "
@@ -233,12 +233,12 @@ def _apply(
         raise UserErrors("Please install terraform on your machine")
     amplitude_client.send_event(amplitude_client.START_GEN_EVENT)
 
-    logger.info("Found existing state")
+    print("Found existing state")
     if not os.path.isdir("./.terraform") and not os.path.isfile("./terraform.tfstate"):
         if terraform.download_state(configfile, env):
-            logger.info("Found existing state")
+            print("Found existing state")
         else:
-            logger.info("No existing state found. Assuming new build")
+            print("No existing state found. Assuming new build")
 
     layer = Layer.load_from_yaml(configfile, env)
     blocks_to_process = (

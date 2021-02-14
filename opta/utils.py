@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 from shutil import which
 from textwrap import dedent
@@ -6,8 +7,14 @@ from typing import Any, Dict, List
 
 from opta.special_formatter import PartialFormatter
 
+# Use logger when it's not core opta output but messages that are mostly for us
+# or for advanced users.
+# Use print for core opta output
 logger = logging.getLogger("opta")
-logger.setLevel(logging.INFO)
+if os.environ.get("OPTA_DEBUG") is None:
+    logger.setLevel(logging.DEBUG)
+else:
+    logger.setLevel(logging.INFO)
 ch = logging.StreamHandler(sys.stdout)
 formatter = logging.Formatter("%(levelname)s: %(message)s")
 ch.setFormatter(formatter)

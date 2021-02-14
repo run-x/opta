@@ -1,4 +1,3 @@
-import logging
 from typing import Optional
 
 import boto3
@@ -6,6 +5,7 @@ import botocore
 import yaml
 
 from opta.layer import Layer
+from opta.utils import logger
 
 
 def download_state(configfile: str, env: Optional[str]) -> bool:
@@ -16,7 +16,7 @@ def download_state(configfile: str, env: Optional[str]) -> bool:
     if "s3" in providers.get("terraform", {}).get("backend", {}):
         bucket = providers["terraform"]["backend"]["s3"]["bucket"]
         key = providers["terraform"]["backend"]["s3"]["key"]
-        logging.debug(
+        logger.debug(
             f"Found an s3 backend in bucket {bucket} and key {key}, "
             "gonna try to download the statefile from there"
         )

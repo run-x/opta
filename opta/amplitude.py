@@ -11,7 +11,7 @@ from git.config import GitConfigParser
 from requests import codes, post
 
 from opta.constants import VERSION
-from opta.utils import safe_run
+from opta.utils import logger, safe_run
 
 
 class AmplitudeClient:
@@ -49,7 +49,7 @@ class AmplitudeClient:
         user_properties: Optional[dict] = None,
     ) -> None:
         if hasattr(sys, "_called_from_test"):
-            print("Not sending amplitude cause we think we're in a pytest")
+            logger.debug("Not sending amplitude cause we think we're in a pytest")
             return
         event_properties = event_properties or {}
         user_properties = user_properties or {}
