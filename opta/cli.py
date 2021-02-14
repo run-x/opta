@@ -45,7 +45,6 @@ else:
     )
 
 
-import json  # noqa: E402
 import os  # noqa: E402
 import os.path  # noqa: E402
 from importlib.util import find_spec  # noqa: E402
@@ -55,6 +54,7 @@ from typing import List, Optional  # noqa: E402
 import click  # noqa: E402
 
 from opta.amplitude import amplitude_client  # noqa: E402
+from opta.commands.output import output  # noqa: E402
 from opta.commands.push import push  # noqa: E402
 from opta.commands.secret import secret  # noqa: E402
 from opta.commands.version import version  # noqa: E402
@@ -63,7 +63,6 @@ from opta.inspect_cmd import InspectCommand  # noqa: E402
 from opta.kubectl import setup_kubectl  # noqa: E402
 from opta.layer import Layer  # noqa: E402
 from opta.nice_subprocess import nice_run  # noqa: E402
-from opta.output import get_terraform_outputs  # noqa: E402
 
 TERRAFORM_PLAN_FILE_PATH = "tf.plan"
 TF_STATE_FILE = "terraform.tfstate"
@@ -95,32 +94,6 @@ def debugger() -> None:
             "have pyenv + Big Sur-- pls look at this issue documentations: "
             "https://github.com/pyenv/pyenv/issues/1755"
         )
-
-
-@cli.command(hidden=True)
-@click.option("--configfile", default="opta.yml", help="Opta config file")
-@click.option("--env", default=None, help="The env to use when loading the config file")
-@click.option(
-    "--include-parent",
-    is_flag=True,
-    default=False,
-    help="Also fetch outputs from the env (parent) layer",
-)
-@click.option(
-    "--force-init",
-    is_flag=True,
-    default=False,
-    help="Force regenerate opta setup files, instead of using cache",
-)
-@click.pass_context
-def output(
-    ctx: Any, configfile: str, env: Optional[str], include_parent: bool, force_init: bool,
-) -> None:
-    """ Print TF outputs """
-    ctx.invoke(apply, configfile=configfile, env=env, no_apply=True)
-    outputs = get_terraform_outputs(force_init, include_parent)
-    outputs_formatted = json.dumps(outputs, indent=4)
-    print(outputs_formatted)
 
 
 @cli.command()
@@ -271,6 +244,7 @@ def _cleanup() -> None:
 cli.add_command(secret)
 cli.add_command(version)
 cli.add_command(push)
+cli.add_command(output)
 
 if __name__ == "__main__":
     try:

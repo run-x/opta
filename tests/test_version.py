@@ -1,7 +1,7 @@
 # type: ignore
 from click.testing import CliRunner
 
-from opta.version import version
+from opta.commands.version import version
 
 
 def test_hello_world():

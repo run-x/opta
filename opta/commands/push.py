@@ -5,10 +5,10 @@ import boto3
 import click
 from botocore.config import Config
 
+from opta.commands.output import get_terraform_outputs
 from opta.core.generator import gen
 from opta.layer import Layer
 from opta.nice_subprocess import nice_run
-from opta.output import get_terraform_outputs
 from opta.utils import is_tool
 
 
