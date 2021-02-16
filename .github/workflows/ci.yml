@@ -87,18 +87,18 @@ jobs:
           aws-access-key-id: ${{ secrets.DEPLOYER_AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.DEPLOYER_AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
-      - name: Test apply command
-        run: |
-          source $(pipenv --venv)/bin/activate
-          export PYTHONPATH=$(pwd)
-          cd test-service
-          yes | python ../opta/cli.py apply --env runx-staging --test
       - name: Test output command
         run: |
           source $(pipenv --venv)/bin/activate
           export PYTHONPATH=$(pwd)
           cd test-service
-          yes | python ../opta/cli.py output --env runx-staging
+          python ../opta/cli.py output --env runx-staging
+      - name: Test apply command
+        run: |
+          source $(pipenv --venv)/bin/activate
+          export PYTHONPATH=$(pwd)
+          cd test-service
+          bash -c "no || true" | python ../opta/cli.py apply --env runx-staging
 
   deploy_test_service:
     if: ${{ github.ref == 'refs/heads/main' }}
