@@ -1,67 +1,26 @@
+import os
+import os.path
 import sys
-from typing import Any
+from importlib.util import find_spec
+from subprocess import CalledProcessError
+from typing import Any, List, Optional
 
-import sentry_sdk
-from sentry_sdk.integrations.atexit import AtexitIntegration
+import click
 
-from opta.constants import VERSION
-from opta.core import terraform
-from opta.core.generator import gen
-from opta.exceptions import UserErrors
-from opta.utils import initialize_logger, is_tool, logger
-
-
-def at_exit_callback(pending: int, timeout: float) -> None:
-    """Don't be loud about sentry, our customer doesn't care about it."""
-
-    def echo(msg):
-        # type: (str) -> None
-        sys.stderr.write(msg + "\n")
-
-    if pending > 0:
-        echo("Sentry is attempting to send %i pending error messages" % pending)
-        echo("Waiting up to %s seconds" % timeout)
-        echo("Press Ctrl-%s to quit" % (os.name == "nt" and "Break" or "C"))
-    sys.stderr.flush()
-
-
-def before_send(event: Any, hint: Any) -> Any:
-    """Don't send us events caused by user errors"""
-    if "exc_info" in hint:
-        exc_type, exc_value, tb = hint["exc_info"]
-        if isinstance(exc_value, UserErrors):
-            return None
-    return event
-
-
-if hasattr(sys, "_called_from_test") or VERSION == "dev":
-    logger.debug("Not sending sentry cause we're in test or dev")
-else:
-    sentry_sdk.init(
-        "https://aab05facf13049368d749e1b30a08b32@o511457.ingest.sentry.io/5610510",
-        traces_sample_rate=1.0,
-        integrations=[AtexitIntegration(at_exit_callback)],
-        before_send=before_send,
-    )
-
-
-import os  # noqa: E402
-import os.path  # noqa: E402
-from importlib.util import find_spec  # noqa: E402
-from subprocess import CalledProcessError  # noqa: E402
-from typing import List, Optional  # noqa: E402
-
-import click  # noqa: E402
-
+import opta.sentry  # noqa: F401 This leads to initialization of sentry sdk
 from opta.amplitude import amplitude_client  # noqa: E402
 from opta.commands.output import output  # noqa: E402
 from opta.commands.push import push  # noqa: E402
 from opta.commands.secret import secret  # noqa: E402
 from opta.commands.version import version  # noqa: E402
 from opta.constants import TF_FILE_PATH  # noqa: E402
+from opta.core import terraform  # noqa: E402
+from opta.core.generator import gen  # noqa: E402
+from opta.exceptions import UserErrors  # noqa: E402
 from opta.inspect_cmd import InspectCommand  # noqa: E402
 from opta.kubectl import setup_kubectl  # noqa: E402
 from opta.nice_subprocess import nice_run  # noqa: E402
+from opta.utils import initialize_logger, is_tool, logger  # noqa: E402
 
 TERRAFORM_PLAN_FILE_PATH = "tf.plan"
 TF_STATE_FILE = "terraform.tfstate"
