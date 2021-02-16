@@ -206,9 +206,9 @@ def _apply(
         amplitude_client.send_event(
             amplitude_client.APPLY_EVENT, event_properties={"block_idx": cur}
         )
-        nice_run(
-            ["terraform", "apply", "-lock-timeout=60s"], check=True,
-        )
+        # We don't set check=True here because terraform apply exits with 1 if
+        # user says no to the apply
+        nice_run(["terraform", "apply", "-lock-timeout=60s"])
 
 
 def _cleanup() -> None:
