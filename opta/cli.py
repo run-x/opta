@@ -8,19 +8,19 @@ from typing import Any, List, Optional
 import click
 
 import opta.sentry  # noqa: F401 This leads to initialization of sentry sdk
-from opta.amplitude import amplitude_client  # noqa: E402
-from opta.commands.output import output  # noqa: E402
-from opta.commands.push import push  # noqa: E402
-from opta.commands.secret import secret  # noqa: E402
-from opta.commands.version import version  # noqa: E402
-from opta.constants import TF_FILE_PATH  # noqa: E402
-from opta.core import terraform  # noqa: E402
-from opta.core.generator import gen  # noqa: E402
-from opta.exceptions import UserErrors  # noqa: E402
-from opta.inspect_cmd import InspectCommand  # noqa: E402
-from opta.kubectl import setup_kubectl  # noqa: E402
-from opta.nice_subprocess import nice_run  # noqa: E402
-from opta.utils import initialize_logger, is_tool, logger  # noqa: E402
+from opta.amplitude import amplitude_client
+from opta.commands.output import output
+from opta.commands.push import push
+from opta.commands.secret import secret
+from opta.commands.version import version
+from opta.constants import TF_FILE_PATH
+from opta.core import terraform
+from opta.core.generator import gen
+from opta.exceptions import UserErrors
+from opta.inspect_cmd import InspectCommand
+from opta.kubectl import setup_kubectl
+from opta.nice_subprocess import nice_run
+from opta.utils import initialize_logger, is_tool, logger
 
 TERRAFORM_PLAN_FILE_PATH = "tf.plan"
 TF_STATE_FILE = "terraform.tfstate"
