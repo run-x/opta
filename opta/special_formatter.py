@@ -1,5 +1,8 @@
+import logging
 import string
 from typing import Any
+
+logger = logging.getLogger("opta")
 
 
 class PartialFormatter(string.Formatter):
@@ -11,7 +14,7 @@ class PartialFormatter(string.Formatter):
         try:
             val = super().get_field(field_name, args, kwargs)
         except (KeyError, AttributeError):
-            print(
+            logger.debug(
                 f"Did not find field {field_name} whent trying to format. Odds are "
                 "this is just setting it to an empty default and you can ignore this"
             )

@@ -8,7 +8,7 @@ from opta.constants import VERSION
 from opta.core import terraform
 from opta.core.generator import gen
 from opta.exceptions import UserErrors
-from opta.utils import is_tool, logger  # noqa: E402
+from opta.utils import initialize_logger, is_tool, logger  # noqa: E402
 
 
 def at_exit_callback(pending: int, timeout: float) -> None:
@@ -61,7 +61,6 @@ from opta.commands.version import version  # noqa: E402
 from opta.constants import TF_FILE_PATH  # noqa: E402
 from opta.inspect_cmd import InspectCommand  # noqa: E402
 from opta.kubectl import setup_kubectl  # noqa: E402
-from opta.layer import Layer  # noqa: E402
 from opta.nice_subprocess import nice_run  # noqa: E402
 
 TERRAFORM_PLAN_FILE_PATH = "tf.plan"
@@ -184,49 +183,31 @@ def _apply(
         raise UserErrors("Please install terraform on your machine")
     amplitude_client.send_event(amplitude_client.START_GEN_EVENT)
 
-    print("Found existing state")
-    if not os.path.isdir("./.terraform") and not os.path.isfile("./terraform.tfstate"):
-        if terraform.download_state(configfile, env):
-            print("Found existing state")
-        else:
-            print("No existing state found. Assuming new build")
+    existing_state = True
+    if terraform.download_state(configfile, env):
+        logger.info("Found existing state")
+    else:
+        existing_state = False
+        logger.info("No existing state found. Assuming new build")
 
-    layer = Layer.load_from_yaml(configfile, env)
-    blocks_to_process = (
-        layer.blocks[: max_block + 1] if max_block is not None else layer.blocks
-    )
-
-    for i in range(len(blocks_to_process)):
-        gen(configfile, env, var, i)
-
+    for (cur, total) in gen(configfile, env, var):
         if no_apply:
             continue
-        logger.debug(f"Will now initialize generate terraform plan for block {i}.")
-        amplitude_client.send_event(
-            amplitude_client.PLAN_EVENT, event_properties={"block_idx": i}
-        )
 
+        if existing_state and cur != total - 1:
+            # If existing_state then we just run apply after the last block
+            # TODO: Deleting blocks after the first run will lead to undefined behavior!
+            # Note that deleting resources in the last block will still work as expected
+            continue
+
+        logger.debug(f"Will now initialize generate terraform plan for block {cur}.")
         nice_run(["terraform", "init"], check=True)
 
-        nice_run(
-            [
-                "terraform",
-                "plan",
-                f"-out={TERRAFORM_PLAN_FILE_PATH}",
-                "-lock-timeout=60s",
-            ],
-            check=True,
-        )
-
-        click.confirm(
-            "Terraform plan generation successful, would you like to apply?", abort=True
-        )
         amplitude_client.send_event(
-            amplitude_client.APPLY_EVENT, event_properties={"block_idx": i}
+            amplitude_client.APPLY_EVENT, event_properties={"block_idx": cur}
         )
         nice_run(
-            ["terraform", "apply", "-lock-timeout=60s"] + [TERRAFORM_PLAN_FILE_PATH],
-            check=True,
+            ["terraform", "apply", "-lock-timeout=60s"], check=True,
         )
 
 
@@ -247,6 +228,7 @@ cli.add_command(push)
 cli.add_command(output)
 
 if __name__ == "__main__":
+    initialize_logger()
     try:
         cli()
     except CalledProcessError as e:

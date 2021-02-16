@@ -7,18 +7,21 @@ from typing import Any, Dict, List
 
 from opta.special_formatter import PartialFormatter
 
-# Use logger when it's not core opta output but messages that are mostly for us
-# or for advanced users.
-# Use print for core opta output
+# Use logger when it's not "essential" output
+# Use print for "essential" output
 logger = logging.getLogger("opta")
-if os.environ.get("OPTA_DEBUG") is None:
-    logger.setLevel(logging.DEBUG)
-else:
-    logger.setLevel(logging.INFO)
-ch = logging.StreamHandler(sys.stdout)
-formatter = logging.Formatter("%(levelname)s: %(message)s")
-ch.setFormatter(formatter)
-logger.addHandler(ch)
+
+
+def initialize_logger() -> None:
+    if os.environ.get("OPTA_DEBUG") is None:
+        logger.setLevel(logging.DEBUG)
+    else:
+        logger.setLevel(logging.INFO)
+    ch = logging.StreamHandler(sys.stdout)
+    formatter = logging.Formatter("%(levelname)s: %(message)s")
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
+    logger.propagate = False
 
 
 fmt = PartialFormatter("")

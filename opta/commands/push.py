@@ -6,7 +6,7 @@ import click
 from botocore.config import Config
 
 from opta.commands.output import get_terraform_outputs
-from opta.core.generator import gen
+from opta.core.generator import gen_all
 from opta.layer import Layer
 from opta.nice_subprocess import nice_run
 from opta.utils import is_tool
@@ -79,7 +79,7 @@ def push(image: str, configfile: str, env: str, tag: Optional[str] = None,) -> N
     if not is_tool("docker"):
         raise Exception("Please install docker on your machine")
 
-    gen(configfile, env)
+    gen_all(configfile, env)
     registry_url = get_registry_url()
     username, password = get_ecr_auth_info(configfile, env)
     push_to_docker(username, password, image, registry_url, tag)

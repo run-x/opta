@@ -3,7 +3,7 @@ from typing import Optional
 
 import click
 
-from opta.core.generator import gen
+from opta.core.generator import gen_all
 from opta.nice_subprocess import nice_run  # noqa: E402
 from opta.utils import deep_merge
 
@@ -74,7 +74,7 @@ def output(
     configfile: str, env: Optional[str], include_parent: bool, force_init: bool,
 ) -> None:
     """ Print TF outputs """
-    gen(configfile, env)
+    gen_all(configfile, env)
     outputs = get_terraform_outputs()
     outputs_formatted = json.dumps(outputs, indent=4)
     print(outputs_formatted)
