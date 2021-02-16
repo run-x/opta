@@ -152,7 +152,7 @@ class TestPush:
 
     def test_no_tag_override(self, mocker: MockFixture) -> None:
         nice_run_mock = mocker.patch("opta.commands.push.nice_run")
-        gen_mock = mocker.patch("opta.commands.push.gen")
+        gen_mock = mocker.patch("opta.commands.push.gen_all")
         mocker.patch(
             "opta.commands.push.get_registry_url"
         ).return_value = "889760294590.dkr.ecr.us-east-1.amazonaws.com/github-runx-app"
@@ -193,7 +193,7 @@ class TestPush:
 
     def test_with_tag_override(self, mocker: MockFixture) -> None:
         nice_run_mock = mocker.patch("opta.commands.push.nice_run")
-        gen_mock = mocker.patch("opta.commands.push.gen")
+        gen_mock = mocker.patch("opta.commands.push.gen_all")
         mocker.patch(
             "opta.commands.push.get_registry_url"
         ).return_value = "889760294590.dkr.ecr.us-east-1.amazonaws.com/github-runx-app"
@@ -242,7 +242,7 @@ class TestPush:
         )
 
     def test_bad_image_name(self, mocker: MockFixture) -> None:
-        gen_mock = mocker.patch("opta.commands.push.gen")
+        gen_mock = mocker.patch("opta.commands.push.gen_all")
         mocker.patch(
             "opta.commands.push.get_registry_url"
         ).return_value = "889760294590.dkr.ecr.us-east-1.amazonaws.com/github-runx-app"

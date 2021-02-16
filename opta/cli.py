@@ -8,7 +8,7 @@ from opta.constants import VERSION
 from opta.core import terraform
 from opta.core.generator import gen
 from opta.exceptions import UserErrors
-from opta.utils import initialize_logger, is_tool, logger  # noqa: E402
+from opta.utils import initialize_logger, is_tool, logger
 
 
 def at_exit_callback(pending: int, timeout: float) -> None:

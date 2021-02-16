@@ -22,7 +22,7 @@ def get_registry_url() -> str:
     return outputs["docker_repo_url"]
 
 
-def get_ecr_auth_info(configfile: str, env: str) -> Tuple[str, str]:
+def get_ecr_auth_info(configfile: str, env: Optional[str]) -> Tuple[str, str]:
     layer = Layer.load_from_yaml(configfile, env)
     providers = layer.gen_providers(0, True)
     account_id = providers["provider"]["aws"]["allowed_account_ids"][0]
@@ -75,7 +75,7 @@ def push_to_docker(
     default=None,
     help="The image tag associated with your docker container. Defaults to your local image tag.",
 )
-def push(image: str, configfile: str, env: str, tag: Optional[str] = None,) -> None:
+def push(image: str, configfile: str, env: Optional[str], tag: Optional[str]) -> None:
     if not is_tool("docker"):
         raise Exception("Please install docker on your machine")
 

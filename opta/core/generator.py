@@ -12,8 +12,8 @@ from opta.utils import deep_merge
 
 
 def gen_all(configfile: str, env: Optional[str], var: List[str] = []) -> None:
-    for _ in gen(configfile, env, var):
-        pass
+    # Just run the generator till the end
+    list(gen(configfile, env, var))
 
 
 def gen(

@@ -71,7 +71,7 @@ class TestOutput:
 
     def test_output(self, mocker: MockFixture) -> None:
         mocker.patch("opta.cli.os.remove")
-        mocker.patch("opta.commands.output.gen")
+        mocker.patch("opta.commands.output.gen_all")
         mocker.patch("opta.commands.output.nice_run", side_effect=self.mock_shell_cmds)
 
         runner = CliRunner()

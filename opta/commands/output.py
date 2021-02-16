@@ -4,7 +4,7 @@ from typing import Optional
 import click
 
 from opta.core.generator import gen_all
-from opta.nice_subprocess import nice_run  # noqa: E402
+from opta.nice_subprocess import nice_run
 from opta.utils import deep_merge
 
 

@@ -9,7 +9,7 @@ from pytest_mock import MockFixture
 
 from opta.cli import TERRAFORM_PLAN_FILE_PATH, _cleanup, at_exit_callback
 from opta.constants import TF_FILE_PATH
-from opta.core.generator import gen
+from opta.core.generator import gen_all
 from tests.fixtures.apply import APPLY_WITHOUT_ORG_ID, BASIC_APPLY
 
 
@@ -59,6 +59,6 @@ class TestCLI:
             with patch("builtins.open") as mocked_open:
                 mocked_open.side_effect = new_open
 
-                gen("opta.yml", None)
+                gen_all("opta.yml", None)
 
                 write_open().write.assert_called_once_with(json.dumps(o, indent=2))
