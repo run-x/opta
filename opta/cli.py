@@ -20,7 +20,7 @@ from opta.exceptions import UserErrors
 from opta.inspect_cmd import InspectCommand
 from opta.kubectl import setup_kubectl
 from opta.nice_subprocess import nice_run
-from opta.utils import initialize_logger, is_tool, logger
+from opta.utils import is_tool, logger
 
 TERRAFORM_PLAN_FILE_PATH = "tf.plan"
 TF_STATE_FILE = "terraform.tfstate"
@@ -187,7 +187,6 @@ cli.add_command(push)
 cli.add_command(output)
 
 if __name__ == "__main__":
-    initialize_logger()
     try:
         cli()
     except CalledProcessError as e:

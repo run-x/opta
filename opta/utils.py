@@ -1,28 +1,32 @@
 import logging
 import os
 import sys
+from logging import Logger
 from shutil import which
 from textwrap import dedent
 from typing import Any, Dict, List
 
 from opta.special_formatter import PartialFormatter
 
-# Use logger when it's not "essential" output
-# Use print for "essential" output
-logger = logging.getLogger("opta")
 
-
-def initialize_logger() -> None:
+def initialize_logger() -> Logger:
+    logger = logging.getLogger("opta")
     if os.environ.get("OPTA_DEBUG") is None:
-        logger.setLevel(logging.DEBUG)
-    else:
         logger.setLevel(logging.INFO)
+    else:
+        logger.setLevel(logging.DEBUG)
     ch = logging.StreamHandler(sys.stdout)
     formatter = logging.Formatter("%(levelname)s: %(message)s")
     ch.setFormatter(formatter)
     logger.addHandler(ch)
     logger.propagate = False
 
+    return logger
+
+
+# Use logger when it's not "essential" output
+# Use print for "essential" output
+logger = initialize_logger()
 
 fmt = PartialFormatter("")
 
