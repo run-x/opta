@@ -7,9 +7,10 @@ from unittest.mock import call, mock_open, patch
 import yaml
 from pytest_mock import MockFixture
 
-from opta.cli import TERRAFORM_PLAN_FILE_PATH, _cleanup, at_exit_callback
+from opta.cli import TERRAFORM_PLAN_FILE_PATH, _cleanup
 from opta.constants import TF_FILE_PATH
 from opta.core.generator import gen_all
+from opta.sentry import at_exit_callback
 from tests.fixtures.apply import APPLY_WITHOUT_ORG_ID, BASIC_APPLY
 
 
