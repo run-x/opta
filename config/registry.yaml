@@ -212,7 +212,7 @@ modules:
       layer_name: str
       module_name: str
       port: optional
-      image: optional
+      image: str
       tag: optional
       env_vars: optional
       secrets: optional

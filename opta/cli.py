@@ -92,6 +92,7 @@ def configure_kubectl(ctx: Any, configfile: str, env: Optional[str]) -> None:
     help="The env to use when loading the config file",
     show_default=True,
 )
+@click.option("--image-tag", default=None, type=int, help="Tag name of image to deploy")
 @click.option(
     "--no-apply",
     is_flag=True,
@@ -120,6 +121,7 @@ def configure_kubectl(ctx: Any, configfile: str, env: Optional[str]) -> None:
 def apply(
     configfile: str,
     env: Optional[str],
+    image_tag: Optional[str],
     no_apply: bool,
     refresh: bool,
     max_block: Optional[int],
@@ -127,12 +129,13 @@ def apply(
     test: bool,
 ) -> None:
     """Apply your opta config file to your infrastructure!"""
-    _apply(configfile, env, no_apply, refresh, max_block, var, test)
+    _apply(configfile, env, image_tag, no_apply, refresh, max_block, var, test)
 
 
 def _apply(
     configfile: str,
     env: Optional[str],
+    image_tag: Optional[str],
     no_apply: bool,
     refresh: bool,
     max_block: Optional[int],
@@ -147,6 +150,10 @@ def _apply(
     amplitude_client.send_event(amplitude_client.START_GEN_EVENT)
 
     conf = yaml.load(open(configfile), Loader=yaml.Loader)
+
+    if image_tag:
+        var.append(f"image={image_tag}")
+
     for v in var:
         key, value = v.split("=")
         conf["meta"]["variables"] = conf["meta"].get("variables", {})

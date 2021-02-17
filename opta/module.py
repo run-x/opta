@@ -26,8 +26,15 @@ class Module:
             },
             "output": {},
         }
+
         for k, v in self.desc["variables"].items():
             if k in self.data:
+
+                # If a user specifies AUTO in their k8s config, let our terrform module
+                # automatically derive their ECR repo
+                if self.data["type"] == "k8s-service" and k == "image" and v == "AUTO":
+                    continue
+
                 module_blk["module"][self.key][k] = self.data[k]
             elif v == "optional":
                 continue

@@ -13,8 +13,8 @@ class K8sServiceProcessor(ModuleProcessor):
             raise Exception(
                 f"The module {module.key} was expected to be of type k8s service"
             )
-        self.read_buckets: list[str] = []
-        self.write_buckets: list[str] = []
+        self.read_buckets: List[str] = []
+        self.write_buckets: List[str] = []
         super(K8sServiceProcessor, self).__init__(module, layer)
 
     def process(self, block_idx: int) -> None:
