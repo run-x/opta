@@ -1,26 +1,20 @@
 import json
-import os  # noqa: E402
-import os.path  # noqa: E402
+from typing import Optional
 
-from opta.nice_subprocess import nice_run  # noqa: E402
+import click
+
+from opta.core.generator import gen_all
+from opta.nice_subprocess import nice_run
 from opta.utils import deep_merge
 
 
-def get_terraform_outputs(force_init: bool = False, include_parent: bool = False) -> dict:
+def get_terraform_outputs() -> dict:
     """ Fetch terraform outputs from existing TF file """
-    if force_init or not _terraform_dir_exists():
-        nice_run(["terraform", "init"], check=True)
-
+    nice_run(["terraform", "init"], check=True)
     outputs = _fetch_current_outputs()
-
-    if include_parent:
-        outputs = deep_merge(outputs, _fetch_parent_outputs())
+    outputs = deep_merge(outputs, _fetch_parent_outputs())
 
     return outputs
-
-
-def _terraform_dir_exists() -> bool:
-    return os.path.isdir(".terraform")
 
 
 def _fetch_current_outputs() -> dict:
@@ -59,3 +53,28 @@ def _fetch_parent_outputs() -> dict:
             parent_state_outputs[output_name] = v
 
     return parent_state_outputs
+
+
+@click.command(hidden=True)
+@click.option("--configfile", default="opta.yml", help="Opta config file")
+@click.option("--env", default=None, help="The env to use when loading the config file")
+@click.option(
+    "--include-parent",
+    is_flag=True,
+    default=False,
+    help="Also fetch outputs from the env (parent) layer",
+)
+@click.option(
+    "--force-init",
+    is_flag=True,
+    default=False,
+    help="Force regenerate opta setup files, instead of using cache",
+)
+def output(
+    configfile: str, env: Optional[str], include_parent: bool, force_init: bool,
+) -> None:
+    """ Print TF outputs """
+    gen_all(configfile, env)
+    outputs = get_terraform_outputs()
+    outputs_formatted = json.dumps(outputs, indent=4)
+    print(outputs_formatted)

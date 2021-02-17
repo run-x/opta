@@ -4,7 +4,7 @@ from pytest_mock import MockFixture
 from opta.cli import inspect
 from opta.module import Module
 from opta.resource import Resource
-from tests.test_output import MockedCmdOut
+from tests.commands.test_output import MockedCmdOut
 
 FAKE_REGISTRY = {
     "modules": {

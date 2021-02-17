@@ -4,7 +4,7 @@ from typing import List
 from click.testing import CliRunner
 from pytest_mock import MockFixture
 
-from opta.cli import output
+from opta.commands.output import output
 
 TERRAFORM_SHOW_JSON = {
     "values": {
@@ -71,9 +71,8 @@ class TestOutput:
 
     def test_output(self, mocker: MockFixture) -> None:
         mocker.patch("opta.cli.os.remove")
-        mocker.patch("opta.output._terraform_dir_exists", return_value=True)
-        mocker.patch("opta.cli.apply")
-        mocker.patch("opta.output.nice_run", side_effect=self.mock_shell_cmds)
+        mocker.patch("opta.commands.output.gen_all")
+        mocker.patch("opta.commands.output.nice_run", side_effect=self.mock_shell_cmds)
 
         runner = CliRunner()
         result = runner.invoke(output, ["--include-parent"])
@@ -87,25 +86,3 @@ class TestOutput:
             "bucket_id": "runx-test-bucket-runx-staging",
             "docker_repo_url": "889760294590.dkr.ecr.us-east-1.amazonaws.com/test-service-runx-app",
         }
-
-    def test_terraform_init(self, mocker: MockFixture) -> None:
-        mocker.patch("opta.cli.os.remove")
-        mocker.patch("opta.output._terraform_dir_exists", return_value=False)
-        mocker.patch("opta.cli.apply")
-        mocked_shell_cmds = mocker.patch("opta.output.nice_run")
-
-        runner = CliRunner()
-        runner.invoke(output, [])
-        terraform_no_exists_shell_call_count = mocked_shell_cmds.call_count
-
-        # Don't run terraform init when .terraform/ exists.
-        mocked_shell_cmds.call_count = 0
-        mocker.patch("opta.output._terraform_dir_exists", return_value=True)
-
-        runner.invoke(output)
-        terraform_exists_shell_call_count = mocked_shell_cmds.call_count
-
-        # One fewer shell command should have been called when .terraform already exists.
-        assert (
-            terraform_no_exists_shell_call_count == terraform_exists_shell_call_count + 1
-        )

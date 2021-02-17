@@ -16,7 +16,7 @@ from opta.exceptions import UserErrors
 from opta.module import Module
 from opta.module_processors.k8s_service import K8sServiceProcessor
 from opta.plugins.derived_providers import DerivedProviders
-from opta.utils import deep_merge, hydrate
+from opta.utils import deep_merge, hydrate, logger
 
 
 class Layer:
@@ -55,7 +55,7 @@ class Layer:
     @classmethod
     def load_from_yaml(cls, configfile: str, env: Optional[str]) -> Layer:
         if configfile.startswith("git@"):
-            print("Loading layer from git...")
+            logger.debug("Loading layer from git...")
             git_url, file_path = configfile.split("//")
             branch = "main"
             if "?" in file_path:
@@ -179,9 +179,9 @@ class Layer:
             return self.parent.state_storage()
         elif "org_id" not in self.meta:
             # TODO: Remove this once everyone is updated
-            print(
-                "\nWARNING: You should specify a unique org_id in environment yml files\
-                   \nWARNING: This will break in future releases\n"
+            logger.warning(
+                "\nYou should specify a unique org_id in environment yml files\
+                   \nThis will break in future releases\n"
             )
             return f"opta-tf-state-{self.meta['name']}"
         else:

@@ -2,14 +2,17 @@ import base64
 from typing import Optional, Tuple
 
 import boto3
+import click
 from botocore.config import Config
 
+from opta.commands.output import get_terraform_outputs
+from opta.core.generator import gen_all
 from opta.layer import Layer
-from opta.nice_subprocess import nice_run  # noqa: E402
-from opta.output import get_terraform_outputs
+from opta.nice_subprocess import nice_run
+from opta.utils import is_tool
 
 
-def get_registry_url() -> None:
+def get_registry_url() -> str:
     outputs = get_terraform_outputs()
     if "docker_repo_url" not in outputs:
         raise Exception(
@@ -19,7 +22,7 @@ def get_registry_url() -> None:
     return outputs["docker_repo_url"]
 
 
-def get_ecr_auth_info(configfile: str, env: str) -> Tuple[str, str]:
+def get_ecr_auth_info(configfile: str, env: Optional[str]) -> Tuple[str, str]:
     layer = Layer.load_from_yaml(configfile, env)
     providers = layer.gen_providers(0, True)
     account_id = providers["provider"]["aws"]["allowed_account_ids"][0]
@@ -27,9 +30,7 @@ def get_ecr_auth_info(configfile: str, env: str) -> Tuple[str, str]:
 
     try:
         ecr = boto3.client("ecr", config=Config(region_name=region))
-        response = ecr.get_authorization_token(
-            registryIds=[str(account_id)],
-        )
+        response = ecr.get_authorization_token(registryIds=[str(account_id)],)
     except Exception:
         raise Exception(
             f"Error getting authorization token for accountId {account_id} in region {region}"
@@ -63,3 +64,22 @@ def push_to_docker(
     )
     nice_run(["docker", "tag", local_image, remote_image_name])
     nice_run(["docker", "push", remote_image_name])
+
+
+@click.command()
+@click.argument("image")
+@click.option("--configfile", default="opta.yml", help="Opta config file.")
+@click.option("--env", default=None, help="The env to use when loading the config file.")
+@click.option(
+    "--tag",
+    default=None,
+    help="The image tag associated with your docker container. Defaults to your local image tag.",
+)
+def push(image: str, configfile: str, env: Optional[str], tag: Optional[str]) -> None:
+    if not is_tool("docker"):
+        raise Exception("Please install docker on your machine")
+
+    gen_all(configfile, env)
+    registry_url = get_registry_url()
+    username, password = get_ecr_auth_info(configfile, env)
+    push_to_docker(username, password, image, registry_url, tag)
