@@ -19,7 +19,7 @@ variable "disk_size" {
 
 variable "instance_type" {
   type    = string
-  default = "t3.medium"
+  default = "t3.micro"
 }
 
 variable "use_gpu" {
