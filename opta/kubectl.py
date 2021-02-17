@@ -3,10 +3,10 @@ from typing import List, Optional, Tuple
 
 import yaml
 
+from opta.commands.output import get_terraform_outputs
 from opta.exceptions import UserErrors
 from opta.layer import Layer
 from opta.nice_subprocess import nice_run
-from opta.output import get_terraform_outputs
 from opta.utils import fmt_msg, is_tool
 
 KUBECTL_INSTALL_URL = (
