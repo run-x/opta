@@ -19,7 +19,7 @@ variable "disk_size" {
 
 variable "instance_type" {
   type    = string
-  default = "t3.medium"
+  default = "t3.micro"
 }
 
 variable "use_gpu" {
@@ -44,7 +44,7 @@ variable "min_size" {
 
 variable "desired_size" {
   type    = number
-  default = 2
+  default = 1
 }
 
 variable "ssh_key" {

@@ -24,5 +24,5 @@ variable "security_group" {
 
 variable "instance_class" {
   type = string
-  default = "db.r5.large"
+  default = "db.t3.medium"
 }
