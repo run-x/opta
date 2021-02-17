@@ -44,7 +44,7 @@ variable "min_size" {
 
 variable "desired_size" {
   type    = number
-  default = 2
+  default = 1
 }
 
 variable "ssh_key" {
