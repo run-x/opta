@@ -45,7 +45,7 @@ def py_check(files_changed: Collection[str], precommit: bool) -> int:
             return 0
 
     isort = "pipenv run isort --check-only"
-    black = "echo ''"  # no-op
+    black = "pipenv run black --check"
     flake8 = "pipenv run flake8"
 
     mypy = "pipenv run mypy"
