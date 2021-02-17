@@ -11,8 +11,8 @@ from opta.utils import column_print, deep_merge, is_tool
 
 
 class InspectCommand:
-    def __init__(self, configfile: str, env: Optional[str]):
-        self.configfile = configfile
+    def __init__(self, config: str, env: Optional[str]):
+        self.config = config
         self.env = env
         # Fetch the current terraform state
         self.terraform_state = self._fetch_terraform_state_resources()
@@ -84,7 +84,7 @@ class InspectCommand:
         return resources_dict
 
     def _get_opta_config_terraform_resources(self) -> List[Resource]:
-        conf = yaml.load(open(self.configfile), Loader=yaml.Loader)
+        conf = yaml.load(open(self.config), Loader=yaml.Loader)
         layer = Layer.load_from_dict(conf, self.env)
 
         terraform_resources = []

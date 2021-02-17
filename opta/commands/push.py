@@ -22,8 +22,8 @@ def get_registry_url() -> str:
     return outputs["docker_repo_url"]
 
 
-def get_ecr_auth_info(configfile: str, env: Optional[str]) -> Tuple[str, str]:
-    layer = Layer.load_from_yaml(configfile, env)
+def get_ecr_auth_info(config: str, env: Optional[str]) -> Tuple[str, str]:
+    layer = Layer.load_from_yaml(config, env)
     providers = layer.gen_providers(0, True)
     account_id = providers["provider"]["aws"]["allowed_account_ids"][0]
     region = providers["provider"]["aws"]["region"]
@@ -68,18 +68,18 @@ def push_to_docker(
 
 @click.command()
 @click.argument("image")
-@click.option("--configfile", default="opta.yml", help="Opta config file.")
+@click.option("--config", default="opta.yml", help="Opta config file.")
 @click.option("--env", default=None, help="The env to use when loading the config file.")
 @click.option(
     "--tag",
     default=None,
     help="The image tag associated with your docker container. Defaults to your local image tag.",
 )
-def push(image: str, configfile: str, env: Optional[str], tag: Optional[str]) -> None:
+def push(image: str, config: str, env: Optional[str], tag: Optional[str]) -> None:
     if not is_tool("docker"):
         raise Exception("Please install docker on your machine")
 
-    gen_all(configfile, env)
+    gen_all(config, env)
     registry_url = get_registry_url()
-    username, password = get_ecr_auth_info(configfile, env)
+    username, password = get_ecr_auth_info(config, env)
     push_to_docker(username, password, image, registry_url, tag)

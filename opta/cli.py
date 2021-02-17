@@ -57,35 +57,29 @@ def debugger() -> None:
 
 
 @cli.command()
-@click.option(
-    "--configfile", default="opta.yml", help="Opta config file", show_default=True
-)
+@click.option("--config", default="opta.yml", help="Opta config file", show_default=True)
 @click.option("--env", default=None, help="The env to use when loading the config file")
 @click.pass_context
-def inspect(ctx: Any, configfile: str, env: Optional[str]) -> None:
+def inspect(ctx: Any, config: str, env: Optional[str]) -> None:
     """ Displays important resources and AWS/Datadog links to them """
-    ctx.invoke(apply, configfile=configfile, env=env, no_apply=True)
+    ctx.invoke(apply, config=config, env=env, no_apply=True)
     nice_run(["terraform", "init"], check=True)
-    InspectCommand(configfile, env).run()
+    InspectCommand(config, env).run()
 
 
 @cli.command()
-@click.option(
-    "--configfile", default="opta.yml", help="Opta config file", show_default=True
-)
+@click.option("--config", default="opta.yml", help="Opta config file", show_default=True)
 @click.option("--env", default=None, help="The env to use when loading the config file")
 @click.pass_context
-def configure_kubectl(ctx: Any, configfile: str, env: Optional[str]) -> None:
+def configure_kubectl(ctx: Any, config: str, env: Optional[str]) -> None:
     """ Configure the kubectl CLI tool for the given cluster """
-    ctx.invoke(apply, configfile=configfile, env=env, no_apply=True)
+    ctx.invoke(apply, config=config, env=env, no_apply=True)
     # Also switches the current kubectl context to the cluster.
-    setup_kubectl(configfile, env)
+    setup_kubectl(config, env)
 
 
 @cli.command()
-@click.option(
-    "--configfile", default="opta.yml", help="Opta config file", show_default=True
-)
+@click.option("--config", default="opta.yml", help="Opta config file", show_default=True)
 @click.option(
     "--env",
     default=None,
@@ -118,7 +112,7 @@ def configure_kubectl(ctx: Any, configfile: str, env: Optional[str]) -> None:
     hidden=True,
 )
 def apply(
-    configfile: str,
+    config: str,
     env: Optional[str],
     no_apply: bool,
     refresh: bool,
@@ -127,11 +121,11 @@ def apply(
     test: bool,
 ) -> None:
     """Apply your opta config file to your infrastructure!"""
-    _apply(configfile, env, no_apply, refresh, max_block, var, test)
+    _apply(config, env, no_apply, refresh, max_block, var, test)
 
 
 def _apply(
-    configfile: str,
+    config: str,
     env: Optional[str],
     no_apply: bool,
     refresh: bool,
@@ -142,11 +136,11 @@ def _apply(
     """ Generate TF file based on opta config file """
     if not is_tool("terraform"):
         raise UserErrors("Please install terraform on your machine")
-    if not os.path.exists(configfile):
-        raise UserErrors(f"File {configfile} not found")
+    if not os.path.exists(config):
+        raise UserErrors(f"File {config} not found")
     amplitude_client.send_event(amplitude_client.START_GEN_EVENT)
 
-    conf = yaml.load(open(configfile), Loader=yaml.Loader)
+    conf = yaml.load(open(config), Loader=yaml.Loader)
     for v in var:
         key, value = v.split("=")
         conf["meta"]["variables"] = conf["meta"].get("variables", {})

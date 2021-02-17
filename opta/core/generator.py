@@ -11,19 +11,19 @@ from opta.layer import Layer
 from opta.utils import deep_merge
 
 
-def gen_all(configfile: str, env: Optional[str], var: List[str] = []) -> None:
+def gen_all(config: str, env: Optional[str], var: List[str] = []) -> None:
     # Just run the generator till the end
-    list(gen(configfile, env, var))
+    list(gen(config, env, var))
 
 
 def gen(
-    configfile: str, env: Optional[str], var: List[str] = []
+    config: str, env: Optional[str], var: List[str] = []
 ) -> Generator[Tuple[int, int], None, None]:
     """ Generate TF file based on opta config file """
-    if not os.path.exists(configfile):
-        raise UserErrors(f"File {configfile} not found")
+    if not os.path.exists(config):
+        raise UserErrors(f"File {config} not found")
 
-    conf = yaml.load(open(configfile), Loader=yaml.Loader)
+    conf = yaml.load(open(config), Loader=yaml.Loader)
     for v in var:
         key, value = v.split("=")
         conf["meta"]["variables"] = conf["meta"].get("variables", {})

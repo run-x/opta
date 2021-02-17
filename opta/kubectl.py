@@ -18,7 +18,7 @@ AWS_CLI_INSTALL_URL = (
 DEFAULT_EKS_CLUSTER_NAME = "main"
 
 
-def setup_kubectl(configfile: str, env: Optional[str]) -> None:
+def setup_kubectl(config: str, env: Optional[str]) -> None:
     """ Configure kubeconfig file with cluster details """
     # Make sure the user has the prerequisite CLI tools installed
 
@@ -55,7 +55,7 @@ def setup_kubectl(configfile: str, env: Optional[str]) -> None:
     current_aws_account_id = aws_caller_identity["Account"]
 
     # Get the environment's account details from the opta config
-    root_layer = _get_root_layer(configfile, env)
+    root_layer = _get_root_layer(config, env)
     env_aws_region, env_aws_account_ids = _get_cluster_env(root_layer)
 
     # Make sure the current account points to the cluster environment
@@ -99,8 +99,8 @@ def _get_cluster_env(root_layer: Layer) -> Tuple[str, List[int]]:
     return aws_provider["region"], aws_provider["allowed_account_ids"]
 
 
-def _get_root_layer(configfile: str, env: Optional[str]) -> Layer:
-    conf = yaml.load(open(configfile), Loader=yaml.Loader)
+def _get_root_layer(config: str, env: Optional[str]) -> Layer:
+    conf = yaml.load(open(config), Loader=yaml.Loader)
     layer = Layer.load_from_dict(conf, env)
 
     while layer.parent is not None:
