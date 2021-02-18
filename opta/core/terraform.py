@@ -51,6 +51,7 @@ class Terraform:
 
     @classmethod
     def download_state(cls, configfile: str, env: Optional[str]) -> bool:
+        cls.init()
         conf = yaml.load(open(configfile), Loader=yaml.Loader)
         layer = Layer.load_from_dict(conf, env)
 
