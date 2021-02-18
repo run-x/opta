@@ -1,13 +1,28 @@
 import json
 from typing import Any, List, Optional
 
+import click
 import yaml
 
 from opta.constants import TF_FILE_PATH
+from opta.core.generator import gen_all
+from opta.core.terraform import Terraform
 from opta.layer import Layer
 from opta.nice_subprocess import nice_run
 from opta.resource import Resource
 from opta.utils import column_print, deep_merge, is_tool
+
+
+@click.command()
+@click.option(
+    "--configfile", default="opta.yml", help="Opta config file", show_default=True
+)
+@click.option("--env", default=None, help="The env to use when loading the config file")
+def inspect(configfile: str, env: Optional[str]) -> None:
+    """ Displays important resources and AWS/Datadog links to them """
+    gen_all(configfile, env)
+    Terraform.init()
+    InspectCommand(configfile, env).run()
 
 
 class InspectCommand:
