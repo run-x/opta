@@ -106,8 +106,12 @@ def _apply(
     amplitude_client.send_event(amplitude_client.START_GEN_EVENT)
 
     configured_modules: Set[str] = set()
-    existing_modules = Terraform.get_existing_modules(configfile, env)
+    existing_modules: Set[str] = set()
     for block_idx, block, total_block_count in gen(configfile, env, var):
+        if block_idx == 0:
+            # This is set during the first iteration, since the tf file must exist.
+            existing_modules = Terraform.get_existing_modules(configfile, env)
+
         configured_modules = configured_modules.union(
             set(map(lambda x: x.key, block.modules))
         )
