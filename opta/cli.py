@@ -134,7 +134,7 @@ def _apply(
         targets = list(map(lambda x: f"-target=module.{x}", target_modules))
 
         if test:
-            Terraform.plan("-lock=false", targets)
+            Terraform.plan("-lock=false", *targets)
             print("Plan ran successfully, not applying since this is a test.")
         else:
             amplitude_client.send_event(
