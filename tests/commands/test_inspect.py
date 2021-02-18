@@ -4,7 +4,7 @@ from pytest_mock import MockFixture
 from opta.commands.inspect_cmd import inspect
 from opta.module import Module
 from opta.resource import Resource
-from tests.commands.test_output import MockedCmdOut
+from tests.utils import MockedCmdJsonOut
 
 FAKE_REGISTRY = {
     "modules": {
@@ -52,7 +52,8 @@ class TestInspect:
         mocker.patch("opta.module.REGISTRY", FAKE_REGISTRY)
         # Mock fetching the terraform state
         mocker.patch(
-            "opta.commands.inspect_cmd.nice_run", return_value=MockedCmdOut(FAKE_TF_STATE)
+            "opta.commands.inspect_cmd.nice_run",
+            return_value=MockedCmdJsonOut(FAKE_TF_STATE),
         )
         # Mock reading the provider's AWS region from the main tf file
         mocker.patch(

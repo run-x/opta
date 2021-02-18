@@ -38,6 +38,9 @@ class Terraform:
         if not cls.downloaded_state:
             success = cls.download_state(configfile, env)
             if not success:
+                logger.info(
+                    "Could not fetch remote terraform state, assuming no resources exist yet."
+                )
                 return []
 
         return (
