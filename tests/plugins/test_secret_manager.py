@@ -13,7 +13,7 @@ from opta.module import Module
 
 
 class TestSecretManager:
-    def test_get_module_no_configfile(self, mocker: MockFixture):  # noqa
+    def test_get_module_no_config(self, mocker: MockFixture):  # noqa
         mocked_path_exists = mocker.patch("os.path.exists")
         mocked_path_exists.return_value = False
         with pytest.raises(Exception):
@@ -73,23 +73,14 @@ class TestSecretManager:
         runner = CliRunner()
         result = runner.invoke(
             view,
-            [
-                "dummyapp",
-                "dummysecret",
-                "--env",
-                "dummyenv",
-                "--configfile",
-                "dummyconfigfile",
-            ],
+            ["dummyapp", "dummysecret", "--env", "dummyenv", "--config", "dummyconfig"],
         )
         assert result.exit_code == 0
         mocked_kube_load_config.assert_called_once_with()
         mocked_client.read_namespaced_secret.assert_called_once_with(
             "secret", "dummy_layer"
         )
-        mocked_get_module.assert_called_once_with(
-            "dummyapp", "dummyenv", "dummyconfigfile"
-        )
+        mocked_get_module.assert_called_once_with("dummyapp", "dummyenv", "dummyconfig")
         mocked_amplitude_client.send_event.assert_called_once_with(
             amplitude_client.VIEW_SECRET_EVENT
         )
@@ -121,17 +112,14 @@ class TestSecretManager:
 
         runner = CliRunner()
         result = runner.invoke(
-            list_command,
-            ["dummyapp", "--env", "dummyenv", "--configfile", "dummyconfigfile"],
+            list_command, ["dummyapp", "--env", "dummyenv", "--config", "dummyconfig"],
         )
         assert result.exit_code == 0
         mocked_kube_load_config.assert_called_once_with()
         mocked_client.read_namespaced_secret.assert_called_once_with(
             "secret", "dummy_layer"
         )
-        mocked_get_module.assert_called_once_with(
-            "dummyapp", "dummyenv", "dummyconfigfile"
-        )
+        mocked_get_module.assert_called_once_with("dummyapp", "dummyenv", "dummyconfig")
         mocked_amplitude_client.send_event.assert_called_once_with(
             amplitude_client.LIST_SECRETS_EVENT
         )
@@ -163,8 +151,8 @@ class TestSecretManager:
                 "dummysecretvalue",
                 "--env",
                 "dummyenv",
-                "--configfile",
-                "dummyconfigfile",
+                "--config",
+                "dummyconfig",
             ],
         )
         assert result.exit_code == 0
@@ -176,9 +164,7 @@ class TestSecretManager:
         mocked_client.patch_namespaced_secret.assert_called_once_with(
             "secret", "dummy_layer", patch
         )
-        mocked_get_module.assert_called_once_with(
-            "dummyapp", "dummyenv", "dummyconfigfile"
-        )
+        mocked_get_module.assert_called_once_with("dummyapp", "dummyenv", "dummyconfig")
         mocked_amplitude_client.send_event.assert_called_once_with(
             amplitude_client.UPDATE_SECRET_EVENT
         )

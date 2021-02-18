@@ -53,10 +53,10 @@ class Layer:
                     )
 
     @classmethod
-    def load_from_yaml(cls, configfile: str, env: Optional[str]) -> Layer:
-        if configfile.startswith("git@"):
+    def load_from_yaml(cls, config: str, env: Optional[str]) -> Layer:
+        if config.startswith("git@"):
             logger.debug("Loading layer from git...")
-            git_url, file_path = configfile.split("//")
+            git_url, file_path = config.split("//")
             branch = "main"
             if "?" in file_path:
                 file_path, file_vars = file_path.split("?")
@@ -71,10 +71,10 @@ class Layer:
             git.Repo.clone_from(git_url, t, branch=branch, depth=1)
             conf = yaml.load(open(os.path.join(t, file_path)), Loader=yaml.Loader)
             shutil.rmtree(t)
-        elif path.exists(configfile):
-            conf = yaml.load(open(configfile), Loader=yaml.Loader)
+        elif path.exists(config):
+            conf = yaml.load(open(config), Loader=yaml.Loader)
         else:
-            raise UserErrors(f"File {configfile} not found")
+            raise UserErrors(f"File {config} not found")
         return cls.load_from_dict(conf, env)
 
     @classmethod

@@ -14,20 +14,18 @@ from opta.utils import column_print, deep_merge, is_tool
 
 
 @click.command()
-@click.option(
-    "--configfile", default="opta.yml", help="Opta config file", show_default=True
-)
+@click.option("--config", default="opta.yml", help="Opta config file", show_default=True)
 @click.option("--env", default=None, help="The env to use when loading the config file")
-def inspect(configfile: str, env: Optional[str]) -> None:
+def inspect(config: str, env: Optional[str]) -> None:
     """ Displays important resources and AWS/Datadog links to them """
-    gen_all(configfile, env)
+    gen_all(config, env)
     Terraform.init()
-    InspectCommand(configfile, env).run()
+    InspectCommand(config, env).run()
 
 
 class InspectCommand:
-    def __init__(self, configfile: str, env: Optional[str]):
-        self.configfile = configfile
+    def __init__(self, config: str, env: Optional[str]):
+        self.config = config
         self.env = env
         # Fetch the current terraform state
         self.terraform_state = self._fetch_terraform_state_resources()
@@ -99,7 +97,7 @@ class InspectCommand:
         return resources_dict
 
     def _get_opta_config_terraform_resources(self) -> List[Resource]:
-        conf = yaml.load(open(self.configfile), Loader=yaml.Loader)
+        conf = yaml.load(open(self.config), Loader=yaml.Loader)
         layer = Layer.load_from_dict(conf, self.env)
 
         terraform_resources = []

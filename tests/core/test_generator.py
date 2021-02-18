@@ -20,13 +20,13 @@ class TestGenerator:
         # from the opta config
         opta_config, gen_tf_file = BASIC_APPLY
         mocker.patch("opta.core.generator.yaml.load", return_value=opta_config)
-        gen_all(configfile="", env=None)
+        gen_all(config="", env=None)
         assert gen_tf_file == json.load(open(test_gen_file_path))
 
         # Make sure generation still works even when org_id is not passed.
         opta_config, gen_tf_file = APPLY_WITHOUT_ORG_ID
         mocker.patch("opta.core.generator.yaml.load", return_value=opta_config)
-        gen_all(configfile="", env=None)
+        gen_all(config="", env=None)
         assert gen_tf_file == json.load(open(test_gen_file_path))
 
         os.remove(test_gen_file_path)

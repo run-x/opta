@@ -28,15 +28,15 @@ class Terraform:
         nice_run(["terraform", "plan", *tf_flags], check=True)
 
     @classmethod
-    def get_existing_modules(cls, configfile: str, env: Optional[str]) -> Set[str]:
-        existing_resources = cls.get_existing_resources(configfile, env)
+    def get_existing_modules(cls, config: str, env: Optional[str]) -> Set[str]:
+        existing_resources = cls.get_existing_resources(config, env)
         module_resources = [r for r in existing_resources if r.startswith("module")]
         return set(map(lambda r: r.split(".")[1], module_resources))
 
     @classmethod
-    def get_existing_resources(cls, configfile: str, env: Optional[str]) -> List[str]:
+    def get_existing_resources(cls, config: str, env: Optional[str]) -> List[str]:
         if not cls.downloaded_state:
-            success = cls.download_state(configfile, env)
+            success = cls.download_state(config, env)
             if not success:
                 logger.info(
                     "Could not fetch remote terraform state, assuming no resources exist yet."
@@ -50,9 +50,9 @@ class Terraform:
         )
 
     @classmethod
-    def download_state(cls, configfile: str, env: Optional[str]) -> bool:
+    def download_state(cls, config: str, env: Optional[str]) -> bool:
         cls.init()
-        conf = yaml.load(open(configfile), Loader=yaml.Loader)
+        conf = yaml.load(open(config), Loader=yaml.Loader)
         layer = Layer.load_from_dict(conf, env)
 
         providers = layer.gen_providers(0, True)

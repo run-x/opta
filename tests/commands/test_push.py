@@ -87,11 +87,11 @@ class TestGetEcrAuthInfo:
         patched_boto_client = mocker.patch("opta.commands.push.boto3.client")
         patched_boto_client.return_value = mocked_ecr_client
 
-        def mocked_load_from_yaml(configfile: str, env: Optional[str]) -> Layer:
+        def mocked_load_from_yaml(config: str, env: Optional[str]) -> Layer:
             return mocked_layer
 
         mocker.patch.object(Layer, "load_from_yaml", new=mocked_load_from_yaml)
-        assert get_ecr_auth_info(configfile="opta.yml", env="runx-staging") == (
+        assert get_ecr_auth_info(config="opta.yml", env="runx-staging") == (
             "username",
             "password",
         )

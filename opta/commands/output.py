@@ -57,7 +57,7 @@ def _fetch_parent_outputs() -> dict:
 
 
 @click.command(hidden=True)
-@click.option("--configfile", default="opta.yml", help="Opta config file")
+@click.option("--config", default="opta.yml", help="Opta config file")
 @click.option("--env", default=None, help="The env to use when loading the config file")
 @click.option(
     "--include-parent",
@@ -72,10 +72,10 @@ def _fetch_parent_outputs() -> dict:
     help="Force regenerate opta setup files, instead of using cache",
 )
 def output(
-    configfile: str, env: Optional[str], include_parent: bool, force_init: bool,
+    config: str, env: Optional[str], include_parent: bool, force_init: bool,
 ) -> None:
     """ Print TF outputs """
-    gen_all(configfile, env)
+    gen_all(config, env)
     outputs = get_terraform_outputs()
     outputs_formatted = json.dumps(outputs, indent=4)
     print(outputs_formatted)

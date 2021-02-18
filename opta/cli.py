@@ -53,9 +53,7 @@ def debugger() -> None:
 
 
 @cli.command()
-@click.option(
-    "--configfile", default="opta.yml", help="Opta config file", show_default=True
-)
+@click.option("--config", default="opta.yml", help="Opta config file", show_default=True)
 @click.option(
     "--env",
     default=None,
@@ -81,7 +79,7 @@ def debugger() -> None:
     hidden=True,
 )
 def apply(
-    configfile: str,
+    config: str,
     env: Optional[str],
     refresh: bool,
     max_block: Optional[int],
@@ -89,11 +87,11 @@ def apply(
     test: bool,
 ) -> None:
     """Apply your opta config file to your infrastructure!"""
-    _apply(configfile, env, refresh, max_block, var, test)
+    _apply(config, env, refresh, max_block, var, test)
 
 
 def _apply(
-    configfile: str,
+    config: str,
     env: Optional[str],
     refresh: bool,
     max_block: Optional[int],
@@ -107,10 +105,10 @@ def _apply(
 
     configured_modules: Set[str] = set()
     existing_modules: Set[str] = set()
-    for block_idx, block, total_block_count in gen(configfile, env, var):
+    for block_idx, block, total_block_count in gen(config, env, var):
         if block_idx == 0:
             # This is set during the first iteration, since the tf file must exist.
-            existing_modules = Terraform.get_existing_modules(configfile, env)
+            existing_modules = Terraform.get_existing_modules(config, env)
 
         configured_modules = configured_modules.union(
             set(map(lambda x: x.key, block.modules))

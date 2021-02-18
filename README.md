@@ -1,5 +1,12 @@
 [![codecov](https://codecov.io/gh/run-x/runxc/branch/main/graph/badge.svg?token=OA3PXV0HYX)](https://codecov.io/gh/run-x/runxc)
 
+Development
+==========
+Scripts
+----------
+- Install pre-commit hook for linting:
+  - `cp scripts/pre-commit .git/hooks/pre-commit`
+
 How to use (out of date)
 ==========
 - Clone the runxc repo

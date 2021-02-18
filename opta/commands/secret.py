@@ -17,8 +17,8 @@ def secret() -> None:
     pass
 
 
-def get_module(module_name: str, env: Optional[str], configfile: str) -> Module:
-    layer = Layer.load_from_yaml(configfile, env)
+def get_module(module_name: str, env: Optional[str], config: str) -> Module:
+    layer = Layer.load_from_yaml(config, env)
     target_module = layer.get_module(module_name)
 
     if target_module is None:
@@ -31,12 +31,10 @@ def get_module(module_name: str, env: Optional[str], configfile: str) -> Module:
 @click.argument("module_name")
 @click.argument("secret")
 @click.option("--env", default=None, help="The env to use when loading the config file")
-@click.option(
-    "--configfile", default="opta.yml", help="Opta config file", show_default=True
-)
-def view(module_name: str, secret: str, env: Optional[str], configfile: str) -> None:
+@click.option("--config", default="opta.yml", help="Opta config file", show_default=True)
+def view(module_name: str, secret: str, env: Optional[str], config: str) -> None:
     """View a given secret of a k8s service"""
-    target_module = get_module(module_name, env, configfile)
+    target_module = get_module(module_name, env, config)
     amplitude_client.send_event(amplitude_client.VIEW_SECRET_EVENT)
     load_kube_config()
     v1 = CoreV1Api()
@@ -52,12 +50,10 @@ def view(module_name: str, secret: str, env: Optional[str], configfile: str) -> 
 @secret.command(name="list")
 @click.argument("module_name")
 @click.option("--env", default=None, help="The env to use when loading the config file")
-@click.option(
-    "--configfile", default="opta.yml", help="Opta config file", show_default=True
-)
-def list_command(module_name: str, env: Optional[str], configfile: str) -> None:
+@click.option("--config", default="opta.yml", help="Opta config file", show_default=True)
+def list_command(module_name: str, env: Optional[str], config: str) -> None:
     """List the secrets setup for the given k8s service module"""
-    target_module = get_module(module_name, env, configfile)
+    target_module = get_module(module_name, env, config)
     amplitude_client.send_event(amplitude_client.LIST_SECRETS_EVENT)
 
     load_kube_config()
@@ -73,14 +69,12 @@ def list_command(module_name: str, env: Optional[str], configfile: str) -> None:
 @click.argument("secret")
 @click.argument("value")
 @click.option("--env", default=None, help="The env to use when loading the config file")
-@click.option(
-    "--configfile", default="opta.yml", help="Opta config file", show_default=True
-)
+@click.option("--config", default="opta.yml", help="Opta config file", show_default=True)
 def update(
-    module_name: str, secret: str, value: str, env: Optional[str], configfile: str
+    module_name: str, secret: str, value: str, env: Optional[str], config: str
 ) -> None:
     """Update a given secret of a k8s service with a new value"""
-    target_module = get_module(module_name, env, configfile)
+    target_module = get_module(module_name, env, config)
     amplitude_client.send_event(amplitude_client.UPDATE_SECRET_EVENT)
     secret_value = base64.b64encode(value.encode("utf-8")).decode("utf-8")
     patch = [{"op": "replace", "path": f"/data/{secret}", "value": secret_value}]
