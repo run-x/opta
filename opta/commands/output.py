@@ -4,13 +4,14 @@ from typing import Optional
 import click
 
 from opta.core.generator import gen_all
+from opta.core.terraform import Terraform
 from opta.nice_subprocess import nice_run
 from opta.utils import deep_merge
 
 
 def get_terraform_outputs() -> dict:
     """ Fetch terraform outputs from existing TF file """
-    nice_run(["terraform", "init"], check=True)
+    Terraform.init()
     outputs = _fetch_current_outputs()
     outputs = deep_merge(outputs, _fetch_parent_outputs())
 

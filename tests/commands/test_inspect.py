@@ -1,7 +1,7 @@
 from click.testing import CliRunner
 from pytest_mock import MockFixture
 
-from opta.cli import inspect
+from opta.commands.inspect_cmd import inspect
 from opta.module import Module
 from opta.resource import Resource
 from tests.commands.test_output import MockedCmdOut
@@ -44,18 +44,20 @@ FAKE_TF_STATE = {
 
 class TestInspect:
     def test_inspect(self, mocker: MockFixture) -> None:
-        mocker.patch("opta.cli.apply")
+        # Mock tf file generation
+        mocker.patch("opta.commands.inspect_cmd.gen_all")
         # Mock that the terraform CLI tool exists.
-        mocker.patch("opta.inspect_cmd.is_tool", return_value=True)
+        mocker.patch("opta.commands.inspect_cmd.is_tool", return_value=True)
         # Mock the inspect config
         mocker.patch("opta.module.REGISTRY", FAKE_REGISTRY)
         # Mock fetching the terraform state
         mocker.patch(
-            "opta.inspect_cmd.nice_run", return_value=MockedCmdOut(FAKE_TF_STATE)
+            "opta.commands.inspect_cmd.nice_run", return_value=MockedCmdOut(FAKE_TF_STATE)
         )
         # Mock reading the provider's AWS region from the main tf file
         mocker.patch(
-            "opta.inspect_cmd.InspectCommand._get_aws_region", return_value="us-east-1"
+            "opta.commands.inspect_cmd.InspectCommand._get_aws_region",
+            return_value="us-east-1",
         )
 
         # Mock reading opta resources.
@@ -64,12 +66,13 @@ class TestInspect:
         )
         fake_resource = Resource(fake_module, "test_resource", "test")
         mocker.patch(
-            "opta.inspect_cmd.InspectCommand._get_opta_config_terraform_resources",
+            "opta.commands.inspect_cmd.InspectCommand._get_opta_config_terraform_resources",
             return_value=[fake_resource],
         )
 
         runner = CliRunner()
         result = runner.invoke(inspect)
+        print(result.exception)
         assert result.exit_code == 0
         # Using split to compare without whitespaces
         assert (
