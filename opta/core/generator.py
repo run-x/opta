@@ -1,4 +1,3 @@
-import logging
 import os
 from typing import Generator, List, Optional, Tuple
 
@@ -9,7 +8,7 @@ from opta.blocks import Blocks
 from opta.constants import TF_FILE_PATH
 from opta.exceptions import UserErrors
 from opta.layer import Layer
-from opta.utils import deep_merge
+from opta.utils import deep_merge, logger
 
 
 def gen_all(configfile: str, env: Optional[str], var: List[str] = []) -> None:
@@ -31,11 +30,11 @@ def gen(
         conf["meta"]["variables"][key] = value
 
     layer = Layer.load_from_dict(conf, env)
-    logging.debug("Loading infra blocks")
+    logger.debug("Loading infra blocks")
 
     total_block_count = len(layer.blocks)
     for block_idx, block in enumerate(layer.blocks):
-        logging.debug(f"Generating block {block_idx}")
+        logger.debug(f"Generating block {block_idx}")
         ret = layer.gen_providers(block_idx, block.backend_enabled)
         ret = deep_merge(layer.gen_tf(block_idx), ret)
 

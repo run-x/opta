@@ -44,6 +44,8 @@ FAKE_TF_STATE = {
 
 class TestInspect:
     def test_inspect(self, mocker: MockFixture) -> None:
+        # Mock terraform init
+        mocker.patch("opta.commands.inspect_cmd.Terraform.init")
         # Mock tf file generation
         mocker.patch("opta.commands.inspect_cmd.gen_all")
         # Mock that the terraform CLI tool exists.

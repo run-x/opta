@@ -21,12 +21,16 @@ class TestGetRegistryUrl:
         def mocked_shell_cmds(args_array: List[str], **kwargs: Any) -> Any:
             mocked_terraform_init = mocker.Mock(spec=CompletedProcess)
             mocked_terraform_output = mocker.Mock(spec=CompletedProcess)
+            mocked_terraform_show = mocker.Mock(spec=CompletedProcess)
             mocked_terraform_output.stdout = json.dumps(tf_output_dict).encode("utf-8")
+            mocked_terraform_show.stdout = json.dumps({}).encode("utf-8")
 
             if args_array == ["terraform", "init"]:
                 return mocked_terraform_init
             if args_array == ["terraform", "output", "-json"]:
                 return mocked_terraform_output
+            if args_array == ["terraform", "show", "-json"]:
+                return mocked_terraform_show
             raise Exception("Unexpected test input")
 
         return mocked_shell_cmds
@@ -55,14 +59,14 @@ class TestGetRegistryUrl:
         mocked_isdir.return_value = True
 
         mocker.patch(
-            "opta.commands.push.nice_run",
+            "opta.commands.output.nice_run",
             side_effect=self.get_mocked_shell_cmds(mocker, {},),
         )
 
         with pytest.raises(Exception) as e_info:
             get_registry_url()
 
-        expected_error_output = "Unable to determine docker repository url. There is likely something wrong with your opta configuration."
+        expected_error_output = "Unable to determine docker repository url"
         assert expected_error_output in str(e_info)
 
 

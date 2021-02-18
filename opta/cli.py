@@ -136,7 +136,7 @@ def _apply(
             amplitude_client.send_event(
                 amplitude_client.APPLY_EVENT, event_properties={"block_idx": block_idx}
             )
-            Terraform.apply("-lock-timeout=60s", targets)
+            Terraform.apply("-lock-timeout=60s", *targets)
 
 
 def _cleanup() -> None:
