@@ -1,9 +1,11 @@
 import json
 from typing import List, Optional, Tuple
 
+import click
 import yaml
 
 from opta.commands.output import get_terraform_outputs
+from opta.core.generator import gen_all
 from opta.exceptions import UserErrors
 from opta.layer import Layer
 from opta.nice_subprocess import nice_run
@@ -18,10 +20,14 @@ AWS_CLI_INSTALL_URL = (
 DEFAULT_EKS_CLUSTER_NAME = "main"
 
 
-def setup_kubectl(config: str, env: Optional[str]) -> None:
-    """ Configure kubeconfig file with cluster details """
-    # Make sure the user has the prerequisite CLI tools installed
+@click.command()
+@click.option("--config", default="opta.yml", help="Opta config file", show_default=True)
+@click.option("--env", default=None, help="The env to use when loading the config file")
+def configure_kubectl(config: str, env: Optional[str]) -> None:
+    """ Configure the kubectl CLI tool for the given cluster """
+    gen_all(config, env)
 
+    # Make sure the user has the prerequisite CLI tools installed
     # kubectl may not *technically* be required for this opta command to run, but require
     # it anyways since user must install it to access the cluster.
     if not is_tool("kubectl"):

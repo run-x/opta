@@ -1,28 +1,22 @@
-import json
 import os
 import os.path
-from typing import Any
-from unittest.mock import call, mock_open, patch
+from unittest.mock import ANY, call
 
-import yaml
+from click.testing import CliRunner
 from pytest_mock import MockFixture
 
-from opta.cli import TERRAFORM_PLAN_FILE_PATH, _cleanup
+from opta.blocks import Blocks
+from opta.cli import _cleanup, apply
 from opta.constants import TF_FILE_PATH
-from opta.core.generator import gen_all
 from opta.sentry import at_exit_callback
-from tests.fixtures.apply import APPLY_WITHOUT_ORG_ID, BASIC_APPLY
 
 
 class TestCLI:
     def test_cleanup(self) -> None:
         with open(TF_FILE_PATH, "w") as f:
             f.write("blah")
-        with open(TERRAFORM_PLAN_FILE_PATH, "w") as f:
-            f.write("blah")
         _cleanup()
         assert not os.path.exists(TF_FILE_PATH)
-        assert not os.path.exists(TERRAFORM_PLAN_FILE_PATH)
 
     def test_at_exit_callback_with_pending(self, mocker: MockFixture) -> None:
         mocked_write = mocker.patch("opta.cli.sys.stderr.write")
@@ -40,26 +34,26 @@ class TestCLI:
         mocked_write.assert_not_called()
         mocked_flush.assert_called_once_with()
 
-    def test_basic_apply(self, mocker: MockFixture) -> None:
-        mocked_exists = mocker.patch("os.path.exists")
-        mocked_exists.return_value = True
-        test_cases: Any = [BASIC_APPLY, APPLY_WITHOUT_ORG_ID]
+    def test_apply(self, mocker: MockFixture) -> None:
+        mocker.patch("opta.cli.is_tool", return_value=True)
+        mocker.patch("opta.cli.amplitude_client.send_event")
 
-        for (i, o) in test_cases:
-            old_open = open
-            write_open = mock_open()
+        # Mock remote state
+        mocker.patch(
+            "opta.cli.Terraform.get_existing_modules", return_value={"deleted_module"}
+        )
 
-            def new_open(a: str, b: Any = "r") -> Any:
-                if a == "opta.yml":
-                    return mock_open(read_data=yaml.dump(i)).return_value
-                elif a == TF_FILE_PATH:
-                    return write_open.return_value
-                else:
-                    return old_open(a, b)
+        # Mock opta config
+        fake_block = Blocks(
+            layer_name="test", module_data={"fake_module": {"type": "k8s-service"}}
+        )
+        mocker.patch("opta.cli.gen", return_value=iter([(0, fake_block, 1)]))
+        tf_apply = mocker.patch("opta.cli.Terraform.apply")
 
-            with patch("builtins.open") as mocked_open:
-                mocked_open.side_effect = new_open
-
-                gen_all("opta.yml", None)
-
-                write_open().write.assert_called_once_with(json.dumps(o, indent=2))
+        # Terraform apply should be called with the configured module (fake_module) and the remote state
+        # module (deleted_module) as targets.
+        runner = CliRunner()
+        runner.invoke(apply)
+        tf_apply.assert_called_once_with(
+            ANY, "-target=module.fake_module", "-target=module.deleted_module"
+        )

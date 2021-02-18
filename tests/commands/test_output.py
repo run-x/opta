@@ -5,6 +5,7 @@ from click.testing import CliRunner
 from pytest_mock import MockFixture
 
 from opta.commands.output import output
+from tests.utils import MockedCmdJsonOut
 
 TERRAFORM_SHOW_JSON = {
     "values": {
@@ -54,20 +55,15 @@ TERRAFORM_OUTPUT_JSON = {
 }
 
 
-class MockedCmdOut:
-    def __init__(self, out: dict):
-        self.stdout = json.dumps(out).encode("utf-8")
-
-
 class TestOutput:
-    def mock_shell_cmds(self, *args: List, **kwargs: dict) -> MockedCmdOut:
+    def mock_shell_cmds(self, *args: List, **kwargs: dict) -> MockedCmdJsonOut:
         ret: dict = {}
         if args[0] == ["terraform", "show", "-json"]:
             ret = TERRAFORM_SHOW_JSON
         elif args[0] == ["terraform", "output", "-json"]:
             ret = TERRAFORM_OUTPUT_JSON
 
-        return MockedCmdOut(ret)
+        return MockedCmdJsonOut(ret)
 
     def test_output(self, mocker: MockFixture) -> None:
         mocker.patch("opta.cli.os.remove")
