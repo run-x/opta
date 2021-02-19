@@ -8,7 +8,6 @@ from opta.constants import TF_FILE_PATH
 from opta.core.generator import gen_all
 from opta.core.terraform import Terraform
 from opta.layer import Layer
-from opta.nice_subprocess import nice_run
 from opta.resource import Resource
 from opta.utils import column_print, deep_merge, is_tool
 
@@ -69,11 +68,9 @@ class InspectCommand:
         column_print(inspect_details)
 
     def _fetch_terraform_state_resources(self) -> dict:
-        out = nice_run(["terraform", "show", "-json"], check=True, capture_output=True)
-        raw_data = out.stdout.decode("utf-8")
-        data = json.loads(raw_data)
+        state = Terraform.get_state()
 
-        root_module = data.get("values", {}).get("root_module", {})
+        root_module = state.get("values", {}).get("root_module", {})
         child_modules = root_module.get("child_modules", [])
 
         resources = root_module.get("resources", [])

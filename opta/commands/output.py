@@ -5,38 +5,23 @@ import click
 
 from opta.core.generator import gen_all
 from opta.core.terraform import Terraform
-from opta.nice_subprocess import nice_run
 from opta.utils import deep_merge
 
 
 def get_terraform_outputs() -> dict:
     """ Fetch terraform outputs from existing TF file """
     Terraform.init()
-    outputs = _fetch_current_outputs()
-    outputs = deep_merge(outputs, _fetch_parent_outputs())
-
-    return outputs
-
-
-def _fetch_current_outputs() -> dict:
-    outputs_raw = nice_run(
-        ["terraform", "output", "-json"], check=True, capture_output=True
-    ).stdout.decode("utf-8")
-    outputs = json.loads(outputs_raw)
-    cleaned_outputs = {}
-    for k, v in outputs.items():
-        cleaned_outputs[k] = v.get("value")
-    return cleaned_outputs
+    current_outputs = Terraform.get_outputs()
+    parent_outputs = _fetch_parent_outputs()
+    return deep_merge(current_outputs, parent_outputs)
 
 
 def _fetch_parent_outputs() -> dict:
     # Fetch the terraform state
-    out = nice_run(["terraform", "show", "-json"], check=True, capture_output=True)
-    raw_data = out.stdout.decode("utf-8")
-    data = json.loads(raw_data)
+    state = Terraform.get_state()
 
     # Fetch any parent remote states
-    root_module = data.get("values", {}).get("root_module", {})
+    root_module = state.get("values", {}).get("root_module", {})
     resources = root_module.get("resources", [])
     parent_states = [
         resource

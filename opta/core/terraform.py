@@ -1,3 +1,4 @@
+import json
 from typing import List, Optional, Set
 
 import boto3
@@ -16,6 +17,26 @@ class Terraform:
     @classmethod
     def init(cls) -> None:
         nice_run(["terraform", "init"], check=True)
+
+    # Get outputs of the current terraform state
+    @classmethod
+    def get_outputs(cls) -> dict:
+        raw_output = nice_run(
+            ["terraform", "output", "-json"], check=True, capture_output=True
+        ).stdout.decode("utf-8")
+        outputs = json.loads(raw_output)
+        cleaned_outputs = {}
+        for k, v in outputs.items():
+            cleaned_outputs[k] = v.get("value")
+        return cleaned_outputs
+
+    # Get the full terraform state.
+    @classmethod
+    def get_state(cls) -> dict:
+        raw_state = nice_run(
+            ["terraform", "show", "-json"], check=True, capture_output=True
+        ).stdout.decode("utf-8")
+        return json.loads(raw_state)
 
     @classmethod
     def apply(cls, *tf_flags: List[str]) -> None:
