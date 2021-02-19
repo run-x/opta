@@ -237,7 +237,7 @@ class Layer:
     # Special logic for mapping the opta config to the provider block
     def handle_special_providers(self, provider_name: str, provider_data: dict) -> None:
         # Terraform requires an array of AWS account ids, but having the customer specify
-        # that is awk, is transform it during the mapping.
+        # that is awk, so transform it during the mapping.
         if provider_name == "aws" and "account_id" in provider_data:
             aws_account_id = provider_data.pop("account_id")
             provider_data["allowed_account_ids"] = [aws_account_id]
