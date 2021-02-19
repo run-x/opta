@@ -1,6 +1,4 @@
 import base64
-import json
-from subprocess import CompletedProcess
 from typing import Any, Dict, List, Optional
 
 import pytest
@@ -10,58 +8,24 @@ from pytest_mock import MockFixture
 from opta.cli import cli
 from opta.commands.push import get_ecr_auth_info, get_registry_url, push_to_docker
 from opta.layer import Layer
-from tests.commands.test_output import TERRAFORM_OUTPUT_JSON
 from tests.fixtures.apply import BASIC_APPLY
 
-REGISTRY_URL = TERRAFORM_OUTPUT_JSON["docker_repo_url"]["value"]
+REGISTRY_URL = "889760294590.dkr.ecr.us-east-1.amazonaws.com/test-service-runx-app"
+TERRAFORM_OUTPUTS = {"docker_repo_url": REGISTRY_URL}
 
 
 class TestGetRegistryUrl:
-    def get_mocked_shell_cmds(self, mocker: MockFixture, tf_output_dict: dict) -> Any:
-        def mocked_shell_cmds(args_array: List[str], **kwargs: Any) -> Any:
-            mocked_terraform_init = mocker.Mock(spec=CompletedProcess)
-            mocked_terraform_output = mocker.Mock(spec=CompletedProcess)
-            mocked_terraform_show = mocker.Mock(spec=CompletedProcess)
-            mocked_terraform_output.stdout = json.dumps(tf_output_dict).encode("utf-8")
-            mocked_terraform_show.stdout = json.dumps({}).encode("utf-8")
-
-            if args_array == ["terraform", "init"]:
-                return mocked_terraform_init
-            if args_array == ["terraform", "output", "-json"]:
-                return mocked_terraform_output
-            if args_array == ["terraform", "show", "-json"]:
-                return mocked_terraform_show
-            raise Exception("Unexpected test input")
-
-        return mocked_shell_cmds
-
-    def test_works(self, mocker: MockFixture) -> None:  # noqa
-        mocked_parent = mocker.patch("opta.commands.output._fetch_parent_outputs")
-        mocked_parent.return_value = {}
-
-        nice_run_mock = mocker.patch(
-            "opta.commands.output.nice_run",
-            side_effect=self.get_mocked_shell_cmds(mocker, TERRAFORM_OUTPUT_JSON,),
+    def test_get_registry_url(self, mocker: MockFixture) -> None:
+        mocker.patch(
+            "opta.commands.push.Terraform.get_outputs", return_value=TERRAFORM_OUTPUTS
         )
 
         docker_repo_url = get_registry_url()
-        nice_run_mock.assert_has_calls(
-            [
-                mocker.call(
-                    ["terraform", "output", "-json"], check=True, capture_output=True
-                ),
-            ]
-        )
         assert docker_repo_url == REGISTRY_URL
 
     def test_no_docker_repo_url_in_output(self, mocker: MockFixture) -> None:
-        mocked_isdir = mocker.patch("os.path.isdir")
-        mocked_isdir.return_value = True
-
-        mocker.patch(
-            "opta.commands.output.nice_run",
-            side_effect=self.get_mocked_shell_cmds(mocker, {},),
-        )
+        mocker.patch("os.path.isdir", return_value=True)
+        mocker.patch("opta.commands.push.Terraform.get_outputs", return_value={})
 
         with pytest.raises(Exception) as e_info:
             get_registry_url()
