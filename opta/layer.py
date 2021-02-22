@@ -138,6 +138,16 @@ class Layer:
                 return module
         return None
 
+    def get_module_by_type(
+        self, module_type: str, module_idx: Optional[int] = None
+    ) -> list[Module]:
+        module_idx = module_idx or len(self.modules) - 1
+        modules = []
+        for module in self.modules[0 : module_idx + 1]:
+            if module.data["type"] == module_type:
+                modules.append(module)
+        return modules
+
     def outputs(self, module_idx: Optional[int] = None) -> Iterable[str]:
         ret: List[str] = []
         module_idx = module_idx or len(self.modules) - 1

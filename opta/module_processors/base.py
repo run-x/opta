@@ -15,7 +15,7 @@ class ModuleProcessor:
         self.layer = layer
         self.module = module
 
-    def process(self, block_idx: int) -> None:
+    def process(self, module_idx: int) -> None:
         if self.module.data.get("root_only", False) and self.layer.parent is not None:
             raise UserErrors(
                 f"Module {self.module.name} can only specified in a root layer"
@@ -33,22 +33,27 @@ class K8sModuleProcessor(ModuleProcessor):
         self.eks = boto3.client("eks", config=Config(region_name=region))
         super(K8sModuleProcessor, self).__init__(module, layer)
 
-    def process(self, block_idx: int) -> None:
-        eks_cluster = self.eks.describe_cluster(name=f"opta-{self.layer.get_env()}")
-        oidc_url = eks_cluster["cluster"]["identity"]["oidc"]["issuer"].replace(
-            "https://", ""
-        )
-        oid_provider_list = self.iam.list_open_id_connect_providers()[
-            "OpenIDConnectProviderList"
-        ]
-        for oidc_provider_data in oid_provider_list:
-            arn = oidc_provider_data["Arn"]
-            full_data = self.iam.get_open_id_connect_provider(
-                OpenIDConnectProviderArn=arn
+    def process(self, module_idx: int) -> None:
+        from_parent = False
+        eks_modules = self.layer.get_module_by_type("aws-eks", module_idx)
+        if len(eks_modules) == 0 and self.layer.parent is not None:
+            from_parent = True
+            eks_modules = self.layer.parent.get_module_by_type("aws-eks")
+
+        if len(eks_modules) == 0:
+            raise UserErrors(
+                "Did not find the aws-eks module in the layer or the parent layer"
             )
-            if full_data["Url"] == oidc_url:
-                self.module.data["openid_provider_url"] = oidc_url
-                self.module.data["openid_provider_arn"] = arn
-                super(K8sModuleProcessor, self).process(block_idx)
-                return
-        raise Exception("Did not find identity provider for K8s cluster")
+        eks_module = eks_modules[0]
+        module_source = (
+            "data.terraform_remote_state.parent.outputs"
+            if from_parent
+            else f"module.{eks_module.name}"
+        )
+        self.module.data[
+            "openid_provider_url"
+        ] = f"${{{{{module_source}.k8s_openid_provider_url}}}}"
+        self.module.data[
+            "openid_provider_arn"
+        ] = f"${{{{{module_source}.k8s_openid_provider_arn}}}}"
+        super(K8sModuleProcessor, self).process(module_idx)
