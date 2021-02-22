@@ -111,7 +111,7 @@ def _apply(
     amplitude_client.send_event(amplitude_client.START_GEN_EVENT)
     layer = Layer.load_from_yaml(config, env)
     layer.variables["image_tag"] = image_tag
-    Terraform.create_storage(layer)
+    Terraform.create_state_storage(layer)
 
     existing_modules: Set[str] = set()
     for module_idx, current_modules, total_block_count in gen(layer):

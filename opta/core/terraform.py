@@ -97,7 +97,7 @@ class Terraform:
         return True
 
     @classmethod
-    def create_storage(cls, layer: "Layer") -> None:
+    def create_state_storage(cls, layer: "Layer") -> None:
         """
         Idempotently create remote storage for tf state
         """
