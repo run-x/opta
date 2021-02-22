@@ -30,12 +30,12 @@ variable "module_name" {
 
 variable "max_nodes" {
   type    = number
-  default = 3
+  default = 5
 }
 
 variable "min_nodes" {
   type    = number
-  default = 1
+  default = 3
 }
 
 variable "node_disk_size" {
