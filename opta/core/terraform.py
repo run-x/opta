@@ -5,6 +5,7 @@ import boto3
 from botocore.config import Config
 from botocore.exceptions import ClientError
 
+from opta.exceptions import UserErrors
 from opta.nice_subprocess import nice_run
 from opta.utils import logger
 
@@ -111,8 +112,14 @@ class Terraform:
             iam = boto3.client("iam", config=Config(region_name=region))
             try:
                 s3.get_bucket_encryption(Bucket=bucket_name,)
-            except ClientError:
-                print("S3 bucket for terraform state not found, creating a new one")
+            except ClientError as e:
+                if e.response["Error"]["Code"] != "NoSuchBucket":
+                    raise UserErrors(
+                        "When trying to determine the status of the state bucket, we got an "
+                        f"{e.response['Error']['Code']} error with the message "
+                        f"{e.response['Error']['Message']}"
+                    )
+                logger.info("S3 bucket for terraform state not found, creating a new one")
                 s3.create_bucket(Bucket=bucket_name,)
                 s3.put_bucket_encryption(
                     Bucket=bucket_name,
