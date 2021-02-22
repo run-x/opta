@@ -31,6 +31,12 @@ logger = initialize_logger()
 fmt = PartialFormatter("")
 
 
+# So folks do parent.blah instead of parent["blah"]
+class Objectview(object):
+    def __init__(self, d: Dict[str, Any]):
+        self.__dict__ = d
+
+
 def deep_merge(a: Dict[Any, Any], b: Dict[Any, Any]) -> Dict[Any, Any]:
     b = b.copy()
     for key, value in a.items():

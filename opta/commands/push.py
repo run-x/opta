@@ -22,9 +22,8 @@ def get_registry_url() -> str:
     return outputs["docker_repo_url"]
 
 
-def get_ecr_auth_info(config: str, env: Optional[str]) -> Tuple[str, str]:
-    layer = Layer.load_from_yaml(config, env)
-    providers = layer.gen_providers(0, True)
+def get_ecr_auth_info(layer: Layer) -> Tuple[str, str]:
+    providers = layer.gen_providers(0)
     account_id = providers["provider"]["aws"]["allowed_account_ids"][0]
     region = providers["provider"]["aws"]["region"]
 
@@ -41,7 +40,7 @@ def get_ecr_auth_info(config: str, env: Optional[str]) -> Tuple[str, str]:
         "ascii"
     )
     username, password = decoded_auth.split(":")
-    return (username, password)
+    return username, password
 
 
 def push_to_docker(
@@ -78,8 +77,8 @@ def push_to_docker(
 def push(image: str, config: str, env: Optional[str], tag: Optional[str]) -> None:
     if not is_tool("docker"):
         raise Exception("Please install docker on your machine")
-
-    gen_all(config, env)
+    layer = Layer.load_from_yaml(config, env)
+    gen_all(layer)
     registry_url = get_registry_url()
-    username, password = get_ecr_auth_info(config, env)
+    username, password = get_ecr_auth_info(layer)
     push_to_docker(username, password, image, registry_url, tag)

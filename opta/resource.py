@@ -8,7 +8,7 @@ class Resource:
         self.parent_module = parent_module
         self.type = tf_resource_type
         self.name = name
-        self.address = f"module.{parent_module.key}.{tf_resource_type}.{name}"
+        self.address = f"module.{parent_module.name}.{tf_resource_type}.{name}"
         self.inspect = self._get_inspect_config()
 
     def _get_inspect_config(self) -> Optional[dict]:

@@ -7,88 +7,28 @@ backends:
           key: "{layer_name}"
           dynamodb_table: "{state_storage}"
           region: "{provider[region]}"
-macros:
-  _init:
-    blocks:
-      - backend: disabled
-        modules:
-          aws-state-init:
-            type: aws-state-init
-            bucket_name: "{state_storage}"
-            dynamodb_lock_table_name: "{state_storage}"
-      - backend: enabled
-        modules:
-          aws-network-init:
-            type: aws-network-init
-            total_ipv4_cidr_block: "10.0.0.0/16"
-            public_ipv4_cidr_blocks:
-              - "10.0.0.0/21"
-              - "10.0.8.0/21"
-              - "10.0.16.0/21"
-            private_ipv4_cidr_blocks:
-              - "10.0.128.0/21"
-              - "10.0.136.0/21"
-              - "10.0.144.0/21"
-            subnet_tags:
-              "kubernetes.io/cluster/main": "shared"
-          aws-eks-init:
-            type: aws-eks-init
-            cluster_name: main
-            subnet_ids: "${{module.aws-network-init.private_subnet_ids}}"
-            key_arn: "${{module.aws-state-init.kms_account_key_arn}}"
-          aws-dns:
-            type: aws-dns
-            domain_name: "{domain}"
-      - modules:
-          aws-acm-cert:
-            type: aws-acm-cert
-            hosted_zone_id: "${{module.aws-dns.zone_id}}"
-            primary_domain: "{domain}"
-            secondary_domains: ["*.{domain}"]
-          aws-eks-nodegroup:
-            type: aws-eks-nodegroup
-            cluster_name: "${{module.aws-eks-init.k8s_cluster_name}}"
-            node_group_name: default
-            max_size: 6
-      - modules:
-          k8s-metric-server:
-            type: k8s-metric-server
-          k8s-cluster-autoscaler:
-            type: k8s-cluster-autoscaler
-            cluster_name: "${{module.aws-eks-init.k8s_cluster_name}}"
-            openid_provider_url: "${{module.aws-eks-init.k8s_openid_provider_url}}"  # TODO: maybe put in parameter store for easy pickup by k8s services?
-            openid_provider_arn: "${{module.aws-eks-init.k8s_openid_provider_arn}}"
-          k8s-external-dns:
-            type: k8s-external-dns
-            openid_provider_url: "${{module.aws-eks-init.k8s_openid_provider_url}}"
-            openid_provider_arn: "${{module.aws-eks-init.k8s_openid_provider_arn}}"
-            domain: "{domain}"
-            hosted_zone_id: "${{module.aws-dns.zone_id}}"
-      - modules:
-          ingress-nginx-init:
-            type: ingress-nginx-init
-            domain_names: [ "{domain}", "*.{domain}" ]
-            acm_cert_arn: "${{module.aws-acm-cert.cert_arn}}"
-          linkerd-init:
-            type: linkerd-init
-          datadog:
-            type: datadog
-            api_key: "{datadog_api_key}"
 
 modules:
-  aws-state-init:
-    location: aws-state-init
+  aws-base:
+    location: aws-base
+    halt: true
     variables:
-      bucket_name: str
-      dynamodb_lock_table_name: str
+      env_name: str
+      layer_name: str
+      module_name: str
+      total_ipv4_cidr_block: optional
+      private_ipv4_cidr_blocks: optional
+      public_ipv4_cidr_blocks: optional
     outputs:
-      state_bucket_id:
-        export: true
-      state_bucket_arn:
-        export: true
       kms_account_key_arn:
         export: true
       kms_account_key_id:
+        export: true
+      vpc_id:
+        export: true
+      private_subnet_ids:
+        export: true
+      public_subnets_ids:
         export: true
     providers:
       data:
@@ -101,30 +41,6 @@ modules:
         name: KMS Key
         desc: General key used for encryption of infra
         url: https://console.aws.amazon.com/kms/home?region=us-east-1#/kms/keys/{key_id}
-      aws_dynamodb_table.tfstate:
-        name: Terraform state lock
-        desc: DO NOT MODIFY. The Terraform state lock is saved here.
-        url: https://console.aws.amazon.com/dynamodb/home?region={aws_region}#tables:selected={id};tab=overview
-      aws_s3_bucket.tf-state-bucket:
-        name: Terraform state bucket
-        desc: DO NOT MODIFY. Terraform state is stored here.
-        url: https://s3.console.aws.amazon.com/s3/buckets/{id}?region={aws_region}&tab=objects
-  aws-network-init:
-    location: aws-network-init
-    variables:
-      name: str
-      total_ipv4_cidr_block: optional
-      private_ipv4_cidr_blocks: optional
-      public_ipv4_cidr_blocks: optional
-      subnet_tags: optional
-    outputs:
-      vpc_id:
-        export: true
-      private_subnet_ids:
-        export: true
-      public_subnets_ids:
-        export: true
-    inspect:
       aws_vpc:
         name: VPC
         desc: Like your own local network, but hosted on the cloud.
@@ -137,13 +53,18 @@ modules:
         name: Private Subnet
         desc: Servers in this subnet do not have direct access to the Internet (must use a proxy).
         url: https://console.aws.amazon.com/vpc/home?region={aws_region}#SubnetDetails:subnetId={id}
-  aws-eks-init:
-    location: aws-eks-init
+  aws-eks:
+    location: aws-eks
+    halt: true
     variables:
-      cluster_name: str
+      env_name: str
+      layer_name: str
+      module_name: str
+      max_nodes: optional
+      min_nodes: optional
+      node_disk_size: optional
+      node_instance_type: optional
       k8s_version: optional
-      subnet_ids: list
-      key_arn: str
       control_plane_security_groups: optional
     outputs:
       k8s_endpoint:
@@ -175,44 +96,32 @@ modules:
             host: "${{{module_source}.k8s_endpoint}}"
             token: "${{data.aws_eks_cluster_auth.k8s.token}}"
             cluster_ca_certificate: "${{base64decode({module_source}.k8s_ca_data)}}"
-  ingress-nginx-init:
-    location: ingress-nginx-init
-    variables:
-      domain_names: optional
-      acm_cert_arn: optional
-    outputs: { }
-  linkerd-init:
-    location: linkerd-init
-    variables: {}
-    outputs: { }
-  aws-eks-nodegroup:
-    location: aws-eks-nodegroup
-    variables:
-      cluster_name: str
-      node_group_name: str
-      disk_sizet: optional
-      instance_type: optional
-      use_gpu: optional
-      node_labels: optional
-      max_size: optional
-      min_size: optional
-      desired_size: optional
-      ssh_key: optional
-      ssh_security_group_ids: optional
   datadog:
     location: datadog
     variables:
-      api_key: optional
+      env_name: str
       layer_name: str
-      name: str
+      module_name: str
+      api_key: optional
+  k8s-base:
+    location: k8s-base
+    variables:
+      env_name: str
+      layer_name: str
+      module_name: str
+      openid_provider_url: str
+      openid_provider_arn: str
+      domain: optional
+      cert_arn: optional
+    outputs: {}
   k8s-service:
     location: k8s-service
     variables:
-      name: str
+      env_name: str
       layer_name: str
       module_name: str
+      image: str
       port: optional
-      image: optional
       tag: optional
       env_vars: optional
       secrets: optional
@@ -224,12 +133,12 @@ modules:
       container_resource_requests: optional
       public_uri: optional
       domain: optional
-      k8s_openid_provider_url: str
-      k8s_openid_provider_arn: str
+      openid_provider_url: str
+      openid_provider_arn: str
       iam_policy: optional
       additional_iam_roles: optional
-      min_autoscaling: optional
-      max_autoscaling: optional
+      min_containers: optional
+      max_containers: optional
     outputs:
       docker_repo_url:
         export: true
@@ -241,11 +150,10 @@ modules:
   aws-documentdb:
     location: aws-documentdb
     variables:
-      name: str
-      kms_account_key_arn: str
-      subnet_group_name: optional
+      env_name: str
+      layer_name: str
+      module_name: str
       engine_version: optional
-      security_group: optional
       instance_class: optional
     outputs:
       db_user: str
@@ -256,14 +164,14 @@ modules:
         name: DocDB
         desc: DocumentDB is a NoSQL database that exposes a similar API to MongoDB.
         url: https://console.aws.amazon.com/docdb/home?region={aws_region}#cluster-details/{cluster_identifier}
-  aws-rds:
-    location: aws-rds
+  aws-db:
+    location: aws-db
     variables:
-      name: str
-      subnet_group_name: optional
+      env_name: str
+      layer_name: str
+      module_name: str
       engine: optional
       engine_version: optional
-      security_group: optional
       instance_class: optional
     outputs:
       db_user: str
@@ -280,49 +188,35 @@ modules:
   aws-redis:
     location: aws-redis
     variables:
-      name: str
-      kms_account_key_arn: str
+      env_name: str
+      layer_name: str
+      module_name: str
       node_type: optional
       redis_version: optional
-      security_group: optional
-      subnet_group_name: optional
     outputs:
       cache_host: str
       cache_auth_token: str
-  k8s-metric-server:
-    location: k8s-metric-server
-    variables: {}
-    outputs: {}
-  k8s-cluster-autoscaler:
-    location: k8s-cluster-autoscaler
-    variables:
-      cluster_name: str
-      openid_provider_url: str
-      openid_provider_arn: str
-    outputs: {}
   aws-dns:
     location: aws-dns
     variables:
-      domain_name: str
-      is_private: optional
-      vpc_id: optional
+      env_name: str
+      layer_name: str
+      module_name: str
+      domain: str
+      delegated: optional
     outputs:
       zone_id:
         export: true
       name_servers:
         export: true
-  k8s-external-dns:
-    location: k8s-external-dns
+      domain:
+        export: true
+  aws-s3:
+    location: aws-s3
     variables:
-      openid_provider_url: str
-      openid_provider_arn: str
-      hosted_zone_id: str
-      domain: str
-      zone_type: optional
-    outputs: { }
-  aws-s3-bucket:
-    location: aws-s3-bucket
-    variables:
+      env_name: str
+      layer_name: str
+      module_name: str
       bucket_name: str
       block_public: optional
       bucket_policy: optional
@@ -336,13 +230,3 @@ modules:
         name: S3 Bucket
         desc: Distributed object storage
         url: https://s3.console.aws.amazon.com/s3/buckets/{id}?region={aws_region}&tab=objects
-  aws-acm-cert:
-    location: aws-acm-cert
-    variables:
-      hosted_zone_id: str
-      primary_domain: str
-      secondary_domains: optional
-  k8s-hello-world-service:
-    location: k8s-hello-world-service
-    variables:
-      hello_world_domain: str

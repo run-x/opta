@@ -10,47 +10,50 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 import git
 import yaml
 
-from opta.blocks import Blocks
 from opta.constants import REGISTRY
 from opta.exceptions import UserErrors
 from opta.module import Module
+from opta.module_processors.base import ModuleProcessor
+from opta.module_processors.datadog import DatadogProcessor
+from opta.module_processors.k8s_base import K8sBaseProcessor
 from opta.module_processors.k8s_service import K8sServiceProcessor
 from opta.plugins.derived_providers import DerivedProviders
-from opta.utils import deep_merge, hydrate, logger
+from opta.utils import Objectview, deep_merge, hydrate, logger
 
 
 class Layer:
     def __init__(
         self,
-        meta: Dict[Any, Any],
-        blocks_data: List[Any],
+        name: str,
+        org_name: Optional[str],
+        providers: Dict[Any, Any],
+        modules_data: List[Any],
         parent: Optional[Layer] = None,
+        variables: Optional[Dict[str, Any]] = None,
     ):
-        self.meta = meta
-        self.parent = parent
-        if not Layer.valid_name(self.meta["name"]):
+        if not Layer.valid_name(name):
             raise UserErrors(
                 "Invalid layer, can only contain lowercase letters, numbers and hyphens!"
             )
-        self.name = self.meta["name"]
-        self.blocks = []
-        for block_data in blocks_data:
-            self.blocks.append(
-                Blocks(
-                    self.name,
-                    block_data["modules"],
-                    block_data.get("backend", "enabled") == "enabled",
-                    self.parent,
-                )
-            )
+        self.name = name
+        self.parent = parent
+        if parent is None and org_name is None:
+            raise UserErrors("Config must have org name or a parent who has an org name")
+        self.org_name = org_name
+        if self.parent and self.org_name is None:
+            self.org_name = self.parent.org_name
+        self.providers = providers
+        self.variables = variables or {}
+        self.modules = []
+        for module_data in modules_data:
+            self.modules.append(Module(self.name, module_data, self.parent,))
         module_names: set = set()
-        for block in self.blocks:
-            for module in block.modules:
-                if module.key in module_names:
-                    raise UserErrors(
-                        f"The module name {module.key} is used multiple time in the "
-                        "layer. Module names must be unique per layer"
-                    )
+        for module in self.modules:
+            if module.name in module_names:
+                raise UserErrors(
+                    f"The module name {module.name} is used multiple time in the "
+                    "layer. Module names must be unique per layer"
+                )
 
     @classmethod
     def load_from_yaml(cls, config: str, env: Optional[str]) -> Layer:
@@ -79,27 +82,28 @@ class Layer:
 
     @classmethod
     def load_from_dict(cls, conf: Dict[Any, Any], env: Optional[str]) -> Layer:
-        meta = conf.pop("meta")
-        for macro_name, macro_value in REGISTRY["macros"].items():
-            if macro_name in conf:
-                conf.pop(macro_name)
-                conf = deep_merge(conf, macro_value)
-        blocks_data = conf.get("blocks", [])
-        modules_data = conf.get("modules")
-        if modules_data is not None:
-            blocks_data.append({"modules": modules_data})
-        parent = None
-        if "envs" in meta:
-            envs = meta.pop("envs")
+        modules_data = conf.get("modules", [])
+        environments = conf.pop("environments", None)
+        name = conf.pop("name")
+        if name is None:
+            raise UserErrors("Config must have name")
+        org_name = conf.pop("org_name", None)
+        providers = conf.pop("providers", {})
+        if environments:
             potential_envs: Dict[str, Tuple] = {}
-            for env_meta in envs:
-                current_parent = cls.load_from_yaml(env_meta["parent"], env)
+            for env_meta in environments:
+                env_name = env_meta["name"]
+                current_parent = cls.load_from_yaml(env_meta["path"], None)
+                if current_parent.parent is not None:
+                    raise UserErrors(
+                        "A parent can not have a parent, only one level of parent-child allowed."
+                    )
                 current_env = current_parent.get_env()
                 if current_env in potential_envs.keys():
                     raise UserErrors(
                         f"Same environment: {current_env} is imported twice as parent"
                     )
-                potential_envs[current_env] = (current_parent, env_meta)
+                potential_envs[env_name] = (current_parent, env_meta)
 
             if len(potential_envs) > 1 and env not in potential_envs:
                 raise UserErrors(
@@ -110,12 +114,10 @@ class Layer:
             else:
                 current_parent, env_meta = potential_envs[env]
             current_variables = env_meta.get("variables", {})
-            meta["parent"] = env_meta["parent"]
-            meta["variables"] = deep_merge(meta.get("variables", {}), current_variables)
-            return cls(meta, blocks_data, current_parent)
-        if "parent" in meta:
-            parent = cls.load_from_yaml(meta["parent"], env)
-        return cls(meta, blocks_data, parent)
+            return cls(
+                name, org_name, providers, modules_data, current_parent, current_variables
+            )
+        return cls(name, org_name, providers, modules_data)
 
     @staticmethod
     def valid_name(name: str) -> bool:
@@ -128,79 +130,76 @@ class Layer:
         return self.name
 
     def get_module(
-        self, module_name: str, block_idx: Optional[int] = None
+        self, module_name: str, module_idx: Optional[int] = None
     ) -> Optional[Module]:
-        block_idx = block_idx or len(self.blocks) - 1
-        for block in self.blocks[0 : block_idx + 1]:
-            for module in block.modules:
-                if module.key == module_name:
-                    return module
+        module_idx = module_idx or len(self.modules) - 1
+        for module in self.modules[0 : module_idx + 1]:
+            if module.name == module_name:
+                return module
         return None
 
-    def outputs(self, block_idx: Optional[int] = None) -> Iterable[str]:
+    def outputs(self, module_idx: Optional[int] = None) -> Iterable[str]:
         ret: List[str] = []
-        block_idx = block_idx or len(self.blocks) - 1
-        for block in self.blocks[0 : block_idx + 1]:
-            ret += block.outputs()
+        module_idx = module_idx or len(self.modules) - 1
+        for module in self.modules[0 : module_idx + 1]:
+            ret += module.outputs()
         return ret
 
-    def gen_tf(self, block_idx: int) -> Dict[Any, Any]:
+    def gen_tf(self, module_idx: int) -> Dict[Any, Any]:
         ret: Dict[Any, Any] = {}
-        for block in self.blocks[0 : block_idx + 1]:
-            for module in block.modules:
-                module_type = module.data["type"]
-                if module_type == "k8s-service":
-                    K8sServiceProcessor(module, self).process(block_idx)
-        for block in self.blocks[0 : block_idx + 1]:
-            ret = deep_merge(block.gen_tf(), ret)
+        for module in self.modules[0 : module_idx + 1]:
+            module_type = module.data["type"]
+            if module_type == "k8s-service":
+                K8sServiceProcessor(module, self).process(module_idx)
+            elif module_type == "k8s-base":
+                K8sBaseProcessor(module, self).process(module_idx)
+            elif module_type == "datadog":
+                DatadogProcessor(module, self).process(module_idx)
+            else:
+                ModuleProcessor(module, self).process(module_idx)
+        for module in self.modules[0 : module_idx + 1]:
+            ret = deep_merge(module.gen_tf(), ret)
 
         return hydrate(ret, self.metadata_hydration())
 
     def metadata_hydration(self) -> Dict[Any, Any]:
-        parent_name = self.parent.meta["name"] if self.parent is not None else "nil"
-        parent = (
-            self.parent.meta.get("variables", {}) if self.parent is not None else "nil"
-        )
-        return deep_merge(
-            self.meta.get("variables", {}),
-            {
-                "parent": parent,
-                "parent_name": parent_name,
-                "layer_name": self.meta["name"],
-                "state_storage": self.state_storage(),
-                "env": self.get_env(),
-            },
-        )
+        parent_name = self.parent.name if self.parent is not None else "nil"
+        parent = None
+        if self.parent is not None:
+            parent = Objectview(
+                {
+                    k: f"${{data.terraform_remote_state.parent.outputs.{k}}}"
+                    for k in self.parent.outputs()
+                }
+            )
+        return {
+            "parent": parent,
+            "vars": Objectview(self.variables),
+            "parent_name": parent_name,
+            "layer_name": self.name,
+            "state_storage": self.state_storage(),
+            "env": self.get_env(),
+        }
 
     def state_storage(self) -> str:
-        if "state_storage" in self.meta:
-            return self.meta["state_storage"]
-        elif self.parent is not None:
-            return self.parent.state_storage()
-        elif "org_id" not in self.meta:
-            # TODO: Remove this once everyone is updated
-            logger.warning(
-                "\nYou should specify a unique org_id in environment yml files\
-                   \nThis will break in future releases\n"
-            )
-            return f"opta-tf-state-{self.meta['name']}"
-        else:
-            return f"opta-tf-state-{self.meta['org_id']}-{self.meta['name']}"
-
-    def gen_providers(self, block_idx: int, backend_enabled: bool) -> Dict[Any, Any]:
-        ret: Dict[Any, Any] = {"provider": {}}
-        providers = self.meta.get("providers", {})
         if self.parent is not None:
-            providers = deep_merge(providers, self.parent.meta.get("providers", {}))
+            return self.parent.state_storage()
+        else:
+            return f"opta-tf-state-{self.org_name}-{self.name}"
+
+    def gen_providers(self, module_idx: int) -> Dict[Any, Any]:
+        ret: Dict[Any, Any] = {"provider": {}}
+        providers = self.providers
+        if self.parent is not None:
+            providers = deep_merge(providers, self.parent.providers)
         for k, v in providers.items():
             self.handle_special_providers(k, v)
             ret["provider"][k] = v
             if k in REGISTRY["backends"]:
-                if backend_enabled:
-                    hydration = deep_merge(self.metadata_hydration(), {"provider": v})
-                    ret["terraform"] = hydrate(
-                        REGISTRY["backends"][k]["terraform"], hydration
-                    )
+                hydration = deep_merge(self.metadata_hydration(), {"provider": v})
+                ret["terraform"] = hydrate(
+                    REGISTRY["backends"][k]["terraform"], hydration
+                )
 
                 if self.parent is not None:
                     # Add remote state
@@ -216,9 +215,7 @@ class Layer:
                                     {
                                         "layer_name": self.parent.name,
                                         "state_storage": self.state_storage(),
-                                        "provider": self.parent.meta.get(
-                                            "providers", {}
-                                        ).get(k, {}),
+                                        "provider": self.parent.providers.get(k, {}),
                                     },
                                 ),
                             }
@@ -227,9 +224,9 @@ class Layer:
 
         # Add derived providers like k8s from parent
         ret = deep_merge(ret, DerivedProviders(self.parent, is_parent=True).gen_tf())
-        # Add derived providers like k8s from own blocks
+        # Add derived providers like k8s from own modules
         ret = deep_merge(
-            ret, DerivedProviders(self, is_parent=False).gen_tf(block_idx=block_idx)
+            ret, DerivedProviders(self, is_parent=False).gen_tf(module_idx=module_idx)
         )
 
         return ret

@@ -5,9 +5,9 @@ from unittest.mock import ANY, call
 from click.testing import CliRunner
 from pytest_mock import MockFixture
 
-from opta.blocks import Blocks
 from opta.cli import _cleanup, apply
 from opta.constants import TF_FILE_PATH
+from opta.module import Module
 from opta.sentry import at_exit_callback
 
 
@@ -44,10 +44,8 @@ class TestCLI:
         )
 
         # Mock opta config
-        fake_block = Blocks(
-            layer_name="test", module_data={"fake_module": {"type": "k8s-service"}}
-        )
-        mocker.patch("opta.cli.gen", return_value=iter([(0, fake_block, 1)]))
+        fake_module = Module("test", data={"type": "k8s-service", "name": "fake_module"})
+        mocker.patch("opta.cli.gen", return_value=iter([(0, [fake_module], 1)]))
         tf_apply = mocker.patch("opta.cli.Terraform.apply")
 
         # Terraform apply should be called with the configured module (fake_module) and the remote state

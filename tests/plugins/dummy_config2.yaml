@@ -1,20 +1,18 @@
-meta:
-  envs:
-    - parent: "./tests/plugins/dummy_config_parent.yaml"
-      variables: {}
-  name: no-secrets-no-link
-  variables:
-    tag: ""
+environments:
+  - path: "./tests/plugins/dummy_config_parent.yaml"
+    name: "dummy-env"
+    variables: {}
+name: no-secrets-no-link
 modules:
-  app:
+  - name: app
     type: k8s-service
     env_vars:
       - name: APPENV
         value: "{env}"
-  database:
-    type: aws-rds
-  redis:
+  - name: database
+    type: aws-db
+  - name: redis
     type: aws-redis
-  bucket:
-    type: aws-s3-bucket
+  - name: bucket
+    type: aws-s3
     bucket_name: "runx-k8s-events-{env}"

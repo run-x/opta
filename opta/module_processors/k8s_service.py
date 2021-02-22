@@ -1,27 +1,31 @@
 from typing import TYPE_CHECKING, List
 
-from opta.module_processors.base import ModuleProcessor
+import boto3
+from botocore.config import Config
+
+from opta.exceptions import UserErrors
+from opta.module_processors.base import K8sModuleProcessor
 
 if TYPE_CHECKING:
     from opta.layer import Layer
     from opta.module import Module
 
 
-class K8sServiceProcessor(ModuleProcessor):
+class K8sServiceProcessor(K8sModuleProcessor):
     def __init__(self, module: "Module", layer: "Layer"):
         if module.data["type"] != "k8s-service":
             raise Exception(
-                f"The module {module.key} was expected to be of type k8s service"
+                f"The module {module.name} was expected to be of type k8s service"
             )
         self.read_buckets: list[str] = []
         self.write_buckets: list[str] = []
+        self.iam = boto3.client("iam")
+        providers = layer.gen_providers(0)
+        region = providers["terraform"]["backend"]["s3"]["region"]
+        self.eks = boto3.client("eks", config=Config(region_name=region))
         super(K8sServiceProcessor, self).__init__(module, layer)
 
-    def process(self, block_idx: int) -> None:
-        current_modules = []
-        for block in self.layer.blocks[0 : block_idx + 1]:
-            current_modules += block.modules
-
+    def process(self, module_idx: int) -> None:
         # Update the secrets
         transformed_secrets = []
         if "original_secrets" in self.module.data:
@@ -37,20 +41,32 @@ class K8sServiceProcessor(ModuleProcessor):
         self.module.data["secrets"] = transformed_secrets
 
         # Handle links
-        for target_module_name, link_permissions in self.module.data.get(
-            "links", {}
-        ).items():
-            module = self.layer.get_module(target_module_name, block_idx)
+        for link_data in self.module.data.get("links", []):
+            if type(link_data) is str:
+                target_module_name = link_data
+                link_permissions = []
+            elif type(link_data) is dict:
+                target_module_name = list(link_data.keys())[0]
+                link_permissions = list(link_data.values())[0]
+            else:
+                raise UserErrors(
+                    f"Link data {link_data} must be a string or map holding the permissions"
+                )
+            module = self.layer.get_module(target_module_name, module_idx)
             if module is None:
-                raise Exception(f"Did not find the desired module {target_module_name}")
+                raise Exception(
+                    f"Did not find the desired module {target_module_name} "
+                    "make sure that the module you're referencing is listed before the k8s "
+                    "app one"
+                )
             module_type = module.data["type"]
-            if module_type == "aws-rds":
+            if module_type == "aws-db":
                 self.handle_rds_link(module, link_permissions)
             elif module_type == "aws-redis":
                 self.handle_redis_link(module, link_permissions)
             elif module_type == "aws-documentdb":
                 self.handle_docdb_link(module, link_permissions)
-            elif module_type == "aws-s3-bucket":
+            elif module_type == "aws-s3":
                 self.handle_s3_link(module, link_permissions)
             else:
                 raise Exception(
@@ -105,6 +121,9 @@ class K8sServiceProcessor(ModuleProcessor):
             "Version": "2012-10-17",
             "Statement": iam_statements,
         }
+        if "image_tag" in self.layer.variables:
+            self.module.data["tag"] = self.layer.variables["image_tag"]
+        super(K8sServiceProcessor, self).process(module_idx)
 
     def handle_rds_link(
         self, linked_module: "Module", link_permissions: List[str]
@@ -112,8 +131,8 @@ class K8sServiceProcessor(ModuleProcessor):
         for key in ["db_user", "db_name", "db_password", "db_host"]:
             self.module.data["secrets"].append(
                 {
-                    "name": f"{linked_module.key}_{key}",
-                    "value": f"${{{{module.{linked_module.key}.{key}}}}}",
+                    "name": f"{linked_module.name}_{key}",
+                    "value": f"${{{{module.{linked_module.name}.{key}}}}}",
                 }
             )
         if link_permissions:
@@ -131,8 +150,8 @@ class K8sServiceProcessor(ModuleProcessor):
         for key in ["cache_host", "cache_auth_token"]:
             self.module.data["secrets"].append(
                 {
-                    "name": f"{linked_module.key}_{key}",
-                    "value": f"${{{{module.{linked_module.key}.{key}}}}}",
+                    "name": f"{linked_module.name}_{key}",
+                    "value": f"${{{{module.{linked_module.name}.{key}}}}}",
                 }
             )
         if link_permissions:
@@ -150,8 +169,8 @@ class K8sServiceProcessor(ModuleProcessor):
         for key in ["db_user", "db_host", "db_password"]:
             self.module.data["secrets"].append(
                 {
-                    "name": f"{linked_module.key}_{key}",
-                    "value": f"${{{{module.{linked_module.key}.{key}}}}}",
+                    "name": f"{linked_module.name}_{key}",
+                    "value": f"${{{{module.{linked_module.name}.{key}}}}}",
                 }
             )
         if link_permissions:

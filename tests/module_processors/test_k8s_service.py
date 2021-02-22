@@ -2,13 +2,14 @@
 import os
 
 import pytest
+from pytest_mock import MockFixture
 
 from opta.layer import Layer
 from opta.module_processors.k8s_service import K8sServiceProcessor
 
 
 class TestK8sServiceProcessor:
-    def test_all_good(self):
+    def test_all_good(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
                 os.path.dirname(os.path.dirname(__file__)),
@@ -17,8 +18,12 @@ class TestK8sServiceProcessor:
             ),
             None,
         )
-        app_module = layer.get_module("app", 1)
-        K8sServiceProcessor(app_module, layer).process(1)
+        app_module = layer.get_module("app", 5)
+        mocked_process = mocker.patch(
+            "opta.module_processors.k8s_service.K8sModuleProcessor.process"
+        )
+        K8sServiceProcessor(app_module, layer).process(5)
+        mocked_process.assert_called_once_with(5)
         assert app_module.data["secrets"] == [
             {"name": "BALONEY", "value": ""},
             {"name": "database_db_user", "value": "${{module.database.db_user}}"},
@@ -72,10 +77,11 @@ class TestK8sServiceProcessor:
             ),
             None,
         )
-        app_module = layer.get_module("app", 1)
-        app_module.data["links"]["database"] = ["read"]
+        app_module = layer.get_module("app", 5)
+        app_module.data["links"] = []
+        app_module.data["links"].append({"database": "read"})
         with pytest.raises(Exception):
-            K8sServiceProcessor(app_module, layer).process(1)
+            K8sServiceProcessor(app_module, layer).process(5)
 
     def test_bad_redis_permission(self):
         layer = Layer.load_from_yaml(
@@ -86,10 +92,11 @@ class TestK8sServiceProcessor:
             ),
             None,
         )
-        app_module = layer.get_module("app", 1)
-        app_module.data["links"]["redis"] = ["read"]
+        app_module = layer.get_module("app", 5)
+        app_module.data["links"] = []
+        app_module.data["links"].append({"redis": "read"})
         with pytest.raises(Exception):
-            K8sServiceProcessor(app_module, layer).process(1)
+            K8sServiceProcessor(app_module, layer).process(5)
 
     def test_bad_docdb_permission(self):
         layer = Layer.load_from_yaml(
@@ -100,10 +107,11 @@ class TestK8sServiceProcessor:
             ),
             None,
         )
-        app_module = layer.get_module("app", 1)
-        app_module.data["links"]["docdb"] = ["read"]
+        app_module = layer.get_module("app", 5)
+        app_module.data["links"] = []
+        app_module.data["links"].append({"docdb": "read"})
         with pytest.raises(Exception):
-            K8sServiceProcessor(app_module, layer).process(1)
+            K8sServiceProcessor(app_module, layer).process(5)
 
     def test_bad_s3_permission(self):
         layer = Layer.load_from_yaml(
@@ -114,7 +122,8 @@ class TestK8sServiceProcessor:
             ),
             None,
         )
-        app_module = layer.get_module("app", 1)
-        app_module.data["links"]["bucket1"] = ["blah"]
+        app_module = layer.get_module("app", 5)
+        app_module.data["links"] = []
+        app_module.data["links"].append({"bucket1": "blah"})
         with pytest.raises(Exception):
-            K8sServiceProcessor(app_module, layer).process(1)
+            K8sServiceProcessor(app_module, layer).process(5)

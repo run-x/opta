@@ -1,6 +1,7 @@
 from pytest_mock import MockFixture
 
 from opta.core.terraform import Terraform
+from opta.layer import Layer
 from opta.utils import fmt_msg
 from tests.utils import MockedCmdOut
 
@@ -35,4 +36,6 @@ class TestTerraform:
             "opta.core.terraform.nice_run",
             return_value=MockedCmdOut(tf_state_list_output),
         )
-        assert {"redis", "doc_db"} == Terraform.get_existing_modules("", None)
+        assert {"redis", "doc_db"} == Terraform.get_existing_modules(
+            mocker.Mock(spec=Layer)
+        )
