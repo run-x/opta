@@ -3,6 +3,8 @@ from typing import TYPE_CHECKING
 import boto3
 from botocore.config import Config
 
+from opta.exceptions import UserErrors
+
 if TYPE_CHECKING:
     from opta.layer import Layer
     from opta.module import Module
@@ -14,6 +16,10 @@ class ModuleProcessor:
         self.module = module
 
     def process(self, block_idx: int) -> None:
+        if self.module.data.get("root_only", False) and self.layer.parent is not None:
+            raise UserErrors(
+                f"Module {self.module.name} can only specified in a root layer"
+            )
         self.module.data["env_name"] = self.layer.get_env()
         self.module.data["layer_name"] = self.layer.name
         self.module.data["module_name"] = self.module.name

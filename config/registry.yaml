@@ -12,6 +12,7 @@ modules:
   aws-base:
     location: aws-base
     halt: true
+    root_only: true
     variables:
       env_name: str
       layer_name: str
@@ -56,6 +57,7 @@ modules:
   aws-eks:
     location: aws-eks
     halt: true
+    root_only: true
     variables:
       env_name: str
       layer_name: str
@@ -98,6 +100,7 @@ modules:
             cluster_ca_certificate: "${{base64decode({module_source}.k8s_ca_data)}}"
   datadog:
     location: datadog
+    root_only: true
     variables:
       env_name: str
       layer_name: str
@@ -105,6 +108,7 @@ modules:
       api_key: optional
   k8s-base:
     location: k8s-base
+    root_only: true
     variables:
       env_name: str
       layer_name: str
