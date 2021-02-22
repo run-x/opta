@@ -7,6 +7,7 @@ from pytest_mock import MockFixture
 
 from opta.cli import _cleanup, apply
 from opta.constants import TF_FILE_PATH
+from opta.layer import Layer
 from opta.module import Module
 from opta.sentry import at_exit_callback
 
@@ -38,6 +39,11 @@ class TestCLI:
         mocker.patch("opta.cli.is_tool", return_value=True)
         mocker.patch("opta.cli.amplitude_client.send_event")
 
+        mocked_layer_class = mocker.patch("opta.cli.Layer")
+        mocked_layer = mocker.Mock(spec=Layer)
+        mocked_layer.variables = {}
+        mocked_layer_class.load_from_yaml.return_value = mocked_layer
+
         # Mock remote state
         mocker.patch(
             "opta.cli.Terraform.get_existing_modules", return_value={"deleted_module"}
@@ -47,11 +53,15 @@ class TestCLI:
         fake_module = Module("test", data={"type": "k8s-service", "name": "fake_module"})
         mocker.patch("opta.cli.gen", return_value=iter([(0, [fake_module], 1)]))
         tf_apply = mocker.patch("opta.cli.Terraform.apply")
+        tf_create_storage = mocker.patch("opta.cli.Terraform.create_state_storage")
 
         # Terraform apply should be called with the configured module (fake_module) and the remote state
         # module (deleted_module) as targets.
         runner = CliRunner()
-        runner.invoke(apply)
+        result = runner.invoke(apply)
+        print(result.output)
+        assert result.exit_code == 0
         tf_apply.assert_called_once_with(
-            ANY, "-target=module.fake_module", "-target=module.deleted_module"
+            ANY, "-target=module.deleted_module", "-target=module.fake_module"
         )
+        tf_create_storage.assert_called_once_with(mocked_layer)

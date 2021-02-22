@@ -124,10 +124,10 @@ def _apply(
         if not is_last_module and not has_new_modules and not refresh:
             continue
         if is_last_module:
-            untouched_modules = list(existing_modules - configured_modules)
-            current_modules += untouched_modules
+            untouched_modules = existing_modules - configured_modules
+            configured_modules = configured_modules.union(untouched_modules)
 
-        targets = list(map(lambda x: f"-target=module.{x}", configured_modules))
+        targets = list(map(lambda x: f"-target=module.{x}", sorted(configured_modules)))
 
         if test:
             Terraform.plan("-lock=false", *targets)
