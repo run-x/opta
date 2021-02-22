@@ -1,7 +1,7 @@
 import json
 from typing import TYPE_CHECKING, List, Tuple
 
-from opta.commands.output import get_terraform_outputs
+from opta.core.terraform import get_terraform_outputs
 from opta.exceptions import UserErrors
 from opta.nice_subprocess import nice_run
 from opta.utils import fmt_msg, is_tool

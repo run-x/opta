@@ -4,6 +4,7 @@ from click.testing import CliRunner
 from pytest_mock import MockFixture
 
 from opta.commands.output import output
+from opta.layer import Layer
 
 TERRAFORM_STATE = {
     "values": {
@@ -44,12 +45,15 @@ TERRAFORM_OUTPUTS = {
 class TestOutput:
     def test_output(self, mocker: MockFixture) -> None:
         mocker.patch("opta.cli.os.remove")
+        mocked_layer_class = mocker.patch("opta.commands.output.Layer")
+        mocked_layer = mocker.Mock(spec=Layer)
+        mocked_layer_class.load_from_yaml.return_value = mocked_layer
         mocker.patch("opta.commands.output.gen_all")
         mocker.patch(
-            "opta.commands.output.Terraform.get_state", return_value=TERRAFORM_STATE
+            "opta.core.terraform.Terraform.get_state", return_value=TERRAFORM_STATE
         )
         mocker.patch(
-            "opta.commands.output.Terraform.get_outputs", return_value=TERRAFORM_OUTPUTS
+            "opta.core.terraform.Terraform.get_outputs", return_value=TERRAFORM_OUTPUTS
         )
 
         runner = CliRunner()

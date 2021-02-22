@@ -7,7 +7,7 @@ from botocore.exceptions import ClientError
 
 from opta.exceptions import UserErrors
 from opta.nice_subprocess import nice_run
-from opta.utils import logger
+from opta.utils import deep_merge, logger
 
 if TYPE_CHECKING:
     from opta.layer import Layer
@@ -172,3 +172,36 @@ class Terraform:
                 )
             except ClientError:
                 print("Load balancing service linked role present")
+
+
+def get_terraform_outputs() -> dict:
+    """ Fetch terraform outputs from existing TF file """
+    Terraform.init()
+    current_outputs = Terraform.get_outputs()
+    parent_outputs = _fetch_parent_outputs()
+    return deep_merge(current_outputs, parent_outputs)
+
+
+def _fetch_parent_outputs() -> dict:
+    # Fetch the terraform state
+    state = Terraform.get_state()
+
+    # Fetch any parent remote states
+    root_module = state.get("values", {}).get("root_module", {})
+    resources = root_module.get("resources", [])
+    parent_states = [
+        resource
+        for resource in resources
+        if resource.get("type") == "terraform_remote_state"
+    ]
+
+    # Grab all outputs from each remote state and save it.
+    parent_state_outputs = {}
+    for parent in parent_states:
+        parent_outputs = parent.get("values", {}).get("outputs", {})
+        for k, v in parent_outputs.items():
+            parent_name = parent.get("name")
+            output_name = f"{parent_name}.{k}"
+            parent_state_outputs[output_name] = v
+
+    return parent_state_outputs
