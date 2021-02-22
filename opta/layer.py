@@ -5,6 +5,7 @@ import re
 import shutil
 import tempfile
 from os import path
+from types import SimpleNamespace
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 import git
@@ -18,7 +19,7 @@ from opta.module_processors.datadog import DatadogProcessor
 from opta.module_processors.k8s_base import K8sBaseProcessor
 from opta.module_processors.k8s_service import K8sServiceProcessor
 from opta.plugins.derived_providers import DerivedProviders
-from opta.utils import Objectview, deep_merge, hydrate, logger
+from opta.utils import deep_merge, hydrate, logger
 
 
 class Layer:
@@ -176,15 +177,15 @@ class Layer:
         parent_name = self.parent.name if self.parent is not None else "nil"
         parent = None
         if self.parent is not None:
-            parent = Objectview(
-                {
+            parent = SimpleNamespace(
+                **{
                     k: f"${{data.terraform_remote_state.parent.outputs.{k}}}"
                     for k in self.parent.outputs()
                 }
             )
         return {
             "parent": parent,
-            "vars": Objectview(self.variables),
+            "vars": SimpleNamespace(**self.variables),
             "parent_name": parent_name,
             "layer_name": self.name,
             "state_storage": self.state_storage(),
