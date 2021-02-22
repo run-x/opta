@@ -3,7 +3,7 @@ org_name: jd-opta
 providers:
   aws:
     region: us-east-1
-    allowed_account_ids: [ 889760294590 ]
+    account_id: 889760294590
 modules:
   - type: aws-base
   - type: aws-dns
