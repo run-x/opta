@@ -23,7 +23,7 @@ resource "helm_release" "k8s-service" {
       containerResourceLimits: var.container_resource_limits,
       containerResourceRequests: var.container_resource_requests,
       deployPods: (var.image != "AUTO") || (var.tag != null),
-      image: var.image == "AUTO" ? "${aws_ecr_repository.repo[0].repository_url}:${var.tag}" : var.image
+      image: var.image == "AUTO" ? (var.tag == null ? "": "${aws_ecr_repository.repo[0].repository_url}:${var.tag}") : var.image
       version: var.tag == null ? "latest" : var.tag
       livenessProbePath: var.liveness_probe_path,
       readinessProbePath: var.readiness_probe_path,

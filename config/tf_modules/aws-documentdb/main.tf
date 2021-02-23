@@ -7,6 +7,10 @@ data "aws_security_group" "security_group" {
   name = "opta-${var.env_name}-documentdb-sg"
 }
 
+data "aws_kms_key" "main" {
+  key_id = "alias/opta-${var.env_name}"
+}
+
 resource "aws_docdb_cluster_instance" "cluster_instances" {
   count              = 1
   identifier         = "opta-${var.layer_name}-${var.module_name}-${count.index}"
@@ -23,7 +27,7 @@ resource "aws_docdb_cluster" "cluster" {
   db_subnet_group_name = "opta-${var.env_name}-docdb"
   engine_version = var.engine_version
   storage_encrypted = true
-  kms_key_id = "alias/opta-${var.env_name}"
+  kms_key_id = data.aws_kms_key.main.arn
   vpc_security_group_ids = [data.aws_security_group.security_group.id]
   apply_immediately = true
   skip_final_snapshot = true
