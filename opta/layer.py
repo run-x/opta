@@ -33,7 +33,9 @@ class Layer:
         variables: Optional[Dict[str, Any]] = None,
     ):
         if not Layer.valid_name(name):
-            raise UserErrors("Invalid layer, can only contain letters and numbers!")
+            raise UserErrors(
+                "Invalid layer, can only contain letters, dashes and numbers!"
+            )
         self.name = name
         self.parent = parent
         if parent is None and org_name is None:
@@ -120,7 +122,7 @@ class Layer:
 
     @staticmethod
     def valid_name(name: str) -> bool:
-        pattern = "^[A-Za-z0-9]*$"
+        pattern = "^[A-Za-z0-9-]*$"
         return bool(re.match(pattern, name))
 
     def get_env(self) -> str:
