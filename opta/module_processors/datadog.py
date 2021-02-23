@@ -4,9 +4,11 @@ from typing import TYPE_CHECKING
 import click
 from kubernetes.client import ApiException, CoreV1Api, V1Namespace, V1ObjectMeta, V1Secret
 from kubernetes.config import load_kube_config
+from requests import codes, get
 
 from opta.core.kubernetes import configure_kubectl
 from opta.module_processors.base import ModuleProcessor
+from opta.utils import logger
 
 if TYPE_CHECKING:
     from opta.layer import Layer
@@ -52,10 +54,24 @@ class DatadogProcessor(ModuleProcessor):
         super(DatadogProcessor, self).process(module_idx)
 
     def create_secret(self) -> str:
-        value = click.prompt("Please enter your datadog api key", type=str)
+        while True:
+            value = click.prompt("Please enter your datadog api key", type=str)
+            if self.validate_api_key(value):
+                break
+            logger.warn(
+                "The api key which you passed was invalid, please provide a valid api key from "
+                "https://app.datadoghq.com/account/settings#api"
+            )
         secret_value = base64.b64encode(value.encode("utf-8")).decode("utf-8")
         patch = [
             {"op": "replace", "path": "/data/DATADOG_API_KEY", "value": secret_value}
         ]
         self.v1.patch_namespaced_secret("secret", self.layer.name, patch)
         return value
+
+    def validate_api_key(self, api_key: str) -> bool:
+        response = get(
+            "https://api.datadoghq.com/api/v1/validate",
+            headers={"Content-Type": "application/json", "DD-API-KEY": api_key},
+        )
+        return response.status_code == codes.ok
