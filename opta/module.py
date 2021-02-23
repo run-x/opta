@@ -1,4 +1,5 @@
 import os
+import re
 from typing import Any, Dict, Iterable, List
 
 import hcl2
@@ -16,6 +17,8 @@ class Module:
         self.data = data
         self.parent_layer = parent_layer
         self.name = data.get("name", data["type"].replace("-", ""))
+        if not Module.valid_name(self.name):
+            raise UserErrors("Invalid module name, can only contain letters and numbers!")
         self.desc = REGISTRY["modules"][data["type"]]
         self.halt = REGISTRY["modules"][data["type"]].get("halt", False)
         self.terraform_resources: Any = None
@@ -27,6 +30,11 @@ class Module:
                 if "export" in v and v["export"]:
                     ret.append(k)
         return ret
+
+    @staticmethod
+    def valid_name(name: str) -> bool:
+        pattern = "^[A-Za-z0-9]*$"
+        return bool(re.match(pattern, name))
 
     def gen_tf(self) -> Dict[Any, Any]:
         module_blk: Dict[Any, Any] = {
