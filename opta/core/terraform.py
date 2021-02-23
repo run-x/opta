@@ -107,7 +107,7 @@ class Terraform:
             bucket_name = providers["terraform"]["backend"]["s3"]["bucket"]
             dynamodb_table = providers["terraform"]["backend"]["s3"]["dynamodb_table"]
             region = providers["terraform"]["backend"]["s3"]["region"]
-            s3 = boto3.client("s3", config=Config(region_name=region))
+            s3 = boto3.client("s3")
             dynamodb = boto3.client("dynamodb", config=Config(region_name=region))
             iam = boto3.client("iam", config=Config(region_name=region))
             try:
@@ -120,7 +120,10 @@ class Terraform:
                         f"{e.response['Error']['Message']}"
                     )
                 logger.info("S3 bucket for terraform state not found, creating a new one")
-                s3.create_bucket(Bucket=bucket_name,)
+                s3.create_bucket(
+                    Bucket=bucket_name,
+                    CreateBucketConfiguration={"LocationConstraint": region},
+                )
                 s3.put_bucket_encryption(
                     Bucket=bucket_name,
                     ServerSideEncryptionConfiguration={
