@@ -7,6 +7,9 @@ data "aws_security_group" "security_group" {
   name = "opta-${var.env_name}-elasticache-sg"
 }
 
+data "aws_kms_key" "main" {
+  key_id = "alias/opta-${var.env_name}"
+}
 
 resource "aws_elasticache_replication_group" "redis_cluster" {
   automatic_failover_enabled    = true
@@ -24,7 +27,7 @@ resource "aws_elasticache_replication_group" "redis_cluster" {
   auth_token = random_password.redis_auth.result
   transit_encryption_enabled = true
   at_rest_encryption_enabled = true
-  kms_key_id = "alias/opta-${var.env_name}"
+  kms_key_id = data.aws_kms_key.main.arn
   lifecycle {
     ignore_changes = [engine_version]
   }

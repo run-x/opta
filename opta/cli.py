@@ -76,7 +76,6 @@ def debugger() -> None:
     default=None,
     type=str,
     help="If this handles a service, it's the image tag you wanna deploy",
-    hidden=True,
 )
 @click.option(
     "--test",
