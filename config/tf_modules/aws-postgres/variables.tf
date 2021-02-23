@@ -13,11 +13,6 @@ variable "module_name" {
   type = string
 }
 
-variable "engine" {
-  type = string
-  default = "aurora-postgresql"
-}
-
 variable "engine_version" {
   type = string
   default = "11.9"

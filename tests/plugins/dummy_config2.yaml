@@ -10,7 +10,7 @@ modules:
       - name: APPENV
         value: "{env}"
   - name: database
-    type: aws-db
+    type: aws-postgres
   - name: redis
     type: aws-redis
   - name: bucket

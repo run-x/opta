@@ -6,7 +6,7 @@ providers:
     allowed_account_ids: [ 12345 ]
 modules:
   - name: database
-    type: aws-db
+    type: aws-postgres
   - name: redis
     type: aws-redis
   - name: docdb

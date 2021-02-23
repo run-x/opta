@@ -25,7 +25,7 @@ modules:
       - API_KEY
       - SECRET_1
   - name: db
-    type: aws-db
+    type: aws-postgres
   - name: s3
     type: aws-s3
     bucket_name: "{layer_name}-testing"

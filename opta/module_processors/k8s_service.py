@@ -60,7 +60,7 @@ class K8sServiceProcessor(K8sModuleProcessor):
                     "app one"
                 )
             module_type = module.data["type"]
-            if module_type == "aws-db":
+            if module_type == "aws-postgres":
                 self.handle_rds_link(module, link_permissions)
             elif module_type == "aws-redis":
                 self.handle_redis_link(module, link_permissions)

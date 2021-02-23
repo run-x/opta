@@ -168,13 +168,12 @@ modules:
         name: DocDB
         desc: DocumentDB is a NoSQL database that exposes a similar API to MongoDB.
         url: https://console.aws.amazon.com/docdb/home?region={aws_region}#cluster-details/{cluster_identifier}
-  aws-db:
-    location: aws-db
+  aws-postgres:
+    location: aws-postgres
     variables:
       env_name: str
       layer_name: str
       module_name: str
-      engine: optional
       engine_version: optional
       instance_class: optional
     outputs:

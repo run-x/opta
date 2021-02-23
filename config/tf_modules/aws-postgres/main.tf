@@ -11,7 +11,7 @@ resource "aws_rds_cluster" "db_cluster" {
   cluster_identifier = "opta-${var.layer_name}-${var.module_name}"
   db_subnet_group_name = "opta-${var.env_name}"
   database_name = "app"
-  engine = var.engine
+  engine = "aurora-postgresql"
   engine_version = var.engine_version
   master_username = "postgres"
   master_password = random_password.pg_password.result
