@@ -46,11 +46,11 @@ class TestCLI:
 
         # Mock remote state
         mocker.patch(
-            "opta.cli.Terraform.get_existing_modules", return_value={"deleted_module"}
+            "opta.cli.Terraform.get_existing_modules", return_value={"deletedmodule"}
         )
 
         # Mock opta config
-        fake_module = Module("test", data={"type": "k8s-service", "name": "fake_module"})
+        fake_module = Module("test", data={"type": "k8s-service", "name": "fakemodule"})
         mocker.patch("opta.cli.gen", return_value=iter([(0, [fake_module], 1)]))
         tf_apply = mocker.patch("opta.cli.Terraform.apply")
         tf_create_storage = mocker.patch("opta.cli.Terraform.create_state_storage")
@@ -62,6 +62,6 @@ class TestCLI:
         print(result.output)
         assert result.exit_code == 0
         tf_apply.assert_called_once_with(
-            ANY, "-target=module.deleted_module", "-target=module.fake_module"
+            ANY, "-target=module.deletedmodule", "-target=module.fakemodule"
         )
         tf_create_storage.assert_called_once_with(mocked_layer)
