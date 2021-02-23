@@ -39,3 +39,36 @@ class TestTerraform:
         assert {"redis", "doc_db"} == Terraform.get_existing_modules(
             mocker.Mock(spec=Layer)
         )
+
+    def test_download_state(self, mocker: MockFixture) -> None:
+        layer = mocker.Mock(spec=Layer)
+        layer.gen_providers.return_value = {
+            "terraform": {
+                "backend": {
+                    "s3": {
+                        "bucket": "opta-tf-state-test-dev1",
+                        "key": "dev1",
+                        "dynamodb_table": "opta-tf-state-test-dev1",
+                        "region": "us-east-1",
+                    }
+                }
+            }
+        }
+        patched_init = mocker.patch(
+            "opta.core.terraform.Terraform.init", return_value=True
+        )
+        mocked_s3_client = mocker.Mock()
+        mocked_boto_client = mocker.patch(
+            "opta.core.terraform.boto3.client", return_value=mocked_s3_client
+        )
+
+        assert Terraform.download_state(layer)
+        layer.gen_providers.assert_called_once_with(0)
+        mocked_s3_client.download_file.assert_called_once_with(
+            "opta-tf-state-test-dev1", "dev1", "./terraform.tfstate"
+        )
+        patched_init.assert_called_once_with()
+        mocked_boto_client.assert_called_once_with("s3")
+
+    def test_create_state_storage(self, mocker: MockFixture) -> None:
+        pass
