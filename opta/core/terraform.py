@@ -120,10 +120,13 @@ class Terraform:
                         f"{e.response['Error']['Message']}"
                     )
                 logger.info("S3 bucket for terraform state not found, creating a new one")
-                s3.create_bucket(
-                    Bucket=bucket_name,
-                    CreateBucketConfiguration={"LocationConstraint": region},
-                )
+                if region == "us-east-1":
+                    s3.create_bucket(Bucket=bucket_name,)
+                else:
+                    s3.create_bucket(
+                        Bucket=bucket_name,
+                        CreateBucketConfiguration={"LocationConstraint": region},
+                    )
                 s3.put_bucket_encryption(
                     Bucket=bucket_name,
                     ServerSideEncryptionConfiguration={
