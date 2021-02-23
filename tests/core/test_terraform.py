@@ -1,3 +1,4 @@
+from botocore.exceptions import ClientError
 from pytest_mock import MockFixture
 
 from opta.core.terraform import Terraform
@@ -71,4 +72,75 @@ class TestTerraform:
         mocked_boto_client.assert_called_once_with("s3")
 
     def test_create_state_storage(self, mocker: MockFixture) -> None:
-        pass
+        layer = mocker.Mock(spec=Layer)
+        layer.gen_providers.return_value = {
+            "terraform": {
+                "backend": {
+                    "s3": {
+                        "bucket": "opta-tf-state-test-dev1",
+                        "key": "dev1",
+                        "dynamodb_table": "opta-tf-state-test-dev1",
+                        "region": "us-east-1",
+                    }
+                }
+            }
+        }
+        mocked_s3_client = mocker.Mock()
+        mocked_dynamodb_client = mocker.Mock()
+        mocked_iam_client = mocker.Mock()
+        mocked_boto3 = mocker.patch("opta.core.terraform.boto3")
+        mocked_boto3.client.side_effect = [
+            mocked_s3_client,
+            mocked_dynamodb_client,
+            mocked_iam_client,
+        ]
+
+        mocked_s3_client.get_bucket_encryption.side_effect = ClientError(
+            error_response={"Error": {"Code": "NoSuchBucket", "Message": "Blah"}},
+            operation_name="Blah",
+        )
+
+        mocked_dynamodb_client.describe_table.side_effect = ClientError(
+            error_response={
+                "Error": {"Code": "ResourceNotFoundException", "Message": "Blah"}
+            },
+            operation_name="Blah",
+        )
+
+        Terraform.create_state_storage(layer)
+
+        layer.gen_providers.assert_called_once_with(0)
+        mocked_dynamodb_client.create_table.assert_called_once_with(
+            TableName="opta-tf-state-test-dev1",
+            KeySchema=[{"AttributeName": "LockID", "KeyType": "HASH"}],
+            AttributeDefinitions=[{"AttributeName": "LockID", "AttributeType": "S"}],
+            BillingMode="PROVISIONED",
+            ProvisionedThroughput={"ReadCapacityUnits": 20, "WriteCapacityUnits": 20},
+        )
+        mocked_s3_client.create_bucket.assert_called_once_with(
+            Bucket="opta-tf-state-test-dev1"
+        )
+        mocked_s3_client.put_bucket_encryption.assert_called_once_with(
+            Bucket="opta-tf-state-test-dev1",
+            ServerSideEncryptionConfiguration={
+                "Rules": [
+                    {"ApplyServerSideEncryptionByDefault": {"SSEAlgorithm": "AES256"}},
+                ]
+            },
+        )
+        mocked_s3_client.put_public_access_block.assert_called_once_with(
+            Bucket="opta-tf-state-test-dev1",
+            PublicAccessBlockConfiguration={
+                "BlockPublicAcls": True,
+                "IgnorePublicAcls": True,
+                "BlockPublicPolicy": True,
+                "RestrictPublicBuckets": True,
+            },
+        )
+        mocked_boto3.client.assert_has_calls(
+            [
+                mocker.call("s3"),
+                mocker.call("dynamodb", config=mocker.ANY),
+                mocker.call("iam", config=mocker.ANY),
+            ]
+        )
