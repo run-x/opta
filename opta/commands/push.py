@@ -6,14 +6,14 @@ import click
 from botocore.config import Config
 
 from opta.core.generator import gen_all
-from opta.core.terraform import Terraform
+from opta.core.terraform import get_terraform_outputs
 from opta.layer import Layer
 from opta.nice_subprocess import nice_run
 from opta.utils import is_tool
 
 
 def get_registry_url() -> str:
-    outputs = Terraform.get_outputs()
+    outputs = get_terraform_outputs()
     if "docker_repo_url" not in outputs:
         raise Exception(
             "Unable to determine docker repository url. There is likely something wrong with your opta configuration."

@@ -17,7 +17,7 @@ TERRAFORM_OUTPUTS = {"docker_repo_url": REGISTRY_URL}
 class TestGetRegistryUrl:
     def test_get_registry_url(self, mocker: MockFixture) -> None:
         mocker.patch(
-            "opta.commands.push.Terraform.get_outputs", return_value=TERRAFORM_OUTPUTS
+            "opta.commands.push.get_terraform_outputs", return_value=TERRAFORM_OUTPUTS
         )
 
         docker_repo_url = get_registry_url()
@@ -25,7 +25,7 @@ class TestGetRegistryUrl:
 
     def test_no_docker_repo_url_in_output(self, mocker: MockFixture) -> None:
         mocker.patch("os.path.isdir", return_value=True)
-        mocker.patch("opta.commands.push.Terraform.get_outputs", return_value={})
+        mocker.patch("opta.commands.push.get_terraform_outputs", return_value={})
 
         with pytest.raises(Exception) as e_info:
             get_registry_url()
