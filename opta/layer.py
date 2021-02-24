@@ -193,6 +193,7 @@ class Layer:
         if self.parent is not None:
             providers = deep_merge(providers, self.parent.meta.get("providers", {}))
         for k, v in providers.items():
+            self.handle_special_providers(k, v)
             ret["provider"][k] = v
             if k in REGISTRY["backends"]:
                 if backend_enabled:
@@ -232,3 +233,11 @@ class Layer:
         )
 
         return ret
+
+    # Special logic for mapping the opta config to the provider block
+    def handle_special_providers(self, provider_name: str, provider_data: dict) -> None:
+        # Terraform requires an array of AWS account ids, but having the customer specify
+        # that is awk, so transform it during the mapping.
+        if provider_name == "aws" and "account_id" in provider_data:
+            aws_account_id = provider_data.pop("account_id")
+            provider_data["allowed_account_ids"] = [aws_account_id]

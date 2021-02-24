@@ -1,8 +1,11 @@
 import os
+import platform
 import sys
 from typing import Any
 
 import sentry_sdk
+from getmac import get_mac_address
+from git.config import GitConfigParser
 from sentry_sdk.integrations.atexit import AtexitIntegration
 
 from opta.constants import VERSION
@@ -42,3 +45,11 @@ else:
         integrations=[AtexitIntegration(at_exit_callback)],
         before_send=before_send,
     )
+    sentry_sdk.set_user(
+        {"email": GitConfigParser().get_value("user", "email", "no_user")}
+    )
+    sentry_sdk.set_tag("device_id", get_mac_address())
+    sentry_sdk.set_tag("os_name", os.name)
+    sentry_sdk.set_tag("platform", platform.system())
+    sentry_sdk.set_tag("os_version", platform.version())
+    sentry_sdk.set_tag("app_version", VERSION)
