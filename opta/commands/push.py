@@ -68,17 +68,27 @@ def push_to_docker(
 @click.command()
 @click.argument("image")
 @click.option("--config", default="opta.yml", help="Opta config file.")
+@click.option(
+    "--init",
+    is_flag=True,
+    default=False,
+    help="Set this if opta has not been run in this machine+directory before.",
+)
 @click.option("--env", default=None, help="The env to use when loading the config file.")
 @click.option(
     "--tag",
     default=None,
     help="The image tag associated with your docker container. Defaults to your local image tag.",
 )
-def push(image: str, config: str, env: Optional[str], tag: Optional[str]) -> None:
+def push(
+    image: str, config: str, init: bool, env: Optional[str], tag: Optional[str]
+) -> None:
     if not is_tool("docker"):
         raise Exception("Please install docker on your machine")
     layer = Layer.load_from_yaml(config, env)
     gen_all(layer)
+    if init:
+        Terraform.init()
     registry_url = get_registry_url()
     username, password = get_ecr_auth_info(layer)
     push_to_docker(username, password, image, registry_url, tag)
