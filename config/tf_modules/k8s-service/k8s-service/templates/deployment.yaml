@@ -4,14 +4,14 @@
 {{- if not (or (hasKey .Values.port "tcp") (hasKey .Values.port "http")) }}
   {{- fail "Port must specify either a single tcp port (for websockets) or a single http port" }}
 {{- end }}
-{{- if .Values.image.tag }}
+{{- if .Values.deployPods }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "k8s-service.fullname" . }}
   labels:
     tags.datadoghq.com/service: {{ include "k8s-service.serviceName" . }}-{{ include "k8s-service.namespaceName" . }}
-    tags.datadoghq.com/version: {{ .Values.image.tag | quote }}
+    tags.datadoghq.com/version: {{ .Values.version | quote }}
     {{- include "k8s-service.labels" . | nindent 4 }}
   namespace: {{ include "k8s-service.namespaceName" . }}
 spec:
@@ -23,7 +23,7 @@ spec:
       labels:
         {{- include "k8s-service.selectorLabels" . | nindent 8 }}
         tags.datadoghq.com/service: {{ include "k8s-service.serviceName" . }}-{{ include "k8s-service.namespaceName" . }}
-        tags.datadoghq.com/version: {{ .Values.image.tag | quote }}
+        tags.datadoghq.com/version: {{ .Values.version | quote }}
       annotations:
         config.linkerd.io/skip-outbound-ports: "8126,5432"
         ad.datadoghq.com/linkerd-proxy.check_names: '["linkerd"]'
@@ -33,7 +33,7 @@ spec:
       serviceAccountName: {{ include "k8s-service.serviceName" . }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ .Values.image }}"
           imagePullPolicy: Always
           volumeMounts:
             - name: config

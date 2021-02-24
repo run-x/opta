@@ -16,7 +16,7 @@ resource "helm_release" "datadog" {
   count = (var.api_key == null || var.api_key == "") ? 0 : 1
   repository = "https://helm.datadoghq.com"
   chart = "datadog"
-  name = var.name
+  name = "${var.layer_name}-${var.module_name}"
 
   values = [
     yamlencode({

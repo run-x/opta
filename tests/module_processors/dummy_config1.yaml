@@ -1,33 +1,31 @@
-meta:
-  name: blahZAs
-  variables:
-    tag: ""
+name: blahZAs
+org_name: baloney
+providers:
+  aws:
+    region: us-east-1
+    allowed_account_ids: [ 12345 ]
 modules:
-  app:
+  - name: database
+    type: aws-postgres
+  - name: redis
+    type: aws-redis
+  - name: docdb
+    type: aws-documentdb
+  - name: bucket1
+    type: aws-s3
+    bucket_name: "bucket1"
+  - name: bucket2
+    type: aws-s3
+    bucket_name: "bucket2"
+  - name: app
     type: k8s-service
-    env_vars:
-      - name: APPENV
-        value: "{env}"
     secrets:
       - BALONEY
     links:
-      database: []
-      redis: []
-      docdb: []
-      bucket1:
+      - database
+      - redis
+      - docdb
+      - bucket1:
         - read
-      bucket2:
+      - bucket2:
         - write
-
-  database:
-    type: aws-rds
-  redis:
-    type: aws-redis
-  docdb:
-    type: aws-documentdb
-  bucket1:
-    type: aws-s3-bucket
-    bucket_name: "bucket1"
-  bucket2:
-    type: aws-s3-bucket
-    bucket_name: "bucket2"

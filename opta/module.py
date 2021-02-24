@@ -1,46 +1,57 @@
 import os
-from typing import Any, Dict, List
+import re
+from typing import Any, Dict, Iterable, List
 
 import hcl2
 
 from opta.constants import REGISTRY
+from opta.exceptions import UserErrors
 from opta.resource import Resource
 
 
 class Module:
-    def __init__(
-        self, layer_name: str, key: str, data: Dict[Any, Any], parent_layer: Any = None
-    ):
+    def __init__(self, layer_name: str, data: Dict[Any, Any], parent_layer: Any = None):
+        if "type" not in data:
+            raise UserErrors("Module data must always have a type")
         self.layer_name = layer_name
-        self.key = key
         self.data = data
         self.parent_layer = parent_layer
+        self.name = data.get("name", data["type"].replace("-", ""))
+        if not Module.valid_name(self.name):
+            raise UserErrors("Invalid module name, can only contain letters and numbers!")
         self.desc = REGISTRY["modules"][data["type"]]
-        self.name = f"{layer_name}-{self.key}"
+        self.halt = REGISTRY["modules"][data["type"]].get("halt", False)
         self.terraform_resources: Any = None
+
+    def outputs(self) -> Iterable[str]:
+        ret = []
+        if "outputs" in self.desc:
+            for k, v in self.desc["outputs"].items():
+                if "export" in v and v["export"]:
+                    ret.append(k)
+        return ret
+
+    @staticmethod
+    def valid_name(name: str) -> bool:
+        pattern = "^[A-Za-z0-9]*$"
+        return bool(re.match(pattern, name))
 
     def gen_tf(self) -> Dict[Any, Any]:
         module_blk: Dict[Any, Any] = {
             "module": {
-                self.key: {"source": self.translate_location(self.desc["location"])}
+                self.name: {"source": self.translate_location(self.desc["location"])}
             },
             "output": {},
         }
         for k, v in self.desc["variables"].items():
             if k in self.data:
-                module_blk["module"][self.key][k] = self.data[k]
+                module_blk["module"][self.name][k] = self.data[k]
             elif v == "optional":
                 continue
-            elif k == "name":
-                module_blk["module"][self.key][k] = self.name
             elif k == "module_name":
-                module_blk["module"][self.key][k] = self.key
+                module_blk["module"][self.name][k] = self.name
             elif k == "layer_name":
-                module_blk["module"][self.key][k] = self.layer_name
-            elif self.parent_layer is not None and k in self.parent_layer.outputs():
-                module_blk["module"][self.key][
-                    k
-                ] = f"${{{{data.terraform_remote_state.parent.outputs.{k} }}}}"
+                module_blk["module"][self.name][k] = self.layer_name
             else:
                 raise Exception(f"Unable to hydrate {k}")
 
@@ -48,7 +59,7 @@ class Module:
             for k, v in self.desc["outputs"].items():
                 if "export" in v and v["export"]:
                     module_blk["output"].update(
-                        {k: {"value": f"${{{{module.{self.key}.{k} }}}}"}}
+                        {k: {"value": f"${{{{module.{self.name}.{k} }}}}"}}
                     )
 
         return module_blk

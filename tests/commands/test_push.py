@@ -1,5 +1,5 @@
 import base64
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import pytest
 from click.testing import CliRunner
@@ -17,7 +17,7 @@ TERRAFORM_OUTPUTS = {"docker_repo_url": REGISTRY_URL}
 class TestGetRegistryUrl:
     def test_get_registry_url(self, mocker: MockFixture) -> None:
         mocker.patch(
-            "opta.commands.push.Terraform.get_outputs", return_value=TERRAFORM_OUTPUTS
+            "opta.commands.push.get_terraform_outputs", return_value=TERRAFORM_OUTPUTS
         )
 
         docker_repo_url = get_registry_url()
@@ -25,7 +25,7 @@ class TestGetRegistryUrl:
 
     def test_no_docker_repo_url_in_output(self, mocker: MockFixture) -> None:
         mocker.patch("os.path.isdir", return_value=True)
-        mocker.patch("opta.commands.push.Terraform.get_outputs", return_value={})
+        mocker.patch("opta.commands.push.get_terraform_outputs", return_value={})
 
         with pytest.raises(Exception) as e_info:
             get_registry_url()
@@ -37,7 +37,7 @@ class TestGetRegistryUrl:
 class TestGetEcrAuthInfo:
     def test_get_ecr_auth_info(self, mocker: MockFixture) -> None:
         mocked_layer = mocker.Mock(spec=Layer)
-        mocked_layer.gen_providers = lambda x, y: BASIC_APPLY[1]
+        mocked_layer.gen_providers = lambda x: BASIC_APPLY[1]
 
         mocked_ecr_client = mocker.Mock()
 
@@ -50,15 +50,7 @@ class TestGetEcrAuthInfo:
         mocked_ecr_client.get_authorization_token = mock_get_authorization_token
         patched_boto_client = mocker.patch("opta.commands.push.boto3.client")
         patched_boto_client.return_value = mocked_ecr_client
-
-        def mocked_load_from_yaml(config: str, env: Optional[str]) -> Layer:
-            return mocked_layer
-
-        mocker.patch.object(Layer, "load_from_yaml", new=mocked_load_from_yaml)
-        assert get_ecr_auth_info(config="opta.yml", env="runx-staging") == (
-            "username",
-            "password",
-        )
+        assert get_ecr_auth_info(mocked_layer) == ("username", "password",)
 
 
 class TestPushToDocker:
@@ -121,6 +113,9 @@ class TestPush:
     def test_no_tag_override(self, mocker: MockFixture) -> None:
         nice_run_mock = mocker.patch("opta.commands.push.nice_run")
         gen_mock = mocker.patch("opta.commands.push.gen_all")
+        layer_object_mock = mocker.patch("opta.commands.push.Layer")
+        layer_mock = mocker.Mock(spec=Layer)
+        layer_object_mock.load_from_yaml.return_value = layer_mock
         mocker.patch(
             "opta.commands.push.get_registry_url"
         ).return_value = "889760294590.dkr.ecr.us-east-1.amazonaws.com/github-runx-app"
@@ -133,7 +128,8 @@ class TestPush:
         result = runner.invoke(cli, ["push", "local_image:local_tag"])
 
         assert result.exit_code == 0
-        gen_mock.assert_called_once_with("opta.yml", None)
+        layer_object_mock.load_from_yaml.assert_called_once_with("opta.yml", None)
+        gen_mock.assert_called_once_with(layer_mock)
 
         nice_run_mock.assert_has_calls(
             [
@@ -162,6 +158,9 @@ class TestPush:
     def test_with_tag_override(self, mocker: MockFixture) -> None:
         nice_run_mock = mocker.patch("opta.commands.push.nice_run")
         gen_mock = mocker.patch("opta.commands.push.gen_all")
+        layer_object_mock = mocker.patch("opta.commands.push.Layer")
+        layer_mock = mocker.Mock(spec=Layer)
+        layer_object_mock.load_from_yaml.return_value = layer_mock
         mocker.patch(
             "opta.commands.push.get_registry_url"
         ).return_value = "889760294590.dkr.ecr.us-east-1.amazonaws.com/github-runx-app"
@@ -176,7 +175,8 @@ class TestPush:
         )
 
         assert result.exit_code == 0
-        gen_mock.assert_called_once_with("opta.yml", None)
+        layer_object_mock.load_from_yaml.assert_called_once_with("opta.yml", None)
+        gen_mock.assert_called_once_with(layer_mock)
 
         nice_run_mock.assert_has_calls(
             [
@@ -211,6 +211,9 @@ class TestPush:
 
     def test_bad_image_name(self, mocker: MockFixture) -> None:
         gen_mock = mocker.patch("opta.commands.push.gen_all")
+        layer_object_mock = mocker.patch("opta.commands.push.Layer")
+        layer_mock = mocker.Mock(spec=Layer)
+        layer_object_mock.load_from_yaml.return_value = layer_mock
         mocker.patch(
             "opta.commands.push.get_registry_url"
         ).return_value = "889760294590.dkr.ecr.us-east-1.amazonaws.com/github-runx-app"
@@ -223,8 +226,9 @@ class TestPush:
         result = runner.invoke(cli, ["push", "local_image", "--tag", "tag-override"])
 
         assert result.exit_code == 1
+        layer_object_mock.load_from_yaml.assert_called_once_with("opta.yml", None)
+        gen_mock.assert_called_once_with(layer_mock)
         assert (
             str(result.exception)
             == "Unexpected image name local_image: your image_name must be of the format <IMAGE>:<TAG>."
         )
-        gen_mock.assert_called_once_with("opta.yml", None)
