@@ -37,7 +37,10 @@ class DatadogProcessor(ModuleProcessor):
             )
         try:
             secret = self.v1.read_namespaced_secret("secret", self.layer.name)
-            if "DATADOG_API_KEY" not in secret.data:
+            if (
+                "DATADOG_API_KEY" not in secret.data
+                or secret.data["DATADOG_API_KEY"] == ""
+            ):
                 api_key = self.create_secret()
             else:
                 api_key = base64.b64decode(secret.data["DATADOG_API_KEY"]).decode("utf-8")
