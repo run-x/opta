@@ -101,7 +101,7 @@ jobs:
           python ../opta/cli.py apply --env runx-staging --test
 
   deploy_test_service:
-    # if: ${{ github.ref == 'refs/heads/main' }}
+    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     steps:
       - name: Deploy test-service
