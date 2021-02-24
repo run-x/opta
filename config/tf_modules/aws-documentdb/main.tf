@@ -29,6 +29,7 @@ resource "aws_docdb_cluster" "cluster" {
   storage_encrypted = true
   kms_key_id = data.aws_kms_key.main.arn
   vpc_security_group_ids = [data.aws_security_group.security_group.id]
+  backup_retention_period = 5
   apply_immediately = true
   skip_final_snapshot = true
 }
