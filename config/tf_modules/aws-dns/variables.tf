@@ -1,13 +1,23 @@
-variable "domain_name" {
+variable "domain" {
   type = string
 }
 
-variable "is_private" {
+variable "env_name" {
+  description = "Env name"
+  type = string
+}
+
+variable "layer_name" {
+  description = "Layer name"
+  type        = string
+}
+
+variable "module_name" {
+  description = "Module name"
+  type = string
+}
+
+variable "delegated" {
   type = bool
   default = false
-}
-
-variable "vpc_id" {
-  type = string
-  default = ""
 }

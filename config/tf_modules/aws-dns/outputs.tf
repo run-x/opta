@@ -1,7 +1,15 @@
 output "zone_id" {
-  value = var.is_private ? aws_route53_zone.private[0].zone_id : aws_route53_zone.public[0].zone_id
+  value = aws_route53_zone.public.zone_id
 }
 
 output "name_servers" {
-  value = var.is_private ? aws_route53_zone.private[0].name_servers : aws_route53_zone.public[0].name_servers
+  value = aws_route53_zone.public.name_servers
+}
+
+output "domain" {
+  value = aws_route53_zone.public.name
+}
+
+output "cert_arn" {
+  value = var.delegated ? aws_acm_certificate.certificate[0].arn : ""
 }

@@ -2,6 +2,7 @@ from click.testing import CliRunner
 from pytest_mock import MockFixture
 
 from opta.commands.inspect_cmd import inspect
+from opta.layer import Layer
 from opta.module import Module
 from opta.resource import Resource
 
@@ -28,7 +29,7 @@ TERRAFORM_STATE = {
                 {
                     "resources": [
                         {
-                            "address": "module.test_module.test_resource.test",
+                            "address": "module.testmodule.test_resource.test",
                             "type": "test_resource",
                             "name": "test",
                             "values": {"test_value": "foobar"},
@@ -46,6 +47,9 @@ class TestInspect:
         # Mock terraform init
         mocker.patch("opta.commands.inspect_cmd.Terraform.init")
         # Mock tf file generation
+        mocked_layer_class = mocker.patch("opta.commands.inspect_cmd.Layer")
+        mocked_layer = mocker.Mock(spec=Layer)
+        mocked_layer_class.load_from_yaml.return_value = mocked_layer
         mocker.patch("opta.commands.inspect_cmd.gen_all")
         # Mock that the terraform CLI tool exists.
         mocker.patch("opta.commands.inspect_cmd.is_tool", return_value=True)
@@ -63,7 +67,7 @@ class TestInspect:
 
         # Mock reading opta resources.
         fake_module = Module(
-            key="test_module", data={"type": "fake-module"}, layer_name=""
+            data={"type": "fake-module", "name": "testmodule"}, layer_name=""
         )
         fake_resource = Resource(fake_module, "test_resource", "test")
         mocker.patch(
@@ -76,6 +80,7 @@ class TestInspect:
         print(result.exception)
         assert result.exit_code == 0
         # Using split to compare without whitespaces
+        print(result.output)
         assert (
             result.output.split()
             == """

@@ -1,10 +1,16 @@
-variable "name" {
+variable "env_name" {
+  description = "Env name"
   type = string
 }
 
-variable "subnet_group_name" {
+variable "layer_name" {
+  description = "Layer name"
+  type        = string
+}
+
+variable "module_name" {
+  description = "Module name"
   type = string
-  default = "main-docdb"
 }
 
 variable "engine_version" {
@@ -12,16 +18,7 @@ variable "engine_version" {
   default = "4.0.0"
 }
 
-variable "security_group" {
-  type = string
-  default = ""
-}
-
 variable "instance_class" {
   type = string
   default = "db.r5.large"
-}
-
-variable "kms_account_key_arn" {
-  type = string
 }

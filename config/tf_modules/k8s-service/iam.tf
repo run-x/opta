@@ -10,12 +10,12 @@ data "aws_iam_policy_document" "trust_k8s_openid" {
 
     condition {
       test     = "StringEquals"
-      variable = "${replace(var.k8s_openid_provider_url, "https://", "")}:sub"
+      variable = "${replace(var.openid_provider_url, "https://", "")}:sub"
       values   = ["system:serviceaccount:${var.layer_name}:${var.module_name}"]
     }
 
     principals {
-      identifiers = [var.k8s_openid_provider_arn]
+      identifiers = [var.openid_provider_arn]
       type        = "Federated"
     }
   }

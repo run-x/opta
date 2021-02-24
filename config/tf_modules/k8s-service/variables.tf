@@ -6,25 +6,27 @@ locals {
   path_prefix = length(local.public_uri_parts) > 1 ? "/${join("/",slice(local.public_uri_parts, 1, length(local.public_uri_parts)))}" : "/"
 }
 
-variable "k8s_openid_provider_url" {
+variable "openid_provider_url" {
   type = string
 }
 
-variable "k8s_openid_provider_arn" {
+variable "openid_provider_arn" {
   type = string
 }
 
 
-variable "name" {
-  description = "Name of the k8s service"
+variable "env_name" {
+  description = "Env name"
   type = string
 }
 
 variable "layer_name" {
-  type = string
+  description = "Layer name"
+  type        = string
 }
 
 variable "module_name" {
+  description = "Module name"
   type = string
 }
 
@@ -36,7 +38,6 @@ variable "port" {
 variable "image" {
   description = "External Image to be deployed"
   type = string
-  default = null
 }
 
 variable "tag" {
@@ -45,13 +46,13 @@ variable "tag" {
   default = null
 }
 
-variable "min_autoscaling" {
+variable "min_containers" {
   description = "Min value for HPA autoscaling"
   type = string
   default = 1
 }
 
-variable "max_autoscaling" {
+variable "max_containers" {
   description = "Max value for HPA autoscaling"
   type = string
   default = 3

@@ -1,16 +1,19 @@
 import json
 import os
 
+import pytest
 from pytest_mock import MockFixture
 
 from opta.core.generator import gen_all
-from tests.fixtures.apply import APPLY_WITHOUT_ORG_ID, BASIC_APPLY
+from opta.exceptions import UserErrors
+from opta.layer import Layer
+from tests.fixtures.apply import BASIC_APPLY
 
 
 class TestGenerator:
     def test_gen(self, mocker: MockFixture) -> None:
-        mocker.patch("opta.core.generator.os.path.exists")
-        mocker.patch("opta.core.generator.open")
+        mocker.patch("opta.layer.open")
+        mocker.patch("opta.layer.os.path.exists")
 
         test_gen_file_path = "pytest_main.tf.json"
         mocker.patch("opta.core.generator.TF_FILE_PATH", test_gen_file_path)
@@ -19,14 +22,20 @@ class TestGenerator:
         # Make sure the expected terraform file contents are generated
         # from the opta config
         opta_config, gen_tf_file = BASIC_APPLY
-        mocker.patch("opta.core.generator.yaml.load", return_value=opta_config)
-        gen_all(config="", env=None)
+        opta_config = opta_config.copy()
+        mocker.patch("opta.layer.yaml.load", return_value=opta_config)
+        layer = Layer.load_from_yaml("", None)
+        gen_all(layer)
+        print(json.load(open(test_gen_file_path)))
         assert gen_tf_file == json.load(open(test_gen_file_path))
 
-        # Make sure generation still works even when org_id is not passed.
-        opta_config, gen_tf_file = APPLY_WITHOUT_ORG_ID
-        mocker.patch("opta.core.generator.yaml.load", return_value=opta_config)
-        gen_all(config="", env=None)
-        assert gen_tf_file == json.load(open(test_gen_file_path))
+        # Make sure generation does not work without org name.
+
+        opta_config, _ = BASIC_APPLY
+        opta_config = opta_config.copy()
+        del opta_config["org_name"]
+        mocker.patch("opta.layer.yaml.load", return_value=opta_config)
+        with pytest.raises(UserErrors):
+            Layer.load_from_yaml("", None)
 
         os.remove(test_gen_file_path)

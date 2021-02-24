@@ -32,7 +32,7 @@ class TestSecretManager:
             ),
         )
 
-        assert target_module.key == "app"
+        assert target_module.name == "app"
 
     def test_get_module_no_secret(self):
         with pytest.raises(Exception) as excinfo:
