@@ -6,13 +6,13 @@ from logging.handlers import QueueHandler, QueueListener
 from queue import Queue
 from shutil import which
 from textwrap import dedent
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 from opta.datadog_logging import DatadogLogHandler
 from opta.special_formatter import PartialFormatter
 
 
-def initialize_logger() -> tuple[Logger, QueueListener, DatadogLogHandler]:
+def initialize_logger() -> Tuple[Logger, QueueListener, DatadogLogHandler]:
     logger = logging.getLogger("opta")
     if os.environ.get("OPTA_DEBUG") is None:
         logger.setLevel(logging.INFO)

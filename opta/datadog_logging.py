@@ -3,7 +3,7 @@ import os
 import platform
 import time
 from logging import NOTSET, Handler, LogRecord
-from typing import Any
+from typing import Any, Dict, List
 
 from getmac import get_mac_address
 from git.config import GitConfigParser
@@ -17,7 +17,7 @@ DEFAULT_CACHE_SIZE = 10
 
 class DatadogLogHandler(Handler):
     def __init__(self, level: int = NOTSET, cache_size: int = DEFAULT_CACHE_SIZE):
-        self.cache: list[dict[str, Any]] = []
+        self.cache: List[Dict[str, Any]] = []
         self.cache_size = cache_size
         self.user_id = GitConfigParser().get_value("user", "email", "no_user")
         self.device_id = get_mac_address()
@@ -26,7 +26,7 @@ class DatadogLogHandler(Handler):
         self.os_version = platform.version()
         super(DatadogLogHandler, self).__init__(level)
 
-    def transform_record(self, record: LogRecord) -> dict[str, Any]:
+    def transform_record(self, record: LogRecord) -> Dict[str, Any]:
         msg = self.format(record)
         return {
             "date": int(time.time() * 1000),
