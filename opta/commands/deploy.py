@@ -16,7 +16,7 @@ from opta.commands.push import get_push_tag, push
     help="The image tag associated with your docker container. Defaults to your local image tag.",
 )
 def deploy(image: str, config: str, env: Optional[str], tag: Optional[str]) -> None:
-    push(image, config, env, tag)
+    push(image=image, config=config, env=env, tag=tag)
     image_tag = get_push_tag(image, tag)
     apply(
         config=config,
