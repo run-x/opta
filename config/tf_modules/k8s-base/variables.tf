@@ -1,5 +1,15 @@
 locals {
-  target_ports = var.cert_arn == "" ? { http: "http" } : { http: "http", https: "http" }
+  target_ports = var.cert_arn == "" ? { http: "http" } : { http: "http", https: "special" }
+  container_ports = var.cert_arn == "" ? { http: 80, https: 443 } : { http: 80, https: 443, special: 8000 }
+  config = var.cert_arn == "" ? { ssl-redirect: false } : {
+    ssl-redirect: false
+    server-snippet: <<EOF
+          listen 8000;
+          if ( $server_port = 80 ) {
+             return 308 https://$host$request_uri;
+          }
+          EOF
+  }
 }
 
 data "aws_eks_cluster" "main" {
