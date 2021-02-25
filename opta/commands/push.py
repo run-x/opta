@@ -12,6 +12,15 @@ from opta.nice_subprocess import nice_run
 from opta.utils import is_tool
 
 
+def get_push_tag(local_image: str, tag_override: Optional[str]) -> str:
+    if ":" not in local_image:
+        raise Exception(
+            f"Unexpected image name {local_image}: your image_name must be of the format <IMAGE>:<TAG>."
+        )
+    local_image_tag = local_image.split(":")[1]
+    return tag_override or local_image_tag
+
+
 def get_registry_url() -> str:
     outputs = get_terraform_outputs()
     if "docker_repo_url" not in outputs:
@@ -50,12 +59,7 @@ def push_to_docker(
     registry_url: str,
     image_tag_override: Optional[str],
 ) -> None:
-    if ":" not in local_image:
-        raise Exception(
-            f"Unexpected image name {local_image}: your image_name must be of the format <IMAGE>:<TAG>."
-        )
-    local_image_tag = local_image.split(":")[1]
-    image_tag = image_tag_override or local_image_tag
+    image_tag = get_push_tag(local_image, image_tag_override)
     remote_image_name = f"{registry_url}:{image_tag}"
     nice_run(
         ["docker", "login", registry_url, "--username", username, "--password-stdin"],
