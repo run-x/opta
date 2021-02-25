@@ -6,9 +6,10 @@ from kubernetes.client import CoreV1Api
 from kubernetes.config import load_kube_config
 
 from opta.amplitude import amplitude_client
+from opta.core.generator import gen_all
+from opta.core.kubernetes import configure_kubectl
 from opta.exceptions import UserErrors
 from opta.layer import Layer
-from opta.module import Module
 
 
 @click.group()
@@ -17,28 +18,19 @@ def secret() -> None:
     pass
 
 
-def get_module(module_name: str, env: Optional[str], config: str) -> Module:
-    layer = Layer.load_from_yaml(config, env)
-    target_module = layer.get_module(module_name)
-
-    if target_module is None:
-        raise UserErrors(f"Invalid target module {module_name}. Not found in layer")
-    else:
-        return target_module
-
-
 @secret.command()
-@click.argument("module_name")
 @click.argument("secret")
 @click.option("--env", default=None, help="The env to use when loading the config file")
 @click.option("--config", default="opta.yml", help="Opta config file", show_default=True)
-def view(module_name: str, secret: str, env: Optional[str], config: str) -> None:
+def view(secret: str, env: Optional[str], config: str) -> None:
     """View a given secret of a k8s service"""
-    target_module = get_module(module_name, env, config)
+    layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(amplitude_client.VIEW_SECRET_EVENT)
+    gen_all(layer)
+    configure_kubectl(layer)
     load_kube_config()
     v1 = CoreV1Api()
-    api_response = v1.read_namespaced_secret("secret", target_module.layer_name)
+    api_response = v1.read_namespaced_secret("secret", layer.name)
     if secret not in api_response.data:
         raise UserErrors(
             f"Secret {secret} was not specified for the app. You sure you set it in your yaml?"
@@ -48,38 +40,37 @@ def view(module_name: str, secret: str, env: Optional[str], config: str) -> None
 
 
 @secret.command(name="list")
-@click.argument("module_name")
 @click.option("--env", default=None, help="The env to use when loading the config file")
 @click.option("--config", default="opta.yml", help="Opta config file", show_default=True)
-def list_command(module_name: str, env: Optional[str], config: str) -> None:
+def list_command(env: Optional[str], config: str) -> None:
     """List the secrets setup for the given k8s service module"""
-    target_module = get_module(module_name, env, config)
+    layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(amplitude_client.LIST_SECRETS_EVENT)
-
+    gen_all(layer)
+    configure_kubectl(layer)
     load_kube_config()
     v1 = CoreV1Api()
-    api_response = v1.read_namespaced_secret("secret", target_module.layer_name)
+    api_response = v1.read_namespaced_secret("secret", layer.name)
 
     for key in api_response.data:
         print(key)
 
 
 @secret.command()
-@click.argument("module_name")
 @click.argument("secret")
 @click.argument("value")
 @click.option("--env", default=None, help="The env to use when loading the config file")
 @click.option("--config", default="opta.yml", help="Opta config file", show_default=True)
-def update(
-    module_name: str, secret: str, value: str, env: Optional[str], config: str
-) -> None:
+def update(secret: str, value: str, env: Optional[str], config: str) -> None:
     """Update a given secret of a k8s service with a new value"""
-    target_module = get_module(module_name, env, config)
+    layer = Layer.load_from_yaml(config, env)
+    gen_all(layer)
+    configure_kubectl(layer)
     amplitude_client.send_event(amplitude_client.UPDATE_SECRET_EVENT)
     secret_value = base64.b64encode(value.encode("utf-8")).decode("utf-8")
     patch = [{"op": "replace", "path": f"/data/{secret}", "value": secret_value}]
     load_kube_config()
     v1 = CoreV1Api()
-    v1.patch_namespaced_secret("secret", target_module.layer_name, patch)
+    v1.patch_namespaced_secret("secret", layer.name, patch)
 
     print("Success")
