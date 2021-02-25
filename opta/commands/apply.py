@@ -49,6 +49,7 @@ def apply(
     image_tag: str,
     test: bool,
 ) -> None:
+    """Apply your opta config file to your infrastructure!"""
     _apply(config, env, refresh, max_module, image_tag, test)
 
 
@@ -60,7 +61,6 @@ def _apply(
     image_tag: str,
     test: bool,
 ) -> None:
-    """Apply your opta config file to your infrastructure!"""
     if not is_tool("terraform"):
         raise UserErrors("Please install terraform on your machine")
     amplitude_client.send_event(amplitude_client.START_GEN_EVENT)

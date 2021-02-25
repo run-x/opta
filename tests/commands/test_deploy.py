@@ -5,8 +5,8 @@ from opta.cli import cli
 
 
 def test_deploy_basic(mocker: MockFixture) -> None:
-    mock_push = mocker.patch("opta.commands.deploy.push")
-    mock_apply = mocker.patch("opta.commands.deploy.apply")
+    mock_push = mocker.patch("opta.commands.deploy._push")
+    mock_apply = mocker.patch("opta.commands.deploy._apply")
     runner = CliRunner()
     result = runner.invoke(cli, ["deploy", "local_image:local_tag"])
 
@@ -25,8 +25,8 @@ def test_deploy_basic(mocker: MockFixture) -> None:
 
 
 def test_deploy_all_flags(mocker: MockFixture) -> None:
-    mock_push = mocker.patch("opta.commands.deploy.push")
-    mock_apply = mocker.patch("opta.commands.deploy.apply")
+    mock_push = mocker.patch("opta.commands.deploy._push")
+    mock_apply = mocker.patch("opta.commands.deploy._apply")
     runner = CliRunner()
     result = runner.invoke(
         cli,
