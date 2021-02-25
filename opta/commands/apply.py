@@ -49,7 +49,7 @@ def apply(
     image_tag: str,
     test: bool,
 ) -> None:
-    """Apply your opta config file to your infrastructure!"""
+    """Initialize your environment or service to match the config file"""
     _apply(config, env, refresh, max_module, image_tag, test)
 
 
