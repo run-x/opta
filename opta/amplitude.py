@@ -3,14 +3,13 @@ import platform
 import random
 import string
 import sys
-import time
 from typing import Optional
 
 from getmac import get_mac_address
 from git.config import GitConfigParser
 from requests import codes, post
 
-from opta.constants import VERSION
+from opta.constants import SESSION_ID, VERSION
 from opta.utils import logger, safe_run
 
 
@@ -36,7 +35,6 @@ class AmplitudeClient:
         self.api_key = "751db5fc75ff34f08a83381f4d54ead6"
         self.user_id = GitConfigParser().get_value("user", "email", "no_user")
         self.device_id = get_mac_address()
-        self.session_id = int(time.time() * 1000)
         self.os_name = os.name
         self.platform = platform.system()
         self.os_version = platform.version()
@@ -70,7 +68,7 @@ class AmplitudeClient:
                     "os_name": self.os_name,
                     "os_version": self.os_version,
                     "insert_id": insert_id,
-                    "session_id": self.session_id,
+                    "session_id": SESSION_ID,
                 }
             ],
         }
