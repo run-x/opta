@@ -113,6 +113,13 @@ class Terraform:
             try:
                 s3.get_bucket_encryption(Bucket=bucket_name,)
             except ClientError as e:
+                if e.response["Error"]["Code"] == "AccessDenied":
+                    raise UserErrors(
+                        f"We were unable to access the S3 bucket, {bucket_name} on your AWS account (opta needs this to store state)."
+                        "Usually, it means that the name in your opta.yml is not unique. Try updating it to something else."
+                        "It could also mean that your AWS account has insufficient permissions."
+                        "Please fix these issues and try again!"
+                    )
                 if e.response["Error"]["Code"] != "NoSuchBucket":
                     raise UserErrors(
                         "When trying to determine the status of the state bucket, we got an "

@@ -92,13 +92,13 @@ jobs:
           source $(pipenv --venv)/bin/activate
           export PYTHONPATH=$(pwd)
           cd test-service
-          python ../opta/cli.py output --env runx-staging
+          python ../opta/cli.py output --env staging
       - name: Test apply command
         run: |
           source $(pipenv --venv)/bin/activate
           export PYTHONPATH=$(pwd)
           cd test-service
-          python ../opta/cli.py apply --env runx-staging --test
+          python ../opta/cli.py apply --env staging --test
 
   deploy_test_service:
     if: ${{ github.ref == 'refs/heads/main' }}
