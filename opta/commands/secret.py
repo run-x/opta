@@ -8,7 +8,6 @@ from kubernetes.config import load_kube_config
 from opta.amplitude import amplitude_client
 from opta.exceptions import UserErrors
 from opta.layer import Layer
-from opta.module import Module
 
 
 @click.group()
@@ -16,11 +15,12 @@ def secret() -> None:
     """Commands for manipulating secrets for a k8s service"""
     pass
 
+
 @secret.command()
 @click.argument("secret")
 @click.option("--env", default=None, help="The env to use when loading the config file")
 @click.option("--config", default="opta.yml", help="Opta config file", show_default=True)
-def view(module_name: str, secret: str, env: Optional[str], config: str) -> None:
+def view(secret: str, env: Optional[str], config: str) -> None:
     """View a given secret of a k8s service"""
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(amplitude_client.VIEW_SECRET_EVENT)
@@ -36,10 +36,9 @@ def view(module_name: str, secret: str, env: Optional[str], config: str) -> None
 
 
 @secret.command(name="list")
-@click.argument("module_name")
 @click.option("--env", default=None, help="The env to use when loading the config file")
 @click.option("--config", default="opta.yml", help="Opta config file", show_default=True)
-def list_command(module_name: str, env: Optional[str], config: str) -> None:
+def list_command(env: Optional[str], config: str) -> None:
     """List the secrets setup for the given k8s service module"""
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(amplitude_client.LIST_SECRETS_EVENT)
@@ -53,14 +52,11 @@ def list_command(module_name: str, env: Optional[str], config: str) -> None:
 
 
 @secret.command()
-@click.argument("module_name")
 @click.argument("secret")
 @click.argument("value")
 @click.option("--env", default=None, help="The env to use when loading the config file")
 @click.option("--config", default="opta.yml", help="Opta config file", show_default=True)
-def update(
-    module_name: str, secret: str, value: str, env: Optional[str], config: str
-) -> None:
+def update(secret: str, value: str, env: Optional[str], config: str) -> None:
     """Update a given secret of a k8s service with a new value"""
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(amplitude_client.UPDATE_SECRET_EVENT)
