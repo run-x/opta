@@ -10,6 +10,7 @@ from opta.layer import Layer
 from opta.utils import is_tool
 
 
+@click.command()
 @click.option("--config", default="opta.yml", help="Opta config file", show_default=True)
 @click.option(
     "--env",

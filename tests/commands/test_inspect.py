@@ -42,49 +42,48 @@ TERRAFORM_STATE = {
 }
 
 
-class TestInspect:
-    def test_inspect(self, mocker: MockFixture) -> None:
-        # Mock terraform init
-        mocker.patch("opta.commands.inspect_cmd.Terraform.init")
-        # Mock tf file generation
-        mocked_layer_class = mocker.patch("opta.commands.inspect_cmd.Layer")
-        mocked_layer = mocker.Mock(spec=Layer)
-        mocked_layer_class.load_from_yaml.return_value = mocked_layer
-        mocker.patch("opta.commands.inspect_cmd.gen_all")
-        # Mock that the terraform CLI tool exists.
-        mocker.patch("opta.commands.inspect_cmd.is_tool", return_value=True)
-        # Mock the inspect config
-        mocker.patch("opta.module.REGISTRY", REGISTRY)
-        # Mock fetching the terraform state
-        mocker.patch(
-            "opta.commands.inspect_cmd.Terraform.get_state", return_value=TERRAFORM_STATE
-        )
-        # Mock reading the provider's AWS region from the main tf file
-        mocker.patch(
-            "opta.commands.inspect_cmd.InspectCommand._get_aws_region",
-            return_value="us-east-1",
-        )
+def test_inspect(mocker: MockFixture) -> None:
+    # Mock terraform init
+    mocker.patch("opta.commands.inspect_cmd.Terraform.init")
+    # Mock tf file generation
+    mocked_layer_class = mocker.patch("opta.commands.inspect_cmd.Layer")
+    mocked_layer = mocker.Mock(spec=Layer)
+    mocked_layer_class.load_from_yaml.return_value = mocked_layer
+    mocker.patch("opta.commands.inspect_cmd.gen_all")
+    # Mock that the terraform CLI tool exists.
+    mocker.patch("opta.commands.inspect_cmd.is_tool", return_value=True)
+    # Mock the inspect config
+    mocker.patch("opta.module.REGISTRY", REGISTRY)
+    # Mock fetching the terraform state
+    mocker.patch(
+        "opta.commands.inspect_cmd.Terraform.get_state", return_value=TERRAFORM_STATE
+    )
+    # Mock reading the provider's AWS region from the main tf file
+    mocker.patch(
+        "opta.commands.inspect_cmd.InspectCommand._get_aws_region",
+        return_value="us-east-1",
+    )
 
-        # Mock reading opta resources.
-        fake_module = Module(
-            data={"type": "fake-module", "name": "testmodule"}, layer_name=""
-        )
-        fake_resource = Resource(fake_module, "test_resource", "test")
-        mocker.patch(
-            "opta.commands.inspect_cmd.InspectCommand._get_opta_config_terraform_resources",
-            return_value=[fake_resource],
-        )
+    # Mock reading opta resources.
+    fake_module = Module(
+        data={"type": "fake-module", "name": "testmodule"}, layer_name=""
+    )
+    fake_resource = Resource(fake_module, "test_resource", "test")
+    mocker.patch(
+        "opta.commands.inspect_cmd.InspectCommand._get_opta_config_terraform_resources",
+        return_value=[fake_resource],
+    )
 
-        runner = CliRunner()
-        result = runner.invoke(inspect)
-        print(result.exception)
-        assert result.exit_code == 0
-        # Using split to compare without whitespaces
-        print(result.output)
-        assert (
-            result.output.split()
-            == """
-        NAME          DESCRIPTION             LINK
-        Test resource This is a test resource https://console.aws.amazon.com/test/foobar?region=us-east-1
-        """.split()
-        )
+    runner = CliRunner()
+    result = runner.invoke(inspect)
+    print(result.exception)
+    assert result.exit_code == 0
+    # Using split to compare without whitespaces
+    print(result.output)
+    assert (
+        result.output.split()
+        == """
+    NAME          DESCRIPTION             LINK
+    Test resource This is a test resource https://console.aws.amazon.com/test/foobar?region=us-east-1
+    """.split()
+    )
