@@ -79,6 +79,10 @@ def push_to_docker(
     help="The image tag associated with your docker container. Defaults to your local image tag.",
 )
 def push(image: str, config: str, env: Optional[str], tag: Optional[str]) -> None:
+    _push(image, config, env, tag)
+
+
+def _push(image: str, config: str, env: Optional[str], tag: Optional[str]) -> None:
     if not is_tool("docker"):
         raise Exception("Please install docker on your machine")
     layer = Layer.load_from_yaml(config, env)

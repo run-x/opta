@@ -49,6 +49,17 @@ def apply(
     image_tag: str,
     test: bool,
 ) -> None:
+    _apply(config, env, refresh, max_module, image_tag, test)
+
+
+def _apply(
+    config: str,
+    env: Optional[str],
+    refresh: bool,
+    max_module: Optional[int],
+    image_tag: str,
+    test: bool,
+) -> None:
     """Apply your opta config file to your infrastructure!"""
     if not is_tool("terraform"):
         raise UserErrors("Please install terraform on your machine")
