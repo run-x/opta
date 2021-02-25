@@ -20,7 +20,7 @@ from opta.core.generator import gen
 from opta.core.terraform import Terraform
 from opta.exceptions import UserErrors
 from opta.layer import Layer
-from opta.utils import is_tool, logger
+from opta.utils import dd_handler, dd_listener, is_tool, logger
 
 TF_STATE_FILE = "terraform.tfstate"
 TF_STATE_BACKUP_FILE = "terraform.tfstate.backup"
@@ -164,6 +164,13 @@ if __name__ == "__main__":
         if e.stderr is not None:
             logger.error(e.stderr.decode("utf-8"))
         sys.exit(1)
+    except UserErrors as e:
+        logger.debug(e)
+        sys.exit(1)
+    except Exception as e:
+        logger.exception(e)
     finally:
+        dd_listener.stop()
+        dd_handler.flush()
         if os.environ.get("OPTA_DEBUG") is None:
             _cleanup()
