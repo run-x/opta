@@ -113,6 +113,14 @@ class Terraform:
             try:
                 s3.get_bucket_encryption(Bucket=bucket_name,)
             except ClientError as e:
+                if e.response["Error"]["Code"] == "AccessDenied":
+                    raise UserErrors(
+                        f"The AWS S3 bucket, {bucket_name} we were trying to access "
+                        "cause it'd hold the state could not be reached cause our access"
+                        "was denied. This means that either the creds you're running with "
+                        "aren't giving you the read+write permissions or that this bucket "
+                        "already exists and this AWS account doesn't own it."
+                    )
                 if e.response["Error"]["Code"] != "NoSuchBucket":
                     raise UserErrors(
                         "When trying to determine the status of the state bucket, we got an "
