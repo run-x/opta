@@ -8,20 +8,24 @@ from shutil import which
 from textwrap import dedent
 from typing import Any, Dict, List, Tuple
 
+from opta.constants import VERSION
 from opta.datadog_logging import DatadogLogHandler
 from opta.special_formatter import PartialFormatter
 
 
 def initialize_logger() -> Tuple[Logger, QueueListener, DatadogLogHandler]:
     logger = logging.getLogger("opta")
-    if os.environ.get("OPTA_DEBUG") is None:
-        logger.setLevel(logging.INFO)
-    else:
-        logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.DEBUG)
     ch = logging.StreamHandler(sys.stdout)
+    if os.environ.get("OPTA_DEBUG") is None:
+        ch.setLevel(logging.INFO)
+    else:
+        ch.setLevel(logging.DEBUG)
     dd_queue: Queue = Queue(-1)
     queue_handler = QueueHandler(dd_queue)
+    queue_handler.setLevel(logging.DEBUG)
     dd_handler = DatadogLogHandler()
+    dd_handler.setLevel(logging.DEBUG)
     dd_listener = QueueListener(dd_queue, dd_handler)
     formatter = logging.Formatter("%(levelname)s: %(message)s")
     ch.setFormatter(formatter)
@@ -32,9 +36,10 @@ def initialize_logger() -> Tuple[Logger, QueueListener, DatadogLogHandler]:
     return logger, dd_listener, dd_handler
 
 
-# Use logger when it's not "essential" output
-# Use print for "essential" output
 logger, dd_listener, dd_handler = initialize_logger()
+# Don't send logs to datadog during tests
+if hasattr(sys, "_called_from_test") or VERSION == "dev":
+    dd_handler.setLevel(logging.CRITICAL)
 
 fmt = PartialFormatter("")
 

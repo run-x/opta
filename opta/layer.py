@@ -76,6 +76,7 @@ class Layer:
             conf = yaml.load(open(os.path.join(t, file_path)), Loader=yaml.Loader)
             shutil.rmtree(t)
         elif path.exists(config):
+            logger.debug(f"Loaded the following configfile:\n{open(config).read()}")
             conf = yaml.load(open(config), Loader=yaml.Loader)
         else:
             raise UserErrors(f"File {config} not found")
