@@ -12,6 +12,9 @@ from opta.layer import Layer
 
 class TestSecretManager:
     def test_view(self, mocker: MockFixture):  # noqa
+        mocker.patch("opta.commands.secret.gen_all")
+        mocker.patch("opta.commands.secret.configure_kubectl")
+
         mocked_load_layer = mocker.patch("opta.commands.secret.Layer.load_from_yaml")
         mocked_layer = mocker.Mock(spec=Layer)
         mocked_layer.name = "dummy_layer"
@@ -50,6 +53,8 @@ class TestSecretManager:
 
     def test_list_secrets(self, mocker: MockFixture):  # noqa
         mocked_print = mocker.patch("builtins.print")
+        mocker.patch("opta.commands.secret.gen_all")
+        mocker.patch("opta.commands.secret.configure_kubectl")
 
         mocked_load_layer = mocker.patch("opta.commands.secret.Layer.load_from_yaml")
         mocked_layer = mocker.Mock(spec=Layer)
@@ -89,6 +94,8 @@ class TestSecretManager:
         mocked_print.assert_has_calls([mocker.call("ALGOLIA_WRITE_KEY")])
 
     def test_update(self, mocker: MockFixture):  # noqa
+        mocker.patch("opta.commands.secret.gen_all")
+        mocker.patch("opta.commands.secret.configure_kubectl")
         mocked_load_layer = mocker.patch("opta.commands.secret.Layer.load_from_yaml")
         mocked_layer = mocker.Mock(spec=Layer)
         mocked_layer.name = "dummy_layer"
