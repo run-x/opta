@@ -30,7 +30,7 @@ variable "module_name" {
 
 variable "max_nodes" {
   type    = number
-  default = 5
+  default = 15
 }
 
 variable "min_nodes" {
