@@ -115,11 +115,10 @@ class Terraform:
             except ClientError as e:
                 if e.response["Error"]["Code"] == "AccessDenied":
                     raise UserErrors(
-                        f"The AWS S3 bucket, {bucket_name} we were trying to access "
-                        "cause it'd hold the state could not be reached cause our access"
-                        "was denied. This means that either the creds you're running with "
-                        "aren't giving you the read+write permissions or that this bucket "
-                        "already exists and this AWS account doesn't own it."
+                        f"We were unable to access the S3 bucket, {bucket_name} on your AWS account (opta needs this to store state)."
+                        "Usually, it means that the name in your opta.yml is not unique. Try updating it to something else."
+                        "It could also mean that your AWS account has insufficient permissions."
+                        "Please fix these issues and try again!"
                     )
                 if e.response["Error"]["Code"] != "NoSuchBucket":
                     raise UserErrors(
