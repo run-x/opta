@@ -59,6 +59,7 @@ resource "helm_release" "ingress-nginx" {
         service: {
           loadBalancerSourceRanges: ["0.0.0.0/0"]
           externalTrafficPolicy: "Local"
+          enableHttps: var.cert_arn == "" ? false : true
           targetPorts: local.target_ports
           annotations: {
             "service.beta.kubernetes.io/aws-load-balancer-type": "nlb"
