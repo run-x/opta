@@ -80,14 +80,12 @@ variable "readiness_probe_path" {
   default = "/healthcheck"
 }
 
-variable "cpu_request" {
-  type = number
-  default = 100
-}
-
-variable "memory_request" {
-  type = number
-  default = 128
+variable "resource_request" {
+  type = map
+  default = {
+    cpu: 100
+    memory: 128
+  }
 }
 
 variable "env_vars" {
