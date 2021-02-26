@@ -86,7 +86,7 @@ class Layer:
     def load_from_dict(cls, conf: Dict[Any, Any], env: Optional[str]) -> Layer:
         modules_data = conf.get("modules", [])
         environments = conf.pop("environments", None)
-        name = conf.pop("name")
+        name = conf.pop("name", None)
         if name is None:
             raise UserErrors("Config must have name")
         org_name = conf.pop("org_name", None)
