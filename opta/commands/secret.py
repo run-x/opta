@@ -20,8 +20,12 @@ def secret() -> None:
 
 @secret.command()
 @click.argument("secret")
-@click.option("--env", default=None, help="The env to use when loading the config file")
-@click.option("--config", default="opta.yml", help="Opta config file", show_default=True)
+@click.option(
+    "-e", "--env", default=None, help="The env to use when loading the config file"
+)
+@click.option(
+    "-c", "--config", default="opta.yml", help="Opta config file", show_default=True
+)
 def view(secret: str, env: Optional[str], config: str) -> None:
     """View a given secret of a k8s service"""
     layer = Layer.load_from_yaml(config, env)

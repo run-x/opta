@@ -12,8 +12,12 @@ from opta.utils import column_print, deep_merge, is_tool
 
 
 @click.command()
-@click.option("--config", default="opta.yml", help="Opta config file", show_default=True)
-@click.option("--env", default=None, help="The env to use when loading the config file")
+@click.option(
+    "-c", "--config", default="opta.yml", help="Opta config file", show_default=True
+)
+@click.option(
+    "-e", "--env", default=None, help="The env to use when loading the config file"
+)
 def inspect(config: str, env: Optional[str]) -> None:
     """ Displays important resources and AWS/Datadog links to them """
     layer = Layer.load_from_yaml(config, env)

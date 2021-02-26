@@ -11,8 +11,11 @@ from opta.utils import is_tool
 
 
 @click.command()
-@click.option("--config", default="opta.yml", help="Opta config file", show_default=True)
 @click.option(
+    "-c", "--config", default="opta.yml", help="Opta config file", show_default=True
+)
+@click.option(
+    "-e",
     "--env",
     default=None,
     help="The env to use when loading the config file",

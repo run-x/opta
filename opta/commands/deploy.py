@@ -7,10 +7,13 @@ from opta.commands.push import _push, get_push_tag
 
 
 @click.command()
-@click.argument("image")
-@click.option("--config", default="opta.yml", help="Opta config file.")
-@click.option("--env", default=None, help="The env to use when loading the config file.")
+@click.option("-i", "--image", help="Your local image in the for myimage:tag")
+@click.option("-c", "--config", default="opta.yml", help="Opta config file.")
 @click.option(
+    "-e", "--env", default=None, help="The env to use when loading the config file."
+)
+@click.option(
+    "-t",
     "--tag",
     default=None,
     help="The image tag associated with your docker container. Defaults to your local image tag.",

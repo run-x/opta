@@ -71,8 +71,10 @@ def push_to_docker(
 
 @click.command()
 @click.argument("image")
-@click.option("--config", default="opta.yml", help="Opta config file.")
-@click.option("--env", default=None, help="The env to use when loading the config file.")
+@click.option("-c", "--config", default="opta.yml", help="Opta config file.")
+@click.option(
+    "-e", "--env", default=None, help="The env to use when loading the config file."
+)
 @click.option(
     "--tag",
     default=None,
