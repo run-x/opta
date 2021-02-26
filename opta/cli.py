@@ -80,7 +80,7 @@ if __name__ == "__main__":
             logger.error(e.stderr.decode("utf-8"))
         sys.exit(1)
     except UserErrors as e:
-        logger.debug(e)
+        logger.error(e)
         sys.exit(1)
     except Exception as e:
         logger.exception(e)

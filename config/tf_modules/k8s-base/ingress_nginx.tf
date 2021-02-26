@@ -1,3 +1,4 @@
+// NOTE: following this solution for http -> https redirect: https://github.com/kubernetes/ingress-nginx/issues/2724#issuecomment-593769295
 resource "helm_release" "ingress-nginx" {
   chart = "ingress-nginx"
   name = "ingress-nginx"
@@ -9,9 +10,7 @@ resource "helm_release" "ingress-nginx" {
   values = [
     yamlencode({
       controller: {
-        config: {
-          "use-proxy-protocol": false  # TODO: set this to true and figure out how to play nicely w/ NLB
-        }
+        config: local.config
         podAnnotations: {
           "linkerd.io/inject": "enabled"
         }
@@ -56,12 +55,14 @@ resource "helm_release" "ingress-nginx" {
             ]
           }
         }
+        containerPort: local.container_ports
         service: {
           loadBalancerSourceRanges: ["0.0.0.0/0"]
           externalTrafficPolicy: "Local"
           enableHttps: var.cert_arn == "" ? false : true
           targetPorts: local.target_ports
           annotations: {
+            "service.beta.kubernetes.io/aws-load-balancer-backend-protocol": "tcp"
             "service.beta.kubernetes.io/aws-load-balancer-type": "nlb"
             "service.beta.kubernetes.io/aws-load-balancer-ssl-ports": var.cert_arn == "" ? "" : "https"
             "service.beta.kubernetes.io/aws-load-balancer-ssl-cert": var.cert_arn
