@@ -48,3 +48,8 @@ variable "openid_provider_url" {
 variable "openid_provider_arn" {
   type = string
 }
+
+variable "high_availability" {
+  type = bool
+  default = true
+}
