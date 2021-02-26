@@ -18,7 +18,7 @@ class TestK8sServiceProcessor:
             ),
             None,
         )
-        app_module = layer.get_module("app", 5)
+        app_module = layer.get_module("app", 6)
         mocked_process = mocker.patch(
             "opta.module_processors.k8s_service.K8sModuleProcessor.process"
         )
@@ -63,7 +63,12 @@ class TestK8sServiceProcessor:
                         "s3:ListBucket",
                     ],
                     "Effect": "Allow",
-                    "Resource": ["arn:aws:s3:::bucket2", "arn:aws:s3:::bucket2/*"],
+                    "Resource": [
+                        "arn:aws:s3:::bucket2",
+                        "arn:aws:s3:::bucket3",
+                        "arn:aws:s3:::bucket2/*",
+                        "arn:aws:s3:::bucket3/*",
+                    ],
                 },
             ],
         }
@@ -77,7 +82,7 @@ class TestK8sServiceProcessor:
             ),
             None,
         )
-        app_module = layer.get_module("app", 5)
+        app_module = layer.get_module("app", 6)
         app_module.data["links"] = []
         app_module.data["links"].append({"database": "read"})
         with pytest.raises(Exception):
@@ -92,7 +97,7 @@ class TestK8sServiceProcessor:
             ),
             None,
         )
-        app_module = layer.get_module("app", 5)
+        app_module = layer.get_module("app", 6)
         app_module.data["links"] = []
         app_module.data["links"].append({"redis": "read"})
         with pytest.raises(Exception):
@@ -107,11 +112,11 @@ class TestK8sServiceProcessor:
             ),
             None,
         )
-        app_module = layer.get_module("app", 5)
+        app_module = layer.get_module("app", 6)
         app_module.data["links"] = []
         app_module.data["links"].append({"docdb": "read"})
         with pytest.raises(Exception):
-            K8sServiceProcessor(app_module, layer).process(5)
+            K8sServiceProcessor(app_module, layer).process(6)
 
     def test_bad_s3_permission(self):
         layer = Layer.load_from_yaml(
@@ -122,8 +127,8 @@ class TestK8sServiceProcessor:
             ),
             None,
         )
-        app_module = layer.get_module("app", 5)
+        app_module = layer.get_module("app", 6)
         app_module.data["links"] = []
         app_module.data["links"].append({"bucket1": "blah"})
         with pytest.raises(Exception):
-            K8sServiceProcessor(app_module, layer).process(5)
+            K8sServiceProcessor(app_module, layer).process(6)

@@ -21,6 +21,12 @@ class AmplitudeClient:
     PLAN_EVENT = "PLAN"
     APPLY_EVENT = "APPLY"
     DEBUGGER_EVENT = "DEBUGGER_START"
+    SHELL_EVENT = "SHELL"
+    DEPLOY_EVENT = "DEPLOY"
+    PUSH_EVENT = "PUSH"
+    INSPECT_EVENT = "INSPECT"
+    CONFIGURE_KUBECTL_EVENT = "CONFIGURE_KUBECTL"
+    VIEW_OUTPUT_EVENT = "VIEW_OUTPUT"
     VALID_EVENTS = [
         UPDATE_SECRET_EVENT,
         VIEW_SECRET_EVENT,
@@ -29,6 +35,12 @@ class AmplitudeClient:
         PLAN_EVENT,
         DEBUGGER_EVENT,
         LIST_SECRETS_EVENT,
+        SHELL_EVENT,
+        DEPLOY_EVENT,
+        PUSH_EVENT,
+        INSPECT_EVENT,
+        CONFIGURE_KUBECTL_EVENT,
+        VIEW_OUTPUT_EVENT,
     ]
 
     def __init__(self) -> None:

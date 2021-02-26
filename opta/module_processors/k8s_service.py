@@ -186,6 +186,9 @@ class K8sServiceProcessor(K8sModuleProcessor):
         self, linked_module: "Module", link_permissions: List[str]
     ) -> None:
         bucket_name = linked_module.data["bucket_name"]
+        # If not specified, bucket should get write permissions
+        if link_permissions is None or len(link_permissions) == 0:
+            link_permissions = ["write"]
         for permission in link_permissions:
             if permission == "read":
                 self.read_buckets.append(bucket_name)

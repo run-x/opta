@@ -2,6 +2,7 @@ from typing import Optional
 
 import click
 
+from opta.amplitude import amplitude_client
 from opta.commands.apply import _apply
 from opta.commands.push import _push, get_push_tag
 
@@ -20,6 +21,7 @@ from opta.commands.push import _push, get_push_tag
 )
 def deploy(image: str, config: str, env: Optional[str], tag: Optional[str]) -> None:
     """Push your new image to the cloud and deploy it in your environment"""
+    amplitude_client.send_event(amplitude_client.DEPLOY_EVENT)
     _push(image=image, config=config, env=env, tag=tag)
     image_tag = get_push_tag(image, tag)
     _apply(

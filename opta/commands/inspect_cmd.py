@@ -3,6 +3,7 @@ from typing import Any, List, Optional
 
 import click
 
+from opta.amplitude import amplitude_client
 from opta.constants import TF_FILE_PATH
 from opta.core.generator import gen_all
 from opta.core.terraform import Terraform
@@ -20,6 +21,7 @@ from opta.utils import column_print, deep_merge, is_tool
 )
 def inspect(config: str, env: Optional[str]) -> None:
     """ Displays important resources and AWS/Datadog links to them """
+    amplitude_client.send_event(amplitude_client.INSPECT_EVENT)
     layer = Layer.load_from_yaml(config, env)
     gen_all(layer)
     Terraform.init()

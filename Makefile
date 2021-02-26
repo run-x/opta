@@ -3,7 +3,7 @@ build-binary:
 	pipenv run pyinstaller opta.spec
 
 lint:
-	pipenv run ./scripts/lint.py
+	pipenv run ./scripts/lint.py --apply
 
 test:
 	pipenv run pytest .

@@ -2,6 +2,7 @@ from typing import Optional
 
 import click
 
+from opta.amplitude import amplitude_client
 from opta.core.generator import gen_all
 from opta.core.kubernetes import configure_kubectl as configure
 from opta.layer import Layer
@@ -16,6 +17,7 @@ from opta.layer import Layer
 )
 def configure_kubectl(config: str, env: Optional[str]) -> None:
     """ Configure the kubectl CLI tool for the given cluster """
+    amplitude_client.send_event(amplitude_client.CONFIGURE_KUBECTL_EVENT)
     layer = Layer.load_from_yaml(config, env)
     gen_all(layer)
 

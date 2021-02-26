@@ -16,7 +16,7 @@ from typing import Collection
 # [TODO] With --js runs js checks on the whole repo
 
 
-def main(precommit: bool) -> None:
+def main(precommit: bool, apply: bool) -> None:
     files_changed = []
     if precommit:
         diff_cmd = ["git", "diff", "--name-only", "--cached", "--diff-filter=ACMR"]
@@ -25,7 +25,7 @@ def main(precommit: bool) -> None:
 
     ret = 0
 
-    ret = py_check(files_changed, precommit) or ret
+    ret = py_check(files_changed, precommit, apply) or ret
 
     if ret >= 256:
         ret = 1
@@ -36,7 +36,7 @@ def main(precommit: bool) -> None:
     sys.exit(ret)
 
 
-def py_check(files_changed: Collection[str], precommit: bool) -> int:
+def py_check(files_changed: Collection[str], precommit: bool, apply: bool) -> int:
     if not precommit:
         files_changed = ["."]
     else:
@@ -50,7 +50,7 @@ def py_check(files_changed: Collection[str], precommit: bool) -> int:
 
     mypy = "pipenv run mypy"
 
-    if precommit:
+    if precommit or apply:
         isort = "pipenv run isort"
         black = "pipenv run black"
         flake8 = "pipenv run flake8"
@@ -78,6 +78,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--precommit", action="store_true", help="Run in precommit mode", default=False
     )
+    parser.add_argument(
+        "--apply", action="store_true", help="Apply fixes if possible", default=False
+    )
     args = parser.parse_args()
 
-    main(args.precommit)
+    main(args.precommit, args.apply)

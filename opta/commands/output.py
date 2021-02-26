@@ -3,6 +3,7 @@ from typing import Optional
 
 import click
 
+from opta.amplitude import amplitude_client
 from opta.core.generator import gen_all
 from opta.core.terraform import get_terraform_outputs
 from opta.layer import Layer
@@ -15,6 +16,7 @@ from opta.layer import Layer
 )
 def output(config: str, env: Optional[str],) -> None:
     """ Print TF outputs """
+    amplitude_client.send_event(amplitude_client.VIEW_OUTPUT_EVENT)
     layer = Layer.load_from_yaml(config, env)
     gen_all(layer)
     outputs = get_terraform_outputs()
