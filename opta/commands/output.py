@@ -9,8 +9,10 @@ from opta.layer import Layer
 
 
 @click.command()
-@click.option("--config", default="opta.yml", help="Opta config file")
-@click.option("--env", default=None, help="The env to use when loading the config file")
+@click.option("-c", "--config", default="opta.yml", help="Opta config file")
+@click.option(
+    "-e", "--env", default=None, help="The env to use when loading the config file"
+)
 def output(config: str, env: Optional[str],) -> None:
     """ Print TF outputs """
     layer = Layer.load_from_yaml(config, env)
