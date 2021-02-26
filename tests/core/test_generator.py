@@ -7,7 +7,7 @@ from pytest_mock import MockFixture
 from opta.core.generator import gen_all
 from opta.exceptions import UserErrors
 from opta.layer import Layer
-from tests.fixtures.apply import BASIC_APPLY
+from tests.fixtures.basic_apply import BASIC_APPLY
 
 
 class TestGenerator:
