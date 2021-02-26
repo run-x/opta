@@ -8,7 +8,7 @@ def test_deploy_basic(mocker: MockFixture) -> None:
     mock_push = mocker.patch("opta.commands.deploy._push")
     mock_apply = mocker.patch("opta.commands.deploy._apply")
     runner = CliRunner()
-    result = runner.invoke(cli, ["deploy", "local_image:local_tag"])
+    result = runner.invoke(cli, ["deploy", "-i", "local_image:local_tag"])
 
     assert result.exit_code == 0
     mock_push.assert_called_once_with(
@@ -32,6 +32,7 @@ def test_deploy_all_flags(mocker: MockFixture) -> None:
         cli,
         [
             "deploy",
+            "--image",
             "local_image:local_tag",
             "--config",
             "app/opta.yml",
