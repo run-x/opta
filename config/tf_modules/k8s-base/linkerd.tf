@@ -78,7 +78,7 @@ resource "helm_release" "linkerd" {
     value = tls_private_key.issuer_key.private_key_pem
   }
 
-  values = [
+  values = var.high_availability ?  [
     file("${path.module}/values-ha.yaml") # Adding the high-availability default values.
-  ]
+  ] : []
 }

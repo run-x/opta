@@ -21,8 +21,8 @@ resource "helm_release" "ingress-nginx" {
           }
         }
         autoscaling: {
-          enabled: true
-          minReplicas: 3
+          enabled: var.high_availability ? true : false
+          minReplicas: var.high_availability ? 3 : 1
         }
         affinity: {
           podAntiAffinity: {

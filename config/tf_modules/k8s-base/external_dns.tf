@@ -60,7 +60,6 @@ resource "helm_release" "external-dns" {
       aws: {
         zoneType: "public"
       }
-//      txtOwnerId: data.aws_route53_zone.main[0].zone_id
       domainFilters: [var.domain]
       serviceAccount: {
         name: "external-dns"
