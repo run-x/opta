@@ -20,8 +20,14 @@ resource "helm_release" "k8s-service" {
         targetMemoryUtilizationPercentage: var.autoscaling_target_mem_percentage
       },
       port: var.port,
-      containerResourceLimits: var.container_resource_limits,
-      containerResourceRequests: var.container_resource_requests,
+      containerResourceLimits: {
+        cpu: "${var.cpu_request * 2}m"
+        memory: "${var.memory_request * 2}Mi"
+      },
+      containerResourceRequests: {
+        cpu: "${var.cpu_request}m"
+        memory: "${var.memory_request}Mi"
+      },
       deployPods: (var.image != "AUTO") || (var.tag != null),
       image: var.image == "AUTO" ? (var.tag == null ? "": "${aws_ecr_repository.repo[0].repository_url}:${var.tag}") : var.image
       version: var.tag == null ? "latest" : var.tag

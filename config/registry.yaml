@@ -133,8 +133,8 @@ modules:
       autoscaling_target_mem_percentage: optional
       liveness_probe_path: optional
       readiness_probe_path: optional
-      container_resource_limits: optional
-      container_resource_requests: optional
+      cpu_request: optional
+      memory_request: optional
       public_uri: optional
       domain: optional
       openid_provider_url: str

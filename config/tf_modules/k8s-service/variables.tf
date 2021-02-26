@@ -80,22 +80,14 @@ variable "readiness_probe_path" {
   default = "/healthcheck"
 }
 
-variable "container_resource_limits" {
-  description = "Resource limits for pod"
-  default = {
-    cpu = "200m"
-    memory = "256Mi"
-  }
-  type = map
+variable "cpu_request" {
+  type = number
+  default = 100
 }
 
-variable "container_resource_requests" {
-  description = "Request requests for pod"
-  default = {
-    cpu = "100m"
-    memory = "128Mi"
-  }
-  type = map
+variable "memory_request" {
+  type = number
+  default = 128
 }
 
 variable "env_vars" {
