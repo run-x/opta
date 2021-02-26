@@ -115,6 +115,7 @@ modules:
       module_name: str
       openid_provider_url: str
       openid_provider_arn: str
+      high_availability: optional
       domain: optional
       cert_arn: optional
     outputs: {}
