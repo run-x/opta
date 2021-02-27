@@ -20,7 +20,7 @@ from opta.layer import Layer
     "-c", "--config", default="opta.yml", help="Opta config file", show_default=True
 )
 def shell(env: Optional[str], config: str) -> None:
-    """View a given secret of a k8s service"""
+    """Get a bash shell into one of the pods in your service"""
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(amplitude_client.SHELL_EVENT)
     gen_all(layer)
@@ -30,7 +30,7 @@ def shell(env: Optional[str], config: str) -> None:
     pod_list = v1.list_namespaced_pod(layer.name).items
     if len(pod_list) == 0:
         raise UserErrors("This service is not yet deployed")
-    subprocess.Popen(
+    p = subprocess.Popen(
         [
             "kubectl",
             "exec",
@@ -44,7 +44,5 @@ def shell(env: Optional[str], config: str) -> None:
             "bash",
             "-il",
         ],
-        stderr=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stdin=subprocess.PIPE,
     )
+    p.wait()

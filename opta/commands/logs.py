@@ -1,5 +1,6 @@
+import signal
 import subprocess
-from typing import List, Optional
+from typing import Any, List, Optional
 
 import click
 from kubernetes.config import load_kube_config
@@ -27,14 +28,14 @@ def get_k8s_service_module(modules: List[Module]) -> Module:
     "-c", "--config", default="opta.yml", help="Opta config file", show_default=True
 )
 def logs(env: Optional[str], config: str) -> None:
-    """View a given secret of a k8s service"""
+    """Get stream of logs from your service"""
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(amplitude_client.SHELL_EVENT)
     gen_all(layer)
     configure_kubectl(layer)
     load_kube_config()
     module_name = get_k8s_service_module(layer.modules).name
-    subprocess.Popen(
+    p = subprocess.Popen(
         [
             "kubectl",
             "logs",
@@ -46,6 +47,10 @@ def logs(env: Optional[str], config: str) -> None:
             "-l",
             f"app.kubernetes.io/instance={layer.name}-{module_name}",
         ],
-        stderr=subprocess.PIPE,
-        stdout=subprocess.PIPE,
     )
+
+    def handle_interrupt(signum: int, frame: Any) -> None:
+        p.terminate()
+
+    signal.signal(signal.SIGINT, handle_interrupt)
+    signal.pause()
