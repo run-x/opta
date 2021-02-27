@@ -29,6 +29,8 @@ def get_k8s_service_module(modules: List[Module]) -> Module:
 )
 def logs(env: Optional[str], config: str) -> None:
     """Get stream of logs from your service"""
+
+    # Configure kubectl
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(amplitude_client.SHELL_EVENT)
     gen_all(layer)
@@ -48,6 +50,9 @@ def logs(env: Optional[str], config: str) -> None:
             f"app.kubernetes.io/instance={layer.name}-{module_name}",
         ],
     )
+
+    # To make sure we can kill the log stream process with interrupt
+    # We need to listen for the interrupt signal and forward the signal to the subprocess
 
     def handle_interrupt(signum: int, frame: Any) -> None:
         p.terminate()
