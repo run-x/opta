@@ -25,7 +25,7 @@ def test_shell(mocker: MockFixture) -> None:
     mocked_v1_pod_list.items = [mocked_v1_pod]
     mocked_core_v1_api.list_namespaced_pod.return_value = mocked_v1_pod_list
 
-    mocked_popen = mocker.patch("opta.commands.shell.subprocess.Popen")
+    mocked_nice_run = mocker.patch("opta.commands.shell.nice_run")
 
     runner = CliRunner()
     result = runner.invoke(cli, ["shell"])
@@ -36,7 +36,7 @@ def test_shell(mocker: MockFixture) -> None:
     load_kube_config.assert_called_once()
     mocked_core_v1_api.list_namespaced_pod.assert_called_once_with("layer_name")
 
-    mocked_popen.assert_called_once_with(
+    mocked_nice_run.assert_called_once_with(
         [
             "kubectl",
             "exec",

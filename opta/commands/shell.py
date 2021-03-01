@@ -1,4 +1,3 @@
-import subprocess
 from typing import Optional
 
 import click
@@ -10,6 +9,7 @@ from opta.core.generator import gen_all
 from opta.core.kubernetes import configure_kubectl
 from opta.exceptions import UserErrors
 from opta.layer import Layer
+from opta.nice_subprocess import nice_run
 
 
 @click.command()
@@ -35,8 +35,7 @@ def shell(env: Optional[str], config: str) -> None:
     if len(pod_list) == 0:
         raise UserErrors("This service is not yet deployed")
 
-    # Stream the logs
-    p = subprocess.Popen(
+    nice_run(
         [
             "kubectl",
             "exec",
@@ -49,6 +48,5 @@ def shell(env: Optional[str], config: str) -> None:
             "--",
             "bash",
             "-il",
-        ],
+        ]
     )
-    p.wait()
