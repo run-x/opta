@@ -1,7 +1,7 @@
 from click.testing import CliRunner
 from pytest_mock import MockFixture
 
-from opta.cli import cli
+from opta.commands.logs import logs
 from opta.layer import Layer
 from opta.module import Module
 
@@ -20,31 +20,14 @@ def test_logs(mocker: MockFixture) -> None:
     mocked_module.name = "module_name"
     mocked_layer.modules = [mocked_module]
 
-    mocked_popen = mocker.patch("opta.commands.shell.subprocess.Popen")
-
-    mocked_signal = mocker.patch("opta.commands.logs.signal")
+    mocked_log_main = mocker.patch("opta.commands.logs.log_main")
 
     runner = CliRunner()
-    result = runner.invoke(cli, ["logs"])
+    result = runner.invoke(logs)
 
     assert result.exit_code == 0
     layer_gen_all.assert_called_once_with(mocked_layer)
     configure_kubectl.assert_called_once_with(mocked_layer)
     load_kube_config.assert_called_once()
 
-    mocked_popen.assert_called_once_with(
-        [
-            "kubectl",
-            "logs",
-            "-f",
-            "-n",
-            "layer_name",
-            "-c",
-            "k8s-service",
-            "-l",
-            "app.kubernetes.io/instance=layer_name-module_name",
-        ]
-    )
-
-    mocked_signal.signal.assert_called_once()
-    mocked_signal.pause.assert_called_once()
+    mocked_log_main.assert_called_once_with(mocked_layer, "module_name", None)
