@@ -20,6 +20,7 @@ macholib = "*"
 [packages]
 pyinquirer = ">1.0,<2"
 click = ">=7.0,<8"
+colored = ">=1.4.2,<2"
 pyyaml = ">=5.0,<6"
 rich = ">=9.0,<10"
 pick = ">=1.0,<2"

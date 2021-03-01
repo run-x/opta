@@ -13,14 +13,15 @@ class Module:
     def __init__(self, layer_name: str, data: Dict[Any, Any], parent_layer: Any = None):
         if "type" not in data:
             raise UserErrors("Module data must always have a type")
+        self.type = data["type"]
         self.layer_name = layer_name
         self.data = data
         self.parent_layer = parent_layer
-        self.name = data.get("name", data["type"].replace("-", ""))
+        self.name = data.get("name", self.type.replace("-", ""))
         if not Module.valid_name(self.name):
             raise UserErrors("Invalid module name, can only contain letters and numbers!")
-        self.desc = REGISTRY["modules"][data["type"]]
-        self.halt = REGISTRY["modules"][data["type"]].get("halt", False)
+        self.desc = REGISTRY["modules"][self.type]
+        self.halt = REGISTRY["modules"][self.type].get("halt", False)
         self.terraform_resources: Any = None
 
     def outputs(self) -> Iterable[str]:

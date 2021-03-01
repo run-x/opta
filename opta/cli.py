@@ -12,9 +12,11 @@ from opta.commands.apply import apply
 from opta.commands.deploy import deploy
 from opta.commands.inspect_cmd import inspect
 from opta.commands.kubectl import configure_kubectl
+from opta.commands.logs import logs
 from opta.commands.output import output
 from opta.commands.push import push
 from opta.commands.secret import secret
+from opta.commands.shell import shell
 from opta.commands.version import version
 from opta.constants import TF_FILE_PATH
 from opta.exceptions import UserErrors
@@ -65,9 +67,11 @@ cli.add_command(apply)
 cli.add_command(deploy)
 cli.add_command(configure_kubectl)
 cli.add_command(inspect)
+cli.add_command(logs)
 cli.add_command(output)
 cli.add_command(push)
 cli.add_command(secret)
+cli.add_command(shell)
 cli.add_command(version)
 
 

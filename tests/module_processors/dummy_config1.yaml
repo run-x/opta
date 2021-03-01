@@ -17,6 +17,9 @@ modules:
   - name: bucket2
     type: aws-s3
     bucket_name: "bucket2"
+  - name: bucket3
+    type: aws-s3
+    bucket_name: "bucket3"
   - name: app
     type: k8s-service
     secrets:
@@ -29,3 +32,4 @@ modules:
         - read
       - bucket2:
         - write
+      - bucket3

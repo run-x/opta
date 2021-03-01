@@ -5,6 +5,7 @@ import boto3
 import click
 from botocore.config import Config
 
+from opta.amplitude import amplitude_client
 from opta.core.generator import gen_all
 from opta.core.terraform import get_terraform_outputs
 from opta.layer import Layer
@@ -81,6 +82,7 @@ def push_to_docker(
     help="The image tag associated with your docker container. Defaults to your local image tag.",
 )
 def push(image: str, config: str, env: Optional[str], tag: Optional[str]) -> None:
+    amplitude_client.send_event(amplitude_client.PUSH_EVENT)
     _push(image, config, env, tag)
 
 
