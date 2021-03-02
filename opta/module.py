@@ -73,28 +73,24 @@ class Module:
     def gen_tags_override(self) -> None:
         override_config: Any = {"resource": []}
 
-        for _, tf_file_config in self.config.items():
-            resources = tf_file_config.get("resource", [])
-            for resource in resources:
-                resource_type = list(resource.keys())[0]
-                resource_name = list(resource[resource_type].keys())[0]
+        resources = self.get_terraform_resources()
+        for resource in resources:
+            resource_tags_raw = resource.config.get("tags", {})
+            resource_tags = {}
+            [resource_tags.update(tag) for tag in resource_tags_raw]
 
-                resource_tags_raw = resource[resource_type][resource_name].get("tags", {})
-                resource_tags = {}
-                [resource_tags.update(tag) for tag in resource_tags_raw]
+            # Add additional tags to each AWS resource
+            resource_tags = deep_merge(
+                resource_tags,
+                {
+                    "opta": "true",
+                    "tf_adddress": f"module.{self.name}.{resource.type}.{resource.name}",
+                },
+            )
 
-                # Add additional tags to each AWS resource
-                resource_tags = deep_merge(
-                    resource_tags,
-                    {
-                        "opta": "true",
-                        "tf_adddress": f"module.{self.name}.{resource_type}.{resource_name}",
-                    },
-                )
-
-                override_config["resource"].append(
-                    {resource_type: {resource_name: {"tags": resource_tags}}}
-                )
+            override_config["resource"].append(
+                {resource.type: {resource.name: {"tags": resource_tags}}}
+            )
 
         with open(f"{self.module_dir_path}/{TAGS_OVERRIDE_FILE}", "w") as f:
             json.dump(override_config, f, ensure_ascii=False, indent=2)
@@ -120,7 +116,8 @@ class Module:
             for resource in tf_resources:
                 resource_type = list(resource.keys())[0]
                 resource_name = list(resource[resource_type].keys())[0]
-                resource = Resource(self, resource_type, resource_name)
+                resource_config = resource[resource_type][resource_name]
+                resource = Resource(self, resource_type, resource_name, resource_config)
                 terraform_resources.append(resource)
 
         return terraform_resources

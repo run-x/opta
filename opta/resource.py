@@ -1,17 +1,28 @@
-from typing import Any, Optional
+from typing import Any
 
 from opta.utils import all_substrings
 
 
 class Resource:
-    def __init__(self, parent_module: Any, tf_resource_type: str, name: str):
+    def __init__(
+        self, parent_module: Any, tf_resource_type: str, name: str, config: dict
+    ):
         self.parent_module = parent_module
         self.type = tf_resource_type
         self.name = name
+        self.config = config
         self.address = f"module.{parent_module.name}.{tf_resource_type}.{name}"
-        self.inspect = self._get_inspect_config()
+        self.inspect_config: Any = None
 
-    def _get_inspect_config(self) -> Optional[dict]:
+    def inspect(self) -> dict:
+        # Reading and extracting the inspect config can be time-consuming,
+        # so only do it once if necessary.
+        if self.inspect_config is None:
+            self.inspect_config = self._get_inspect_config()
+
+        return self.inspect_config
+
+    def _get_inspect_config(self) -> dict:
         # A module can configure an "inspect" field so that certain resources
         # are displayed during `opta inspect`
         module_inspect_config = self.parent_module.desc.get("inspect", {})
@@ -26,6 +37,6 @@ class Resource:
                     most_specific_inspect_key = resource_inspect_key
 
         if most_specific_inspect_key == "":
-            return None
+            return {}
 
         return module_inspect_config[most_specific_inspect_key]
