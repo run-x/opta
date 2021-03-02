@@ -79,7 +79,6 @@ def test_inspect(mocker: MockFixture) -> None:
     runner = CliRunner()
     result = runner.invoke(inspect)
     print(result.exception)
-    print(result.output)
     assert result.exit_code == 0
     # Using split to compare without whitespaces
     assert (
