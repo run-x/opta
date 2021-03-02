@@ -27,8 +27,6 @@ class Module:
         self.desc = REGISTRY["modules"][self.type]
         self.halt = REGISTRY["modules"][self.type].get("halt", False)
         self.module_dir_path = self.translate_location(self.desc["location"])
-        self.config = self._read_tf_module_config()
-        self.gen_tags_override()
 
     def outputs(self) -> Iterable[str]:
         ret = []
@@ -75,7 +73,7 @@ class Module:
 
         resources = self.get_terraform_resources()
         for resource in resources:
-            resource_tags_raw = resource.config.get("tags", {})
+            resource_tags_raw = resource.tf_config.get("tags", {})
             resource_tags = {}
             [resource_tags.update(tag) for tag in resource_tags_raw]
 
@@ -110,8 +108,9 @@ class Module:
 
     # Get the list of resources created by the current module.
     def get_terraform_resources(self) -> List[Resource]:
+        tf_config = self._read_tf_module_config()
         terraform_resources: List[Resource] = []
-        for _, tf_file_config in self.config.items():
+        for _, tf_file_config in tf_config.items():
             tf_resources = tf_file_config.get("resource", [])
             for resource in tf_resources:
                 resource_type = list(resource.keys())[0]

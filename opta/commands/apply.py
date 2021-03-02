@@ -3,7 +3,7 @@ from typing import Optional, Set
 import click
 
 from opta.amplitude import amplitude_client
-from opta.core.generator import gen
+from opta.core.generator import gen, gen_opta_resource_tags
 from opta.core.terraform import Terraform
 from opta.exceptions import UserErrors
 from opta.layer import Layer
@@ -70,6 +70,7 @@ def _apply(
     layer = Layer.load_from_yaml(config, env)
     layer.variables["image_tag"] = image_tag
     Terraform.create_state_storage(layer)
+    gen_opta_resource_tags(layer)
 
     existing_modules: Set[str] = set()
     for module_idx, current_modules, total_block_count in gen(layer):

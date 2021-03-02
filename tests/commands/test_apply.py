@@ -11,6 +11,7 @@ from opta.module import Module
 def test_apply(mocker: MockFixture) -> None:
     mocker.patch("opta.commands.apply.is_tool", return_value=True)
     mocker.patch("opta.commands.apply.amplitude_client.send_event")
+    mocker.patch("opta.commands.apply.gen_opta_resource_tags")
 
     mocked_layer_class = mocker.patch("opta.commands.apply.Layer")
     mocked_layer = mocker.Mock(spec=Layer)

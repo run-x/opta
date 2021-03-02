@@ -31,3 +31,9 @@ def gen(layer: "Layer") -> Generator[Tuple[int, List["Module"], int], None, None
         gen_tf.gen(ret, TF_FILE_PATH)
 
         yield module_idx, current_modules, total_module_count
+
+
+# Generate a tags override file in every module, that adds opta tags to every resource.
+def gen_opta_resource_tags(layer: "Layer") -> None:
+    for module in layer.modules:
+        module.gen_tags_override()

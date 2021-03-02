@@ -5,12 +5,12 @@ from opta.utils import all_substrings
 
 class Resource:
     def __init__(
-        self, parent_module: Any, tf_resource_type: str, name: str, config: dict
+        self, parent_module: Any, tf_resource_type: str, name: str, tf_config: dict
     ):
         self.parent_module = parent_module
         self.type = tf_resource_type
         self.name = name
-        self.config = config
+        self.tf_config = tf_config
         self.address = f"module.{parent_module.name}.{tf_resource_type}.{name}"
         self.inspect_config: Any = None
 
