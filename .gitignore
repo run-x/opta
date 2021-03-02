@@ -6,6 +6,7 @@ tf.plan
 terraform.tfstate
 terraform.tfstate.backup
 main.tf.json
+*tags_override.tf.json
 .idea
 __pycache__
 .coverage

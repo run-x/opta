@@ -5,12 +5,12 @@ resource "aws_subnet" "public_subnets" {
   vpc_id                  = aws_vpc.vpc.id
   map_public_ip_on_launch = true
 
-  tags = merge({
+  tags = {
     Name                         = "opta-${var.layer_name}-public-${data.aws_availability_zones.current.zone_ids[count.index]}"
     "kubernetes.io/cluster/opta-${var.layer_name}" = "shared"
     type = "public"
     terraform                    = "true"
-  }, var.subnet_tags)
+  }
 }
 
 resource "aws_route_table" "public_route_table" {

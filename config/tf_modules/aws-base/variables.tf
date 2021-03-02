@@ -41,8 +41,3 @@ variable "public_ipv4_cidr_blocks" {
     "10.0.16.0/21"
   ]
 }
-
-variable "subnet_tags" {
-  type    = map(string)
-  default = {}
-}
