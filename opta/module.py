@@ -96,9 +96,8 @@ class Module:
                     {resource_type: {resource_name: {"tags": resource_tags}}}
                 )
 
-        for tf_module_name, tf_file_config in self.config.items():
-            with open(f"{self.module_dir_path}/{TAGS_OVERRIDE_FILE}", "w") as f:
-                json.dump(override_config, f, ensure_ascii=False, indent=2)
+        with open(f"{self.module_dir_path}/{TAGS_OVERRIDE_FILE}", "w") as f:
+            json.dump(override_config, f, ensure_ascii=False, indent=2)
 
     def translate_location(self, loc: str) -> str:
         relative_path = os.path.relpath(
