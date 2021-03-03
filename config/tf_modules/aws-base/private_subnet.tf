@@ -4,12 +4,12 @@ resource "aws_subnet" "private_subnets" {
   availability_zone_id = data.aws_availability_zones.current.zone_ids[count.index]
   vpc_id               = aws_vpc.vpc.id
 
-  tags = merge({
+  tags = {
     Name      = "opta-${var.layer_name}-private-${data.aws_availability_zones.current.zone_ids[count.index]}"
     "kubernetes.io/cluster/opta-${var.layer_name}" = "shared"
     type = "private"
     terraform = "true"
-  }, var.subnet_tags)
+  }
 }
 
 resource "aws_route_table" "private_route_tables" {

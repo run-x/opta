@@ -1,3 +1,4 @@
+import json
 import os
 import re
 from typing import Any, Dict, Iterable, List
@@ -7,6 +8,9 @@ import hcl2
 from opta.constants import REGISTRY
 from opta.exceptions import UserErrors
 from opta.resource import Resource
+from opta.utils import deep_merge
+
+TAGS_OVERRIDE_FILE = "tags_override.tf.json"
 
 
 class Module:
@@ -22,7 +26,7 @@ class Module:
             raise UserErrors("Invalid module name, can only contain letters and numbers!")
         self.desc = REGISTRY["modules"][self.type]
         self.halt = REGISTRY["modules"][self.type].get("halt", False)
-        self.terraform_resources: Any = None
+        self.module_dir_path = self.translate_location(self.desc["location"])
 
     def outputs(self) -> Iterable[str]:
         ret = []
@@ -39,9 +43,7 @@ class Module:
 
     def gen_tf(self) -> Dict[Any, Any]:
         module_blk: Dict[Any, Any] = {
-            "module": {
-                self.name: {"source": self.translate_location(self.desc["location"])}
-            },
+            "module": {self.name: {"source": self.module_dir_path}},
             "output": {},
         }
         for k, v in self.desc["variables"].items():
@@ -65,6 +67,32 @@ class Module:
 
         return module_blk
 
+    # Generate an override file in the module, that adds extra tags to every resource.
+    def gen_tags_override(self) -> None:
+        override_config: Any = {"resource": []}
+
+        resources = self.get_terraform_resources()
+        for resource in resources:
+            resource_tags_raw = resource.tf_config.get("tags", {})
+            resource_tags = {}
+            [resource_tags.update(tag) for tag in resource_tags_raw]
+
+            # Add additional tags to each AWS resource
+            resource_tags = deep_merge(
+                resource_tags,
+                {
+                    "opta": "true",
+                    "tf_address": f"module.{self.name}.{resource.type}.{resource.name}",
+                },
+            )
+
+            override_config["resource"].append(
+                {resource.type: {resource.name: {"tags": resource_tags}}}
+            )
+
+        with open(f"{self.module_dir_path}/{TAGS_OVERRIDE_FILE}", "w") as f:
+            json.dump(override_config, f, ensure_ascii=False, indent=2)
+
     def translate_location(self, loc: str) -> str:
         relative_path = os.path.relpath(
             os.path.join(
@@ -78,31 +106,35 @@ class Module:
 
         return relative_path
 
+    # Get the list of resources created by the current module.
     def get_terraform_resources(self) -> List[Resource]:
-        # Reading and extracting resources from terraform HCL files can be
-        # time-consuming, so only do it once if necessary (for the inspect command).
-        if self.terraform_resources is not None:
-            return self.terraform_resources
-
-        self.terraform_resources = self._read_terraform_resources()
-        return self.terraform_resources
-
-    def _read_terraform_resources(self) -> List[Resource]:
-        tf_module_dir = self.translate_location(self.desc["location"])
-        # Get all of the (non-nested) terraform files in the current module.
-        tf_files = [
-            entry for entry in os.scandir(tf_module_dir) if entry.path.endswith(".tf")
-        ]
-
+        tf_config = self._read_tf_module_config()
         terraform_resources: List[Resource] = []
-        # Read and extract the resources from each current terraform file.
-        for tf_file in tf_files:
-            tf_config = hcl2.load(open(tf_file))
-            tf_resources = tf_config.get("resource", [])
+        for _, tf_file_config in tf_config.items():
+            tf_resources = tf_file_config.get("resource", [])
             for resource in tf_resources:
                 resource_type = list(resource.keys())[0]
                 resource_name = list(resource[resource_type].keys())[0]
-                resource = Resource(self, resource_type, resource_name)
+                resource_config = resource[resource_type][resource_name]
+                resource = Resource(self, resource_type, resource_name, resource_config)
                 terraform_resources.append(resource)
 
         return terraform_resources
+
+    # Read all terraform files in the module and return its contents as a single dict.
+    def _read_tf_module_config(self) -> dict:
+        tf_module_config = {}
+
+        # Get all of the (non-nested) terraform files in the current module.
+        tf_files = [
+            entry
+            for entry in os.scandir(self.module_dir_path)
+            if entry.path.endswith(".tf")
+        ]
+
+        # Read and parse each terraform file.
+        for tf_file in tf_files:
+            tf_file_config = hcl2.load(open(tf_file))
+            tf_module_config[tf_file.name] = tf_file_config
+
+        return tf_module_config

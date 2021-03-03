@@ -65,10 +65,11 @@ def test_inspect(mocker: MockFixture) -> None:
     )
 
     # Mock reading opta resources.
+    mocker.patch("opta.module.Module._read_tf_module_config")
     fake_module = Module(
         data={"type": "fake-module", "name": "testmodule"}, layer_name=""
     )
-    fake_resource = Resource(fake_module, "test_resource", "test")
+    fake_resource = Resource(fake_module, "test_resource", "test", {})
     mocker.patch(
         "opta.commands.inspect_cmd.InspectCommand._get_opta_config_terraform_resources",
         return_value=[fake_resource],
@@ -79,7 +80,6 @@ def test_inspect(mocker: MockFixture) -> None:
     print(result.exception)
     assert result.exit_code == 0
     # Using split to compare without whitespaces
-    print(result.output)
     assert (
         result.output.split()
         == """
