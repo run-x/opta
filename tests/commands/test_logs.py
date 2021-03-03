@@ -18,9 +18,9 @@ def test_logs(mocker: MockFixture) -> None:
     mocked_module = mocker.Mock(spec=Module)
     mocked_module.type = "k8s-service"
     mocked_module.name = "module_name"
-    mocked_layer.modules = [mocked_module]
+    mocked_layer.get_module_by_type.return_value = [mocked_module]
 
-    mocked_log_main = mocker.patch("opta.commands.logs.log_main")
+    mocked_tail_module_log = mocker.patch("opta.commands.logs.tail_module_log")
 
     runner = CliRunner()
     result = runner.invoke(logs)
@@ -30,4 +30,5 @@ def test_logs(mocker: MockFixture) -> None:
     configure_kubectl.assert_called_once_with(mocked_layer)
     load_kube_config.assert_called_once()
 
-    mocked_log_main.assert_called_once_with(mocked_layer, "module_name", None)
+    mocked_tail_module_log.assert_called_once_with(mocked_layer, "module_name", None)
+    mocked_layer.get_module_by_type.assert_called_once_with("k8s-service")

@@ -24,3 +24,4 @@ SESSION_ID = int(time.time() * 1000)
 
 # Path of the generated tf file.
 TF_FILE_PATH = "main.tf.json"
+TF_PLAN_PATH = "tf.plan"

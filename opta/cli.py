@@ -10,6 +10,7 @@ import opta.sentry  # noqa: F401 This leads to initialization of sentry sdk
 from opta.amplitude import amplitude_client
 from opta.commands.apply import apply
 from opta.commands.deploy import deploy
+from opta.commands.events import events
 from opta.commands.inspect_cmd import inspect
 from opta.commands.kubectl import configure_kubectl
 from opta.commands.logs import logs
@@ -18,7 +19,7 @@ from opta.commands.push import push
 from opta.commands.secret import secret
 from opta.commands.shell import shell
 from opta.commands.version import version
-from opta.constants import TF_FILE_PATH
+from opta.constants import TF_FILE_PATH, TF_PLAN_PATH
 from opta.exceptions import UserErrors
 from opta.utils import dd_handler, dd_listener, logger
 
@@ -54,12 +55,11 @@ def debugger() -> None:
 
 
 def _cleanup() -> None:
-    try:
-        os.remove(TF_FILE_PATH)
-        os.remove(TF_STATE_FILE)
-        os.remove(TF_STATE_BACKUP_FILE)
-    except FileNotFoundError:
-        pass
+    for f in [TF_FILE_PATH, TF_PLAN_PATH, TF_STATE_FILE, TF_STATE_BACKUP_FILE]:
+        try:
+            os.remove(f)
+        except FileNotFoundError:
+            pass
 
 
 # Add commands
@@ -73,6 +73,7 @@ cli.add_command(push)
 cli.add_command(secret)
 cli.add_command(shell)
 cli.add_command(version)
+cli.add_command(events)
 
 
 if __name__ == "__main__":

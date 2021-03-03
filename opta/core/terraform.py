@@ -1,5 +1,6 @@
 import json
-from typing import TYPE_CHECKING, List, Set
+from subprocess import DEVNULL, PIPE
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
 
 import boto3
 from botocore.config import Config
@@ -42,14 +43,32 @@ class Terraform:
         return json.loads(raw_state)
 
     @classmethod
-    def apply(cls, *tf_flags: List[str]) -> None:
-        cls.init()
-        nice_run(["terraform", "apply", *tf_flags], check=True)
+    def apply(
+        cls,
+        *tf_flags: str,
+        no_init: Optional[bool] = False,
+        quiet: Optional[bool] = False,
+    ) -> None:
+        if not no_init:
+            cls.init()
+        kwargs: Dict[str, Any] = {}
+        if quiet:
+            kwargs["stderr"] = PIPE
+            kwargs["stdout"] = DEVNULL
+        nice_run(["terraform", "apply", *tf_flags], check=True, **kwargs)
 
     @classmethod
-    def plan(cls, *tf_flags: List[str]) -> None:
+    def plan(cls, *tf_flags: str, quiet: Optional[bool] = False) -> None:
         cls.init()
-        nice_run(["terraform", "plan", *tf_flags], check=True)
+        kwargs: Dict[str, Any] = {}
+        if quiet:
+            kwargs["stderr"] = PIPE
+            kwargs["stdout"] = DEVNULL
+        nice_run(["terraform", "plan", *tf_flags], check=True, **kwargs)
+
+    @classmethod
+    def show(cls, *tf_flags: str) -> None:
+        nice_run(["terraform", "show", *tf_flags], check=True)
 
     @classmethod
     def get_existing_modules(cls, layer: "Layer") -> Set[str]:
