@@ -1,0 +1,27 @@
+environments: list(include('env'), required=False)
+name: str()
+modules: map(include('module'), key=str())
+---
+env:
+  name: str()
+  path: str()
+  vars: list(str())
+module: any(include('k8s-service-module'))
+k8s-service-module:
+  type: regex('k8s-service')
+  port:
+    http: int()
+  tag: str()
+  liveness_probe_path: str()
+  readiness_probe_path: str()
+  env_vars: map(str(), key=str())
+  secrets: list(str())
+  links: any()
+aws-rds-module:
+  type: regex('aws-rds')
+aws-documentdb-module:
+  type: regex('aws-documentdb')
+  name: str()
+redis:
+  type: regex('aws-redis')
+  bucket_name: str()
