@@ -82,7 +82,7 @@ class Module:
                 resource_tags,
                 {
                     "opta": "true",
-                    "tf_adddress": f"module.{self.name}.{resource.type}.{resource.name}",
+                    "tf_address": f"module.{self.name}.{resource.type}.{resource.name}",
                 },
             )
 
