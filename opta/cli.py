@@ -17,6 +17,7 @@ from opta.commands.output import output
 from opta.commands.push import push
 from opta.commands.secret import secret
 from opta.commands.shell import shell
+from opta.commands.validate import validate
 from opta.commands.version import version
 from opta.constants import TF_FILE_PATH
 from opta.exceptions import UserErrors
@@ -72,6 +73,7 @@ cli.add_command(output)
 cli.add_command(push)
 cli.add_command(secret)
 cli.add_command(shell)
+cli.add_command(validate)
 cli.add_command(version)
 
 
