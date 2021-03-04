@@ -11,6 +11,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 import git
 import yaml
 
+from opta.commands.validate import validate_dict
 from opta.constants import REGISTRY
 from opta.exceptions import UserErrors
 from opta.module import Module
@@ -84,6 +85,7 @@ class Layer:
 
     @classmethod
     def load_from_dict(cls, conf: Dict[Any, Any], env: Optional[str]) -> Layer:
+        validate_dict(conf)
         modules_data = conf.get("modules", [])
         environments = conf.pop("environments", None)
         name = conf.pop("name", None)
