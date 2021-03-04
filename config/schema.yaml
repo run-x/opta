@@ -16,7 +16,7 @@ service-schema:
 env:
   name: str()
   path: str()
-  vars: list(map(), required=False)
+  vars: map()
 ---
 service-module: any(
     include('k8s-service-module'),
