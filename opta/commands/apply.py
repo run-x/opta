@@ -4,6 +4,7 @@ from typing import Optional, Set
 import click
 
 from opta.amplitude import amplitude_client
+from opta.constants import TF_PLAN_PATH
 from opta.core.generator import gen, gen_opta_resource_tags
 from opta.core.kubernetes import tail_module_log, tail_namespace_events
 from opta.core.terraform import Terraform
@@ -99,9 +100,13 @@ def _apply(
             )
             logger.info("Planning your changes (might take a minute)")
             Terraform.plan(
-                "-lock=false", "-input=false", "-out=tf.plan", *targets, quiet=True
+                "-lock=false",
+                "-input=false",
+                f"-out={TF_PLAN_PATH}",
+                *targets,
+                quiet=True,
             )
-            Terraform.show("tf.plan")
+            Terraform.show(TF_PLAN_PATH)
             click.confirm(
                 "The above are the planned changes for your opta run. Do you approve (yes/no)?",
                 abort=True,
@@ -126,5 +131,5 @@ def _apply(
                         target=tail_namespace_events, args=(layer, 0, 1), daemon=True,
                     )
                     new_thread.start()
-            Terraform.apply("tf.plan", no_init=True, quiet=True)
+            Terraform.apply(TF_PLAN_PATH, no_init=True, quiet=True)
             logger.info("Opta updates complete!")
