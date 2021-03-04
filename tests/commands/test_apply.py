@@ -2,6 +2,7 @@ from click.testing import CliRunner
 from pytest_mock import MockFixture
 
 from opta.commands.apply import apply
+from opta.constants import TF_PLAN_PATH
 from opta.layer import Layer
 from opta.module import Module
 
@@ -36,11 +37,11 @@ def test_apply(mocker: MockFixture) -> None:
     runner = CliRunner()
     result = runner.invoke(apply)
     assert result.exit_code == 0
-    tf_apply.assert_called_once_with("tf.plan", no_init=True, quiet=True)
+    tf_apply.assert_called_once_with(TF_PLAN_PATH, no_init=True, quiet=True)
     tf_plan.assert_called_once_with(
         "-lock=false",
         "-input=false",
-        "-out=tf.plan",
+        f"-out={TF_PLAN_PATH}",
         "-target=module.deletedmodule",
         "-target=module.fakemodule",
         quiet=True,
@@ -49,5 +50,5 @@ def test_apply(mocker: MockFixture) -> None:
         "The above are the planned changes for your opta run. Do you approve (yes/no)?",
         abort=True,
     )
-    tf_show.assert_called_once_with("tf.plan")
+    tf_show.assert_called_once_with(TF_PLAN_PATH)
     tf_create_storage.assert_called_once_with(mocked_layer)
