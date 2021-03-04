@@ -42,17 +42,17 @@ class InspectCommand:
         inspect_details = []
         target_resources = self._get_opta_config_terraform_resources()
         for resource in target_resources:
-            if resource.inspect is None:
+            if resource.inspect() == {}:
                 continue
             # Make sure the resource exists in the current terraform state.
             if resource.address not in self.terraform_state:
                 continue
 
             # Extract resource details to display as inspect output.
-            inspected_resource_name = resource.inspect.get("name", "")
-            inspected_resource_desc = resource.inspect.get("desc", "")
+            inspected_resource_name = resource.inspect().get("name", "")
+            inspected_resource_desc = resource.inspect().get("desc", "")
             inspected_resource_desc = inspected_resource_desc.replace("\n", " ")
-            inspected_resource_template_url = resource.inspect.get("url", "")
+            inspected_resource_template_url = resource.inspect().get("url", "")
 
             # Generate the resource url from the template.
             resource_state = self.terraform_state[resource.address]

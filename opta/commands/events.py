@@ -5,8 +5,7 @@ from kubernetes.config import load_kube_config
 
 from opta.amplitude import amplitude_client
 from opta.core.generator import gen_all
-from opta.core.kubernetes import configure_kubectl, tail_module_log
-from opta.exceptions import UserErrors
+from opta.core.kubernetes import configure_kubectl, tail_namespace_events
 from opta.layer import Layer
 
 
@@ -25,7 +24,7 @@ from opta.layer import Layer
     show_default=False,
     type=int,
 )
-def logs(env: Optional[str], config: str, seconds: Optional[int]) -> None:
+def events(env: Optional[str], config: str, seconds: Optional[int]) -> None:
     """Get stream of logs from your service"""
 
     # Configure kubectl
@@ -34,10 +33,4 @@ def logs(env: Optional[str], config: str, seconds: Optional[int]) -> None:
     gen_all(layer)
     configure_kubectl(layer)
     load_kube_config()
-    modules = layer.get_module_by_type("k8s-service")
-    if len(modules) == 0:
-        raise UserErrors("No module of type k8s-service in the yaml file")
-    elif len(modules) > 1:
-        raise UserErrors("Don't put more than one k8s-service module file per opta file")
-    module_name = modules[0].name
-    tail_module_log(layer, module_name, seconds)
+    tail_namespace_events(layer, seconds)

@@ -15,6 +15,9 @@ debugger_path = os.path.join(
 version_path = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), "config", "version.txt"
 )
+tf_modules_path = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)), "config", "tf_modules"
+)
 
 REGISTRY = yaml.load(open(registry_path), Loader=yaml.Loader)
 DEBUG_TREE = yaml.load(open(debugger_path), Loader=yaml.Loader)
@@ -24,3 +27,4 @@ SESSION_ID = int(time.time() * 1000)
 
 # Path of the generated tf file.
 TF_FILE_PATH = "main.tf.json"
+TF_PLAN_PATH = "tf.plan"

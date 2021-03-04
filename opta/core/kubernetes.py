@@ -1,10 +1,19 @@
+import datetime
 import json
-from typing import TYPE_CHECKING, List, Tuple
+import time
+from threading import Thread
+from typing import TYPE_CHECKING, List, Optional, Set, Tuple
+
+import pytz
+from colored import attr, fg
+from kubernetes.client import ApiException, CoreV1Api, V1Event, V1Pod
+from kubernetes.config import load_kube_config
+from kubernetes.watch import Watch
 
 from opta.core.terraform import get_terraform_outputs
 from opta.exceptions import UserErrors
 from opta.nice_subprocess import nice_run
-from opta.utils import fmt_msg, is_tool
+from opta.utils import fmt_msg, is_tool, logger
 
 if TYPE_CHECKING:
     from opta.layer import Layer
@@ -103,3 +112,127 @@ def _get_root_layer(layer: "Layer") -> "Layer":
         layer = layer.parent
 
     return layer
+
+
+def tail_module_log(
+    layer: "Layer",
+    module_name: str,
+    seconds: Optional[int] = None,
+    start_color_idx: int = 1,
+) -> None:
+    current_pods_monitored: Set[str] = set()
+    load_kube_config()
+    v1 = CoreV1Api()
+    watch = Watch()
+    count = 0
+    for event in watch.stream(
+        v1.list_namespaced_pod,
+        namespace=layer.name,
+        label_selector=f"app.kubernetes.io/instance={layer.name}-{module_name}",
+    ):
+        pod: V1Pod = event["object"]
+        color_idx = count % (256 - start_color_idx) + start_color_idx
+        if pod.metadata.name not in current_pods_monitored:
+            current_pods_monitored.add(pod.metadata.name)
+            new_thread = Thread(
+                target=tail_pod_log,
+                args=(layer.name, pod, color_idx, seconds),
+                daemon=True,
+            )
+            new_thread.start()
+            count += 1
+
+
+def tail_pod_log(
+    namespace: str, pod: V1Pod, color_idx: int, seconds: Optional[int]
+) -> None:
+    v1 = CoreV1Api()
+    watch = Watch()
+    print(
+        f"{fg(color_idx)}Showing the logs for server {pod.metadata.name} of your service{attr(0)}"
+    )
+    retry_count = 0
+    while True:
+        try:
+            for logline in watch.stream(
+                v1.read_namespaced_pod_log,
+                name=pod.metadata.name,
+                namespace=namespace,
+                container="k8s-service",
+                since_seconds=seconds,
+            ):
+                print(f"{fg(color_idx)}{pod.metadata.name} {logline}{attr(0)}")
+        except ApiException as e:
+            if e.status == 404:
+                print(
+                    f"{fg(color_idx)}Server {pod.metadata.name} has been terminated{attr(0)}"
+                )
+                return
+            elif retry_count < 5:
+                print(
+                    f"{fg(color_idx)}Couldn't get logs, waiting a bit and retrying{attr(0)}"
+                )
+                time.sleep(1 << retry_count)
+                retry_count += 1
+            else:
+                logger.error(
+                    f"Got the following error while trying to fetch the logs for pod {pod.metadata.name} in namespace {namespace}: {e}"
+                )
+                return
+        except Exception as e:
+            logger.error(
+                f"Got the following error while trying to fetch the logs for pod {pod.metadata.name} in namespace {namespace}: {e}"
+            )
+            return
+
+
+def tail_namespace_events(
+    layer: "Layer", seconds: Optional[int] = None, color_idx: int = 1,
+) -> None:
+    load_kube_config()
+    v1 = CoreV1Api()
+    watch = Watch()
+    print(f"{fg(color_idx)}Showing events for namespace {layer.name}{attr(0)}")
+    retry_count = 0
+    start_time = pytz.utc.localize(datetime.datetime.min)
+    if seconds is not None:
+        start_time = datetime.datetime.now(pytz.utc) - datetime.timedelta(seconds=seconds)
+    old_events: List[V1Event] = v1.list_namespaced_event(namespace=layer.name).items
+    # Filter by time
+    old_events = list(filter(lambda x: x.last_timestamp > start_time, old_events))
+    # Sort by timestamp
+    old_events = sorted(old_events, key=lambda x: x.last_timestamp)
+    event: V1Event
+    for event in old_events:
+        start_time = event.last_timestamp
+        print(
+            f"{fg(color_idx)}{event.last_timestamp} Namespace {layer.name} event: {event.message}{attr(0)}"
+        )
+
+    while True:
+        try:
+            for stream_obj in watch.stream(
+                v1.list_namespaced_event, namespace=layer.name,
+            ):
+                event = stream_obj["object"]
+                if event.last_timestamp > start_time:
+                    print(
+                        f"{fg(color_idx)}{event.last_timestamp} Namespace {layer.name} event: {event.message}{attr(0)}"
+                    )
+        except ApiException as e:
+            if retry_count < 5:
+                print(
+                    f"{fg(color_idx)}Couldn't get logs, waiting a bit and retrying{attr(0)}"
+                )
+                time.sleep(1 << retry_count)
+                retry_count += 1
+            else:
+                logger.error(
+                    f"{fg(color_idx)}Got the following error while trying to fetch the events in namespace {layer.name}: {e}"
+                )
+                return
+        except Exception as e:
+            logger.error(
+                f"{fg(color_idx)}Got the following error while trying to fetch the events in namespace {layer.name}: {e}{attr(0)}"
+            )
+            return

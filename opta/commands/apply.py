@@ -1,13 +1,15 @@
+from threading import Thread
 from typing import Optional, Set
 
 import click
 
 from opta.amplitude import amplitude_client
-from opta.core.generator import gen
+from opta.core.generator import gen, gen_opta_resource_tags
+from opta.core.kubernetes import tail_module_log, tail_namespace_events
 from opta.core.terraform import Terraform
 from opta.exceptions import UserErrors
 from opta.layer import Layer
-from opta.utils import is_tool
+from opta.utils import is_tool, logger
 
 
 @click.command()
@@ -49,7 +51,7 @@ def apply(
     env: Optional[str],
     refresh: bool,
     max_module: Optional[int],
-    image_tag: str,
+    image_tag: Optional[str],
     test: bool,
 ) -> None:
     """Initialize your environment or service to match the config file"""
@@ -61,7 +63,7 @@ def _apply(
     env: Optional[str],
     refresh: bool,
     max_module: Optional[int],
-    image_tag: str,
+    image_tag: Optional[str],
     test: bool,
 ) -> None:
     if not is_tool("terraform"):
@@ -70,6 +72,7 @@ def _apply(
     layer = Layer.load_from_yaml(config, env)
     layer.variables["image_tag"] = image_tag
     Terraform.create_state_storage(layer)
+    gen_opta_resource_tags(layer)
 
     existing_modules: Set[str] = set()
     for module_idx, current_modules, total_block_count in gen(layer):
@@ -94,4 +97,34 @@ def _apply(
             amplitude_client.send_event(
                 amplitude_client.APPLY_EVENT, event_properties={"module_idx": module_idx}
             )
-            Terraform.apply("-lock-timeout=60s", *targets)
+            logger.info("Planning your changes (might take a minute)")
+            Terraform.plan(
+                "-lock=false", "-input=false", "-out=tf.plan", *targets, quiet=True
+            )
+            Terraform.show("tf.plan")
+            click.confirm(
+                "The above are the planned changes for your opta run. Do you approve (yes/no)?",
+                abort=True,
+            )
+            logger.info("Applying your changes (might take a minute)")
+            if image_tag is not None:
+                service_modules = layer.get_module_by_type("k8s-service", module_idx)
+                if len(service_modules) != 0:
+                    service_module = service_modules[0]
+                    # Tailing logs
+                    logger.info(
+                        f"Identified deployment for kubernetes service module {service_module.name}, tailing logs now."
+                    )
+                    new_thread = Thread(
+                        target=tail_module_log,
+                        args=(layer, service_module.name, 10, 2),
+                        daemon=True,
+                    )
+                    # Tailing events
+                    new_thread.start()
+                    new_thread = Thread(
+                        target=tail_namespace_events, args=(layer, 0, 1), daemon=True,
+                    )
+                    new_thread.start()
+            Terraform.apply("tf.plan", no_init=True, quiet=True)
+            logger.info("Opta updates complete!")

@@ -134,6 +134,7 @@ modules:
       autoscaling_target_mem_percentage: optional
       liveness_probe_path: optional
       readiness_probe_path: optional
+      healthcheck_path: optional
       resource_request: optional
       public_uri: optional
       domain: optional

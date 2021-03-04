@@ -80,6 +80,11 @@ variable "readiness_probe_path" {
   default = "/healthcheck"
 }
 
+variable "healthcheck_path" {
+  type = string
+  default = null
+}
+
 variable "resource_request" {
   type = map
   default = {
