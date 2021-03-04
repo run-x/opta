@@ -3,7 +3,7 @@ org_name: baloney
 providers:
   aws:
     region: us-east-1
-    allowed_account_ids: [ 12345 ]
+    account_id: 12345
 modules:
   - name: database
     type: aws-postgres

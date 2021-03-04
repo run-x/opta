@@ -1,15 +1,9 @@
-from typing import Any, Dict
-
 import click
 import yamale
 
 from opta.constants import schema_path
 
 schema = yamale.make_schema(schema_path)
-
-
-def validate_dict(conf: Dict[Any, Any]) -> None:
-    yamale.validate(schema, conf)
 
 
 def validate_yaml(config_file_path: str) -> None:

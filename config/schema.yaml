@@ -7,24 +7,29 @@ environment-schema:
     aws:
       region: str()
       account_id: int()
-  modules: list(include('env-module'))
+  modules: list(include('module'))
 ---
 service-schema:
   environments: list(include('env'), required=False)
   name: str()
-  modules: list(include('service-module'))
+  modules: list(include('module'))
 env:
   name: str()
   path: str()
   vars: map()
 ---
-service-module: any(
-    include('k8s-service-module'),
+module: any(
+    include('aws-base-module'),
+    include('aws-dns-module'),
     include('aws-documentdb-module'),
-    include('aws-redis-module'),
+    include('aws-documentdb-module'),
+    include('aws-eks-module'),
+    include('aws-k8s-base-module'),
     include('aws-postgres-module'),
-    include('aws-documentdb-module'),
-    include('aws-s3-module')
+    include('aws-redis-module'),
+    include('aws-s3-module'),
+    include('datadog-module'),
+    include('k8s-service-module'),
   )
 k8s-service-module:
   type: regex('k8s-service')
@@ -35,7 +40,7 @@ k8s-service-module:
   image: str(required=False)
   port: any(required=False)
   tag: any(required=False)
-  env_vars: list(include('env-var'))
+  env_vars: list(include('env-var'), required=False)
   secrets: list(str(), required=False)
   autoscaling_target_cpu_percentage: any(str(), int(), required=False)
   autoscaling_target_mem_percentage: any(str(), int(), required=False)
@@ -85,13 +90,6 @@ aws-s3-module:
   block_public: any(required=False)
   bucket_policy: any(required=False)
 ---
-env-module: any(
-    include('aws-base-module'),
-    include('aws-dns-module'),
-    include('aws-eks-module'),
-    include('aws-k8s-base-module'),
-    include('datadog-module'),
-  )
 aws-base-module:
   type: regex('aws-base')
   env_name: str(required=False)
