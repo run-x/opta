@@ -156,6 +156,7 @@ class TestKubernetes:
         )
 
     def test_tail_namespace_events(self, mocker: MockFixture) -> None:
+        mocker.patch("opta.core.kubernetes.load_kube_config")
         mocked_core_v1_api = mocker.Mock(spec=CoreV1Api)
         mocked_core_v1_api_call = mocker.patch(
             "opta.core.kubernetes.CoreV1Api", return_value=mocked_core_v1_api
