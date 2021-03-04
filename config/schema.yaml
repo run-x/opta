@@ -20,7 +20,6 @@ env:
 ---
 service-module: any(
     include('k8s-service-module'),
-    include('aws-rds-module'),
     include('aws-documentdb-module'),
     include('aws-redis-module'),
     include('aws-postgres-module'),
@@ -52,9 +51,6 @@ k8s-service-module:
   min_containers: any(str(), int(), required=False)
   max_containers: any(str(), int(), required=False)
   links: list(any(str(), map()))
-aws-rds-module:
-  type: regex('aws-rds')
-  name: str(required=False)
 aws-documentdb-module:
   type: regex('aws-documentdb')
   name: str(required=False)
