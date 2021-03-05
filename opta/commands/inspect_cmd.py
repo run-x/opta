@@ -24,13 +24,13 @@ def inspect(config: str, env: Optional[str]) -> None:
     amplitude_client.send_event(amplitude_client.INSPECT_EVENT)
     layer = Layer.load_from_yaml(config, env)
     gen_all(layer)
-    Terraform.init()
     InspectCommand(layer).run()
 
 
 class InspectCommand:
     def __init__(self, layer: Layer):
         self.layer = layer
+        Terraform.download_state(layer)
         # Fetch the current terraform state
         self.terraform_state = self._fetch_terraform_state_resources()
 
@@ -75,26 +75,24 @@ class InspectCommand:
     def _fetch_terraform_state_resources(self) -> dict:
         state = Terraform.get_state()
 
-        root_module = state.get("values", {}).get("root_module", {})
-        child_modules = root_module.get("child_modules", [])
-
-        resources = root_module.get("resources", [])
-
-        for child_module in child_modules:
-            resources += child_module.get("resources", [])
+        resources = state.get("resources", [])
 
         resources_dict = {}
         for resource in resources:
-            address = resource.get("address")
-            if address is None:
+            address = ".".join(
+                [
+                    resource.get("module", ""),
+                    resource.get("type", ""),
+                    resource.get("name", ""),
+                ]
+            )
+            if address == "..":
                 continue
 
-            # The terraform resource address may have "[0]" or "[#]" appending it, in
-            # which case strip it out, so it's easier to match against the inspect key later.
-            if "[" in address:
-                address = address[0 : address.find("[")]
-
-            resources_dict[address] = resource
+            resources_dict[address] = resource["instances"][0]["attributes"]
+            resources_dict[address]["module"] = resource.get("module", "")
+            resources_dict[address]["type"] = resource.get("type", "")
+            resources_dict[address]["name"] = resource.get("name", "")
 
         return resources_dict
 
@@ -114,8 +112,7 @@ class InspectCommand:
 
         # Get the resource properties from the terraform state, which
         # may be used to populate the template URL.
-        resource_properties = resource_state.get("values", {})
-        for k, v in resource_properties.items():
+        for k, v in resource_state.items():
             template_url_values[k] = str(v)
 
         # Some inspect keys may require custom logic to fetch the values
@@ -124,7 +121,7 @@ class InspectCommand:
             resource_state.get("type") == "helm_release"
             and resource_state.get("name") == "k8s-service"
         ):
-            k8s_metadata_values = self._get_k8s_metadata_values(resource_properties)
+            k8s_metadata_values = self._get_k8s_metadata_values(resource_state)
             template_url_values = deep_merge(template_url_values, k8s_metadata_values)
 
         return template_url_values

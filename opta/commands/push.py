@@ -22,8 +22,8 @@ def get_push_tag(local_image: str, tag_override: Optional[str]) -> str:
     return tag_override or local_image_tag
 
 
-def get_registry_url() -> str:
-    outputs = get_terraform_outputs()
+def get_registry_url(layer: Layer) -> str:
+    outputs = get_terraform_outputs(layer)
     if "docker_repo_url" not in outputs:
         raise Exception(
             "Unable to determine docker repository url. There is likely something wrong with your opta configuration."
@@ -91,6 +91,6 @@ def _push(image: str, config: str, env: Optional[str], tag: Optional[str]) -> No
         raise Exception("Please install docker on your machine")
     layer = Layer.load_from_yaml(config, env)
     gen_all(layer)
-    registry_url = get_registry_url()
+    registry_url = get_registry_url(layer)
     username, password = get_ecr_auth_info(layer)
     push_to_docker(username, password, image, registry_url, tag)

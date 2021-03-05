@@ -19,6 +19,6 @@ def output(config: str, env: Optional[str],) -> None:
     amplitude_client.send_event(amplitude_client.VIEW_OUTPUT_EVENT)
     layer = Layer.load_from_yaml(config, env)
     gen_all(layer)
-    outputs = get_terraform_outputs()
+    outputs = get_terraform_outputs(layer)
     outputs_formatted = json.dumps(outputs, indent=4)
     print(outputs_formatted)
