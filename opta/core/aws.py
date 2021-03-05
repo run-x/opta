@@ -1,9 +1,11 @@
-import boto3
 import json
 
+import boto3
 from botocore.config import Config
+
 from opta.layer import Layer
 from opta.utils import deep_merge
+
 
 class AWS:
     def __init__(self, layer: Layer):
@@ -25,13 +27,13 @@ class AWS:
         global_resources = self._get_opta_resources()
         return deep_merge(regional_resources, global_resources)
 
-    def _get_opta_resources(self, region = None) -> dict:
+    def _get_opta_resources(self, region=None) -> dict:
         extra_args = {} if region is None else {"config": Config(region_name=region)}
         client = boto3.client("resourcegroupstagingapi", **extra_args)
 
         state = client.get_resources(TagFilters=[{"Key": "opta", "Values": ["true"]}])
         resources = state["ResourceTagMappingList"]
-        
+
         resources_map = {}
         for resource in resources:
             arn = resource["ResourceARN"]
@@ -39,5 +41,5 @@ class AWS:
                 if tag["Key"] == "tf_address":
                     terraform_address = tag["Value"]
                     resources_map[terraform_address] = arn
-    
+
         return resources_map
