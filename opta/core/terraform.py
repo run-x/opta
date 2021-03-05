@@ -6,6 +6,7 @@ import boto3
 from botocore.config import Config
 from botocore.exceptions import ClientError
 
+from opta.core.aws import AWS
 from opta.exceptions import UserErrors
 from opta.nice_subprocess import nice_run
 from opta.utils import deep_merge, logger
@@ -58,7 +59,15 @@ class Terraform:
         if quiet:
             kwargs["stderr"] = PIPE
             kwargs["stdout"] = DEVNULL
-        nice_run(["terraform", "apply", *tf_flags], check=True, **kwargs)
+        try:
+            nice_run(["terraform", "apply", *tf_flags], check=True, **kwargs)
+        except Exception as err:
+            cls.rollback()
+
+    @classmethod
+    def rollback(cls, layer: "Layer"):
+        aws_resources = AWS(layer).get_opta_resources()
+        terraform_resources = cls.get_existing_resources()
 
     @classmethod
     def plan(cls, *tf_flags: str, quiet: Optional[bool] = False) -> None:
