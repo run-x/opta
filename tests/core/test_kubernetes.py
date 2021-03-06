@@ -45,7 +45,7 @@ class TestKubernetes:
 
         configure_kubectl(layer)
 
-        mocked_terraform_output.assert_called_once_with()
+        mocked_terraform_output.assert_called_once_with(layer)
         mocked_is_tool.assert_has_calls([mocker.call("kubectl"), mocker.call("aws")])
         mocked_nice_run.assert_has_calls(
             [

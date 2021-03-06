@@ -22,29 +22,20 @@ REGISTRY = {
 }
 
 TERRAFORM_STATE = {
-    "values": {
-        "root_module": {
-            "resources": [],
-            "child_modules": [
-                {
-                    "resources": [
-                        {
-                            "address": "module.testmodule.test_resource.test",
-                            "type": "test_resource",
-                            "name": "test",
-                            "values": {"test_value": "foobar"},
-                        }
-                    ]
-                }
-            ],
+    "resources": [
+        {
+            "module": "module.testmodule",
+            "type": "test_resource",
+            "name": "test",
+            "instances": [{"attributes": {"test_value": "foobar"}}],
         }
-    }
+    ]
 }
 
 
 def test_inspect(mocker: MockFixture) -> None:
-    # Mock terraform init
-    mocker.patch("opta.commands.inspect_cmd.Terraform.init")
+    # Mock terraform download_state
+    mocker.patch("opta.commands.inspect_cmd.Terraform.download_state")
     # Mock tf file generation
     mocked_layer_class = mocker.patch("opta.commands.inspect_cmd.Layer")
     mocked_layer = mocker.Mock(spec=Layer)
@@ -77,7 +68,7 @@ def test_inspect(mocker: MockFixture) -> None:
 
     runner = CliRunner()
     result = runner.invoke(inspect)
-    print(result.exception)
+
     assert result.exit_code == 0
     # Using split to compare without whitespaces
     assert (
