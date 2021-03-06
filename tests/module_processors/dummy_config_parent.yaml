@@ -1,13 +1,13 @@
-name: dummy-env
-org_name: test-opta
+name: dummy-parent
+org_name: opta-tests
 providers:
   aws:
     region: us-east-1
-    allowed_account_ids: [ silly_value ]
+    account_id: 889760294590
 modules:
   - type: aws-base
   - type: aws-dns
-    domain: "baloney.dev"
+    domain: staging2.runx.dev
     delegated: true
   - type: aws-eks
     max_nodes: 6
