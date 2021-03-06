@@ -30,7 +30,6 @@ def inspect(config: str, env: Optional[str]) -> None:
 class InspectCommand:
     def __init__(self, layer: Layer):
         self.layer = layer
-        Terraform.download_state(layer)
         # Fetch the current terraform state
         self.terraform_state = self._fetch_terraform_state_resources()
 
@@ -73,6 +72,7 @@ class InspectCommand:
         column_print(inspect_details)
 
     def _fetch_terraform_state_resources(self) -> dict:
+        Terraform.download_state(self.layer)
         state = Terraform.get_state()
 
         resources = state.get("resources", [])
