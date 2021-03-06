@@ -18,17 +18,20 @@ def test_get_registry_url(mocker: MockFixture) -> None:
     mocker.patch(
         "opta.commands.push.get_terraform_outputs", return_value=TERRAFORM_OUTPUTS
     )
+    layer = mocker.Mock(spec=Layer)
+    layer.name = "blah"
 
-    docker_repo_url = get_registry_url()
+    docker_repo_url = get_registry_url(layer)
     assert docker_repo_url == REGISTRY_URL
 
 
 def test_no_docker_repo_url_in_output(mocker: MockFixture) -> None:
     mocker.patch("os.path.isdir", return_value=True)
     mocker.patch("opta.commands.push.get_terraform_outputs", return_value={})
-
+    layer = mocker.Mock(spec=Layer)
+    layer.name = "blah"
     with pytest.raises(Exception) as e_info:
-        get_registry_url()
+        get_registry_url(layer)
 
     expected_error_output = "Unable to determine docker repository url"
     assert expected_error_output in str(e_info)

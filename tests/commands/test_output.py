@@ -7,33 +7,32 @@ from opta.commands.output import output
 from opta.layer import Layer
 
 TERRAFORM_STATE = {
-    "values": {
-        "root_module": {
-            "resources": [
+    "resources": [
+        {
+            "address": "data.terraform_remote_state.parent",
+            "mode": "data",
+            "type": "terraform_remote_state",
+            "name": "parent",
+            "instances": [
                 {
-                    "address": "data.terraform_remote_state.parent",
-                    "mode": "data",
-                    "type": "terraform_remote_state",
-                    "name": "parent",
-                    "provider_name": "terraform.io/builtin/terraform",
-                    "schema_version": 0,
-                    "values": {
-                        "backend": "s3",
-                        "config": {},
-                        "defaults": "None",
+                    "attributes": {
                         "outputs": {
-                            "k8s_cluster_name": "main",
-                            "k8s_endpoint": "https://bla.bla.bla.eks.amazonaws.com",
-                            "state_bucket_arn": "arn:aws:s3:::opta-tf-state-runx-staging",
-                            "state_bucket_id": "opta-tf-state-runx-staging",
-                        },
-                        "workspace": "None",
-                    },
+                            "value": {
+                                "k8s_cluster_name": "main",
+                                "k8s_endpoint": "https://bla.bla.bla.eks.amazonaws.com",
+                                "state_bucket_arn": "arn:aws:s3:::opta-tf-state-runx-staging",
+                                "state_bucket_id": "opta-tf-state-runx-staging",
+                            },
+                        }
+                    }
                 }
-            ]
+            ],
+            "provider_name": "terraform.io/builtin/terraform",
+            "schema_version": 0,
         }
-    }
+    ]
 }
+
 
 TERRAFORM_OUTPUTS = {
     "bucket_arn": "arn:aws:s3:::runx-test-bucket-runx-staging",
@@ -55,7 +54,6 @@ def test_output(mocker: MockFixture) -> None:
 
     runner = CliRunner()
     result = runner.invoke(output)
-    print(result.exception)
     assert result.exit_code == 0
     assert json.loads(result.output) == {
         "parent.k8s_cluster_name": "main",

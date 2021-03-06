@@ -80,7 +80,7 @@ def configure_kubectl(layer: "Layer") -> None:
         )
 
     # Get the cluster name from the outputs.
-    outputs = get_terraform_outputs()
+    outputs = get_terraform_outputs(layer)
     cluster_name = outputs.get("parent.k8s_cluster_name") or outputs.get(
         "k8s_cluster_name"
     )

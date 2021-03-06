@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 class Terraform:
     # True if terraform.tfstate is downloaded.
-    downloaded_state = False
+    downloaded_state: Dict[str, bool] = {}
 
     @classmethod
     def init(cls) -> None:
@@ -24,11 +24,15 @@ class Terraform:
 
     # Get outputs of the current terraform state
     @classmethod
-    def get_outputs(cls) -> dict:
-        raw_output = nice_run(
-            ["terraform", "output", "-json"], check=True, capture_output=True
-        ).stdout.decode("utf-8")
-        outputs = json.loads(raw_output)
+    def get_outputs(cls, layer: "Layer") -> dict:
+        if not cls.downloaded_state.get(layer.name, False):
+            success = cls.download_state(layer)
+            if not success:
+                raise UserErrors(
+                    "Could not fetch remote terraform state, assuming no resources exist yet."
+                )
+        state = cls.get_state()
+        outputs = state.get("outputs", {})
         cleaned_outputs = {}
         for k, v in outputs.items():
             cleaned_outputs[k] = v.get("value")
@@ -36,10 +40,9 @@ class Terraform:
 
     # Get the full terraform state.
     @classmethod
-    def get_state(cls) -> dict:
-        raw_state = nice_run(
-            ["terraform", "show", "-json"], check=True, capture_output=True
-        ).stdout.decode("utf-8")
+    def get_state(cls, state_file: str = "./terraform.tfstate") -> dict:
+        with open(state_file, "r") as file:
+            raw_state = file.read().replace("\n", "")
         return json.loads(raw_state)
 
     @classmethod
@@ -78,7 +81,7 @@ class Terraform:
 
     @classmethod
     def get_existing_resources(cls, layer: "Layer") -> List[str]:
-        if not cls.downloaded_state:
+        if not cls.downloaded_state.get(layer.name, False):
             success = cls.download_state(layer)
             if not success:
                 logger.info(
@@ -93,9 +96,9 @@ class Terraform:
         )
 
     @classmethod
-    def download_state(cls, layer: "Layer") -> bool:
-        cls.init()
-
+    def download_state(
+        cls, layer: "Layer", state_file: str = "./terraform.tfstate"
+    ) -> bool:
         providers = layer.gen_providers(0)
         if "s3" in providers.get("terraform", {}).get("backend", {}):
             bucket = providers["terraform"]["backend"]["s3"]["bucket"]
@@ -106,14 +109,14 @@ class Terraform:
             )
             s3 = boto3.client("s3")
             try:
-                s3.download_file(bucket, key, "./terraform.tfstate")
+                s3.download_file(bucket, key, state_file)
             except ClientError as e:
                 if e.response["Error"]["Code"] == "404":
                     # The object does not exist.
                     return False
                 raise
 
-        cls.downloaded_state = True
+        cls.downloaded_state[layer.name] = True
         return True
 
     @classmethod
@@ -224,21 +227,21 @@ class Terraform:
                 print("Load balancing service linked role present")
 
 
-def get_terraform_outputs() -> dict:
+def get_terraform_outputs(layer: "Layer", pull_state: bool = True) -> dict:
     """ Fetch terraform outputs from existing TF file """
-    Terraform.init()
-    current_outputs = Terraform.get_outputs()
-    parent_outputs = _fetch_parent_outputs()
+    if not pull_state:
+        Terraform.init()
+    current_outputs = Terraform.get_outputs(layer)
+    parent_outputs = _fetch_parent_outputs(pull_state)
     return deep_merge(current_outputs, parent_outputs)
 
 
-def _fetch_parent_outputs() -> dict:
+def _fetch_parent_outputs(pull_state: bool = True) -> dict:
     # Fetch the terraform state
     state = Terraform.get_state()
 
     # Fetch any parent remote states
-    root_module = state.get("values", {}).get("root_module", {})
-    resources = root_module.get("resources", [])
+    resources = state.get("resources", [])
     parent_states = [
         resource
         for resource in resources
@@ -248,7 +251,12 @@ def _fetch_parent_outputs() -> dict:
     # Grab all outputs from each remote state and save it.
     parent_state_outputs = {}
     for parent in parent_states:
-        parent_outputs = parent.get("values", {}).get("outputs", {})
+        parent_outputs = (
+            parent["instances"][0]
+            .get("attributes", {})
+            .get("outputs", {})
+            .get("value", {})
+        )
         for k, v in parent_outputs.items():
             parent_name = parent.get("name")
             output_name = f"{parent_name}.{k}"

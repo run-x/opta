@@ -37,9 +37,9 @@ class TestTerraform:
             "opta.core.terraform.nice_run",
             return_value=MockedCmdOut(tf_state_list_output),
         )
-        assert {"redis", "doc_db"} == Terraform.get_existing_modules(
-            mocker.Mock(spec=Layer)
-        )
+        mocked_layer = mocker.Mock(spec=Layer)
+        mocked_layer.name = "blah"
+        assert {"redis", "doc_db"} == Terraform.get_existing_modules(mocked_layer)
 
     def test_download_state(self, mocker: MockFixture) -> None:
         layer = mocker.Mock(spec=Layer)
@@ -55,6 +55,7 @@ class TestTerraform:
                 }
             }
         }
+        layer.name = "blah"
         patched_init = mocker.patch(
             "opta.core.terraform.Terraform.init", return_value=True
         )
@@ -68,7 +69,7 @@ class TestTerraform:
         mocked_s3_client.download_file.assert_called_once_with(
             "opta-tf-state-test-dev1", "dev1", "./terraform.tfstate"
         )
-        patched_init.assert_called_once_with()
+        patched_init.assert_not_called()
         mocked_boto_client.assert_called_once_with("s3")
 
     def test_create_state_storage(self, mocker: MockFixture) -> None:
