@@ -74,7 +74,6 @@ class Module(Validator):
 validators = DefaultValidators.copy()
 validators[Opta.tag] = Opta
 
-print(validators)
 main_schema_path = path.join(schema_dir_path, "opta.yaml")
 main_schema = yamale.make_schema(main_schema_path, validators=validators)
 
