@@ -16,4 +16,4 @@ service-schema:
 env:
   name: str()
   path: str()
-  vars: map()
+  variables: map()
