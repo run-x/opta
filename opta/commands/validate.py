@@ -30,10 +30,18 @@ class Module(Validator):
 
         module_schema = yamale.make_schema(module_schema_path)
         module_data = [(value, None)]
+
+        # This is an array of `ValidationResult`s, each of which has an
+        # array of errors in its `errors` field
         validation_results = yamale.validate(
             module_schema, module_data, _raise_error=False
         )
-        return [result.errors for result in validation_results]
+
+        all_errors = []
+        for result in validation_results:
+            all_errors.extend(result.errors)
+
+        return all_errors
 
 
 validators = DefaultValidators.copy()
