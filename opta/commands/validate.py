@@ -30,10 +30,10 @@ class Module(Validator):
 
         module_schema = yamale.make_schema(module_schema_path)
         module_data = [(value, None)]
-        validation_result = yamale.validate(
+        validation_results = yamale.validate(
             module_schema, module_data, _raise_error=False
         )
-        return validation_result.errors
+        return [result.errors for result in validation_results]
 
 
 validators = DefaultValidators.copy()
