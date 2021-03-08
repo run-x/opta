@@ -1,9 +1,9 @@
 import os
 
 from click.testing import CliRunner
-from yamale.yamale_error import YamaleError
 
 from opta.cli import cli
+from opta.exceptions import UserErrors
 
 REGISTRY_URL = "889760294590.dkr.ecr.us-east-1.amazonaws.com/test-service-runx-app"
 TERRAFORM_OUTPUTS = {"docker_repo_url": REGISTRY_URL}
@@ -39,11 +39,9 @@ def test_wrong_type() -> None:
 
     runner = CliRunner()
     result = runner.invoke(cli, ["validate", "-c", test_file])
-    assert isinstance(result.exception, YamaleError)
-
-    results = result.exception.results
-    assert len(results) == 1
-    assert "org_name: '1' is not a str." in results[0].errors[0]
+    assert result.exit_code == 1
+    assert isinstance(result.exception, UserErrors)
+    assert "org_name: '1' is not a str." in result.output
 
 
 def test_invalid_module_type() -> None:
@@ -56,11 +54,9 @@ def test_invalid_module_type() -> None:
 
     runner = CliRunner()
     result = runner.invoke(cli, ["validate", "-c", test_file])
-    assert isinstance(result.exception, YamaleError)
-
-    results = result.exception.results
-    assert len(results) == 1
-    assert "fake-module-type is not a valid module type" in results[0].errors[0]
+    assert result.exit_code == 1
+    assert isinstance(result.exception, UserErrors)
+    assert "fake-module-type is not a valid module type" in result.output
 
 
 def test_unexpected_field() -> None:
@@ -73,11 +69,9 @@ def test_unexpected_field() -> None:
 
     runner = CliRunner()
     result = runner.invoke(cli, ["validate", "-c", test_file])
-    assert isinstance(result.exception, YamaleError)
-
-    results = result.exception.results
-    assert len(results) == 1
-    assert "Unexpected element" in results[0].errors[0]
+    assert result.exit_code == 1
+    assert isinstance(result.exception, UserErrors)
+    assert "Unexpected element" in result.output
 
 
 def test_unexpected_field_in_module() -> None:
@@ -90,8 +84,6 @@ def test_unexpected_field_in_module() -> None:
 
     runner = CliRunner()
     result = runner.invoke(cli, ["validate", "-c", test_file])
-    assert isinstance(result.exception, YamaleError)
-
-    results = result.exception.results
-    assert len(results) == 1
-    assert "Unexpected element" in results[0].errors[0]
+    assert result.exit_code == 1
+    assert isinstance(result.exception, UserErrors)
+    assert "Unexpected element" in result.output
