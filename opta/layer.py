@@ -11,6 +11,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 import git
 import yaml
 
+from opta.commands.validate import validate_yaml
 from opta.constants import REGISTRY
 from opta.exceptions import UserErrors
 from opta.module import Module
@@ -80,6 +81,8 @@ class Layer:
             conf = yaml.load(open(config), Loader=yaml.Loader)
         else:
             raise UserErrors(f"File {config} not found")
+
+        validate_yaml(config)
         conf["path"] = config
         return cls.load_from_dict(conf, env)
 

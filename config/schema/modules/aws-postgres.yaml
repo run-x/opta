@@ -1,0 +1,7 @@
+type: regex('aws-postgres')
+name: str(required=False)
+env_name: str(required=False)
+layer_name: str(required=False)
+module_name: str(required=False)
+engine_version: any(required=False)
+instance_class: any(required=False)

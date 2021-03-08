@@ -15,6 +15,7 @@ class TestGenerator:
     def test_gen(self, mocker: MockFixture) -> None:
         mocker.patch("opta.layer.open")
         mocker.patch("opta.layer.os.path.exists")
+        mocker.patch("opta.layer.validate_yaml")
 
         test_gen_file_path = "pytest_main.tf.json"
         mocker.patch("opta.core.generator.TF_FILE_PATH", test_gen_file_path)
@@ -48,6 +49,7 @@ class TestGenerator:
 
         mocker.patch("opta.layer.open")
         mocker.patch("opta.layer.os.path.exists")
+        mocker.patch("opta.layer.validate_yaml")
 
         opta_config, gen_tf_file = BASIC_APPLY
         opta_config = opta_config.copy()

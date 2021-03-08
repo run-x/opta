@@ -33,6 +33,7 @@ getmac = "<1"
 requests = ">=2.0,<3"
 kubernetes = ">=12.0,<13"
 python-hcl2 = ">=2.0,<3"
+yamale = ">=3.0,<4"
 
 [requires]
 python_version = "3.8"
