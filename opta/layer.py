@@ -83,6 +83,7 @@ class Layer:
             raise UserErrors(f"File {config} not found")
 
         validate_yaml(config)
+        conf["path"] = config
         return cls.load_from_dict(conf, env)
 
     @classmethod
@@ -98,7 +99,12 @@ class Layer:
             potential_envs: Dict[str, Tuple] = {}
             for env_meta in environments:
                 env_name = env_meta["name"]
-                current_parent = cls.load_from_yaml(env_meta["path"], None)
+                parent_path: str = env_meta["path"]
+                if not parent_path.startswith("git@") and not parent_path.startswith("/"):
+                    parent_path = os.path.join(
+                        os.path.dirname(conf["path"]), env_meta["path"]
+                    )
+                current_parent = cls.load_from_yaml(parent_path, None)
                 if current_parent.parent is not None:
                     raise UserErrors(
                         "A parent can not have a parent, only one level of parent-child allowed."

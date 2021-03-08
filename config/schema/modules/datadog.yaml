@@ -1,0 +1,5 @@
+type: regex('datadog')
+env_name: str(required=False)
+layer_name: str(required=False)
+module_name: str(required=False)
+api_key: str(required=False)

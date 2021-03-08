@@ -1,9 +1,8 @@
-name: blahZAs
-org_name: baloney
-providers:
-  aws:
-    region: us-east-1
-    account_id: 12345
+environments:
+  - path: "./dummy_config_parent.yaml"
+    name: "dummy-env"
+    variables: {}
+name: dummy-config-1
 modules:
   - name: database
     type: aws-postgres
@@ -29,7 +28,7 @@ modules:
       - redis
       - docdb
       - bucket1:
-        - read
+          - read
       - bucket2:
-        - write
+          - write
       - bucket3
