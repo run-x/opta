@@ -1,0 +1,16 @@
+name: staging-2
+org_name: jd-opta
+providers:
+  aws:
+    region: us-east-1
+    account_id: 889760294590
+modules:
+  - type: aws-base
+  - type: aws-dns
+    domain: staging2.runx.dev
+    delegated: true
+  - type: aws-eks
+    max_nodes: 6
+  - type: k8s-base
+  - type: datadog
+  - type: fake-module-type

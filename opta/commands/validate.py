@@ -41,14 +41,6 @@ class Opta(Validator):
         if not isinstance(value, Mapping):
             return ["opta.yaml files should be a map"]
 
-        if "org_name" not in value and "name" not in value:
-            return [
-                """
-                Unable to determine whether this file is an environment file or a service file. Service files
-                Environment files should contain an 'org_name' field, and service files should contain a `name` field.
-            """
-            ]
-
         if "org_name" in value:
             schema_path = path.join(schema_dir_path, "environment.yaml")
         else:
