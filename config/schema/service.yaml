@@ -1,0 +1,8 @@
+environments: list(include('env'), required=False)
+name: str()
+modules: list(module())
+---
+env:
+  name: str()
+  path: str()
+  variables: map()

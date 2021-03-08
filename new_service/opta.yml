@@ -1,8 +1,8 @@
 environments:
   - name: staging
     path: "../new_env/opta.yml"
-    vars:
-      - max_nodes: 2
+    variables:
+      max_nodes: 2
 name: jd-test-2
 modules:
   - name: app

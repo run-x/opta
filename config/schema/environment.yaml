@@ -1,0 +1,7 @@
+name: str()
+org_name: str()
+providers:
+  aws:
+    region: str()
+    account_id: int()
+modules: list(module())

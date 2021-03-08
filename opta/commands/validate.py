@@ -9,6 +9,54 @@ from yamale.validators import DefaultValidators, Validator
 from opta.constants import schema_dir_path
 
 
+def _get_yamale_errors(data: Any, schema_path: str) -> List[str]:
+    validators = DefaultValidators.copy()
+    validators[Module.tag] = Module
+
+    schema = yamale.make_schema(schema_path, validators=validators)
+    formatted_data = [(data, None)]
+
+    # This is an array of `ValidationResult`s, each of which has an
+    # array of errors in its `errors` field
+    validation_results = yamale.validate(schema, formatted_data, _raise_error=False)
+    all_errors = []
+    for result in validation_results:
+        all_errors.extend(result.errors)
+
+    return all_errors
+
+
+class Opta(Validator):
+    """Opta Yaml Validator"""
+
+    tag = "opta"
+    constaints: List = []
+
+    def _is_valid(self, value: Any) -> bool:
+        if not isinstance(value, Mapping):
+            return False
+        return "org_name" in value or "name" in value
+
+    def validate(self, value: Any) -> List[str]:
+        if not isinstance(value, Mapping):
+            return ["opta.yaml files should be a map"]
+
+        if "org_name" not in value and "name" not in value:
+            return [
+                """
+                Unable to determine whether this file is an environment file or a service file. Service files
+                Environment files should contain an 'org_name' field, and service files should contain a `name` field.
+            """
+            ]
+
+        if "org_name" in value:
+            schema_path = path.join(schema_dir_path, "environment.yaml")
+        else:
+            schema_path = path.join(schema_dir_path, "service.yaml")
+
+        return _get_yamale_errors(value, schema_path)
+
+
 class Module(Validator):
     """Custom Module Validator"""
 
@@ -28,24 +76,13 @@ class Module(Validator):
         if not path.isfile(module_schema_path):
             return [f"{type} is not a valid module type"]
 
-        module_schema = yamale.make_schema(module_schema_path)
-        module_data = [(value, None)]
-
-        # This is an array of `ValidationResult`s, each of which has an
-        # array of errors in its `errors` field
-        validation_results = yamale.validate(
-            module_schema, module_data, _raise_error=False
-        )
-
-        all_errors = []
-        for result in validation_results:
-            all_errors.extend(result.errors)
-
-        return all_errors
+        return _get_yamale_errors(value, module_schema_path)
 
 
 validators = DefaultValidators.copy()
-validators[Module.tag] = Module
+validators[Opta.tag] = Opta
+
+print(validators)
 main_schema_path = path.join(schema_dir_path, "opta.yaml")
 main_schema = yamale.make_schema(main_schema_path, validators=validators)
 
