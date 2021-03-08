@@ -6,7 +6,7 @@ import boto3
 from botocore.config import Config
 from botocore.exceptions import ClientError
 
-from opta.core.aws import AWS
+from opta.core.aws import AWS, get_aws_resource_id
 from opta.exceptions import UserErrors
 from opta.nice_subprocess import nice_run
 from opta.utils import deep_merge, logger
@@ -81,7 +81,7 @@ class Terraform:
                 continue
 
             try:
-                resource_id = AWS.get_resource_id(aws_resources[resource])
+                resource_id = get_aws_resource_id(aws_resources[resource])
                 cls.import_resource(resource, resource_id)
                 stale_resources.append(resource)
             except Exception:

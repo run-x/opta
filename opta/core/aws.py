@@ -15,7 +15,6 @@ class AWS:
 
         providers = layer.root().gen_providers(0)["provider"]
         self.region = providers["aws"]["region"]
-        self.account_id = providers["aws"]["allowed_account_ids"][0]
 
     # Fetches AWS resources tagged with "opta: true"
     # Works on most resources, but not all (ex. IAM, elasticache subnet groups)
@@ -53,24 +52,24 @@ class AWS:
 
         return resources_map
 
-    # AWS Resource ARNs can be one of the following 3 formats:
-    # 1). arn:partition:service:region:account-id:resource-id
-    # 2). arn:partition:service:region:account-id:resource-type/resource-id
-    # 3). arn:partition:service:region:account-id:resource-type:resource-id
-    @staticmethod
-    def get_resource_id(resource_arn: str) -> str:
-        arn_parts = resource_arn.split(":")
 
-        # Format 1:
-        if len(arn_parts) == 6 and "/" not in arn_parts[-1]:
-            return arn_parts[-1]
+# AWS Resource ARNs can be one of the following 3 formats:
+# 1). arn:partition:service:region:account-id:resource-id
+# 2). arn:partition:service:region:account-id:resource-type/resource-id
+# 3). arn:partition:service:region:account-id:resource-type:resource-id
+def get_aws_resource_id(resource_arn: str) -> str:
+    arn_parts = resource_arn.split(":")
 
-        # Format 2
-        if len(arn_parts) == 6 and "/" in arn_parts[-1]:
-            return arn_parts[-1].split("/")[1]
+    # Format 1:
+    if len(arn_parts) == 6 and "/" not in arn_parts[-1]:
+        return arn_parts[-1]
 
-        # Format 3
-        if len(arn_parts) == 7:
-            return arn_parts[-1]
+    # Format 2
+    if len(arn_parts) == 6 and "/" in arn_parts[-1]:
+        return arn_parts[-1].split("/")[1]
 
-        raise Exception(f"Not a valid AWS arn: {resource_arn}")
+    # Format 3
+    if len(arn_parts) == 7:
+        return arn_parts[-1]
+
+    raise Exception(f"Not a valid AWS arn: {resource_arn}")
