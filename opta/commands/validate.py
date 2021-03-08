@@ -4,9 +4,11 @@ from typing import Any, List
 
 import click
 import yamale
+from colored import attr, fg
 from yamale.validators import DefaultValidators, Validator
 
 from opta.constants import schema_dir_path
+from opta.exceptions import UserErrors
 
 
 def _get_yamale_errors(data: Any, schema_path: str) -> List[str]:
@@ -78,12 +80,33 @@ main_schema_path = path.join(schema_dir_path, "opta.yaml")
 main_schema = yamale.make_schema(main_schema_path, validators=validators)
 
 
-def validate_yaml(config_file_path: str) -> None:
+def validate_yaml(config_file_path: str) -> List[str]:
     data = yamale.make_data(config_file_path)
-    yamale.validate(main_schema, data)
+    yamale_result = yamale.validate(main_schema, data, _raise_error=False)
+    all_errors = []
+    for result in yamale_result:
+        all_errors.extend(result.errors)
+
+    return all_errors
 
 
 @click.command()
 @click.option("-c", "--config", default="opta.yml", help="Opta config file.")
 def validate(config: str) -> None:
-    validate_yaml(config)
+    errors = validate_yaml(config)
+    if len(errors) == 0:
+        print(fg("green"), end="")
+        print(attr("bold"), end="")
+        print(f"{config} is a valid opta file!")
+        print(attr("reset"), end="")
+    else:
+        print(fg("red"), end="")
+        print(attr("bold"), end="")
+        print("Opta file validation failed with errors:")
+        print(attr("reset"), end="")
+
+        print(fg("red"), end="")
+        for error in errors:
+            print(f"  {error}")
+        print(attr("reset"), end="")
+        raise UserErrors(f"{config} is not a valid Opta file.")
