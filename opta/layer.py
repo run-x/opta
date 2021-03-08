@@ -259,3 +259,11 @@ class Layer:
         if provider_name == "aws" and "account_id" in provider_data:
             aws_account_id = provider_data.pop("account_id")
             provider_data["allowed_account_ids"] = [aws_account_id]
+
+    # Get the root-most layer
+    def root(self) -> "Layer":
+        layer = self
+        while layer.parent is not None:
+            layer = layer.parent
+
+        return layer

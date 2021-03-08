@@ -49,6 +49,7 @@ class Terraform:
     @classmethod
     def apply(
         cls,
+        layer: "Layer",
         *tf_flags: str,
         no_init: Optional[bool] = False,
         quiet: Optional[bool] = False,
@@ -62,12 +63,52 @@ class Terraform:
         try:
             nice_run(["terraform", "apply", *tf_flags], check=True, **kwargs)
         except Exception as err:
-            cls.rollback()
+            print(err)
+            print("Terraform apply failed, rolling back stale resources.")
+            cls.rollback(layer)
 
     @classmethod
-    def rollback(cls, layer: "Layer"):
+    def rollback(cls, layer: "Layer") -> None:
         aws_resources = AWS(layer).get_opta_resources()
-        terraform_resources = cls.get_existing_resources()
+        print("aws resources", aws_resources)
+        terraform_resources = set(cls.get_existing_resources(layer))
+        print("terraform resources", terraform_resources)
+
+        # Import all stale resources into terraform state (so they can be destroyed later).
+        stale_resources = []
+        for resource in aws_resources:
+            if resource in terraform_resources:
+                continue
+
+            try:
+                resource_id = AWS.get_resource_id(aws_resources[resource])
+                cls.import_resource(resource, resource_id)
+                stale_resources.append(resource)
+            except Exception:
+                print(
+                    f"Resource {resource_id} failed to import. It probably no longer exists, skipping."
+                )
+                continue
+
+        # Skip destroy if no resources are stale.
+        if len(stale_resources) == 0:
+            return None
+
+        # Destroy stale terraform resources.
+        destroy_targets = [f"-target={resource}" for resource in stale_resources]
+        cls.destroy(*destroy_targets)
+
+    @classmethod
+    def import_resource(cls, tf_resource_address: str, aws_resource_id: str) -> None:
+        print(f"terraform import {tf_resource_address} {aws_resource_id}")
+        nice_run(
+            ["terraform", "import", tf_resource_address, aws_resource_id], check=True
+        )
+
+    @classmethod
+    def destroy(cls, *tf_flags: str) -> None:
+        print(f"terraform destroy {tf_flags}")
+        nice_run(["terraform", "destroy", *tf_flags], check=True)
 
     @classmethod
     def plan(cls, *tf_flags: str, quiet: Optional[bool] = False) -> None:
@@ -85,8 +126,7 @@ class Terraform:
     @classmethod
     def get_existing_modules(cls, layer: "Layer") -> Set[str]:
         existing_resources = cls.get_existing_resources(layer)
-        module_resources = [r for r in existing_resources if r.startswith("module")]
-        return set(map(lambda r: r.split(".")[1], module_resources))
+        return set(map(lambda r: r.split(".")[1], existing_resources))
 
     @classmethod
     def get_existing_resources(cls, layer: "Layer") -> List[str]:
@@ -98,11 +138,19 @@ class Terraform:
                 )
                 return []
 
-        return (
+        resource_state = (
             nice_run(["terraform", "state", "list"], check=True, capture_output=True)
             .stdout.decode("utf-8")
             .split("\n")
         )
+        # Filter out all `data.*` sources. Only care about module resources
+        module_resources = [r for r in resource_state if r.startswith("module")]
+        # Sometimes module resource addresses may have [0] or [1] at the end, remove it.
+        module_resources = list(
+            map(lambda r: r[0 : r.find("[")] if "[" in r else r, module_resources)
+        )
+
+        return module_resources
 
     @classmethod
     def download_state(
