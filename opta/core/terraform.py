@@ -1,4 +1,5 @@
 import json
+import logging
 from subprocess import DEVNULL, PIPE
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
 
@@ -63,9 +64,9 @@ class Terraform:
             kwargs["stdout"] = DEVNULL
         try:
             nice_run(["terraform", "apply", *tf_flags], check=True, **kwargs)
-        except Exception as err:
-            print(err)
-            print("Terraform apply failed, rolling back stale resources.")
+        except Exception as e:
+            logging.error(e)
+            logging.info("Terraform apply failed, rolling back stale resources.")
             cls.rollback(layer)
 
     @classmethod
@@ -73,9 +74,7 @@ class Terraform:
         amplitude_client.send_event(amplitude_client.ROLLBACK_EVENT)
 
         aws_resources = AWS(layer).get_opta_resources()
-        print("aws resources", aws_resources)
         terraform_resources = set(cls.get_existing_resources(layer))
-        print("terraform resources", terraform_resources)
 
         # Import all stale resources into terraform state (so they can be destroyed later).
         stale_resources = []
@@ -88,7 +87,7 @@ class Terraform:
                 cls.import_resource(resource, resource_id)
                 stale_resources.append(resource)
             except Exception:
-                print(
+                logging.debug(
                     f"Resource {resource_id} failed to import. It probably no longer exists, skipping."
                 )
                 continue
@@ -103,7 +102,6 @@ class Terraform:
 
     @classmethod
     def import_resource(cls, tf_resource_address: str, aws_resource_id: str) -> None:
-        print(f"terraform import {tf_resource_address} {aws_resource_id}")
         nice_run(
             ["terraform", "import", tf_resource_address, aws_resource_id], check=True
         )
