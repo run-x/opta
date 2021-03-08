@@ -13,7 +13,8 @@ class TestTerraform:
 
         # Calling terraform apply should also call terraform init
         tf_init = mocker.patch("opta.core.terraform.Terraform.init")
-        Terraform.apply()
+        fake_layer = mocker.Mock(spec=Layer)
+        Terraform.apply(fake_layer)
         assert tf_init.call_count == 1
 
         # Calling terraform plan should also call terraform init

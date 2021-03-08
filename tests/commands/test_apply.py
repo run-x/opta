@@ -37,7 +37,7 @@ def test_apply(mocker: MockFixture) -> None:
     runner = CliRunner()
     result = runner.invoke(apply)
     assert result.exit_code == 0
-    tf_apply.assert_called_once_with(TF_PLAN_PATH, no_init=True, quiet=True)
+    tf_apply.assert_called_once_with(mocked_layer, TF_PLAN_PATH, no_init=True, quiet=True)
     tf_plan.assert_called_once_with(
         "-lock=false",
         "-input=false",

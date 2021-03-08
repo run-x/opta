@@ -6,6 +6,7 @@ import boto3
 from botocore.config import Config
 from botocore.exceptions import ClientError
 
+from opta.amplitude import amplitude_client
 from opta.core.aws import AWS, get_aws_resource_id
 from opta.exceptions import UserErrors
 from opta.nice_subprocess import nice_run
@@ -69,6 +70,8 @@ class Terraform:
 
     @classmethod
     def rollback(cls, layer: "Layer") -> None:
+        amplitude_client.send_event(amplitude_client.ROLLBACK_EVENT)
+
         aws_resources = AWS(layer).get_opta_resources()
         print("aws resources", aws_resources)
         terraform_resources = set(cls.get_existing_resources(layer))
@@ -107,7 +110,6 @@ class Terraform:
 
     @classmethod
     def destroy(cls, *tf_flags: str) -> None:
-        print(f"terraform destroy {tf_flags}")
         nice_run(["terraform", "destroy", *tf_flags], check=True)
 
     @classmethod
