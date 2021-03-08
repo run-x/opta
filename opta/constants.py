@@ -3,8 +3,8 @@ import time
 
 import yaml
 
-schema_path = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)), "config", "schema.yaml"
+schema_dir_path = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)), "config", "schema"
 )
 registry_path = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), "config", "registry.yaml"
