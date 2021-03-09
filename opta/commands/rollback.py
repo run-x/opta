@@ -9,7 +9,7 @@ from opta.layer import Layer
 
 # Rollback automatically runs when terraform apply fails.
 # This explicit command for rollback is primarily for debugging/development.
-@click.command()
+@click.command(hidden=True)
 @click.option("-c", "--config", default="opta.yml", help="Opta config file.")
 @click.option(
     "-e", "--env", default=None, help="The env to use when loading the config file."
