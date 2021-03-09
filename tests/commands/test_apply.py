@@ -47,7 +47,7 @@ def test_apply(mocker: MockFixture) -> None:
         quiet=True,
     )
     mocked_click.confirm.assert_called_once_with(
-        "The above are the planned changes for your opta run. Do you approve (yes/no)?",
+        "The above are the planned changes for your opta run. Do you approve?",
         abort=True,
     )
     tf_show.assert_called_once_with(TF_PLAN_PATH)
