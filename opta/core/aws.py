@@ -1,9 +1,7 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import boto3
 from botocore.config import Config
-
-from opta.utils import deep_merge
 
 if TYPE_CHECKING:
     from opta.layer import Layer
@@ -26,13 +24,9 @@ class AWS:
     #    "terraform.address" : "aws resource arn"
     # }
     def get_opta_resources(self) -> dict:
-        regional_resources = self._get_opta_resources(self.region)
-        global_resources = self._get_opta_resources()
-        return deep_merge(regional_resources, global_resources)
-
-    def _get_opta_resources(self, region: Optional[str] = None) -> dict:
-        extra_args = {} if region is None else {"config": Config(region_name=region)}
-        client = boto3.client("resourcegroupstaggingapi", **extra_args)
+        client = boto3.client(
+            "resourcegroupstaggingapi", config=Config(region_name=self.region)
+        )
 
         state = client.get_resources(
             TagFilters=[
