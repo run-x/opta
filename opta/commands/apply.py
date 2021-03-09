@@ -108,7 +108,7 @@ def _apply(
             )
             Terraform.show(TF_PLAN_PATH)
             click.confirm(
-                "The above are the planned changes for your opta run. Do you approve (yes/no)?",
+                "The above are the planned changes for your opta run. Do you approve?",
                 abort=True,
             )
             logger.info("Applying your changes (might take a minute)")
