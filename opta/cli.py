@@ -9,6 +9,7 @@ import click
 import opta.sentry  # noqa: F401 This leads to initialization of sentry sdk
 from opta.amplitude import amplitude_client
 from opta.commands.apply import apply
+from opta.commands.cleanup import cleanup
 from opta.commands.deploy import deploy
 from opta.commands.destroy import destroy
 from opta.commands.events import events
@@ -67,6 +68,7 @@ def _cleanup() -> None:
 
 # Add commands
 cli.add_command(apply)
+cli.add_command(cleanup)
 cli.add_command(deploy)
 cli.add_command(destroy)
 cli.add_command(rollback)
