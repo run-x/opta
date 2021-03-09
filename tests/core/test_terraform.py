@@ -13,7 +13,8 @@ class TestTerraform:
 
         # Calling terraform apply should also call terraform init
         tf_init = mocker.patch("opta.core.terraform.Terraform.init")
-        Terraform.apply()
+        fake_layer = mocker.Mock(spec=Layer)
+        Terraform.apply(fake_layer)
         assert tf_init.call_count == 1
 
         # Calling terraform plan should also call terraform init
@@ -40,6 +41,51 @@ class TestTerraform:
         mocked_layer = mocker.Mock(spec=Layer)
         mocked_layer.name = "blah"
         assert {"redis", "doc_db"} == Terraform.get_existing_modules(mocked_layer)
+
+    def test_rollback(self, mocker: MockFixture) -> None:
+        mocker.patch("opta.core.terraform.nice_run")
+
+        # Mock existing terraform resources
+        mocker.patch(
+            "opta.core.terraform.Terraform.get_existing_resources",
+            return_value=["fake.tf.resource.address.1"],
+        )
+
+        # Mock existing AWS resources
+        # Note that `fake.tf.resource.address.2` is a stale resource that is
+        # not in the terraform state.
+        mocked_aws_class = mocker.patch("opta.core.terraform.AWS")
+        mocked_aws_instance = mocked_aws_class.return_value
+        mocked_aws_instance.get_opta_resources.return_value = {
+            "fake.tf.resource.address.1": "fake:aws:us-east-1:resource:arn:i-1",
+            "fake.tf.resource.address.2": "fake:aws:us-east-1:resource:arn:i-2",
+        }
+
+        mocked_import = mocker.patch("opta.core.terraform.Terraform.import_resource")
+        mocked_destroy = mocker.patch("opta.core.terraform.Terraform.destroy")
+
+        # Run rollback
+        fake_layer = mocker.Mock(spec=Layer)
+        Terraform.rollback(fake_layer)
+
+        # The stale resource should be imported and destroyed.
+        mocked_import.assert_called_once_with("fake.tf.resource.address.2", "i-2")
+        mocked_destroy.assert_called_once_with("-target=fake.tf.resource.address.2")
+
+        # Test rollback again, but without the stale resource.
+        del mocked_aws_instance.get_opta_resources.return_value[
+            "fake.tf.resource.address.2"
+        ]
+
+        mocked_import = mocker.patch("opta.core.terraform.Terraform.import_resource")
+        mocked_destroy = mocker.patch("opta.core.terraform.Terraform.destroy")
+
+        # Run rollback
+        Terraform.rollback(mocker.Mock(spec=Layer))
+
+        # Import and destroy should *not* be called.
+        assert not mocked_import.called
+        assert not mocked_destroy.called
 
     def test_download_state(self, mocker: MockFixture) -> None:
         layer = mocker.Mock(spec=Layer)

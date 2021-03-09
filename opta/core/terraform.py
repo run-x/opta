@@ -1,4 +1,5 @@
 import json
+import logging
 from subprocess import DEVNULL, PIPE
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
 
@@ -6,6 +7,8 @@ import boto3
 from botocore.config import Config
 from botocore.exceptions import ClientError
 
+from opta.amplitude import amplitude_client
+from opta.core.aws import AWS, get_aws_resource_id
 from opta.exceptions import UserErrors
 from opta.nice_subprocess import nice_run
 from opta.utils import deep_merge, logger
@@ -48,6 +51,7 @@ class Terraform:
     @classmethod
     def apply(
         cls,
+        layer: "Layer",
         *tf_flags: str,
         no_init: Optional[bool] = False,
         quiet: Optional[bool] = False,
@@ -58,7 +62,53 @@ class Terraform:
         if quiet:
             kwargs["stderr"] = PIPE
             kwargs["stdout"] = DEVNULL
-        nice_run(["terraform", "apply", *tf_flags], check=True, **kwargs)
+        try:
+            nice_run(["terraform", "apply", *tf_flags], check=True, **kwargs)
+        except Exception as e:
+            logging.error(e)
+            logging.info("Terraform apply failed, rolling back stale resources.")
+            cls.rollback(layer)
+
+    @classmethod
+    def rollback(cls, layer: "Layer") -> None:
+        amplitude_client.send_event(amplitude_client.ROLLBACK_EVENT)
+
+        aws_resources = AWS(layer).get_opta_resources()
+        terraform_resources = set(cls.get_existing_resources(layer))
+
+        # Import all stale resources into terraform state (so they can be destroyed later).
+        stale_resources = []
+        for resource in aws_resources:
+            if resource in terraform_resources:
+                continue
+
+            try:
+                resource_id = get_aws_resource_id(aws_resources[resource])
+                cls.import_resource(resource, resource_id)
+                stale_resources.append(resource)
+            except Exception:
+                logging.debug(
+                    f"Resource {resource_id} failed to import. It probably no longer exists, skipping."
+                )
+                continue
+
+        # Skip destroy if no resources are stale.
+        if len(stale_resources) == 0:
+            return None
+
+        # Destroy stale terraform resources.
+        destroy_targets = [f"-target={resource}" for resource in stale_resources]
+        cls.destroy(*destroy_targets)
+
+    @classmethod
+    def import_resource(cls, tf_resource_address: str, aws_resource_id: str) -> None:
+        nice_run(
+            ["terraform", "import", tf_resource_address, aws_resource_id], check=True
+        )
+
+    @classmethod
+    def destroy(cls, *tf_flags: str) -> None:
+        nice_run(["terraform", "destroy", *tf_flags], check=True)
 
     @classmethod
     def plan(cls, *tf_flags: str, quiet: Optional[bool] = False) -> None:
@@ -76,8 +126,7 @@ class Terraform:
     @classmethod
     def get_existing_modules(cls, layer: "Layer") -> Set[str]:
         existing_resources = cls.get_existing_resources(layer)
-        module_resources = [r for r in existing_resources if r.startswith("module")]
-        return set(map(lambda r: r.split(".")[1], module_resources))
+        return set(map(lambda r: r.split(".")[1], existing_resources))
 
     @classmethod
     def get_existing_resources(cls, layer: "Layer") -> List[str]:
@@ -89,11 +138,19 @@ class Terraform:
                 )
                 return []
 
-        return (
+        resource_state = (
             nice_run(["terraform", "state", "list"], check=True, capture_output=True)
             .stdout.decode("utf-8")
             .split("\n")
         )
+        # Filter out all `data.*` sources. Only care about module resources
+        module_resources = [r for r in resource_state if r.startswith("module")]
+        # Sometimes module resource addresses may have [0] or [1] at the end, remove it.
+        module_resources = list(
+            map(lambda r: r[0 : r.find("[")] if "[" in r else r, module_resources)
+        )
+
+        return module_resources
 
     @classmethod
     def download_state(

@@ -10,12 +10,14 @@ import opta.sentry  # noqa: F401 This leads to initialization of sentry sdk
 from opta.amplitude import amplitude_client
 from opta.commands.apply import apply
 from opta.commands.deploy import deploy
+from opta.commands.destroy import destroy
 from opta.commands.events import events
 from opta.commands.inspect_cmd import inspect
 from opta.commands.kubectl import configure_kubectl
 from opta.commands.logs import logs
 from opta.commands.output import output
 from opta.commands.push import push
+from opta.commands.rollback import rollback
 from opta.commands.secret import secret
 from opta.commands.shell import shell
 from opta.commands.validate import validate
@@ -66,6 +68,8 @@ def _cleanup() -> None:
 # Add commands
 cli.add_command(apply)
 cli.add_command(deploy)
+cli.add_command(destroy)
+cli.add_command(rollback)
 cli.add_command(configure_kubectl)
 cli.add_command(inspect)
 cli.add_command(logs)
