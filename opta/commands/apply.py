@@ -131,5 +131,5 @@ def _apply(
                         target=tail_namespace_events, args=(layer, 0, 1), daemon=True,
                     )
                     new_thread.start()
-            Terraform.apply(layer, TF_PLAN_PATH, no_init=True, quiet=True)
+            Terraform.apply(layer, TF_PLAN_PATH, no_init=True, quiet=False)
             logger.info("Opta updates complete!")
