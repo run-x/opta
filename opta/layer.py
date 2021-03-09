@@ -74,15 +74,17 @@ class Layer:
             t = tempfile.mkdtemp()
             # Clone into temporary dir
             git.Repo.clone_from(git_url, t, branch=branch, depth=1)
-            conf = yaml.load(open(os.path.join(t, file_path)), Loader=yaml.Loader)
+            config_path = os.path.join(t, file_path)
+            validate_yaml(config_path)
+            conf = yaml.load(open(config_path), Loader=yaml.Loader)
             shutil.rmtree(t)
         elif path.exists(config):
             logger.debug(f"Loaded the following configfile:\n{open(config).read()}")
+            validate_yaml(config)
             conf = yaml.load(open(config), Loader=yaml.Loader)
         else:
             raise UserErrors(f"File {config} not found")
 
-        validate_yaml(config)
         conf["path"] = config
         return cls.load_from_dict(conf, env)
 
@@ -259,11 +261,3 @@ class Layer:
         if provider_name == "aws" and "account_id" in provider_data:
             aws_account_id = provider_data.pop("account_id")
             provider_data["allowed_account_ids"] = [aws_account_id]
-
-    # Get the root-most layer
-    def root(self) -> "Layer":
-        layer = self
-        while layer.parent is not None:
-            layer = layer.parent
-
-        return layer
