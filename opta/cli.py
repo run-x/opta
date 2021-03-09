@@ -97,6 +97,7 @@ if __name__ == "__main__":
         sys.exit(1)
     except Exception as e:
         logger.exception(e)
+        sys.exit(1)
     finally:
         dd_listener.stop()
         dd_handler.flush()
