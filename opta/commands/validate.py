@@ -80,9 +80,9 @@ main_schema_path = path.join(schema_dir_path, "opta.yaml")
 main_schema = yamale.make_schema(main_schema_path, validators=validators)
 
 
-def validate_yaml(config_file_path: str) -> List[str]:
+def validate_yaml(config_file_path: str, _raise_error: bool = True) -> List[str]:
     data = yamale.make_data(config_file_path)
-    yamale_result = yamale.validate(main_schema, data, _raise_error=False)
+    yamale_result = yamale.validate(main_schema, data, _raise_error=_raise_error)
     all_errors = []
     for result in yamale_result:
         all_errors.extend(result.errors)
@@ -93,7 +93,7 @@ def validate_yaml(config_file_path: str) -> List[str]:
 @click.command()
 @click.option("-c", "--config", default="opta.yml", help="Opta config file.")
 def validate(config: str) -> None:
-    errors = validate_yaml(config)
+    errors = validate_yaml(config, _raise_error=False)
     if len(errors) == 0:
         print(fg("green"), end="")
         print(attr("bold"), end="")
