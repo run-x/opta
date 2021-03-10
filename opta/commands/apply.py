@@ -5,6 +5,7 @@ import click
 
 from opta.amplitude import amplitude_client
 from opta.constants import TF_PLAN_PATH
+from opta.core.aws import AWS
 from opta.core.generator import gen, gen_opta_resource_tags
 from opta.core.kubernetes import tail_module_log, tail_namespace_events
 from opta.core.terraform import Terraform
@@ -74,6 +75,7 @@ def _apply(
     layer.variables["image_tag"] = image_tag
     Terraform.create_state_storage(layer)
     gen_opta_resource_tags(layer)
+    AWS(layer).upload_opta_config(config)
 
     existing_modules: Set[str] = set()
     for module_idx, current_modules, total_block_count in gen(layer):
