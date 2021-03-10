@@ -24,7 +24,7 @@ def destroy(config: str, env: Optional[str]) -> None:
     destroy_order = [*children_layers, layer]
     for layer in destroy_order:
         gen_all(layer)
-        Terraform.init()
+        Terraform.init("-reconfigure")
         Terraform.destroy()
 
 
@@ -56,9 +56,7 @@ def _fetch_all_opta_configs(bucket_name: str) -> List[str]:
     s3_client = boto3.client("s3")
 
     resp = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=s3_config_dir)
-    if resp["KeyCount"] == 0:
-        return []
-    s3_config_paths = [obj["Key"] for obj in resp["Contents"]]
+    s3_config_paths = [obj["Key"] for obj in resp.get("Contents", [])]
 
     configs = []
     for config_path in s3_config_paths:

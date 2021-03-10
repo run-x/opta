@@ -22,8 +22,8 @@ class Terraform:
     downloaded_state: Dict[str, bool] = {}
 
     @classmethod
-    def init(cls) -> None:
-        nice_run(["terraform", "init"], check=True)
+    def init(cls, *tf_flags: str) -> None:
+        nice_run(["terraform", "init", *tf_flags], check=True)
 
     # Get outputs of the current terraform state
     @classmethod
