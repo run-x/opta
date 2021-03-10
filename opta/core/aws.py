@@ -47,6 +47,7 @@ class AWS:
 
         return resources_map
 
+    # Upload the current opta config to the state bucket, under opta_config/.
     def upload_opta_config(self, config: str) -> None:
         bucket = self.layer.state_storage()
         config_path = f"opta_config/{self.layer.name}"
