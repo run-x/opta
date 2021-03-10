@@ -1,6 +1,6 @@
 from collections.abc import Mapping
 from os import path
-from typing import Any, List
+from typing import Any, List, Literal
 
 import click
 import yamale
@@ -80,33 +80,42 @@ main_schema_path = path.join(schema_dir_path, "opta.yaml")
 main_schema = yamale.make_schema(main_schema_path, validators=validators)
 
 
-def validate_yaml(config_file_path: str) -> List[str]:
+def _print_success(config_file_path: str) -> None:
+    print(fg("green"), end="")
+    print(attr("bold"), end="")
+    print(f"{config_file_path} is a valid opta file!")
+    print(attr("reset"), end="")
+
+
+def _print_errors(errors: List[str]) -> None:
+    print(fg("red"), end="")
+    print(attr("bold"), end="")
+    print("Opta file validation failed with errors:")
+    print(attr("reset"), end="")
+
+    print(fg("red"), end="")
+    for error in errors:
+        print(f"  {error}")
+    print(attr("reset"), end="")
+
+
+def validate_yaml(config_file_path: str) -> Literal[True]:
     data = yamale.make_data(config_file_path)
     yamale_result = yamale.validate(main_schema, data, _raise_error=False)
-    all_errors = []
+    errors = []
     for result in yamale_result:
-        all_errors.extend(result.errors)
+        errors.extend(result.errors)
 
-    return all_errors
+    if len(errors) == 0:
+        _print_success(config_file_path)
+    else:
+        _print_errors(errors)
+        raise UserErrors(f"{config_file_path} is not a valid Opta file.")
+
+    return True
 
 
 @click.command()
 @click.option("-c", "--config", default="opta.yml", help="Opta config file.")
 def validate(config: str) -> None:
-    errors = validate_yaml(config)
-    if len(errors) == 0:
-        print(fg("green"), end="")
-        print(attr("bold"), end="")
-        print(f"{config} is a valid opta file!")
-        print(attr("reset"), end="")
-    else:
-        print(fg("red"), end="")
-        print(attr("bold"), end="")
-        print("Opta file validation failed with errors:")
-        print(attr("reset"), end="")
-
-        print(fg("red"), end="")
-        for error in errors:
-            print(f"  {error}")
-        print(attr("reset"), end="")
-        raise UserErrors(f"{config} is not a valid Opta file.")
+    validate_yaml(config)
