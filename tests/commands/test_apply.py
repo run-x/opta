@@ -31,6 +31,7 @@ def test_apply(mocker: MockFixture) -> None:
     tf_plan = mocker.patch("opta.commands.apply.Terraform.plan")
     tf_show = mocker.patch("opta.commands.apply.Terraform.show")
     tf_create_storage = mocker.patch("opta.commands.apply.Terraform.create_state_storage")
+    mocker.patch("opta.commands.apply.AWS")
 
     # Terraform apply should be called with the configured module (fake_module) and the remote state
     # module (deleted_module) as targets.
