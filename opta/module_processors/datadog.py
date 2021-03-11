@@ -65,7 +65,8 @@ class DatadogProcessor(ModuleProcessor):
             if self.validate_api_key(value):
                 break
             logger.warn(
-                "The api key which you passed was invalid, please provide a valid api key."
+                "The api key which you passed was invalid, please provide a valid api key from "
+                "https://app.datadoghq.com/account/settings#api"
             )
         secret_value = base64.b64encode(value.encode("utf-8")).decode("utf-8")
         patch = [
