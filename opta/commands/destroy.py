@@ -78,7 +78,7 @@ def _download_all_opta_configs(bucket_name: str) -> List[str]:
     # Download every opta config file and write each to a temp file.
     for config_path in s3_config_paths:
         config_name = config_path[len(s3_config_dir) :]
-        local_config_path = f"opta-tmp-{config_name}"
+        local_config_path = f"tmp.opta.{config_name}"
         with open(local_config_path, "wb") as f:
             s3_client.download_fileobj(bucket_name, config_path, f)
 
