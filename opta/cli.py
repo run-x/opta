@@ -65,6 +65,10 @@ def _cleanup() -> None:
         except FileNotFoundError:
             pass
 
+    for f in os.listdir("."):
+        if os.path.isfile(f) and f.startswith("tmp.opta."):
+            os.remove(f)
+
 
 # Add commands
 cli.add_command(apply)
