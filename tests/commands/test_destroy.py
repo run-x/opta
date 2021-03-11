@@ -25,7 +25,7 @@ def test_destroy(mocker: MockFixture) -> None:
 
     mocker.patch(
         "opta.commands.destroy._download_all_opta_configs",
-        return_value=[FAKE_SERVICE_CONFIG],
+        return_value=[FAKE_ENV_CONFIG, FAKE_SERVICE_CONFIG],
     )
 
     mocked_gen_all = mocker.patch("opta.commands.destroy.gen_all")
