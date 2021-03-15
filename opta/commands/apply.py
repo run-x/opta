@@ -1,5 +1,5 @@
 from threading import Thread
-from typing import Optional, Set
+from typing import List, Optional, Set
 
 import click
 
@@ -48,6 +48,12 @@ from opta.utils import is_tool, logger
     help="Run tf plan, but don't lock state file",
     hidden=True,
 )
+@click.option(
+    "--auto-approve",
+    is_flag=True,
+    default=False,
+    help="Automatically approve terraform plan.",
+)
 def apply(
     config: str,
     env: Optional[str],
@@ -55,9 +61,10 @@ def apply(
     max_module: Optional[int],
     image_tag: Optional[str],
     test: bool,
+    auto_approve: bool,
 ) -> None:
     """Initialize your environment or service to match the config file"""
-    _apply(config, env, refresh, max_module, image_tag, test)
+    _apply(config, env, refresh, max_module, image_tag, test, auto_approve)
 
 
 def _apply(
@@ -67,6 +74,7 @@ def _apply(
     max_module: Optional[int],
     image_tag: Optional[str],
     test: bool,
+    auto_approve: bool,
 ) -> None:
     if not is_tool("terraform"):
         raise UserErrors("Please install terraform on your machine")
@@ -109,10 +117,12 @@ def _apply(
                 quiet=True,
             )
             Terraform.show(TF_PLAN_PATH)
-            click.confirm(
-                "The above are the planned changes for your opta run. Do you approve?",
-                abort=True,
-            )
+
+            if not auto_approve:
+                click.confirm(
+                    "The above are the planned changes for your opta run. Do you approve?",
+                    abort=True,
+                )
             logger.info("Applying your changes (might take a minute)")
             if image_tag is not None:
                 service_modules = layer.get_module_by_type("k8s-service", module_idx)
@@ -133,5 +143,10 @@ def _apply(
                         target=tail_namespace_events, args=(layer, 0, 1), daemon=True,
                     )
                     new_thread.start()
-            Terraform.apply(layer, TF_PLAN_PATH, no_init=True, quiet=False)
+
+            tf_flags: List[str] = []
+            if auto_approve:
+                tf_flags.append("-auto-approve")
+
+            Terraform.apply(layer, *tf_flags, TF_PLAN_PATH, no_init=True, quiet=False)
             logger.info("Opta updates complete!")

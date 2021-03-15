@@ -62,6 +62,7 @@ class Terraform:
         if quiet:
             kwargs["stderr"] = PIPE
             kwargs["stdout"] = DEVNULL
+
         try:
             nice_run(["terraform", "apply", *tf_flags], check=True, **kwargs)
         except Exception as e:
