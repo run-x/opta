@@ -49,7 +49,10 @@ from opta.utils import is_tool, logger
     hidden=True,
 )
 @click.option(
-    "--auto-approve", is_flag=True, default=False,
+    "--auto-approve",
+    is_flag=True,
+    default=False,
+    help="Automatically approve terraform plan.",
 )
 def apply(
     config: str,
