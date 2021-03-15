@@ -97,8 +97,7 @@ class Terraform:
             return None
 
         # Destroy stale terraform resources.
-        destroy_targets = [f"-target={resource}" for resource in stale_resources]
-        cls.destroy(*destroy_targets)
+        cls.destroy_resources(layer, stale_resources)
 
     @classmethod
     def import_resource(cls, tf_resource_address: str, aws_resource_id: str) -> None:
@@ -107,8 +106,43 @@ class Terraform:
         )
 
     @classmethod
-    def destroy(cls, *tf_flags: str) -> None:
+    def destroy_resources(
+        cls, layer: "Layer", target_resources: List[str], *tf_flags: str
+    ) -> None:
+        if len(target_resources) == 0:
+            raise Exception(
+                "Target resources was specified to be destroyed, but contained an empty list"
+            )
+
+        for module in reversed(layer.modules):
+            module_address_prefix = f"module.{module.name}"
+            module_resources = [
+                resource
+                for resource in target_resources
+                if module_address_prefix in resource
+            ]
+            if len(module_resources) == 0:
+                continue
+
+            hosted_zone_resource = "module.awsdns.aws_route53_zone.public"
+            if hosted_zone_resource in module_resources:
+                cls.destroy_hosted_zone_resources(layer)
+
+            tf_flags += tuple([f"-target={resource}" for resource in module_resources])
+            nice_run(["terraform", "destroy", *tf_flags], check=True)
+
+    @classmethod
+    def destroy_all(cls, layer: "Layer", *tf_flags: str) -> None:
+        cls.destroy_hosted_zone_resources(layer)
         nice_run(["terraform", "destroy", *tf_flags], check=True)
+
+    @classmethod
+    def destroy_hosted_zone_resources(cls, layer: "Layer") -> None:
+        hosted_zone_resource = "module.awsdns.aws_route53_zone.public"
+        terraform_state = fetch_terraform_state_resources(layer)
+        if hosted_zone_resource in terraform_state:
+            zone_id = terraform_state[hosted_zone_resource]["zone_id"]
+            AWS(layer).delete_hosted_zone_records(zone_id)
 
     @classmethod
     def plan(cls, *tf_flags: str, quiet: Optional[bool] = False) -> None:
@@ -320,3 +354,29 @@ def _fetch_parent_outputs(pull_state: bool = True) -> dict:
             parent_state_outputs[output_name] = v
 
     return parent_state_outputs
+
+
+def fetch_terraform_state_resources(layer: "Layer") -> dict:
+    Terraform.download_state(layer)
+    state = Terraform.get_state()
+
+    resources = state.get("resources", [])
+
+    resources_dict = {}
+    for resource in resources:
+        address = ".".join(
+            [
+                resource.get("module", ""),
+                resource.get("type", ""),
+                resource.get("name", ""),
+            ]
+        )
+        if address == "..":
+            continue
+
+        resources_dict[address] = resource["instances"][0]["attributes"]
+        resources_dict[address]["module"] = resource.get("module", "")
+        resources_dict[address]["type"] = resource.get("type", "")
+        resources_dict[address]["name"] = resource.get("name", "")
+
+    return resources_dict

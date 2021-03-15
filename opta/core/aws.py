@@ -1,3 +1,4 @@
+from time import sleep
 from typing import TYPE_CHECKING
 
 import boto3
@@ -55,6 +56,35 @@ class AWS:
         s3_client = boto3.client("s3")
         s3_client.upload_file(config, bucket, config_path)
         logger.debug("Uploaded opta config to s3")
+
+    def delete_hosted_zone_records(self, zone_id: str) -> None:
+        client = boto3.client("route53")
+        # TODO: Pagination is necessary after 100+ records in a zone.
+        list_resp = client.list_resource_record_sets(HostedZoneId=zone_id)
+        records = list_resp["ResourceRecordSets"]
+
+        non_required_records = [
+            record for record in records if record["Type"] not in ["NS", "SOA"]
+        ]
+        if len(non_required_records) == 0:
+            return
+
+        delete_records_batch = list(
+            map(
+                lambda x: {"Action": "DELETE", "ResourceRecordSet": x},
+                non_required_records,
+            )
+        )
+        delete_resp = client.change_resource_record_sets(
+            HostedZoneId=zone_id, ChangeBatch={"Changes": delete_records_batch}
+        )
+        while delete_resp["ChangeInfo"]["Status"] == "PENDING":
+            sleep(5)
+            logger.debug("Hosted zone records delete pending...")
+            delete_resp = client.get_change(Id=delete_resp["ChangeInfo"]["Id"])
+
+        delete_status = delete_resp["ChangeInfo"]["Status"]
+        print(f"Records in hosted zone ({zone_id} deleted with status {delete_status}")
 
 
 # AWS Resource ARNs can be one of the following 3 formats:

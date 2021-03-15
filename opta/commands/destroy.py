@@ -28,7 +28,7 @@ def destroy(config: str, env: Optional[str]) -> None:
     for layer in destroy_order:
         gen_all(layer)
         Terraform.init("-reconfigure")
-        Terraform.destroy()
+        Terraform.destroy_all(layer)
 
 
 # Fetch all the children layers of the current layer.
