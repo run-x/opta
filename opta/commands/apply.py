@@ -148,5 +148,5 @@ def _apply(
             if auto_approve:
                 tf_flags.append("-auto-approve")
 
-            Terraform.apply(layer, TF_PLAN_PATH, *tf_flags, no_init=True, quiet=False)
+            Terraform.apply(layer, *tf_flags, TF_PLAN_PATH, no_init=True, quiet=False)
             logger.info("Opta updates complete!")
