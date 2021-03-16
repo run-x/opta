@@ -6,3 +6,4 @@ env:
   name: str()
   path: str()
   variables: map()
+  vars: map()
