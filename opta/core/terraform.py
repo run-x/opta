@@ -138,18 +138,26 @@ class Terraform:
                     "Could not fetch remote terraform state, assuming no resources exist yet."
                 )
                 return []
-
-        resource_state = (
-            nice_run(["terraform", "state", "list"], check=True, capture_output=True)
-            .stdout.decode("utf-8")
-            .split("\n")
-        )
-        # Filter out all `data.*` sources. Only care about module resources
-        module_resources = [r for r in resource_state if r.startswith("module")]
-        # Sometimes module resource addresses may have [0] or [1] at the end, remove it.
-        module_resources = list(
-            map(lambda r: r[0 : r.find("[")] if "[" in r else r, module_resources)
-        )
+        state = cls.get_state()
+        resources = state.get("resources", [])
+        module_resources: List[str] = []
+        resource: dict
+        for resource in resources:
+            if (
+                "module" not in resource
+                or "module" not in resource
+                or "module" not in resource
+            ):
+                continue
+            module_resources.append(
+                ".".join(
+                    [
+                        resource.get("module", ""),
+                        resource.get("type", ""),
+                        resource.get("name", ""),
+                    ]
+                )
+            )
 
         return module_resources
 
