@@ -86,10 +86,12 @@ def _apply(
     AWS(layer).upload_opta_config(config)
 
     existing_modules: Set[str] = set()
+    first_loop = True
     for module_idx, current_modules, total_block_count in gen(layer):
-        if module_idx == 0:
+        if first_loop:
             # This is set during the first iteration, since the tf file must exist.
             existing_modules = Terraform.get_existing_modules(layer)
+            first_loop = False
         configured_modules = set([x.name for x in current_modules])
         is_last_module = module_idx == total_block_count - 1
         has_new_modules = not configured_modules.issubset(existing_modules)
@@ -100,7 +102,6 @@ def _apply(
             configured_modules = configured_modules.union(untouched_modules)
 
         targets = list(map(lambda x: f"-target=module.{x}", sorted(configured_modules)))
-
         if test:
             Terraform.plan("-lock=false", *targets)
             print("Plan ran successfully, not applying since this is a test.")

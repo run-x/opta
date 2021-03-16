@@ -3,8 +3,6 @@ from pytest_mock import MockFixture
 
 from opta.core.terraform import Terraform
 from opta.layer import Layer
-from opta.utils import fmt_msg
-from tests.utils import MockedCmdOut
 
 
 class TestTerraform:
@@ -24,19 +22,38 @@ class TestTerraform:
     def test_get_modules(self, mocker: MockFixture) -> None:
         mocker.patch("opta.core.terraform.Terraform.download_state", return_value=True)
 
-        tf_state_list_output = fmt_msg(
-            """
-            ~data.aws_caller_identity.provider
-            ~data.aws_eks_cluster_auth.k8s
-            ~module.redis.data.aws_security_group.security_group[0]
-            ~module.redis.aws_elasticache_replication_group.redis_cluster
-            ~module.doc_db.data.aws_security_group.security_group[0]
-        """
-        )
-
         mocker.patch(
-            "opta.core.terraform.nice_run",
-            return_value=MockedCmdOut(tf_state_list_output),
+            "opta.core.terraform.Terraform.get_state",
+            return_value={
+                "resources": [
+                    {
+                        "module": "module.redis",
+                        "mode": "managed",
+                        "type": "aws_elasticache_replication_group",
+                        "name": "redis_cluster",
+                    },
+                    {
+                        "module": "module.redis",
+                        "mode": "data",
+                        "type": "aws_eks_cluster_auth",
+                        "name": "k8s",
+                    },
+                    {
+                        "module": "module.redis",
+                        "mode": "managed",
+                        "type": "aws_elasticache_replication_group",
+                        "name": "redis_cluster",
+                    },
+                    {
+                        "module": "module.doc_db",
+                        "mode": "data",
+                        "type": "aws_security_group",
+                        "name": "security_group",
+                    },
+                    {"mode": "data", "type": "aws_caller_identity", "name": "provider"},
+                    {"mode": "data", "type": "aws_eks_cluster_auth", "name": "k8s"},
+                ]
+            },
         )
         mocked_layer = mocker.Mock(spec=Layer)
         mocked_layer.name = "blah"
@@ -47,7 +64,7 @@ class TestTerraform:
 
         # Mock existing terraform resources
         mocker.patch(
-            "opta.core.terraform.Terraform.get_existing_resources",
+            "opta.core.terraform.Terraform.get_existing_module_resources",
             return_value=["fake.tf.resource.address.1"],
         )
 
