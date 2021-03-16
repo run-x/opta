@@ -51,8 +51,8 @@ resource "aws_eks_node_group" "node_group" {
   labels         = { node_group_name = "opta-${var.layer_name}-default" }
 
   scaling_config {
-    desired_size = var.max_nodes
     max_size     = var.max_nodes
+    desired_size = var.min_nodes
     min_size     = var.min_nodes
   }
 
