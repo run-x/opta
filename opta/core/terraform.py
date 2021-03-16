@@ -75,7 +75,7 @@ class Terraform:
         amplitude_client.send_event(amplitude_client.ROLLBACK_EVENT)
 
         aws_resources = AWS(layer).get_opta_resources()
-        terraform_resources = set(cls.get_existing_resources(layer))
+        terraform_resources = set(cls.get_existing_module_resources(layer))
 
         # Import all stale resources into terraform state (so they can be destroyed later).
         stale_resources = []
@@ -126,11 +126,11 @@ class Terraform:
 
     @classmethod
     def get_existing_modules(cls, layer: "Layer") -> Set[str]:
-        existing_resources = cls.get_existing_resources(layer)
+        existing_resources = cls.get_existing_module_resources(layer)
         return set(map(lambda r: r.split(".")[1], existing_resources))
 
     @classmethod
-    def get_existing_resources(cls, layer: "Layer") -> List[str]:
+    def get_existing_module_resources(cls, layer: "Layer") -> List[str]:
         if not cls.downloaded_state.get(layer.name, False):
             success = cls.download_state(layer)
             if not success:
@@ -145,19 +145,17 @@ class Terraform:
         for resource in resources:
             if (
                 "module" not in resource
-                or "module" not in resource
-                or "module" not in resource
+                or "type" not in resource
+                or "name" not in resource
             ):
                 continue
-            module_resources.append(
-                ".".join(
-                    [
-                        resource.get("module", ""),
-                        resource.get("type", ""),
-                        resource.get("name", ""),
-                    ]
-                )
-            )
+            resource_name_builder = list()
+            resource_name_builder.append(resource["module"])
+            if resource["mode"] == "managed":
+                resource_name_builder.append("data")
+            resource_name_builder.append(resource["type"])
+            resource_name_builder.append(resource["name"])
+            module_resources.append(".".join(resource_name_builder))
 
         return module_resources
 
