@@ -21,7 +21,7 @@ iam_policy: any(required=False)
 additional_iam_roles: any(required=False)
 min_containers: any(str(), int(), required=False)
 max_containers: any(str(), int(), required=False)
-links: list(any(str(), map()))
+links: list(any(str(), map()), required=False)
 ---
 env-var:
   name: str(required=False)
