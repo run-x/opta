@@ -40,6 +40,7 @@ def mocked_layer(mocker: MockFixture) -> Any:
 
 def test_apply(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None:
     mocked_click = mocker.patch("opta.commands.apply.click")
+    mocker.patch("opta.commands.apply.configure_kubectl")
     tf_apply = mocker.patch("opta.commands.apply.Terraform.apply")
     tf_plan = mocker.patch("opta.commands.apply.Terraform.plan")
     tf_show = mocker.patch("opta.commands.apply.Terraform.show")
@@ -71,6 +72,7 @@ def test_apply(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None
 
 def test_auto_approve(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None:
     mocked_click = mocker.patch("opta.commands.apply.click")
+    mocker.patch("opta.commands.apply.configure_kubectl")
     tf_apply = mocker.patch("opta.commands.apply.Terraform.apply")
     tf_plan = mocker.patch("opta.commands.apply.Terraform.plan")
     tf_show = mocker.patch("opta.commands.apply.Terraform.show")
