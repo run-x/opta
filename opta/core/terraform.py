@@ -67,8 +67,8 @@ class Terraform:
             nice_run(["terraform", "apply", *tf_flags], check=True, **kwargs)
         except Exception as e:
             logging.error(e)
-            logging.info("Terraform apply failed, rolling back stale resources.")
-            cls.rollback(layer)
+            logging.info("Terraform apply failed, would rollback, but skipping for now..")
+            # cls.rollback(layer)
 
     @classmethod
     def rollback(cls, layer: "Layer") -> None:
