@@ -19,7 +19,9 @@ jobs:
           pipenv install --deploy --dev
           source $(pipenv --venv)/bin/activate
       - name: Package
-        run: VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/||') make build-binary
+        run: |
+          export VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/||')
+          make build-binary
       - uses: actions/upload-artifact@v2
         with:
           name: opta_linux
@@ -39,7 +41,9 @@ jobs:
           pipenv install --deploy --dev
           source $(pipenv --venv)/bin/activate
       - name: Package
-        run: VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/||') make build-binary
+        run: |
+          export VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/||')
+          make build-binary
       - uses: actions/upload-artifact@v2
         with:
           name: opta_macos
