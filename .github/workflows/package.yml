@@ -1,17 +1,14 @@
 name: Package
 
 on: 
-  workflow_dispatch:
-    inputs:
-      version:
-        description: "version to build"
-        required: true
+  release:
+    types: [published]
 
 jobs:
   package-linux:
     runs-on: ubuntu-16.04
     env:
-      VERSION: ${{ github.event.inputs.version }}
+      VERSION: ${{ github.ref }}
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python 3.8
@@ -33,7 +30,7 @@ jobs:
   package-macos:
     runs-on: macos-10.15
     env:
-      VERSION: ${{ github.event.inputs.version }}
+      VERSION: ${{ github.ref }}
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python 3.8
