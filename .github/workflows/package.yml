@@ -20,12 +20,18 @@ jobs:
           source $(pipenv --venv)/bin/activate
       - name: Package
         run: |
-          export VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/||')
+          VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/||')
           make build-binary
-      - uses: actions/upload-artifact@v2
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          name: opta_linux
-          path: dist/opta
+          aws-access-key-id: ${{ secrets.AWS_S3_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_S3_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      - name: Upload to S3
+        run: |
+          VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/v||')
+          aws s3 cp dist/opta.zip s3://dev-runx-opta-binaries/linux/$VERSION/ --acl public-read
 
   package-macos:
     runs-on: macos-10.15
@@ -42,9 +48,15 @@ jobs:
           source $(pipenv --venv)/bin/activate
       - name: Package
         run: |
-          export VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/||')
+          VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/||')
           make build-binary
-      - uses: actions/upload-artifact@v2
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          name: opta_macos
-          path: dist/opta
+          aws-access-key-id: ${{ secrets.AWS_S3_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_S3_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      - name: Upload to S3
+        run: |
+          VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/v||')
+          aws s3 cp dist/opta.zip s3://dev-runx-opta-binaries/mac/$VERSION/ --acl public-read
