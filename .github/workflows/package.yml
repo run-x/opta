@@ -48,7 +48,7 @@ jobs:
           source $(pipenv --venv)/bin/activate
       - name: Package
         run: |
-          export VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/||')
+          VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/||')
           make build-binary
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
