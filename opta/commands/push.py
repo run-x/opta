@@ -70,7 +70,7 @@ def push_to_docker(
     nice_run(["docker", "push", remote_image_name])
 
 
-@click.command()
+@click.command(hidden=True)
 @click.argument("image")
 @click.option("-c", "--config", default="opta.yml", help="Opta config file.")
 @click.option(
