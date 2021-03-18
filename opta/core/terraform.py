@@ -43,10 +43,13 @@ class Terraform:
 
     # Get the full terraform state.
     @classmethod
-    def get_state(cls, state_file: str = "./terraform.tfstate") -> dict:
-        with open(state_file, "r") as file:
-            raw_state = file.read().replace("\n", "")
-        return json.loads(raw_state)
+    def get_state(cls) -> dict:
+        for state_file in ["./terraform.tfstate", "terraform.tfstate.backup"]:
+            with open(state_file, "r") as file:
+                raw_state = file.read().replace("\n", "")
+            if raw_state != "":
+                return json.loads(raw_state)
+        raise UserErrors("Terraform statefiles not found")
 
     @classmethod
     def apply(
@@ -160,9 +163,8 @@ class Terraform:
         return module_resources
 
     @classmethod
-    def download_state(
-        cls, layer: "Layer", state_file: str = "./terraform.tfstate"
-    ) -> bool:
+    def download_state(cls, layer: "Layer") -> bool:
+        state_file: str = "./terraform.tfstate"
         providers = layer.gen_providers(0)
         if "s3" in providers.get("terraform", {}).get("backend", {}):
             bucket = providers["terraform"]["backend"]["s3"]["bucket"]
