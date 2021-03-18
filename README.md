@@ -7,22 +7,11 @@ Scripts
 - Install pre-commit hook for linting:
   - `cp scripts/pre-commit .git/hooks/pre-commit`
 
-How to use (out of date)
-==========
-- Clone the runxc repo
-- `cd runxc`
-- `pipenv install`
-- Create your env or service yaml
-    - Check out env/opta.yml and service/opta.yml for examples
-- Now you can run: `pipenv run python ./opta/cli.py apply --inp <file>`
-
 Packaging
 =========
-- Trigger a new action here and supply a new version number (0.<n>): https://github.com/run-x/runxc/actions?query=workflow%3APackage
-- For now version numbers are 0.<n> where n goes up with each release
-- This action will build both a macos and linux binary
-- Upload the binaries to this s3 bucket with appropriate names (/platform/0.<n>/opta): https://s3.console.aws.amazon.com/s3/buckets/dev-runx-opta-binaries It's in the "runx" aws account. Make sure to mark both binaries public and note down their url.
-- Create a new release on github for the sha that the action was run with and set tag=v0.<n>
+- Create a new release with a new tag (0.<x>.<y>)
+- This will trigger the `package` github action, which creates the binary and upload it to S3
+- Update the `latest` file to point to the new release in the S3 bucket
 - In the release, provide the s3 urls and also write a changelog based on the commits since the last release
 - Update the docs website to point to this latest release
 
