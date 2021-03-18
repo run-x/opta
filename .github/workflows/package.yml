@@ -31,7 +31,8 @@ jobs:
       - name: Upload to S3
         run: |
           VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/v||')
-          aws s3 cp dist/opta.zip s3://dev-runx-opta-binaries/linux/$VERSION/ --acl public-read
+          zip opta.zip dist/opta
+          aws s3 cp opta.zip s3://dev-runx-opta-binaries/linux/$VERSION/ --acl public-read
 
   package-macos:
     runs-on: macos-10.15
@@ -59,4 +60,5 @@ jobs:
       - name: Upload to S3
         run: |
           VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/v||')
-          aws s3 cp dist/opta.zip s3://dev-runx-opta-binaries/mac/$VERSION/ --acl public-read
+          zip opta.zip dist/opta
+          aws s3 cp opta.zip s3://dev-runx-opta-binaries/mac/$VERSION/ --acl public-read
