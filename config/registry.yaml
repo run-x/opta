@@ -54,6 +54,25 @@ modules:
         name: Private Subnet
         desc: Servers in this subnet do not have direct access to the Internet (must use a proxy).
         url: https://console.aws.amazon.com/vpc/home?region={aws_region}#SubnetDetails:subnetId={id}
+  aws-nodegroup:
+    location: aws-nodegroup
+    halt: false
+    root_only: true
+    variables:
+      env_name: str
+      layer_name: str
+      module_name: str
+      max_nodes: optional
+      min_nodes: optional
+      node_disk_size: optional
+      node_instance_type: optional
+      uge_gpu: optional
+    outputs: {}
+    inspect:
+      aws_eks_node_group:
+        name: EKS Node Group
+        desc: Managed Kubernetes service.
+        url: https://console.aws.amazon.com/eks/home?region={aws_region}#/clusters/{name}
   aws-eks:
     location: aws-eks
     halt: true
