@@ -3,8 +3,9 @@ from pytest_mock import MockFixture
 
 from opta.core.terraform import Terraform, fetch_terraform_state_resources
 from opta.layer import Layer
+from opta.module import Module
 from opta.utils import fmt_msg
-from tests.utils import MockedCmdOut
+from tests.utils import MockedCmdOut, get_call_args
 
 
 class TestTerraform:
@@ -191,6 +192,37 @@ class TestTerraform:
                 mocker.call("iam", config=mocker.ANY),
             ]
         )
+
+    def test_destroy_modules_in_order(self, mocker: MockFixture) -> None:
+        fake_modules = [mocker.Mock(spec=Module) for _ in range(3)]
+        for i, module in enumerate(fake_modules):
+            module.name = f"fake_module_{i}"
+
+        fake_layer = mocker.Mock(spec=Layer)
+        fake_layer.modules = fake_modules
+
+        mocker.patch("opta.core.terraform.Terraform.refresh")
+        mocked_cmd = mocker.patch("opta.core.terraform.nice_run")
+        Terraform.destroy_all(fake_layer)
+        assert get_call_args(mocked_cmd) == [
+            ["terraform", "destroy", "-target=module.fake_module_2"],
+            ["terraform", "destroy", "-target=module.fake_module_1"],
+            ["terraform", "destroy", "-target=module.fake_module_0"],
+        ]
+
+        # Additionally verify this works for destroy_resources()
+        fake_resources = [
+            "module.fake_module_1.bar",
+            "module.fake_module_2.foo",
+            "module.fake_module_0.baz",
+        ]
+        mocked_cmd = mocker.patch("opta.core.terraform.nice_run")
+        Terraform.destroy_resources(fake_layer, fake_resources)
+        assert get_call_args(mocked_cmd) == [
+            ["terraform", "destroy", "-target=module.fake_module_2.foo"],
+            ["terraform", "destroy", "-target=module.fake_module_1.bar"],
+            ["terraform", "destroy", "-target=module.fake_module_0.baz"],
+        ]
 
     def test_fetch_terraform_state_resources(self, mocker: MockFixture) -> None:
         raw_s3_tf_state = {

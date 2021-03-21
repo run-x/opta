@@ -134,8 +134,8 @@ class Terraform:
             if hosted_zone_resource in module_resources:
                 cls.destroy_hosted_zone_resources(layer)
 
-            tf_flags += tuple([f"-target={resource}" for resource in module_resources])
-            nice_run(["terraform", "destroy", *tf_flags], check=True)
+            resource_targets = [f"-target={resource}" for resource in module_resources]
+            nice_run(["terraform", "destroy", *resource_targets, *tf_flags], check=True)
 
     @classmethod
     def destroy_all(cls, layer: "Layer", *tf_flags: str) -> None:
