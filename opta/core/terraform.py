@@ -113,11 +113,16 @@ class Terraform:
     def destroy_resources(
         cls, layer: "Layer", target_resources: List[str], *tf_flags: str
     ) -> None:
+        # If no targets are passed, "terraform destroy" attempts to destroy ALL
+        # resources, which should be avoided unless explicitly done.
         if len(target_resources) == 0:
             raise Exception(
                 "Target resources was specified to be destroyed, but contained an empty list"
             )
 
+        # Refreshing the state is necessary to update terraform outputs.
+        # This includes fetching the latest EKS cluster auth token, which is
+        # necessary for destroying many k8s resources.
         cls.refresh()
 
         for module in reversed(layer.modules):
@@ -166,6 +171,7 @@ class Terraform:
             cls.remove_from_state(hosted_zone_resource)
             AWS.delete_hosted_zone(zone_id)
 
+    # Remove a resource from the terraform state, but does not destroy it.
     @classmethod
     def remove_from_state(cls, resource_address: str) -> None:
         nice_run(["terraform", "state", "rm", resource_address])
