@@ -21,7 +21,7 @@ FAKE_SERVICE_CONFIG = os.path.join(
 def test_destroy(mocker: MockFixture) -> None:
     mocker.patch("opta.commands.destroy.amplitude_client.send_event")
     mocker.patch("opta.commands.destroy.Terraform.init")
-    mocker.patch("opta.commands.destroy.Terraform.destroy")
+    mocker.patch("opta.commands.destroy.Terraform.destroy_all")
 
     mocker.patch(
         "opta.commands.destroy._download_all_opta_configs",

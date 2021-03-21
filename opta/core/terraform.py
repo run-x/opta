@@ -106,6 +106,10 @@ class Terraform:
         )
 
     @classmethod
+    def refresh(cls, *tf_flags: str) -> None:
+        nice_run(["terraform", "refresh", *tf_flags], check=True)
+
+    @classmethod
     def destroy_resources(
         cls, layer: "Layer", target_resources: List[str], *tf_flags: str
     ) -> None:
@@ -113,6 +117,8 @@ class Terraform:
             raise Exception(
                 "Target resources was specified to be destroyed, but contained an empty list"
             )
+
+        cls.refresh()
 
         for module in reversed(layer.modules):
             module_address_prefix = f"module.{module.name}"
@@ -133,16 +139,36 @@ class Terraform:
 
     @classmethod
     def destroy_all(cls, layer: "Layer", *tf_flags: str) -> None:
-        cls.destroy_hosted_zone_resources(layer)
-        nice_run(["terraform", "destroy", *tf_flags], check=True)
+        cls.refresh()
 
+        for module in reversed(layer.modules):
+            module_address_prefix = f"module.{module.name}"
+
+            hosted_zone_resource = "module.awsdns.aws_route53_zone.public"
+            if hosted_zone_resource.startswith(module_address_prefix):
+                cls.destroy_hosted_zone_resources(layer)
+
+            nice_run(
+                ["terraform", "destroy", f"-target={module_address_prefix}", *tf_flags],
+                check=True,
+            )
+
+    # The hosted zone resource must often be explicitly destroyed b/c records are created
+    # as a side effect of the "external-dns" helm chart.
+    # We must destroy the generated records AND the hosted zone itself, or else the helm
+    # chart will attempt to re-populate the deleted records in the existing hosted zone.
     @classmethod
     def destroy_hosted_zone_resources(cls, layer: "Layer") -> None:
         hosted_zone_resource = "module.awsdns.aws_route53_zone.public"
         terraform_state = fetch_terraform_state_resources(layer)
         if hosted_zone_resource in terraform_state:
             zone_id = terraform_state[hosted_zone_resource]["zone_id"]
-            AWS(layer).delete_hosted_zone_records(zone_id)
+            cls.remove_from_state(hosted_zone_resource)
+            AWS(layer).delete_hosted_zone(zone_id)
+
+    @classmethod
+    def remove_from_state(cls, resource_address: str) -> None:
+        nice_run(["terraform", "state", "rm", resource_address])
 
     @classmethod
     def plan(cls, *tf_flags: str, quiet: Optional[bool] = False) -> None:
@@ -362,8 +388,11 @@ def fetch_terraform_state_resources(layer: "Layer") -> dict:
 
     resources = state.get("resources", [])
 
-    resources_dict = {}
+    resources_dict: Dict[str, dict] = {}
     for resource in resources:
+        # Note that resource addresses should start with "module.", but in the
+        # saved terraform state, it is already part of the module name.
+        # Ex. "module.awsbase"
         address = ".".join(
             [
                 resource.get("module", ""),
@@ -374,7 +403,13 @@ def fetch_terraform_state_resources(layer: "Layer") -> dict:
         if address == "..":
             continue
 
-        resources_dict[address] = resource["instances"][0]["attributes"]
+        # Some resources like module.awsdns.aws_acm_certificate.certificate have
+        # an empty instances list.
+        if len(resource["instances"]) == 0:
+            resources_dict[address] = {}
+        else:
+            resources_dict[address] = resource["instances"][0]["attributes"]
+
         resources_dict[address]["module"] = resource.get("module", "")
         resources_dict[address]["type"] = resource.get("type", "")
         resources_dict[address]["name"] = resource.get("name", "")
