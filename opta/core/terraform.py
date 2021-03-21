@@ -186,6 +186,21 @@ class Terraform:
         return True
 
     @classmethod
+    def delete_state_storage(cls, layer: "Layer") -> None:
+        providers = layer.gen_providers(0)
+        if "s3" not in providers.get("terraform", {}).get("backend", {}):
+            return
+
+        # Delete the state storage bucket
+        bucket_name = providers["terraform"]["backend"]["s3"]["bucket"]
+        AWS.delete_bucket(bucket_name)
+
+        # Delete the dynamodb state lock table
+        dynamodb_table = providers["terraform"]["backend"]["s3"]["dynamodb_table"]
+        region = providers["terraform"]["backend"]["s3"]["region"]
+        AWS.delete_dynamodb_table(dynamodb_table, region)
+
+    @classmethod
     def create_state_storage(cls, layer: "Layer") -> None:
         """
         Idempotently create remote storage for tf state
