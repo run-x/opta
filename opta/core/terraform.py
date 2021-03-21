@@ -164,7 +164,7 @@ class Terraform:
         if hosted_zone_resource in terraform_state:
             zone_id = terraform_state[hosted_zone_resource]["zone_id"]
             cls.remove_from_state(hosted_zone_resource)
-            AWS(layer).delete_hosted_zone(zone_id)
+            AWS.delete_hosted_zone(zone_id)
 
     @classmethod
     def remove_from_state(cls, resource_address: str) -> None:

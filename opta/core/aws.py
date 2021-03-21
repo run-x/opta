@@ -57,18 +57,20 @@ class AWS:
         s3_client.upload_file(config, bucket, config_path)
         logger.debug("Uploaded opta config to s3")
 
-    def delete_hosted_zone(self, zone_id: str) -> None:
-        self._delete_hosted_zone_records(zone_id)
+    @staticmethod
+    def delete_hosted_zone(zone_id: str) -> None:
+        AWS._delete_hosted_zone_records(zone_id)
 
         client = boto3.client("route53")
         delete_state = client.delete_hosted_zone(Id=zone_id)
-        delete_status = self._wait_for_route53_delete_completion(delete_state)
+        delete_status = AWS._wait_for_route53_delete_completion(delete_state)
 
         print(f"Hosted zone ({zone_id}) deleted with status {delete_status}")
 
+    @staticmethod
     # Before a hosted zone can be deleted, all of its non-required records must
     # be removed.
-    def _delete_hosted_zone_records(self, zone_id: str) -> None:
+    def _delete_hosted_zone_records(zone_id: str) -> None:
         client = boto3.client("route53")
         # TODO: Pagination is necessary after 100+ records in a zone.
         list_resp = client.list_resource_record_sets(HostedZoneId=zone_id)
@@ -89,11 +91,12 @@ class AWS:
         delete_state = client.change_resource_record_sets(
             HostedZoneId=zone_id, ChangeBatch={"Changes": delete_records_batch}
         )
-        delete_status = self._wait_for_route53_delete_completion(delete_state)
+        delete_status = AWS._wait_for_route53_delete_completion(delete_state)
 
         print(f"Records in hosted zone ({zone_id} deleted with status {delete_status}")
 
-    def _wait_for_route53_delete_completion(self, delete_state: dict) -> str:
+    @staticmethod
+    def _wait_for_route53_delete_completion(delete_state: dict) -> str:
         client = boto3.client("route53")
         while delete_state["ChangeInfo"]["Status"] == "PENDING":
             sleep(5)
