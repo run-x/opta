@@ -43,10 +43,13 @@ class Terraform:
 
     # Get the full terraform state.
     @classmethod
-    def get_state(cls, state_file: str = "./terraform.tfstate") -> dict:
-        with open(state_file, "r") as file:
-            raw_state = file.read().replace("\n", "")
-        return json.loads(raw_state)
+    def get_state(cls) -> dict:
+        for state_file in ["./terraform.tfstate", "terraform.tfstate.backup"]:
+            with open(state_file, "r") as file:
+                raw_state = file.read().replace("\n", "")
+            if raw_state != "":
+                return json.loads(raw_state)
+        raise UserErrors("Terraform statefiles not found")
 
     @classmethod
     def apply(
@@ -62,19 +65,20 @@ class Terraform:
         if quiet:
             kwargs["stderr"] = PIPE
             kwargs["stdout"] = DEVNULL
+
         try:
             nice_run(["terraform", "apply", *tf_flags], check=True, **kwargs)
         except Exception as e:
             logging.error(e)
-            logging.info("Terraform apply failed, rolling back stale resources.")
-            cls.rollback(layer)
+            logging.info("Terraform apply failed, would rollback, but skipping for now..")
+            # cls.rollback(layer)
 
     @classmethod
     def rollback(cls, layer: "Layer") -> None:
         amplitude_client.send_event(amplitude_client.ROLLBACK_EVENT)
 
         aws_resources = AWS(layer).get_opta_resources()
-        terraform_resources = set(cls.get_existing_resources(layer))
+        terraform_resources = set(cls.get_existing_module_resources(layer))
 
         # Import all stale resources into terraform state (so they can be destroyed later).
         stale_resources = []
@@ -185,11 +189,11 @@ class Terraform:
 
     @classmethod
     def get_existing_modules(cls, layer: "Layer") -> Set[str]:
-        existing_resources = cls.get_existing_resources(layer)
+        existing_resources = cls.get_existing_module_resources(layer)
         return set(map(lambda r: r.split(".")[1], existing_resources))
 
     @classmethod
-    def get_existing_resources(cls, layer: "Layer") -> List[str]:
+    def get_existing_module_resources(cls, layer: "Layer") -> List[str]:
         if not cls.downloaded_state.get(layer.name, False):
             success = cls.download_state(layer)
             if not success:
@@ -197,25 +201,30 @@ class Terraform:
                     "Could not fetch remote terraform state, assuming no resources exist yet."
                 )
                 return []
-
-        resource_state = (
-            nice_run(["terraform", "state", "list"], check=True, capture_output=True)
-            .stdout.decode("utf-8")
-            .split("\n")
-        )
-        # Filter out all `data.*` sources. Only care about module resources
-        module_resources = [r for r in resource_state if r.startswith("module")]
-        # Sometimes module resource addresses may have [0] or [1] at the end, remove it.
-        module_resources = list(
-            map(lambda r: r[0 : r.find("[")] if "[" in r else r, module_resources)
-        )
+        state = cls.get_state()
+        resources = state.get("resources", [])
+        module_resources: List[str] = []
+        resource: dict
+        for resource in resources:
+            if (
+                "module" not in resource
+                or "type" not in resource
+                or "name" not in resource
+            ):
+                continue
+            resource_name_builder = list()
+            resource_name_builder.append(resource["module"])
+            if resource["mode"] == "managed":
+                resource_name_builder.append("data")
+            resource_name_builder.append(resource["type"])
+            resource_name_builder.append(resource["name"])
+            module_resources.append(".".join(resource_name_builder))
 
         return module_resources
 
     @classmethod
-    def download_state(
-        cls, layer: "Layer", state_file: str = "./terraform.tfstate"
-    ) -> bool:
+    def download_state(cls, layer: "Layer") -> bool:
+        state_file: str = "./terraform.tfstate"
         providers = layer.gen_providers(0)
         if "s3" in providers.get("terraform", {}).get("backend", {}):
             bucket = providers["terraform"]["backend"]["s3"]["bucket"]
@@ -254,9 +263,9 @@ class Terraform:
             except ClientError as e:
                 if e.response["Error"]["Code"] == "AccessDenied":
                     raise UserErrors(
-                        f"We were unable to access the S3 bucket, {bucket_name} on your AWS account (opta needs this to store state)."
-                        "Usually, it means that the name in your opta.yml is not unique. Try updating it to something else."
-                        "It could also mean that your AWS account has insufficient permissions."
+                        f"We were unable to access the S3 bucket, {bucket_name} on your AWS account (opta needs this to store state). "
+                        "Usually, it means that the name in your opta.yml is not unique. Try updating it to something else. "
+                        "It could also mean that your AWS account has insufficient permissions. "
                         "Please fix these issues and try again!"
                     )
                 if e.response["Error"]["Code"] != "NoSuchBucket":

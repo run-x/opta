@@ -58,7 +58,10 @@ class DatadogProcessor(ModuleProcessor):
 
     def create_secret(self) -> str:
         while True:
-            value = click.prompt("Please enter your datadog api key", type=str)
+            value = click.prompt(
+                "Please enter your datadog api key (from https://app.datadoghq.com/account/settings#api)",
+                type=str,
+            )
             if self.validate_api_key(value):
                 break
             logger.warn(

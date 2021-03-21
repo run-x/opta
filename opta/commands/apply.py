@@ -1,5 +1,5 @@
 from threading import Thread
-from typing import Optional, Set
+from typing import List, Optional, Set
 
 import click
 
@@ -7,7 +7,7 @@ from opta.amplitude import amplitude_client
 from opta.constants import TF_PLAN_PATH
 from opta.core.aws import AWS
 from opta.core.generator import gen, gen_opta_resource_tags
-from opta.core.kubernetes import tail_module_log, tail_namespace_events
+from opta.core.kubernetes import configure_kubectl, tail_module_log, tail_namespace_events
 from opta.core.terraform import Terraform
 from opta.exceptions import UserErrors
 from opta.layer import Layer
@@ -48,6 +48,12 @@ from opta.utils import is_tool, logger
     help="Run tf plan, but don't lock state file",
     hidden=True,
 )
+@click.option(
+    "--auto-approve",
+    is_flag=True,
+    default=False,
+    help="Automatically approve terraform plan.",
+)
 def apply(
     config: str,
     env: Optional[str],
@@ -55,9 +61,10 @@ def apply(
     max_module: Optional[int],
     image_tag: Optional[str],
     test: bool,
+    auto_approve: bool,
 ) -> None:
     """Initialize your environment or service to match the config file"""
-    _apply(config, env, refresh, max_module, image_tag, test)
+    _apply(config, env, refresh, max_module, image_tag, test, auto_approve)
 
 
 def _apply(
@@ -67,6 +74,7 @@ def _apply(
     max_module: Optional[int],
     image_tag: Optional[str],
     test: bool,
+    auto_approve: bool,
 ) -> None:
     if not is_tool("terraform"):
         raise UserErrors("Please install terraform on your machine")
@@ -78,10 +86,12 @@ def _apply(
     AWS(layer).upload_opta_config(config)
 
     existing_modules: Set[str] = set()
+    first_loop = True
     for module_idx, current_modules, total_block_count in gen(layer):
-        if module_idx == 0:
+        if first_loop:
             # This is set during the first iteration, since the tf file must exist.
             existing_modules = Terraform.get_existing_modules(layer)
+            first_loop = False
         configured_modules = set([x.name for x in current_modules])
         is_last_module = module_idx == total_block_count - 1
         has_new_modules = not configured_modules.issubset(existing_modules)
@@ -92,7 +102,6 @@ def _apply(
             configured_modules = configured_modules.union(untouched_modules)
 
         targets = list(map(lambda x: f"-target=module.{x}", sorted(configured_modules)))
-
         if test:
             Terraform.plan("-lock=false", *targets)
             print("Plan ran successfully, not applying since this is a test.")
@@ -109,14 +118,17 @@ def _apply(
                 quiet=True,
             )
             Terraform.show(TF_PLAN_PATH)
-            click.confirm(
-                "The above are the planned changes for your opta run. Do you approve?",
-                abort=True,
-            )
+
+            if not auto_approve:
+                click.confirm(
+                    "The above are the planned changes for your opta run. Do you approve?",
+                    abort=True,
+                )
             logger.info("Applying your changes (might take a minute)")
             if image_tag is not None:
                 service_modules = layer.get_module_by_type("k8s-service", module_idx)
                 if len(service_modules) != 0:
+                    configure_kubectl(layer)
                     service_module = service_modules[0]
                     # Tailing logs
                     logger.info(
@@ -133,5 +145,10 @@ def _apply(
                         target=tail_namespace_events, args=(layer, 0, 1), daemon=True,
                     )
                     new_thread.start()
-            Terraform.apply(layer, TF_PLAN_PATH, no_init=True, quiet=False)
+
+            tf_flags: List[str] = []
+            if auto_approve:
+                tf_flags.append("-auto-approve")
+
+            Terraform.apply(layer, *tf_flags, TF_PLAN_PATH, no_init=True, quiet=False)
             logger.info("Opta updates complete!")

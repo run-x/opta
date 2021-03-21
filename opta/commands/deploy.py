@@ -25,7 +25,15 @@ from opta.utils import logger
     default=None,
     help="The image tag associated with your docker container. Defaults to your local image tag.",
 )
-def deploy(image: str, config: str, env: Optional[str], tag: Optional[str]) -> None:
+@click.option(
+    "--auto-approve",
+    is_flag=True,
+    default=False,
+    help="Automatically approve terraform plan.",
+)
+def deploy(
+    image: str, config: str, env: Optional[str], tag: Optional[str], auto_approve: bool
+) -> None:
     """Push your new image to the cloud and deploy it in your environment"""
     amplitude_client.send_event(amplitude_client.DEPLOY_EVENT)
     layer = Layer.load_from_yaml(config, env)
@@ -49,6 +57,7 @@ def deploy(image: str, config: str, env: Optional[str], tag: Optional[str]) -> N
             max_module=None,
             image_tag=None,
             test=False,
+            auto_approve=auto_approve,
         )
     _push(image=image, config=config, env=env, tag=tag)
     image_tag = get_push_tag(image, tag)
@@ -59,4 +68,5 @@ def deploy(image: str, config: str, env: Optional[str], tag: Optional[str]) -> N
         max_module=None,
         image_tag=image_tag,
         test=False,
+        auto_approve=auto_approve,
     )

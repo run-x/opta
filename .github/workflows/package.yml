@@ -1,17 +1,12 @@
 name: Package
 
 on: 
-  workflow_dispatch:
-    inputs:
-      version:
-        description: "version to build"
-        required: true
+  release:
+    types: [published]
 
 jobs:
   package-linux:
     runs-on: ubuntu-16.04
-    env:
-      VERSION: ${{ github.event.inputs.version }}
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python 3.8
@@ -24,16 +19,24 @@ jobs:
           pipenv install --deploy --dev
           source $(pipenv --venv)/bin/activate
       - name: Package
-        run: make build-binary
-      - uses: actions/upload-artifact@v2
+        run: |
+          export VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/||')
+          make build-binary
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          name: opta_linux
-          path: dist/opta
+          aws-access-key-id: ${{ secrets.AWS_S3_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_S3_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      - name: Upload to S3
+        run: |
+          VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/v||')
+          cd dist/opta
+          zip -r opta.zip ./*
+          aws s3 cp opta.zip s3://dev-runx-opta-binaries/linux/$VERSION/ --acl public-read
 
   package-macos:
     runs-on: macos-10.15
-    env:
-      VERSION: ${{ github.event.inputs.version }}
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python 3.8
@@ -46,8 +49,18 @@ jobs:
           pipenv install --deploy --dev
           source $(pipenv --venv)/bin/activate
       - name: Package
-        run: make build-binary
-      - uses: actions/upload-artifact@v2
+        run: |
+          export VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/||')
+          make build-binary
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          name: opta_macos
-          path: dist/opta
+          aws-access-key-id: ${{ secrets.AWS_S3_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_S3_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      - name: Upload to S3
+        run: |
+          VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/v||')
+          cd dist/opta
+          zip -r opta.zip ./*
+          aws s3 cp opta.zip s3://dev-runx-opta-binaries/mac/$VERSION/ --acl public-read

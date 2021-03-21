@@ -5,4 +5,5 @@ modules: list(module())
 env:
   name: str()
   path: str()
-  variables: map()
+  variables: map(required=False)
+  vars: map(required=False)
