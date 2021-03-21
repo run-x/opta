@@ -9,7 +9,7 @@ from opta.core.terraform import get_terraform_outputs
 from opta.layer import Layer
 
 
-@click.command()
+@click.command(hidden=True)
 @click.option("-c", "--config", default="opta.yml", help="Opta config file")
 @click.option(
     "-e", "--env", default=None, help="The env to use when loading the config file"

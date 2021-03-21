@@ -58,6 +58,9 @@ resource "helm_release" "linkerd" {
   chart = "linkerd2"
   name = "linkerd"
   repository = "https://helm.linkerd.io/stable"
+  # Version 2.10.0 is not backwards compatible.
+  version = "2.9.4"
+
   set {
     name  = "global.identityTrustAnchorsPEM"
     value = tls_self_signed_cert.trustanchor_cert.cert_pem

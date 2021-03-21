@@ -12,7 +12,7 @@ data "aws_iam_policy_document" "node_group" {
 }
 
 resource "aws_iam_role" "node_group" {
-  name = "opta-${var.layer_name}-eks-default-node-group"
+  name = "opta-${var.layer_name}-eks-${var.module_name}-node-group"
 
   assume_role_policy = data.aws_iam_policy_document.node_group.json
   tags = {
@@ -36,19 +36,19 @@ resource "aws_iam_role_policy_attachment" "node_group_AmazonEC2ContainerRegistry
 }
 
 resource "aws_eks_node_group" "node_group" {
-  cluster_name    = aws_eks_cluster.cluster.name
-  node_group_name = "opta-${var.layer_name}-default"
+  cluster_name    = data.aws_eks_cluster.main.name
+  node_group_name = "opta-${var.layer_name}-${var.module_name}"
   node_role_arn   = aws_iam_role.node_group.arn
-  subnet_ids      = aws_eks_cluster.cluster.vpc_config[0].subnet_ids
+  subnet_ids      = data.aws_eks_cluster.main.vpc_config[0].subnet_ids
 
   # Yes, Graviton2 AL2_ARM_64 option is available, but I'm not considering it right now because it's really new, and
   # the release post mentioned the need to be multi-arched ready, which I'm not dealing with.
   # https://aws.amazon.com/blogs/containers/eks-on-graviton-generally-available/
-  ami_type = "AL2_x86_64"
+  ami_type = var.use_gpu ? "AL2_x86_64_GPU" : "AL2_x86_64"
 
   disk_size      = var.node_disk_size
   instance_types = [var.node_instance_type]
-  labels         = { node_group_name = "opta-${var.layer_name}-default" }
+  labels         = merge(local.default_labels, var.labels)
 
   scaling_config {
     max_size     = var.max_nodes

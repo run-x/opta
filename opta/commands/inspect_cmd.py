@@ -12,7 +12,7 @@ from opta.resource import Resource
 from opta.utils import column_print, deep_merge, is_tool
 
 
-@click.command()
+@click.command(hidden=True)
 @click.option(
     "-c", "--config", default="opta.yml", help="Opta config file", show_default=True
 )

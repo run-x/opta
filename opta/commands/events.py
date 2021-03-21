@@ -9,7 +9,7 @@ from opta.core.kubernetes import configure_kubectl, tail_namespace_events
 from opta.layer import Layer
 
 
-@click.command()
+@click.command(hidden=True)
 @click.option(
     "-e", "--env", default=None, help="The env to use when loading the config file"
 )

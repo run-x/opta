@@ -115,7 +115,7 @@ def validate_yaml(config_file_path: str) -> Literal[True]:
     return True
 
 
-@click.command()
+@click.command(hidden=True)
 @click.option("-c", "--config", default="opta.yml", help="Opta config file.")
 def validate(config: str) -> None:
     validate_yaml(config)

@@ -127,6 +127,7 @@ class Layer:
             else:
                 current_parent, env_meta = potential_envs[env]
             current_variables = env_meta.get("variables", {})
+            current_variables = deep_merge(current_variables, env_meta.get("vars", {}))
             return cls(
                 name, org_name, providers, modules_data, current_parent, current_variables
             )
@@ -198,6 +199,7 @@ class Layer:
         return {
             "parent": parent,
             "vars": SimpleNamespace(**self.variables),
+            "variables": SimpleNamespace(**self.variables),
             "parent_name": parent_name,
             "layer_name": self.name,
             "state_storage": self.state_storage(),
