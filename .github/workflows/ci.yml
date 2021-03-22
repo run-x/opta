@@ -62,6 +62,12 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
+      - name: Checkout runx-infra repo
+        uses: actions/checkout@v2
+        with:
+          repository: "run-x/runx-infra"
+          path: "runx-infra"
+          ssh-key: ${{ secrets.SSH_KEY }}
       - name: Checkout test-service repo
         uses: actions/checkout@v2
         with:
@@ -87,18 +93,28 @@ jobs:
           aws-access-key-id: ${{ secrets.DEPLOYER_AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.DEPLOYER_AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
-      - name: Test output command
+      - name: Deploy opta environment
         run: |
           source $(pipenv --venv)/bin/activate
           export PYTHONPATH=$(pwd)
-          cd test-service
-          python ../opta/cli.py output --env staging
-      - name: Test apply command
+          python ./runxc/opta/cli.py apply
+          --config runx-infra/staging/opta.yml
+          --auto-approve
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+      - name: Build test-service image
+        run: docker build -t app:latest -f Dockerfile test-service/
+      - name: Deploy test-service
         run: |
           source $(pipenv --venv)/bin/activate
           export PYTHONPATH=$(pwd)
-          cd test-service
-          python ../opta/cli.py apply --env staging --test
+          python ./runxc/opta/cli.py deploy
+          --image app:latest
+          --env runx-staging
+          --config test-service/opta.yml
+          --tag ${{ github.sha }}
+          --auto-approve
 
   deploy_test_service:
     if: ${{ github.ref == 'refs/heads/main' }}
