@@ -41,3 +41,14 @@ variable "public_ipv4_cidr_blocks" {
     "10.0.16.0/21"
   ]
 }
+
+locals {
+  public_subnet_count = min(
+    length(var.public_ipv4_cidr_blocks),
+    length(data.aws_availability_zones.current.zone_ids)
+  )
+  private_subnet_count = min(
+    length(var.private_ipv4_cidr_blocks),
+    length(data.aws_availability_zones.current.zone_ids)
+  )
+}
