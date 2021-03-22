@@ -115,6 +115,13 @@ jobs:
           --config test-service/opta.yml \
           --tag ${{ github.sha }} \
           --auto-approve
+      - name: Destroy test-service # TODO: Should be destroy env
+        run: |
+          source $(pipenv --venv)/bin/activate
+          export PYTHONPATH=$(pwd)
+          python ./opta/cli.py destroy \
+          --env staging \
+          --config test-service/opta.yml
 
   deploy_test_service:
     if: ${{ github.ref == 'refs/heads/main' }}
