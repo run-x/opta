@@ -93,19 +93,12 @@ jobs:
           aws-access-key-id: ${{ secrets.DEPLOYER_AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.DEPLOYER_AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
-      - name: debug
-        run: |
-          ls
-          cd runx-infra
-          ls
-          cd staging
-          ls
       - name: Deploy opta environment
         run: |
           source $(pipenv --venv)/bin/activate
           export PYTHONPATH=$(pwd)
-          python ./opta/cli.py apply
-          --config runx-infra/staging/opta.yml
+          python ./opta/cli.py apply \
+          --config runx-infra/staging/opta.yml \
           --auto-approve
       - name: Login to Amazon ECR
         id: login-ecr
@@ -116,11 +109,11 @@ jobs:
         run: |
           source $(pipenv --venv)/bin/activate
           export PYTHONPATH=$(pwd)
-          python ./opta/cli.py deploy
-          --image app:latest
-          --env runx-staging
-          --config test-service/opta.yml
-          --tag ${{ github.sha }}
+          python ./opta/cli.py deploy \
+          --image app:latest \
+          --env runx-staging \
+          --config test-service/opta.yml \
+          --tag ${{ github.sha }} \
           --auto-approve
 
   deploy_test_service:
