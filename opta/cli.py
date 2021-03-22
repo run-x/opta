@@ -11,6 +11,7 @@ from opta.amplitude import amplitude_client
 from opta.commands.apply import apply
 from opta.commands.cleanup import cleanup
 from opta.commands.deploy import deploy
+from opta.commands.destroy import destroy
 from opta.commands.events import events
 from opta.commands.inspect_cmd import inspect
 from opta.commands.kubectl import configure_kubectl
@@ -72,6 +73,7 @@ def _cleanup() -> None:
 cli.add_command(apply)
 cli.add_command(cleanup)
 cli.add_command(deploy)
+cli.add_command(destroy)
 cli.add_command(configure_kubectl)
 cli.add_command(inspect)
 cli.add_command(logs)
