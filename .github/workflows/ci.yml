@@ -98,7 +98,7 @@ jobs:
           ls
           cd runx-infra
           ls
-          cd runx-infra/staging
+          cd staging
           ls
       - name: Deploy opta environment
         run: |
