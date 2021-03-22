@@ -104,7 +104,7 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
       - name: Build test-service image
-        run: docker build -t app:latest -f Dockerfile test-service/
+        run: docker build -t app:latest -f test-service/Dockerfile test-service/
       - name: Deploy test-service
         run: |
           source $(pipenv --venv)/bin/activate
