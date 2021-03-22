@@ -111,7 +111,7 @@ jobs:
           export PYTHONPATH=$(pwd)
           python ./opta/cli.py deploy \
           --image app:latest \
-          --env runx-staging \
+          --env staging \
           --config test-service/opta.yml \
           --tag ${{ github.sha }} \
           --auto-approve
