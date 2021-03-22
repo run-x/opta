@@ -97,7 +97,7 @@ jobs:
         run: |
           source $(pipenv --venv)/bin/activate
           export PYTHONPATH=$(pwd)
-          python ./runxc/opta/cli.py apply
+          python ./opta/cli.py apply
           --config runx-infra/staging/opta.yml
           --auto-approve
       - name: Login to Amazon ECR
@@ -109,7 +109,7 @@ jobs:
         run: |
           source $(pipenv --venv)/bin/activate
           export PYTHONPATH=$(pwd)
-          python ./runxc/opta/cli.py deploy
+          python ./opta/cli.py deploy
           --image app:latest
           --env runx-staging
           --config test-service/opta.yml
