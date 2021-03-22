@@ -93,6 +93,13 @@ jobs:
           aws-access-key-id: ${{ secrets.DEPLOYER_AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.DEPLOYER_AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
+      - name: debug
+        run: |
+          ls
+          cd runx-infra
+          ls
+          cd runx-infra/staging
+          ls
       - name: Deploy opta environment
         run: |
           source $(pipenv --venv)/bin/activate
