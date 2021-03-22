@@ -82,13 +82,13 @@ class AWS:
                     fmt_msg(
                         """
                         The dynamodb table is currently being created/updated.
-                        ~Please wait for deletion to begin..
+                        ~Please wait for deletion to retry..
                     """
                     )
                 )
                 sleep(5)
 
-        raise Exception("Deletion failed to start after 100 seconds, quitting.")
+        raise Exception("Failed to delete after 20 retries, quitting.")
 
 
 # AWS Resource ARNs can be one of the following 3 formats:
