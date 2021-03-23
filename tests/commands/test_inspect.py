@@ -22,20 +22,16 @@ REGISTRY = {
 }
 
 TERRAFORM_STATE = {
-    "resources": [
-        {
-            "module": "module.testmodule",
-            "type": "test_resource",
-            "name": "test",
-            "instances": [{"attributes": {"test_value": "foobar"}}],
-        }
-    ]
+    "module.testmodule.test_resource.test": {
+        "module": "module.testmodule",
+        "name": "test",
+        "test_value": "foobar",
+        "type": "test_resource",
+    }
 }
 
 
 def test_inspect(mocker: MockFixture) -> None:
-    # Mock terraform download_state
-    mocker.patch("opta.commands.inspect_cmd.Terraform.download_state")
     # Mock tf file generation
     mocked_layer_class = mocker.patch("opta.commands.inspect_cmd.Layer")
     mocked_layer = mocker.Mock(spec=Layer)
@@ -47,7 +43,8 @@ def test_inspect(mocker: MockFixture) -> None:
     mocker.patch("opta.module.REGISTRY", REGISTRY)
     # Mock fetching the terraform state
     mocker.patch(
-        "opta.commands.inspect_cmd.Terraform.get_state", return_value=TERRAFORM_STATE
+        "opta.commands.inspect_cmd.fetch_terraform_state_resources",
+        return_value=TERRAFORM_STATE,
     )
     # Mock reading the provider's AWS region from the main tf file
     mocker.patch(

@@ -10,7 +10,7 @@ from opta.core.terraform import Terraform
 from opta.layer import Layer
 
 
-@click.command()
+@click.command(hidden=True)
 @click.option("-c", "--config", default="opta.yml", help="Opta config file.")
 @click.option(
     "-e", "--env", default=None, help="The env to use when loading the config file."
@@ -28,7 +28,7 @@ def destroy(config: str, env: Optional[str]) -> None:
     for layer in destroy_order:
         gen_all(layer)
         Terraform.init("-reconfigure")
-        Terraform.destroy()
+        Terraform.destroy_all(layer)
 
 
 # Fetch all the children layers of the current layer.

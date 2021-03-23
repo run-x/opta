@@ -1,8 +1,10 @@
 from botocore.exceptions import ClientError
 from pytest_mock import MockFixture
 
-from opta.core.terraform import Terraform
+from opta.core.terraform import Terraform, fetch_terraform_state_resources
 from opta.layer import Layer
+from opta.module import Module
+from tests.utils import get_call_args
 
 
 class TestTerraform:
@@ -79,7 +81,7 @@ class TestTerraform:
         }
 
         mocked_import = mocker.patch("opta.core.terraform.Terraform.import_resource")
-        mocked_destroy = mocker.patch("opta.core.terraform.Terraform.destroy")
+        mocked_destroy = mocker.patch("opta.core.terraform.Terraform.destroy_resources")
 
         # Run rollback
         fake_layer = mocker.Mock(spec=Layer)
@@ -87,7 +89,7 @@ class TestTerraform:
 
         # The stale resource should be imported and destroyed.
         mocked_import.assert_called_once_with("fake.tf.resource.address.2", "i-2")
-        mocked_destroy.assert_called_once_with("-target=fake.tf.resource.address.2")
+        mocked_destroy.assert_called_once_with(fake_layer, ["fake.tf.resource.address.2"])
 
         # Test rollback again, but without the stale resource.
         del mocked_aws_instance.get_opta_resources.return_value[
@@ -95,7 +97,7 @@ class TestTerraform:
         ]
 
         mocked_import = mocker.patch("opta.core.terraform.Terraform.import_resource")
-        mocked_destroy = mocker.patch("opta.core.terraform.Terraform.destroy")
+        mocked_destroy = mocker.patch("opta.core.terraform.Terraform.destroy_resources")
 
         # Run rollback
         Terraform.rollback(mocker.Mock(spec=Layer))
@@ -208,3 +210,62 @@ class TestTerraform:
                 mocker.call("iam", config=mocker.ANY),
             ]
         )
+
+    def test_destroy_modules_in_order(self, mocker: MockFixture) -> None:
+        fake_modules = [mocker.Mock(spec=Module) for _ in range(3)]
+        for i, module in enumerate(fake_modules):
+            module.name = f"fake_module_{i}"
+
+        fake_layer = mocker.Mock(spec=Layer)
+        fake_layer.modules = fake_modules
+
+        mocker.patch("opta.core.terraform.Terraform.refresh")
+        mocked_cmd = mocker.patch("opta.core.terraform.nice_run")
+        Terraform.destroy_all(fake_layer)
+        assert get_call_args(mocked_cmd) == [
+            ["terraform", "destroy", "-target=module.fake_module_2"],
+            ["terraform", "destroy", "-target=module.fake_module_1"],
+            ["terraform", "destroy", "-target=module.fake_module_0"],
+        ]
+
+        # Additionally verify this works for destroy_resources()
+        fake_resources = [
+            "module.fake_module_1.bar",
+            "module.fake_module_2.foo",
+            "module.fake_module_0.baz",
+        ]
+        mocked_cmd = mocker.patch("opta.core.terraform.nice_run")
+        Terraform.destroy_resources(fake_layer, fake_resources)
+        assert get_call_args(mocked_cmd) == [
+            ["terraform", "destroy", "-target=module.fake_module_2.foo"],
+            ["terraform", "destroy", "-target=module.fake_module_1.bar"],
+            ["terraform", "destroy", "-target=module.fake_module_0.baz"],
+        ]
+
+    def test_fetch_terraform_state_resources(self, mocker: MockFixture) -> None:
+        raw_s3_tf_state = {
+            "resources": [
+                {
+                    "module": "module.testmodule",
+                    "type": "test_resource",
+                    "name": "test",
+                    "instances": [{"attributes": {"test_value": "foobar"}}],
+                }
+            ]
+        }
+        mocker.patch("opta.core.terraform.Terraform.download_state")
+        mocker.patch(
+            "opta.core.terraform.Terraform.get_state", return_value=raw_s3_tf_state
+        )
+
+        fake_layer = mocker.Mock(spec=Layer)
+        parsed_tf_state = fetch_terraform_state_resources(fake_layer)
+
+        assert parsed_tf_state == {
+            "module.testmodule.test_resource.test": {
+                "module": "module.testmodule",
+                "name": "test",
+                "test_value": "foobar",
+                "type": "test_resource",
+            }
+        }

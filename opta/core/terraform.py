@@ -101,8 +101,7 @@ class Terraform:
             return None
 
         # Destroy stale terraform resources.
-        destroy_targets = [f"-target={resource}" for resource in stale_resources]
-        cls.destroy(*destroy_targets)
+        cls.destroy_resources(layer, stale_resources)
 
     @classmethod
     def import_resource(cls, tf_resource_address: str, aws_resource_id: str) -> None:
@@ -111,8 +110,75 @@ class Terraform:
         )
 
     @classmethod
-    def destroy(cls, *tf_flags: str) -> None:
-        nice_run(["terraform", "destroy", *tf_flags], check=True)
+    def refresh(cls, *tf_flags: str) -> None:
+        nice_run(["terraform", "refresh", *tf_flags], check=True)
+
+    @classmethod
+    def destroy_resources(
+        cls, layer: "Layer", target_resources: List[str], *tf_flags: str
+    ) -> None:
+        # If no targets are passed, "terraform destroy" attempts to destroy ALL
+        # resources, which should be avoided unless explicitly done.
+        if len(target_resources) == 0:
+            raise Exception(
+                "Target resources was specified to be destroyed, but contained an empty list"
+            )
+
+        # Refreshing the state is necessary to update terraform outputs.
+        # This includes fetching the latest EKS cluster auth token, which is
+        # necessary for destroying many k8s resources.
+        cls.refresh()
+
+        for module in reversed(layer.modules):
+            module_address_prefix = f"module.{module.name}"
+            module_resources = [
+                resource
+                for resource in target_resources
+                if module_address_prefix in resource
+            ]
+            if len(module_resources) == 0:
+                continue
+
+            hosted_zone_resource = "module.awsdns.aws_route53_zone.public"
+            if hosted_zone_resource in module_resources:
+                cls.destroy_hosted_zone_resources(layer)
+
+            resource_targets = [f"-target={resource}" for resource in module_resources]
+            nice_run(["terraform", "destroy", *resource_targets, *tf_flags], check=True)
+
+    @classmethod
+    def destroy_all(cls, layer: "Layer", *tf_flags: str) -> None:
+        cls.refresh()
+
+        for module in reversed(layer.modules):
+            module_address_prefix = f"module.{module.name}"
+
+            hosted_zone_resource = "module.awsdns.aws_route53_zone.public"
+            if hosted_zone_resource.startswith(module_address_prefix):
+                cls.destroy_hosted_zone_resources(layer)
+
+            nice_run(
+                ["terraform", "destroy", f"-target={module_address_prefix}", *tf_flags],
+                check=True,
+            )
+
+    # The hosted zone resource must often be explicitly destroyed b/c records are created
+    # as a side effect of the "external-dns" helm chart.
+    # We must destroy the generated records AND the hosted zone itself, or else the helm
+    # chart will attempt to re-populate the deleted records in the existing hosted zone.
+    @classmethod
+    def destroy_hosted_zone_resources(cls, layer: "Layer") -> None:
+        hosted_zone_resource = "module.awsdns.aws_route53_zone.public"
+        terraform_state = fetch_terraform_state_resources(layer)
+        if hosted_zone_resource in terraform_state:
+            zone_id = terraform_state[hosted_zone_resource]["zone_id"]
+            cls.remove_from_state(hosted_zone_resource)
+            AWS.delete_hosted_zone(zone_id)
+
+    # Remove a resource from the terraform state, but does not destroy it.
+    @classmethod
+    def remove_from_state(cls, resource_address: str) -> None:
+        nice_run(["terraform", "state", "rm", resource_address])
 
     @classmethod
     def plan(cls, *tf_flags: str, quiet: Optional[bool] = False) -> None:
@@ -329,3 +395,38 @@ def _fetch_parent_outputs(pull_state: bool = True) -> dict:
             parent_state_outputs[output_name] = v
 
     return parent_state_outputs
+
+
+def fetch_terraform_state_resources(layer: "Layer") -> dict:
+    Terraform.download_state(layer)
+    state = Terraform.get_state()
+
+    resources = state.get("resources", [])
+
+    resources_dict: Dict[str, dict] = {}
+    for resource in resources:
+        # Note that resource addresses should start with "module.", but in the
+        # saved terraform state, it is already part of the module name.
+        # Ex. "module.awsbase"
+        address = ".".join(
+            [
+                resource.get("module", ""),
+                resource.get("type", ""),
+                resource.get("name", ""),
+            ]
+        )
+        if address == "..":
+            continue
+
+        # Some resources like module.awsdns.aws_acm_certificate.certificate have
+        # an empty instances list.
+        if len(resource["instances"]) == 0:
+            resources_dict[address] = {}
+        else:
+            resources_dict[address] = resource["instances"][0]["attributes"]
+
+        resources_dict[address]["module"] = resource.get("module", "")
+        resources_dict[address]["type"] = resource.get("type", "")
+        resources_dict[address]["name"] = resource.get("name", "")
+
+    return resources_dict
