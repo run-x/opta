@@ -57,5 +57,5 @@ variable "node_disk_size" {
 
 variable "node_instance_type" {
   type    = string
-  default = "t3.medium"
+  default = "n2-highcpu-4"
 }

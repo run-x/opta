@@ -2,12 +2,19 @@ resource "google_compute_global_address" "load_balancer" {
   name    = "opta-${var.layer_name}"
 }
 
-resource "google_compute_http_health_check" "healthcheck" {
+resource "google_compute_health_check" "healthcheck" {
   name               = "opta-${var.layer_name}"
+  http_health_check {
+    port_specification = "USE_SERVING_PORT"
+  }
 }
 
+data "google_compute_zones" "zones" {}
+
 data "google_compute_network_endpoint_group" "http" {
+  count = length(data.google_compute_zones.zones.names)
   name = "opta-${var.layer_name}-http"
+  zone = data.google_compute_zones.zones.names[count.index]
   depends_on = [
     helm_release.ingress-nginx
   ]
@@ -15,7 +22,9 @@ data "google_compute_network_endpoint_group" "http" {
 
 
 data "google_compute_network_endpoint_group" "https" {
+  count = var.delegated ? length(data.google_compute_zones.zones.names) : 0
   name = "opta-${var.layer_name}-https"
+  zone = data.google_compute_zones.zones.names[count.index]
   depends_on = [
     helm_release.ingress-nginx
   ]
@@ -26,11 +35,13 @@ resource "google_compute_backend_service" "backend_service" {
   port_name   = "http"
   protocol    = "HTTP"
 
-  health_checks = [google_compute_http_health_check.healthcheck.id]
+  health_checks = [google_compute_health_check.healthcheck.id]
 
   dynamic "backend" {
-    for_each = var.delegated ? [data.google_compute_network_endpoint_group.http.id, data.google_compute_network_endpoint_group.https.id] : [data.google_compute_network_endpoint_group.http.id]
+    for_each = local.negs
     content {
+      balancing_mode = "RATE"
+      max_rate_per_endpoint = 50
       group = backend.value
     }
   }
@@ -51,7 +62,8 @@ resource "google_compute_url_map" "http" {
 }
 
 resource "google_compute_url_map" "https" {
-  name        = "opta-${var.layer_name}"
+  count           = var.delegated ? 1 : 0
+  name            = "opta-${var.layer_name}"
   default_service = google_compute_backend_service.backend_service.id
 }
 
@@ -64,7 +76,7 @@ resource "google_compute_target_http_proxy" "proxy" {
 resource "google_compute_target_https_proxy" "proxy" {
   count            = var.delegated ? 1 : 0
   name             = "opta-${var.layer_name}"
-  url_map          = google_compute_url_map.https.name
+  url_map          = google_compute_url_map.https[0].name
   ssl_certificates = [data.google_compute_ssl_certificate.certificate[0].self_link]
 }
 
