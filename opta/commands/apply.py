@@ -83,7 +83,8 @@ def _apply(
     layer.variables["image_tag"] = image_tag
     Terraform.create_state_storage(layer)
     gen_opta_resource_tags(layer)
-    AWS(layer).upload_opta_config(config)
+    if "aws" in layer.root().providers:
+        AWS(layer).upload_opta_config(config)
 
     existing_modules: Set[str] = set()
     first_loop = True

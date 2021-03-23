@@ -1,9 +1,9 @@
 environments:
   - name: staging
-    path: "../new_env/opta.yml"
+    path: "../env/opta.yml"
     variables:
       max_nodes: 2
-name: jd-test-2
+name: jd-test-gcp
 modules:
   - name: app
     type: k8s-service
@@ -19,13 +19,13 @@ modules:
         value: B
     public_uri: "jd.{parent.domain}"
     links:
-      - s3: ["read"]
+      - gcs: ["read"]
       - db
     secrets:
       - API_KEY
       - SECRET_1
   - name: db
-    type: aws-postgres
-  - name: s3
-    type: aws-s3
+    type: gcp-postgres
+  - name: gcs
+    type: gcp-gcs
     bucket_name: "{layer_name}-testing"

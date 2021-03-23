@@ -1,0 +1,100 @@
+{{- if ne ((keys .Values.port) | len) 1 }}
+  {{- fail "Port must specify either a single tcp port (for websockets) or a single http port" }}
+{{- end }}
+{{- if not (or (hasKey .Values.port "tcp") (hasKey .Values.port "http")) }}
+  {{- fail "Port must specify either a single tcp port (for websockets) or a single http port" }}
+{{- end }}
+{{- if .Values.deployPods }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "k8s-service.fullname" . }}
+  labels:
+    tags.datadoghq.com/service: {{ include "k8s-service.serviceName" . }}-{{ include "k8s-service.namespaceName" . }}
+    tags.datadoghq.com/version: {{ .Values.version | quote }}
+    {{- include "k8s-service.labels" . | nindent 4 }}
+  namespace: {{ include "k8s-service.namespaceName" . }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "k8s-service.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "k8s-service.selectorLabels" . | nindent 8 }}
+        tags.datadoghq.com/service: {{ include "k8s-service.serviceName" . }}-{{ include "k8s-service.namespaceName" . }}
+        tags.datadoghq.com/version: {{ .Values.version | quote }}
+      annotations:
+        config.linkerd.io/skip-outbound-ports: "8126,5432"
+        ad.datadoghq.com/linkerd-proxy.check_names: '["linkerd"]'
+        ad.datadoghq.com/linkerd-proxy.init_configs: '[{}]'
+        ad.datadoghq.com/linkerd-proxy.instances: '[{"prometheus_url": "http://%%host%%:4191/metrics"}]'
+    spec:
+      serviceAccountName: {{ include "k8s-service.serviceName" . }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image }}"
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: config
+              mountPath: "/config"
+              readOnly: true
+          ports:
+            - name: main
+              protocol: TCP
+            {{- if hasKey .Values.port "http" }}
+              containerPort: {{ .Values.port.http }}
+            {{- end }}
+            {{- if hasKey .Values.port "tcp" }}
+              containerPort: {{ .Values.port.tcp }}
+            {{- end }}
+          env:
+            - name: RDS_CA_PATH # This is the path to the public key for the docdb tls
+              value: "/config/rds_ca.pem"
+            {{- if or (.Values.envVars) (.Values.secrets) }}
+            {{ range .Values.envVars }}
+            - name: {{ .name | quote }}
+              value: {{ .value | quote }}
+            {{ end }}
+            {{ range $val := .Values.secrets }}
+            - name: {{ $val.name | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: secret
+                  key: {{ $val.name | quote }}
+            {{ end }}
+            {{- end }}
+          livenessProbe:
+            initialDelaySeconds: 30
+            {{ if hasKey .Values.port "tcp" }}
+            tcpSocket:
+            {{ end }}
+            {{- if hasKey .Values.port "http" }}
+            httpGet:
+              path: {{ .Values.livenessProbePath }}
+            {{ end }}
+              port: main
+          readinessProbe:
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            {{ if hasKey .Values.port "tcp" }}
+            tcpSocket:
+            {{ end }}
+            {{- if hasKey .Values.port "http" }}
+            httpGet:
+              path: {{ .Values.readinessProbePath }}
+            {{ end }}
+              port: main
+          resources:
+            limits:
+              {{- toYaml .Values.containerResourceLimits | nindent 14 }}
+            requests:
+              {{- toYaml .Values.containerResourceRequests | nindent 14 }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "k8s-service.fullname" . }}
+            items:
+              - key: "rds_ca.pem"
+                path: "rds_ca.pem"
+{{- end }}

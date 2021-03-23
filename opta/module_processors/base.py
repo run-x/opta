@@ -1,8 +1,5 @@
 from typing import TYPE_CHECKING
 
-import boto3
-from botocore.config import Config
-
 from opta.exceptions import UserErrors
 
 if TYPE_CHECKING:
@@ -25,13 +22,9 @@ class ModuleProcessor:
         self.module.data["module_name"] = self.module.name
 
 
-class K8sModuleProcessor(ModuleProcessor):
+class AWSK8sModuleProcessor(ModuleProcessor):
     def __init__(self, module: "Module", layer: "Layer"):
-        self.iam = boto3.client("iam")
-        providers = layer.gen_providers(0)
-        region = providers["terraform"]["backend"]["s3"]["region"]
-        self.eks = boto3.client("eks", config=Config(region_name=region))
-        super(K8sModuleProcessor, self).__init__(module, layer)
+        super(AWSK8sModuleProcessor, self).__init__(module, layer)
 
     def process(self, module_idx: int) -> None:
         from_parent = False
@@ -56,4 +49,12 @@ class K8sModuleProcessor(ModuleProcessor):
         self.module.data[
             "openid_provider_arn"
         ] = f"${{{{{module_source}.k8s_openid_provider_arn}}}}"
-        super(K8sModuleProcessor, self).process(module_idx)
+        super(AWSK8sModuleProcessor, self).process(module_idx)
+
+
+class GcpK8sModuleProcessor(ModuleProcessor):
+    def __init__(self, module: "Module", layer: "Layer"):
+        super(GcpK8sModuleProcessor, self).__init__(module, layer)
+
+    def process(self, module_idx: int) -> None:
+        super(GcpK8sModuleProcessor, self).process(module_idx)

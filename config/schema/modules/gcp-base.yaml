@@ -1,0 +1,8 @@
+type: regex('gcp-base')
+name: str(required=False)
+env_name: str(required=False)
+layer_name: str(required=False)
+module_name: str(required=False)
+private_ipv4_cidr_blocks: any(required=False)
+cluster_ipv4_cidr_block: str(required=False)
+services_ipv4_cidr_block: str(required=False)

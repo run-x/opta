@@ -4,14 +4,14 @@ import boto3
 from botocore.config import Config
 
 from opta.exceptions import UserErrors
-from opta.module_processors.base import K8sModuleProcessor
+from opta.module_processors.base import AWSK8sModuleProcessor
 
 if TYPE_CHECKING:
     from opta.layer import Layer
     from opta.module import Module
 
 
-class K8sServiceProcessor(K8sModuleProcessor):
+class K8sServiceProcessor(AWSK8sModuleProcessor):
     def __init__(self, module: "Module", layer: "Layer"):
         if module.data["type"] != "k8s-service":
             raise Exception(
@@ -19,10 +19,6 @@ class K8sServiceProcessor(K8sModuleProcessor):
             )
         self.read_buckets: list[str] = []
         self.write_buckets: list[str] = []
-        self.iam = boto3.client("iam")
-        providers = layer.gen_providers(0)
-        region = providers["terraform"]["backend"]["s3"]["region"]
-        self.eks = boto3.client("eks", config=Config(region_name=region))
         super(K8sServiceProcessor, self).__init__(module, layer)
 
     def process(self, module_idx: int) -> None:

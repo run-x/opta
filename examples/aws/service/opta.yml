@@ -1,0 +1,31 @@
+environments:
+  - name: staging
+    path: "../env/opta.yml"
+    variables:
+      max_nodes: 2
+name: jd-test-2
+modules:
+  - name: app
+    type: k8s-service
+    image: "kennethreitz/httpbin" # external image
+    min_containers: 2
+    max_containers: "{vars.max_nodes}"
+    liveness_probe_path: "/get"
+    readiness_probe_path: "/get"
+    port:
+      http: 80
+    env_vars:
+      - name: A
+        value: B
+    public_uri: "jd.{parent.domain}"
+    links:
+      - s3: ["read"]
+      - db
+    secrets:
+      - API_KEY
+      - SECRET_1
+  - name: db
+    type: aws-postgres
+  - name: s3
+    type: aws-s3
+    bucket_name: "{layer_name}-testing"
