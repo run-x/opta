@@ -259,9 +259,9 @@ class Terraform:
             credentials, project_id = GCP.get_credentials()
             gcs_client = storage.Client(project=project_id, credentials=credentials)
             bucket_object = gcs_client.get_bucket(bucket)
-            blob = storage.Blob(prefix, bucket_object)
+            blob = storage.Blob(f"{prefix}/default.tfstate", bucket_object)
             try:
-                with open(state_file, "w") as file_obj:
+                with open(state_file, "wb") as file_obj:
                     gcs_client.download_blob_to_file(blob, file_obj)
             except GoogleClientError as e:
                 if e.code == 404:

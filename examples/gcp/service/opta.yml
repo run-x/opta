@@ -20,6 +20,7 @@ modules:
     public_uri: "jd.{parent.domain}"
     links:
       - gcs: ["read"]
+      - redis
       - db
     secrets:
       - API_KEY
@@ -29,3 +30,5 @@ modules:
   - name: gcs
     type: gcp-gcs
     bucket_name: "{layer_name}-testing"
+  - name: redis
+    type: gcp-redis
