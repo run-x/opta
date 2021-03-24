@@ -35,6 +35,7 @@ class TestKubernetes:
         )
         layer = mocker.Mock(spec=Layer)
         layer.parent = None
+        layer.cloud = "aws"
         layer.providers = {
             "aws": {"region": "us-east-1", "allowed_account_ids": [111111111111]}
         }

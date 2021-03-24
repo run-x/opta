@@ -6,6 +6,7 @@ resource "google_compute_health_check" "healthcheck" {
   name               = "opta-${var.layer_name}"
   http_health_check {
     port_specification = "USE_SERVING_PORT"
+    request_path = "/healthz"
   }
 }
 
