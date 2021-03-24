@@ -4,7 +4,7 @@ data "google_client_config" "current" {}
 
 locals {
   public_uri_parts = split("/", var.public_uri)
-  domain = var.domain == ""? local.public_uri_parts[0] : var.domain
+  domain = var.domain == ""? trim(local.public_uri_parts[0], ".") : trim(var.domain, ".")
   path_prefix = length(local.public_uri_parts) > 1 ? "/${join("/",slice(local.public_uri_parts, 1, length(local.public_uri_parts)))}" : "/"
 }
 

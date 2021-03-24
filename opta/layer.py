@@ -18,6 +18,7 @@ from opta.module import Module
 from opta.module_processors.base import ModuleProcessor
 from opta.module_processors.datadog import DatadogProcessor
 from opta.module_processors.gcp_k8s_base import GcpK8sBaseProcessor
+from opta.module_processors.gcp_k8s_service import GcpK8sServiceProcessor
 from opta.module_processors.k8s_base import K8sBaseProcessor
 from opta.module_processors.k8s_service import K8sServiceProcessor
 from opta.plugins.derived_providers import DerivedProviders
@@ -196,6 +197,8 @@ class Layer:
                 DatadogProcessor(module, self).process(module_idx)
             elif module_type == "gcp-k8s-base":
                 GcpK8sBaseProcessor(module, self).process(module_idx)
+            elif module_type == "gcp-k8s-service":
+                GcpK8sServiceProcessor(module, self).process(module_idx)
             else:
                 ModuleProcessor(module, self).process(module_idx)
         for module in self.modules[0 : module_idx + 1]:

@@ -20,14 +20,13 @@ resource "google_sql_database_instance" "instance" {
       private_network = data.google_compute_network.vpc.id
     }
     backup_configuration {
-      binary_log_enabled = true
       enabled            = true
       start_time         = "23:00"
     }
   }
 
   lifecycle {
-    ignore_changes = [settings.disk_size]
+    ignore_changes = [settings[0].disk_size]
   }
 }
 

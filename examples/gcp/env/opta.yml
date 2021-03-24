@@ -8,6 +8,8 @@ modules:
   - type: gcp-base
   - type: gcp-dns
     domain: gcp-staging-1.runx.dev
+    subdomains:
+      - jd
     delegated: true
   - type: gcp-gke
     max_nodes: 6

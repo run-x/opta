@@ -316,6 +316,7 @@ class Terraform:
             "cloudkms.googleapis.com",
             "dns.googleapis.com",
             "servicenetworking.googleapis.com",
+            "redis.googleapis.com",
         ]:
             service = discovery.build("serviceusage", "v1", credentials=credentials)
             request = service.services().enable(

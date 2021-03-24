@@ -1,7 +1,16 @@
 data "google_client_config" "current" {}
 
+locals {
+  full_subdomains = formatlist("%s.${var.domain}", var.subdomains)
+}
+
 variable "domain" {
   type = string
+}
+
+variable "subdomains" {
+  type = list(string)
+  default = []
 }
 
 variable "env_name" {

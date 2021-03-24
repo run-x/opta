@@ -1,5 +1,5 @@
 data "google_compute_network" "vpc" {
-  name = "opta-${var.layer_name}"
+  name = "opta-${var.env_name}"
 }
 
 variable "node_type" {

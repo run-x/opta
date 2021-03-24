@@ -1,4 +1,4 @@
-type: regex('k8s-service')
+type: regex('gcp-k8s-service')
 name: str(required=False)
 env_name: str(required=False)
 layer_name: str(required=False)

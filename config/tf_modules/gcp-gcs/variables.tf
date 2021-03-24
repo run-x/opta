@@ -1,13 +1,13 @@
 data "google_client_config" "current" {}
 
 data "google_kms_key_ring" "key_ring" {
-  name     = "opta-${var.layer_name}"
+  name     = "opta-${var.env_name}"
   location = data.google_client_config.current.region
 }
 
 data "google_kms_crypto_key" "kms" {
   key_ring = data.google_kms_key_ring.key_ring.self_link
-  name = "opta-${var.layer_name}"
+  name = "opta-${var.env_name}"
 }
 
 variable "env_name" {

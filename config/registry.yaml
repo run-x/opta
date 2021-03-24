@@ -291,6 +291,7 @@ modules:
       layer_name: str
       module_name: str
       domain: str
+      subdomains: optional
       delegated: optional
     outputs:
       zone_id:
@@ -421,8 +422,6 @@ modules:
       resource_request: optional
       public_uri: optional
       domain: optional
-      openid_provider_url: str
-      openid_provider_arn: str
       read_buckets: optional
       write_buckets: optional
       min_containers: optional

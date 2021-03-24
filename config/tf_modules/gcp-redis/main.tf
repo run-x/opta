@@ -1,7 +1,3 @@
-resource "random_password" "redis_auth" {
-  length = 20
-  special = false
-}
 # TODO: TLS transit encryption
 resource "google_redis_instance" "main" {
   memory_size_gb = var.memory_size_gb
@@ -12,5 +8,4 @@ resource "google_redis_instance" "main" {
   connect_mode       = "PRIVATE_SERVICE_ACCESS"
   redis_version = var.redis_version
   auth_enabled = true
-  auth_string = random_password.redis_auth.result
 }

@@ -1,8 +1,5 @@
 from typing import TYPE_CHECKING, List
 
-import boto3
-from botocore.config import Config
-
 from opta.exceptions import UserErrors
 from opta.module_processors.base import GcpK8sModuleProcessor
 
@@ -19,9 +16,6 @@ class GcpK8sServiceProcessor(GcpK8sModuleProcessor):
             )
         self.read_buckets: list[str] = []
         self.write_buckets: list[str] = []
-        providers = layer.gen_providers(0)
-        region = providers["terraform"]["backend"]["s3"]["region"]
-        self.eks = boto3.client("eks", config=Config(region_name=region))
         super(GcpK8sServiceProcessor, self).__init__(module, layer)
 
     def process(self, module_idx: int) -> None:
@@ -79,12 +73,40 @@ class GcpK8sServiceProcessor(GcpK8sModuleProcessor):
     def handle_rds_link(
         self, linked_module: "Module", link_permissions: List[str]
     ) -> None:
-        pass
+        for key in ["db_user", "db_name", "db_password", "db_host"]:
+            self.module.data["secrets"].append(
+                {
+                    "name": f"{linked_module.name}_{key}",
+                    "value": f"${{{{module.{linked_module.name}.{key}}}}}",
+                }
+            )
+        if link_permissions:
+            raise Exception(
+                "We're not supporting IAM permissions for rds right now. "
+                "Your k8s service will have the db user, name, password, "
+                "and host as envars (pls see docs) and these IAM "
+                "permissions are for manipulating the db itself, which "
+                "I don't think is what you're looking for."
+            )
 
     def handle_redis_link(
         self, linked_module: "Module", link_permissions: List[str]
     ) -> None:
-        pass
+        for key in ["cache_host", "cache_auth_token"]:
+            self.module.data["secrets"].append(
+                {
+                    "name": f"{linked_module.name}_{key}",
+                    "value": f"${{{{module.{linked_module.name}.{key}}}}}",
+                }
+            )
+        if link_permissions:
+            raise Exception(
+                "We're not supporting IAM permissions for redis right now. "
+                "Your k8s service will have the cache's host and auth token "
+                "as envars (pls see docs) and these IAM permissions "
+                "are for manipulating the redis cluster itself, which "
+                "I don't think is what you're looking for."
+            )
 
     def handle_gcs_link(
         self, linked_module: "Module", link_permissions: List[str]

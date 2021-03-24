@@ -15,7 +15,7 @@ resource "google_storage_bucket_iam_member" "bucket_viewer" {
   count = length(var.read_buckets)
   bucket = var.read_buckets[count.index]
   role = "roles/storage.objectViewer"
-  member = "serviceAccount:${google_service_account.k8s_service..email}"
+  member = "serviceAccount:${google_service_account.k8s_service.email}"
 }
 
 resource "google_storage_bucket_iam_member" "viewer" {

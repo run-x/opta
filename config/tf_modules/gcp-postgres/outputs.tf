@@ -12,5 +12,5 @@ output "db_host" {
 }
 
 output "db_name" {
-  value = aws_rds_cluster.db_cluster.database_name
+  value = google_sql_database_instance.instance.name
 }
