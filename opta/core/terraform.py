@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 from subprocess import DEVNULL, PIPE
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
 
@@ -139,9 +140,12 @@ class Terraform:
             if len(module_resources) == 0:
                 continue
 
-            hosted_zone_resource = "module.awsdns.aws_route53_zone.public"
-            if hosted_zone_resource in module_resources:
-                cls.destroy_hosted_zone_resources(layer)
+            # If the public hosted zone resource is in the module, delete it explicitly
+            # instead of through terraform (See destroy_hosted_zone_resources).
+            pattern = re.compile("^module\..+\.aws_route53_zone.public")  # noqa
+            hosted_zone_resource = list(filter(pattern.match, module_resources))
+            if len(hosted_zone_resource) == 1:
+                cls.destroy_hosted_zone_resources(layer, hosted_zone_resource[0])
 
             resource_targets = [f"-target={resource}" for resource in module_resources]
             nice_run(["terraform", "destroy", *resource_targets, *tf_flags], check=True)
@@ -152,10 +156,14 @@ class Terraform:
 
         for module in reversed(layer.modules):
             module_address_prefix = f"module.{module.name}"
+            module_resources = [r.address for r in module.get_terraform_resources()]
 
-            hosted_zone_resource = "module.awsdns.aws_route53_zone.public"
-            if hosted_zone_resource.startswith(module_address_prefix):
-                cls.destroy_hosted_zone_resources(layer)
+            # If the public hosted zone resource is in the module, delete it explicitly
+            # instead of through terraform (See destroy_hosted_zone_resources).
+            pattern = re.compile("^module\..+\.aws_route53_zone.public")  # noqa
+            hosted_zone_resource = list(filter(pattern.match, module_resources))
+            if len(hosted_zone_resource) == 1:
+                cls.destroy_hosted_zone_resources(layer, hosted_zone_resource[0])
 
             nice_run(
                 ["terraform", "destroy", f"-target={module_address_prefix}", *tf_flags],
@@ -167,12 +175,13 @@ class Terraform:
     # We must destroy the generated records AND the hosted zone itself, or else the helm
     # chart will attempt to re-populate the deleted records in the existing hosted zone.
     @classmethod
-    def destroy_hosted_zone_resources(cls, layer: "Layer") -> None:
-        hosted_zone_resource = "module.awsdns.aws_route53_zone.public"
+    def destroy_hosted_zone_resources(
+        cls, layer: "Layer", hosted_zone_resource_address: str
+    ) -> None:
         terraform_state = fetch_terraform_state_resources(layer)
-        if hosted_zone_resource in terraform_state:
-            zone_id = terraform_state[hosted_zone_resource]["zone_id"]
-            cls.remove_from_state(hosted_zone_resource)
+        if hosted_zone_resource_address in terraform_state:
+            zone_id = terraform_state[hosted_zone_resource_address]["zone_id"]
+            cls.remove_from_state(hosted_zone_resource_address)
             AWS.delete_hosted_zone(zone_id)
 
     # Remove a resource from the terraform state, but does not destroy it.

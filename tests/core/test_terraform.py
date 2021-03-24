@@ -215,6 +215,7 @@ class TestTerraform:
         fake_modules = [mocker.Mock(spec=Module) for _ in range(3)]
         for i, module in enumerate(fake_modules):
             module.name = f"fake_module_{i}"
+            module.get_terraform_resources = lambda: []
 
         fake_layer = mocker.Mock(spec=Layer)
         fake_layer.modules = fake_modules
@@ -230,17 +231,27 @@ class TestTerraform:
 
         # Additionally verify this works for destroy_resources()
         fake_resources = [
-            "module.fake_module_1.bar",
-            "module.fake_module_2.foo",
-            "module.fake_module_0.baz",
+            "module.fake_module_1.test_resource.bar",
+            "module.fake_module_2.test_resource.foo",
+            "module.fake_module_0.test_resource.baz",
         ]
         mocked_cmd = mocker.patch("opta.core.terraform.nice_run")
+        mocked_destroy_hz = mocker.patch(
+            "opta.core.terraform.Terraform.destroy_hosted_zone_resources"
+        )
         Terraform.destroy_resources(fake_layer, fake_resources)
         assert get_call_args(mocked_cmd) == [
-            ["terraform", "destroy", "-target=module.fake_module_2.foo"],
-            ["terraform", "destroy", "-target=module.fake_module_1.bar"],
-            ["terraform", "destroy", "-target=module.fake_module_0.baz"],
+            ["terraform", "destroy", "-target=module.fake_module_2.test_resource.foo"],
+            ["terraform", "destroy", "-target=module.fake_module_1.test_resource.bar"],
+            ["terraform", "destroy", "-target=module.fake_module_0.test_resource.baz"],
         ]
+        # The hosted zone should not be destroyed since it was not in the specified resources.
+        assert mocked_destroy_hz.call_count == 0
+
+        # Now the hosted zone shoud be destroyed.
+        fake_resources.append("module.fake_module_1.aws_route53_zone.public")
+        Terraform.destroy_resources(fake_layer, fake_resources)
+        assert mocked_destroy_hz.call_count == 1
 
     def test_fetch_terraform_state_resources(self, mocker: MockFixture) -> None:
         raw_s3_tf_state = {
