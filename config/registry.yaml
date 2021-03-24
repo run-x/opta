@@ -301,6 +301,8 @@ modules:
         export: true
       delegated:
         export: true
+      cert_self_link:
+        export: true
   gcp-gke:
     location: gcp-gke
     halt: true
@@ -348,6 +350,7 @@ modules:
       module_name: str
       high_availability: optional
       domain: optional
+      cert_self_link: optional
       delegated: optional
     outputs: {}
   gcp-postgres:

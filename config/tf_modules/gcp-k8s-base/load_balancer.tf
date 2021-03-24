@@ -23,7 +23,7 @@ data "google_compute_network_endpoint_group" "http" {
 
 
 data "google_compute_network_endpoint_group" "https" {
-  count = var.delegated ? length(data.google_compute_zones.zones.names) : 0
+  count = length(data.google_compute_zones.zones.names)
   name = "opta-${var.layer_name}-https"
   zone = data.google_compute_zones.zones.names[count.index]
   depends_on = [
@@ -51,7 +51,7 @@ resource "google_compute_backend_service" "backend_service" {
 
 resource "google_compute_url_map" "http" {
   name        = "opta-${var.layer_name}"
-  default_service = google_compute_backend_service.backend_service.id
+  default_service = var.delegated ? null : google_compute_backend_service.backend_service.id
   dynamic "default_url_redirect" {
     for_each = var.delegated ? [1] : []
     content {
@@ -64,7 +64,7 @@ resource "google_compute_url_map" "http" {
 
 resource "google_compute_url_map" "https" {
   count           = var.delegated ? 1 : 0
-  name            = "opta-${var.layer_name}"
+  name            = "opta-${var.layer_name}-https"
   default_service = google_compute_backend_service.backend_service.id
 }
 
@@ -78,7 +78,7 @@ resource "google_compute_target_https_proxy" "proxy" {
   count            = var.delegated ? 1 : 0
   name             = "opta-${var.layer_name}"
   url_map          = google_compute_url_map.https[0].name
-  ssl_certificates = [data.google_compute_ssl_certificate.certificate[0].self_link]
+  ssl_certificates = [var.cert_self_link]
 }
 
 resource "google_compute_global_forwarding_rule" "http" {
@@ -114,9 +114,4 @@ resource "google_dns_record_set" "wildcard" {
 
 data "google_dns_managed_zone" "public" {
   name = "opta-${var.layer_name}"
-}
-
-data "google_compute_ssl_certificate" "certificate" {
-  count = var.delegated? 1 : 0
-  name = "opta-${var.env_name}"
 }

@@ -5,9 +5,6 @@ locals {
   annotations = var.delegated? "{\"exposed_ports\": {\"80\":{\"name\": \"opta-${var.layer_name}-http\"}, \"443\":{\"name\": \"opta-${var.layer_name}-https\"}}}" : "{\"exposed_ports\": {\"80\":{\"name\": \"opta-${var.layer_name}-http\"}}}"
   negs = var.delegated ? compact(concat(data.google_compute_network_endpoint_group.http.*.id, data.google_compute_network_endpoint_group.https.*.id))  : compact(data.google_compute_network_endpoint_group.http.*.id)
 }
-output "negs" {
-  value = local.negs
-}
 
 data "google_client_config" "current" {}
 
@@ -39,11 +36,17 @@ variable "domain" {
   default = ""
 }
 
-variable "delegated" {
-  type = bool
-}
-
 variable "high_availability" {
   type = bool
   default = true
+}
+
+variable "delegated" {
+  type = bool
+  default = false
+}
+
+variable "cert_self_link" {
+  type = string
+  default = null
 }

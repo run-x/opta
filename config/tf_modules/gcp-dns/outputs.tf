@@ -13,3 +13,7 @@ output "domain" {
 output "delegated" {
   value = var.delegated ? true : false
 }
+
+output "cert_self_link" {
+  value = var.delegated ? google_compute_managed_ssl_certificate.certificate[0].self_link : null
+}
