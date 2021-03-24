@@ -1,6 +1,6 @@
 from typing import Any
 
-from click.testing import CliRunner
+from click.testing import CliRunner, Result
 from pytest import fixture
 from pytest_mock import MockFixture
 
@@ -33,6 +33,7 @@ def mocked_layer(mocker: MockFixture) -> Any:
     mocked_layer_class = mocker.patch("opta.commands.apply.Layer")
     mocked_layer = mocker.Mock(spec=Layer)
     mocked_layer.variables = {}
+    mocked_layer.cloud = "aws"
     mocked_layer_class.load_from_yaml.return_value = mocked_layer
 
     return mocked_layer
@@ -81,7 +82,7 @@ def test_auto_approve(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) 
     # Terraform apply should be called with the configured module (fake_module) and the remote state
     # module (deleted_module) as targets.
     runner = CliRunner()
-    result = runner.invoke(apply, "--auto-approve")
+    result: Result = runner.invoke(apply, "--auto-approve")
     assert result.exit_code == 0
     tf_apply.assert_called_once_with(
         mocked_layer, "-auto-approve", TF_PLAN_PATH, no_init=True, quiet=False

@@ -39,22 +39,6 @@ def configure_kubectl(layer: "Layer") -> None:
         _aws_configure_kubectl(layer)
     elif layer.cloud == "google":
         _gcp_configure_kubectl(layer)
-    # Make sure the user has the prerequisite CLI tools installed
-    # kubectl may not *technically* be required for this opta command to run, but require
-    # it anyways since user must install it to access the cluster.
-    if not is_tool("kubectl"):
-        raise UserErrors(
-            f"Please visit this link to install kubectl first: {KUBECTL_INSTALL_URL}"
-        )
-
-    if layer.cloud == "aws" and not is_tool("aws"):
-        raise UserErrors(
-            f"Please visit the link to install the AWS CLI first: {AWS_CLI_INSTALL_URL}"
-        )
-    elif layer.cloud == "google" and not is_tool("gcloud"):
-        raise UserErrors(
-            f"Please visit the link to install the gcloud CLI first: {GCP_CLI_INSTALL_URL}"
-        )
 
 
 def _gcp_configure_kubectl(layer: "Layer") -> None:
