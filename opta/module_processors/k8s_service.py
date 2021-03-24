@@ -1,8 +1,5 @@
 from typing import TYPE_CHECKING, List
 
-import boto3
-from botocore.config import Config
-
 from opta.exceptions import UserErrors
 from opta.module_processors.base import AWSK8sModuleProcessor
 

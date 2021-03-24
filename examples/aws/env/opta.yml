@@ -5,11 +5,11 @@ providers:
     region: us-east-1
     account_id: 889760294590
 modules:
-  - type: gcp-base
-  - type: gcp-dns
-    domain: gcp-staging1.runx.dev
-    delegated: false
-  - type: gcp-gke
+  - type: aws-base
+  - type: aws-dns
+    domain: staging2.runx.dev
+    delegated: true
+  - type: aws-eks
     max_nodes: 6
-  - type: gcp-k8s-base
+  - type: k8s-base
   - type: datadog
