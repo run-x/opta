@@ -1,5 +1,6 @@
 from typing import Optional, Tuple
 
+import google.auth.transport.requests
 from google.auth import default
 from google.auth.credentials import Credentials
 from google.auth.exceptions import DefaultCredentialsError, GoogleAuthError
@@ -23,4 +24,6 @@ class GCP:
                 )
             except GoogleAuthError as e:
                 raise UserErrors(*e.args)
+        # Refresh credentials to get new access token
+        cls.credentials.refresh(google.auth.transport.requests.Request())
         return cls.credentials, cls.project_id  # type: ignore

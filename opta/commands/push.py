@@ -4,7 +4,6 @@ from typing import Optional, Tuple
 import boto3
 import click
 from botocore.config import Config
-from google.cloud import storage
 
 from opta.amplitude import amplitude_client
 from opta.core.gcp import GCP
@@ -57,10 +56,6 @@ def get_ecr_auth_info(layer: Layer) -> Tuple[str, str]:
 
 def get_gcr_auth_info(layer: Layer) -> Tuple[str, str]:
     credentials, project_id = GCP.get_credentials()
-    if not credentials.token:
-        # Do a dummy api call to refresh crdentials
-        gcs_client = storage.Client(project=project_id, credentials=credentials)
-        list(gcs_client.list_buckets())
     return "oauth2accesstoken", credentials.token
 
 

@@ -6,7 +6,12 @@ from click.testing import CliRunner
 from pytest_mock import MockFixture
 
 from opta.cli import cli
-from opta.commands.push import get_ecr_auth_info, get_registry_url, push_to_docker
+from opta.commands.push import (
+    get_ecr_auth_info,
+    get_gcr_auth_info,
+    get_registry_url,
+    push_to_docker,
+)
 from opta.layer import Layer
 from tests.fixtures.basic_apply import BASIC_APPLY
 
@@ -53,6 +58,18 @@ def test_get_ecr_auth_info(mocker: MockFixture) -> None:
     patched_boto_client = mocker.patch("opta.commands.push.boto3.client")
     patched_boto_client.return_value = mocked_ecr_client
     assert get_ecr_auth_info(mocked_layer) == ("username", "password",)
+
+
+def test_get_gcr_auth_info(mocker: MockFixture) -> None:
+    mocked_layer = mocker.Mock(spec=Layer)
+    mocked_credentials = mocker.Mock()
+    mocked_credentials.token = "blah"
+    patched_gcp = mocker.patch(
+        "opta.commands.push.GCP.get_credentials",
+        return_value=tuple([mocked_credentials, "oauth2accesstoken"]),
+    )
+    assert get_gcr_auth_info(mocked_layer) == ("oauth2accesstoken", "blah",)
+    patched_gcp.assert_called_once_with()
 
 
 def test_valid_input(mocker: MockFixture) -> None:

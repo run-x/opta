@@ -1,0 +1,16 @@
+name: gcp-dummy-parent
+org_name: opta-tests
+providers:
+  google:
+    region: us-central1
+    project: jds-throwaway-1
+modules:
+  - type: gcp-base
+  - type: gcp-dns
+    domain: gcp-staging-1.runx.dev
+    subdomains:
+      - jd
+    delegated: true
+  - type: gcp-gke
+    max_nodes: 6
+  - type: gcp-k8s-base
