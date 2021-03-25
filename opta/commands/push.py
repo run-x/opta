@@ -4,8 +4,10 @@ from typing import Optional, Tuple
 import boto3
 import click
 from botocore.config import Config
+from google.cloud import storage
 
 from opta.amplitude import amplitude_client
+from opta.core.gcp import GCP
 from opta.core.generator import gen_all
 from opta.core.terraform import get_terraform_outputs
 from opta.layer import Layer
@@ -53,6 +55,15 @@ def get_ecr_auth_info(layer: Layer) -> Tuple[str, str]:
     return username, password
 
 
+def get_gcr_auth_info(layer: Layer) -> Tuple[str, str]:
+    credentials, project_id = GCP.get_credentials()
+    if not credentials.token:
+        # Do a dummy api call to refresh crdentials
+        gcs_client = storage.Client(project=project_id, credentials=credentials)
+        list(gcs_client.list_buckets())
+    return "oauth2accesstoken", credentials.token
+
+
 def push_to_docker(
     username: str,
     password: str,
@@ -92,5 +103,10 @@ def _push(image: str, config: str, env: Optional[str], tag: Optional[str]) -> No
     layer = Layer.load_from_yaml(config, env)
     gen_all(layer)
     registry_url = get_registry_url(layer)
-    username, password = get_ecr_auth_info(layer)
+    if layer.cloud == "aws":
+        username, password = get_ecr_auth_info(layer)
+    elif layer.cloud == "google":
+        username, password = get_gcr_auth_info(layer)
+    else:
+        raise Exception(f"No support for pushing image to provider {layer.cloud}")
     push_to_docker(username, password, image, registry_url, tag)

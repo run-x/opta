@@ -7,7 +7,7 @@ name: jd-test-gcp
 modules:
   - name: app
     type: gcp-k8s-service
-    image: "kennethreitz/httpbin" # external image
+    image: AUTO
     min_containers: 2
     max_containers: "{vars.max_nodes}"
     liveness_probe_path: "/get"
@@ -19,7 +19,7 @@ modules:
         value: B
     public_uri: "jd.{parent.domain}"
     links:
-      - gcs: ["read"]
+      - gcs: ["write"]
       - redis
       - db
     secrets:
@@ -29,6 +29,6 @@ modules:
     type: gcp-postgres
   - name: gcs
     type: gcp-gcs
-    bucket_name: "{layer_name}-testing"
+    bucket_name: "{layer_name}-testing-1"
   - name: redis
     type: gcp-redis
