@@ -1,4 +1,5 @@
 from botocore.exceptions import ClientError
+from google.api_core.exceptions import ClientError as GoogleClientError
 from pytest_mock import MockFixture
 
 from opta.core.terraform import Terraform, fetch_terraform_state_resources
@@ -137,7 +138,7 @@ class TestTerraform:
         patched_init.assert_not_called()
         mocked_boto_client.assert_called_once_with("s3")
 
-    def test_create_state_storage(self, mocker: MockFixture) -> None:
+    def test_create_aws_state_storage(self, mocker: MockFixture) -> None:
         layer = mocker.Mock(spec=Layer)
         layer.gen_providers.return_value = {
             "terraform": {
@@ -209,6 +210,53 @@ class TestTerraform:
                 mocker.call("dynamodb", config=mocker.ANY),
                 mocker.call("iam", config=mocker.ANY),
             ]
+        )
+
+    def test_create_google_state_storage(self, mocker: MockFixture) -> None:
+        layer = mocker.Mock(spec=Layer)
+        layer.gen_providers.return_value = {
+            "terraform": {
+                "backend": {
+                    "gcs": {"bucket": "opta-tf-state-test-dev1", "prefix": "dev1"}
+                }
+            },
+            "provider": {"google": {"region": "us-central1", "project": "dummy-project"}},
+        }
+        mocked_gcp = mocker.patch("opta.core.terraform.GCP")
+        mocked_credentials = mocker.Mock()
+        mocked_gcp.get_credentials.return_value = tuple(
+            [mocked_credentials, "dummy-project"]
+        )
+        mocked_storage = mocker.patch("opta.core.terraform.storage")
+        mocked_storage_client = mocker.Mock()
+        mocked_storage.Client.return_value = mocked_storage_client
+        get_bucket_error = GoogleClientError(message="blah")
+        get_bucket_error.code = 404
+        mocked_storage_client.get_bucket.side_effect = get_bucket_error
+
+        mocked_google_credentials = mocker.patch("opta.core.terraform.GoogleCredentials")
+        mocked_api_credentials = mocker.Mock()
+        mocked_google_credentials.get_application_default.return_value = (
+            mocked_api_credentials
+        )
+        mocked_discovery = mocker.patch("opta.core.terraform.discovery")
+        mocked_service = mocker.Mock()
+        mocked_discovery.build.return_value = mocked_service
+
+        Terraform.create_state_storage(layer)
+        mocked_gcp.get_credentials.assert_called_once_with()
+        mocked_storage.Client.assert_called_once_with(
+            project="dummy-project", credentials=mocked_credentials
+        )
+        mocked_storage_client.get_bucket.assert_called_once_with(
+            "opta-tf-state-test-dev1"
+        )
+        mocked_storage_client.create_bucket.assert_called_once_with(
+            "opta-tf-state-test-dev1", location="us-central1"
+        )
+        mocked_google_credentials.get_application_default.assert_called_once_with()
+        mocked_discovery.build.assert_called_once_with(
+            "serviceusage", "v1", credentials=mocked_api_credentials
         )
 
     def test_destroy_modules_in_order(self, mocker: MockFixture) -> None:
