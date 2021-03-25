@@ -329,7 +329,7 @@ modules:
       google_container_cluster:
         name: GKE
         desc: Managed Kubernetes service.
-        url: https://console.cloud.google.com/kubernetes/clusters/details/{gcp_region}/{name}/details
+        url: https://console.cloud.google.com/kubernetes/clusters/details/{gcp_region}/{cluster_name}/details?folder=&organizationId=&project={gcp_project}
     providers:
       data:
         google_container_cluster:
@@ -372,7 +372,7 @@ modules:
         name: RDS
         desc: |
           Postgres database
-        url: https://console.aws.amazon.com/rds/home?region={aws_region}#database:id={id};is-cluster=true
+        url: https://console.cloud.google.com/sql/instances/{id}/overview?folder=&organizationId=&project={gcp_project}
   gcp-redis:
     location: gcp-redis
     variables:
@@ -402,7 +402,7 @@ modules:
       google_storage_bucket:
         name: GCS Bucket
         desc: Distributed object storage
-        url: https://s3.console.aws.amazon.com/s3/buckets/{id}?region={aws_region}&tab=objects
+        url: https://console.cloud.google.com/storage/browser/{id}
   gcp-k8s-service:
     location: gcp-k8s-service
     variables:
