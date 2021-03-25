@@ -1,5 +1,6 @@
 data "google_client_config" "current" {}
 data "google_project" "current" {}
+data "google_storage_project_service_account" "gcs_account" {}
 
 variable "env_name" {
   description = "Env name"

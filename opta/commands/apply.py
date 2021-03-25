@@ -127,7 +127,11 @@ def _apply(
                 )
             logger.info("Applying your changes (might take a minute)")
             if image_tag is not None:
-                service_modules = layer.get_module_by_type("k8s-service", module_idx)
+                service_modules = (
+                    layer.get_module_by_type("k8s-service", module_idx)
+                    if layer.cloud == "aws"
+                    else layer.get_module_by_type("gcp-k8s-service", module_idx)
+                )
                 if len(service_modules) != 0:
                     configure_kubectl(layer)
                     service_module = service_modules[0]

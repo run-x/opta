@@ -111,14 +111,17 @@ class GcpK8sServiceProcessor(GcpK8sModuleProcessor):
     def handle_gcs_link(
         self, linked_module: "Module", link_permissions: List[str]
     ) -> None:
-        bucket_name = linked_module.data["bucket_name"]
         # If not specified, bucket should get write permissions
         if link_permissions is None or len(link_permissions) == 0:
             link_permissions = ["write"]
         for permission in link_permissions:
             if permission == "read":
-                self.read_buckets.append(bucket_name)
+                self.read_buckets.append(
+                    f"${{{{module.{linked_module.name}.bucket_name}}}}"
+                )
             elif permission == "write":
-                self.write_buckets.append(bucket_name)
+                self.write_buckets.append(
+                    f"${{{{module.{linked_module.name}.bucket_name}}}}"
+                )
             else:
                 raise Exception(f"Invalid permission {permission}")

@@ -13,3 +13,9 @@ resource "google_kms_crypto_key_iam_member" "gke" {
   member = "serviceAccount:service-${data.google_project.current.number}@container-engine-robot.iam.gserviceaccount.com"
   role = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 }
+
+resource "google_kms_crypto_key_iam_member" "gcs" {
+  crypto_key_id = google_kms_crypto_key.key.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member = "serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"
+}
