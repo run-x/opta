@@ -1,5 +1,5 @@
 type: regex('gcp-redis')
-name: str(required=False)
+name: str()
 env_name: str(required=False)
 layer_name: str(required=False)
 module_name: str(required=False)

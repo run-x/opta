@@ -11,7 +11,7 @@ output "domain" {
 }
 
 output "delegated" {
-  value = var.delegated ? true : false
+  value = var.delegated
 }
 
 output "cert_self_link" {
