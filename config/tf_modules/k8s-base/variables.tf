@@ -12,6 +12,8 @@ locals {
   }
 }
 
+data "aws_region" "current" {}
+
 data "aws_eks_cluster" "main" {
   name = "opta-${var.env_name}"
 }
