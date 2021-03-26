@@ -107,7 +107,7 @@ class TestTerraform:
         assert not mocked_import.called
         assert not mocked_destroy.called
 
-    def test_download_state(self, mocker: MockFixture) -> None:
+    def test_aws_download_state(self, mocker: MockFixture) -> None:
         layer = mocker.Mock(spec=Layer)
         layer.gen_providers.return_value = {
             "terraform": {
@@ -137,6 +137,50 @@ class TestTerraform:
         )
         patched_init.assert_not_called()
         mocked_boto_client.assert_called_once_with("s3")
+
+    def test_google_download_state(self, mocker: MockFixture) -> None:
+        layer = mocker.Mock(spec=Layer)
+        layer.gen_providers.return_value = {
+            "terraform": {
+                "backend": {
+                    "gcs": {"bucket": "opta-tf-state-test-dev1", "prefix": "dev1"}
+                }
+            },
+            "provider": {"google": {"region": "us-central1", "project": "dummy-project"}},
+        }
+        layer.name = "blah"
+        patched_init = mocker.patch(
+            "opta.core.terraform.Terraform.init", return_value=True
+        )
+        mocked_credentials = mocker.Mock()
+        mocked_gcp_credentials = mocker.patch(
+            "opta.core.terraform.GCP.get_credentials",
+            return_value=[mocked_credentials, "dummy-project"],
+        )
+        mocked_storage_client = mocker.Mock()
+        mocked_client_constructor = mocker.patch(
+            "opta.core.terraform.storage.Client", return_value=mocked_storage_client
+        )
+        mocked_bucket_object = mocker.Mock()
+        mocked_storage_client.get_bucket.return_value = mocked_bucket_object
+        read_data = ""
+        mocked_file = mocker.mock_open(read_data=read_data)
+        mocked_open = mocker.patch("opta.core.terraform.open", mocked_file)
+
+        assert Terraform.download_state(layer)
+
+        patched_init.assert_not_called()
+        mocked_gcp_credentials.assert_called_once_with()
+        mocked_client_constructor.assert_called_once_with(
+            project="dummy-project", credentials=mocked_credentials
+        )
+        mocked_storage_client.get_bucket.assert_called_once_with(
+            "opta-tf-state-test-dev1"
+        )
+        mocked_open.assert_called_once_with("./terraform.tfstate", "wb")
+        mocked_storage_client.download_blob_to_file.assert_called_once_with(
+            mocker.ANY, mocker.ANY
+        )
 
     def test_create_aws_state_storage(self, mocker: MockFixture) -> None:
         layer = mocker.Mock(spec=Layer)
