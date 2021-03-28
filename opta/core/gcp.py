@@ -39,12 +39,12 @@ class GCP:
         return cls.credentials, cls.project_id  # type: ignore
 
     # Upload the current opta config to the state bucket, under opta_config/.
-    def upload_opta_config(self, config: str) -> None:
+    def upload_opta_config(self, config_data: str) -> None:
         bucket = self.layer.state_storage()
         config_path = f"opta_config/{self.layer.name}"
         credentials, project_id = self.get_credentials()
         gcs_client = storage.Client(project=project_id, credentials=credentials)
         bucket_object = gcs_client.get_bucket(bucket)
         blob = storage.Blob(config_path, bucket_object)
-        blob.upload_from_string(config)
-        logger.debug("Uploaded opta config to s3")
+        blob.upload_from_string(config_data)
+        logger.debug("Uploaded opta config to gcs")
