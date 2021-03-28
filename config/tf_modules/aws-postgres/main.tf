@@ -25,6 +25,7 @@ resource "aws_rds_cluster" "db_cluster" {
   skip_final_snapshot = true
   storage_encrypted = true
   kms_key_id = data.aws_kms_key.main.arn
+  deletion_protection = var.safety
   lifecycle {
     ignore_changes = [storage_encrypted, kms_key_id]
   }

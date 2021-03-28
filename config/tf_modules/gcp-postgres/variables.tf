@@ -26,3 +26,8 @@ variable "instance_tier" {
   type = string
   default = "db-f1-micro"
 }
+
+variable "safety" {
+  type = bool
+  default = true
+}

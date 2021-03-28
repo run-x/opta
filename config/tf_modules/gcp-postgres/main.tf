@@ -8,6 +8,7 @@ resource "random_password" "root_auth" {
 resource "google_sql_database_instance" "instance" {
   name   = "opta-${var.layer_name}-${var.module_name}"
   database_version = "POSTGRES_${var.engine_version}"
+  deletion_protection = var.safety
 
   settings {
     disk_autoresize = true

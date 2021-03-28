@@ -22,3 +22,8 @@ variable "instance_class" {
   type = string
   default = "db.t3.medium"
 }
+
+variable "safety" {
+  type = bool
+  default = true
+}

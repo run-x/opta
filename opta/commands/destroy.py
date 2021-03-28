@@ -3,8 +3,10 @@ from typing import List, Optional
 import boto3
 import click
 import yaml
+from google.cloud import storage
 
 from opta.amplitude import amplitude_client
+from opta.core.gcp import GCP
 from opta.core.generator import gen_all
 from opta.core.terraform import Terraform
 from opta.layer import Layer
@@ -39,9 +41,13 @@ def _fetch_children_layers(layer: "Layer") -> List["Layer"]:
         return []
 
     # Download all the opta config files in the bucket
-    s3_bucket_name = layer.state_storage()
-    opta_configs = _download_all_opta_configs(s3_bucket_name)
-
+    bucket_name = layer.state_storage()
+    if layer.cloud == "aws":
+        opta_configs = _aws_download_all_opta_configs(bucket_name)
+    elif layer.cloud == "google":
+        opta_configs = _gcp_download_all_opta_configs(bucket_name)
+    else:
+        raise Exception(f"Not handling deletion for cloud {layer.cloud}")
     # Keep track of children layers as we find them.
     children_layers = []
     for config_path in opta_configs:
@@ -65,7 +71,7 @@ def _fetch_children_layers(layer: "Layer") -> List["Layer"]:
 
 # Download all the opta config files from the specified bucket and return
 # a list of temporary file paths to access them.
-def _download_all_opta_configs(bucket_name: str) -> List[str]:
+def _aws_download_all_opta_configs(bucket_name: str) -> List[str]:
     # Opta configs for every layer are saved in the opta_config/ directory
     # in the state bucket.
     s3_config_dir = "opta_config/"
@@ -84,4 +90,18 @@ def _download_all_opta_configs(bucket_name: str) -> List[str]:
 
         configs.append(local_config_path)
 
+    return configs
+
+
+def _gcp_download_all_opta_configs(bucket_name: str) -> List[str]:
+    gcs_config_dir = "opta_config/"
+    credentials, project_id = GCP.get_credentials()
+    gcs_client = storage.Client(project=project_id, credentials=credentials)
+    bucket_object = gcs_client.get_bucket(bucket_name)
+    blobs: List[storage.Blob] = list(
+        gcs_client.list_blobs(bucket_object, prefix=gcs_config_dir)
+    )
+    configs: List[str] = []
+    for blob in blobs:
+        configs.append(blob.download_as_bytes().decode("utf-8"))
     return configs
