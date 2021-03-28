@@ -1,0 +1,8 @@
+type: regex('gcp-redis')
+name: str()
+env_name: str(required=False)
+layer_name: str(required=False)
+module_name: str(required=False)
+memory_size_gb: int(required=False)
+redis_version: str(required=False)
+high_availability: bool(required=False)

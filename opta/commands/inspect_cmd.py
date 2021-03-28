@@ -82,8 +82,14 @@ class InspectCommand:
     def _get_template_url_values(self, resource_state: dict) -> dict:
         template_url_values = {}
 
-        # The template url may require the current AWS region.
-        template_url_values["aws_region"] = self._get_aws_region()
+        # The template url may require the current AWS/GCP region.
+        if self.layer.cloud == "aws":
+            template_url_values["aws_region"] = self._get_aws_region()
+        elif self.layer.cloud == "google":
+            template_url_values["gcp_region"] = self._get_gcp_region()
+            template_url_values["gcp_project"] = self._get_gcp_project()
+        else:
+            raise Exception(f"Currently can not handle cloud {self.layer.cloud}")
 
         # Get the resource properties from the terraform state, which
         # may be used to populate the template URL.
@@ -98,7 +104,8 @@ class InspectCommand:
         ):
             k8s_metadata_values = self._get_k8s_metadata_values(resource_state)
             template_url_values = deep_merge(template_url_values, k8s_metadata_values)
-
+        if resource_state.get("type") == "google_container_cluster":
+            template_url_values["cluster_name"] = template_url_values["id"].split("/")[-1]
         return template_url_values
 
     def _get_k8s_metadata_values(self, resource_properties: dict) -> dict:
@@ -119,3 +126,11 @@ class InspectCommand:
     def _get_aws_region(self) -> str:
         tf_config = json.load(open(TF_FILE_PATH))
         return tf_config["provider"]["aws"]["region"]
+
+    def _get_gcp_region(self) -> str:
+        tf_config = json.load(open(TF_FILE_PATH))
+        return tf_config["provider"]["google"]["region"]
+
+    def _get_gcp_project(self) -> str:
+        tf_config = json.load(open(TF_FILE_PATH))
+        return tf_config["provider"]["google"]["project"]

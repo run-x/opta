@@ -1,13 +1,13 @@
 from typing import TYPE_CHECKING
 
-from opta.module_processors.base import K8sModuleProcessor
+from opta.module_processors.base import AWSK8sModuleProcessor
 
 if TYPE_CHECKING:
     from opta.layer import Layer
     from opta.module import Module
 
 
-class K8sBaseProcessor(K8sModuleProcessor):
+class K8sBaseProcessor(AWSK8sModuleProcessor):
     def __init__(self, module: "Module", layer: "Layer"):
         if module.data["type"] != "k8s-base":
             raise Exception(

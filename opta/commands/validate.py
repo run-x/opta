@@ -44,7 +44,12 @@ class Opta(Validator):
             return ["opta.yaml files should be a map"]
 
         if "org_name" in value:
-            schema_path = path.join(schema_dir_path, "environment.yaml")
+            if value.get("providers", {}).get("google"):
+                schema_path = path.join(schema_dir_path, "gcp_environment.yaml")
+            elif value.get("providers", {}).get("aws"):
+                schema_path = path.join(schema_dir_path, "aws_environment.yaml")
+            else:
+                raise UserErrors("We currently only support AWS and GCP")
         else:
             schema_path = path.join(schema_dir_path, "service.yaml")
 

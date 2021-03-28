@@ -12,6 +12,7 @@ def test_configure_kubectl(mocker: MockFixture) -> None:
     # Mock tf file generation
     mocked_layer_class = mocker.patch("opta.commands.kubectl.Layer")
     mocked_layer = mocker.Mock(spec=Layer)
+    mocked_layer.cloud = "aws"
     mocked_layer_class.load_from_yaml.return_value = mocked_layer
     mocker.patch("opta.commands.kubectl.gen_all")
 
@@ -39,7 +40,7 @@ def test_configure_kubectl(mocker: MockFixture) -> None:
     # Mock fetching the opta env aws account id.
     mocker.patch("opta.core.kubernetes._get_root_layer")
     mocker.patch(
-        "opta.core.kubernetes._get_cluster_env",
+        "opta.core.kubernetes._aws_get_cluster_env",
         return_value=("us-east-1", [fake_aws_account_id]),
     )
     # Mock fetching the cluster name

@@ -35,5 +35,6 @@ def gen(layer: "Layer") -> Generator[Tuple[int, List["Module"], int], None, None
 
 # Generate a tags override file in every module, that adds opta tags to every resource.
 def gen_opta_resource_tags(layer: "Layer") -> None:
-    for module in layer.modules:
-        module.gen_tags_override()
+    if "aws" in layer.providers:
+        for module in layer.modules:
+            module.gen_tags_override()

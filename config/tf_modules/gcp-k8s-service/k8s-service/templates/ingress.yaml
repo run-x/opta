@@ -1,0 +1,29 @@
+{{- if .Values.domain }}
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name:  {{ include "k8s-service.fullname" . }}
+  namespace: {{ include "k8s-service.namespaceName" . }}
+  annotations:
+    {{- if not (eq .Values.pathPrefix "/") }}
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    {{- end }}
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      proxy_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;
+      grpc_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;
+    {{/* For websockets */}}
+    {{ if hasKey .Values.port "tcp" }}
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    {{- end }}
+spec:
+  rules:
+    - host: {{ .Values.domain }}
+      http:
+        paths:
+          - path: {{ .Values.pathPrefix }}{{ if not (eq .Values.pathPrefix "/") }}(/|$)(.*){{ end }}
+            backend:
+              serviceName: {{ include "k8s-service.serviceName" . }}
+              servicePort: 80
+{{- end }}

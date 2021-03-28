@@ -83,7 +83,8 @@ def _apply(
     layer.variables["image_tag"] = image_tag
     Terraform.create_state_storage(layer)
     gen_opta_resource_tags(layer)
-    AWS(layer).upload_opta_config(config)
+    if layer.cloud == "aws":
+        AWS(layer).upload_opta_config(config)
 
     existing_modules: Set[str] = set()
     first_loop = True
@@ -126,7 +127,11 @@ def _apply(
                 )
             logger.info("Applying your changes (might take a minute)")
             if image_tag is not None:
-                service_modules = layer.get_module_by_type("k8s-service", module_idx)
+                service_modules = (
+                    layer.get_module_by_type("k8s-service", module_idx)
+                    if layer.cloud == "aws"
+                    else layer.get_module_by_type("gcp-k8s-service", module_idx)
+                )
                 if len(service_modules) != 0:
                     configure_kubectl(layer)
                     service_module = service_modules[0]

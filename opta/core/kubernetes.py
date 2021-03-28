@@ -19,12 +19,11 @@ if TYPE_CHECKING:
     from opta.layer import Layer
 
 
-KUBECTL_INSTALL_URL = (
-    "https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html"
-)
+KUBECTL_INSTALL_URL = "https://kubernetes.io/docs/tasks/tools/install-kubectl-macos/"
 AWS_CLI_INSTALL_URL = (
     "https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html"
 )
+GCP_CLI_INSTALL_URL = "https://cloud.google.com/sdk/docs/install"
 
 
 def configure_kubectl(layer: "Layer") -> None:
@@ -36,7 +35,71 @@ def configure_kubectl(layer: "Layer") -> None:
         raise UserErrors(
             f"Please visit this link to install kubectl first: {KUBECTL_INSTALL_URL}"
         )
+    if layer.cloud == "aws":
+        _aws_configure_kubectl(layer)
+    elif layer.cloud == "google":
+        _gcp_configure_kubectl(layer)
 
+
+def _gcp_configure_kubectl(layer: "Layer") -> None:
+    if not is_tool("gcloud"):
+        raise UserErrors(
+            f"Please visit the link to install the gcloud CLI first: {GCP_CLI_INSTALL_URL}"
+        )
+    try:
+        out: str = nice_run(
+            ["gcloud", "config", "get-value", "project"], check=True, capture_output=True
+        ).stdout.decode("utf-8")
+    except Exception as err:
+        raise UserErrors(
+            fmt_msg(
+                f"""
+                Running the gcloud CLI failed. Please make sure you've properly
+                configured your gcloud credentials, and recently refreshed them if
+                they're expired:
+                ~{err}
+                """
+            )
+        )
+    current_project_id = out.strip()
+
+    root_layer = _get_root_layer(layer)
+    env_gcp_region, env_gcp_project = _gcp_get_cluster_env(root_layer)
+    if env_gcp_project != current_project_id:
+        raise UserErrors(
+            fmt_msg(
+                f"""
+                The gcloud CLI is not configured with the right credentials to
+                access the {root_layer.name or ""} cluster.
+                ~Current GCP project: {current_project_id}
+                ~Expected GCP project: {env_gcp_project}
+                """
+            )
+        )
+
+    # Get the cluster name from the outputs.
+    outputs = get_terraform_outputs(layer)
+    cluster_name = outputs.get("parent.k8s_cluster_name") or outputs.get(
+        "k8s_cluster_name"
+    )
+
+    if cluster_name is None:
+        raise Exception("The GKE cluster name could not be determined.")
+
+    # Update kubeconfig with the cluster details, and also switches context
+    nice_run(
+        [
+            "gcloud",
+            "container",
+            "clusters",
+            "get-credentials",
+            cluster_name,
+            f"--region={env_gcp_region}",
+        ]
+    )
+
+
+def _aws_configure_kubectl(layer: "Layer") -> None:
     if not is_tool("aws"):
         raise UserErrors(
             f"Please visit the link to install the AWS CLI first: {AWS_CLI_INSTALL_URL}"
@@ -64,7 +127,7 @@ def configure_kubectl(layer: "Layer") -> None:
 
     # Get the environment's account details from the opta config
     root_layer = _get_root_layer(layer)
-    env_aws_region, env_aws_account_ids = _get_cluster_env(root_layer)
+    env_aws_region, env_aws_account_ids = _aws_get_cluster_env(root_layer)
 
     # Make sure the current account points to the cluster environment
     if int(current_aws_account_id) not in env_aws_account_ids:
@@ -102,9 +165,14 @@ def configure_kubectl(layer: "Layer") -> None:
     )
 
 
-def _get_cluster_env(root_layer: "Layer") -> Tuple[str, List[int]]:
+def _aws_get_cluster_env(root_layer: "Layer") -> Tuple[str, List[int]]:
     aws_provider = root_layer.providers["aws"]
     return aws_provider["region"], aws_provider["allowed_account_ids"]
+
+
+def _gcp_get_cluster_env(root_layer: "Layer") -> Tuple[str, str]:
+    googl_provider = root_layer.providers["google"]
+    return googl_provider["region"], googl_provider["project"]
 
 
 def _get_root_layer(layer: "Layer") -> "Layer":
