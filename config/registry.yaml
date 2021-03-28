@@ -202,6 +202,7 @@ modules:
       module_name: str
       engine_version: optional
       instance_class: optional
+      safety: optional
     outputs:
       db_user: str
       db_password: str
@@ -362,6 +363,7 @@ modules:
       module_name: str
       instance_tier: optional
       engine_version: optional
+      safety: optional
     outputs:
       db_user: str
       db_password: str

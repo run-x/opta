@@ -4,6 +4,7 @@ resource "google_storage_bucket" "bucket" {
   encryption {
     default_kms_key_name = data.google_kms_crypto_key.kms.id
   }
+  force_destroy = true
 }
 
 resource "google_storage_bucket_acl" "acl" {
