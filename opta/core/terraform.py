@@ -317,6 +317,7 @@ class Terraform:
             "dns.googleapis.com",
             "servicenetworking.googleapis.com",
             "redis.googleapis.com",
+            "compute.googleapis.com",
         ]:
             request = service.services().enable(
                 name=f"projects/{project_name}/services/{service_name}"
