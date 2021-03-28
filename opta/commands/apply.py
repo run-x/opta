@@ -6,6 +6,7 @@ import click
 from opta.amplitude import amplitude_client
 from opta.constants import TF_PLAN_PATH
 from opta.core.aws import AWS
+from opta.core.gcp import GCP
 from opta.core.generator import gen, gen_opta_resource_tags
 from opta.core.kubernetes import configure_kubectl, tail_module_log, tail_namespace_events
 from opta.core.terraform import Terraform
@@ -85,6 +86,10 @@ def _apply(
     gen_opta_resource_tags(layer)
     if layer.cloud == "aws":
         AWS(layer).upload_opta_config(config)
+    elif layer.cloud == "google":
+        GCP(layer).upload_opta_config(config)
+    else:
+        raise Exception(f"Cannot handle upload config for cloud {layer.cloud}")
 
     existing_modules: Set[str] = set()
     first_loop = True
