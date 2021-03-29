@@ -34,6 +34,10 @@ requests = ">=2.0,<3"
 kubernetes = ">=12.0,<13"
 python-hcl2 = ">=2.0,<3"
 yamale = ">=3.0,<4"
+google-api-python-client = ">=2.0.2,<2.1.0"
+oauth2client = ">=4.1.3,<4.2.0"
+google-cloud-storage = ">=1.36.2,<1.37.0"
+google-auth = ">=1.27.1,<1.28"
 
 [requires]
 python_version = "3.8"

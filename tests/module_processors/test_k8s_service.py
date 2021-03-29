@@ -20,7 +20,7 @@ class TestK8sServiceProcessor:
         )
         app_module = layer.get_module("app", 6)
         mocked_process = mocker.patch(
-            "opta.module_processors.k8s_service.K8sModuleProcessor.process"
+            "opta.module_processors.k8s_service.AWSK8sModuleProcessor.process"
         )
         K8sServiceProcessor(app_module, layer).process(5)
         mocked_process.assert_called_once_with(5)

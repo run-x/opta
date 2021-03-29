@@ -17,6 +17,8 @@ from opta.exceptions import UserErrors
 from opta.module import Module
 from opta.module_processors.base import ModuleProcessor
 from opta.module_processors.datadog import DatadogProcessor
+from opta.module_processors.gcp_k8s_base import GcpK8sBaseProcessor
+from opta.module_processors.gcp_k8s_service import GcpK8sServiceProcessor
 from opta.module_processors.k8s_base import K8sBaseProcessor
 from opta.module_processors.k8s_service import K8sServiceProcessor
 from opta.plugins.derived_providers import DerivedProviders
@@ -45,6 +47,20 @@ class Layer:
         if self.parent and self.org_name is None:
             self.org_name = self.parent.org_name
         self.providers = providers
+        total_base_providers = deep_merge(
+            self.providers, self.parent.providers if self.parent else {}
+        )
+        self.cloud: str
+        if "google" in total_base_providers and "aws" in total_base_providers:
+            raise UserErrors(
+                "You can have AWS as the cloud provider, or google, but not both"
+            )
+        if "google" in total_base_providers:
+            self.cloud = "google"
+        elif "aws" in total_base_providers:
+            self.cloud = "aws"
+        else:
+            raise UserErrors("No cloud provider (AWS or GCP) found")
         self.variables = variables or {}
         self.modules = []
         for module_data in modules_data:
@@ -179,6 +195,10 @@ class Layer:
                 K8sBaseProcessor(module, self).process(module_idx)
             elif module_type == "datadog":
                 DatadogProcessor(module, self).process(module_idx)
+            elif module_type == "gcp-k8s-base":
+                GcpK8sBaseProcessor(module, self).process(module_idx)
+            elif module_type == "gcp-k8s-service":
+                GcpK8sServiceProcessor(module, self).process(module_idx)
             else:
                 ModuleProcessor(module, self).process(module_idx)
         for module in self.modules[0 : module_idx + 1]:

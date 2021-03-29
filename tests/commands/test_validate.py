@@ -11,7 +11,12 @@ TERRAFORM_OUTPUTS = {"docker_repo_url": REGISTRY_URL}
 
 def test_validate_service() -> None:
     test_service_file_path = os.path.join(
-        os.path.dirname(os.path.dirname(__file__)), "..", "new_service", "opta.yml"
+        os.path.dirname(os.path.dirname(__file__)),
+        "..",
+        "examples",
+        "aws",
+        "service",
+        "opta.yml",
     )
     runner = CliRunner()
     result = runner.invoke(cli, ["validate", "-c", test_service_file_path])
@@ -21,7 +26,12 @@ def test_validate_service() -> None:
 
 def test_validate_env() -> None:
     test_env_file_path = os.path.join(
-        os.path.dirname(os.path.dirname(__file__)), "..", "new_env", "opta.yml"
+        os.path.dirname(os.path.dirname(__file__)),
+        "..",
+        "examples",
+        "aws",
+        "env",
+        "opta.yml",
     )
     runner = CliRunner()
     result = runner.invoke(cli, ["validate", "-c", test_env_file_path])

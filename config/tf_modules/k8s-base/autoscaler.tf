@@ -65,6 +65,7 @@ resource "helm_release" "autoscaler" {
           name: "autoscaler"
         }
       }
+      awsRegion: data.aws_region.current.name
     })
   ]
   namespace = "autoscaler"

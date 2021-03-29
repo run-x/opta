@@ -1,0 +1,31 @@
+environments:
+  - path: "./gcp_dummy_config_parent.yaml"
+    name: "dummy-env"
+    variables: {}
+name: gcp-dummy-config
+modules:
+  - name: database
+    type: gcp-postgres
+  - name: redis
+    type: gcp-redis
+  - name: bucket1
+    type: gcp-gcs
+    bucket_name: "bucket1"
+  - name: bucket2
+    type: gcp-gcs
+    bucket_name: "bucket2"
+  - name: bucket3
+    type: gcp-gcs
+    bucket_name: "bucket3"
+  - name: app
+    type: gcp-k8s-service
+    secrets:
+      - BALONEY
+    links:
+      - database
+      - redis
+      - bucket1:
+          - read
+      - bucket2:
+          - write
+      - bucket3

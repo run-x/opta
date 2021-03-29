@@ -6,7 +6,8 @@ from logging.handlers import QueueHandler, QueueListener
 from queue import Queue
 from shutil import which
 from textwrap import dedent
-from typing import Any, Dict, List, Tuple
+from time import sleep
+from typing import Any, Dict, Generator, List, Tuple
 
 from opta.constants import VERSION
 from opta.datadog_logging import DatadogLogHandler
@@ -44,18 +45,18 @@ if hasattr(sys, "_called_from_test") or VERSION == "dev":
 fmt = PartialFormatter("")
 
 
-def deep_merge(a: Dict[Any, Any], b: Dict[Any, Any]) -> Dict[Any, Any]:
-    b = b.copy()
-    for key, value in a.items():
-        if key in b:
-            if isinstance(value, dict) and isinstance(b[key], dict):
-                b[key] = deep_merge(value, b[key])
-            elif value != b[key]:
+def deep_merge(dict1: Dict[Any, Any], dict2: Dict[Any, Any]) -> Dict[Any, Any]:
+    dict2 = dict2.copy()
+    for key, value in dict1.items():
+        if key in dict2:
+            if isinstance(value, dict) and isinstance(dict2[key], dict):
+                dict2[key] = deep_merge(value, dict2[key])
+            elif value != dict2[key]:
                 raise Exception(f"Cant merge conflicting non-dict values (key: {key})")
         else:
-            b[key] = value
+            dict2[key] = value
 
-    return b
+    return dict2
 
 
 def hydrate(target: Any, hydration: Dict[Any, Any]) -> Dict[Any, Any]:
@@ -139,3 +140,14 @@ def all_substrings(string: str, delimiter: str = "") -> List[str]:
 
     add_words(0, 1)
     return all_substrings
+
+
+# Exponential backoff for some external requests that may not work 100% on the
+# first try.
+def exp_backoff(num_tries: int = 3) -> Generator:
+    seconds = 2
+
+    for _ in range(num_tries):
+        yield
+        sleep(seconds)
+        seconds *= seconds

@@ -6,9 +6,15 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
 import boto3
 from botocore.config import Config
 from botocore.exceptions import ClientError
+from google.api_core.exceptions import ClientError as GoogleClientError
+from google.cloud import storage
+from googleapiclient import discovery
+from googleapiclient.errors import HttpError
+from oauth2client.client import GoogleCredentials
 
 from opta.amplitude import amplitude_client
 from opta.core.aws import AWS, get_aws_resource_id
+from opta.core.gcp import GCP
 from opta.exceptions import UserErrors
 from opta.nice_subprocess import nice_run
 from opta.utils import deep_merge, logger
@@ -101,8 +107,7 @@ class Terraform:
             return None
 
         # Destroy stale terraform resources.
-        destroy_targets = [f"-target={resource}" for resource in stale_resources]
-        cls.destroy(*destroy_targets)
+        cls.destroy_resources(layer, stale_resources)
 
     @classmethod
     def import_resource(cls, tf_resource_address: str, aws_resource_id: str) -> None:
@@ -111,8 +116,54 @@ class Terraform:
         )
 
     @classmethod
-    def destroy(cls, *tf_flags: str) -> None:
-        nice_run(["terraform", "destroy", *tf_flags], check=True)
+    def refresh(cls, *tf_flags: str) -> None:
+        nice_run(["terraform", "refresh", *tf_flags], check=True)
+
+    @classmethod
+    def destroy_resources(
+        cls, layer: "Layer", target_resources: List[str], *tf_flags: str
+    ) -> None:
+        # If no targets are passed, "terraform destroy" attempts to destroy ALL
+        # resources, which should be avoided unless explicitly done.
+        if len(target_resources) == 0:
+            raise Exception(
+                "Target resources was specified to be destroyed, but contained an empty list"
+            )
+
+        # Refreshing the state is necessary to update terraform outputs.
+        # This includes fetching the latest EKS cluster auth token, which is
+        # necessary for destroying many k8s resources.
+        cls.refresh()
+
+        for module in reversed(layer.modules):
+            module_address_prefix = f"module.{module.name}"
+            module_resources = [
+                resource
+                for resource in target_resources
+                if module_address_prefix in resource
+            ]
+            if len(module_resources) == 0:
+                continue
+
+            resource_targets = [f"-target={resource}" for resource in module_resources]
+            nice_run(["terraform", "destroy", *resource_targets, *tf_flags], check=True)
+
+    @classmethod
+    def destroy_all(cls, layer: "Layer", *tf_flags: str) -> None:
+        cls.refresh()
+
+        for module in reversed(layer.modules):
+            module_address_prefix = f"module.{module.name}"
+
+            nice_run(
+                ["terraform", "destroy", f"-target={module_address_prefix}", *tf_flags],
+                check=True,
+            )
+
+    # Remove a resource from the terraform state, but does not destroy it.
+    @classmethod
+    def remove_from_state(cls, resource_address: str) -> None:
+        nice_run(["terraform", "state", "rm", resource_address])
 
     @classmethod
     def plan(cls, *tf_flags: str, quiet: Optional[bool] = False) -> None:
@@ -181,11 +232,27 @@ class Terraform:
                     # The object does not exist.
                     return False
                 raise
+        elif "gcs" in providers.get("terraform", {}).get("backend", {}):
+            bucket = providers["terraform"]["backend"]["gcs"]["bucket"]
+            prefix = providers["terraform"]["backend"]["gcs"]["prefix"]
+            credentials, project_id = GCP.get_credentials()
+            gcs_client = storage.Client(project=project_id, credentials=credentials)
+            bucket_object = gcs_client.get_bucket(bucket)
+            blob = storage.Blob(f"{prefix}/default.tfstate", bucket_object)
+            try:
+                with open(state_file, "wb") as file_obj:
+                    gcs_client.download_blob_to_file(blob, file_obj)
+            except GoogleClientError as e:
+                if e.code == 404:
+                    # The object does not exist.
+                    return False
+                raise
+        else:
+            raise UserErrors("Need to get state from S3 or GCS")
 
         cls.downloaded_state[layer.name] = True
         return True
 
-    @classmethod
     def delete_state_storage(cls, layer: "Layer") -> None:
         providers = layer.gen_providers(0)
         if "s3" not in providers.get("terraform", {}).get("backend", {}):
@@ -200,6 +267,160 @@ class Terraform:
         region = providers["terraform"]["backend"]["s3"]["region"]
         AWS.delete_dynamodb_table(dynamodb_table, region)
 
+    def _create_gcp_state_storage(cls, providers: dict) -> None:
+        bucket_name = providers["terraform"]["backend"]["gcs"]["bucket"]
+        region = providers["provider"]["google"]["region"]
+        project_name = providers["provider"]["google"]["project"]
+        credentials, project_id = GCP.get_credentials()
+        if project_id != project_name:
+            raise UserErrors(
+                f"We got {project_name} as the project name in opta, but {project_id} in the google credentials"
+            )
+        gcs_client = storage.Client(project=project_id, credentials=credentials)
+
+        try:
+            gcs_client.get_bucket(bucket_name)
+        except GoogleClientError as e:
+            if e.code == 403:
+                raise UserErrors(
+                    f"We were unable to access the gcs bucket, {bucket_name} on your gcp project (opta needs this to store state). "
+                    "Usually, it means that the name in your opta.yml is not unique. Try updating it to something else. "
+                    "It could also mean that your GCP user account has insufficient permissions. "
+                    "Please fix these issues and try again!"
+                )
+            elif e.code != 404:
+                raise UserErrors(
+                    "When trying to determine the status of the state bucket, we got an "
+                    f"{e.code} error with the message "
+                    f"{e.message}"
+                )
+            logger.info("GCS bucket for terraform state not found, creating a new one")
+
+            gcs_client.create_bucket(bucket_name, location=region)
+
+        # Enable the APIs
+        credentials = GoogleCredentials.get_application_default()
+        service = discovery.build("serviceusage", "v1", credentials=credentials)
+        for service_name in [
+            "container.googleapis.com",
+            "iam.googleapis.com",
+            "containerregistry.googleapis.com",
+            "cloudkms.googleapis.com",
+            "dns.googleapis.com",
+            "servicenetworking.googleapis.com",
+            "redis.googleapis.com",
+            "compute.googleapis.com",
+        ]:
+            request = service.services().enable(
+                name=f"projects/{project_name}/services/{service_name}"
+            )
+            try:
+                request.execute()
+            except HttpError as e:
+                if e.resp.status == 400:
+                    raise UserErrors(
+                        f"Got a 400 response when trying to enable the google {service_name} service with the following error reason: {e._get_reason()}"
+                    )
+            print(f"Google service {service_name} activated")
+
+    @classmethod
+    def _create_aws_state_storage(cls, providers: dict) -> None:
+        bucket_name = providers["terraform"]["backend"]["s3"]["bucket"]
+        dynamodb_table = providers["terraform"]["backend"]["s3"]["dynamodb_table"]
+        region = providers["terraform"]["backend"]["s3"]["region"]
+        s3 = boto3.client("s3")
+        dynamodb = boto3.client("dynamodb", config=Config(region_name=region))
+        iam = boto3.client("iam", config=Config(region_name=region))
+        try:
+            s3.get_bucket_encryption(Bucket=bucket_name,)
+        except ClientError as e:
+            if e.response["Error"]["Code"] == "AccessDenied":
+                raise UserErrors(
+                    f"We were unable to access the S3 bucket, {bucket_name} on your AWS account (opta needs this to store state). "
+                    "Usually, it means that the name in your opta.yml is not unique. Try updating it to something else. "
+                    "It could also mean that your AWS account has insufficient permissions. "
+                    "Please fix these issues and try again!"
+                )
+            if e.response["Error"]["Code"] != "NoSuchBucket":
+                raise UserErrors(
+                    "When trying to determine the status of the state bucket, we got an "
+                    f"{e.response['Error']['Code']} error with the message "
+                    f"{e.response['Error']['Message']}"
+                )
+            logger.info("S3 bucket for terraform state not found, creating a new one")
+            if region == "us-east-1":
+                s3.create_bucket(Bucket=bucket_name,)
+            else:
+                s3.create_bucket(
+                    Bucket=bucket_name,
+                    CreateBucketConfiguration={"LocationConstraint": region},
+                )
+            s3.put_bucket_encryption(
+                Bucket=bucket_name,
+                ServerSideEncryptionConfiguration={
+                    "Rules": [
+                        {
+                            "ApplyServerSideEncryptionByDefault": {
+                                "SSEAlgorithm": "AES256"
+                            },
+                        },
+                    ]
+                },
+            )
+            s3.put_public_access_block(
+                Bucket=bucket_name,
+                PublicAccessBlockConfiguration={
+                    "BlockPublicAcls": True,
+                    "IgnorePublicAcls": True,
+                    "BlockPublicPolicy": True,
+                    "RestrictPublicBuckets": True,
+                },
+            )
+
+        try:
+            dynamodb.describe_table(TableName=dynamodb_table)
+        except ClientError as e:
+            if e.response["Error"]["Code"] != "ResourceNotFoundException":
+                raise UserErrors(
+                    "When trying to determine the status of the state dynamodb table, we got an "
+                    f"{e.response['Error']['Code']} error with the message "
+                    f"{e.response['Error']['Message']}"
+                )
+            print("Dynamodb table for terraform state not found, creating a new one")
+            dynamodb.create_table(
+                TableName=dynamodb_table,
+                KeySchema=[{"AttributeName": "LockID", "KeyType": "HASH"}],
+                AttributeDefinitions=[{"AttributeName": "LockID", "AttributeType": "S"}],
+                BillingMode="PROVISIONED",
+                ProvisionedThroughput={
+                    "ReadCapacityUnits": 20,
+                    "WriteCapacityUnits": 20,
+                },
+            )
+        # Create the service linked roles
+        try:
+            iam.create_service_linked_role(AWSServiceName="autoscaling.amazonaws.com",)
+        except ClientError as e:
+            if e.response["Error"]["Code"] != "InvalidInput":
+                raise UserErrors(
+                    "When trying to create the aws service linked role for autoscaling, we got an "
+                    f"{e.response['Error']['Code']} error with the message "
+                    f"{e.response['Error']['Message']}"
+                )
+            print("Autoscaling service linked role present")
+        try:
+            iam.create_service_linked_role(
+                AWSServiceName="elasticloadbalancing.amazonaws.com",
+            )
+        except ClientError as e:
+            if e.response["Error"]["Code"] != "InvalidInput":
+                raise UserErrors(
+                    "When trying to create the aws service linked role for load balancing, we got an "
+                    f"{e.response['Error']['Code']} error with the message "
+                    f"{e.response['Error']['Message']}"
+                )
+            print("Load balancing service linked role present")
+
     @classmethod
     def create_state_storage(cls, layer: "Layer") -> None:
         """
@@ -207,105 +428,9 @@ class Terraform:
         """
         providers = layer.gen_providers(0)
         if "s3" in providers.get("terraform", {}).get("backend", {}):
-            bucket_name = providers["terraform"]["backend"]["s3"]["bucket"]
-            dynamodb_table = providers["terraform"]["backend"]["s3"]["dynamodb_table"]
-            region = providers["terraform"]["backend"]["s3"]["region"]
-            s3 = boto3.client("s3")
-            dynamodb = boto3.client("dynamodb", config=Config(region_name=region))
-            iam = boto3.client("iam", config=Config(region_name=region))
-            try:
-                s3.get_bucket_encryption(Bucket=bucket_name,)
-            except ClientError as e:
-                if e.response["Error"]["Code"] == "AccessDenied":
-                    raise UserErrors(
-                        f"We were unable to access the S3 bucket, {bucket_name} on your AWS account (opta needs this to store state). "
-                        "Usually, it means that the name in your opta.yml is not unique. Try updating it to something else. "
-                        "It could also mean that your AWS account has insufficient permissions. "
-                        "Please fix these issues and try again!"
-                    )
-                if e.response["Error"]["Code"] != "NoSuchBucket":
-                    raise UserErrors(
-                        "When trying to determine the status of the state bucket, we got an "
-                        f"{e.response['Error']['Code']} error with the message "
-                        f"{e.response['Error']['Message']}"
-                    )
-                logger.info("S3 bucket for terraform state not found, creating a new one")
-                if region == "us-east-1":
-                    s3.create_bucket(Bucket=bucket_name,)
-                else:
-                    s3.create_bucket(
-                        Bucket=bucket_name,
-                        CreateBucketConfiguration={"LocationConstraint": region},
-                    )
-                s3.put_bucket_encryption(
-                    Bucket=bucket_name,
-                    ServerSideEncryptionConfiguration={
-                        "Rules": [
-                            {
-                                "ApplyServerSideEncryptionByDefault": {
-                                    "SSEAlgorithm": "AES256"
-                                },
-                            },
-                        ]
-                    },
-                )
-                s3.put_public_access_block(
-                    Bucket=bucket_name,
-                    PublicAccessBlockConfiguration={
-                        "BlockPublicAcls": True,
-                        "IgnorePublicAcls": True,
-                        "BlockPublicPolicy": True,
-                        "RestrictPublicBuckets": True,
-                    },
-                )
-
-            try:
-                dynamodb.describe_table(TableName=dynamodb_table)
-            except ClientError as e:
-                if e.response["Error"]["Code"] != "ResourceNotFoundException":
-                    raise UserErrors(
-                        "When trying to determine the status of the state dynamodb table, we got an "
-                        f"{e.response['Error']['Code']} error with the message "
-                        f"{e.response['Error']['Message']}"
-                    )
-                print("Dynamodb table for terraform state not found, creating a new one")
-                dynamodb.create_table(
-                    TableName=dynamodb_table,
-                    KeySchema=[{"AttributeName": "LockID", "KeyType": "HASH"}],
-                    AttributeDefinitions=[
-                        {"AttributeName": "LockID", "AttributeType": "S"},
-                    ],
-                    BillingMode="PROVISIONED",
-                    ProvisionedThroughput={
-                        "ReadCapacityUnits": 20,
-                        "WriteCapacityUnits": 20,
-                    },
-                )
-            # Create the service linked roles
-            try:
-                iam.create_service_linked_role(
-                    AWSServiceName="autoscaling.amazonaws.com",
-                )
-            except ClientError as e:
-                if e.response["Error"]["Code"] != "InvalidInput":
-                    raise UserErrors(
-                        "When trying to create the aws service linked role for autoscaling, we got an "
-                        f"{e.response['Error']['Code']} error with the message "
-                        f"{e.response['Error']['Message']}"
-                    )
-                print("Autoscaling service linked role present")
-            try:
-                iam.create_service_linked_role(
-                    AWSServiceName="elasticloadbalancing.amazonaws.com",
-                )
-            except ClientError as e:
-                if e.response["Error"]["Code"] != "InvalidInput":
-                    raise UserErrors(
-                        "When trying to create the aws service linked role for load balancing, we got an "
-                        f"{e.response['Error']['Code']} error with the message "
-                        f"{e.response['Error']['Message']}"
-                    )
-                print("Load balancing service linked role present")
+            cls._create_aws_state_storage(providers)
+        if "gcs" in providers.get("terraform", {}).get("backend", {}):
+            cls._create_gcp_state_storage(providers)
 
 
 def get_terraform_outputs(layer: "Layer", pull_state: bool = True) -> dict:
@@ -344,3 +469,38 @@ def _fetch_parent_outputs(pull_state: bool = True) -> dict:
             parent_state_outputs[output_name] = v
 
     return parent_state_outputs
+
+
+def fetch_terraform_state_resources(layer: "Layer") -> dict:
+    Terraform.download_state(layer)
+    state = Terraform.get_state()
+
+    resources = state.get("resources", [])
+
+    resources_dict: Dict[str, dict] = {}
+    for resource in resources:
+        # Note that resource addresses should start with "module.", but in the
+        # saved terraform state, it is already part of the module name.
+        # Ex. "module.awsbase"
+        address = ".".join(
+            [
+                resource.get("module", ""),
+                resource.get("type", ""),
+                resource.get("name", ""),
+            ]
+        )
+        if address == "..":
+            continue
+
+        # Some resources like module.awsdns.aws_acm_certificate.certificate have
+        # an empty instances list.
+        if len(resource["instances"]) == 0:
+            resources_dict[address] = {}
+        else:
+            resources_dict[address] = resource["instances"][0]["attributes"]
+
+        resources_dict[address]["module"] = resource.get("module", "")
+        resources_dict[address]["type"] = resource.get("type", "")
+        resources_dict[address]["name"] = resource.get("name", "")
+
+    return resources_dict

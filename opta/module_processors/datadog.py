@@ -8,7 +8,7 @@ from requests import codes, get
 
 from opta.core.kubernetes import configure_kubectl
 from opta.module_processors.base import ModuleProcessor
-from opta.utils import logger
+from opta.utils import exp_backoff, logger
 
 if TYPE_CHECKING:
     from opta.layer import Layer
@@ -21,7 +21,13 @@ class DatadogProcessor(ModuleProcessor):
             raise Exception(
                 f"The module {module.name} was expected to be of type datadog"
             )
-        configure_kubectl(layer)
+        # If the k8s cluster was recently created, it may take some time for it to be ready.
+        for _ in exp_backoff(num_tries=3):
+            try:
+                configure_kubectl(layer)
+                break
+            except Exception:
+                logger.info("Retrying attempt to talk to K8s cluster...")
         load_kube_config()
         self.v1 = CoreV1Api()
         super(DatadogProcessor, self).__init__(module, layer)

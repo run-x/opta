@@ -1,6 +1,6 @@
 environments:
   - name: staging
-    path: "../new_env/opta.yml"
+    path: "../env/opta.yml"
     variables:
       max_nodes: 2
 name: jd-test-2

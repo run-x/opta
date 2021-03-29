@@ -1,5 +1,6 @@
 import os
 import os.path
+import shutil
 import sys
 from importlib.util import find_spec
 from subprocess import CalledProcessError
@@ -9,8 +10,8 @@ import click
 import opta.sentry  # noqa: F401 This leads to initialization of sentry sdk
 from opta.amplitude import amplitude_client
 from opta.commands.apply import apply
-from opta.commands.cleanup import cleanup
 from opta.commands.deploy import deploy
+from opta.commands.destroy import destroy
 from opta.commands.events import events
 from opta.commands.inspect_cmd import inspect
 from opta.commands.kubectl import configure_kubectl
@@ -25,6 +26,8 @@ from opta.constants import TF_FILE_PATH, TF_PLAN_PATH
 from opta.exceptions import UserErrors
 from opta.utils import dd_handler, dd_listener, logger
 
+TF_DIR = ".terraform"
+TF_LOCK = ".terraform.lock.hcl"
 TF_STATE_FILE = "terraform.tfstate"
 TF_STATE_BACKUP_FILE = "terraform.tfstate.backup"
 
@@ -57,11 +60,14 @@ def debugger() -> None:
 
 
 def _cleanup() -> None:
-    for f in [TF_FILE_PATH, TF_PLAN_PATH, TF_STATE_FILE, TF_STATE_BACKUP_FILE]:
+    for f in [TF_FILE_PATH, TF_LOCK, TF_PLAN_PATH, TF_STATE_FILE, TF_STATE_BACKUP_FILE]:
         try:
             os.remove(f)
         except FileNotFoundError:
             pass
+
+    if os.path.isdir(TF_DIR):
+        shutil.rmtree(TF_DIR)
 
     for f in os.listdir("."):
         if os.path.isfile(f) and f.startswith("tmp.opta."):
@@ -70,8 +76,8 @@ def _cleanup() -> None:
 
 # Add commands
 cli.add_command(apply)
-cli.add_command(cleanup)
 cli.add_command(deploy)
+cli.add_command(destroy)
 cli.add_command(configure_kubectl)
 cli.add_command(inspect)
 cli.add_command(logs)
