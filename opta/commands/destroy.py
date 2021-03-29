@@ -36,6 +36,7 @@ def destroy(config: str, env: Optional[str], auto_approve: bool) -> None:
 
     tf_flags: List[str] = []
     if auto_approve:
+        # Note that for ci, you can just do "yes | opta destroy --auto-approve"
         click.confirm(
             fmt_msg(
                 f"""
