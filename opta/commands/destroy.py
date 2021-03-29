@@ -10,6 +10,7 @@ from opta.core.gcp import GCP
 from opta.core.generator import gen_all
 from opta.core.terraform import Terraform
 from opta.layer import Layer
+from opta.utils import fmt_msg
 
 
 @click.command(hidden=True)
@@ -17,7 +18,13 @@ from opta.layer import Layer
 @click.option(
     "-e", "--env", default=None, help="The env to use when loading the config file."
 )
-def destroy(config: str, env: Optional[str]) -> None:
+@click.option(
+    "--auto-approve",
+    is_flag=True,
+    default=False,
+    help="Automatically approve terraform plan.",
+)
+def destroy(config: str, env: Optional[str], auto_approve: bool) -> None:
     """Destroy all opta resources from the current config"""
     amplitude_client.send_event(amplitude_client.DESTROY_EVENT)
 
@@ -27,10 +34,24 @@ def destroy(config: str, env: Optional[str]) -> None:
     children_layers = _fetch_children_layers(layer)
     destroy_order = [*children_layers, layer]
 
+    tf_flags: List[str] = []
+    if auto_approve:
+        # Note that for ci, you can just do "yes | opta destroy --auto-approve"
+        click.confirm(
+            fmt_msg(
+                f"""
+                Are you REALLY sure you want to run destroy with auto-approve?
+                ~Please make sure *{layer.name}* is the correct opta config.
+                """
+            ),
+            abort=True,
+        )
+        tf_flags.append("-auto-approve")
+
     for layer in destroy_order:
         gen_all(layer)
         Terraform.init("-reconfigure")
-        Terraform.destroy_all(layer)
+        Terraform.destroy_all(layer, *tf_flags)
 
 
 # Fetch all the children layers of the current layer.

@@ -312,6 +312,7 @@ class TestTerraform:
         fake_layer.modules = fake_modules
 
         mocker.patch("opta.core.terraform.Terraform.refresh")
+        mocker.patch("opta.core.terraform.AWS")
         mocked_cmd = mocker.patch("opta.core.terraform.nice_run")
         Terraform.destroy_all(fake_layer)
         assert get_call_args(mocked_cmd) == [
