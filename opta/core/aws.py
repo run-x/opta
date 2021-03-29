@@ -57,6 +57,18 @@ class AWS:
         s3_client.upload_file(config, bucket, config_path)
         logger.debug("Uploaded opta config to s3")
 
+    def delete_opta_config(self) -> None:
+        bucket = self.layer.state_storage()
+        config_path = f"opta_config/{self.layer.name}"
+
+        s3_client = boto3.client("s3")
+        resp = s3_client.delete_object(Bucket=bucket, Key=config_path)
+
+        if resp["ResponseMetadata"]["HTTPStatusCode"] != 204:
+            raise Exception(f"Failed to delete opta config in {bucket}/{config_path}.")
+
+        logger.debug("Deleted opta config from s3")
+
     @staticmethod
     def delete_bucket(bucket_name: str) -> None:
         # Before a bucket can be deleted, all of the objects inside must be removed.
