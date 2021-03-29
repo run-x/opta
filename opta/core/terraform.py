@@ -152,13 +152,13 @@ class Terraform:
     def destroy_all(cls, layer: "Layer", *tf_flags: str) -> None:
         cls.refresh()
 
+        targets = []
         for module in reversed(layer.modules):
-            module_address_prefix = f"module.{module.name}"
+            targets.append(f"-target=module.{module.name}")
 
-            nice_run(
-                ["terraform", "destroy", f"-target={module_address_prefix}", *tf_flags],
-                check=True,
-            )
+        nice_run(
+            ["terraform", "destroy", *targets, *tf_flags], check=True,
+        )
 
         # After the layer is completely deleted, remove the opta config from the state bucket.
         AWS(layer).delete_opta_config()
