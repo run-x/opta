@@ -4,11 +4,11 @@ import click
 
 from opta.amplitude import amplitude_client
 from opta.commands.apply import _apply
-from opta.commands.push import _push, get_push_tag
+from opta.commands.push import _push, get_push_tag, is_service_config
 from opta.core.terraform import Terraform
 from opta.exceptions import UserErrors
 from opta.layer import Layer
-from opta.utils import logger
+from opta.utils import fmt_msg, logger
 
 
 @click.command()
@@ -35,6 +35,19 @@ def deploy(
     image: str, config: str, env: Optional[str], tag: Optional[str], auto_approve: bool
 ) -> None:
     """Push your new image to the cloud and deploy it in your environment"""
+    if not is_service_config(config):
+        raise UserErrors(
+            fmt_msg(
+                """
+            Opta deploy can only run on service yaml files. This is an environment yaml file.
+            ~See https://docs.runx.dev/docs/reference/service_modules/ for more details.
+            ~
+            ~(We know that this is an environment yaml file, because service yaml must
+            ~specify the "environments" field).
+            """
+            )
+        )
+
     amplitude_client.send_event(amplitude_client.DEPLOY_EVENT)
     layer = Layer.load_from_yaml(config, env)
     try:

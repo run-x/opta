@@ -19,6 +19,18 @@ REGISTRY_URL = "889760294590.dkr.ecr.us-east-1.amazonaws.com/test-service-runx-a
 TERRAFORM_OUTPUTS = {"docker_repo_url": REGISTRY_URL}
 
 
+@pytest.fixture(scope="module", autouse=True)
+def mock_is_service_config(module_mocker: MockFixture) -> None:
+    module_mocker.patch("opta.commands.push.is_service_config", return_value=True)
+
+
+def test_is_env_config(mocker: MockFixture) -> None:
+    mocker.patch("opta.commands.push.is_service_config", return_value=False)
+    runner = CliRunner()
+    result = runner.invoke(cli, ["push", "local_image:local_tag"])
+    assert "Opta push can only run on service yaml files." in str(result.exception)
+
+
 def test_get_registry_url(mocker: MockFixture) -> None:
     mocker.patch(
         "opta.commands.push.get_terraform_outputs", return_value=TERRAFORM_OUTPUTS

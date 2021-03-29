@@ -3,15 +3,17 @@ from typing import Optional, Tuple
 
 import boto3
 import click
+import yaml
 from botocore.config import Config
 
 from opta.amplitude import amplitude_client
 from opta.core.gcp import GCP
 from opta.core.generator import gen_all
 from opta.core.terraform import get_terraform_outputs
+from opta.exceptions import UserErrors
 from opta.layer import Layer
 from opta.nice_subprocess import nice_run
-from opta.utils import is_tool
+from opta.utils import fmt_msg, is_tool
 
 
 def get_push_tag(local_image: str, tag_override: Optional[str]) -> str:
@@ -76,6 +78,15 @@ def push_to_docker(
     nice_run(["docker", "push", remote_image_name])
 
 
+# Check if the config file is for a service or environment opta layer.
+# Some commands (like push/deploy) are meant only for service layers.
+#
+# If the config file has the "environments" field, then it is a child/service layer.
+def is_service_config(config: str) -> bool:
+    config_data = yaml.load(open(config), Loader=yaml.Loader)
+    return "environments" in config_data
+
+
 @click.command(hidden=True)
 @click.argument("image")
 @click.option("-c", "--config", default="opta.yml", help="Opta config file.")
@@ -88,6 +99,19 @@ def push_to_docker(
     help="The image tag associated with your docker container. Defaults to your local image tag.",
 )
 def push(image: str, config: str, env: Optional[str], tag: Optional[str]) -> None:
+    if not is_service_config(config):
+        raise UserErrors(
+            fmt_msg(
+                """
+            Opta push can only run on service yaml files. This is an environment yaml file.
+            ~See https://docs.runx.dev/docs/reference/service_modules/ for more details.
+            ~
+            ~(We know that this is an environment yaml file, because service yaml must
+            ~specify the "environments" field).
+            """
+            )
+        )
+
     amplitude_client.send_event(amplitude_client.PUSH_EVENT)
     _push(image, config, env, tag)
 
