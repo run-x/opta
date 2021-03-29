@@ -253,6 +253,7 @@ class Terraform:
         cls.downloaded_state[layer.name] = True
         return True
 
+    @classmethod
     def delete_state_storage(cls, layer: "Layer") -> None:
         providers = layer.gen_providers(0)
         if "s3" not in providers.get("terraform", {}).get("backend", {}):
@@ -267,6 +268,7 @@ class Terraform:
         region = providers["terraform"]["backend"]["s3"]["region"]
         AWS.delete_dynamodb_table(dynamodb_table, region)
 
+    @classmethod
     def _create_gcp_state_storage(cls, providers: dict) -> None:
         bucket_name = providers["terraform"]["backend"]["gcs"]["bucket"]
         region = providers["provider"]["google"]["region"]
