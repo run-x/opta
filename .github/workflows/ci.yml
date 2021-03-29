@@ -117,7 +117,7 @@ jobs:
           --config test-service/opta.yml \
           --tag ${{ github.sha }} \
           --auto-approve
-      - name: Destroy environment (and test-service)
+      - name: Destroy environment (and test service)
         run: |
           source $(pipenv --venv)/bin/activate
           export PYTHONPATH=$(pwd)
