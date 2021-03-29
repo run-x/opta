@@ -97,10 +97,10 @@ def push(image: str, config: str, env: Optional[str], tag: Optional[str]) -> Non
         raise UserErrors(
             fmt_msg(
                 """
-            Opta push can only be run on service modules.
+            Opta push can only run on service yaml files. This is an environment yaml file.
             ~See https://docs.runx.dev/docs/reference/service_modules/ for more details.
             ~
-            ~(We know that this is an environment module, because service modules must
+            ~(We know that this is an environment yaml file, because service yaml must
             ~specify the "environments" field).
             """
             )
