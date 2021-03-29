@@ -23,7 +23,7 @@ def test_is_env_config(mocker: MockFixture) -> None:
     mocker.patch("opta.commands.push.is_service_config", return_value=False)
     runner = CliRunner()
     result = runner.invoke(cli, ["push", "local_image:local_tag"])
-    assert "Opta push can only be run on service modules" in str(result.exception)
+    assert "Opta push can only run on service yaml files." in str(result.exception)
 
 
 def test_get_registry_url(mocker: MockFixture) -> None:
