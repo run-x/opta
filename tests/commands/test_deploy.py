@@ -1,8 +1,14 @@
 from click.testing import CliRunner
+from pytest import fixture
 from pytest_mock import MockFixture
 
 from opta.cli import cli
 from opta.layer import Layer
+
+
+@fixture(scope="module", autouse=True)
+def mock_is_service_config(module_mocker: MockFixture) -> None:
+    module_mocker.patch("opta.commands.deploy.is_service_config", return_value=True)
 
 
 def test_deploy_basic(mocker: MockFixture) -> None:
