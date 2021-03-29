@@ -160,6 +160,9 @@ class Terraform:
                 check=True,
             )
 
+        # After the layer is completely deleted, remove the opta config from the state bucket.
+        AWS(layer).delete_opta_config()
+
     # Remove a resource from the terraform state, but does not destroy it.
     @classmethod
     def remove_from_state(cls, resource_address: str) -> None:
