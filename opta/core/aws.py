@@ -1,9 +1,10 @@
+from time import sleep
 from typing import TYPE_CHECKING
 
 import boto3
 from botocore.config import Config
 
-from opta.utils import logger
+from opta.utils import fmt_msg, logger
 
 if TYPE_CHECKING:
     from opta.layer import Layer
@@ -55,6 +56,39 @@ class AWS:
         s3_client = boto3.client("s3")
         s3_client.upload_file(config, bucket, config_path)
         logger.debug("Uploaded opta config to s3")
+
+    @staticmethod
+    def delete_bucket(bucket_name: str) -> None:
+        # Before a bucket can be deleted, all of the objects inside must be removed.
+        bucket = boto3.resource("s3").Bucket(bucket_name)
+        bucket.objects.all().delete()
+
+        # Delete the bucket itself
+        client = boto3.client("s3")
+        client.delete_bucket(Bucket=bucket_name)
+        print(f"Bucket ({bucket_name}) successfully deleted.")
+
+    @staticmethod
+    def delete_dynamodb_table(table_name: str, region: str) -> None:
+        client = boto3.client("dynamodb", config=Config(region_name=region))
+
+        for _ in range(20):
+            try:
+                client.delete_table(TableName=table_name)
+                print(f"DynamoDB table ({table_name}) successfully deleted.")
+                return None
+            except client.exceptions.ResourceInUseException:
+                logger.info(
+                    fmt_msg(
+                        """
+                        The dynamodb table is currently being created/updated.
+                        ~Please wait for deletion to retry..
+                    """
+                    )
+                )
+                sleep(5)
+
+        raise Exception("Failed to delete after 20 retries, quitting.")
 
 
 # AWS Resource ARNs can be one of the following 3 formats:
