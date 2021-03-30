@@ -134,7 +134,7 @@ setup(
     install_requires=[
         "click==7.1.2",
         "prompt-toolkit==1.0.14",
-        "pygments==2.7.3",
+        "pygments==2.7.4",
         "pyinquirer==1.0.3",
         "regex==2020.11.13",
         "six==1.15.0",
