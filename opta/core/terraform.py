@@ -1,5 +1,6 @@
 import json
 import logging
+import time
 from subprocess import DEVNULL, PIPE
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
 
@@ -308,6 +309,7 @@ class Terraform:
         service = discovery.build(
             "serviceusage", "v1", credentials=credentials, static_discovery=False
         )
+        new_api_enabled = False
         for service_name in [
             "container.googleapis.com",
             "iam.googleapis.com",
@@ -322,13 +324,21 @@ class Terraform:
                 name=f"projects/{project_name}/services/{service_name}"
             )
             try:
-                request.execute()
+                response = request.execute()
+                new_api_enabled = new_api_enabled or (
+                    response.get("name") != "operations/noop.DONE_OPERATION"
+                )
             except HttpError as e:
                 if e.resp.status == 400:
                     raise UserErrors(
                         f"Got a 400 response when trying to enable the google {service_name} service with the following error reason: {e._get_reason()}"
                     )
             print(f"Google service {service_name} activated")
+        if new_api_enabled:
+            logger.info("New api has been enabled, waiting 30 seconds before progressing")
+            time.sleep(30)
+        else:
+            logger.info("No new API found that needs to be enabled")
 
     @classmethod
     def _create_aws_state_storage(cls, providers: dict) -> None:
