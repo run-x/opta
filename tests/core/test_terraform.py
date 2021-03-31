@@ -300,7 +300,10 @@ class TestTerraform:
         )
         mocked_google_credentials.get_application_default.assert_called_once_with()
         mocked_discovery.build.assert_called_once_with(
-            "serviceusage", "v1", credentials=mocked_api_credentials
+            "serviceusage",
+            "v1",
+            credentials=mocked_api_credentials,
+            static_discovery=False,
         )
 
     def test_destroy_modules_in_order(self, mocker: MockFixture) -> None:
