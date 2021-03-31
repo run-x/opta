@@ -286,6 +286,13 @@ class TestTerraform:
         mocked_discovery = mocker.patch("opta.core.terraform.discovery")
         mocked_service = mocker.Mock()
         mocked_discovery.build.return_value = mocked_service
+        mocked_service_services = mocker.Mock()
+        mocked_service.services.return_value = mocked_service_services
+        mocked_request = mocker.Mock()
+        mocked_service_services.enable.return_value = mocked_request
+        mocked_response: dict = {}
+        mocked_request.execute.return_value = mocked_response
+        mocked_sleep = mocker.patch("opta.core.terraform.time.sleep")
 
         Terraform.create_state_storage(layer)
         mocked_gcp.get_credentials.assert_called_once_with()
@@ -305,6 +312,7 @@ class TestTerraform:
             credentials=mocked_api_credentials,
             static_discovery=False,
         )
+        mocked_sleep.assert_called_once_with(30)
 
     def test_destroy_modules_in_order(self, mocker: MockFixture) -> None:
         fake_modules = [mocker.Mock(spec=Module) for _ in range(3)]
