@@ -305,7 +305,9 @@ class Terraform:
 
         # Enable the APIs
         credentials = GoogleCredentials.get_application_default()
-        service = discovery.build("serviceusage", "v1", credentials=credentials)
+        service = discovery.build(
+            "serviceusage", "v1", credentials=credentials, static_discovery=False
+        )
         for service_name in [
             "container.googleapis.com",
             "iam.googleapis.com",
