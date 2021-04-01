@@ -36,7 +36,7 @@ conclusion="null"
 status="n/a"
 while [[ $conclusion == "null" && $status != "\"completed\"" ]]; do
   echo "Waiting for build to finish..."
-  sleep 5
+  sleep 120
   current_build=$(get_latest_build_data)
   conclusion=$(echo $current_build | jq '.conclusion')
   status=$(echo $current_build | jq '.status')
