@@ -10,6 +10,13 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
+      # This test cannot be run concurrently because it is
+      # creating and destroying real resources in the us-east-2 region.
+      # Wait for any previous builds of this workflow to finish.
+      - name: Limit concurrency to 1.
+        uses: softprops/turnstyle@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.ALL_GITHUB_TOKEN }}
       - name: Checkout runx-infra repo
         uses: actions/checkout@v2
         with:
