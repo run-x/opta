@@ -62,12 +62,6 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
-      - name: Checkout runx-infra repo
-        uses: actions/checkout@v2
-        with:
-          repository: "run-x/runx-infra"
-          path: "runx-infra"
-          ssh-key: ${{ secrets.SSH_KEY }}
       - name: Checkout test-service repo
         uses: actions/checkout@v2
         with:
@@ -93,38 +87,18 @@ jobs:
           aws-access-key-id: ${{ secrets.DEPLOYER_AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.DEPLOYER_AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
-      # test
-      - name: Deploy opta environment
+      - name: Test output command
         run: |
           source $(pipenv --venv)/bin/activate
           export PYTHONPATH=$(pwd)
-          python ./opta/cli.py apply \
-          --config runx-infra/staging/opta-ci.yml \
-          --auto-approve \
-          --refresh
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-      - name: Build test-service image
-        run: docker build -t app:latest -f test-service/Dockerfile test-service/
-      - name: Deploy test-service
+          cd test-service
+          python ../opta/cli.py output --env staging
+      - name: Test apply command
         run: |
           source $(pipenv --venv)/bin/activate
           export PYTHONPATH=$(pwd)
-          python ./opta/cli.py deploy \
-          --image app:latest \
-          --env ci \
-          --config test-service/opta.yml \
-          --tag ${{ github.sha }} \
-          --auto-approve
-      - name: Destroy environment (and test service)
-        run: |
-          source $(pipenv --venv)/bin/activate
-          export PYTHONPATH=$(pwd)
-          yes | python ./opta/cli.py destroy \
-          --config runx-infra/staging/opta-ci.yml \
-          --auto-approve
-
+          cd test-service
+          python ../opta/cli.py apply --env staging --test
   deploy_test_service:
     if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
