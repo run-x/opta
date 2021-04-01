@@ -5,7 +5,20 @@ on:
     types: [published]
 
 jobs:
+  create-destroy-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Create and destroy test-service and opta environment
+        run: ./scripts/dispatch_workflow.sh create-and-destroy.yml
+        env:
+          github_token: ${{ secrets.ALL_GITHUB_TOKEN }}
+      # - name: Slack alert if failed.
+      #   if: ${{ failure() }}
+      #   run: echo "TODO, send slack alert to notify failure"
+
   package-linux:
+    needs: create-destroy-tests
     runs-on: ubuntu-16.04
     steps:
       - uses: actions/checkout@v2
@@ -36,6 +49,7 @@ jobs:
           aws s3 cp opta.zip s3://dev-runx-opta-binaries/linux/$VERSION/ --acl public-read
 
   package-macos:
+    needs: create-destroy-tests
     runs-on: macos-10.15
     steps:
       - uses: actions/checkout@v2

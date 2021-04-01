@@ -99,7 +99,6 @@ jobs:
           export PYTHONPATH=$(pwd)
           cd test-service
           python ../opta/cli.py apply --env staging --test
-
   deploy_test_service:
     if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest

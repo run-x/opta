@@ -164,6 +164,11 @@ class Terraform:
         # After the layer is completely deleted, remove the opta config from the state bucket.
         AWS(layer).delete_opta_config()
 
+        # If this is the env layer, delete the state bucket & dynamo table as well.
+        if layer == layer.root():
+            logger.debug(f"Deleting the state storage for {layer.name}...")
+            cls._delete_state_storage(layer)
+
     # Remove a resource from the terraform state, but does not destroy it.
     @classmethod
     def remove_from_state(cls, resource_address: str) -> None:
@@ -258,7 +263,7 @@ class Terraform:
         return True
 
     @classmethod
-    def delete_state_storage(cls, layer: "Layer") -> None:
+    def _delete_state_storage(cls, layer: "Layer") -> None:
         providers = layer.gen_providers(0)
         if "s3" not in providers.get("terraform", {}).get("backend", {}):
             return
