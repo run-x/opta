@@ -4,7 +4,7 @@ from unittest.mock import call
 
 from pytest_mock import MockFixture
 
-from opta.cli import _cleanup
+from opta.cleanup_files import cleanup_files
 from opta.constants import TF_FILE_PATH
 from opta.sentry import at_exit_callback
 
@@ -12,7 +12,7 @@ from opta.sentry import at_exit_callback
 def test_cleanup() -> None:
     with open(TF_FILE_PATH, "w") as f:
         f.write("blah")
-    _cleanup()
+    cleanup_files()
     assert not os.path.exists(TF_FILE_PATH)
 
 
