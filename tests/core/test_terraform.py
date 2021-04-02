@@ -320,6 +320,7 @@ class TestTerraform:
             module.name = f"fake_module_{i}"
 
         fake_layer = mocker.Mock(spec=Layer)
+        fake_layer.cloud = "aws"
         fake_layer.modules = fake_modules
 
         mocker.patch("opta.core.terraform.Terraform.refresh")

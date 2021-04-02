@@ -67,7 +67,7 @@ class AWS:
         if resp["ResponseMetadata"]["HTTPStatusCode"] != 204:
             raise Exception(f"Failed to delete opta config in {bucket}/{config_path}.")
 
-        logger.debug("Deleted opta config from s3")
+        logger.info("Deleted opta config from s3")
 
     @staticmethod
     def delete_bucket(bucket_name: str) -> None:

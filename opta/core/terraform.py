@@ -162,7 +162,14 @@ class Terraform:
             )
 
         # After the layer is completely deleted, remove the opta config from the state bucket.
-        AWS(layer).delete_opta_config()
+        if layer.cloud == "aws":
+            AWS(layer).delete_opta_config()
+        elif layer.cloud == "google":
+            GCP(layer).delete_opta_config()
+        else:
+            raise Exception(
+                f"Can not handle opta config deletion for cloud {layer.cloud}"
+            )
 
         # If this is the env layer, delete the state bucket & dynamo table as well.
         if layer == layer.root():

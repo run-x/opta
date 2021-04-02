@@ -5,6 +5,7 @@ from google.auth import default
 from google.auth.credentials import Credentials
 from google.auth.exceptions import DefaultCredentialsError, GoogleAuthError
 from google.cloud import storage
+from google.cloud.exceptions import NotFound
 
 from opta.exceptions import UserErrors
 from opta.utils import logger
@@ -48,3 +49,15 @@ class GCP:
         blob = storage.Blob(config_path, bucket_object)
         blob.upload_from_string(config_data)
         logger.debug("Uploaded opta config to gcs")
+
+    def delete_opta_config(self) -> None:
+        bucket = self.layer.state_storage()
+        config_path = f"opta_config/{self.layer.name}"
+        credentials, project_id = self.get_credentials()
+        gcs_client = storage.Client(project=project_id, credentials=credentials)
+        bucket_object = gcs_client.get_bucket(bucket)
+        try:
+            bucket_object.delete_blob(config_path)
+        except NotFound:
+            logger.warn(f"Did not find opta config {config_path} to delete")
+        logger.info("Deleted opta config from gcs")
