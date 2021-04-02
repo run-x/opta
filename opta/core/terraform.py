@@ -402,8 +402,10 @@ class Terraform:
                     )
             print(f"Google service {service_name} activated")
         if new_api_enabled:
-            logger.info("New api has been enabled, waiting 30 seconds before progressing")
-            time.sleep(30)
+            logger.info(
+                "New api has been enabled, waiting 120 seconds before progressing"
+            )
+            time.sleep(120)
         else:
             logger.info("No new API found that needs to be enabled")
 
