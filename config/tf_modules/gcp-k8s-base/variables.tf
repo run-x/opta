@@ -31,11 +31,6 @@ variable "module_name" {
   type = string
 }
 
-variable "domain" {
-  type = string
-  default = ""
-}
-
 variable "high_availability" {
   type = bool
   default = true
@@ -47,6 +42,11 @@ variable "delegated" {
 }
 
 variable "cert_self_link" {
+  type = string
+  default = null
+}
+
+variable "hosted_zone_name" {
   type = string
   default = null
 }

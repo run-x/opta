@@ -2,6 +2,10 @@ output "zone_id" {
   value = google_dns_managed_zone.public.id
 }
 
+output "zone_name" {
+  value = google_dns_managed_zone.public.name
+}
+
 output "name_servers" {
   value = google_dns_managed_zone.public.name_servers
 }

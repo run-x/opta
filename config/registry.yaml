@@ -301,6 +301,8 @@ modules:
     outputs:
       zone_id:
         export: true
+      zone_name:
+        export: true
       name_servers:
         export: true
       domain:
@@ -357,7 +359,7 @@ modules:
       layer_name: str
       module_name: str
       high_availability: optional
-      domain: optional
+      hosted_zone_name: optional
       cert_self_link: optional
       delegated: optional
     outputs: {}
