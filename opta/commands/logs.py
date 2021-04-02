@@ -34,10 +34,17 @@ def logs(env: Optional[str], config: str, seconds: Optional[int]) -> None:
     gen_all(layer)
     configure_kubectl(layer)
     load_kube_config()
-    modules = layer.get_module_by_type("k8s-service")
+    if layer.cloud == "aws":
+        modules = layer.get_module_by_type("k8s-service")
+    elif layer.cloud == "google":
+        modules = layer.get_module_by_type("gcp-k8s-service")
+    else:
+        raise Exception(f"Currently not handling logs for cloud {layer.cloud}")
     if len(modules) == 0:
-        raise UserErrors("No module of type k8s-service in the yaml file")
+        raise UserErrors("No module of type (gcp-)k8s-service in the yaml file")
     elif len(modules) > 1:
-        raise UserErrors("Don't put more than one k8s-service module file per opta file")
+        raise UserErrors(
+            "Don't put more than one (gcp-)k8s-service module file per opta file"
+        )
     module_name = modules[0].name
     tail_module_log(layer, module_name, seconds)
