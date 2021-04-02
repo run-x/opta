@@ -4,13 +4,14 @@ import boto3
 import click
 import yaml
 from google.cloud import storage
+from google.cloud.exceptions import NotFound
 
 from opta.amplitude import amplitude_client
 from opta.core.gcp import GCP
 from opta.core.generator import gen_all
 from opta.core.terraform import Terraform
 from opta.layer import Layer
-from opta.utils import fmt_msg
+from opta.utils import fmt_msg, logger
 
 
 @click.command(hidden=True)
@@ -29,6 +30,11 @@ def destroy(config: str, env: Optional[str], auto_approve: bool) -> None:
     amplitude_client.send_event(amplitude_client.DESTROY_EVENT)
 
     layer = Layer.load_from_yaml(config, env)
+    if not Terraform.verify_storage(layer):
+        logger.info(
+            "State storage not found. This is expected if destroy ran successfully before."
+        )
+        return
 
     # Any child layers should be destroyed first before the current layer.
     children_layers = _fetch_children_layers(layer)
@@ -118,7 +124,13 @@ def _gcp_download_all_opta_configs(bucket_name: str) -> List[str]:
     gcs_config_dir = "opta_config/"
     credentials, project_id = GCP.get_credentials()
     gcs_client = storage.Client(project=project_id, credentials=credentials)
-    bucket_object = gcs_client.get_bucket(bucket_name)
+    try:
+        bucket_object = gcs_client.get_bucket(bucket_name)
+    except NotFound:
+        logger.warn(
+            "Couldn't find the state bucket, must have already been destroyed in a previous destroy run"
+        )
+        return []
     blobs: List[storage.Blob] = list(
         gcs_client.list_blobs(bucket_object, prefix=gcs_config_dir)
     )

@@ -1,10 +1,29 @@
+resource "random_id" "key_suffix" {
+  byte_length = 8
+}
+
+resource "google_secret_manager_secret" "kms_secret" {
+  secret_id = "opta-${var.layer_name}-kms-suffix"
+
+  replication {
+    automatic = true
+  }
+}
+
+
+resource "google_secret_manager_secret_version" "secret-version-basic" {
+  secret = google_secret_manager_secret.kms_secret.id
+
+  secret_data = random_id.key_suffix.hex
+}
+
 resource "google_kms_key_ring" "keyring" {
-  name     = "opta-${var.layer_name}"
+  name     = "opta-${var.layer_name}-${random_id.key_suffix.hex}"
   location = data.google_client_config.current.region
 }
 
 resource "google_kms_crypto_key" "key" {
-  name            = "opta-${var.layer_name}"
+  name            = "opta-${var.layer_name}-${random_id.key_suffix.hex}"
   key_ring        = google_kms_key_ring.keyring.id
 }
 
