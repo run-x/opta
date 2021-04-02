@@ -312,7 +312,7 @@ class TestTerraform:
             credentials=mocked_api_credentials,
             static_discovery=False,
         )
-        mocked_sleep.assert_called_once_with(30)
+        mocked_sleep.assert_called_once_with(120)
 
     def test_destroy_modules_in_order(self, mocker: MockFixture) -> None:
         fake_modules = [mocker.Mock(spec=Module) for _ in range(3)]
