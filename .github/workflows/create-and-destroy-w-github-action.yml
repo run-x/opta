@@ -76,10 +76,10 @@ jobs:
           IMAGE: app:latest
           TAG: ${{ github.sha }}
           CONFIG: test-service/opta.yml
-      - name: Destroy environment (and test service)
-        run: |
-          source $(pipenv --venv)/bin/activate
-          export PYTHONPATH=$(pwd)
-          yes | python ./opta/cli.py destroy \
-          --config runx-infra/staging/opta-ga-ci.yml \
-          --auto-approve
+      # - name: Destroy test service
+      #   run: |
+      #     source $(pipenv --venv)/bin/activate
+      #     export PYTHONPATH=$(pwd)
+      #     yes | python ./opta/cli.py destroy \
+      #     --config runx-infra/staging/opta-ga-ci.yml \
+      #     --auto-approve
