@@ -4,7 +4,11 @@
 # to ensure it still works.
 name: Test Create and Destroy with Deploy Action
 
-on: workflow_dispatch
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
   create-and-destroy:
@@ -13,7 +17,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v2
       # This test cannot be run concurrently because it is
-      # creating and destroying real resources in the us-east-2 region.
+      # creating and destroying real resources in the us-west-2 region.
       # Wait for any previous builds of this workflow to finish.
       - name: Limit concurrency to 1.
         uses: softprops/turnstyle@v1
