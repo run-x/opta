@@ -20,8 +20,8 @@ resource "google_container_cluster" "primary" {
   remove_default_node_pool = true
   initial_node_count       = 1
 
-  network = data.google_compute_network.vpc.name
-  subnetwork = data.google_compute_subnetwork.private.name
+  network = var.vpc_self_link
+  subnetwork = var.private_subnet_self_link
   workload_identity_config {
     identity_namespace = "${data.google_client_config.current.project}.svc.id.goog"
   }

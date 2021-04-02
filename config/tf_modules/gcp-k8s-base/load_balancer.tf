@@ -46,7 +46,7 @@ resource "google_compute_backend_service" "backend_service" {
       group = backend.value
     }
   }
-  depends_on = [helm_release.ingress-nginx]
+  depends_on = [helm_release.ingress-nginx, google_compute_health_check.healthcheck]
 }
 
 resource "google_compute_url_map" "http" {

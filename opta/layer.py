@@ -17,6 +17,7 @@ from opta.exceptions import UserErrors
 from opta.module import Module
 from opta.module_processors.base import ModuleProcessor
 from opta.module_processors.datadog import DatadogProcessor
+from opta.module_processors.gcp_gke import GcpGkeProcessor
 from opta.module_processors.gcp_k8s_base import GcpK8sBaseProcessor
 from opta.module_processors.gcp_k8s_service import GcpK8sServiceProcessor
 from opta.module_processors.k8s_base import K8sBaseProcessor
@@ -199,10 +200,15 @@ class Layer:
                 GcpK8sBaseProcessor(module, self).process(module_idx)
             elif module_type == "gcp-k8s-service":
                 GcpK8sServiceProcessor(module, self).process(module_idx)
+            elif module_type == "gcp-gke":
+                GcpGkeProcessor(module, self).process(module_idx)
             else:
                 ModuleProcessor(module, self).process(module_idx)
+        previous_module_reference = None
         for module in self.modules[0 : module_idx + 1]:
-            ret = deep_merge(module.gen_tf(), ret)
+            ret = deep_merge(module.gen_tf(depends_on=previous_module_reference), ret)
+            if module.desc.get("halt"):
+                previous_module_reference = [f"module.{module.name}"]
 
         return hydrate(ret, self.metadata_hydration())
 

@@ -1,7 +1,7 @@
 import json
 import os
 import re
-from typing import Any, Dict, Iterable, List
+from typing import Any, Dict, Iterable, List, Optional
 
 import hcl2
 
@@ -41,7 +41,7 @@ class Module:
         pattern = "^[A-Za-z0-9]*$"
         return bool(re.match(pattern, name))
 
-    def gen_tf(self) -> Dict[Any, Any]:
+    def gen_tf(self, depends_on: Optional[List[str]] = None) -> Dict[Any, Any]:
         module_blk: Dict[Any, Any] = {
             "module": {self.name: {"source": self.module_dir_path}},
             "output": {},
@@ -64,7 +64,8 @@ class Module:
                     module_blk["output"].update(
                         {k: {"value": f"${{{{module.{self.name}.{k} }}}}"}}
                     )
-
+        if depends_on is not None:
+            module_blk["module"][self.name]["depends_on"] = depends_on
         return module_blk
 
     # Generate an override file in the module, that adds extra tags to every resource.

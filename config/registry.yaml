@@ -281,6 +281,10 @@ modules:
         export: true
       private_subnet_id:
         export: true
+      vpc_self_link:
+        export: true
+      private_subnet_self_link:
+        export: true
     providers:
       data:
         google_client_config:
@@ -318,6 +322,8 @@ modules:
       node_disk_size: optional
       node_instance_type: optional
       gke_channel: optional
+      vpc_self_link: str
+      private_subnet_self_link: str
     outputs:
       k8s_endpoint:
         export: true

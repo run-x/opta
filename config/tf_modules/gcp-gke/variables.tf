@@ -34,15 +34,13 @@ data "google_kms_crypto_key" "kms" {
   name = "opta-${var.env_name}-${data.google_secret_manager_secret_version.kms_suffix.secret_data}"
 }
 
-
-data "google_compute_network" "vpc" {
-  name = "opta-${var.layer_name}"
+variable "vpc_self_link" {
+  type = string
 }
 
-data "google_compute_subnetwork" "private" {
-  name = "opta-${var.layer_name}-${data.google_client_config.current.region}-private"
+variable "private_subnet_self_link" {
+  type = string
 }
-
 
 variable "max_nodes" {
   type    = number
