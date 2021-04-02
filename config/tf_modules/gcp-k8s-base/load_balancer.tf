@@ -97,21 +97,24 @@ resource "google_compute_global_forwarding_rule" "https" {
 }
 
 resource "google_dns_record_set" "default" {
-  name         = var.domain
+  count = var.hosted_zone_name == null? 0 : 1
+  name         = "*.${data.google_dns_managed_zone.public[0].dns_name}"
   type         = "A"
   ttl          = 3600
-  managed_zone = data.google_dns_managed_zone.public.name
+  managed_zone = data.google_dns_managed_zone.public[0].name
   rrdatas      = [google_compute_global_address.load_balancer.address]
 }
 
 resource "google_dns_record_set" "wildcard" {
-  name         = "*.${var.domain}"
+  count = var.hosted_zone_name == null? 0 : 1
+  name         = "*.${data.google_dns_managed_zone.public[0].dns_name}"
   type         = "A"
   ttl          = 3600
-  managed_zone = data.google_dns_managed_zone.public.name
+  managed_zone = data.google_dns_managed_zone.public[0].name
   rrdatas      = [google_compute_global_address.load_balancer.address]
 }
 
 data "google_dns_managed_zone" "public" {
-  name = "opta-${var.layer_name}"
+  count = var.hosted_zone_name == null? 0 : 1
+  name = var.hosted_zone_name
 }

@@ -22,7 +22,9 @@ class GcpK8sBaseProcessor(GcpK8sModuleProcessor):
                 gcp_dns_module = module
                 break
         if gcp_dns_module is not None:
-            self.module.data["domain"] = f"${{{{module.{gcp_dns_module.name}.domain}}}}"
+            self.module.data[
+                "hosted_zone_name"
+            ] = f"${{{{module.{gcp_dns_module.name}.zone_name}}}}"
             self.module.data[
                 "cert_self_link"
             ] = f"${{{{module.{gcp_dns_module.name}.cert_self_link}}}}"
