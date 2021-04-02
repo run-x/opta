@@ -4,11 +4,7 @@
 # to ensure it still works.
 name: Test Create and Destroy with Deploy Action
 
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+on: workflow_dispatch
 
 jobs:
   create-and-destroy:
@@ -40,6 +36,7 @@ jobs:
         with:
           repository: "run-x/deploy-action"
           path: "deploy-action"
+          ref: kjin/deploy-action-create-and-destroy
           ssh-key: ${{ secrets.SSH_KEY }}
       - name: Setup ssh
         uses: webfactory/ssh-agent@v0.4.1
