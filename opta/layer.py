@@ -207,7 +207,8 @@ class Layer:
         previous_module_reference = None
         for module in self.modules[0 : module_idx + 1]:
             ret = deep_merge(module.gen_tf(depends_on=previous_module_reference), ret)
-            previous_module_reference = [f"module.{module.name}"]
+            if module.desc.get("halt"):
+                previous_module_reference = [f"module.{module.name}"]
 
         return hydrate(ret, self.metadata_hydration())
 
