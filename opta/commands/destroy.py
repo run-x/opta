@@ -50,7 +50,7 @@ def destroy(config: str, env: Optional[str], auto_approve: bool) -> None:
 
     for layer in destroy_order:
         gen_all(layer)
-        Terraform.init("-reconfigure")
+        Terraform.init()
         Terraform.destroy_all(layer, *tf_flags)
 
 

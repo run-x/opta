@@ -30,6 +30,10 @@ class Terraform:
 
     @classmethod
     def init(cls, *tf_flags: str) -> None:
+        # When prompted to copy local terraform state to s3 or gcp, say no by default.
+        if "-force-copy" not in tf_flags and "-reconfigure" not in tf_flags:
+            tf_flags = ("-reconfigure", *tf_flags)
+
         nice_run(["terraform", "init", *tf_flags], check=True)
 
     # Get outputs of the current terraform state
