@@ -1,6 +1,4 @@
-import os
 import os.path
-import shutil
 import sys
 from importlib.util import find_spec
 from subprocess import CalledProcessError
@@ -9,6 +7,7 @@ import click
 
 import opta.sentry  # noqa: F401 This leads to initialization of sentry sdk
 from opta.amplitude import amplitude_client
+from opta.cleanup_files import cleanup_files
 from opta.commands.apply import apply
 from opta.commands.deploy import deploy
 from opta.commands.destroy import destroy
@@ -22,14 +21,8 @@ from opta.commands.secret import secret
 from opta.commands.shell import shell
 from opta.commands.validate import validate
 from opta.commands.version import version
-from opta.constants import TF_FILE_PATH, TF_PLAN_PATH
 from opta.exceptions import UserErrors
 from opta.utils import dd_handler, dd_listener, logger
-
-TF_DIR = ".terraform"
-TF_LOCK = ".terraform.lock.hcl"
-TF_STATE_FILE = "terraform.tfstate"
-TF_STATE_BACKUP_FILE = "terraform.tfstate.backup"
 
 
 @click.group()
@@ -57,21 +50,6 @@ def debugger() -> None:
             "have pyenv + Big Sur-- pls look at this issue documentations: "
             "https://github.com/pyenv/pyenv/issues/1755"
         )
-
-
-def _cleanup() -> None:
-    for f in [TF_FILE_PATH, TF_LOCK, TF_PLAN_PATH, TF_STATE_FILE, TF_STATE_BACKUP_FILE]:
-        try:
-            os.remove(f)
-        except FileNotFoundError:
-            pass
-
-    if os.path.isdir(TF_DIR):
-        shutil.rmtree(TF_DIR)
-
-    for f in os.listdir("."):
-        if os.path.isfile(f) and f.startswith("tmp.opta."):
-            os.remove(f)
 
 
 # Add commands
@@ -108,4 +86,4 @@ if __name__ == "__main__":
         dd_listener.stop()
         dd_handler.flush()
         if os.environ.get("OPTA_DEBUG") is None:
-            _cleanup()
+            cleanup_files()
