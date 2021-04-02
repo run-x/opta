@@ -98,7 +98,7 @@ resource "google_compute_global_forwarding_rule" "https" {
 
 resource "google_dns_record_set" "default" {
   count = var.hosted_zone_name == null? 0 : 1
-  name         = "*.${data.google_dns_managed_zone.public[0].dns_name}"
+  name         = data.google_dns_managed_zone.public[0].dns_name
   type         = "A"
   ttl          = 3600
   managed_zone = data.google_dns_managed_zone.public[0].name
