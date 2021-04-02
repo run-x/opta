@@ -14,7 +14,7 @@ resource "google_compute_route" "default" {
 }
 
 resource "google_compute_global_address" "private_ip_alloc" {
-  name          = "private-ip-alloc"
+  name          = "opta-${var.layer_name}-private-ip-alloc"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 22

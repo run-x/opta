@@ -9,6 +9,7 @@ from botocore.config import Config
 from botocore.exceptions import ClientError
 from google.api_core.exceptions import ClientError as GoogleClientError
 from google.cloud import storage
+from google.cloud.exceptions import NotFound
 from googleapiclient import discovery
 from googleapiclient.errors import HttpError
 from oauth2client.client import GoogleCredentials
@@ -78,6 +79,7 @@ class Terraform:
         except Exception as e:
             logging.error(e)
             logging.info("Terraform apply failed, would rollback, but skipping for now..")
+            raise e
             # cls.rollback(layer)
 
     @classmethod
@@ -151,11 +153,14 @@ class Terraform:
 
     @classmethod
     def destroy_all(cls, layer: "Layer", *tf_flags: str) -> None:
-        cls.refresh()
+        existing_modules = Terraform.get_existing_modules(layer)
 
         for module in reversed(layer.modules):
             module_address_prefix = f"module.{module.name}"
 
+            if module.name not in existing_modules:
+                continue
+            cls.refresh(f"-target={module_address_prefix}")
             nice_run(
                 ["terraform", "destroy", f"-target={module_address_prefix}", *tf_flags],
                 check=True,
@@ -174,12 +179,47 @@ class Terraform:
         # If this is the env layer, delete the state bucket & dynamo table as well.
         if layer == layer.root():
             logger.debug(f"Deleting the state storage for {layer.name}...")
-            cls._delete_state_storage(layer)
+            if layer.cloud == "aws":
+                cls._aws_delete_state_storage(layer)
+            elif layer.cloud == "google":
+                cls._gcp_delete_state_storage(layer)
 
     # Remove a resource from the terraform state, but does not destroy it.
     @classmethod
     def remove_from_state(cls, resource_address: str) -> None:
         nice_run(["terraform", "state", "rm", resource_address])
+
+    @classmethod
+    def verify_storage(cls, layer: "Layer") -> bool:
+        if layer.cloud == "aws":
+            return cls._aws_verify_storage(layer)
+        elif layer.cloud == "google":
+            return cls._gcp_verify_storage(layer)
+        else:
+            raise Exception(f"Can not verify state storage for cloud {layer.cloud}")
+
+    @classmethod
+    def _gcp_verify_storage(cls, layer: "Layer") -> bool:
+        credentials, project_id = GCP.get_credentials()
+        bucket = layer.state_storage()
+        gcs_client = storage.Client(project=project_id, credentials=credentials)
+        try:
+            gcs_client.get_bucket(bucket)
+        except NotFound:
+            return False
+        return True
+
+    @classmethod
+    def _aws_verify_storage(cls, layer: "Layer") -> bool:
+        bucket = layer.state_storage()
+        s3 = boto3.client("s3")
+        try:
+            s3.get_bucket_encryption(Bucket=bucket,)
+        except ClientError as e:
+            if e.response["Error"]["Code"] != "NoSuchBucket":
+                return False
+            raise e
+        return True
 
     @classmethod
     def plan(cls, *tf_flags: str, quiet: Optional[bool] = False) -> None:
@@ -270,7 +310,7 @@ class Terraform:
         return True
 
     @classmethod
-    def _delete_state_storage(cls, layer: "Layer") -> None:
+    def _aws_delete_state_storage(cls, layer: "Layer") -> None:
         providers = layer.gen_providers(0)
         if "s3" not in providers.get("terraform", {}).get("backend", {}):
             return
@@ -283,6 +323,20 @@ class Terraform:
         dynamodb_table = providers["terraform"]["backend"]["s3"]["dynamodb_table"]
         region = providers["terraform"]["backend"]["s3"]["region"]
         AWS.delete_dynamodb_table(dynamodb_table, region)
+
+    @classmethod
+    def _gcp_delete_state_storage(cls, layer: "Layer") -> None:
+        providers = layer.gen_providers(0)
+        if "gcs" not in providers.get("terraform", {}).get("backend", {}):
+            return
+        bucket_name = providers["terraform"]["backend"]["gcs"]["bucket"]
+        credentials, project_id = GCP.get_credentials()
+        gcs_client = storage.Client(project=project_id, credentials=credentials)
+        try:
+            bucket_obj = gcs_client.get_bucket(bucket_name)
+            bucket_obj.delete(force=True)
+        except NotFound:
+            logger.warn("State bucket was already deleted")
 
     @classmethod
     def _create_gcp_state_storage(cls, providers: dict) -> None:
@@ -331,6 +385,7 @@ class Terraform:
             "servicenetworking.googleapis.com",
             "redis.googleapis.com",
             "compute.googleapis.com",
+            "secretmanager.googleapis.com",
         ]:
             request = service.services().enable(
                 name=f"projects/{project_name}/services/{service_name}"

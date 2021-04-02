@@ -28,5 +28,8 @@ resource "google_container_node_pool" "default" {
     workload_metadata_config {
       node_metadata = "SECURE"
     }
+    labels = {
+      node_pool_name = "opta-${var.layer_name}-default"
+    }
   }
 }
