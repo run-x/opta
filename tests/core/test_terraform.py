@@ -320,9 +320,14 @@ class TestTerraform:
             module.name = f"fake_module_{i}"
 
         fake_layer = mocker.Mock(spec=Layer)
+        fake_layer.name = "blah"
         fake_layer.cloud = "aws"
         fake_layer.modules = fake_modules
 
+        mocker.patch(
+            "opta.core.terraform.Terraform.get_existing_modules",
+            return_value={"fake_module_2", "fake_module_1", "fake_module_0"},
+        )
         mocker.patch("opta.core.terraform.Terraform.refresh")
         mocker.patch("opta.core.terraform.AWS")
         mocked_cmd = mocker.patch("opta.core.terraform.nice_run")
