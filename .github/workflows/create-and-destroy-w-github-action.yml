@@ -19,12 +19,6 @@ jobs:
         uses: softprops/turnstyle@v1
         env:
           GITHUB_TOKEN: ${{ secrets.ALL_GITHUB_TOKEN }}
-      - name: Checkout runx-infra repo
-        uses: actions/checkout@v2
-        with:
-          repository: "run-x/runx-infra"
-          path: "runx-infra"
-          ssh-key: ${{ secrets.SSH_KEY }}
       - name: Checkout test-service repo
         uses: actions/checkout@v2
         with:
@@ -57,14 +51,6 @@ jobs:
           aws-access-key-id: ${{ secrets.DEPLOYER_AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.DEPLOYER_AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
-      - name: Deploy opta environment
-        run: |
-          source $(pipenv --venv)/bin/activate
-          export PYTHONPATH=$(pwd)
-          python ./opta/cli.py apply \
-          --config runx-infra/staging/opta-ga-ci.yml \
-          --auto-approve \
-          --refresh
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
@@ -77,10 +63,11 @@ jobs:
           IMAGE: app:latest
           TAG: ${{ github.sha }}
           CONFIG: test-service/opta.yml
-      # - name: Destroy test service
-      #   run: |
-      #     source $(pipenv --venv)/bin/activate
-      #     export PYTHONPATH=$(pwd)
-      #     yes | python ./opta/cli.py destroy \
-      #     --config runx-infra/staging/opta-ga-ci.yml \
-      #     --auto-approve
+      - name: Destroy test service
+        run: |
+          source $(pipenv --venv)/bin/activate
+          export PYTHONPATH=$(pwd)
+          yes | python ./opta/cli.py destroy \
+          --config test-service/opta.yml \
+          --env github-action \
+          --auto-approve
