@@ -34,6 +34,7 @@ def mocked_layer(mocker: MockFixture) -> Any:
     mocked_layer = mocker.Mock(spec=Layer)
     mocked_layer.variables = {}
     mocked_layer.cloud = "aws"
+    mocked_layer.gen_providers = lambda x: {"provider": {"aws": {"region": "us-east-1"}}}
     mocked_layer_class.load_from_yaml.return_value = mocked_layer
 
     return mocked_layer
@@ -42,6 +43,9 @@ def mocked_layer(mocker: MockFixture) -> Any:
 def test_apply(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None:
     mocked_click = mocker.patch("opta.commands.apply.click")
     mocker.patch("opta.commands.apply.configure_kubectl")
+    mocker.patch(
+        "opta.commands.apply._fetch_availability_zones", return_value=["a", "b", "c"]
+    )
     tf_apply = mocker.patch("opta.commands.apply.Terraform.apply")
     tf_plan = mocker.patch("opta.commands.apply.Terraform.plan")
     tf_show = mocker.patch("opta.commands.apply.Terraform.show")
@@ -74,6 +78,9 @@ def test_apply(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None
 def test_auto_approve(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None:
     mocked_click = mocker.patch("opta.commands.apply.click")
     mocker.patch("opta.commands.apply.configure_kubectl")
+    mocker.patch(
+        "opta.commands.apply._fetch_availability_zones", return_value=["a", "b", "c"]
+    )
     tf_apply = mocker.patch("opta.commands.apply.Terraform.apply")
     tf_plan = mocker.patch("opta.commands.apply.Terraform.plan")
     tf_show = mocker.patch("opta.commands.apply.Terraform.show")
@@ -98,3 +105,16 @@ def test_auto_approve(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) 
     mocked_click.confirm.assert_not_called()
     tf_show.assert_called_once_with(TF_PLAN_PATH)
     tf_create_storage.assert_called_once_with(mocked_layer)
+
+
+def test_fail_on_2_azs(mocker: MockFixture, mocked_layer: Any) -> None:
+    # Opta needs a region with at least 3 AZs, fewer should fail.
+    mocker.patch(
+        "opta.commands.apply._fetch_availability_zones",
+        return_value=["us-west-1a", "us-west-1c"],
+    )
+    runner = CliRunner()
+    result = runner.invoke(apply)
+    assert "Opta requires a region with at least *3* availability zones." in str(
+        result.exception
+    )
