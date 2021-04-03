@@ -70,6 +70,11 @@ cli.add_command(events)
 
 if __name__ == "__main__":
     try:
+        # In case OPTA_DEBUG is set, local state files may not be cleaned up
+        # after the command.
+        # However, we should still clean them up before the next command, or
+        # else it may interfere with it.
+        cleanup_files()
         cli()
     except CalledProcessError as e:
         logger.exception(e)
