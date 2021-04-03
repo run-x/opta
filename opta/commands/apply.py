@@ -1,7 +1,9 @@
 from threading import Thread
 from typing import List, Optional, Set
 
+import boto3
 import click
+from botocore.config import Config
 
 from opta.amplitude import amplitude_client
 from opta.constants import TF_PLAN_PATH
@@ -12,7 +14,7 @@ from opta.core.kubernetes import configure_kubectl, tail_module_log, tail_namesp
 from opta.core.terraform import Terraform
 from opta.exceptions import UserErrors
 from opta.layer import Layer
-from opta.utils import is_tool, logger
+from opta.utils import fmt_msg, is_tool, logger
 
 
 @click.command()
@@ -82,6 +84,24 @@ def _apply(
     amplitude_client.send_event(amplitude_client.START_GEN_EVENT)
     layer = Layer.load_from_yaml(config, env)
     layer.variables["image_tag"] = image_tag
+
+    # We need a region with at least 3 AZs for leader election during failover.
+    # Also EKS historically had problems with regions that have fewer than 3 AZs.
+    if layer.cloud == "aws":
+        providers = layer.gen_providers(0)["provider"]
+        aws_region = providers["aws"]["region"]
+        azs = _fetch_availability_zones(aws_region)
+        if len(azs) < 3:
+            raise UserErrors(
+                fmt_msg(
+                    f"""
+                    Opta requires a region with at least *3* availability zones.
+                    ~You configured {aws_region}, which only has the availability zones: {azs}.
+                    ~Please choose a different region.
+                    """
+                )
+            )
+
     Terraform.create_state_storage(layer)
     gen_opta_resource_tags(layer)
     if layer.cloud == "aws":
@@ -162,3 +182,12 @@ def _apply(
 
             Terraform.apply(layer, *tf_flags, TF_PLAN_PATH, no_init=True, quiet=False)
             logger.info("Opta updates complete!")
+
+
+# Fetch the AZs of a region with boto3
+def _fetch_availability_zones(aws_region: str) -> List[str]:
+    client = boto3.client("ec2", config=Config(region_name=aws_region))
+    resp = client.describe_availability_zones(
+        Filters=[{"Name": "zone-type", "Values": ["availability-zone"]}]
+    )
+    return list(map(lambda az: az["ZoneName"], resp["AvailabilityZones"]))
