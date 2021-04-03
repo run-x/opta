@@ -7,7 +7,6 @@ from google.cloud import storage
 from google.cloud.exceptions import NotFound
 
 from opta.amplitude import amplitude_client
-from opta.cleanup_files import cleanup_files
 from opta.core.gcp import GCP
 from opta.core.generator import gen_all
 from opta.core.terraform import Terraform
@@ -29,8 +28,6 @@ from opta.utils import fmt_msg, logger
 def destroy(config: str, env: Optional[str], auto_approve: bool) -> None:
     """Destroy all opta resources from the current config"""
     amplitude_client.send_event(amplitude_client.DESTROY_EVENT)
-    logger.info("Cleaning up local state files")
-    cleanup_files()
     layer = Layer.load_from_yaml(config, env)
     if not Terraform.verify_storage(layer):
         logger.info(
