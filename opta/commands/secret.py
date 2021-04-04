@@ -34,8 +34,7 @@ def view(secret: str, env: Optional[str], config: str) -> None:
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(amplitude_client.VIEW_SECRET_EVENT)
     gen_all(layer)
-    if layer.cloud == "aws":
-        _raise_if_no_eks_cluster_exists(layer)
+    _raise_if_no_k8s_cluster_exists(layer)
 
     configure_kubectl(layer)
     load_kube_config()
@@ -57,8 +56,7 @@ def list_command(env: Optional[str], config: str) -> None:
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(amplitude_client.LIST_SECRETS_EVENT)
     gen_all(layer)
-    if layer.cloud == "aws":
-        _raise_if_no_eks_cluster_exists(layer)
+    _raise_if_no_k8s_cluster_exists(layer)
 
     configure_kubectl(layer)
     load_kube_config()
@@ -78,9 +76,7 @@ def update(secret: str, value: str, env: Optional[str], config: str) -> None:
     """Update a given secret of a k8s service with a new value"""
     layer = Layer.load_from_yaml(config, env)
     gen_all(layer)
-
-    if layer.cloud == "aws":
-        _raise_if_no_eks_cluster_exists(layer)
+    _raise_if_no_k8s_cluster_exists(layer)
 
     configure_kubectl(layer)
     amplitude_client.send_event(amplitude_client.UPDATE_SECRET_EVENT)
@@ -93,16 +89,24 @@ def update(secret: str, value: str, env: Optional[str], config: str) -> None:
     print("Success")
 
 
-def _raise_if_no_eks_cluster_exists(layer: "Layer") -> None:
+def _raise_if_no_k8s_cluster_exists(layer: "Layer") -> None:
     terraform_state = fetch_terraform_state_resources(layer)
     terraform_state_resources = terraform_state.keys()
-    pattern = re.compile(r"^module\..+\.aws_eks_cluster\.cluster")
-    eks_cluster = list(filter(pattern.match, terraform_state_resources))
-    if len(eks_cluster) == 0:
+
+    if layer.cloud == "aws":
+        pattern = re.compile(r"^module\..+\.aws_eks_cluster\.cluster")
+    elif layer.cloud == "google":
+        pattern = re.compile(r"module\..+\.google_container_cluster\.primary")
+    else:
+        # Don't fail if the cloud vendor is not supported in this check.
+        return
+
+    k8s_cluster = list(filter(pattern.match, terraform_state_resources))
+    if len(k8s_cluster) == 0:
         raise UserErrors(
             fmt_msg(
                 """
-                Cannot set/view secrets because there was no EKS cluster found in the opta state.
+                Cannot set/view secrets because there was no K8s cluster found in the opta state.
                 ~Please make sure to create the opta environment first with *opta apply*.
                 ~See the following docs: https://docs.runx.dev/docs/getting-started/#environment-creation
                 """

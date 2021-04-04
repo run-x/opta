@@ -30,11 +30,11 @@ class TestSecretManager:
         )
         runner = CliRunner()
         result = runner.invoke(update, ["dummysecret", "dummysecretvalue"])
-        assert "there was no EKS cluster found in the opta state" in str(result.exception)
+        assert "there was no K8s cluster found in the opta state" in str(result.exception)
 
     def test_view(self, mocker: MockFixture, mocked_layer: Any) -> None:  # noqa
         mocker.patch("opta.commands.secret.gen_all")
-        mocker.patch("opta.commands.secret._raise_if_no_eks_cluster_exists")
+        mocker.patch("opta.commands.secret._raise_if_no_k8s_cluster_exists")
         mocker.patch("opta.commands.secret.configure_kubectl")
 
         mocked_kube_load_config = mocker.patch("opta.commands.secret.load_kube_config")
@@ -71,7 +71,7 @@ class TestSecretManager:
     def test_list_secrets(self, mocker: MockFixture, mocked_layer: Any) -> None:  # noqa
         mocked_print = mocker.patch("builtins.print")
         mocker.patch("opta.commands.secret.gen_all")
-        mocker.patch("opta.commands.secret._raise_if_no_eks_cluster_exists")
+        mocker.patch("opta.commands.secret._raise_if_no_k8s_cluster_exists")
         mocker.patch("opta.commands.secret.configure_kubectl")
 
         mocked_kube_load_config = mocker.patch("opta.commands.secret.load_kube_config")
@@ -109,7 +109,7 @@ class TestSecretManager:
     def test_update(self, mocker: MockFixture, mocked_layer: Any) -> None:
         mocker.patch("opta.commands.secret.gen_all")
         mocker.patch("opta.commands.secret.configure_kubectl")
-        mocker.patch("opta.commands.secret._raise_if_no_eks_cluster_exists")
+        mocker.patch("opta.commands.secret._raise_if_no_k8s_cluster_exists")
 
         mocked_kube_load_config = mocker.patch("opta.commands.secret.load_kube_config")
 
