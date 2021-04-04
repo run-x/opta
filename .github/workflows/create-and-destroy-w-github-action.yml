@@ -1,6 +1,8 @@
-# This workflow creates the environment & service layer from scratch and then destroys them.
-# This workflow should be run before each release, to ensure opta's core functionality still works.
-name: Test Create and Destroy
+# This workflow creates the environment & service layer from scratch using our
+# deploy-action Github Action and then destroys them.
+# This workflow should be run before each release of the github action,
+# to ensure it still works.
+name: Test Create and Destroy with Deploy Action
 
 on: workflow_dispatch
 
@@ -11,23 +13,24 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v2
       # This test cannot be run concurrently because it is
-      # creating and destroying real resources in the us-east-2 region.
+      # creating and destroying real resources in the us-west-2 region.
       # Wait for any previous builds of this workflow to finish.
       - name: Limit concurrency to 1.
         uses: softprops/turnstyle@v1
         env:
           GITHUB_TOKEN: ${{ secrets.ALL_GITHUB_TOKEN }}
-      - name: Checkout runx-infra repo
-        uses: actions/checkout@v2
-        with:
-          repository: "run-x/runx-infra"
-          path: "runx-infra"
-          ssh-key: ${{ secrets.SSH_KEY }}
       - name: Checkout test-service repo
         uses: actions/checkout@v2
         with:
           repository: "run-x/test-service"
           path: "test-service"
+          ssh-key: ${{ secrets.SSH_KEY }}
+      - name: Checkout deploy-action repo
+        uses: actions/checkout@v2
+        with:
+          repository: "run-x/deploy-action"
+          path: "deploy-action"
+          ref: kjin/deploy-action-ci
           ssh-key: ${{ secrets.SSH_KEY }}
       - name: Setup ssh
         uses: webfactory/ssh-agent@v0.4.1
@@ -48,33 +51,23 @@ jobs:
           aws-access-key-id: ${{ secrets.DEPLOYER_AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.DEPLOYER_AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
-      - name: Deploy opta environment
-        run: |
-          source $(pipenv --venv)/bin/activate
-          export PYTHONPATH=$(pwd)
-          python ./opta/cli.py apply \
-          --config runx-infra/staging/opta-ci.yml \
-          --auto-approve \
-          --refresh
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
       - name: Build test-service image
         run: docker build -t app:latest -f test-service/Dockerfile test-service/
-      - name: Deploy test-service
-        run: |
-          source $(pipenv --venv)/bin/activate
-          export PYTHONPATH=$(pwd)
-          python ./opta/cli.py deploy \
-          --image app:latest \
-          --env ci \
-          --config test-service/opta.yml \
-          --tag ${{ github.sha }} \
-          --auto-approve
-      - name: Destroy environment (and test service)
+      - name: Deploy test-service with github action
+        run: ./deploy-action/deploy.sh
+        env:
+          OPTA_ENV: github-action
+          IMAGE: app:latest
+          TAG: ${{ github.sha }}
+          CONFIG: test-service/opta-ga-ci.yml
+      - name: Destroy test service
         run: |
           source $(pipenv --venv)/bin/activate
           export PYTHONPATH=$(pwd)
           yes | python ./opta/cli.py destroy \
-          --config runx-infra/staging/opta-ci.yml \
+          --config test-service/opta-ga-ci.yml \
+          --env github-action \
           --auto-approve

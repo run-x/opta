@@ -18,7 +18,7 @@ curl -X POST "https://api.github.com/repos/run-x/runxc/actions/workflows/${workf
 -H "Accept: application/vnd.github.v3+json" \
 -H "Content-Type: application/json" \
 -H "Authorization: Bearer ${github_token}" \
---data '{"ref":"kjin/test-service-create-and-destroy"}'
+--data '{"ref":"main"}'
 
 # Wait for the build to start.
 latest_build_id=""
