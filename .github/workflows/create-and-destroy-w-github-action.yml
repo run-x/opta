@@ -30,7 +30,6 @@ jobs:
         with:
           repository: "run-x/deploy-action"
           path: "deploy-action"
-          ref: kjin/deploy-action-ci
           ssh-key: ${{ secrets.SSH_KEY }}
       - name: Setup ssh
         uses: webfactory/ssh-agent@v0.4.1
