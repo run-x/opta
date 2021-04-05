@@ -236,7 +236,7 @@ def tail_pod_log(
                     f"{fg(color_idx)}Server {pod.metadata.name} has been terminated{attr(0)}"
                 )
                 return
-            elif retry_count < 5:
+            elif retry_count < 10:
                 print(
                     f"{fg(color_idx)}Couldn't get logs, waiting a bit and retrying{attr(0)}"
                 )
