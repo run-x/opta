@@ -10,6 +10,7 @@ terraform {
 resource "helm_release" "k8s-service" {
   chart = "${path.module}/k8s-service"
   name = "${var.layer_name}-${var.module_name}"
+  recreate_pods = true
   values = [
     yamlencode({
       deployment_timestamp: timestamp()
