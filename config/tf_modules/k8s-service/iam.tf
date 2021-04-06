@@ -1,5 +1,5 @@
 resource "aws_iam_policy" "k8s_service" {
-  name = "${var.layer_name}-${var.module_name}"
+  name = "${var.env_name}-${var.layer_name}-${var.module_name}"
   policy = jsonencode(var.iam_policy)
 }
 
@@ -23,11 +23,11 @@ data "aws_iam_policy_document" "trust_k8s_openid" {
 
 resource "aws_iam_role" "k8s_service" {
   assume_role_policy = data.aws_iam_policy_document.trust_k8s_openid.json
-  name = "${var.layer_name}-${var.module_name}"
+  name = "${var.env_name}-${var.layer_name}-${var.module_name}"
 }
 
 resource "aws_iam_policy_attachment" "k8s_service" {
-  name = "${var.layer_name}-${var.module_name}"
+  name = "${var.env_name}-${var.layer_name}-${var.module_name}"
   policy_arn = aws_iam_policy.k8s_service.arn
   roles = concat([aws_iam_role.k8s_service.name], var.additional_iam_roles)
 }
