@@ -31,3 +31,13 @@ resource "aws_acm_certificate_validation" "example_com" {
   certificate_arn         = aws_acm_certificate.certificate[0].arn
   validation_record_fqdns = [for record in aws_route53_record.validation_record : record.fqdn]
 }
+
+resource "aws_acm_certificate" "imported_certificate" {
+  count = var.upload_cert ? 1 : 0
+  private_key = data.aws_ssm_parameter.private_key[0].value
+  certificate_body = data.aws_ssm_parameter.certificate_body[0].value
+  certificate_chain = var.cert_chain_included? data.aws_ssm_parameter.certificate_chain[0].value : null
+  tags = {
+    Name = "opta-${var.env_name}"
+  }
+}

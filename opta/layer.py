@@ -15,6 +15,7 @@ from opta.commands.validate import validate_yaml
 from opta.constants import REGISTRY
 from opta.exceptions import UserErrors
 from opta.module import Module
+from opta.module_processors.aws_dns import AwsDnsProcessor
 from opta.module_processors.base import ModuleProcessor
 from opta.module_processors.datadog import DatadogProcessor
 from opta.module_processors.gcp_gke import GcpGkeProcessor
@@ -202,6 +203,8 @@ class Layer:
                 GcpK8sServiceProcessor(module, self).process(module_idx)
             elif module_type == "gcp-gke":
                 GcpGkeProcessor(module, self).process(module_idx)
+            elif module_type == "aws-dns":
+                AwsDnsProcessor(module, self).process(module_idx)
             else:
                 ModuleProcessor(module, self).process(module_idx)
         previous_module_reference = None
