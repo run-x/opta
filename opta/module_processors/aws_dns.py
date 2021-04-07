@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional, Tuple
+from typing import TYPE_CHECKING, List, Optional, Tuple
 
 import boto3
 from botocore.config import Config
@@ -185,7 +185,7 @@ class AwsDnsProcessor(ModuleProcessor):
                 logger.warn("certificate chain is not correct pem cert")
                 continue
 
-    def get_subject_alternative_names(self, cert_obj: X509) -> list[str]:
+    def get_subject_alternative_names(self, cert_obj: X509) -> List[str]:
         domains_list = []
         for i in range(0, cert_obj.get_extension_count()):
             ext = cert_obj.get_extension(i)
