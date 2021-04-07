@@ -35,7 +35,7 @@ class AwsDnsProcessor(ModuleProcessor):
     def process(self, module_idx: int) -> None:
         providers = self.layer.gen_providers(0)
         region = providers["provider"]["aws"]["region"]
-        if self.module.data["upload_cert"]:
+        if self.module.data.get("upload_cert"):
             ssm_client: SSMClient = boto3.client("ssm", config=Config(region_name=region))
             parameters = ssm_client.get_parameters_by_path(
                 Path=f"/opta-{self.layer.get_env()}", Recursive=True
