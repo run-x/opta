@@ -55,3 +55,16 @@ variable "high_availability" {
   type = bool
   default = true
 }
+
+data "aws_vpc" "main" {
+  tags = {
+    Name = "opta-${var.env_name}"
+  }
+}
+
+data "aws_subnet_ids" "public" {
+  vpc_id = data.aws_vpc.main.id
+  tags = {
+    type = "public"
+  }
+}

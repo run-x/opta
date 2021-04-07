@@ -234,6 +234,9 @@ modules:
       module_name: str
       domain: str
       delegated: optional
+      upload_cert: optional
+      cert_chain_included: optional
+      force_update: optional
     outputs:
       zone_id:
         export: true
