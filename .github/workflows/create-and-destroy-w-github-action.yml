@@ -64,7 +64,7 @@ jobs:
         uses: run-x/deploy-action@master
         with:
           env: github-action
-          image: app:${{ github.sha }}
+          image: app:latest
           tag: ${{ github.sha }}
           config: test-service/opta-ga-ci.yml
       - name: Destroy test service
