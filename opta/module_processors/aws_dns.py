@@ -72,7 +72,7 @@ class AwsDnsProcessor(ModuleProcessor):
                     cert_pub = dump_publickey(FILETYPE_PEM, cert_obj.get_pubkey())
                     key_pub = dump_publickey(FILETYPE_PEM, private_key_obj)
                     if cert_pub != key_pub:
-                        logger.warn(
+                        logger.warning(
                             "Certificate private key does not match inputted private key, try again"
                         )
                         continue
@@ -122,7 +122,7 @@ class AwsDnsProcessor(ModuleProcessor):
                 with open(privkey_path, "r") as f:
                     privkey = f.read()
             except FileNotFoundError:
-                logger.warn(
+                logger.warning(
                     f"Could not find private key with path {privkey_path}. Pls try again"
                 )
                 continue
@@ -130,7 +130,7 @@ class AwsDnsProcessor(ModuleProcessor):
                 private_key_obj = load_privatekey(FILETYPE_PEM, privkey)
                 return private_key_obj, privkey
             except Error:
-                logger.warn("private key is not correct pem private key")
+                logger.warning("private key is not correct pem private key")
                 continue
 
     def fetch_cert_body(self) -> Tuple[X509, str]:
@@ -144,19 +144,19 @@ class AwsDnsProcessor(ModuleProcessor):
                 with open(cert_body_path, "r") as f:
                     cert_body = f.read()
             except FileNotFoundError:
-                logger.warn(
-                    f"Could not find cert body with path {cert_body}. Pls try again"
+                logger.warning(
+                    f"Could not find cert body with path {cert_body_path}. Pls try again"
                 )
                 continue
             if len(cert_body.split("-----END CERTIFICATE-----")) > 2:
-                logger.warn(
+                logger.warning(
                     "Certificate body can only have one certificate-- additional ones must go in the chain."
                 )
             try:
                 cert_obj = load_certificate(FILETYPE_PEM, cert_body)
                 return cert_obj, cert_body
             except Error:
-                logger.warn("Certificate body is not correct pem cert.")
+                logger.warning("Certificate body is not correct pem cert.")
                 continue
 
     def fetch_cert_chain(self) -> Tuple[Optional[X509], Optional[str]]:
@@ -174,15 +174,15 @@ class AwsDnsProcessor(ModuleProcessor):
                 with open(cert_chain_path, "r") as f:
                     cert_chain = f.read()
             except FileNotFoundError:
-                logger.warn(
-                    f"Could not find cert chain with path {cert_chain}. Pls try again"
+                logger.warning(
+                    f"Could not find cert chain with path {cert_chain_path}. Pls try again"
                 )
                 continue
             try:
                 cert_chain_obj = load_certificate(FILETYPE_PEM, cert_chain)
                 return cert_chain_obj, cert_chain
             except Error:
-                logger.warn("certificate chain is not correct pem cert")
+                logger.warning("certificate chain is not correct pem cert")
                 continue
 
     def get_subject_alternative_names(self, cert_obj: X509) -> List[str]:
