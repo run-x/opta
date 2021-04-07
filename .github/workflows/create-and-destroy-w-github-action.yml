@@ -4,12 +4,7 @@
 # to ensure it still works.
 name: Test Create and Destroy with Deploy Action
 
-# on: workflow_dispatch
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+on: workflow_dispatch
 
 jobs:
   create-and-destroy:
