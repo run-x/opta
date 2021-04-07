@@ -121,8 +121,16 @@ modules:
         helm:
           kubernetes:
             host: "${{{module_source}.k8s_endpoint}}"
-            token: "${{data.aws_eks_cluster_auth.k8s.token}}"
+            # token: "${{data.aws_eks_cluster_auth.k8s.token}}"
             cluster_ca_certificate: "${{base64decode({module_source}.k8s_ca_data)}}"
+            exec:
+              api_version: "client.authentication.k8s.io/v1alpha1"
+              args:
+                - "eks"
+                - "get-token"
+                - "--cluster-name"
+                - "${{{module_source}.k8s_cluster_name}}"
+              command: "aws"
   datadog:
     location: datadog
     root_only: true
