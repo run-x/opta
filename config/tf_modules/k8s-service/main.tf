@@ -7,6 +7,10 @@ terraform {
   }
 }
 
+provider "kubernetes" {
+  load_config_file = false
+}
+
 resource "helm_release" "k8s-service" {
   chart = "${path.module}/k8s-service"
   name = "${var.layer_name}-${var.module_name}"
