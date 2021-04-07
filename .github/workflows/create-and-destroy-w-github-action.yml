@@ -56,12 +56,12 @@ jobs:
       - name: Build test-service image
         run: docker build -t app:latest -f test-service/Dockerfile test-service/
       - name: Deploy test-service with github action
-        run: ./deploy-action/deploy.sh
-        env:
-          OPTA_ENV: github-action
-          IMAGE: app:latest
-          TAG: ${{ github.sha }}
-          CONFIG: test-service/opta-ga-ci.yml
+        uses: run-x/deploy-action@master
+        with:
+          env: github-action
+          image: app:${{ github.sha }}
+          tag: ${{ github.sha }}
+          config: test-service/opta-ga-ci.yml
       - name: Destroy test service
         run: |
           source $(pipenv --venv)/bin/activate
