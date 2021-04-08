@@ -37,6 +37,11 @@ variable "force_update" {
   default = false
 }
 
+variable "external_cert_arn" {
+  type = string
+  default = ""
+}
+
 data "aws_ssm_parameter" "private_key" {
   count = var.upload_cert ? 1 : 0
   name = "/opta-${var.env_name}/dns-private-key.pem"

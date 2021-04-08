@@ -31,7 +31,7 @@ resource "helm_release" "k8s-service" {
       deployPods: (var.image != "AUTO") || (var.tag != null),
       image: var.image == "AUTO" ? (var.tag == null ? "": "${aws_ecr_repository.repo[0].repository_url}:${var.tag}") : var.image
       version: var.tag == null ? "latest" : var.tag
-      livenessProbePath: var.healthcheck_path == null || var.liveness_probe_path != "/healtcheck"? var.liveness_probe_path : var.healthcheck_path,
+      livenessProbePath: var.healthcheck_path == null || var.liveness_probe_path != "/healthcheck"? var.liveness_probe_path : var.healthcheck_path,
       readinessProbePath: var.healthcheck_path == null || var.readiness_probe_path != "/healthcheck"? var.readiness_probe_path : var.healthcheck_path,
       envVars: var.env_vars,
       secrets: var.secrets,

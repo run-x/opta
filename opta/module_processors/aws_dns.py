@@ -4,6 +4,7 @@ import boto3
 from botocore.config import Config
 from click import prompt
 from colored import attr, fg
+from mypy_boto3_acm.client import ACMClient
 from mypy_boto3_ssm.client import SSMClient
 from OpenSSL.crypto import (
     FILETYPE_PEM,
@@ -110,6 +111,26 @@ class AwsDnsProcessor(ModuleProcessor):
                     "certificate files uploaded securely to parameter store for future consumption"
                 )
                 self.module.data["_updated_already"] = True
+        elif self.module.data.get("external_cert_arn") is not None:
+            acm_client: ACMClient = boto3.client("acm", config=Config(region_name=region))
+            try:
+                cert = acm_client.describe_certificate(
+                    CertificateArn=str(self.module.data.get("external_cert_arn"))
+                )
+            except Exception as e:
+                raise UserErrors(
+                    f"Encountered error when attempting to verify external certificate {self.module.data.get('external_cert_arn')}: "
+                    f"{e}"
+                )
+            cert_domains = set(
+                [cert["Certificate"]["DomainName"]]
+                + cert["Certificate"]["SubjectAlternativeNames"]
+            )
+            if self.module.data["domain"] not in cert_domains:
+                raise UserErrors(
+                    f"Inputted certificate is for domains of {cert_domains}, but the main domain "
+                    f"{self.module.data['domain']} is not one of them"
+                )
         super(AwsDnsProcessor, self).process(module_idx)
 
     def fetch_private_key(self) -> Tuple[PKey, str]:
