@@ -25,5 +25,5 @@ variable "instance_class" {
 
 variable "safety" {
   type = bool
-  default = true
+  default = false
 }
