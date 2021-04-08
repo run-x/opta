@@ -1,10 +1,9 @@
+# type: ignore
 import base64
-from typing import Any
 
 from click.testing import CliRunner
 from kubernetes.client import CoreV1Api, V1Secret
-from pytest import fixture
-from pytest_mock import MockFixture
+from pytest_mock import MockFixture, mocker  # noqa
 
 from opta.amplitude import AmplitudeClient, amplitude_client
 from opta.commands.secret import list_command, update, view
@@ -12,30 +11,14 @@ from opta.layer import Layer
 
 
 class TestSecretManager:
-    @fixture
-    def mocked_layer(self, mocker: MockFixture) -> Any:
+    def test_view(self, mocker: MockFixture):  # noqa
+        mocker.patch("opta.commands.secret.gen_all")
+        mocker.patch("opta.commands.secret.configure_kubectl")
+
         mocked_load_layer = mocker.patch("opta.commands.secret.Layer.load_from_yaml")
         mocked_layer = mocker.Mock(spec=Layer)
         mocked_layer.name = "dummy_layer"
-        mocked_layer.cloud = "aws"
         mocked_load_layer.return_value = mocked_layer
-        return mocked_load_layer
-
-    def test_eks_cluster_doesnt_exist(
-        self, mocker: MockFixture, mocked_layer: Any
-    ) -> None:
-        mocker.patch("opta.commands.secret.gen_all")
-        mocker.patch(
-            "opta.commands.secret.fetch_terraform_state_resources", return_value={}
-        )
-        runner = CliRunner()
-        result = runner.invoke(update, ["dummysecret", "dummysecretvalue"])
-        assert "there was no K8s cluster found in the opta state" in str(result.exception)
-
-    def test_view(self, mocker: MockFixture, mocked_layer: Any) -> None:  # noqa
-        mocker.patch("opta.commands.secret.gen_all")
-        mocker.patch("opta.commands.secret._raise_if_no_k8s_cluster_exists")
-        mocker.patch("opta.commands.secret.configure_kubectl")
 
         mocked_kube_load_config = mocker.patch("opta.commands.secret.load_kube_config")
 
@@ -63,16 +46,20 @@ class TestSecretManager:
         mocked_client.read_namespaced_secret.assert_called_once_with(
             "secret", "dummy_layer"
         )
-        mocked_layer.assert_called_once_with("dummyconfig", "dummyenv")
+        mocked_load_layer.assert_called_once_with("dummyconfig", "dummyenv")
         mocked_amplitude_client.send_event.assert_called_once_with(
             amplitude_client.VIEW_SECRET_EVENT
         )
 
-    def test_list_secrets(self, mocker: MockFixture, mocked_layer: Any) -> None:  # noqa
+    def test_list_secrets(self, mocker: MockFixture):  # noqa
         mocked_print = mocker.patch("builtins.print")
         mocker.patch("opta.commands.secret.gen_all")
-        mocker.patch("opta.commands.secret._raise_if_no_k8s_cluster_exists")
         mocker.patch("opta.commands.secret.configure_kubectl")
+
+        mocked_load_layer = mocker.patch("opta.commands.secret.Layer.load_from_yaml")
+        mocked_layer = mocker.Mock(spec=Layer)
+        mocked_layer.name = "dummy_layer"
+        mocked_load_layer.return_value = mocked_layer
 
         mocked_kube_load_config = mocker.patch("opta.commands.secret.load_kube_config")
 
@@ -100,16 +87,19 @@ class TestSecretManager:
         mocked_client.read_namespaced_secret.assert_called_once_with(
             "secret", "dummy_layer"
         )
-        mocked_layer.assert_called_once_with("dummyconfig", "dummyenv")
+        mocked_load_layer.assert_called_once_with("dummyconfig", "dummyenv")
         mocked_amplitude_client.send_event.assert_called_once_with(
             amplitude_client.LIST_SECRETS_EVENT
         )
         mocked_print.assert_has_calls([mocker.call("ALGOLIA_WRITE_KEY")])
 
-    def test_update(self, mocker: MockFixture, mocked_layer: Any) -> None:
+    def test_update(self, mocker: MockFixture):  # noqa
         mocker.patch("opta.commands.secret.gen_all")
         mocker.patch("opta.commands.secret.configure_kubectl")
-        mocker.patch("opta.commands.secret._raise_if_no_k8s_cluster_exists")
+        mocked_load_layer = mocker.patch("opta.commands.secret.Layer.load_from_yaml")
+        mocked_layer = mocker.Mock(spec=Layer)
+        mocked_layer.name = "dummy_layer"
+        mocked_load_layer.return_value = mocked_layer
 
         mocked_kube_load_config = mocker.patch("opta.commands.secret.load_kube_config")
 
@@ -143,7 +133,7 @@ class TestSecretManager:
         mocked_client.patch_namespaced_secret.assert_called_once_with(
             "secret", "dummy_layer", patch
         )
-        mocked_layer.assert_called_once_with("dummyconfig", "dummyenv")
+        mocked_load_layer.assert_called_once_with("dummyconfig", "dummyenv")
         mocked_amplitude_client.send_event.assert_called_once_with(
             amplitude_client.UPDATE_SECRET_EVENT
         )
