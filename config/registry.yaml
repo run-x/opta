@@ -237,6 +237,7 @@ modules:
       upload_cert: optional
       cert_chain_included: optional
       force_update: optional
+      external_cert_arn: optional
     outputs:
       zone_id:
         export: true

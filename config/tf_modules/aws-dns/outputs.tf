@@ -11,5 +11,5 @@ output "domain" {
 }
 
 output "cert_arn" {
-  value = var.delegated ? aws_acm_certificate.certificate[0].arn : (var.upload_cert ? aws_acm_certificate.imported_certificate[0].arn : "")
+  value = var.delegated ? aws_acm_certificate.certificate[0].arn : (var.upload_cert ? aws_acm_certificate.imported_certificate[0].arn : var.external_cert_arn)
 }

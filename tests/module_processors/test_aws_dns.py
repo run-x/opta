@@ -177,3 +177,26 @@ class TestAwsDnsProcessor:
                 ),
             ]
         )
+
+    def test_process_new_external(self, mocker: MockFixture):
+        layer = Layer.load_from_yaml(
+            os.path.join(
+                os.path.dirname(os.path.dirname(__file__)),
+                "module_processors",
+                "dummy_config_parent.yaml",
+            ),
+            None,
+        )
+        dns_module = layer.get_module("awsdns", 6)
+        del dns_module.data["upload_cert"]
+        dns_module.data["external_cert_arn"] = "blah"
+        mocked_acm = mocker.Mock()
+        mocked_boto3 = mocker.patch("opta.module_processors.aws_dns.boto3")
+        mocked_boto3.client.return_value = mocked_acm
+        mocked_acm.describe_certificate.return_value = {
+            "Certificate": {"DomainName": "www.blah.com", "SubjectAlternativeNames": []}
+        }
+        processor = AwsDnsProcessor(dns_module, layer)
+        processor.process(2)
+        mocked_boto3.client.assert_called_once_with("acm", config=mocker.ANY)
+        mocked_acm.describe_certificate.assert_called_once_with(CertificateArn="blah")
