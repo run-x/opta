@@ -29,5 +29,5 @@ variable "instance_tier" {
 
 variable "safety" {
   type = bool
-  default = true
+  default = false
 }
