@@ -568,13 +568,14 @@ def fetch_terraform_state_resources(layer: "Layer") -> dict:
         # Note that resource addresses should start with "module.", but in the
         # saved terraform state, it is already part of the module name.
         # Ex. "module.awsbase"
-        address = ".".join(
-            [
-                resource.get("module", ""),
-                resource.get("type", ""),
-                resource.get("name", ""),
-            ]
-        )
+        address_parts = []
+        if resource.get("module"):
+            address_parts.append(resource.get("module"))
+        if resource.get("mode") == "data":
+            address_parts.append(resource.get("mode"))
+        address_parts.append(resource.get("type", ""))
+        address_parts.append(resource.get("name", ""))
+        address = ".".join(address_parts)
         if address == "..":
             continue
 

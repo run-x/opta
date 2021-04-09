@@ -62,7 +62,11 @@ def list_command(env: Optional[str], config: str) -> None:
     load_kube_config()
     v1 = CoreV1Api()
     api_response = v1.read_namespaced_secret("secret", layer.name)
-
+    if api_response.data is None:
+        print(
+            "No secrets found, you can make some by adding them in you opta file k8s service"
+        )
+        return
     for key in api_response.data:
         print(key)
 
@@ -94,9 +98,13 @@ def _raise_if_no_k8s_cluster_exists(layer: "Layer") -> None:
     terraform_state_resources = terraform_state.keys()
 
     if layer.cloud == "aws":
-        pattern = re.compile(r"^module\..+\.aws_eks_cluster\.cluster")
+        pattern = re.compile(
+            r"^module\..+\.aws_eks_cluster\.cluster|^data\.aws_eks_cluster_auth\.k8s"
+        )
     elif layer.cloud == "google":
-        pattern = re.compile(r"module\..+\.google_container_cluster\.primary")
+        pattern = re.compile(
+            r"module\..+\.google_container_cluster\.primary|^data\.google_container_cluster\.k8s"
+        )
     else:
         # Don't fail if the cloud vendor is not supported in this check.
         return
