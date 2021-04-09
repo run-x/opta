@@ -2,7 +2,11 @@
 # This workflow should be run before each release, to ensure opta's core functionality still works.
 name: Test Create and Destroy
 
-on: workflow_dispatch
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
   create-and-destroy:
