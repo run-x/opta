@@ -90,6 +90,10 @@ def update(secret: str, value: str, env: Optional[str], config: str) -> None:
 
 
 def _raise_if_no_k8s_cluster_exists(layer: "Layer") -> None:
+    # Checking for the k8s cluster resource only makes sense in the env layer.
+    if layer.parent is not None:
+        return
+
     terraform_state = fetch_terraform_state_resources(layer)
     terraform_state_resources = terraform_state.keys()
 

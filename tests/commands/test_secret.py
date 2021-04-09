@@ -18,6 +18,7 @@ class TestSecretManager:
         mocked_layer = mocker.Mock(spec=Layer)
         mocked_layer.name = "dummy_layer"
         mocked_layer.cloud = "aws"
+        mocked_layer.parent = None
         mocked_load_layer.return_value = mocked_layer
         return mocked_load_layer
 
