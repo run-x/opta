@@ -68,7 +68,7 @@ class TestSecretManager:
             amplitude_client.VIEW_SECRET_EVENT
         )
 
-    def test_list_secrets(self, mocker: MockFixture, mocked_layer: Any) -> None:  # noqa
+    def test_list_secrets(self, mocker: MockFixture, mocked_layer: Any) -> None:
         mocked_print = mocker.patch("builtins.print")
         mocker.patch("opta.commands.secret.gen_all")
         mocker.patch("opta.commands.secret._raise_if_no_k8s_cluster_exists")
