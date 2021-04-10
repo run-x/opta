@@ -1,7 +1,7 @@
 data "google_client_config" "current" {}
 
 data "google_secret_manager_secret_version" "kms_suffix" {
-  secret = "opta-${var.layer_name}-kms-suffix"
+  secret = "opta-${var.env_name}-kms-suffix"
 }
 
 data "google_kms_key_ring" "key_ring" {
