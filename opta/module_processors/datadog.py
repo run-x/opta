@@ -24,7 +24,6 @@ class DatadogProcessor(ModuleProcessor):
         # If the k8s cluster was recently created, it may take some time for it to be ready.
         for _ in exp_backoff(num_tries=3):
             try:
-                print(layer)
                 configure_kubectl(layer)
                 break
             except Exception as err:
