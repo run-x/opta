@@ -130,7 +130,6 @@ class Module:
 
     def get_terraform_variables(self) -> List[str]:
         variables = self.config.get("variables.tf", {}).get("variable")
-        print(variables)
         return [list(v.keys())[0] for v in variables]
 
     # Read all terraform files in the module and return its contents as a single dict.
