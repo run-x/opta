@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 
+from opta.core.terraform import get_terraform_outputs
 from opta.exceptions import UserErrors
 
 if TYPE_CHECKING:
@@ -20,6 +21,14 @@ class ModuleProcessor:
         self.module.data["env_name"] = self.layer.get_env()
         self.module.data["layer_name"] = self.layer.name
         self.module.data["module_name"] = self.module.name
+
+        if self.layer.parent is not None:
+            outputs = get_terraform_outputs(self.layer)
+            for k, v in outputs.items():
+                if k.startswith("parent.exported_"):
+                    # Strip the "parent." prefix out.
+                    output_key = k[len("parent.") :]
+                    self.module.data[output_key] = v
 
 
 class AWSK8sModuleProcessor(ModuleProcessor):

@@ -18,10 +18,9 @@ resource "google_storage_bucket_iam_member" "bucket_viewer" {
   member = "serviceAccount:${google_service_account.k8s_service.email}"
 }
 
-resource "google_storage_bucket_iam_member" "viewer" {
+resource "google_storage_bucket_iam_member" "node_bucket_editor" {
   count = length(var.write_buckets)
   bucket = var.write_buckets[count.index]
   role = "roles/storage.objectAdmin"
-  member = "serviceAccount:${google_service_account.k8s_service.email}"
+  member = "serviceAccount:${var.exported_gke_node_sa_email}"
 }
-

@@ -23,6 +23,11 @@ variable "module_name" {
   type = string
 }
 
+variable "exported_gke_node_sa_email" {
+  description = "GKE Node service account email"
+  type        = string
+}
+
 variable "port" {
   description = "Port to be exposed as :80"
   type = map(number)

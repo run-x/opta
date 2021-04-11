@@ -27,6 +27,7 @@ class Module:
         self.desc = REGISTRY["modules"][self.type]
         self.halt = REGISTRY["modules"][self.type].get("halt", False)
         self.module_dir_path = self.translate_location(self.desc["location"])
+        self.config = self.read_tf_module_config()
 
     def outputs(self) -> Iterable[str]:
         ret = []
@@ -57,6 +58,10 @@ class Module:
                 module_blk["module"][self.name][k] = self.layer_name
             else:
                 raise Exception(f"Unable to hydrate {k}")
+
+        for k, v in self.data.items():
+            if k.startswith("exported_") and k in self.get_terraform_variables():
+                module_blk["module"][self.name][k] = v
 
         if "outputs" in self.desc:
             for k, v in self.desc["outputs"].items():
@@ -110,7 +115,7 @@ class Module:
 
     # Get the list of resources created by the current module.
     def get_terraform_resources(self) -> List[Resource]:
-        tf_config = self._read_tf_module_config()
+        tf_config = self.read_tf_module_config()
         terraform_resources: List[Resource] = []
         for _, tf_file_config in tf_config.items():
             tf_resources = tf_file_config.get("resource", [])
@@ -123,8 +128,13 @@ class Module:
 
         return terraform_resources
 
+    def get_terraform_variables(self) -> List[str]:
+        variables = self.config.get("variables.tf", {}).get("variable")
+        print(variables)
+        return [list(v.keys())[0] for v in variables]
+
     # Read all terraform files in the module and return its contents as a single dict.
-    def _read_tf_module_config(self) -> dict:
+    def read_tf_module_config(self) -> dict:
         tf_module_config = {}
 
         # Get all of the (non-nested) terraform files in the current module.

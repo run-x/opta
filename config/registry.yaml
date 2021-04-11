@@ -338,6 +338,8 @@ modules:
       # This output is used by the configure-kubectl cmd
       k8s_cluster_name:
         export: true
+      exported_gke_node_sa_email:
+        export: true
     inspect:
       google_container_cluster:
         name: GKE

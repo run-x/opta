@@ -196,6 +196,7 @@ class Layer:
             elif module_type == "k8s-base":
                 K8sBaseProcessor(module, self).process(module_idx)
             elif module_type == "datadog":
+                print(self)
                 DatadogProcessor(module, self).process(module_idx)
             elif module_type == "gcp-k8s-base":
                 GcpK8sBaseProcessor(module, self).process(module_idx)

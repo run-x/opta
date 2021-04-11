@@ -24,10 +24,15 @@ class DatadogProcessor(ModuleProcessor):
         # If the k8s cluster was recently created, it may take some time for it to be ready.
         for _ in exp_backoff(num_tries=3):
             try:
+                print(layer)
                 configure_kubectl(layer)
                 break
-            except Exception:
+            except Exception as err:
+                logger.exception(err)
                 logger.info("Retrying attempt to talk to K8s cluster...")
+        else:
+            raise Exception("Couldn't connect to the K8s cluster")
+
         load_kube_config()
         self.v1 = CoreV1Api()
         super(DatadogProcessor, self).__init__(module, layer)
