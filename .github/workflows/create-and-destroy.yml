@@ -91,6 +91,7 @@ jobs:
           --env ci \
           --config test-service/opta.yml \
           foo | tail -1)
+          echo "This was the found secret value: ${secret_value}"
           [[ $secret_value != *"bar"* ]] && exit 1
       - name: Destroy environment (and test service)
         run: |
