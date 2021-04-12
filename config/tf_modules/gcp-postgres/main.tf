@@ -1,12 +1,15 @@
+resource "random_id" "key_suffix" {
+  byte_length = 8
+}
+
 resource "random_password" "root_auth" {
   length = 20
   special = false
 }
 
-
 # TODO: add encryption key name once out of beta
 resource "google_sql_database_instance" "instance" {
-  name   = "opta-${var.layer_name}-${var.module_name}"
+  name   = "opta-${var.layer_name}-${var.module_name}-${random_id.key_suffix.hex}"
   database_version = "POSTGRES_${var.engine_version}"
   deletion_protection = var.safety
 
@@ -33,7 +36,7 @@ resource "google_sql_database_instance" "instance" {
 
 resource "google_sql_database" "main" {
   instance = google_sql_database_instance.instance.name
-  name     = "opta-${var.layer_name}-${var.module_name}"
+  name     = "opta-${var.layer_name}-${var.module_name}-${random_id.key_suffix.hex}"
 }
 
 resource "google_sql_user" "root" {
