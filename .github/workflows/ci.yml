@@ -104,6 +104,7 @@ jobs:
         with:
           service_account_key: ${{ secrets.CI_GKE_SA_KEY }}
           project_id: gcpoptatest123
+          export_default_credentials: true
       - name: Test output command
         run: |
           source $(pipenv --venv)/bin/activate
@@ -121,6 +122,7 @@ jobs:
     # if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: Deploy the AWS and GCP test-service and wait for success
         run: ./scripts/dispatch_workflow.sh test-service cicd.yml
         env:
