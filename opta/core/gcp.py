@@ -36,10 +36,9 @@ class GCP:
                 )
             except GoogleAuthError as e:
                 raise UserErrors(*e.args)
-        # Refresh credentials to get new access token
-        request = google.auth.transport.requests.Request()
         try:
-            cls.credentials.refresh(request)
+            # Refresh credentials to get new access token
+            cls.credentials.refresh(google.auth.transport.requests.Request())
         except RefreshError:
             logger.info(
                 fmt_msg(
