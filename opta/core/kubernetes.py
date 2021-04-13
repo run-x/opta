@@ -10,6 +10,7 @@ from kubernetes.client import ApiException, CoreV1Api, V1Event, V1Pod
 from kubernetes.config import load_kube_config
 from kubernetes.watch import Watch
 
+from opta.core.gcp import GCP
 from opta.core.terraform import get_terraform_outputs
 from opta.exceptions import UserErrors
 from opta.nice_subprocess import nice_run
@@ -47,6 +48,18 @@ def _gcp_configure_kubectl(layer: "Layer") -> None:
             f"Please visit the link to install the gcloud CLI first: {GCP_CLI_INSTALL_URL}"
         )
     try:
+        if GCP.using_service_account():
+            service_account_key_path = GCP.get_service_account_key_path()
+            nice_run(
+                [
+                    "gcloud",
+                    "auth",
+                    "activate-service-account",
+                    "--key-file",
+                    service_account_key_path,
+                ]
+            )
+
         out: str = nice_run(
             ["gcloud", "config", "get-value", "project"], check=True, capture_output=True
         ).stdout.decode("utf-8")
