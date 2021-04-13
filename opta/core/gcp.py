@@ -1,5 +1,4 @@
 import os
-from datetime import datetime
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 import google.auth.transport.requests
@@ -21,7 +20,6 @@ if TYPE_CHECKING:
 class GCP:
     project_id: Optional[str] = None
     credentials: Optional[Credentials] = None
-    last_refreshed = datetime(1, 1, 1, 0, 0, 0)
 
     def __init__(self, layer: "Layer"):
         self.layer = layer
@@ -41,22 +39,12 @@ class GCP:
             except GoogleAuthError as e:
                 raise UserErrors(*e.args)
 
-        cls._refresh_token_if_necessary()
+        # For some non-service account credentials, an access token is generated with
+        # an expiry time, so it has to be refreshed.
+        if not cls.using_service_account():
+            cls.credentials.refresh(google.auth.transport.requests.Request())
+
         return cls.credentials, cls.project_id  # type: ignore
-
-    # For some credentials, an access token is generated with an expiration time.
-    # Refresh the access token if it's expired.
-    @classmethod
-    def _refresh_token_if_necessary(cls) -> None:
-        if cls.using_service_account():
-            # Service account credentials don't have a refreshable token, so skip.
-            return
-
-        current_time = datetime.now()
-        seconds_since_last_refresh = (current_time - cls.last_refreshed).total_seconds()
-        if cls.credentials.expired or seconds_since_last_refresh > 30:  # type: ignore
-            cls.credentials.refresh(google.auth.transport.requests.Request())  # type: ignore
-            cls.last_refreshed = current_time
 
     @classmethod
     def using_service_account(cls) -> bool:

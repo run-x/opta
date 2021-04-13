@@ -57,11 +57,11 @@ def get_ecr_auth_info(layer: Layer) -> Tuple[str, str]:
 
 
 def get_gcr_auth_info(layer: Layer) -> Tuple[str, str]:
-    credentials, project_id = GCP.get_credentials()
     if GCP.using_service_account():
         service_account_key = GCP.get_service_account_raw_credentials()
         return "_json_key", service_account_key
 
+    credentials, _ = GCP.get_credentials()
     return "oauth2accesstoken", credentials.token
 
 
