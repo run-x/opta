@@ -76,6 +76,7 @@ def test_get_gcr_auth_info(mocker: MockFixture) -> None:
     mocked_layer = mocker.Mock(spec=Layer)
     mocked_credentials = mocker.Mock()
     mocked_credentials.token = "blah"
+    mocker.patch("opta.commands.push.GCP.using_service_account", return_value=False)
     patched_gcp = mocker.patch(
         "opta.commands.push.GCP.get_credentials",
         return_value=tuple([mocked_credentials, "oauth2accesstoken"]),

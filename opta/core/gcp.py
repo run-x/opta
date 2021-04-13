@@ -1,11 +1,13 @@
+import os
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 import google.auth.transport.requests
 from google.auth import default
 from google.auth.credentials import Credentials
-from google.auth.exceptions import DefaultCredentialsError, GoogleAuthError, RefreshError
+from google.auth.exceptions import DefaultCredentialsError, GoogleAuthError
 from google.cloud import storage
 from google.cloud.exceptions import NotFound
+from google.oauth2 import service_account
 from googleapiclient import discovery
 
 from opta.exceptions import UserErrors
@@ -36,21 +38,45 @@ class GCP:
                 )
             except GoogleAuthError as e:
                 raise UserErrors(*e.args)
-        try:
-            # Refresh credentials to get new access token
+
+        # For some non-service account credentials, an access token is generated with
+        # an expiry time, which must be occasionally refreshed.
+        if not cls.using_service_account():
             cls.credentials.refresh(google.auth.transport.requests.Request())
-        # TODO: Check if this error only occurs for service accounts, and if so, only
-        # catch it for service accounts instead of catch-all.
-        except RefreshError:
-            logger.info(
+
+        return cls.credentials, cls.project_id  # type: ignore
+
+    @classmethod
+    def using_service_account(cls) -> bool:
+        credentials = cls.credentials or cls.get_credentials()[0]
+        return type(credentials) == service_account.Credentials
+
+    @classmethod
+    def get_service_account_key_path(cls) -> str:
+        if not cls.using_service_account:
+            raise Exception(
+                "Tried getting service account key, but service account is not used."
+            )
+
+        service_account_key_file_path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
+        if service_account_key_file_path is None:
+            raise UserErrors(
                 fmt_msg(
                     """
-                Tried refreshing credentials and failed. Assuming this user/service account
-                doesn't have the permissions to do so. Continuing anyways.
+                If you're using a service account to authenticate with GCP, please make
+                ~sure you set $GOOGLE_APPLICATION_CREDENTIALS to the absolute path of the
+                ~service account json key file.
                 """
                 )
             )
-        return cls.credentials, cls.project_id  # type: ignore
+        return service_account_key_file_path
+
+    @classmethod
+    def get_service_account_raw_credentials(cls) -> str:
+        service_account_key_file_path = cls.get_service_account_key_path()
+        with open(service_account_key_file_path, "r") as f:
+            service_account_key = f.read()
+        return service_account_key
 
     # Upload the current opta config to the state bucket, under opta_config/.
     def upload_opta_config(self, config_data: str) -> None:
