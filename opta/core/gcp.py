@@ -39,6 +39,8 @@ class GCP:
         try:
             # Refresh credentials to get new access token
             cls.credentials.refresh(google.auth.transport.requests.Request())
+        # TODO: Check if this error only occurs for service accounts, and if so, only
+        # catch it for service accounts instead of catch-all.
         except RefreshError:
             logger.info(
                 fmt_msg(
