@@ -1,5 +1,5 @@
 resource "random_string" "node_group_hash" {
-  length = 8
+  length = 4
   special = false
   lower = true
   upper = false

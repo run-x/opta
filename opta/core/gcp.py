@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 import google.auth.transport.requests
 from google.auth import default
@@ -6,6 +6,7 @@ from google.auth.credentials import Credentials
 from google.auth.exceptions import DefaultCredentialsError, GoogleAuthError
 from google.cloud import storage
 from google.cloud.exceptions import NotFound
+from googleapiclient import discovery
 
 from opta.exceptions import UserErrors
 from opta.utils import logger
@@ -61,3 +62,13 @@ class GCP:
         except NotFound:
             logger.warn(f"Did not find opta config {config_path} to delete")
         logger.info("Deleted opta config from gcs")
+
+    def get_current_zones(self, max_number: int = 3) -> List[str]:
+        credentials, project_id = self.get_credentials()
+        service = discovery.build("compute", "v1", credentials=credentials)
+        request = service.zones().list(
+            project=project_id,
+            filter=f'(region = "https://www.googleapis.com/compute/v1/projects/{project_id}/regions/{GCP(self.layer).region}")',
+        )
+        response: Dict = request.execute()
+        return sorted([x["name"] for x in response.get("items", [])])[:max_number]
