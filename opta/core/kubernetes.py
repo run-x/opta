@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, List, Optional, Set, Tuple
 
 import pytz
 from colored import attr, fg
-from kubernetes.client import ApiException, CoreV1Api, V1Event, V1Pod
+from kubernetes.client import ApiException, CoreV1Api, V1Event, V1ObjectReference, V1Pod
 from kubernetes.config import load_kube_config
 from kubernetes.watch import Watch
 
@@ -289,7 +289,7 @@ def tail_namespace_events(
         print(
             f"{fg(color_idx)}{event.last_timestamp} Namespace {layer.name} event: {event.message}{attr(0)}"
         )
-
+    deleted_pods = set()
     while True:
         try:
             for stream_obj in watch.stream(
@@ -297,6 +297,15 @@ def tail_namespace_events(
             ):
                 event = stream_obj["object"]
                 if event.last_timestamp > start_time:
+                    if "Deleted pod:" in event.message:
+                        deleted_pods.add(event.message.split(" ")[-1])
+                    involved_object: Optional[V1ObjectReference] = event.involved_object
+                    if (
+                        involved_object is not None
+                        and involved_object.kind == "Pod"
+                        and involved_object.name in deleted_pods
+                    ):
+                        continue
                     print(
                         f"{fg(color_idx)}{event.last_timestamp} Namespace {layer.name} event: {event.message}{attr(0)}"
                     )
