@@ -40,7 +40,7 @@ class GCP:
                 raise UserErrors(*e.args)
 
         # For some non-service account credentials, an access token is generated with
-        # an expiry time, so it has to be refreshed.
+        # an expiry time, which must be occasionally refreshed.
         if not cls.using_service_account():
             cls.credentials.refresh(google.auth.transport.requests.Request())
 
