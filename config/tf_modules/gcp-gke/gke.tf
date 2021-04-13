@@ -13,6 +13,7 @@
 resource "google_container_cluster" "primary" {
   name     = "opta-${var.layer_name}"
   location = data.google_client_config.current.region
+  node_locations = var.node_zone_names
 
   # We can't create a cluster with no node pool defined, but we want to only use
   # separately managed node pools. So we create the smallest possible default

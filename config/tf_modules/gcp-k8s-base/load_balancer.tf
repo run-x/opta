@@ -10,12 +10,11 @@ resource "google_compute_health_check" "healthcheck" {
   }
 }
 
-data "google_compute_zones" "zones" {}
 
 data "google_compute_network_endpoint_group" "http" {
-  count = length(data.google_compute_zones.zones.names)
+  count = length(var.zone_names)
   name = "opta-${var.layer_name}-http"
-  zone = data.google_compute_zones.zones.names[count.index]
+  zone = var.zone_names[count.index]
   depends_on = [
     helm_release.ingress-nginx
   ]
@@ -23,9 +22,9 @@ data "google_compute_network_endpoint_group" "http" {
 
 
 data "google_compute_network_endpoint_group" "https" {
-  count = length(data.google_compute_zones.zones.names)
+  count = length(var.zone_names)
   name = "opta-${var.layer_name}-https"
-  zone = data.google_compute_zones.zones.names[count.index]
+  zone = var.zone_names[count.index]
   depends_on = [
     helm_release.ingress-nginx
   ]

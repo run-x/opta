@@ -20,6 +20,10 @@ variable "gke_channel" {
   default = "REGULAR"
 }
 
+variable "node_zone_names" {
+  type = list(string)
+}
+
 data "google_secret_manager_secret_version" "kms_suffix" {
   secret = "opta-${var.layer_name}-kms-suffix"
 }

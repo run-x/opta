@@ -1,16 +1,16 @@
-name: jd-gcp-test-1
+name: jd-gcp-test-1-blah
 org_name: jd-opta
 providers:
   google:
     region: us-central1
-    project: jds-throwaway-1
+    project: jds-throwaway-1-310508
 modules:
   - type: gcp-base
   - type: gcp-dns
     domain: gcp-staging-1.runx.dev
     subdomains:
       - jd
-    delegated: true
+    delegated: false
   - type: gcp-gke
     max_nodes: 6
   - type: gcp-k8s-base

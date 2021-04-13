@@ -330,6 +330,7 @@ modules:
       gke_channel: optional
       vpc_self_link: str
       private_subnet_self_link: str
+      node_zone_names: optional
     outputs:
       k8s_endpoint:
         export: true
@@ -366,6 +367,7 @@ modules:
       hosted_zone_name: optional
       cert_self_link: optional
       delegated: optional
+      zone_names: optional
     outputs: {}
   gcp-postgres:
     location: gcp-postgres

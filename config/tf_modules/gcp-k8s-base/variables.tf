@@ -3,7 +3,7 @@ locals {
   container_ports = var.delegated ? { http: 80, https: 443 } : { http: 80, https: 443 }
   config = { ssl-redirect: false }
   annotations = var.delegated? "{\"exposed_ports\": {\"80\":{\"name\": \"opta-${var.layer_name}-http\"}, \"443\":{\"name\": \"opta-${var.layer_name}-https\"}}}" : "{\"exposed_ports\": {\"80\":{\"name\": \"opta-${var.layer_name}-http\"}}}"
-  negs = var.delegated ? compact(concat(data.google_compute_network_endpoint_group.http.*.id, data.google_compute_network_endpoint_group.https.*.id))  : compact(data.google_compute_network_endpoint_group.http.*.id)
+  negs = var.delegated ? concat(data.google_compute_network_endpoint_group.http.*.id, data.google_compute_network_endpoint_group.https.*.id)  : data.google_compute_network_endpoint_group.http.*.id
 }
 
 data "google_client_config" "current" {}
@@ -49,4 +49,9 @@ variable "cert_self_link" {
 variable "hosted_zone_name" {
   type = string
   default = null
+}
+
+variable "zone_names" {
+  type = list(string)
+  default = []
 }

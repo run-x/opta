@@ -8,6 +8,7 @@ import boto3
 from botocore.config import Config
 from botocore.exceptions import ClientError
 from google.api_core.exceptions import ClientError as GoogleClientError
+from google.api_core.exceptions import Conflict
 from google.cloud import storage
 from google.cloud.exceptions import NotFound
 from googleapiclient import discovery
@@ -367,8 +368,14 @@ class Terraform:
                     f"{e.message}"
                 )
             logger.info("GCS bucket for terraform state not found, creating a new one")
-
-            gcs_client.create_bucket(bucket_name, location=region)
+            try:
+                gcs_client.create_bucket(bucket_name, location=region)
+            except Conflict:
+                raise UserErrors(
+                    f"It looks like a gcs bucket with the name {bucket_name} was created recently, but then deleted "
+                    "and Google keeps hold of gcs bucket names for 30 days after deletion-- pls wait until the end of "
+                    "that time or change your environment name slightly."
+                )
 
         # Enable the APIs
         credentials = GoogleCredentials.get_application_default()

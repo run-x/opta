@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 
+from opta.core.gcp import GCP
 from opta.module_processors.base import GcpK8sModuleProcessor
 
 if TYPE_CHECKING:
@@ -31,4 +32,5 @@ class GcpK8sBaseProcessor(GcpK8sModuleProcessor):
             self.module.data[
                 "delegated"
             ] = f"${{{{module.{gcp_dns_module.name}.delegated}}}}"
+        self.module.data["zone_names"] = GCP(self.layer).get_current_zones()
         super(GcpK8sBaseProcessor, self).process(module_idx)
