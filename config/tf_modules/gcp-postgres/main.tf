@@ -43,4 +43,6 @@ resource "google_sql_user" "root" {
   instance = google_sql_database_instance.instance.name
   name     = "postgres"
   password = random_password.root_auth.result
+
+  deletion_policy = "ABANDON"
 }
