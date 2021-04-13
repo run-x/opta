@@ -66,6 +66,12 @@ class Module:
                     )
         if depends_on is not None:
             module_blk["module"][self.name]["depends_on"] = depends_on
+
+        # If there are no outputs, don't set the output key. Terraform doesn't like an
+        # empty output block.
+        if module_blk["output"] == {}:
+            del module_blk["output"]
+
         return module_blk
 
     # Generate an override file in the module, that adds extra tags to every resource.
