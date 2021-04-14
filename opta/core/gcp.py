@@ -103,7 +103,9 @@ class GCP:
 
     def get_current_zones(self, max_number: int = 3) -> List[str]:
         credentials, project_id = self.get_credentials()
-        service = discovery.build("compute", "v1", credentials=credentials, static_discovery=False)
+        service = discovery.build(
+            "compute", "v1", credentials=credentials, static_discovery=False
+        )
         request = service.zones().list(
             project=project_id,
             filter=f'(region = "https://www.googleapis.com/compute/v1/projects/{project_id}/regions/{GCP(self.layer).region}")',
