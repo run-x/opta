@@ -280,14 +280,16 @@ def tail_namespace_events(
         start_time = datetime.datetime.now(pytz.utc) - datetime.timedelta(seconds=seconds)
     old_events: List[V1Event] = v1.list_namespaced_event(namespace=layer.name).items
     # Filter by time
-    old_events = list(filter(lambda x: x.last_timestamp > start_time, old_events))
+    old_events = list(
+        filter(lambda x: (x.last_timestamp or x.event_time) > start_time, old_events,)
+    )
     # Sort by timestamp
-    old_events = sorted(old_events, key=lambda x: x.last_timestamp)
+    old_events = sorted(old_events, key=lambda x: (x.last_timestamp or x.event_time))
     event: V1Event
     for event in old_events:
-        start_time = event.last_timestamp
+        start_time = event.last_timestamp or event.event_time
         print(
-            f"{fg(color_idx)}{event.last_timestamp} Namespace {layer.name} event: {event.message}{attr(0)}"
+            f"{fg(color_idx)}{event.last_timestamp or event.event_time} Namespace {layer.name} event: {event.message}{attr(0)}"
         )
     deleted_pods = set()
     while True:
@@ -296,7 +298,7 @@ def tail_namespace_events(
                 v1.list_namespaced_event, namespace=layer.name,
             ):
                 event = stream_obj["object"]
-                if event.last_timestamp > start_time:
+                if (event.last_timestamp or event.event_time) > start_time:
                     if "Deleted pod:" in event.message:
                         deleted_pods.add(event.message.split(" ")[-1])
                     involved_object: Optional[V1ObjectReference] = event.involved_object
@@ -307,7 +309,7 @@ def tail_namespace_events(
                     ):
                         continue
                     print(
-                        f"{fg(color_idx)}{event.last_timestamp} Namespace {layer.name} event: {event.message}{attr(0)}"
+                        f"{fg(color_idx)}{event.last_timestamp or event.event_time} Namespace {layer.name} event: {event.message}{attr(0)}"
                     )
         except ApiException as e:
             if retry_count < 5:
