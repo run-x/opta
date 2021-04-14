@@ -100,7 +100,7 @@ jobs:
           cd test-service
           python ../opta/cli.py apply --env staging --test
       - name: Configure GCP credentials
-        uses: GoogleCloudPlatform/github-actions/setup-gcloud@0.1.3
+        uses: GoogleCloudPlatform/github-actions/setup-gcloud@v0.2.1
         with:
           service_account_key: ${{ secrets.CI_GKE_SA_KEY }}
           project_id: gcpoptatest123
