@@ -59,7 +59,7 @@ resource "helm_release" "ingress-nginx" {
         service: {
           loadBalancerSourceRanges: ["0.0.0.0/0"]
           externalTrafficPolicy: "Local"
-          enableHttps: false
+          enableHttps: var.delegated ? true : false
           targetPorts: local.target_ports
           annotations: {
             "cloud.google.com/neg": local.annotations

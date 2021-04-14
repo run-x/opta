@@ -3,7 +3,9 @@ locals {
   container_ports = var.delegated ? { http: 80, https: 443 } : { http: 80, https: 443 }
   config = { ssl-redirect: false }
   annotations = var.delegated? "{\"exposed_ports\": {\"80\":{\"name\": \"opta-${var.layer_name}-http\"}, \"443\":{\"name\": \"opta-${var.layer_name}-https\"}}}" : "{\"exposed_ports\": {\"80\":{\"name\": \"opta-${var.layer_name}-http\"}}}"
-  negs = var.delegated ? concat(data.google_compute_network_endpoint_group.http.*.id, data.google_compute_network_endpoint_group.https.*.id)  : data.google_compute_network_endpoint_group.http.*.id
+  negs = var.delegated ? concat(local.http_delegated_negs, local.https_delegated_negs) : local.http_delegated_negs
+  http_delegated_negs = formatlist("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/networkEndpointGroups/opta-staging-http", data.google_client_config.current.project, var.zone_names)
+  https_delegated_negs = formatlist("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/networkEndpointGroups/opta-staging-https", data.google_client_config.current.project, var.zone_names)
 }
 
 data "google_client_config" "current" {}

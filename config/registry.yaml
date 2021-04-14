@@ -353,7 +353,7 @@ modules:
       provider:
         helm:
           kubernetes:
-            host: "${{{module_source}.k8s_endpoint}}"
+            host: "${{data.google_container_cluster.k8s.endpoint}}"
             token: "${{data.google_client_config.provider.access_token}}"
             cluster_ca_certificate: "${{base64decode({module_source}.k8s_ca_data)}}"
   gcp-k8s-base:
