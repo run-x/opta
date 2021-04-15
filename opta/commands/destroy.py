@@ -29,9 +29,9 @@ def destroy(config: str, env: Optional[str], auto_approve: bool) -> None:
     """Destroy all opta resources from the current config"""
     amplitude_client.send_event(amplitude_client.DESTROY_EVENT)
     layer = Layer.load_from_yaml(config, env)
-    if not Terraform.verify_storage(layer):
+    if not Terraform.download_state(layer):
         logger.info(
-            "State storage not found. This is expected if destroy ran successfully before."
+            "The opta state could not be found. This happens if destroy ran successfully before."
         )
         return
 

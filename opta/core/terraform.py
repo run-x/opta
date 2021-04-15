@@ -20,7 +20,7 @@ from opta.core.aws import AWS, get_aws_resource_id
 from opta.core.gcp import GCP
 from opta.exceptions import UserErrors
 from opta.nice_subprocess import nice_run
-from opta.utils import deep_merge, logger
+from opta.utils import deep_merge, fmt_msg, logger
 
 if TYPE_CHECKING:
     from opta.layer import Layer
@@ -217,7 +217,7 @@ class Terraform:
         try:
             s3.get_bucket_encryption(Bucket=bucket,)
         except ClientError as e:
-            if e.response["Error"]["Code"] != "NoSuchBucket":
+            if e.response["Error"]["Code"] == "NoSuchBucket":
                 return False
             raise e
         return True
@@ -272,6 +272,18 @@ class Terraform:
 
     @classmethod
     def download_state(cls, layer: "Layer") -> bool:
+        if not cls.verify_storage(layer):
+            logger.info(
+                fmt_msg(
+                    """
+                    We store state in S3/GCP buckets. Since the state bucket was not found,
+                    this probably means that you either haven't created your opta resources yet,
+                    or you previously successfully destroyed your opta resources (including the state bucket).
+                    """
+                )
+            )
+            return False
+
         state_file: str = "./terraform.tfstate"
         providers = layer.gen_providers(0)
         if "s3" in providers.get("terraform", {}).get("backend", {}):
