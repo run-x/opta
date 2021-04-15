@@ -230,15 +230,15 @@ def tail_pod_log(
                 since_seconds=seconds,
             ):
                 print(f"{fg(color_idx)}{pod.metadata.name} {logline}{attr(0)}")
-        except ApiException as e:
-            if e.status == 404:
-                print(
-                    f"{fg(color_idx)}Server {pod.metadata.name} has been terminated{attr(0)}"
-                )
-            else:
-                raise
         except Exception as e:
-            if retry_count < 10:
+            if type(e) == ApiException:
+                if e.status == 404:  # type: ignore
+                    print(
+                        f"{fg(color_idx)}Server {pod.metadata.name} has been terminated{attr(0)}"
+                    )
+                    return
+
+            if retry_count < 5:
                 print(
                     f"{fg(color_idx)}Couldn't get logs, waiting a bit and retrying{attr(0)}"
                 )
