@@ -106,6 +106,7 @@ def test_valid_input(mocker: MockFixture) -> None:
                     "--password-stdin",
                 ],
                 input=b"password",
+                check=True,
             ),
             mocker.call(
                 [
@@ -113,9 +114,12 @@ def test_valid_input(mocker: MockFixture) -> None:
                     "tag",
                     "local_image:local_tag",
                     f"{REGISTRY_URL}:image_tag_override",
-                ]
+                ],
+                check=True,
             ),
-            mocker.call(["docker", "push", f"{REGISTRY_URL}:image_tag_override"]),
+            mocker.call(
+                ["docker", "push", f"{REGISTRY_URL}:image_tag_override"], check=True
+            ),
         ]
     )
 
@@ -176,6 +180,7 @@ def test_no_tag_override(mocker: MockFixture) -> None:
                     "--password-stdin",
                 ],
                 input=b"password",
+                check=True,
             ),
             mocker.call(
                 [
@@ -183,7 +188,8 @@ def test_no_tag_override(mocker: MockFixture) -> None:
                     "tag",
                     "local_image:local_tag",
                     "889760294590.dkr.ecr.us-east-1.amazonaws.com/github-runx-app:local_tag",
-                ]
+                ],
+                check=True,
             ),
         ]
     )
@@ -225,6 +231,7 @@ def test_with_tag_override(mocker: MockFixture) -> None:
                     "--password-stdin",
                 ],
                 input=b"password",
+                check=True,
             ),
             mocker.call(
                 [
@@ -232,14 +239,16 @@ def test_with_tag_override(mocker: MockFixture) -> None:
                     "tag",
                     "local_image:local_tag",
                     "889760294590.dkr.ecr.us-east-1.amazonaws.com/github-runx-app:tag-override",
-                ]
+                ],
+                check=True,
             ),
             mocker.call(
                 [
                     "docker",
                     "push",
                     "889760294590.dkr.ecr.us-east-1.amazonaws.com/github-runx-app:tag-override",
-                ]
+                ],
+                check=True,
             ),
         ]
     )
