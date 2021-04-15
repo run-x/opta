@@ -31,7 +31,7 @@ def destroy(config: str, env: Optional[str], auto_approve: bool) -> None:
     layer = Layer.load_from_yaml(config, env)
     if not Terraform.download_state(layer):
         logger.info(
-            "The opta state could not be found. This happens if destroy ran successfully before."
+            "The opta state could not be found. This may happen if destroy ran successfully before."
         )
         return
 
