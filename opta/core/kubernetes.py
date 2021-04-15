@@ -243,13 +243,15 @@ def tail_pod_log(
                 since_seconds=seconds,
             ):
                 print(f"{fg(color_idx)}{pod.metadata.name} {logline}{attr(0)}")
-        except ApiException as e:
-            if e.status == 404:
-                print(
-                    f"{fg(color_idx)}Server {pod.metadata.name} has been terminated{attr(0)}"
-                )
-                return
-            elif retry_count < 10:
+        except Exception as e:
+            if type(e) == ApiException:
+                if e.status == 404:  # type: ignore
+                    print(
+                        f"{fg(color_idx)}Server {pod.metadata.name} has been terminated{attr(0)}"
+                    )
+                    return
+
+            if retry_count < 5:
                 print(
                     f"{fg(color_idx)}Couldn't get logs, waiting a bit and retrying{attr(0)}"
                 )
@@ -260,11 +262,6 @@ def tail_pod_log(
                     f"Got the following error while trying to fetch the logs for pod {pod.metadata.name} in namespace {namespace}: {e}"
                 )
                 return
-        except Exception as e:
-            logger.error(
-                f"Got the following error while trying to fetch the logs for pod {pod.metadata.name} in namespace {namespace}: {e}"
-            )
-            return
 
 
 def tail_namespace_events(
