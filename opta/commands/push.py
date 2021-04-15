@@ -77,9 +77,10 @@ def push_to_docker(
     nice_run(
         ["docker", "login", registry_url, "--username", username, "--password-stdin"],
         input=password.encode(),
+        check=True,
     )
-    nice_run(["docker", "tag", local_image, remote_image_name])
-    nice_run(["docker", "push", remote_image_name])
+    nice_run(["docker", "tag", local_image, remote_image_name], check=True)
+    nice_run(["docker", "push", remote_image_name], check=True)
 
 
 # Check if the config file is for a service or environment opta layer.
