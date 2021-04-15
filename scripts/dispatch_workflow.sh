@@ -1,10 +1,11 @@
 set -euo
 
+repo="$1"
 # Filename of the triggered workflow.
-workflow="$1"
+workflow="$2"
 
 get_latest_build_data() {
-  latest_build=$(curl -X GET "https://api.github.com/repos/run-x/runxc/actions/workflows/${workflow}/runs" \
+  latest_build=$(curl -X GET "https://api.github.com/repos/run-x/${repo}/actions/workflows/${workflow}/runs" \
   -H 'Accept: application/vnd.github.antiope-preview+json' \
   -H "Authorization: Bearer ${github_token}" | jq '[.workflow_runs[]] | first')
   echo "$latest_build"
@@ -14,7 +15,7 @@ previous_build=$(get_latest_build_data)
 previous_build_id=$(echo $previous_build | jq '.id')
 
 # Trigger new workflow build
-curl -X POST "https://api.github.com/repos/run-x/runxc/actions/workflows/${workflow}/dispatches" \
+curl -X POST "https://api.github.com/repos/run-x/${repo}/actions/workflows/${workflow}/dispatches" \
 -H "Accept: application/vnd.github.v3+json" \
 -H "Content-Type: application/json" \
 -H "Authorization: Bearer ${github_token}" \
