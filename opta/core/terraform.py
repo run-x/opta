@@ -277,8 +277,8 @@ class Terraform:
                 fmt_msg(
                     """
                     We store state in S3/GCP buckets. Since the state bucket was not found,
-                    this probably means that you either haven't created your opta resources yet,
-                    or you previously successfully destroyed your opta resources (including the state bucket).
+                    ~this probably means that you either haven't created your opta resources yet,
+                    ~or you previously successfully destroyed your opta resources (including the state bucket).
                     """
                 )
             )
