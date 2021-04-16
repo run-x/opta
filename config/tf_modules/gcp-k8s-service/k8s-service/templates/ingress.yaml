@@ -19,7 +19,9 @@ metadata:
     {{- end }}
 spec:
   rules:
-    - host: {{ .Values.domain }}
+    - {{ if not (eq .Values.domain "all" ) }}
+      host: {{ .Values.domain }}
+      {{ end }}
       http:
         paths:
           - path: {{ .Values.pathPrefix }}{{ if not (eq .Values.pathPrefix "/") }}(/|$)(.*){{ end }}
