@@ -43,7 +43,7 @@ class Terraform:
                 raise UserErrors(
                     "Could not fetch remote terraform state, assuming no resources exist yet."
                 )
-        state = cls.get_state()
+        state = cls.get_state(layer)
         outputs = state.get("outputs", {})
         cleaned_outputs = {}
         for k, v in outputs.items():
@@ -52,8 +52,11 @@ class Terraform:
 
     # Get the full terraform state.
     @classmethod
-    def get_state(cls) -> dict:
-        for state_file in ["./terraform.tfstate", "terraform.tfstate.backup"]:
+    def get_state(cls, layer: "Layer") -> dict:
+        for state_file in [
+            f"./{layer.name}.terraform.tfstate",
+            f"./{layer.name}.terraform.tfstate.backup",
+        ]:
             with open(state_file, "r") as file:
                 raw_state = file.read().replace("\n", "")
             if raw_state != "":
@@ -249,7 +252,7 @@ class Terraform:
                     "Could not fetch remote terraform state, assuming no resources exist yet."
                 )
                 return []
-        state = cls.get_state()
+        state = cls.get_state(layer)
         resources = state.get("resources", [])
         module_resources: List[str] = []
         resource: dict
@@ -272,7 +275,7 @@ class Terraform:
 
     @classmethod
     def download_state(cls, layer: "Layer") -> bool:
-        state_file: str = "./terraform.tfstate"
+        state_file: str = f"./{layer.name}.terraform.tfstate"
         providers = layer.gen_providers(0)
         if "s3" in providers.get("terraform", {}).get("backend", {}):
             bucket = providers["terraform"]["backend"]["s3"]["bucket"]
@@ -526,47 +529,24 @@ class Terraform:
             cls._create_gcp_state_storage(providers)
 
 
-def get_terraform_outputs(layer: "Layer", pull_state: bool = True) -> dict:
+def get_terraform_outputs(layer: "Layer") -> dict:
     """ Fetch terraform outputs from existing TF file """
-    if not pull_state:
-        Terraform.init()
     current_outputs = Terraform.get_outputs(layer)
-    parent_outputs = _fetch_parent_outputs(pull_state)
-    return deep_merge(current_outputs, parent_outputs)
 
+    if layer.parent is None:
+        return current_outputs
 
-def _fetch_parent_outputs(pull_state: bool = True) -> dict:
-    # Fetch the terraform state
-    state = Terraform.get_state()
+    parent_outputs = Terraform.get_outputs(layer.parent)
+    prefixed_parent_outputs = {}
+    for k, v in parent_outputs.items():
+        prefixed_parent_outputs[f"parent.{k}"] = v
 
-    # Fetch any parent remote states
-    resources = state.get("resources", [])
-    parent_states = [
-        resource
-        for resource in resources
-        if resource.get("type") == "terraform_remote_state"
-    ]
-
-    # Grab all outputs from each remote state and save it.
-    parent_state_outputs = {}
-    for parent in parent_states:
-        parent_outputs = (
-            parent["instances"][0]
-            .get("attributes", {})
-            .get("outputs", {})
-            .get("value", {})
-        )
-        for k, v in parent_outputs.items():
-            parent_name = parent.get("name")
-            output_name = f"{parent_name}.{k}"
-            parent_state_outputs[output_name] = v
-
-    return parent_state_outputs
+    return deep_merge(prefixed_parent_outputs, current_outputs)
 
 
 def fetch_terraform_state_resources(layer: "Layer") -> dict:
     Terraform.download_state(layer)
-    state = Terraform.get_state()
+    state = Terraform.get_state(layer)
 
     resources = state.get("resources", [])
 
