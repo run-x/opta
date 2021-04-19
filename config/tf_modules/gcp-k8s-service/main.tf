@@ -35,8 +35,7 @@ resource "helm_release" "k8s-service" {
       readinessProbePath: var.healthcheck_path == null || var.readiness_probe_path != "/healthcheck"? var.readiness_probe_path : var.healthcheck_path,
       envVars: var.env_vars,
       secrets: var.secrets,
-      domain: local.domain,
-      pathPrefix: local.path_prefix,
+      uriComponents: local.uri_components,
       layerName: var.layer_name,
       moduleName: var.module_name
       googleServiceAccount: google_service_account.k8s_service.email

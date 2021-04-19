@@ -33,6 +33,9 @@ class GcpK8sServiceProcessor(GcpK8sModuleProcessor):
                 raise Exception("Secret must be string or dict")
         self.module.data["secrets"] = transformed_secrets
 
+        if isinstance(self.module.data.get("public_uri"), str):
+            self.module.data["public_uri"] = [self.module.data["public_uri"]]
+
         # Handle links
         for link_data in self.module.data.get("links", []):
             if type(link_data) is str:

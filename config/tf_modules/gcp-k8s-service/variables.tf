@@ -3,9 +3,10 @@ data "google_client_config" "current" {}
 
 
 locals {
-  public_uri_parts = split("/", var.public_uri)
-  domain = var.domain == ""? trim(local.public_uri_parts[0], ".") : trim(var.domain, ".")
-  path_prefix = length(local.public_uri_parts) > 1 ? "/${join("/",slice(local.public_uri_parts, 1, length(local.public_uri_parts)))}" : "/"
+  uri_components = [for s in var.public_uri: {
+    domain: split("/", s)[0],
+    pathPrefix: (length(split("/", s)) > 1 ? "/${join("/",slice(split("/", s), 1, length(split("/", s))))}" : "/")
+  }]
 }
 
 variable "env_name" {
@@ -96,8 +97,8 @@ variable "env_vars" {
 }
 
 variable "public_uri" {
-  type = string
-  default = ""
+  type = list(string)
+  default = []
 }
 
 variable "domain" {
