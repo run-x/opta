@@ -1,11 +1,9 @@
 data "aws_caller_identity" "current" {}
 
 locals {
-  domains = [for s in var.public_uri : split("/", s)[0]]
-  path_prefixes = [for s in var.public_uri : (length(split("/", s)) > 1 ? "/${join("/",slice(split("/", s), 1, length(split("/", s))))}" : "/")]
-  uri_components = [for i in range(length(var.public_uri)): {
-    domain: local.domains[i],
-    pathPrefix: local.path_prefixes[i]
+  uri_components = [for s in var.public_uri: {
+    domain: split("/", s)[0],
+    pathPrefix: (length(split("/", s)) > 1 ? "/${join("/",slice(split("/", s), 1, length(split("/", s))))}" : "/")
   }]
 }
 
