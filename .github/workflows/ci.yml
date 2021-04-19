@@ -119,7 +119,8 @@ jobs:
           python ../opta/cli.py apply --config opta-gcp.yml --env staging --test
 
   deploy_test_service:
-    # if: ${{ github.ref == 'refs/heads/main' }}
+    if: ${{ github.ref == 'refs/heads/main' }}
+    needs: test_cli
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
