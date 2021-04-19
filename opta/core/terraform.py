@@ -545,7 +545,12 @@ def get_terraform_outputs(layer: "Layer") -> dict:
 
 
 def fetch_terraform_state_resources(layer: "Layer") -> dict:
-    Terraform.download_state(layer)
+    success = Terraform.download_state(layer)
+    if not success:
+        raise UserErrors(
+            "Could not fetch remote terraform state, assuming no resources exist yet."
+        )
+
     state = Terraform.get_state(layer)
 
     resources = state.get("resources", [])

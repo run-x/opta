@@ -20,5 +20,6 @@ def cleanup_files() -> None:
         shutil.rmtree(TF_DIR)
 
     for f in os.listdir("."):
-        if os.path.isfile(f) and f.startswith("tmp.opta."):
-            os.remove(f)
+        if os.path.isfile(f):
+            if f.startswith("tmp.opta.") or f.endswith("terraform.tfstate"):
+                os.remove(f)

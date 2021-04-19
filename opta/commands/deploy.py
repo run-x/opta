@@ -1,3 +1,4 @@
+import re
 from typing import Optional
 
 import click
@@ -5,7 +6,7 @@ import click
 from opta.amplitude import amplitude_client
 from opta.commands.apply import _apply
 from opta.commands.push import _push, get_push_tag, is_service_config
-from opta.core.terraform import Terraform
+from opta.core.terraform import fetch_terraform_state_resources
 from opta.exceptions import UserErrors
 from opta.layer import Layer
 from opta.utils import fmt_msg, logger
@@ -50,16 +51,22 @@ def deploy(
 
     amplitude_client.send_event(amplitude_client.DEPLOY_EVENT)
     layer = Layer.load_from_yaml(config, env)
+
+    print("hello there")
     try:
-        outputs = Terraform.get_outputs(layer)
+        state = fetch_terraform_state_resources(layer)
     except UserErrors as e:
         if (
             str(e)
             != "Could not fetch remote terraform state, assuming no resources exist yet."
         ):
             raise
-        outputs = {}
-    if "docker_repo_url" not in outputs:
+        state = {}
+
+    ecr_repo_pattern = re.compile(r"^module\..+\.aws_ecr_repository\.repo")
+    ecr_repo = list(filter(ecr_repo_pattern.match, state.keys()))
+    print("this happen", ecr_repo)
+    if len(ecr_repo) == 0:
         logger.info(
             "Did not find docker repository in state, so applying once to create it before deployment"
         )
