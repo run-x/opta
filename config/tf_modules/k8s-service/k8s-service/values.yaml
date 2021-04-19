@@ -1,7 +1,6 @@
 nameOverride: ""
 fullnameOverride: ""
-domain: ""
-pathPrefix: "/"
+uriComponents: []
 iamRoleArn: ""
 envVars: []
 secrets: []

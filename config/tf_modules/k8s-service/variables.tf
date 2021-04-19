@@ -1,9 +1,12 @@
 data "aws_caller_identity" "current" {}
 
 locals {
-  public_uri_parts = split("/", var.public_uri)
-  domain = var.domain == ""? local.public_uri_parts[0] : var.domain
-  path_prefix = length(local.public_uri_parts) > 1 ? "/${join("/",slice(local.public_uri_parts, 1, length(local.public_uri_parts)))}" : "/"
+  domains = [for s in var.public_uri : split("/", s)[0]]
+  path_prefixes = [for s in var.public_uri : (length(split("/", s)) > 1 ? "/${join("/",slice(split("/", s), 1, length(split("/", s))))}" : "/")]
+  uri_components = [for i in range(length(var.public_uri)): {
+    domain: local.domains[i],
+    pathPrefix: local.path_prefixes[i]
+  }]
 }
 
 variable "openid_provider_url" {
@@ -103,8 +106,8 @@ variable "env_vars" {
 }
 
 variable "public_uri" {
-  type = string
-  default = ""
+  type = list(string)
+  default = []
 }
 
 variable "domain" {
