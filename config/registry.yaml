@@ -368,7 +368,9 @@ modules:
       cert_self_link: optional
       delegated: optional
       zone_names: optional
-    outputs: {}
+    outputs:
+      load_balancer_raw_ip:
+        export: true
   gcp-postgres:
     location: gcp-postgres
     variables:
