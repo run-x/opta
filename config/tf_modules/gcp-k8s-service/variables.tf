@@ -4,7 +4,7 @@ data "google_client_config" "current" {}
 
 locals {
   uri_components = [for s in var.public_uri: {
-    domain: split("/", s)[0],
+    domain: trim(split("/", s)[0], "."),
     pathPrefix: (length(split("/", s)) > 1 ? "/${join("/",slice(split("/", s), 1, length(split("/", s))))}" : "/")
   }]
 }
