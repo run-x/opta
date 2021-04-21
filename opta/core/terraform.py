@@ -350,7 +350,7 @@ class Terraform:
                 f"We got {project_name} as the project name in opta, but {project_id} in the google credentials"
             )
         gcs_client = storage.Client(project=project_id, credentials=credentials)
-
+        bucket_project_number = "blah"
         try:
             bucket = gcs_client.get_bucket(bucket_name)
             bucket_project_number = bucket.project_number
@@ -422,11 +422,15 @@ class Terraform:
         )
         request = service.projects().get(projectId=project_id)
         response = request.execute()
-        if response["projectNumber"] != bucket_project_number:
+
+        if response["projectNumber"] != str(bucket_project_number):
             raise UserErrors(
                 f"State storage bucket {bucket_name}, has already been created, but it was created in another project. "
+                f"Current project's number {response['projectNumber']}. Bucket's project number: {bucket_project_number}. "
                 "You do, however, have access to view that bucket, so it sounds like you already run this opta apply in "
                 "your org, but on a different project."
+                "Note: project number is NOT project id. It is yet another globally unique identifier for your project "
+                "I kid you not, go ahead and look it up."
             )
 
     @classmethod
