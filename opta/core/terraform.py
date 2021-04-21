@@ -350,7 +350,6 @@ class Terraform:
                 f"We got {project_name} as the project name in opta, but {project_id} in the google credentials"
             )
         gcs_client = storage.Client(project=project_id, credentials=credentials)
-        bucket_project_number = "blah"
         try:
             bucket = gcs_client.get_bucket(bucket_name)
             bucket_project_number = bucket.project_number
@@ -370,7 +369,8 @@ class Terraform:
                 )
             logger.info("GCS bucket for terraform state not found, creating a new one")
             try:
-                gcs_client.create_bucket(bucket_name, location=region)
+                bucket = gcs_client.create_bucket(bucket_name, location=region)
+                bucket_project_number = bucket.project_number
             except Conflict:
                 raise UserErrors(
                     f"It looks like a gcs bucket with the name {bucket_name} was created recently, but then deleted "

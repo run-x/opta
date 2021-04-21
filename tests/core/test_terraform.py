@@ -277,6 +277,9 @@ class TestTerraform:
         get_bucket_error = GoogleClientError(message="blah")
         get_bucket_error.code = 404
         mocked_storage_client.get_bucket.side_effect = get_bucket_error
+        mocked_bucket = mocker.Mock()
+        mocked_bucket.project_number = "123"
+        mocked_storage_client.create_bucket.return_value = mocked_bucket
 
         mocked_google_credentials = mocker.patch("opta.core.terraform.GoogleCredentials")
         mocked_api_credentials = mocker.Mock()
@@ -285,7 +288,8 @@ class TestTerraform:
         )
         mocked_discovery = mocker.patch("opta.core.terraform.discovery")
         mocked_service = mocker.Mock()
-        mocked_discovery.build.return_value = mocked_service
+        mocked_cloudresourcemanager = mocker.Mock()
+        mocked_discovery.build.side_effect = [mocked_service, mocked_cloudresourcemanager]
         mocked_service_services = mocker.Mock()
         mocked_service.services.return_value = mocked_service_services
         mocked_request = mocker.Mock()
@@ -293,6 +297,19 @@ class TestTerraform:
         mocked_response: dict = {}
         mocked_request.execute.return_value = mocked_response
         mocked_sleep = mocker.patch("opta.core.terraform.time.sleep")
+
+        mocked_cloudresourcemanager_projects = mocker.Mock()
+        mocked_cloudresourcemanager.projects.return_value = (
+            mocked_cloudresourcemanager_projects
+        )
+        mocked_cloudresourcemanager_request = mocker.Mock()
+        mocked_cloudresourcemanager_projects.get.return_value = (
+            mocked_cloudresourcemanager_request
+        )
+        mocked_cloudresourcemanager_response: dict = {"projectNumber": "123"}
+        mocked_cloudresourcemanager_request.execute.return_value = (
+            mocked_cloudresourcemanager_response
+        )
 
         Terraform.create_state_storage(layer)
         mocked_gcp.get_credentials.assert_called_once_with()
@@ -306,11 +323,21 @@ class TestTerraform:
             "opta-tf-state-test-dev1", location="us-central1"
         )
         mocked_google_credentials.get_application_default.assert_called_once_with()
-        mocked_discovery.build.assert_called_once_with(
-            "serviceusage",
-            "v1",
-            credentials=mocked_api_credentials,
-            static_discovery=False,
+        mocked_discovery.build.assert_has_calls(
+            [
+                mocker.call(
+                    "serviceusage",
+                    "v1",
+                    credentials=mocked_api_credentials,
+                    static_discovery=False,
+                ),
+                mocker.call(
+                    "cloudresourcemanager",
+                    "v1",
+                    credentials=mocked_api_credentials,
+                    static_discovery=False,
+                ),
+            ]
         )
         mocked_sleep.assert_called_once_with(120)
 
