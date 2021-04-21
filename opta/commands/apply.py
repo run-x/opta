@@ -151,30 +151,29 @@ def _apply(
                     abort=True,
                 )
             logger.info("Applying your changes (might take a minute)")
-            if image_tag is not None:
-                service_modules = (
-                    layer.get_module_by_type("k8s-service", module_idx)
-                    if layer.cloud == "aws"
-                    else layer.get_module_by_type("gcp-k8s-service", module_idx)
+            service_modules = (
+                layer.get_module_by_type("k8s-service", module_idx)
+                if layer.cloud == "aws"
+                else layer.get_module_by_type("gcp-k8s-service", module_idx)
+            )
+            if len(service_modules) != 0:
+                configure_kubectl(layer)
+                service_module = service_modules[0]
+                # Tailing logs
+                logger.info(
+                    f"Identified deployment for kubernetes service module {service_module.name}, tailing logs now."
                 )
-                if len(service_modules) != 0:
-                    configure_kubectl(layer)
-                    service_module = service_modules[0]
-                    # Tailing logs
-                    logger.info(
-                        f"Identified deployment for kubernetes service module {service_module.name}, tailing logs now."
-                    )
-                    new_thread = Thread(
-                        target=tail_module_log,
-                        args=(layer, service_module.name, 10, 2),
-                        daemon=True,
-                    )
-                    # Tailing events
-                    new_thread.start()
-                    new_thread = Thread(
-                        target=tail_namespace_events, args=(layer, 0, 1), daemon=True,
-                    )
-                    new_thread.start()
+                new_thread = Thread(
+                    target=tail_module_log,
+                    args=(layer, service_module.name, 10, 2),
+                    daemon=True,
+                )
+                # Tailing events
+                new_thread.start()
+                new_thread = Thread(
+                    target=tail_namespace_events, args=(layer, 0, 1), daemon=True,
+                )
+                new_thread.start()
 
             tf_flags: List[str] = []
             if auto_approve:

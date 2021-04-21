@@ -350,9 +350,9 @@ class Terraform:
                 f"We got {project_name} as the project name in opta, but {project_id} in the google credentials"
             )
         gcs_client = storage.Client(project=project_id, credentials=credentials)
-
         try:
-            gcs_client.get_bucket(bucket_name)
+            bucket = gcs_client.get_bucket(bucket_name)
+            bucket_project_number = bucket.project_number
         except GoogleClientError as e:
             if e.code == 403:
                 raise UserErrors(
@@ -369,7 +369,8 @@ class Terraform:
                 )
             logger.info("GCS bucket for terraform state not found, creating a new one")
             try:
-                gcs_client.create_bucket(bucket_name, location=region)
+                bucket = gcs_client.create_bucket(bucket_name, location=region)
+                bucket_project_number = bucket.project_number
             except Conflict:
                 raise UserErrors(
                     f"It looks like a gcs bucket with the name {bucket_name} was created recently, but then deleted "
@@ -393,6 +394,7 @@ class Terraform:
             "redis.googleapis.com",
             "compute.googleapis.com",
             "secretmanager.googleapis.com",
+            "cloudresourcemanager.googleapis.com",
         ]:
             request = service.services().enable(
                 name=f"projects/{project_name}/services/{service_name}"
@@ -415,6 +417,21 @@ class Terraform:
             time.sleep(120)
         else:
             logger.info("No new API found that needs to be enabled")
+        service = discovery.build(
+            "cloudresourcemanager", "v1", credentials=credentials, static_discovery=False,
+        )
+        request = service.projects().get(projectId=project_id)
+        response = request.execute()
+
+        if response["projectNumber"] != str(bucket_project_number):
+            raise UserErrors(
+                f"State storage bucket {bucket_name}, has already been created, but it was created in another project. "
+                f"Current project's number {response['projectNumber']}. Bucket's project number: {bucket_project_number}. "
+                "You do, however, have access to view that bucket, so it sounds like you already run this opta apply in "
+                "your org, but on a different project."
+                "Note: project number is NOT project id. It is yet another globally unique identifier for your project "
+                "I kid you not, go ahead and look it up."
+            )
 
     @classmethod
     def _create_aws_state_storage(cls, providers: dict) -> None:
