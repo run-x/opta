@@ -1,16 +1,17 @@
-name: jd-gcp-test-1-blah
-org_name: jd-opta
+name: gcp-live-example
+org_name: runx
 providers:
   google:
     region: us-central1
-    project: jds-throwaway-1-310508
+    project: gcp-opta-live-example
 modules:
+  - type: runx
   - type: gcp-base
   - type: gcp-dns
-    domain: gcp-staging-1.runx.dev
-    subdomains:
-      - jd
+    domain: gcp-example.runx.dev
     delegated: false
+    subdomains:
+      - subdomain1
   - type: gcp-gke
     max_nodes: 6
   - type: gcp-k8s-base

@@ -1,5 +1,6 @@
 import os
 import platform
+import sys
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional, Tuple
 
@@ -57,6 +58,7 @@ class RunxProcessor(ModuleProcessor):
                 "os_version": self.os_version,
                 "active_variables": self.layer.variables,
                 "module_idx": module_idx,
+                "argv": sys.argv[:],
             },
             "time": datetime.utcnow().isoformat(),
         }
