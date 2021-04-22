@@ -42,6 +42,8 @@ class Module:
         return bool(re.match(pattern, name))
 
     def gen_tf(self, depends_on: Optional[List[str]] = None) -> Dict[Any, Any]:
+        if self.module_dir_path == "":
+            return {}
         module_blk: Dict[Any, Any] = {
             "module": {self.name: {"source": self.module_dir_path}},
             "output": {},
@@ -97,11 +99,15 @@ class Module:
             override_config["resource"].append(
                 {resource.type: {resource.name: {"tags": resource_tags}}}
             )
+        if override_config["resource"] == []:
+            return
 
         with open(f"{self.module_dir_path}/{TAGS_OVERRIDE_FILE}", "w") as f:
             json.dump(override_config, f, ensure_ascii=False, indent=2)
 
     def translate_location(self, loc: str) -> str:
+        if loc == "":
+            return ""
         relative_path = os.path.relpath(
             os.path.join(
                 os.path.dirname(os.path.dirname(__file__)), "config", "tf_modules", loc
@@ -116,6 +122,8 @@ class Module:
 
     # Get the list of resources created by the current module.
     def get_terraform_resources(self) -> List[Resource]:
+        if self.module_dir_path == "":
+            return []
         tf_config = self._read_tf_module_config()
         terraform_resources: List[Resource] = []
         for _, tf_file_config in tf_config.items():
