@@ -452,3 +452,5 @@ modules:
         name: K8s Service
         desc: Secure and scalable Kubernetes service packaged into a helm chart
         url: https://app.datadoghq.com/apm/service/{k8s-moduleName}-{k8s-layerName}/
+  runx:
+    location: ""

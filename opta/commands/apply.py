@@ -10,7 +10,12 @@ from opta.constants import TF_PLAN_PATH
 from opta.core.aws import AWS
 from opta.core.gcp import GCP
 from opta.core.generator import gen, gen_opta_resource_tags
-from opta.core.kubernetes import configure_kubectl, tail_module_log, tail_namespace_events
+from opta.core.kubernetes import (
+    configure_kubectl,
+    get_cluster_name,
+    tail_module_log,
+    tail_namespace_events,
+)
 from opta.core.terraform import Terraform
 from opta.exceptions import UserErrors
 from opta.layer import Layer
@@ -156,7 +161,14 @@ def _apply(
                 if layer.cloud == "aws"
                 else layer.get_module_by_type("gcp-k8s-service", module_idx)
             )
-            if len(service_modules) != 0:
+            if (
+                len(service_modules) != 0
+                and (
+                    Terraform.downloaded_state.get(layer.name, False)
+                    or Terraform.download_state(layer)
+                )
+                and get_cluster_name(layer) is not None
+            ):
                 configure_kubectl(layer)
                 service_module = service_modules[0]
                 # Tailing logs
@@ -178,8 +190,13 @@ def _apply(
             tf_flags: List[str] = []
             if auto_approve:
                 tf_flags.append("-auto-approve")
-
-            Terraform.apply(layer, *tf_flags, TF_PLAN_PATH, no_init=True, quiet=False)
+            try:
+                Terraform.apply(layer, *tf_flags, TF_PLAN_PATH, no_init=True, quiet=False)
+            except Exception as e:
+                layer.post_hook(module_idx, e)
+                raise e
+            else:
+                layer.post_hook(module_idx, None)
             logger.info("Opta updates complete!")
 
 

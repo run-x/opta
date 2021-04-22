@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from opta.exceptions import UserErrors
 
@@ -20,6 +20,9 @@ class ModuleProcessor:
         self.module.data["env_name"] = self.layer.get_env()
         self.module.data["layer_name"] = self.layer.name
         self.module.data["module_name"] = self.module.name
+
+    def post_hook(self, module_idx: int, exception: Optional[Exception]) -> None:
+        pass
 
 
 class AWSK8sModuleProcessor(ModuleProcessor):

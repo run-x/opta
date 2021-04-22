@@ -3,11 +3,12 @@ environments:
     path: "../env/opta.yml"
     variables:
       max_nodes: 2
-name: jd-test-2
+name: service-1
 modules:
+  - type: runx
   - name: app
     type: k8s-service
-    image: AUTO 
+    image: kennethreitz/httpbin 
     min_containers: 2
     max_containers: "{vars.max_nodes}"
     liveness_probe_path: "/get"
@@ -18,8 +19,7 @@ modules:
       - name: A
         value: B
     public_uri:
-      - "jd.{parent.domain}"
-      - "jd2.{parent.domain}"
+    - "subdomain1.{parent.domain}"
     secrets:
       - API_KEY
       - SECRET_1

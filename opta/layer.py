@@ -23,6 +23,7 @@ from opta.module_processors.gcp_k8s_base import GcpK8sBaseProcessor
 from opta.module_processors.gcp_k8s_service import GcpK8sServiceProcessor
 from opta.module_processors.k8s_base import K8sBaseProcessor
 from opta.module_processors.k8s_service import K8sServiceProcessor
+from opta.module_processors.runx import RunxProcessor
 from opta.plugins.derived_providers import DerivedProviders
 from opta.utils import deep_merge, hydrate, logger
 
@@ -36,12 +37,14 @@ class Layer:
         modules_data: List[Any],
         parent: Optional[Layer] = None,
         variables: Optional[Dict[str, Any]] = None,
+        original_spec: str = "",
     ):
         if not Layer.valid_name(name):
             raise UserErrors(
                 "Invalid layer, can only contain letters, dashes and numbers!"
             )
         self.name = name
+        self.original_spec = original_spec
         self.parent = parent
         if parent is None and org_name is None:
             raise UserErrors("Config must have org name or a parent who has an org name")
@@ -99,7 +102,10 @@ class Layer:
         elif path.exists(config):
             logger.debug(f"Loaded the following configfile:\n{open(config).read()}")
             validate_yaml(config)
-            conf = yaml.load(open(config), Loader=yaml.Loader)
+            with open(config) as f:
+                config_string = f.read()
+            conf = yaml.load(config_string, Loader=yaml.Loader)
+            conf["orignal_spec"] = config_string
         else:
             raise UserErrors(f"File {config} not found")
 
@@ -110,6 +116,7 @@ class Layer:
     def load_from_dict(cls, conf: Dict[Any, Any], env: Optional[str]) -> Layer:
         modules_data = conf.get("modules", [])
         environments = conf.pop("environments", None)
+        original_spec = conf.pop("orignal_spec", "")
         name = conf.pop("name", None)
         if name is None:
             raise UserErrors("Config must have name")
@@ -147,9 +154,15 @@ class Layer:
             current_variables = env_meta.get("variables", {})
             current_variables = deep_merge(current_variables, env_meta.get("vars", {}))
             return cls(
-                name, org_name, providers, modules_data, current_parent, current_variables
+                name,
+                org_name,
+                providers,
+                modules_data,
+                current_parent,
+                current_variables,
+                original_spec,
             )
-        return cls(name, org_name, providers, modules_data)
+        return cls(name, org_name, providers, modules_data, original_spec=original_spec)
 
     @staticmethod
     def valid_name(name: str) -> bool:
@@ -205,6 +218,8 @@ class Layer:
                 GcpGkeProcessor(module, self).process(module_idx)
             elif module_type == "aws-dns":
                 AwsDnsProcessor(module, self).process(module_idx)
+            elif module_type == "runx":
+                RunxProcessor(module, self).process(module_idx)
             else:
                 ModuleProcessor(module, self).process(module_idx)
         previous_module_reference = None
@@ -214,6 +229,28 @@ class Layer:
                 previous_module_reference = [f"module.{module.name}"]
 
         return hydrate(ret, self.metadata_hydration())
+
+    def post_hook(self, module_idx: int, exception: Optional[Exception]) -> None:
+        for module in self.modules[0 : module_idx + 1]:
+            module_type = module.data["type"]
+            if module_type == "k8s-service":
+                K8sServiceProcessor(module, self).post_hook(module_idx, exception)
+            elif module_type == "k8s-base":
+                K8sBaseProcessor(module, self).post_hook(module_idx, exception)
+            elif module_type == "datadog":
+                DatadogProcessor(module, self).post_hook(module_idx, exception)
+            elif module_type == "gcp-k8s-base":
+                GcpK8sBaseProcessor(module, self).post_hook(module_idx, exception)
+            elif module_type == "gcp-k8s-service":
+                GcpK8sServiceProcessor(module, self).post_hook(module_idx, exception)
+            elif module_type == "gcp-gke":
+                GcpGkeProcessor(module, self).post_hook(module_idx, exception)
+            elif module_type == "aws-dns":
+                AwsDnsProcessor(module, self).post_hook(module_idx, exception)
+            elif module_type == "runx":
+                RunxProcessor(module, self).post_hook(module_idx, exception)
+            else:
+                ModuleProcessor(module, self).post_hook(module_idx, exception)
 
     def metadata_hydration(self) -> Dict[Any, Any]:
         parent_name = self.parent.name if self.parent is not None else "nil"
