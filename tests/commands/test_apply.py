@@ -34,6 +34,7 @@ def mocked_layer(mocker: MockFixture) -> Any:
     mocked_layer_class = mocker.patch("opta.commands.apply.Layer")
     mocked_layer = mocker.Mock(spec=Layer)
     mocked_layer.variables = {}
+    mocked_layer.name = "blah"
     mocked_layer.cloud = "aws"
     mocked_layer.gen_providers = lambda x: {"provider": {"aws": {"region": "us-east-1"}}}
     mocked_layer_class.load_from_yaml.return_value = mocked_layer
@@ -47,6 +48,8 @@ def test_apply(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None
     mocker.patch(
         "opta.commands.apply._fetch_availability_zones", return_value=["a", "b", "c"]
     )
+    mocker.patch("opta.commands.apply.Terraform.downloaded_state")
+    mocker.patch("opta.commands.apply.Terraform.download_state")
     tf_apply = mocker.patch("opta.commands.apply.Terraform.apply")
     tf_plan = mocker.patch("opta.commands.apply.Terraform.plan")
     tf_show = mocker.patch("opta.commands.apply.Terraform.show")
@@ -99,6 +102,8 @@ def test_auto_approve(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) 
     mocker.patch(
         "opta.commands.apply._fetch_availability_zones", return_value=["a", "b", "c"]
     )
+    mocker.patch("opta.commands.apply.Terraform.downloaded_state")
+    mocker.patch("opta.commands.apply.Terraform.download_state")
     tf_apply = mocker.patch("opta.commands.apply.Terraform.apply")
     tf_plan = mocker.patch("opta.commands.apply.Terraform.plan")
     tf_show = mocker.patch("opta.commands.apply.Terraform.show")
