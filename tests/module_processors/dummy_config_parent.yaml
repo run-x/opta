@@ -13,3 +13,4 @@ modules:
     max_nodes: 6
   - type: k8s-base
   - type: datadog
+  - type: runx

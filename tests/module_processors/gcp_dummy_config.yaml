@@ -29,3 +29,4 @@ modules:
       - bucket2:
           - write
       - bucket3
+  - type: runx
