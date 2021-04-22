@@ -30,6 +30,6 @@ modules:
     type: gcp-postgres
   - name: gcs
     type: gcp-gcs
-    bucket_name: "{environment_name}-{layer_name}"
+    bucket_name: "{parent_name}-{layer_name}"
   - name: redis
     type: gcp-redis
