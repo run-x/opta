@@ -3,7 +3,7 @@ environments:
     path: "../env/opta.yml"
     variables:
       max_nodes: 2
-name: jd-test-gcp
+name: service-1
 modules:
   - type: runx
   - name: app
@@ -30,6 +30,6 @@ modules:
     type: gcp-postgres
   - name: gcs
     type: gcp-gcs
-    bucket_name: "{layer_name}-testing-1"
+    bucket_name: "{environment_name}-{layer_name}"
   - name: redis
     type: gcp-redis

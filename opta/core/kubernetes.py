@@ -90,11 +90,7 @@ def _gcp_configure_kubectl(layer: "Layer") -> None:
             )
         )
 
-    # Get the cluster name from the outputs.
-    outputs = get_terraform_outputs(layer)
-    cluster_name = outputs.get("parent.k8s_cluster_name") or outputs.get(
-        "k8s_cluster_name"
-    )
+    cluster_name = get_cluster_name(layer)
 
     if cluster_name is None:
         raise Exception("The GKE cluster name could not be determined.")
@@ -155,11 +151,7 @@ def _aws_configure_kubectl(layer: "Layer") -> None:
             )
         )
 
-    # Get the cluster name from the outputs.
-    outputs = get_terraform_outputs(layer)
-    cluster_name = outputs.get("parent.k8s_cluster_name") or outputs.get(
-        "k8s_cluster_name"
-    )
+    cluster_name = get_cluster_name(layer)
 
     if cluster_name is None:
         raise Exception("The EKS cluster name could not be determined.")
@@ -176,6 +168,14 @@ def _aws_configure_kubectl(layer: "Layer") -> None:
             env_aws_region,
         ]
     )
+
+
+def get_cluster_name(layer: "Layer") -> Optional[str]:
+    outputs = get_terraform_outputs(layer)
+    cluster_name = outputs.get("parent.k8s_cluster_name") or outputs.get(
+        "k8s_cluster_name"
+    )
+    return cluster_name
 
 
 def _aws_get_cluster_env(root_layer: "Layer") -> Tuple[str, List[int]]:
