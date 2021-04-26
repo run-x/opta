@@ -1,6 +1,10 @@
 import json
 from typing import Any, Callable, List
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
+
+from pytest_mock import MockFixture
+
+from opta.layer import Layer
 
 
 class MockedCmdJsonOut:
@@ -31,3 +35,17 @@ def mocked_function(
         return return_value
 
     return dummy_function
+
+
+def mocked_aws_layer(mocker: MockFixture) -> "Mock":
+    mocked_layer = mocker.Mock(spec=Layer)
+    mocked_layer.name = "dummy_layer"
+    mocked_layer.cloud = "aws"
+    return mocked_layer
+
+
+def mocked_gcp_layer(mocker: MockFixture) -> "Mock":
+    mocked_layer = mocker.Mock(spec=Layer)
+    mocked_layer.name = "dummy_layer"
+    mocked_layer.cloud = "google"
+    return mocked_layer

@@ -8,16 +8,14 @@ from pytest_mock import MockFixture
 
 from opta.amplitude import AmplitudeClient, amplitude_client
 from opta.commands.secret import list_command, update, view
-from opta.layer import Layer
+from tests.utils import mocked_aws_layer
 
 
 class TestSecretManager:
     @fixture
     def mocked_layer(self, mocker: MockFixture) -> Any:
         mocked_load_layer = mocker.patch("opta.commands.secret.Layer.load_from_yaml")
-        mocked_layer = mocker.Mock(spec=Layer)
-        mocked_layer.name = "dummy_layer"
-        mocked_layer.cloud = "aws"
+        mocked_layer = mocked_aws_layer(mocker)
         mocked_load_layer.return_value = mocked_layer
         return mocked_load_layer
 

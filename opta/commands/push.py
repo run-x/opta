@@ -1,4 +1,5 @@
 import base64
+import re
 from typing import Optional, Tuple
 
 import boto3
@@ -9,7 +10,7 @@ from botocore.config import Config
 from opta.amplitude import amplitude_client
 from opta.core.gcp import GCP
 from opta.core.generator import gen_all
-from opta.core.terraform import get_terraform_outputs
+from opta.core.terraform import fetch_terraform_state_resources, get_terraform_outputs
 from opta.exceptions import UserErrors
 from opta.layer import Layer
 from opta.nice_subprocess import nice_run
@@ -126,6 +127,7 @@ def _push(image: str, config: str, env: Optional[str], tag: Optional[str]) -> No
         raise Exception("Please install docker on your machine")
     layer = Layer.load_from_yaml(config, env)
     gen_all(layer)
+    _raise_if_no_ecr_repo_exists(layer)
     registry_url = get_registry_url(layer)
     if layer.cloud == "aws":
         username, password = get_ecr_auth_info(layer)
@@ -134,3 +136,36 @@ def _push(image: str, config: str, env: Optional[str], tag: Optional[str]) -> No
     else:
         raise Exception(f"No support for pushing image to provider {layer.cloud}")
     push_to_docker(username, password, image, registry_url, tag)
+
+
+def _raise_if_no_ecr_repo_exists(layer: "Layer") -> None:
+    terraform_state = fetch_terraform_state_resources(layer)
+    terraform_state_resources = terraform_state.keys()
+
+    if layer.cloud == "aws":
+        pattern = re.compile(
+            # Example pattern:
+            # module.app.data.aws_ecr_image.service_image[0]
+            r"^module\..+\.aws_ecr_image\.service_image.*"
+        )
+    elif layer.cloud == "google":
+        pattern = re.compile(
+            # Example pattern:
+            # module.gcpk8sservice.data.google_container_registry_repository.root
+            r"module\..+\.google_container_registry_repository.*"
+        )
+    else:
+        # Don't fail if the cloud vendor is not supported in this check.
+        return
+
+    image_repo = list(filter(pattern.match, terraform_state_resources))
+    if len(image_repo) == 0:
+        raise UserErrors(
+            fmt_msg(
+                """
+                Cannot push image because there was no image repository found in the opta state.
+                ~Please make sure to create the opta environment first with *opta apply*.
+                ~See the following docs: https://docs.runx.dev/docs/getting-started/#environment-creation
+                """
+            )
+        )

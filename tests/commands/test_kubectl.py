@@ -5,14 +5,13 @@ from click.testing import CliRunner
 from pytest_mock import MockFixture
 
 from opta.commands.kubectl import configure_kubectl
-from opta.layer import Layer
+from tests.utils import mocked_aws_layer
 
 
 def test_configure_kubectl(mocker: MockFixture) -> None:
     # Mock tf file generation
     mocked_layer_class = mocker.patch("opta.commands.kubectl.Layer")
-    mocked_layer = mocker.Mock(spec=Layer)
-    mocked_layer.cloud = "aws"
+    mocked_layer = mocked_aws_layer(mocker)
     mocked_layer_class.load_from_yaml.return_value = mocked_layer
     mocker.patch("opta.commands.kubectl.gen_all")
 

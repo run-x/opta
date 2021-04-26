@@ -10,10 +10,12 @@ from opta.commands.push import (
     get_ecr_auth_info,
     get_gcr_auth_info,
     get_registry_url,
+    push,
     push_to_docker,
 )
 from opta.layer import Layer
 from tests.fixtures.basic_apply import BASIC_APPLY
+from tests.utils import mocked_aws_layer
 
 REGISTRY_URL = "889760294590.dkr.ecr.us-east-1.amazonaws.com/test-service-runx-app"
 TERRAFORM_OUTPUTS = {"docker_repo_url": REGISTRY_URL}
@@ -40,6 +42,22 @@ def test_get_registry_url(mocker: MockFixture) -> None:
 
     docker_repo_url = get_registry_url(layer)
     assert docker_repo_url == REGISTRY_URL
+
+
+def test_image_repo_doesnt_exist(mocker: MockFixture) -> None:
+    mocker.patch("opta.commands.push.is_tool")
+    mocker.patch("opta.commands.push.Layer.load_from_yaml")
+
+    mocked_load_layer = mocker.patch("opta.commands.push.Layer.load_from_yaml")
+    mocked_load_layer.return_value = mocked_aws_layer(mocker)
+
+    mocker.patch("opta.commands.push.gen_all")
+    mocker.patch("opta.commands.push.fetch_terraform_state_resources", return_value={})
+    runner = CliRunner()
+    result = runner.invoke(push, ["app:latest"])
+    assert "there was no image repository found in the opta state" in str(
+        result.exception
+    )
 
 
 def test_no_docker_repo_url_in_output(mocker: MockFixture) -> None:
@@ -147,6 +165,7 @@ def test_no_docker(mocker: MockFixture) -> None:
 
 
 def test_no_tag_override(mocker: MockFixture) -> None:
+    mocker.patch("opta.commands.push._raise_if_no_ecr_repo_exists")
     nice_run_mock = mocker.patch("opta.commands.push.nice_run")
     gen_mock = mocker.patch("opta.commands.push.gen_all")
     layer_object_mock = mocker.patch("opta.commands.push.Layer")
@@ -196,6 +215,7 @@ def test_no_tag_override(mocker: MockFixture) -> None:
 
 
 def test_with_tag_override(mocker: MockFixture) -> None:
+    mocker.patch("opta.commands.push._raise_if_no_ecr_repo_exists")
     nice_run_mock = mocker.patch("opta.commands.push.nice_run")
     gen_mock = mocker.patch("opta.commands.push.gen_all")
     layer_object_mock = mocker.patch("opta.commands.push.Layer")
@@ -255,6 +275,7 @@ def test_with_tag_override(mocker: MockFixture) -> None:
 
 
 def test_bad_image_name(mocker: MockFixture) -> None:
+    mocker.patch("opta.commands.push._raise_if_no_ecr_repo_exists")
     gen_mock = mocker.patch("opta.commands.push.gen_all")
     layer_object_mock = mocker.patch("opta.commands.push.Layer")
     layer_mock = mocker.Mock(spec=Layer)

@@ -2,9 +2,9 @@ from click.testing import CliRunner
 from pytest_mock import MockFixture
 
 from opta.commands.inspect_cmd import inspect
-from opta.layer import Layer
 from opta.module import Module
 from opta.resource import Resource
+from tests.utils import mocked_aws_layer
 
 REGISTRY = {
     "modules": {
@@ -34,8 +34,7 @@ TERRAFORM_STATE = {
 def test_inspect(mocker: MockFixture) -> None:
     # Mock tf file generation
     mocked_layer_class = mocker.patch("opta.commands.inspect_cmd.Layer")
-    mocked_layer = mocker.Mock(spec=Layer)
-    mocked_layer.cloud = "aws"
+    mocked_layer = mocked_aws_layer(mocker)
     mocked_layer_class.load_from_yaml.return_value = mocked_layer
     mocker.patch("opta.commands.inspect_cmd.gen_all")
     # Mock that the terraform CLI tool exists.

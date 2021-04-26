@@ -54,10 +54,13 @@ class Terraform:
     @classmethod
     def get_state(cls) -> dict:
         for state_file in ["./terraform.tfstate", "terraform.tfstate.backup"]:
-            with open(state_file, "r") as file:
-                raw_state = file.read().replace("\n", "")
-            if raw_state != "":
-                return json.loads(raw_state)
+            try:
+                with open(state_file, "r") as file:
+                    raw_state = file.read().replace("\n", "")
+                if raw_state != "":
+                    return json.loads(raw_state)
+            except Exception:
+                continue
         raise UserErrors("Terraform statefiles not found")
 
     @classmethod
@@ -583,7 +586,11 @@ def _fetch_parent_outputs(pull_state: bool = True) -> dict:
 
 def fetch_terraform_state_resources(layer: "Layer") -> dict:
     Terraform.download_state(layer)
-    state = Terraform.get_state()
+    try:
+        state = Terraform.get_state()
+    except Exception as err:
+        logger.error(err)
+        return {}
 
     resources = state.get("resources", [])
 

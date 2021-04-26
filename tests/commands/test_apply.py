@@ -7,8 +7,8 @@ from pytest_mock import MockFixture
 from opta.commands.apply import apply
 from opta.constants import TF_PLAN_PATH
 from opta.core.kubernetes import tail_module_log, tail_namespace_events
-from opta.layer import Layer
 from opta.module import Module
+from tests.utils import mocked_aws_layer
 
 
 @fixture
@@ -32,10 +32,8 @@ def basic_mocks(mocker: MockFixture) -> None:
 @fixture
 def mocked_layer(mocker: MockFixture) -> Any:
     mocked_layer_class = mocker.patch("opta.commands.apply.Layer")
-    mocked_layer = mocker.Mock(spec=Layer)
+    mocked_layer = mocked_aws_layer(mocker)
     mocked_layer.variables = {}
-    mocked_layer.name = "blah"
-    mocked_layer.cloud = "aws"
     mocked_layer.gen_providers = lambda x: {"provider": {"aws": {"region": "us-east-1"}}}
     mocked_layer_class.load_from_yaml.return_value = mocked_layer
 
