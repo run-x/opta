@@ -122,6 +122,10 @@ class TestTerraform:
             }
         }
         layer.name = "blah"
+        layer.cloud = "aws"
+        mocker.patch(
+            "opta.core.terraform.Terraform._aws_verify_storage", return_value=True
+        )
         patched_init = mocker.patch(
             "opta.core.terraform.Terraform.init", return_value=True
         )
@@ -149,6 +153,10 @@ class TestTerraform:
             "provider": {"google": {"region": "us-central1", "project": "dummy-project"}},
         }
         layer.name = "blah"
+        layer.cloud = "google"
+        mocker.patch(
+            "opta.core.terraform.Terraform._gcp_verify_storage", return_value=True
+        )
         patched_init = mocker.patch(
             "opta.core.terraform.Terraform.init", return_value=True
         )
