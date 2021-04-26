@@ -164,8 +164,8 @@ def _raise_if_no_ecr_repo_exists(layer: "Layer") -> None:
             fmt_msg(
                 """
                 Cannot push image because there was no image repository found in the opta state.
-                ~Please make sure to create the opta environment first with *opta apply*.
-                ~See the following docs: https://docs.runx.dev/docs/getting-started/#environment-creation
+                ~Please make sure to create the opta service first with *opta apply*.
+                ~See the following docs: https://docs.runx.dev/docs/getting-started/#service-creation
                 """
             )
         )
