@@ -222,6 +222,10 @@ class Layer:
                 RunxProcessor(module, self).process(module_idx)
             else:
                 ModuleProcessor(module, self).process(module_idx)
+        if self.parent is not None and self.parent.get_module("runx") is not None:
+            RunxProcessor(self.parent.get_module("runx"), self).process(  # type:ignore
+                module_idx
+            )
         previous_module_reference = None
         for module in self.modules[0 : module_idx + 1]:
             ret = deep_merge(module.gen_tf(depends_on=previous_module_reference), ret)
@@ -251,6 +255,10 @@ class Layer:
                 RunxProcessor(module, self).post_hook(module_idx, exception)
             else:
                 ModuleProcessor(module, self).post_hook(module_idx, exception)
+        if self.parent is not None and self.parent.get_module("runx") is not None:
+            RunxProcessor(self.parent.get_module("runx"), self).post_hook(  # type:ignore
+                module_idx, exception
+            )
 
     def metadata_hydration(self) -> Dict[Any, Any]:
         parent_name = self.parent.name if self.parent is not None else "nil"

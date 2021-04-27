@@ -10,35 +10,13 @@ from opta.module_processors.runx import OPTA_DOMAIN, RunxProcessor
 
 
 class TestRunxProcessor:
-    def test_init_no_api_key(self, mocker: MockFixture):
-        layer = Layer.load_from_yaml(
-            os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "dummy_config1.yaml",
-            ),
-            None,
-        )
-        runx_module = layer.get_module("runx", 7)
-        with pytest.raises(UserErrors):
-            RunxProcessor(runx_module, layer)
-
-    def test_init_api_key(self, mocker: MockFixture):
-        layer = Layer.load_from_yaml(
-            os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "dummy_config1.yaml",
-            ),
-            None,
-        )
-        os.environ["OPTA_API_KEY"] = "blah"
-        runx_module = layer.get_module("runx", 7)
-        RunxProcessor(runx_module, layer)
-
     def test_process(self, mocker: MockFixture):
-        mocked_fetch_jwt = mocker.patch(
-            "opta.module_processors.runx.RunxProcessor.fetch_jwt"
+        mocked_fetch_secret = mocker.patch(
+            "opta.module_processors.runx.RunxProcessor.fetch_secret"
+        )
+        mocked_fetch_secret.return_value = None
+        mocked_set_secret = mocker.patch(
+            "opta.module_processors.runx.RunxProcessor.set_secret"
         )
         layer = Layer.load_from_yaml(
             os.path.join(
@@ -48,12 +26,15 @@ class TestRunxProcessor:
             ),
             None,
         )
-        os.environ["OPTA_API_KEY"] = "blah"
-        runx_module = layer.get_module("runx", 7)
+        runx_module = layer.parent.get_module("runx", 7)
         RunxProcessor(runx_module, layer).process(7)
-        mocked_fetch_jwt.assert_called_once_with()
+        mocked_fetch_secret.assert_called_once_with()
+        mocked_set_secret.assert_called_once_with()
 
     def test_post_hook(self, mocker: MockFixture):
+        mocked_fetch_secret = mocker.patch(
+            "opta.module_processors.runx.RunxProcessor.fetch_secret"
+        )
         mocked_fetch_jwt = mocker.patch(
             "opta.module_processors.runx.RunxProcessor.fetch_jwt"
         )
@@ -66,8 +47,7 @@ class TestRunxProcessor:
             ),
             None,
         )
-        os.environ["OPTA_API_KEY"] = "blah"
-        runx_module = layer.get_module("runx", 7)
+        runx_module = layer.parent.get_module("runx", 7)
 
         mocked_request = mocker.patch("opta.module_processors.runx.requests")
         mocked_response = mocker.Mock()
@@ -81,6 +61,7 @@ class TestRunxProcessor:
             json=mocker.ANY,
             headers={"opta": "blah"},
         )
+        mocked_fetch_secret.assert_called_once_with()
 
     def test_fetch_jwt(self, mocker: MockFixture):
         mocked_request = mocker.patch("opta.module_processors.runx.requests")
@@ -97,9 +78,11 @@ class TestRunxProcessor:
             ),
             None,
         )
-        os.environ["OPTA_API_KEY"] = "blah"
-        runx_module = layer.get_module("runx", 7)
-        assert RunxProcessor(runx_module, layer).fetch_jwt() == ({"a": "b"}, "baloney")
+        runx_module = layer.parent.get_module("runx", 7)
+        assert RunxProcessor(runx_module, layer).fetch_jwt("blah") == (
+            {"a": "b"},
+            "baloney",
+        )
         mocked_request.post.assert_called_once_with(
             f"https://{OPTA_DOMAIN}/user/apikeys/validate", json={"api_key": "blah"}
         )
@@ -118,10 +101,9 @@ class TestRunxProcessor:
             ),
             None,
         )
-        os.environ["OPTA_API_KEY"] = "blah"
-        runx_module = layer.get_module("runx", 7)
+        runx_module = layer.parent.get_module("runx", 7)
         with pytest.raises(UserErrors):
-            RunxProcessor(runx_module, layer).fetch_jwt()
+            RunxProcessor(runx_module, layer).fetch_jwt("blah")
 
     def test_fetch_jwt_500(self, mocker: MockFixture):
         mocked_request = mocker.patch("opta.module_processors.runx.requests")
@@ -137,7 +119,6 @@ class TestRunxProcessor:
             ),
             None,
         )
-        os.environ["OPTA_API_KEY"] = "blah"
-        runx_module = layer.get_module("runx", 7)
+        runx_module = layer.parent.get_module("runx", 7)
         with pytest.raises(Exception):
-            RunxProcessor(runx_module, layer).fetch_jwt()
+            RunxProcessor(runx_module, layer).fetch_jwt("blah")
