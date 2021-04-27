@@ -3,7 +3,7 @@ from typing import List, Optional
 import boto3
 import click
 import yaml
-from google.cloud import storage
+from google.cloud import storage  # type: ignore
 from google.cloud.exceptions import NotFound
 
 from opta.amplitude import amplitude_client

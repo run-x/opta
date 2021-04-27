@@ -5,7 +5,6 @@ environments:
       max_nodes: 2
 name: service-1
 modules:
-  - type: runx
   - name: app
     type: gcp-k8s-service
     image: kennethreitz/httpbin
