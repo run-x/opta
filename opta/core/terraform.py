@@ -9,7 +9,7 @@ from botocore.config import Config
 from botocore.exceptions import ClientError
 from google.api_core.exceptions import ClientError as GoogleClientError
 from google.api_core.exceptions import Conflict
-from google.cloud import storage
+from google.cloud import storage  # type: ignore
 from google.cloud.exceptions import NotFound
 from googleapiclient import discovery
 from googleapiclient.errors import HttpError
