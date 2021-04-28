@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import time
 from subprocess import DEVNULL, PIPE
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
@@ -32,7 +33,10 @@ class Terraform:
 
     @classmethod
     def init(cls, *tf_flags: str) -> None:
-        nice_run(["terraform", "init", *tf_flags], check=True)
+        kwargs: Dict[str, Any] = {
+            "env": {**os.environ.copy(), **{"KUBE_CONFIG_PATH": "~/.kube/config"}}
+        }
+        nice_run(["terraform", "init", *tf_flags], check=True, **kwargs)
 
     # Get outputs of the current terraform state
     @classmethod
@@ -49,6 +53,14 @@ class Terraform:
         for k, v in outputs.items():
             cleaned_outputs[k] = v.get("value")
         return cleaned_outputs
+
+    @classmethod
+    def get_version(cls) -> str:
+        out = nice_run(
+            ["terraform", "version", "-json"], check=True, capture_output=True
+        ).stdout.decode("utf-8")
+        terraform_data = json.loads(out)
+        return terraform_data["terraform_version"]
 
     # Get the full terraform state.
     @classmethod
@@ -70,7 +82,9 @@ class Terraform:
     ) -> None:
         if not no_init:
             cls.init()
-        kwargs: Dict[str, Any] = {}
+        kwargs: Dict[str, Any] = {
+            "env": {**os.environ.copy(), **{"KUBE_CONFIG_PATH": "~/.kube/config"}}
+        }
         if quiet:
             kwargs["stderr"] = PIPE
             kwargs["stdout"] = DEVNULL
@@ -115,13 +129,21 @@ class Terraform:
 
     @classmethod
     def import_resource(cls, tf_resource_address: str, aws_resource_id: str) -> None:
+        kwargs: Dict[str, Any] = {
+            "env": {**os.environ.copy(), **{"KUBE_CONFIG_PATH": "~/.kube/config"}}
+        }
         nice_run(
-            ["terraform", "import", tf_resource_address, aws_resource_id], check=True
+            ["terraform", "import", tf_resource_address, aws_resource_id],
+            check=True,
+            **kwargs,
         )
 
     @classmethod
     def refresh(cls, *tf_flags: str) -> None:
-        nice_run(["terraform", "refresh", *tf_flags], check=True)
+        kwargs: Dict[str, Any] = {
+            "env": {**os.environ.copy(), **{"KUBE_CONFIG_PATH": "~/.kube/config"}}
+        }
+        nice_run(["terraform", "refresh", *tf_flags], check=True, **kwargs)
 
     @classmethod
     def destroy_resources(
@@ -138,6 +160,9 @@ class Terraform:
         # This includes fetching the latest EKS cluster auth token, which is
         # necessary for destroying many k8s resources.
         cls.refresh()
+        kwargs: Dict[str, Any] = {
+            "env": {**os.environ.copy(), **{"KUBE_CONFIG_PATH": "~/.kube/config"}}
+        }
 
         for module in reversed(layer.modules):
             module_address_prefix = f"module.{module.name}"
@@ -150,11 +175,18 @@ class Terraform:
                 continue
 
             resource_targets = [f"-target={resource}" for resource in module_resources]
-            nice_run(["terraform", "destroy", *resource_targets, *tf_flags], check=True)
+            nice_run(
+                ["terraform", "destroy", *resource_targets, *tf_flags],
+                check=True,
+                **kwargs,
+            )
 
     @classmethod
     def destroy_all(cls, layer: "Layer", *tf_flags: str) -> None:
         existing_modules = Terraform.get_existing_modules(layer)
+        kwargs: Dict[str, Any] = {
+            "env": {**os.environ.copy(), **{"KUBE_CONFIG_PATH": "~/.kube/config"}}
+        }
 
         for module in reversed(layer.modules):
             module_address_prefix = f"module.{module.name}"
@@ -165,6 +197,7 @@ class Terraform:
             nice_run(
                 ["terraform", "destroy", f"-target={module_address_prefix}", *tf_flags],
                 check=True,
+                **kwargs,
             )
 
         # After the layer is completely deleted, remove the opta config from the state bucket.
@@ -188,7 +221,10 @@ class Terraform:
     # Remove a resource from the terraform state, but does not destroy it.
     @classmethod
     def remove_from_state(cls, resource_address: str) -> None:
-        nice_run(["terraform", "state", "rm", resource_address])
+        kwargs: Dict[str, Any] = {
+            "env": {**os.environ.copy(), **{"KUBE_CONFIG_PATH": "~/.kube/config"}}
+        }
+        nice_run(["terraform", "state", "rm", resource_address], **kwargs)
 
     @classmethod
     def verify_storage(cls, layer: "Layer") -> bool:
@@ -225,7 +261,9 @@ class Terraform:
     @classmethod
     def plan(cls, *tf_flags: str, quiet: Optional[bool] = False) -> None:
         cls.init()
-        kwargs: Dict[str, Any] = {}
+        kwargs: Dict[str, Any] = {
+            "env": {**os.environ.copy(), **{"KUBE_CONFIG_PATH": "~/.kube/config"}}
+        }
         if quiet:
             kwargs["stderr"] = PIPE
             kwargs["stdout"] = DEVNULL
@@ -233,7 +271,10 @@ class Terraform:
 
     @classmethod
     def show(cls, *tf_flags: str) -> None:
-        nice_run(["terraform", "show", *tf_flags], check=True)
+        kwargs: Dict[str, Any] = {
+            "env": {**os.environ.copy(), **{"KUBE_CONFIG_PATH": "~/.kube/config"}}
+        }
+        nice_run(["terraform", "show", *tf_flags], check=True, **kwargs)
 
     @classmethod
     def get_existing_modules(cls, layer: "Layer") -> Set[str]:

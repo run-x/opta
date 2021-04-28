@@ -4,9 +4,10 @@ from typing import List, Optional, Set
 import boto3
 import click
 from botocore.config import Config
+from packaging import version
 
 from opta.amplitude import amplitude_client
-from opta.constants import TF_PLAN_PATH
+from opta.constants import MAX_TERRAFORM_VERSION, MIN_TERRAFORM_VERSION, TF_PLAN_PATH
 from opta.core.aws import AWS
 from opta.core.gcp import GCP
 from opta.core.generator import gen, gen_opta_resource_tags
@@ -75,6 +76,20 @@ def apply(
     _apply(config, env, refresh, max_module, image_tag, test, auto_approve)
 
 
+def _check_terraform_version() -> None:
+    if not is_tool("terraform"):
+        raise UserErrors("Please install terraform on your machine")
+    current_version = Terraform.get_version()
+    if version.parse(current_version) < version.parse(MIN_TERRAFORM_VERSION):
+        raise UserErrors(
+            f"Invalid terraform version {current_version}-- must be at least {MIN_TERRAFORM_VERSION}"
+        )
+    if version.parse(current_version) >= version.parse(MAX_TERRAFORM_VERSION):
+        raise UserErrors(
+            f"Invalid terraform version {current_version}-- must be less than  {MAX_TERRAFORM_VERSION}"
+        )
+
+
 def _apply(
     config: str,
     env: Optional[str],
@@ -84,8 +99,7 @@ def _apply(
     test: bool,
     auto_approve: bool,
 ) -> None:
-    if not is_tool("terraform"):
-        raise UserErrors("Please install terraform on your machine")
+    _check_terraform_version()
     amplitude_client.send_event(amplitude_client.START_GEN_EVENT)
     layer = Layer.load_from_yaml(config, env)
     layer.variables["image_tag"] = image_tag
