@@ -17,8 +17,18 @@ modules:
     env_vars:
       - name: A
         value: B
-    public_uri:
-    - "subdomain1.{parent.domain}"
+    public_uri: "subdomain1.{parent.domain}"
+    links:
+      - s3: ["write"]
+      - redis
+      - db
     secrets:
       - API_KEY
       - SECRET_1
+  - name: db
+    type: aws-postgres
+  - name: s3
+    type: aws-s3
+    bucket_name: "{parent_name}-{layer_name}"
+  - name: redis
+    type: aws-redis

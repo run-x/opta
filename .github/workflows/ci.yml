@@ -98,6 +98,7 @@ jobs:
           source $(pipenv --venv)/bin/activate
           export PYTHONPATH=$(pwd)
           cd test-service
+          terraform version
           python ../opta/cli.py apply --env staging --test
       - name: Configure GCP credentials
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@v0.2.1

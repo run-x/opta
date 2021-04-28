@@ -43,8 +43,11 @@ class RunxProcessor(ModuleProcessor):
 
     def process(self, module_idx: int) -> None:
         logger.info("Checking for runx api key secret")
-        if self.fetch_secret() is None:
+        current_api_key = self.fetch_secret()
+        if current_api_key is None:
             self.set_secret()
+        else:
+            self.fetch_jwt(current_api_key)
 
     def fetch_secret(self) -> Optional[str]:
         if self.layer.cloud == "aws":
