@@ -204,10 +204,13 @@ modules:
       instance_class: optional
       safety: optional
     outputs:
-      db_user: str
+      db_user:
+        export: true
       db_password: str
-      db_host: str
-      db_name: str
+      db_host:
+        export: true
+      db_name:
+        export: true
     inspect:
       aws_rds_cluster:
         name: RDS
@@ -224,7 +227,8 @@ modules:
       node_type: optional
       redis_version: optional
     outputs:
-      cache_host: str
+      cache_host:
+        export: true
       cache_auth_token: str
   aws-dns:
     location: aws-dns
@@ -454,3 +458,20 @@ modules:
         url: https://app.datadoghq.com/apm/service/{k8s-moduleName}-{k8s-layerName}/
   runx:
     location: ""
+  helm-chart:
+    location: helm-chart
+    variables:
+      env_name: str
+      layer_name: str
+      module_name: str
+      chart: str
+      repository: optional
+      namespace: optional
+      create_namespace: optional
+      atomic: optional
+      cleanup_on_fail: optional
+      chart_version: optional
+      values_file: optional
+      values: optional
+      timeout: optional
+

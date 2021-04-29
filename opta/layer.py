@@ -21,6 +21,7 @@ from opta.module_processors.datadog import DatadogProcessor
 from opta.module_processors.gcp_gke import GcpGkeProcessor
 from opta.module_processors.gcp_k8s_base import GcpK8sBaseProcessor
 from opta.module_processors.gcp_k8s_service import GcpK8sServiceProcessor
+from opta.module_processors.helm_chart import HelmChartProcessor
 from opta.module_processors.k8s_base import K8sBaseProcessor
 from opta.module_processors.k8s_service import K8sServiceProcessor
 from opta.module_processors.runx import RunxProcessor
@@ -220,6 +221,8 @@ class Layer:
                 AwsDnsProcessor(module, self).process(module_idx)
             elif module_type == "runx":
                 RunxProcessor(module, self).process(module_idx)
+            elif module_type == "helm-chart":
+                HelmChartProcessor(module, self).process(module_idx)
             else:
                 ModuleProcessor(module, self).process(module_idx)
         if self.parent is not None and self.parent.get_module("runx") is not None:
@@ -253,6 +256,8 @@ class Layer:
                 AwsDnsProcessor(module, self).post_hook(module_idx, exception)
             elif module_type == "runx":
                 RunxProcessor(module, self).post_hook(module_idx, exception)
+            elif module_type == "helm-chart":
+                HelmChartProcessor(module, self).process(module_idx)
             else:
                 ModuleProcessor(module, self).post_hook(module_idx, exception)
         if self.parent is not None and self.parent.get_module("runx") is not None:
