@@ -38,7 +38,6 @@ variable "values_file" {
 }
 
 variable "values" {
-  type = map
   default = {}
 }
 

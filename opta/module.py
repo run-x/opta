@@ -63,9 +63,10 @@ class Module:
         if "outputs" in self.desc:
             for k, v in self.desc["outputs"].items():
                 if "export" in v and v["export"]:
-                    module_blk["output"].update(
-                        {k: {"value": f"${{{{module.{self.name}.{k} }}}}"}}
-                    )
+                    entry: Dict[Any, Any] = {"value": f"${{{{module.{self.name}.{k} }}}}"}
+                    if v.get("sensitive", False):
+                        entry["sensitive"] = True
+                    module_blk["output"].update({k: entry})
         if depends_on is not None:
             module_blk["module"][self.name]["depends_on"] = depends_on
 
