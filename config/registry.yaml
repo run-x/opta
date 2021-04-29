@@ -454,3 +454,20 @@ modules:
         url: https://app.datadoghq.com/apm/service/{k8s-moduleName}-{k8s-layerName}/
   runx:
     location: ""
+  helm-chart:
+    location: helm-chart
+    variables:
+      env_name: str
+      layer_name: str
+      module_name: str
+      chart: str
+      repository: optional
+      namespace: optional
+      create_namespace: optional
+      atomic: optional
+      cleanup_on_fail: optional
+      chart_version: optional
+      values_file: optional
+      values: optional
+      timeout: optional
+

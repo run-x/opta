@@ -14,3 +14,11 @@ modules:
     max_nodes: 6
   - type: k8s-base
   - type: datadog
+#  - type: helm-chart  # example of basic airflow isntallation
+#    repository: https://airflow-helm.github.io/charts
+#    chart: airflow
+#    namespace: airflow
+#    version: 8.0.9
+#    create_namespace: true
+#    values:
+#      helmWait: true
