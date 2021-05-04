@@ -43,6 +43,7 @@ def mocked_layer(mocker: MockFixture) -> Any:
 
 
 def test_apply(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None:
+    mocked_click = mocker.patch("opta.commands.apply.click")
     mocker.patch("opta.commands.apply.configure_kubectl")
     mocker.patch(
         "opta.commands.apply._fetch_availability_zones", return_value=["a", "b", "c"]
@@ -63,7 +64,7 @@ def test_apply(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None
     result = runner.invoke(apply)
     assert result.exit_code == 0
     tf_apply.assert_called_once_with(
-        mocked_layer, "-auto-approve", TF_PLAN_PATH, no_init=True, quiet=False
+        mocked_layer, TF_PLAN_PATH, no_init=True, quiet=False
     )
     tf_plan.assert_called_once_with(
         "-lock=false",
@@ -72,6 +73,10 @@ def test_apply(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None
         "-target=module.deletedmodule",
         "-target=module.fakemodule",
         quiet=True,
+    )
+    mocked_click.confirm.assert_called_once_with(
+        "The above are the planned changes for your opta run. Do you approve?",
+        abort=True,
     )
     tf_show.assert_called_once_with(TF_PLAN_PATH)
     mocked_layer.get_module_by_type.assert_called_once_with("k8s-service", 0)

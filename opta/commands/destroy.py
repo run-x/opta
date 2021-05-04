@@ -20,10 +20,9 @@ from opta.utils import fmt_msg, logger
     "-e", "--env", default=None, help="The env to use when loading the config file."
 )
 @click.option(
-    "--auto-approve/--manual",
+    "--auto-approve",
     is_flag=True,
-    default=True,
-    hidden=True,
+    default=False,
     help="Automatically approve terraform plan.",
 )
 def destroy(config: str, env: Optional[str], auto_approve: bool) -> None:
