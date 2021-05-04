@@ -43,7 +43,6 @@ def mocked_layer(mocker: MockFixture) -> Any:
 
 
 def test_apply(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None:
-    mocked_click = mocker.patch("opta.commands.apply.click")
     mocker.patch("opta.commands.apply.configure_kubectl")
     mocker.patch(
         "opta.commands.apply._fetch_availability_zones", return_value=["a", "b", "c"]

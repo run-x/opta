@@ -35,8 +35,8 @@ def test_destroy(mocker: MockFixture) -> None:
     result = runner.invoke(destroy, ["--config", FAKE_ENV_CONFIG])
 
     mocked_click.confirm.assert_called_once_with(
-        " Are you REALLY sure you want to run destroy with auto-approve? \n" +
-        "Please make sure *dummy-parent* is the correct opta config. ",
+        " Are you REALLY sure you want to run destroy with auto-approve? \n"
+        + "Please make sure *dummy-parent* is the correct opta config. ",
         abort=True,
     )
     assert result.exit_code == 0
