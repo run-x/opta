@@ -58,10 +58,9 @@ from opta.utils import fmt_msg, is_tool, logger
     hidden=True,
 )
 @click.option(
-    "--auto-approve/--manual",
+    "--auto-approve",
     is_flag=True,
-    default=True,
-    hidden=True,
+    default=False,
     help="Automatically approve terraform plan.",
 )
 def apply(

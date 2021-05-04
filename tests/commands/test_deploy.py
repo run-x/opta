@@ -36,7 +36,7 @@ def test_deploy_basic(mocker: MockFixture) -> None:
         max_module=None,
         image_tag="local_tag",
         test=False,
-        auto_approve=True,
+        auto_approve=False,
     )
     mock_terraform_outputs.assert_called_once_with(mocker.ANY)
 
@@ -111,7 +111,7 @@ def test_deploy_all_flags(mocker: MockFixture) -> None:
         max_module=None,
         image_tag="latest",
         test=False,
-        auto_approve=True,
+        auto_approve=False,
     )
 
 
@@ -154,7 +154,7 @@ def test_deploy_ecr_apply(mocker: MockFixture) -> None:
                 max_module=None,
                 image_tag=None,
                 test=False,
-                auto_approve=True,
+                auto_approve=False,
             ),
             mocker.call(
                 config="app/opta.yml",
@@ -163,7 +163,7 @@ def test_deploy_ecr_apply(mocker: MockFixture) -> None:
                 max_module=None,
                 image_tag="latest",
                 test=False,
-                auto_approve=True,
+                auto_approve=False,
             ),
         ]
     )

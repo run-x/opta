@@ -26,10 +26,9 @@ from opta.utils import fmt_msg, logger
     help="The image tag associated with your docker container. Defaults to your local image tag.",
 )
 @click.option(
-    "--auto-approve/--manual",
+    "--auto-approve",
     is_flag=True,
-    default=True,
-    hidden=True,
+    default=False,
     help="Automatically approve terraform plan.",
 )
 def deploy(

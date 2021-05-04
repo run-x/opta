@@ -18,7 +18,6 @@ FAKE_SERVICE_CONFIG = os.path.join(
 
 
 def test_destroy(mocker: MockFixture) -> None:
-    mocked_click = mocker.patch("opta.commands.destroy.click")
     mocker.patch("opta.commands.destroy.amplitude_client.send_event")
     mocker.patch("opta.commands.destroy.Terraform.init")
     mocker.patch("opta.commands.destroy.Terraform.destroy_all")
@@ -34,11 +33,7 @@ def test_destroy(mocker: MockFixture) -> None:
     runner = CliRunner()
     result = runner.invoke(destroy, ["--config", FAKE_ENV_CONFIG])
 
-    mocked_click.confirm.assert_called_once_with(
-        " Are you REALLY sure you want to run destroy with auto-approve? \n"
-        + "Please make sure *dummy-parent* is the correct opta config. ",
-        abort=True,
-    )
+    print(result.exception)
     assert result.exit_code == 0
 
     actual_destroy_order = [layer.name for layer in get_call_args(mocked_gen_all)]
