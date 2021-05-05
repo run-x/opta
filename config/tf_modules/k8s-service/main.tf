@@ -39,7 +39,6 @@ resource "helm_release" "k8s-service" {
       layerName: var.layer_name,
       moduleName: var.module_name
       iamRoleArn: aws_iam_role.k8s_service.arn
-      grpc: var.grpc
     })
   ]
   atomic          = true

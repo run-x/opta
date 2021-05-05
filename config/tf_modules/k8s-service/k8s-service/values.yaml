@@ -5,7 +5,6 @@ iamRoleArn: ""
 envVars: []
 secrets: []
 port: {}
-grpc: false
 
 serviceAccount:
   # The name of the service account to use.

@@ -39,7 +39,6 @@ resource "helm_release" "k8s-service" {
       layerName: var.layer_name,
       moduleName: var.module_name
       googleServiceAccount: google_service_account.k8s_service.email
-      grpc: var.grpc
     })
   ]
   atomic          = true
