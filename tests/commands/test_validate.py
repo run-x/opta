@@ -15,7 +15,7 @@ def test_validate_service() -> None:
         "..",
         "examples",
         "aws",
-        "service",
+        "http-service",
         "opta.yml",
     )
     runner = CliRunner()

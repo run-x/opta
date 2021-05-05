@@ -2,7 +2,9 @@ BASIC_APPLY = (
     {
         "name": "dev1",
         "org_name": "test",
-        "providers": {"aws": {"account_id": "abc", "region": "us-east-1"}},
+        "providers": {
+            "aws": {"account_id": "abc", "region": "us-east-1", "version": "3.38.0"}
+        },
         "modules": [{"name": "core", "type": "aws-base"}],
     },
     {
