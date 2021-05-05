@@ -63,6 +63,7 @@ class K8sBaseProcessor(AWSK8sModuleProcessor):
             marker = output.get("NextMarker", "")
             load_balancers = output["LoadBalancers"]
             current_arns = [x["LoadBalancerArn"] for x in load_balancers]
+            arn_to_lb = {x["LoadBalancerArn"]: x for x in load_balancers}
             tag_descriptions = client.describe_tags(ResourceArns=current_arns)[
                 "TagDescriptions"
             ]
@@ -75,7 +76,7 @@ class K8sBaseProcessor(AWSK8sModuleProcessor):
                     and tag_dict.get("kubernetes.io/service-name")
                     == "ingress-nginx/ingress-nginx-controller"
                 ):
-                    return load_balancers[idx]
+                    return arn_to_lb[tag_description["ResourceArn"]]
 
             if marker == "":
                 break
