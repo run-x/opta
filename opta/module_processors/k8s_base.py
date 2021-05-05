@@ -35,7 +35,7 @@ class K8sBaseProcessor(AWSK8sModuleProcessor):
 
     def post_hook(self, module_idx: int, exception: Optional[Exception]) -> None:
         # Manually set the AlpnPolicy to HTTP2Preferred cause the damn K8s service annotation doesn't do its job.
-        if exception is None:
+        if exception is not None:
             return
         providers = self.layer.gen_providers(0)
         region = providers["provider"]["aws"]["region"]
