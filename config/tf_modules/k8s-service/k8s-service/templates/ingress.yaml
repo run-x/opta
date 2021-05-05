@@ -8,7 +8,7 @@ metadata:
     {{- if not (eq $val.pathPrefix "/") }}
     nginx.ingress.kubernetes.io/rewrite-target: /$2
     {{- end }}
-    {{- if .Values.grpc }}
+    {{- if $.Values.grpc }}
     nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
     {{- end }}
     cert-manager.io/cluster-issuer: opta-selfsigned
