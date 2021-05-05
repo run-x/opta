@@ -28,6 +28,9 @@ from opta.module_processors.runx import RunxProcessor
 from opta.plugins.derived_providers import DerivedProviders
 from opta.utils import deep_merge, hydrate, logger
 
+AWS_PROVIDER_VERSION = "3.38.0"
+GCP_PROVIDER_VERSION = "3.66.1"
+
 
 class Layer:
     def __init__(
@@ -123,6 +126,10 @@ class Layer:
             raise UserErrors("Config must have name")
         org_name = conf.pop("org_name", None)
         providers = conf.pop("providers", {})
+        if "aws" in providers:
+            providers["aws"]["version"] = AWS_PROVIDER_VERSION
+        if "google" in providers:
+            providers["google"]["version"] = GCP_PROVIDER_VERSION
         if environments:
             potential_envs: Dict[str, Tuple] = {}
             for env_meta in environments:
