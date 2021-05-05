@@ -8,7 +8,7 @@ resource "aws_eks_cluster" "cluster" {
   version  = var.k8s_version
 
   vpc_config {
-    subnet_ids              = sort([data.aws_subnet_ids.private.ids])
+    subnet_ids              = sort(data.aws_subnet_ids.private.ids)
     endpoint_private_access = false # TODO: make this true once we got VPN figured out
     endpoint_public_access  = true # TODO: make this false once we got VPN figured out
   }
