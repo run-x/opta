@@ -63,7 +63,8 @@ resource "helm_release" "ingress-nginx" {
           enableHttps: var.cert_arn == "" ? false : true
           targetPorts: local.target_ports
           annotations: {
-            "service.beta.kubernetes.io/aws-load-balancer-backend-protocol": "tcp"
+            "service.beta.kubernetes.io/aws-load-balancer-backend-protocol": "ssl"
+            "service.beta.kubernetes.io/aws-load-balancer-proxy-protocol": "*"
             "service.beta.kubernetes.io/aws-load-balancer-type": "nlb"
             "service.beta.kubernetes.io/aws-load-balancer-ssl-ports": var.cert_arn == "" ? "" : "https"
             "service.beta.kubernetes.io/aws-load-balancer-ssl-cert": var.cert_arn
@@ -72,5 +73,8 @@ resource "helm_release" "ingress-nginx" {
         }
       }
     })
+  ]
+  depends_on = [
+    helm_release.linkerd
   ]
 }

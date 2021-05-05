@@ -9,6 +9,11 @@ locals {
   }]
 }
 
+variable "grpc" {
+  type = bool
+  default = false
+}
+
 variable "env_name" {
   description = "Env name"
   type = string

@@ -68,4 +68,7 @@ resource "helm_release" "ingress-nginx" {
       }
     })
   ]
+  depends_on = [
+    helm_release.linkerd
+  ]
 }

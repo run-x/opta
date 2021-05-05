@@ -1,11 +1,9 @@
 locals {
-  target_ports = var.delegated ? { http: "http", https: "http" } : { http: "http" }
-  container_ports = var.delegated ? { http: 80, https: 443 } : { http: 80, https: 443 }
+  target_ports = var.delegated ? { http: "http", https: "https" } : { http: "http" }
+  container_ports = { http: 80, https: 443 }
   config = { ssl-redirect: false }
-  annotations = var.delegated? "{\"exposed_ports\": {\"80\":{\"name\": \"opta-${var.layer_name}-http\"}, \"443\":{\"name\": \"opta-${var.layer_name}-https\"}}}" : "{\"exposed_ports\": {\"80\":{\"name\": \"opta-${var.layer_name}-http\"}}}"
-  negs = var.delegated ? concat(local.http_delegated_negs, local.https_delegated_negs) : local.http_delegated_negs
-  http_delegated_negs = formatlist("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/networkEndpointGroups/opta-%s-http", data.google_client_config.current.project, var.zone_names, var.layer_name)
-  https_delegated_negs = formatlist("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/networkEndpointGroups/opta-%s-https", data.google_client_config.current.project, var.zone_names, var.layer_name)
+  annotations = "{\"exposed_ports\": { \"443\":{\"name\": \"opta-${var.layer_name}-https\"}}}"
+  negs = formatlist("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/networkEndpointGroups/opta-%s-https", data.google_client_config.current.project, var.zone_names, var.layer_name)
 }
 
 data "google_client_config" "current" {}

@@ -1,10 +1,9 @@
 locals {
-  target_ports = var.cert_arn == "" ? { http: "http" } : { http: "http", https: "special" }
-  container_ports = var.cert_arn == "" ? { http: 80, https: 443 } : { http: 80, https: 443, special: 8000 }
+  target_ports = var.cert_arn == "" ? { http: "http" } : { http: "http", https: "https" }
+  container_ports = var.cert_arn == "" ? { http: 80, https: 443 } : { http: 80, https: 443 }
   config = var.cert_arn == "" ? { ssl-redirect: false } : {
     ssl-redirect: false
     server-snippet: <<EOF
-          listen 8000;
           if ( $server_port = 80 ) {
              return 308 https://$host$request_uri;
           }

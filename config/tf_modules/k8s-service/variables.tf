@@ -15,6 +15,10 @@ variable "openid_provider_arn" {
   type = string
 }
 
+variable "grpc" {
+  type = bool
+  default = false
+}
 
 variable "env_name" {
   description = "Env name"

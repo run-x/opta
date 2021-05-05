@@ -4,7 +4,7 @@ resource "google_compute_global_address" "load_balancer" {
 
 resource "google_compute_health_check" "healthcheck" {
   name               = "opta-${var.layer_name}"
-  http_health_check {
+  https_health_check {
     port_specification = "USE_SERVING_PORT"
     request_path = "/healthz"
   }
@@ -12,8 +12,8 @@ resource "google_compute_health_check" "healthcheck" {
 
 resource "google_compute_backend_service" "backend_service" {
   name        = "opta-${var.layer_name}"
-  port_name   = "http"
-  protocol    = "HTTP"
+  port_name   = "https"
+  protocol    = "HTTP2"
 
   health_checks = [google_compute_health_check.healthcheck.id]
 

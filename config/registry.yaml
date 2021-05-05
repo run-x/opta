@@ -169,6 +169,7 @@ modules:
       additional_iam_roles: optional
       min_containers: optional
       max_containers: optional
+      grpc: optional
     outputs:
       docker_repo_url:
         export: true
@@ -448,6 +449,7 @@ modules:
       write_buckets: optional
       min_containers: optional
       max_containers: optional
+      grpc: optional
     outputs:
       docker_repo_url:
         export: true
