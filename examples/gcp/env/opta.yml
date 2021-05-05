@@ -9,9 +9,10 @@ modules:
   - type: gcp-base
   - type: gcp-dns
     domain: gcp-example.runx.dev
-    delegated: false
+    delegated: true
     subdomains:
       - subdomain1
+      - subdomain2
   - type: gcp-gke
     max_nodes: 6
   - type: gcp-k8s-base
