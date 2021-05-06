@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Create and destroy test-service and opta environment
-        run: ./scripts/dispatch_workflow.sh runxc create-and-destroy.yml
+        run: ./scripts/dispatch_workflow.sh opta create-and-destroy.yml
         env:
           github_token: ${{ secrets.ALL_GITHUB_TOKEN }}
       # - name: Slack alert if failed.
