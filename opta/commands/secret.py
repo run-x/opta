@@ -3,6 +3,7 @@ import re
 from typing import Optional
 
 import click
+from click_didyoumean import DYMGroup
 from kubernetes.client import CoreV1Api
 from kubernetes.config import load_kube_config
 
@@ -15,7 +16,7 @@ from opta.layer import Layer
 from opta.utils import fmt_msg
 
 
-@click.group()
+@click.group(cls=DYMGroup)
 def secret() -> None:
     """Commands for manipulating secrets for a k8s service"""
     pass
