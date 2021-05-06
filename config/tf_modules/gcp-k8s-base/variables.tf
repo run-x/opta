@@ -1,5 +1,5 @@
 locals {
-  target_ports = var.delegated ? { http: "http", https: "https" } : { http: "http" }
+  target_ports = { http: "http", https: "https" }
   container_ports = { http: 80, https: 443 }
   config = { ssl-redirect: false }
   annotations = "{\"exposed_ports\": { \"443\":{\"name\": \"opta-${var.layer_name}-https\"}}}"
