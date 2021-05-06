@@ -35,7 +35,10 @@ resource "aws_eks_cluster" "cluster" {
   }
   lifecycle {
     ignore_changes = [
-      vpc_config[0].subnet_ids
+      # For some reason a data refresh appears randomly and even though the exact same data is going to be read,
+      # terraform panics and thinks it needs to recreate the whole cluster.
+      vpc_config[0].subnet_ids,
+      encryption_config[0].provider[0].key_arn
     ]
   }
 }
