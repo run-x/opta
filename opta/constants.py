@@ -26,6 +26,7 @@ VERSION = open(version_path).read().strip()
 SESSION_ID = int(time.time() * 1000)
 
 # Path of the generated tf file.
+OPTA_DISABLE_REPORTING = "OPTA_DISABLE_REPORTING"
 TF_FILE_PATH = "main.tf.json"
 TF_PLAN_PATH = "tf.plan"
 MAX_TERRAFORM_VERSION = "0.16.0"
