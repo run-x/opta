@@ -1,11 +1,13 @@
 # type: ignore
 import json
+import os
 import time
 from logging import LogRecord
 
 from pytest_mock import MockFixture, mocker  # noqa
 from requests import Response, codes
 
+from opta.constants import OPTA_DISABLE_REPORTING
 from opta.datadog_logging import CLIENT_TOKEN, DEFAULT_CACHE_SIZE, DatadogLogHandler
 
 
@@ -66,3 +68,22 @@ class TestDatadogLogHandler:
             data=json.dumps(cache_entry).encode("utf-8"),
             timeout=5,
         )
+
+    def test_dont_flush(self, mocker: MockFixture):  # noqa
+        mocked_response = mocker.Mock(spec=Response)
+        mocked_response.status_code = codes.ok
+        mocked_post = mocker.patch(
+            "opta.datadog_logging.post", return_value=mocked_response
+        )
+        handler = DatadogLogHandler()
+        cache_entry = {
+            "date": int(time.time() * 1000),
+            "message": "blah",
+            "status": "INFO",
+        }
+        handler.cache = [cache_entry]
+        os.environ[OPTA_DISABLE_REPORTING] = "1"
+        handler.flush()
+        del os.environ[OPTA_DISABLE_REPORTING]
+        assert handler.cache == []
+        mocked_post.assert_not_called()

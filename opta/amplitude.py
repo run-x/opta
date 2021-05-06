@@ -9,7 +9,7 @@ from getmac import get_mac_address
 from git.config import GitConfigParser
 from requests import codes, post
 
-from opta.constants import SESSION_ID, VERSION
+from opta.constants import OPTA_DISABLE_REPORTING, SESSION_ID, VERSION
 from opta.utils import logger, safe_run
 
 
@@ -89,16 +89,21 @@ class AmplitudeClient:
             ],
         }
         headers = {"Content-Type": "application/json", "Accept": "*/*"}
-        r = post(
-            "https://api2.amplitude.com/2/httpapi", params={}, headers=headers, json=body
-        )
-        if r.status_code != codes.ok:
-            raise Exception(
-                "Hey, we're trying to send some analytics over to our devs for the "
-                f"product usage and we got a {r.status_code} response back. Could "
-                "you pls email over to our dev team about this and tell them of the "
-                f"failure with the aforementioned code and this response body: {r.text}"
+
+        if os.environ.get(OPTA_DISABLE_REPORTING) is None:
+            r = post(
+                "https://api2.amplitude.com/2/httpapi",
+                params={},
+                headers=headers,
+                json=body,
             )
+            if r.status_code != codes.ok:
+                raise Exception(
+                    "Hey, we're trying to send some analytics over to our devs for the "
+                    f"product usage and we got a {r.status_code} response back. Could "
+                    "you pls email over to our dev team about this and tell them of the "
+                    f"failure with the aforementioned code and this response body: {r.text}"
+                )
 
 
 amplitude_client = AmplitudeClient()

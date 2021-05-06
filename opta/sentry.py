@@ -8,7 +8,7 @@ from getmac import get_mac_address
 from git.config import GitConfigParser
 from sentry_sdk.integrations.atexit import AtexitIntegration
 
-from opta.constants import VERSION
+from opta.constants import OPTA_DISABLE_REPORTING, VERSION
 from opta.exceptions import UserErrors
 from opta.utils import logger
 
@@ -38,6 +38,8 @@ def before_send(event: Any, hint: Any) -> Any:
 
 if hasattr(sys, "_called_from_test") or VERSION == "dev":
     logger.debug("Not sending sentry cause we're in test or dev")
+elif os.environ.get(OPTA_DISABLE_REPORTING) is not None:
+    logger.debug("Not sending sentry cause disable reporting flag is set")
 else:
     sentry_sdk.init(
         "https://aab05facf13049368d749e1b30a08b32@o511457.ingest.sentry.io/5610510",
