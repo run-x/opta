@@ -35,7 +35,8 @@ resource "aws_eks_cluster" "cluster" {
   }
   lifecycle {
     ignore_changes = [
-      vpc_config[0].subnet_ids
+      vpc_config[0].subnet_ids,
+      encryption_config[0].provider[0].key_arn
     ]
   }
 }
