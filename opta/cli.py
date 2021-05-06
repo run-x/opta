@@ -4,6 +4,7 @@ from importlib.util import find_spec
 from subprocess import CalledProcessError
 
 import click
+from click_didyoumean import DYMGroup
 
 import opta.sentry  # noqa: F401 This leads to initialization of sentry sdk
 from opta.amplitude import amplitude_client
@@ -25,7 +26,7 @@ from opta.exceptions import UserErrors
 from opta.utils import dd_handler, dd_listener, logger
 
 
-@click.group()
+@click.group(cls=DYMGroup)
 def cli() -> None:
     """Welcome to opta, runx's cli!"""
     pass
