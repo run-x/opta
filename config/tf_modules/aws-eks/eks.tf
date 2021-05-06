@@ -33,6 +33,11 @@ resource "aws_eks_cluster" "cluster" {
   tags = {
     terraform = "true"
   }
+  lifecycle {
+    ignore_changes = [
+      vpc_config[0].subnet_ids
+    ]
+  }
 }
 
 resource "aws_security_group_rule" "control_plane_access" {

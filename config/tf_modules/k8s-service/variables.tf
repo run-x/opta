@@ -15,7 +15,6 @@ variable "openid_provider_arn" {
   type = string
 }
 
-
 variable "env_name" {
   description = "Env name"
   type = string

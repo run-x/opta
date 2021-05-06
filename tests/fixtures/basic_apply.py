@@ -2,11 +2,19 @@ BASIC_APPLY = (
     {
         "name": "dev1",
         "org_name": "test",
-        "providers": {"aws": {"account_id": "abc", "region": "us-east-1"}},
+        "providers": {
+            "aws": {"account_id": "abc", "region": "us-east-1", "version": "3.38.0"}
+        },
         "modules": [{"name": "core", "type": "aws-base"}],
     },
     {
-        "provider": {"aws": {"allowed_account_ids": ["abc"], "region": "us-east-1"}},
+        "provider": {
+            "aws": {
+                "allowed_account_ids": ["abc"],
+                "region": "us-east-1",
+                "version": "3.38.0",
+            }
+        },
         "terraform": {
             "backend": {
                 "s3": {

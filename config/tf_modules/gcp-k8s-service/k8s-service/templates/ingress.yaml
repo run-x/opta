@@ -8,6 +8,10 @@ metadata:
     {{- if not (eq $val.pathPrefix "/") }}
     nginx.ingress.kubernetes.io/rewrite-target: /$2
     {{- end }}
+    {{ if hasKey $.Values.port "grpc" }}
+    nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+    {{- end }}
+    cert-manager.io/cluster-issuer: opta-selfsigned
     kubernetes.io/ingress.class: "nginx"
     nginx.ingress.kubernetes.io/configuration-snippet: |
       proxy_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;
@@ -18,6 +22,14 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
     {{- end }}
 spec:
+  tls:
+    - hosts:
+        - {{ if not (eq $val.domain "all" ) }}
+          {{ $val.domain | quote }}
+          {{ else }}
+          "*"
+      {{ end }}
+      secretName: self-signed
   rules:
     - {{ if not (eq $val.domain "all" ) }}
       host: {{ $val.domain }}
