@@ -115,22 +115,24 @@ def test_load_extra_aws_outputs(mocker: MockFixture) -> None:
     elb_client.describe_tags.return_value = {
         "TagDescriptions": [
             {
+                "ResourceArn": "abc",
                 "Tags": [
                     {"Key": "kubernetes.io/cluster/malarkey", "Value": "owned"},
                     {
                         "Key": "kubernetes.io/service-name",
                         "Value": "ingress-nginx/ingress-nginx-controller",
                     },
-                ]
+                ],
             },
             {
+                "ResourceArn": "def",
                 "Tags": [
                     {
                         "Key": "kubernetes.io/service-name",
                         "Value": "ingress-nginx/ingress-nginx-controller",
                     },
                     {"Key": "kubernetes.io/cluster/opta-baloney", "Value": "owned"},
-                ]
+                ],
             },
         ]
     }

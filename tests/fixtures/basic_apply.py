@@ -8,7 +8,13 @@ BASIC_APPLY = (
         "modules": [{"name": "core", "type": "aws-base"}],
     },
     {
-        "provider": {"aws": {"allowed_account_ids": ["abc"], "region": "us-east-1"}},
+        "provider": {
+            "aws": {
+                "allowed_account_ids": ["abc"],
+                "region": "us-east-1",
+                "version": "3.38.0",
+            }
+        },
         "terraform": {
             "backend": {
                 "s3": {
