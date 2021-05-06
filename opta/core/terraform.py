@@ -89,7 +89,11 @@ class Terraform:
             kwargs["stdout"] = DEVNULL
 
         try:
-            nice_run(["terraform", "apply", *tf_flags], check=True, **kwargs)
+            nice_run(
+                ["terraform", "apply", "-compact-warnings", *tf_flags],
+                check=True,
+                **kwargs,
+            )
         except Exception as e:
             logging.error(e)
             logging.info("Terraform apply failed, would rollback, but skipping for now..")
@@ -254,7 +258,9 @@ class Terraform:
         if quiet:
             kwargs["stderr"] = PIPE
             kwargs["stdout"] = DEVNULL
-        nice_run(["terraform", "plan", *tf_flags], check=True, **kwargs)
+        nice_run(
+            ["terraform", "plan", "-compact-warnings", *tf_flags], check=True, **kwargs
+        )
 
     @classmethod
     def show(cls, *tf_flags: str) -> None:
