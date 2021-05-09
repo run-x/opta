@@ -2,14 +2,14 @@ environments:
   - name: staging
     path: "../env/opta.yml"
     variables:
-      max_nodes: 2
+      max_containers: 2
 name: service-1
 modules:
   - name: app
     type: k8s-service
-    image: kennethreitz/httpbin 
+    image: kennethreitz/httpbin
     min_containers: 2
-    max_containers: "{vars.max_nodes}"
+    max_containers: "{vars.max_containers}"
     liveness_probe_path: "/get"
     readiness_probe_path: "/get"
     port:

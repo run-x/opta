@@ -67,3 +67,8 @@ data "aws_subnet_ids" "public" {
     type = "public"
   }
 }
+
+variable "admin_arns" {
+  type = list(string)
+  default = []
+}

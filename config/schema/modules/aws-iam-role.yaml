@@ -1,0 +1,13 @@
+type: regex('aws-iam-role')
+name: str(required=False)
+env_name: str(required=False)
+layer_name: str(required=False)
+module_name: str(required=False)
+allowed_k8s_services: list(include('allowed-k8s-services'), required=False)
+allowed_iams: list(str(), required=False)
+extra_iam_policies: list(str(), required=False)
+links: list(any(str(), map()), required=False)
+---
+allowed-k8s-services:
+  service_name: str(required=True)
+  namespace: str(required=True)

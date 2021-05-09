@@ -120,7 +120,7 @@ variable "secrets" {
 variable "iam_policy" {
 }
 
-variable "additional_iam_roles" {
+variable "additional_iam_policies" {
   type = list(string)
   default = []
 }

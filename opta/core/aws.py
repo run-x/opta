@@ -1,5 +1,5 @@
 from time import sleep
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Optional, TypedDict
 
 import boto3
 from botocore.config import Config
@@ -8,6 +8,16 @@ from opta.utils import fmt_msg, logger
 
 if TYPE_CHECKING:
     from opta.layer import Layer
+
+
+class AwsArn(TypedDict):
+    arn: str
+    partition: str
+    service: str
+    region: str
+    account: str
+    resource: str
+    resource_type: Optional[str]
 
 
 class AWS:
@@ -70,6 +80,31 @@ class AWS:
         logger.info("Deleted opta config from s3")
 
     @staticmethod
+    def prepare_read_buckets_iam_statements(bucket_names: List[str]) -> dict:
+        return {
+            "Sid": "ReadBuckets",
+            "Action": ["s3:GetObject*", "s3:ListBucket"],
+            "Effect": "Allow",
+            "Resource": [f"arn:aws:s3:::{bucket_name}" for bucket_name in bucket_names]
+            + [f"arn:aws:s3:::{bucket_name}/*" for bucket_name in bucket_names],
+        }
+
+    @staticmethod
+    def prepare_write_buckets_iam_statements(bucket_names: List[str]) -> dict:
+        return {
+            "Sid": "WriteBuckets",
+            "Action": [
+                "s3:GetObject*",
+                "s3:PutObject*",
+                "s3:DeleteObject*",
+                "s3:ListBucket",
+            ],
+            "Effect": "Allow",
+            "Resource": [f"arn:aws:s3:::{bucket_name}" for bucket_name in bucket_names]
+            + [f"arn:aws:s3:::{bucket_name}/*" for bucket_name in bucket_names],
+        }
+
+    @staticmethod
     def delete_bucket(bucket_name: str) -> None:
         # Before a bucket can be deleted, all of the objects inside must be removed.
         bucket = boto3.resource("s3").Bucket(bucket_name)
@@ -101,6 +136,25 @@ class AWS:
                 sleep(5)
 
         raise Exception("Failed to delete after 20 retries, quitting.")
+
+    @staticmethod
+    def parse_arn(arn) -> AwsArn:
+        # http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html
+        elements = arn.split(":", 5)
+        result = {
+            "arn": elements[0],
+            "partition": elements[1],
+            "service": elements[2],
+            "region": elements[3],
+            "account": elements[4],
+            "resource": elements[5],
+            "resource_type": None,
+        }
+        if "/" in result["resource"]:
+            result["resource_type"], result["resource"] = result["resource"].split("/", 1)
+        elif ":" in result["resource"]:
+            result["resource_type"], result["resource"] = result["resource"].split(":", 1)
+        return result
 
 
 # AWS Resource ARNs can be one of the following 3 formats:

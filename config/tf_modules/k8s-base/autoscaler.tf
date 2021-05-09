@@ -42,10 +42,10 @@ resource "aws_iam_role" "autoscaler" {
   name = "opta-${var.env_name}-k8s-autoscaler"
 }
 
-resource "aws_iam_policy_attachment" "autoscaler" {
+resource "aws_iam_role_policy_attachment" "autoscaler" {
   name = "opta-${var.env_name}-k8s-autoscaler"
   policy_arn = aws_iam_policy.autoscaler.arn
-  roles = [aws_iam_role.autoscaler.name]
+  role = aws_iam_role.autoscaler.name
 }
 
 resource "helm_release" "autoscaler" {
