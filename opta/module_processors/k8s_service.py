@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING, List
 
+from opta.core.aws import AWS
 from opta.exceptions import UserErrors
 from opta.module_processors.base import AWSK8sModuleProcessor
 
@@ -79,39 +80,11 @@ class K8sServiceProcessor(AWSK8sModuleProcessor):
         ]
         if self.read_buckets:
             iam_statements.append(
-                {
-                    "Sid": "ReadBuckets",
-                    "Action": ["s3:GetObject*", "s3:ListBucket"],
-                    "Effect": "Allow",
-                    "Resource": [
-                        f"arn:aws:s3:::{bucket_name}" for bucket_name in self.read_buckets
-                    ]
-                    + [
-                        f"arn:aws:s3:::{bucket_name}/*"
-                        for bucket_name in self.read_buckets
-                    ],
-                }
+                AWS.prepare_read_buckets_iam_statements(self.read_buckets)
             )
         if self.write_buckets:
             iam_statements.append(
-                {
-                    "Sid": "WriteBuckets",
-                    "Action": [
-                        "s3:GetObject*",
-                        "s3:PutObject*",
-                        "s3:DeleteObject*",
-                        "s3:ListBucket",
-                    ],
-                    "Effect": "Allow",
-                    "Resource": [
-                        f"arn:aws:s3:::{bucket_name}"
-                        for bucket_name in self.write_buckets
-                    ]
-                    + [
-                        f"arn:aws:s3:::{bucket_name}/*"
-                        for bucket_name in self.write_buckets
-                    ],
-                }
+                AWS.prepare_write_buckets_iam_statements(self.write_buckets)
             )
         self.module.data["iam_policy"] = {
             "Version": "2012-10-17",

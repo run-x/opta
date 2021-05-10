@@ -2,9 +2,15 @@ from typing import TYPE_CHECKING, Optional
 
 import boto3
 import mypy_boto3_elbv2.type_defs
+import yaml
 from botocore.config import Config
+from kubernetes.client import CoreV1Api, V1ConfigMap
+from kubernetes.config import load_kube_config
 from mypy_boto3_elbv2 import ElasticLoadBalancingv2Client
 
+from opta.core.aws import AWS
+from opta.core.kubernetes import configure_kubectl
+from opta.exceptions import UserErrors
 from opta.module_processors.base import AWSK8sModuleProcessor
 
 if TYPE_CHECKING:
@@ -34,9 +40,65 @@ class K8sBaseProcessor(AWSK8sModuleProcessor):
         super(K8sBaseProcessor, self).process(module_idx)
 
     def post_hook(self, module_idx: int, exception: Optional[Exception]) -> None:
-        # Manually set the AlpnPolicy to HTTP2Preferred cause the damn K8s service annotation doesn't do its job.
         if exception is not None:
             return
+        self.add_alpn_olicy()
+        self.add_admin_roles()
+
+    def add_admin_roles(self) -> None:
+        if self.module.data.get("admin_arns") is None:
+            return
+        configure_kubectl(self.layer)
+        load_kube_config()
+        v1 = CoreV1Api()
+        aws_auth_config_map: V1ConfigMap = v1.read_namespaced_config_map(
+            "aws-auth", "kube-system"
+        )
+        opta_arns_config_map: V1ConfigMap = v1.read_namespaced_config_map(
+            "opta-arns", "default"
+        )
+        admin_arns = yaml.load(opta_arns_config_map.data["adminArns"])
+        current_data = aws_auth_config_map.data
+        old_map_roles = yaml.load(current_data["mapRoles"])
+        new_map_roles = [
+            old_map_role
+            for old_map_role in old_map_roles
+            if not old_map_role["username"].startswith("opta-managed")
+        ]
+        old_map_users = yaml.load(current_data["mapUsers"])
+        new_map_users = [
+            old_map_user
+            for old_map_user in old_map_users
+            if not old_map_user["username"].startswith("opta-managed")
+        ]
+        for arn in admin_arns:
+            arn_data = AWS.parse_arn(arn)
+            if arn_data["resource_type"] == "user":
+                new_map_users.append(
+                    {
+                        "groups": ["system:masters"],
+                        "userarn": arn,
+                        "username": "opta-managed",
+                    }
+                )
+            elif arn_data["resource_type"] == "role":
+                new_map_roles.append(
+                    {
+                        "groups": ["system:masters"],
+                        "rolearn": arn,
+                        "username": "opta-managed",
+                    }
+                )
+            else:
+                raise UserErrors(f"Invalid arn for IAM role or user: {arn}")
+        aws_auth_config_map.data["mapRoles"] = yaml.dump(new_map_roles)
+        aws_auth_config_map.data["mapUsers"] = yaml.dump(new_map_users)
+        v1.replace_namespaced_config_map(
+            "aws-auth", "kube-system", body=aws_auth_config_map
+        )
+
+    def add_alpn_olicy(self) -> None:
+        # Manually set the AlpnPolicy to HTTP2Preferred cause the damn K8s service annotation doesn't do its job.
         providers = self.layer.gen_providers(0)
         region = providers["provider"]["aws"]["region"]
         client: ElasticLoadBalancingv2Client = boto3.client(

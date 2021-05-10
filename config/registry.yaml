@@ -143,6 +143,7 @@ modules:
       high_availability: optional
       domain: optional
       cert_arn: optional
+      admin_arns: optional
     outputs: {}
   k8s-service:
     location: k8s-service
@@ -166,7 +167,7 @@ modules:
       openid_provider_url: str
       openid_provider_arn: str
       iam_policy: optional
-      additional_iam_roles: optional
+      additional_iam_policies: optional
       min_containers: optional
       max_containers: optional
     outputs:
@@ -474,4 +475,27 @@ modules:
       values_file: optional
       values: optional
       timeout: optional
-
+  aws-iam-role:
+    location: aws-iam-role
+    variables:
+      env_name: str
+      layer_name: str
+      module_name: str
+      kubernetes_trusts: optional
+      allowed_iams: optional
+      iam_policy: str
+      extra_iam_policies: optional
+    outputs:
+      role_arn:
+        export: true
+  aws-iam-user:
+    location: aws-iam-user
+    variables:
+      env_name: str
+      layer_name: str
+      module_name: str
+      iam_policy: str
+      extra_iam_policies: optional
+    outputs:
+      user_arn:
+        export: true
