@@ -138,10 +138,10 @@ class AWS:
         raise Exception("Failed to delete after 20 retries, quitting.")
 
     @staticmethod
-    def parse_arn(arn) -> AwsArn:
+    def parse_arn(arn: str) -> AwsArn:
         # http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html
         elements = arn.split(":", 5)
-        result = {
+        result: AwsArn = {
             "arn": elements[0],
             "partition": elements[1],
             "service": elements[2],
