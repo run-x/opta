@@ -115,8 +115,10 @@ class Module:
             ),
             os.getcwd(),
         )
-        # Note: This breaks should runxc ever be prefixed with "."
-        if "." != relative_path[0]:
+
+        # Terraform requires the module paths to be relative so add a ./ when
+        # that's not the output of os.path.relpath
+        if not (relative_path.startswith("./") or relative_path.startswith("../")):
             relative_path = f"./{relative_path}"
 
         return relative_path
