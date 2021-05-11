@@ -1,16 +1,11 @@
 data "aws_region" "current" {}
 
-data "aws_vpc" "main" {
-  tags = {
-    Name = "opta-${var.env_name}"
-  }
+variable "kms_account_key_arn" {
+  type = string
 }
 
-data "aws_subnet_ids" "private" {
-  vpc_id = data.aws_vpc.main.id
-  tags = {
-     type = "private"
-  }
+variable "private_subnet_ids" {
+  type = list(string)
 }
 
 variable "env_name" {
