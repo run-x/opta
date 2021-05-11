@@ -1,14 +1,10 @@
-data "aws_kms_key" "default" {
-  key_id = "alias/opta-${var.env_name}"
-}
-
 resource "aws_eks_cluster" "cluster" {
   name     = "opta-${var.layer_name}"
   role_arn = aws_iam_role.cluster_role.arn
   version  = var.k8s_version
 
   vpc_config {
-    subnet_ids              = data.aws_subnet_ids.private.ids
+    subnet_ids              = var.private_subnet_ids
     endpoint_private_access = false # TODO: make this true once we got VPN figured out
     endpoint_public_access  = true # TODO: make this false once we got VPN figured out
   }
@@ -16,7 +12,7 @@ resource "aws_eks_cluster" "cluster" {
   encryption_config {
     resources = ["secrets"]
     provider {
-      key_arn = data.aws_kms_key.default.arn
+      key_arn = var.kms_account_key_arn
     }
   }
 
@@ -32,14 +28,6 @@ resource "aws_eks_cluster" "cluster" {
 
   tags = {
     terraform = "true"
-  }
-  lifecycle {
-    ignore_changes = [
-      # For some reason a data refresh appears randomly and even though the exact same data is going to be read,
-      # terraform panics and thinks it needs to recreate the whole cluster.
-      vpc_config[0].subnet_ids,
-      encryption_config[0].provider[0].key_arn
-    ]
   }
 }
 
@@ -59,8 +47,4 @@ resource "aws_cloudwatch_log_group" "cluster_logs" {
   tags = {
     terraform = "true"
   }
-}
-
-data "aws_eks_cluster_auth" "cluster" {
-  name = aws_eks_cluster.cluster.name
 }

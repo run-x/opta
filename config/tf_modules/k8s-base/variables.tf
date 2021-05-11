@@ -1,3 +1,5 @@
+data "aws_region" "current" {}
+
 locals {
   target_ports = var.cert_arn == "" ? { http: "http" } : { http: "http", https: "https" }
   container_ports = var.cert_arn == "" ? { http: 80, https: 443 } : { http: 80, https: 443 }
@@ -11,10 +13,8 @@ locals {
   }
 }
 
-data "aws_region" "current" {}
-
-data "aws_eks_cluster" "main" {
-  name = "opta-${var.env_name}"
+variable "eks_cluster_name" {
+  type = string
 }
 
 variable "env_name" {
@@ -53,19 +53,6 @@ variable "openid_provider_arn" {
 variable "high_availability" {
   type = bool
   default = true
-}
-
-data "aws_vpc" "main" {
-  tags = {
-    Name = "opta-${var.env_name}"
-  }
-}
-
-data "aws_subnet_ids" "public" {
-  vpc_id = data.aws_vpc.main.id
-  tags = {
-    type = "public"
-  }
 }
 
 variable "admin_arns" {

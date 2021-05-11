@@ -55,7 +55,7 @@ resource "helm_release" "autoscaler" {
   values = [
     yamlencode({
       autoDiscovery: {
-        clusterName: data.aws_eks_cluster.main.name
+        clusterName: var.eks_cluster_name
       },
       rbac: {
         serviceAccount: {
