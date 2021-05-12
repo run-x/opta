@@ -13,6 +13,7 @@ resource "helm_release" "remote_chart" {
     yamlencode(var.values)
   ]
   timeout = var.timeout
+  dependency_update = var.dependency_update
 }
 
 resource "helm_release" "local_chart" {
@@ -28,4 +29,5 @@ resource "helm_release" "local_chart" {
     yamlencode(var.values)
   ]
   timeout = var.timeout
+  dependency_update = var.dependency_update
 }

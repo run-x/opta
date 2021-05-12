@@ -61,3 +61,8 @@ variable "timeout" {
   default = 300
 }
 
+variable "dependency_update" {
+  type = bool
+  default = true
+}
+

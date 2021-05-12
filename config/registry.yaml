@@ -478,6 +478,7 @@ modules:
       values_file: optional
       values: optional
       timeout: optional
+      dependency_update: optional
   aws-iam-role:
     location: aws-iam-role
     variables:
