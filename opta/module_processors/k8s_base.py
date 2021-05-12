@@ -65,7 +65,7 @@ class K8sBaseProcessor(AWSK8sModuleProcessor):
             for old_map_role in old_map_roles
             if not old_map_role["username"].startswith("opta-managed")
         ]
-        old_map_users = yaml.load(current_data["mapUsers"], Loader=yaml.Loader)
+        old_map_users = yaml.load(current_data.get("mapUsers", "[]"), Loader=yaml.Loader)
         new_map_users = [
             old_map_user
             for old_map_user in old_map_users
@@ -92,7 +92,8 @@ class K8sBaseProcessor(AWSK8sModuleProcessor):
             else:
                 raise UserErrors(f"Invalid arn for IAM role or user: {arn}")
         aws_auth_config_map.data["mapRoles"] = yaml.dump(new_map_roles)
-        aws_auth_config_map.data["mapUsers"] = yaml.dump(new_map_users)
+        if len(new_map_users) > 0:
+            aws_auth_config_map.data["mapUsers"] = yaml.dump(new_map_users)
         v1.replace_namespaced_config_map(
             "aws-auth", "kube-system", body=aws_auth_config_map
         )
