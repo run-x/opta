@@ -39,7 +39,10 @@ infrastructure.
 * No lock in
 * Complete security
 # Quick start
-Install: `/bin/bash -c "$(curl -fsSL https://docs.runx.dev/install.sh)"`
+Install: 
+
+`/bin/bash -c "$(curl -fsSL https://docs.runx.dev/install.sh)"`
+
 Create environment:
 ```
 name: staging
@@ -67,7 +70,9 @@ modules:
     image: docker.io/kennethreitz/httpbin:latest
     healthcheck_path: "/get"
 ```
-Deploy: `opta apply`
+Deploy: 
+
+`opta apply`
 # [WIP] Features
 # [WIP] Community
 # [WIP] Development
