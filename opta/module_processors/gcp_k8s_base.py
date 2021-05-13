@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 class GcpK8sBaseProcessor(GcpK8sModuleProcessor):
     def __init__(self, module: "Module", layer: "Layer"):
-        if module.data["type"] != "gcp-k8s-base":
+        if (module.aliased_type or module.type) != "gcp-k8s-base":
             raise Exception(
                 f"The module {module.name} was expected to be of type k8s base"
             )
@@ -19,7 +19,7 @@ class GcpK8sBaseProcessor(GcpK8sModuleProcessor):
     def process(self, module_idx: int) -> None:
         gcp_dns_module = None
         for module in self.layer.modules:
-            if module.data["type"] == "gcp-dns":
+            if (module.aliased_type or module.type) == "gcp-dns":
                 gcp_dns_module = module
                 break
         if gcp_dns_module is not None:

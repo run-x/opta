@@ -18,13 +18,13 @@ if TYPE_CHECKING:
     from opta.module import Module
 
 
-class K8sBaseProcessor(AWSK8sModuleProcessor):
+class AwsK8sBaseProcessor(AWSK8sModuleProcessor):
     def __init__(self, module: "Module", layer: "Layer"):
-        if module.data["type"] != "k8s-base":
+        if (module.aliased_type or module.type) != "aws-k8s-base":
             raise Exception(
                 f"The module {module.name} was expected to be of type k8s base"
             )
-        super(K8sBaseProcessor, self).__init__(module, layer)
+        super(AwsK8sBaseProcessor, self).__init__(module, layer)
 
     def process(self, module_idx: int) -> None:
         aws_dns_module = None
@@ -37,7 +37,7 @@ class K8sBaseProcessor(AWSK8sModuleProcessor):
             self.module.data[
                 "cert_arn"
             ] = f"${{{{module.{aws_dns_module.name}.cert_arn}}}}"
-        super(K8sBaseProcessor, self).process(module_idx)
+        super(AwsK8sBaseProcessor, self).process(module_idx)
 
     def post_hook(self, module_idx: int, exception: Optional[Exception]) -> None:
         if exception is not None:

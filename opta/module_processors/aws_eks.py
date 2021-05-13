@@ -10,9 +10,9 @@ if TYPE_CHECKING:
 
 class AwsEksProcessor(ModuleProcessor):
     def __init__(self, module: "Module", layer: "Layer"):
-        if module.data["type"] != "aws-eks":
+        if (module.aliased_type or module.type) != "aws-eks":
             raise Exception(
-                f"The module {module.name} was expected to be of type k8s base"
+                f"The module {module.name} was expected to be of type aws eks"
             )
         super(AwsEksProcessor, self).__init__(module, layer)
 

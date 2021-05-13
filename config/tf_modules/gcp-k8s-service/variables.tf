@@ -7,6 +7,9 @@ locals {
     domain: trim(split("/", s)[0], "."),
     pathPrefix: (length(split("/", s)) > 1 ? "/${join("/",slice(split("/", s), 1, length(split("/", s))))}" : "/")
   }]
+  env_short = substr(var.env_name, 0, 9)
+  layer_short = substr(var.layer_name, 0, 9)
+  module_short = substr(var.module_name, 0, 9)
 }
 
 variable "env_name" {

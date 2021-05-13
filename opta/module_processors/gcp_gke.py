@@ -16,7 +16,7 @@ class GcpGkeProcessor(ModuleProcessor):
     def process(self, module_idx: int) -> None:
         gcp_base_module = None
         for module in self.layer.modules:
-            if module.data["type"] == "gcp-base":
+            if (module.aliased_type or module.type) == "gcp-base":
                 gcp_base_module = module
                 break
         if gcp_base_module is None:

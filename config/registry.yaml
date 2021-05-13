@@ -16,6 +16,7 @@ backends:
 
 modules:
   aws-base:
+    cloud: aws
     location: aws-base
     halt: true
     root_only: true
@@ -61,6 +62,7 @@ modules:
         desc: Servers in this subnet do not have direct access to the Internet (must use a proxy).
         url: https://console.aws.amazon.com/vpc/home?region={aws_region}#SubnetDetails:subnetId={id}
   aws-nodegroup:
+    cloud: aws
     location: aws-nodegroup
     halt: false
     root_only: true
@@ -80,6 +82,7 @@ modules:
         desc: Managed Kubernetes service.
         url: https://console.aws.amazon.com/eks/home?region={aws_region}#/clusters/{name}
   aws-eks:
+    cloud: aws
     location: aws-eks
     halt: true
     root_only: true
@@ -126,6 +129,7 @@ modules:
             token: "${{data.aws_eks_cluster_auth.k8s.token}}"
             cluster_ca_certificate: "${{base64decode({module_source}.k8s_ca_data)}}"
   datadog:
+    cloud: any
     location: datadog
     root_only: true
     variables:
@@ -133,7 +137,8 @@ modules:
       layer_name: str
       module_name: str
       api_key: optional
-  k8s-base:
+  aws-k8s-base:
+    cloud: aws
     location: k8s-base
     root_only: true
     variables:
@@ -148,7 +153,8 @@ modules:
       cert_arn: optional
       admin_arns: optional
     outputs: {}
-  k8s-service:
+  aws-k8s-service:
+    cloud: aws
     location: k8s-service
     variables:
       env_name: str
@@ -182,6 +188,7 @@ modules:
         desc: Secure and scalable Kubernetes service packaged into a helm chart
         url: https://app.datadoghq.com/apm/service/{k8s-moduleName}-{k8s-layerName}/
   aws-documentdb:
+    cloud: aws
     location: aws-documentdb
     variables:
       env_name: str
@@ -199,6 +206,7 @@ modules:
         desc: DocumentDB is a NoSQL database that exposes a similar API to MongoDB.
         url: https://console.aws.amazon.com/docdb/home?region={aws_region}#cluster-details/{cluster_identifier}
   aws-postgres:
+    cloud: aws
     location: aws-postgres
     variables:
       env_name: str
@@ -223,6 +231,7 @@ modules:
           (Postgres, MySQL, SQL Server, ...)
         url: https://console.aws.amazon.com/rds/home?region={aws_region}#database:id={id};is-cluster=true
   aws-redis:
+    cloud: aws
     location: aws-redis
     variables:
       env_name: str
@@ -235,6 +244,7 @@ modules:
         export: true
       cache_auth_token: str
   aws-dns:
+    cloud: aws
     location: aws-dns
     variables:
       env_name: str
@@ -254,6 +264,7 @@ modules:
       domain:
         export: true
   aws-s3:
+    cloud: aws
     location: aws-s3
     variables:
       env_name: str
@@ -274,6 +285,7 @@ modules:
         url: https://s3.console.aws.amazon.com/s3/buckets/{id}?region={aws_region}&tab=objects
 
   gcp-base:
+    cloud: google
     location: gcp-base
     halt: true
     root_only: true
@@ -302,6 +314,7 @@ modules:
         google_client_config:
           provider: {}
   gcp-dns:
+    cloud: google
     location: gcp-dns
     variables:
       env_name: str
@@ -324,6 +337,7 @@ modules:
       cert_self_link:
         export: true
   gcp-gke:
+    cloud: google
     location: gcp-gke
     halt: true
     root_only: true
@@ -365,6 +379,7 @@ modules:
             token: "${{data.google_client_config.provider.access_token}}"
             cluster_ca_certificate: "${{base64decode({module_source}.k8s_ca_data)}}"
   gcp-k8s-base:
+    cloud: google
     location: gcp-k8s-base
     root_only: true
     variables:
@@ -380,6 +395,7 @@ modules:
       load_balancer_raw_ip:
         export: true
   gcp-postgres:
+    cloud: google
     location: gcp-postgres
     variables:
       env_name: str
@@ -400,6 +416,7 @@ modules:
           Postgres database
         url: https://console.cloud.google.com/sql/instances/{id}/overview?folder=&organizationId=&project={gcp_project}
   gcp-redis:
+    cloud: google
     location: gcp-redis
     variables:
       env_name: str
@@ -412,6 +429,7 @@ modules:
       cache_host: str
       cache_auth_token: str
   gcp-gcs:
+    cloud: google
     location: gcp-gcs
     variables:
       env_name: str
@@ -430,6 +448,7 @@ modules:
         desc: Distributed object storage
         url: https://console.cloud.google.com/storage/browser/{id}
   gcp-k8s-service:
+    cloud: google
     location: gcp-k8s-service
     variables:
       env_name: str
@@ -461,8 +480,10 @@ modules:
         desc: Secure and scalable Kubernetes service packaged into a helm chart
         url: https://app.datadoghq.com/apm/service/{k8s-moduleName}-{k8s-layerName}/
   runx:
+    cloud: any
     location: ""
   helm-chart:
+    cloud: any
     location: helm-chart
     variables:
       env_name: str
@@ -480,6 +501,7 @@ modules:
       timeout: optional
       dependency_update: optional
   aws-iam-role:
+    cloud: aws
     location: aws-iam-role
     variables:
       env_name: str
@@ -493,6 +515,7 @@ modules:
       role_arn:
         export: true
   aws-iam-user:
+    cloud: aws
     location: aws-iam-user
     variables:
       env_name: str
@@ -503,3 +526,38 @@ modules:
     outputs:
       user_arn:
         export: true
+
+  postgres:
+    alias:
+      google: gcp-postgres
+      aws: aws-postgres
+
+  redis:
+    alias:
+      google: gcp-redis
+      aws: aws-redis
+
+  k8s-service:
+    alias:
+      google: gcp-k8s-service
+      aws: aws-k8s-service
+
+  base:
+    alias:
+      google: gcp-base
+      aws: aws-base
+
+  k8s-base:
+    alias:
+      google: gcp-k8s-base
+      aws: aws-k8s-base
+
+  k8s-cluster:
+    alias:
+      google: gcp-gke
+      aws: aws-eks
+
+  dns:
+    alias:
+      google: gcp-dns
+      aws: aws-dns

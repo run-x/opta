@@ -11,22 +11,22 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 import git
 import yaml
 
-from opta.commands.validate import validate_yaml
 from opta.constants import REGISTRY
+from opta.core.validator import validate_yaml
 from opta.exceptions import UserErrors
 from opta.module import Module
 from opta.module_processors.aws_dns import AwsDnsProcessor
 from opta.module_processors.aws_eks import AwsEksProcessor
 from opta.module_processors.aws_iam_role import AwsIamRoleProcessor
 from opta.module_processors.aws_iam_user import AwsIamUserProcessor
+from opta.module_processors.aws_k8s_base import AwsK8sBaseProcessor
+from opta.module_processors.aws_k8s_service import AwsK8sServiceProcessor
 from opta.module_processors.base import ModuleProcessor
 from opta.module_processors.datadog import DatadogProcessor
 from opta.module_processors.gcp_gke import GcpGkeProcessor
 from opta.module_processors.gcp_k8s_base import GcpK8sBaseProcessor
 from opta.module_processors.gcp_k8s_service import GcpK8sServiceProcessor
 from opta.module_processors.helm_chart import HelmChartProcessor
-from opta.module_processors.k8s_base import K8sBaseProcessor
-from opta.module_processors.k8s_service import K8sServiceProcessor
 from opta.module_processors.runx import RunxProcessor
 from opta.plugins.derived_providers import DerivedProviders
 from opta.utils import deep_merge, hydrate, logger
@@ -76,7 +76,7 @@ class Layer:
         self.variables = variables or {}
         self.modules = []
         for module_data in modules_data:
-            self.modules.append(Module(self.name, module_data, self.parent,))
+            self.modules.append(Module(self, module_data, self.parent,))
         module_names: set = set()
         for module in self.modules:
             if module.name in module_names:
@@ -103,27 +103,31 @@ class Layer:
             # Clone into temporary dir
             git.Repo.clone_from(git_url, t, branch=branch, depth=1)
             config_path = os.path.join(t, file_path)
-            validate_yaml(config_path)
-            conf = yaml.load(open(config_path), Loader=yaml.Loader)
-            shutil.rmtree(t)
-        elif path.exists(config):
-            logger.debug(f"Loaded the following configfile:\n{open(config).read()}")
-            validate_yaml(config)
             with open(config) as f:
                 config_string = f.read()
             conf = yaml.load(config_string, Loader=yaml.Loader)
-            conf["orignal_spec"] = config_string
+            shutil.rmtree(t)
+        elif path.exists(config):
+            config_path = config
+            logger.debug(f"Loaded the following configfile:\n{open(config).read()}")
+            with open(config) as f:
+                config_string = f.read()
+            conf = yaml.load(config_string, Loader=yaml.Loader)
         else:
             raise UserErrors(f"File {config} not found")
 
+        conf["original_spec"] = config_string
         conf["path"] = config
-        return cls.load_from_dict(conf, env)
+
+        layer = cls.load_from_dict(conf, env)
+        validate_yaml(config_path, layer.cloud)
+        return layer
 
     @classmethod
     def load_from_dict(cls, conf: Dict[Any, Any], env: Optional[str]) -> Layer:
         modules_data = conf.get("modules", [])
         environments = conf.pop("environments", None)
-        original_spec = conf.pop("orignal_spec", "")
+        original_spec = conf.pop("original_spec", "")
         name = conf.pop("name", None)
         if name is None:
             raise UserErrors("Config must have name")
@@ -200,7 +204,7 @@ class Layer:
         module_idx = module_idx or len(self.modules) - 1
         modules = []
         for module in self.modules[0 : module_idx + 1]:
-            if module.data["type"] == module_type:
+            if module.type == module_type or module.aliased_type == module_type:
                 modules.append(module)
         return modules
 
@@ -214,11 +218,11 @@ class Layer:
     def gen_tf(self, module_idx: int) -> Dict[Any, Any]:
         ret: Dict[Any, Any] = {}
         for module in self.modules[0 : module_idx + 1]:
-            module_type = module.data["type"]
-            if module_type == "k8s-service":
-                K8sServiceProcessor(module, self).process(module_idx)
-            elif module_type == "k8s-base":
-                K8sBaseProcessor(module, self).process(module_idx)
+            module_type = module.aliased_type or module.type
+            if module_type == "aws-k8s-service":
+                AwsK8sServiceProcessor(module, self).process(module_idx)
+            elif module_type == "aws-k8s-base":
+                AwsK8sBaseProcessor(module, self).process(module_idx)
             elif module_type == "datadog":
                 DatadogProcessor(module, self).process(module_idx)
             elif module_type == "gcp-k8s-base":
@@ -256,10 +260,10 @@ class Layer:
     def post_hook(self, module_idx: int, exception: Optional[Exception]) -> None:
         for module in self.modules[0 : module_idx + 1]:
             module_type = module.data["type"]
-            if module_type == "k8s-service":
-                K8sServiceProcessor(module, self).post_hook(module_idx, exception)
-            elif module_type == "k8s-base":
-                K8sBaseProcessor(module, self).post_hook(module_idx, exception)
+            if module_type == "aws-k8s-service":
+                AwsK8sServiceProcessor(module, self).post_hook(module_idx, exception)
+            elif module_type == "aws-k8s-base":
+                AwsK8sBaseProcessor(module, self).post_hook(module_idx, exception)
             elif module_type == "datadog":
                 DatadogProcessor(module, self).post_hook(module_idx, exception)
             elif module_type == "gcp-k8s-base":
@@ -363,6 +367,14 @@ class Layer:
         # that is awk, so transform it during the mapping.
         if provider_name == "aws" and "account_id" in provider_data:
             aws_account_id = provider_data.pop("account_id")
+            if str(aws_account_id) not in (
+                self.original_spec
+                + ("" if self.parent is None else self.parent.original_spec)
+            ):
+                raise UserErrors(
+                    "The AWS account id which opta parsed is different than the one in the original yaml. "
+                    "Odds are this is because the account starts with a leading 0, which we'll fix soon."
+                )
             provider_data["allowed_account_ids"] = [aws_account_id]
 
     # Get the root-most layer

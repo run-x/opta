@@ -1,6 +1,6 @@
 resource "google_service_account" "k8s_service" {
-  account_id   = "${var.layer_name}-${var.module_name}"
-  display_name = "${var.layer_name}-${var.module_name}"
+  account_id   = "${local.env_short}-${local.layer_short}-${local.module_short}"
+  display_name = "${local.env_short}-${local.layer_short}-${local.module_short}"
 }
 
 resource "google_service_account_iam_binding" "trust_k8s_workload_idu" {
