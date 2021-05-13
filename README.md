@@ -25,9 +25,49 @@
   </a>
   </p>
 
-# [WIP] Introduction
-# [WIP] Why Opta
-# [WIP] Quick start
+# Introduction
+Opta is a platform for running containerized workloads on the cloud. It
+abstracts away the complexity of networking, IAM, kubernetes, and various other
+components - giving you a clean cloud agnostic interface to deploy and run your
+containers.
+It's all configuration driven so you always get a repeatable copy of your
+infrastructure.
+# Why Opta
+* No devops expertise required
+* Multi Cloud (AWS, GCP, Azure)
+* Progressively configurable
+* No lock in
+* Complete security
+# Quick start
+Install: `/bin/bash -c "$(curl -fsSL https://docs.runx.dev/install.sh)"`
+Create environment:
+```
+name: staging
+org_name: <something unique>
+providers:
+  aws:
+    region: us-east-1
+    account_id: XXXX
+modules:
+  - type: base
+  - type: k8s-cluster
+  - type: k8s-base
+```
+Create service:
+```
+name: hello-world
+environments:
+  - name: staging
+    path: "staging/opta.yml"
+modules:
+  - name: app
+    type: k8s-service
+    port:
+      http: 80
+    image: docker.io/kennethreitz/httpbin:latest
+    healthcheck_path: "/get"
+```
+Deploy: `opta apply`
 # [WIP] Features
 # [WIP] Community
 # [WIP] Development
