@@ -20,7 +20,7 @@
 </p>
 <p align="center">
   <a href="https://docs.runx.dev/docs">Documentation</a> |
-<a href="https://discord.gg/AyEpG2vY">
+<a href="https://discord.gg/BXjmBhkwvB">
     Discord Community
   </a>
   </p>
@@ -73,6 +73,20 @@ modules:
 Deploy: 
 
 `opta apply`
-# [WIP] Features
-# [WIP] Community
-# [WIP] Development
+# Features
+* Hardened, best practice configurations
+* Easily create/update/destroy multiple environments
+* Built in integrations with observability tools
+* Built in service mesh
+* Built in auto-scaling
+* Supports non-k8s resources like RDS, Cloud SQL, DocumentDB etc
+
+# Community Users
+* https://github.com/flyteorg/flyte
+* https://canvasapp.com/
+* https://biocogniv.com/
+* https://planaday.com/
+* You?
+
+# Development
+[Dev guide](https://github.com/run-x/opta/blob/main/development.md)
