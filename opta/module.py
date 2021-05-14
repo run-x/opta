@@ -1,7 +1,7 @@
 import json
 import os
 import re
-from typing import Any, Dict, Iterable, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional
 
 import hcl2
 
@@ -11,21 +11,36 @@ from opta.resource import Resource
 from opta.utils import deep_merge
 
 TAGS_OVERRIDE_FILE = "tags_override.tf.json"
+if TYPE_CHECKING:
+    from opta.layer import Layer
 
 
 class Module:
-    def __init__(self, layer_name: str, data: Dict[Any, Any], parent_layer: Any = None):
+    def __init__(
+        self, layer: "Layer", data: Dict[Any, Any], parent_layer: Optional["Layer"] = None
+    ):
         if "type" not in data:
             raise UserErrors("Module data must always have a type")
         self.type = data["type"]
-        self.layer_name = layer_name
-        self.data = data
+        if self.type not in REGISTRY["modules"]:
+            raise UserErrors(f"{self.type} is not a valid module type")
+        self.aliased_type: Optional[str] = None
+        self.layer_name = layer.name
+        self.desc = REGISTRY["modules"][self.type]
+        if "alias" in self.desc:
+            cloud = layer.cloud
+            if cloud not in self.desc["alias"]:
+                raise UserErrors(
+                    f"Alias module type {self.type} currently does not support cloud {cloud}"
+                )
+            self.aliased_type = self.desc["alias"][cloud]
+            self.desc = REGISTRY["modules"][self.aliased_type]
+        self.data: Dict[Any, Any] = data
         self.parent_layer = parent_layer
-        self.name = data.get("name", self.type.replace("-", ""))
+        self.name: str = data.get("name", self.type.replace("-", ""))
         if not Module.valid_name(self.name):
             raise UserErrors("Invalid module name, can only contain letters and numbers!")
-        self.desc = REGISTRY["modules"][self.type]
-        self.halt = REGISTRY["modules"][self.type].get("halt", False)
+        self.halt = REGISTRY["modules"][self.aliased_type or self.type].get("halt", False)
         self.module_dir_path = self.translate_location(self.desc["location"])
 
     def outputs(self) -> Iterable[str]:

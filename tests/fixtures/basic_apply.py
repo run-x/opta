@@ -3,14 +3,18 @@ BASIC_APPLY = (
         "name": "dev1",
         "org_name": "test",
         "providers": {
-            "aws": {"account_id": "abc", "region": "us-east-1", "version": "3.38.0"}
+            "aws": {
+                "account_id": "111111111111",
+                "region": "us-east-1",
+                "version": "3.38.0",
+            }
         },
         "modules": [{"name": "core", "type": "aws-base"}],
     },
     {
         "provider": {
             "aws": {
-                "allowed_account_ids": ["abc"],
+                "allowed_account_ids": ["111111111111"],
                 "region": "us-east-1",
                 "version": "3.38.0",
             }

@@ -9,15 +9,15 @@ if TYPE_CHECKING:
     from opta.module import Module
 
 
-class K8sServiceProcessor(AWSK8sModuleProcessor):
+class AwsK8sServiceProcessor(AWSK8sModuleProcessor):
     def __init__(self, module: "Module", layer: "Layer"):
-        if module.data["type"] != "k8s-service":
+        if (module.aliased_type or module.type) != "aws-k8s-service":
             raise Exception(
-                f"The module {module.name} was expected to be of type k8s service"
+                f"The module {module.name} was expected to be of type aws k8s service"
             )
         self.read_buckets: list[str] = []
         self.write_buckets: list[str] = []
-        super(K8sServiceProcessor, self).__init__(module, layer)
+        super(AwsK8sServiceProcessor, self).__init__(module, layer)
 
     def process(self, module_idx: int) -> None:
         # Update the secrets
@@ -92,7 +92,7 @@ class K8sServiceProcessor(AWSK8sModuleProcessor):
         }
         if "image_tag" in self.layer.variables:
             self.module.data["tag"] = self.layer.variables["image_tag"]
-        super(K8sServiceProcessor, self).process(module_idx)
+        super(AwsK8sServiceProcessor, self).process(module_idx)
 
     def handle_rds_link(
         self, linked_module: "Module", link_permissions: List[str]

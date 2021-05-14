@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 class GcpK8sServiceProcessor(GcpK8sModuleProcessor):
     def __init__(self, module: "Module", layer: "Layer"):
-        if module.data["type"] != "gcp-k8s-service":
+        if (module.aliased_type or module.type) != "gcp-k8s-service":
             raise Exception(
                 f"The module {module.name} was expected to be of type k8s service"
             )
