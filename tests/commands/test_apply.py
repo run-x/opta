@@ -24,7 +24,10 @@ def basic_mocks(mocker: MockFixture) -> None:
     )
 
     # Mock opta config
-    fake_module = Module("test", data={"type": "k8s-service", "name": "fakemodule"})
+    mocked_layer = mocker.Mock()
+    mocked_layer.name = "test"
+    mocked_layer.cloud = "aws"
+    fake_module = Module(mocked_layer, data={"type": "k8s-service", "name": "fakemodule"})
     mocker.patch("opta.commands.apply.gen", return_value=iter([(0, [fake_module], 1)]))
     mocker.patch("opta.commands.apply.AWS")
 
