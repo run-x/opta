@@ -43,7 +43,6 @@ resource "aws_iam_role" "autoscaler" {
 }
 
 resource "aws_iam_role_policy_attachment" "autoscaler" {
-  name = "opta-${var.env_name}-k8s-autoscaler"
   policy_arn = aws_iam_policy.autoscaler.arn
   role = aws_iam_role.autoscaler.name
 }
