@@ -87,6 +87,7 @@ class Layer:
 
     @classmethod
     def load_from_yaml(cls, config: str, env: Optional[str]) -> Layer:
+        t = None
         if config.startswith("git@"):
             logger.debug("Loading layer from git...")
             git_url, file_path = config.split("//")
@@ -106,7 +107,6 @@ class Layer:
             with open(config_path) as f:
                 config_string = f.read()
             conf = yaml.load(config_string, Loader=yaml.Loader)
-            shutil.rmtree(t)
         elif path.exists(config):
             config_path = config
             logger.debug(f"Loaded the following configfile:\n{open(config_path).read()}")
@@ -121,6 +121,8 @@ class Layer:
 
         layer = cls.load_from_dict(conf, env)
         validate_yaml(config_path, layer.cloud)
+        if t is not None:
+            shutil.rmtree(t)
         return layer
 
     @classmethod
