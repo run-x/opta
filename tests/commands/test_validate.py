@@ -66,7 +66,7 @@ def test_invalid_module_type() -> None:
     result = runner.invoke(cli, ["validate", "-c", test_file])
     assert result.exit_code == 1
     assert isinstance(result.exception, UserErrors)
-    assert "fake-module-type is not a valid module type" in result.output
+    assert "fake-module-type is not a valid module type" in result.exception.args[0]
 
 
 def test_unexpected_field() -> None:

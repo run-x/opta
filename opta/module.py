@@ -22,6 +22,8 @@ class Module:
         if "type" not in data:
             raise UserErrors("Module data must always have a type")
         self.type = data["type"]
+        if self.type not in REGISTRY["modules"]:
+            raise UserErrors(f"{self.type} is not a valid module type")
         self.aliased_type: Optional[str] = None
         self.layer_name = layer.name
         self.desc = REGISTRY["modules"][self.type]

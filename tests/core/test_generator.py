@@ -2,6 +2,7 @@ import json
 import os
 
 import pytest
+import yaml
 from pytest_mock import MockFixture
 
 from opta.constants import tf_modules_path
@@ -13,7 +14,6 @@ from tests.fixtures.basic_apply import BASIC_APPLY
 
 class TestGenerator:
     def test_gen(self, mocker: MockFixture) -> None:
-        mocker.patch("opta.layer.open")
         mocker.patch("opta.layer.os.path.exists")
         mocker.patch("opta.layer.validate_yaml")
 
@@ -24,6 +24,8 @@ class TestGenerator:
         # Make sure the expected terraform file contents are generated
         # from the opta config
         opta_config, gen_tf_file = BASIC_APPLY
+        mocked_file = mocker.mock_open(read_data=yaml.dump(opta_config))
+        mocker.patch("opta.layer.open", mocked_file)
         opta_config = opta_config.copy()
         mocker.patch("opta.layer.yaml.load", return_value=opta_config)
         layer = Layer.load_from_yaml("", None)

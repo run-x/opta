@@ -26,7 +26,7 @@ class Module(Validator):
             return ["module must have a 'type' field"]
 
         type = value["type"]
-        if "alias" in REGISTRY["modules"][type]:
+        if "alias" in REGISTRY["modules"].get(type, {}):
             if self.cloud is None or self.cloud not in REGISTRY["modules"][type]["alias"]:
                 raise UserErrors(
                     f"Alias module is unsupported-- assumed cloud is {self.cloud}, supported alias for clouds is "
@@ -34,7 +34,10 @@ class Module(Validator):
                 )
             value["type"] = REGISTRY["modules"][type]["alias"][self.cloud]  # type:ignore
             type = value["type"]
-        elif REGISTRY["modules"][type]["cloud"] not in {"any", self.cloud}:
+        elif REGISTRY["modules"].get(type, {}).get("cloud", "") not in {
+            "any",
+            self.cloud,
+        }:
             raise UserErrors(f"Module {type} is not supported for cloud {self.cloud}")
         module_schema_path = path.join(schema_dir_path, "modules", f"{type}.yaml")
         if not path.isfile(module_schema_path):
