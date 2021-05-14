@@ -103,14 +103,14 @@ class Layer:
             # Clone into temporary dir
             git.Repo.clone_from(git_url, t, branch=branch, depth=1)
             config_path = os.path.join(t, file_path)
-            with open(config) as f:
+            with open(config_path) as f:
                 config_string = f.read()
             conf = yaml.load(config_string, Loader=yaml.Loader)
             shutil.rmtree(t)
         elif path.exists(config):
             config_path = config
-            logger.debug(f"Loaded the following configfile:\n{open(config).read()}")
-            with open(config) as f:
+            logger.debug(f"Loaded the following configfile:\n{open(config_path).read()}")
+            with open(config_path) as f:
                 config_string = f.read()
             conf = yaml.load(config_string, Loader=yaml.Loader)
         else:
