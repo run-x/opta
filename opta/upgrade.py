@@ -6,7 +6,7 @@ from opta.constants import VERSION
 from opta.utils import logger
 
 LATEST_VERSION_FILE_URL = "https://dev-runx-opta-binaries.s3.amazonaws.com/latest"
-UPGRADE_CHECK_PROBABILITY = 1
+UPGRADE_CHECK_PROBABILITY = 0.2
 # TODO: Change this to the actual upgrade URL.
 UPGRADE_INSTRUCTIONS_URL = "https://docs.runx.dev/docs/installation/"
 
