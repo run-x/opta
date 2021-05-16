@@ -23,6 +23,7 @@ from opta.commands.shell import shell
 from opta.commands.validate import validate
 from opta.commands.version import version
 from opta.exceptions import UserErrors
+from opta.upgrade import check_version_upgrade
 from opta.utils import dd_handler, dd_listener, logger
 
 
@@ -89,6 +90,7 @@ if __name__ == "__main__":
         logger.exception(e)
         sys.exit(1)
     finally:
+        check_version_upgrade()
         dd_listener.stop()
         dd_handler.flush()
         if os.environ.get("OPTA_DEBUG") is None:
