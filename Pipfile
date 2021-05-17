@@ -16,6 +16,7 @@ coverage = "*"
 argparse = "*"
 pyinstaller = "*"
 macholib = "*"
+requests-mock = "*"
 
 [packages]
 pyinquirer = ">1.0,<2"

@@ -30,7 +30,8 @@ def check_version_upgrade() -> None:
         latest_version = _get_latest_version()
     except Exception as e:
         logger.debug(e, exc_info=True)
-        logger.info("Unable to find latest version. Continuing...")
+        logger.info("Unable to find latest version.")
+        return
     if latest_version > VERSION:
         logger.warning(
             "New version available.\n"
