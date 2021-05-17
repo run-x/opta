@@ -17,6 +17,7 @@ from opta.exceptions import UserErrors
 from opta.module import Module
 from opta.module_processors.aws_dns import AwsDnsProcessor
 from opta.module_processors.aws_eks import AwsEksProcessor
+from opta.module_processors.aws_email import AwsEmailProcessor
 from opta.module_processors.aws_iam_role import AwsIamRoleProcessor
 from opta.module_processors.aws_iam_user import AwsIamUserProcessor
 from opta.module_processors.aws_k8s_base import AwsK8sBaseProcessor
@@ -245,6 +246,8 @@ class Layer:
                 AwsIamUserProcessor(module, self).process(module_idx)
             elif module_type == "aws-eks":
                 AwsEksProcessor(module, self).process(module_idx)
+            elif module_type == "aws-email":
+                AwsEmailProcessor(module, self).process(module_idx)
             else:
                 ModuleProcessor(module, self).process(module_idx)
         if self.parent is not None and self.parent.get_module("runx") is not None:
@@ -286,6 +289,8 @@ class Layer:
                 AwsIamUserProcessor(module, self).post_hook(module_idx, exception)
             elif module_type == "aws-eks":
                 AwsEksProcessor(module, self).post_hook(module_idx, exception)
+            elif module_type == "aws-email":
+                AwsEmailProcessor(module, self).post_hook(module_idx, exception)
             else:
                 ModuleProcessor(module, self).post_hook(module_idx, exception)
         if self.parent is not None and self.parent.get_module("runx") is not None:

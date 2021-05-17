@@ -29,7 +29,7 @@ class AwsK8sBaseProcessor(AWSK8sModuleProcessor):
     def process(self, module_idx: int) -> None:
         aws_dns_module = None
         for module in self.layer.modules:
-            if module.data["type"] == "aws-dns":
+            if (module.aliased_type or module.type) == "aws-dns":
                 aws_dns_module = module
                 break
         if aws_dns_module is not None:

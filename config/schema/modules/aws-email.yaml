@@ -1,0 +1,6 @@
+type: regex('aws-email')
+name: str(required=False)
+env_name: str(required=False)
+layer_name: str(required=False)
+module_name: str(required=False)
+mail_from_prefix: str(required=False)
