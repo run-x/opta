@@ -43,6 +43,8 @@ google-cloud-storage = ">=1.36.2,<1.37.0"
 google-auth = ">=1.27.1,<1.28"
 boto3-stubs = {version = ">=1.17.44.0,<1.18", extras = ["essential", "ssm", "route53", "acm", "elbv2"]}
 pyOpenSSL = ">=20.0.1,<20.1"
+semver = "~=2.13.0"
+
 [requires]
 python_version = "3.8"
 

@@ -10,8 +10,8 @@ from opta.upgrade import (
     check_version_upgrade,
 )
 
-TEST_LATEST_VERSION = "1.2.3"
-TEST_OLD_VERSION = "1.1.11"
+TEST_LATEST_VERSION = "1.11.1"
+TEST_OLD_VERSION = "1.9.6"
 
 
 class TestGetLatestVersion:

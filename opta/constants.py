@@ -22,6 +22,7 @@ tf_modules_path = os.path.join(
 REGISTRY = yaml.load(open(registry_path), Loader=yaml.Loader)
 DEBUG_TREE = yaml.load(open(debugger_path), Loader=yaml.Loader)
 VERSION = open(version_path).read().strip()
+DEV_VERSION = "dev"
 
 SESSION_ID = int(time.time() * 1000)
 
