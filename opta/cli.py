@@ -90,7 +90,11 @@ if __name__ == "__main__":
         logger.exception(e)
         sys.exit(1)
     finally:
+        # NOTE: Statements after the cli() invocation in the try clause are not executed.
+        # A quick glance at click documentation did not show why that is the case or any workarounds.
+        # Therefore adding this version check in the finally clause for now.
         check_version_upgrade()
+
         dd_listener.stop()
         dd_handler.flush()
         if os.environ.get("OPTA_DEBUG") is None:

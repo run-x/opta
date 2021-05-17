@@ -23,6 +23,12 @@ def _get_latest_version() -> str:
 
 
 def check_version_upgrade() -> None:
+    """Logs a warning if newer version of opta is available.
+
+    The version check is not always performed when this function is called.
+    It is performed non-deterministically with a probability of UPGRADE_CHECK_PROBABILITY
+    in order to not spam the user.
+    """
     if not _should_check_for_version_upgrade():
         return
     logger.info("Checking for version upgrades...")
