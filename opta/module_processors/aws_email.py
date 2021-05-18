@@ -1,8 +1,8 @@
 from typing import TYPE_CHECKING, List, Optional
 
 import boto3
-import click
 from botocore.config import Config
+from click import prompt
 from colored import attr, fg
 from email_validator import EmailNotValidError, validate_email
 from mypy_boto3_sesv2.client import SESV2Client
@@ -43,12 +43,15 @@ class AwsEmailProcessor(ModuleProcessor):
         super(AwsEmailProcessor, self).process(module_idx)
 
     def post_hook(self, module_idx: int, exception: Optional[Exception]) -> None:
+        if exception is not None:
+            return
         providers = self.layer.gen_providers(0)
         region = providers["provider"]["aws"]["region"]
         sesv2_client: SESV2Client = boto3.client(
             "sesv2", config=Config(region_name=region)
         )
         ses_account = sesv2_client.get_account()
+
         if ses_account["ProductionAccessEnabled"]:
             logger.info("Alrighty, looks like your account is out of SES sandbox")
             return
@@ -73,6 +76,7 @@ class AwsEmailProcessor(ModuleProcessor):
                     f"human's questions/concerns to get your access approved.{attr(0)}"
                 )
                 return
+
         logger.info(
             f"{fg(5)}{attr(1)}Alright, if you're seeing this message in your terminal, there's a little bit more setup "
             f"which we're going to guide you through. So with its email service Amazon is a little bit freaked out that "
@@ -85,7 +89,7 @@ class AwsEmailProcessor(ModuleProcessor):
         )
         website_url = ""
         while website_url == "":
-            website_url = click.prompt(
+            website_url = prompt(
                 "Please enter your official website url-- the most official thing to show the AWS folks that this is for real.",
                 type=str,
             ).strip()
@@ -93,7 +97,7 @@ class AwsEmailProcessor(ModuleProcessor):
             website_url = f"https://{website_url}"
         description = ""
         while description == "":
-            description = click.prompt(
+            description = prompt(
                 "Please enter some brief description about why you want this email capability",
                 type=str,
             ).strip()
@@ -101,7 +105,7 @@ class AwsEmailProcessor(ModuleProcessor):
         valid_emails = False
         while not valid_emails:
             email_list = []
-            contact_emails: str = click.prompt(
+            contact_emails: str = prompt(
                 "Please enter a comma-delimited list of contact emails to keep in the loop about this request (need at least one).",
                 type=str,
             )
