@@ -19,7 +19,7 @@ class TestAwsEmailProcessor:
             ),
             None,
         )
-        aws_email_module = layer.get_module("awsemail", 8)
+        aws_email_module = layer.get_module("awsses", 8)
         with pytest.raises(UserErrors):
             AwsEmailProcessor(aws_email_module, layer).process(8)
         aws_dns_modules = layer.get_module("awsdns", 8)
@@ -37,7 +37,7 @@ class TestAwsEmailProcessor:
             ),
             None,
         )
-        aws_email_module = layer.get_module("awsemail", 8)
+        aws_email_module = layer.get_module("awsses", 8)
 
         mocked_sesv2 = mocker.Mock()
         mocked_boto3 = mocker.patch("opta.module_processors.aws_email.boto3")
@@ -60,7 +60,7 @@ class TestAwsEmailProcessor:
             ),
             None,
         )
-        aws_email_module = layer.get_module("awsemail", 8)
+        aws_email_module = layer.get_module("awsses", 8)
 
         patched_logger = mocker.patch("opta.module_processors.aws_email.logger")
         mocked_sesv2 = mocker.Mock()
@@ -87,7 +87,7 @@ class TestAwsEmailProcessor:
             ),
             None,
         )
-        aws_email_module = layer.get_module("awsemail", 8)
+        aws_email_module = layer.get_module("awsses", 8)
 
         patched_logger = mocker.patch("opta.module_processors.aws_email.logger")
         mocked_sesv2 = mocker.Mock()
@@ -114,7 +114,7 @@ class TestAwsEmailProcessor:
             ),
             None,
         )
-        aws_email_module = layer.get_module("awsemail", 8)
+        aws_email_module = layer.get_module("awsses", 8)
 
         patched_prompt = mocker.patch("opta.module_processors.aws_email.prompt")
         patched_prompt.side_effect = ["www.blah.com", "hello, world", "blah@runx.dev"]
