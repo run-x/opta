@@ -68,24 +68,20 @@ class AwsEmailProcessor(ModuleProcessor):
                 or ses_account["Details"]["ReviewDetails"]["Status"] == "DENIED"
             ):
                 logger.warning(
-                    f"{fg(5)}{attr(1)}Crap, not good, looks like your request to move out of the SES sandbox has been "
+                    f"{fg(5)}{attr(1)}Looks like your request to move out of the SES sandbox has been "
                     f"denied/failed-- you're gonna need to go resolve this manually in your support case. This is how "
                     f"you do it: go to our AWS Support Cases (e.g. go to the AWS UI aka console and at the top search "
-                    f"bar look for \"support\")-- your case id is {ses_account['Details']['ReviewDetails']['CaseId']} "
-                    f"odds are someone in AWS customer service responded to it. Just click on it, and nicely answer the "
+                    f"bar look for \"support\")-- your case id is {ses_account['Details']['ReviewDetails']['CaseId']}. "
+                    f"AWS customer service can help you get this approve. Just click on it, and nicely answer the "
                     f"human's questions/concerns to get your access approved.{attr(0)}"
                 )
                 return
 
         logger.info(
-            f"{fg(5)}{attr(1)}Alright, if you're seeing this message in your terminal, there's a little bit more setup "
-            f"which we're going to guide you through. So with its email service Amazon is a little bit freaked out that "
-            f"folks would use it for spam and what not from bot-created accounts. To address this issue, all AWS accounts "
-            f'start with "sandboxed" email service, meaning they can only send emails to verified accounts. A user would '
-            f"then make a special request via the AWS console to get out of the sandbox mode. You can read "
-            f"more about it here https://docs.aws.amazon.com/ses/latest/DeveloperGuide/request-production-access.html. "
-            f"Of course, that is terrible user experience, so opta is here to help! We'll submit the form for you"
-            f"but we need you to fill in a few things now.{attr(0)}"
+            f'{fg(5)}{attr(1)}Currently the amazon email service is provisioned in the default "sandboxed" mode, i.e. '
+            f"they can only send emails to a few verified accounts. You can read more about it "
+            f"https://docs.aws.amazon.com/ses/latest/DeveloperGuide/request-production-access.html. To apply for the "
+            f"production access, please answer a few questions.{attr(0)}"
         )
         website_url = ""
         while website_url == "":
