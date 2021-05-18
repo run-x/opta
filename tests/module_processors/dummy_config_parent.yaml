@@ -14,4 +14,4 @@ modules:
   - type: k8s-base
   - type: datadog
   - type: runx
-  - type: aws-email
+  - type: aws-ses

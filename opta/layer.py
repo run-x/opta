@@ -246,7 +246,7 @@ class Layer:
                 AwsIamUserProcessor(module, self).process(module_idx)
             elif module_type == "aws-eks":
                 AwsEksProcessor(module, self).process(module_idx)
-            elif module_type == "aws-email":
+            elif module_type == "aws-ses":
                 AwsEmailProcessor(module, self).process(module_idx)
             else:
                 ModuleProcessor(module, self).process(module_idx)
@@ -289,7 +289,7 @@ class Layer:
                 AwsIamUserProcessor(module, self).post_hook(module_idx, exception)
             elif module_type == "aws-eks":
                 AwsEksProcessor(module, self).post_hook(module_idx, exception)
-            elif module_type == "aws-email":
+            elif module_type == "aws-ses":
                 AwsEmailProcessor(module, self).post_hook(module_idx, exception)
             else:
                 ModuleProcessor(module, self).post_hook(module_idx, exception)

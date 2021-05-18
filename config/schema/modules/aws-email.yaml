@@ -1,4 +1,4 @@
-type: regex('aws-email')
+type: regex('aws-ses')
 name: str(required=False)
 env_name: str(required=False)
 layer_name: str(required=False)

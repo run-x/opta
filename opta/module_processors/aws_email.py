@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 class AwsEmailProcessor(ModuleProcessor):
     def __init__(self, module: "Module", layer: "Layer"):
-        if (module.aliased_type or module.type) != "aws-email":
+        if (module.aliased_type or module.type) != "aws-ses":
             raise Exception(
                 f"The module {module.name} was expected to be of type aws email"
             )

@@ -27,4 +27,4 @@ modules:
       - "${{module.deployeruser.user_arn}}"
       - "${{module.deployerrole.role_arn}}"
   - type: datadog
-  - type: aws-email # Needs to be done after dns delegation -- emails are super hardcore about domain ownership.
+  - type: aws-ses # Needs to be done after dns delegation -- emails are super hardcore about domain ownership.

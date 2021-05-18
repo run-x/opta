@@ -527,9 +527,9 @@ modules:
       user_arn:
         export: true
 
-  aws-email:
+  aws-ses:
     cloud: aws
-    location: aws-email
+    location: aws-ses
     variables:
       env_name: str
       layer_name: str
