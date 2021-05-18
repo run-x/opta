@@ -31,6 +31,8 @@ CERTIFICATE_BODY_FILE_NAME = "dns-certificate-body.pem"
 
 class AwsDnsProcessor(ModuleProcessor):
     def __init__(self, module: "Module", layer: "Layer"):
+        if layer.parent is not None:
+            raise UserErrors("AWS dns must be set on environment, not service")
         super(AwsDnsProcessor, self).__init__(module, layer)
 
     def process(self, module_idx: int) -> None:

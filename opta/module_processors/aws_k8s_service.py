@@ -56,7 +56,7 @@ class AwsK8sServiceProcessor(AWSK8sModuleProcessor):
                     "make sure that the module you're referencing is listed before the k8s "
                     "app one"
                 )
-            module_type = module.data["type"]
+            module_type = module.aliased_type or module.type
             if module_type == "aws-postgres":
                 self.handle_rds_link(module, link_permissions)
             elif module_type == "aws-redis":
