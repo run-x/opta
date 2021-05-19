@@ -17,6 +17,9 @@ class AwsK8sServiceProcessor(AWSK8sModuleProcessor):
             )
         self.read_buckets: list[str] = []
         self.write_buckets: list[str] = []
+        self.publish_queues: list[str] = []
+        self.subscribe_queues: list[str] = []
+        self.publish_topics: list[str] = []
         super(AwsK8sServiceProcessor, self).__init__(module, layer)
 
     def process(self, module_idx: int) -> None:
@@ -65,6 +68,10 @@ class AwsK8sServiceProcessor(AWSK8sModuleProcessor):
                 self.handle_docdb_link(module, link_permissions)
             elif module_type == "aws-s3":
                 self.handle_s3_link(module, link_permissions)
+            elif module_type == "aws-sqs":
+                self.handle_sqs_link(module, link_permissions)
+            elif module_type == "aws-sns":
+                self.handle_sns_link(module, link_permissions)
             else:
                 raise Exception(
                     f"Unsupported module type for k8s service link: {module_type}"
@@ -86,6 +93,18 @@ class AwsK8sServiceProcessor(AWSK8sModuleProcessor):
             iam_statements.append(
                 AWS.prepare_write_buckets_iam_statements(self.write_buckets)
             )
+        if self.publish_queues:
+            iam_statements.append(
+                AWS.prepare_publish_queues_iam_statements(self.publish_queues)
+            )
+        if self.subscribe_queues:
+            iam_statements.append(
+                AWS.prepare_subscribe_queues_iam_statements(self.subscribe_queues)
+            )
+        if self.publish_topics:
+            iam_statements.append(
+                AWS.prepare_publish_sns_iam_statements(self.publish_topics)
+            )
         self.module.data["iam_policy"] = {
             "Version": "2012-10-17",
             "Statement": iam_statements,
@@ -93,6 +112,38 @@ class AwsK8sServiceProcessor(AWSK8sModuleProcessor):
         if "image_tag" in self.layer.variables:
             self.module.data["tag"] = self.layer.variables["image_tag"]
         super(AwsK8sServiceProcessor, self).process(module_idx)
+
+    def handle_sqs_link(
+        self, linked_module: "Module", link_permissions: List[str]
+    ) -> None:
+        # If not specified, bucket should get write permissions
+        if link_permissions is None or len(link_permissions) == 0:
+            link_permissions = ["publish", "subscribe"]
+        for permission in link_permissions:
+            if permission == "publish":
+                self.publish_queues.append(
+                    f"${{{{module.{linked_module.name}.queue_arn}}}}"
+                )
+            elif permission == "subscribe":
+                self.subscribe_queues.append(
+                    f"${{{{module.{linked_module.name}.queue_arn}}}}"
+                )
+            else:
+                raise Exception(f"Invalid permission {permission}")
+
+    def handle_sns_link(
+        self, linked_module: "Module", link_permissions: List[str]
+    ) -> None:
+        # If not specified, bucket should get write permissions
+        if link_permissions is None or len(link_permissions) == 0:
+            link_permissions = ["publish"]
+        for permission in link_permissions:
+            if permission == "publish":
+                self.publish_topics.append(
+                    f"${{{{module.{linked_module.name}.topic_arn}}}}"
+                )
+            else:
+                raise Exception(f"Invalid permission {permission}")
 
     def handle_rds_link(
         self, linked_module: "Module", link_permissions: List[str]

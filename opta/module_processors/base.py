@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, Optional, Tuple
 
 from opta.exceptions import UserErrors
 
@@ -67,3 +67,29 @@ def get_eks_module_refs(layer: "Layer", module_idx: int) -> Tuple[str, str, str]
         f"${{{{{module_source}.k8s_openid_provider_arn}}}}",
         f"${{{{{module_source}.k8s_cluster_name}}}}",
     )
+
+
+def get_aws_base_module_refs(layer: "Layer") -> Dict[str, str]:
+    from_parent = False
+    aws_base_modules = layer.get_module_by_type("aws-base")
+    if len(aws_base_modules) == 0 and layer.parent is not None:
+        from_parent = True
+        aws_base_modules = layer.parent.get_module_by_type("aws-base")
+
+    if len(aws_base_modules) == 0:
+        raise UserErrors(
+            "Did not find the aws-base module in the layer or the parent layer"
+        )
+    aws_base_module = aws_base_modules[0]
+    module_source = (
+        "data.terraform_remote_state.parent.outputs"
+        if from_parent
+        else f"module.{aws_base_module.name}"
+    )
+    return {
+        "kms_account_key_arn": f"${{{{{module_source}.kms_account_key_arn}}}}",
+        "kms_account_key_id": f"${{{{{module_source}.kms_account_key_id}}}}",
+        "vpc_id": f"${{{{{module_source}.vpc_id}}}}",
+        "private_subnet_ids": f"${{{{{module_source}.private_subnet_ids}}}}",
+        "public_subnets_ids": f"${{{{{module_source}.public_subnets_ids}}}}",
+    }

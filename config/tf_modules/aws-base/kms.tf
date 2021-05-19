@@ -31,6 +31,20 @@ data "aws_iam_policy_document" "kms_policy" {
   }
 
   statement {
+    sid    = "Allow sns access"
+    effect = "Allow"
+    principals {
+      identifiers = ["sns.amazonaws.com"]
+      type        = "Service"
+    }
+    actions = [
+      "kms:Decrypt",
+      "kms:GenerateDataKey*"
+    ]
+    resources = ["*"]
+  }
+
+  statement {
     sid    = "Allow attachment of persistent resources"
     effect = "Allow"
     principals {

@@ -105,6 +105,38 @@ class AWS:
         }
 
     @staticmethod
+    def prepare_publish_queues_iam_statements(queue_arns: List[str]) -> dict:
+        return {
+            "Sid": "PublishQueues",
+            "Action": [
+                "sqs:SendMessage",
+                "sqs:SendMessageBatch",
+                "sqs:GetQueueUrl",
+                "sqs:GetQueueAttributes",
+            ],
+            "Effect": "Allow",
+            "Resource": [queue_arn for queue_arn in queue_arns],
+        }
+
+    @staticmethod
+    def prepare_subscribe_queues_iam_statements(queue_arns: List[str]) -> dict:
+        return {
+            "Sid": "WriteQueues",
+            "Action": ["sqs:ReceiveMessage", "sqs:GetQueueUrl", "sqs:GetQueueAttributes"],
+            "Effect": "Allow",
+            "Resource": [queue_arn for queue_arn in queue_arns],
+        }
+
+    @staticmethod
+    def prepare_publish_sns_iam_statements(topic_arns: List[str]) -> dict:
+        return {
+            "Sid": "PublishSns",
+            "Action": ["sns:Publish"],
+            "Effect": "Allow",
+            "Resource": [topic_arn for topic_arn in topic_arns],
+        }
+
+    @staticmethod
     def delete_bucket(bucket_name: str) -> None:
         # Before a bucket can be deleted, all of the objects inside must be removed.
         bucket = boto3.resource("s3").Bucket(bucket_name)
