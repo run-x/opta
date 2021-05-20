@@ -83,9 +83,9 @@ class TestAwsIamRoleProcessor:
             ),
             None,
         )
-        app_module = layer.get_module("deployerrole", 8)
+        app_module = layer.get_module("deployerrole", 10)
         processor = AwsIamRoleProcessor(app_module, layer)
-        processor.handle_iam_policy(module_idx=8)
+        processor.handle_iam_policy(module_idx=10)
         assert processor.module.data["iam_policy"]["Statement"] == [
             {
                 "Sid": "PolicySimulatorAPI",
@@ -139,5 +139,32 @@ class TestAwsIamRoleProcessor:
                 ],
                 "Effect": "Allow",
                 "Resource": ["arn:aws:s3:::bucket1", "arn:aws:s3:::bucket1/*"],
+            },
+            {
+                "Action": [
+                    "sqs:SendMessage",
+                    "sqs:SendMessageBatch",
+                    "sqs:GetQueueUrl",
+                    "sqs:GetQueueAttributes",
+                ],
+                "Effect": "Allow",
+                "Resource": ["${{module.queue.queue_arn}}"],
+                "Sid": "PublishQueues",
+            },
+            {
+                "Action": [
+                    "sqs:ReceiveMessage",
+                    "sqs:GetQueueUrl",
+                    "sqs:GetQueueAttributes",
+                ],
+                "Effect": "Allow",
+                "Resource": ["${{module.queue.queue_arn}}"],
+                "Sid": "WriteQueues",
+            },
+            {
+                "Action": ["sns:Publish"],
+                "Effect": "Allow",
+                "Resource": ["${{module.topic.topic_arn}}"],
+                "Sid": "PublishSns",
             },
         ]

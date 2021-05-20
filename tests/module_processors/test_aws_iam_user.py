@@ -33,9 +33,9 @@ class TestAwsIamUserProcessor:
             ),
             None,
         )
-        app_module = layer.get_module("deployeruser", 8)
+        app_module = layer.get_module("deployeruser", 10)
         processor = AwsIamUserProcessor(app_module, layer)
-        processor.handle_iam_policy(module_idx=8)
+        processor.handle_iam_policy(module_idx=10)
         assert processor.module.data["iam_policy"]["Statement"] == [
             {
                 "Sid": "AllowViewAccountInfo",
@@ -112,5 +112,32 @@ class TestAwsIamUserProcessor:
                 ],
                 "Effect": "Allow",
                 "Resource": ["arn:aws:s3:::bucket1", "arn:aws:s3:::bucket1/*"],
+            },
+            {
+                "Action": [
+                    "sqs:SendMessage",
+                    "sqs:SendMessageBatch",
+                    "sqs:GetQueueUrl",
+                    "sqs:GetQueueAttributes",
+                ],
+                "Effect": "Allow",
+                "Resource": ["${{module.queue.queue_arn}}"],
+                "Sid": "PublishQueues",
+            },
+            {
+                "Action": [
+                    "sqs:ReceiveMessage",
+                    "sqs:GetQueueUrl",
+                    "sqs:GetQueueAttributes",
+                ],
+                "Effect": "Allow",
+                "Resource": ["${{module.queue.queue_arn}}"],
+                "Sid": "WriteQueues",
+            },
+            {
+                "Action": ["sns:Publish"],
+                "Effect": "Allow",
+                "Resource": ["${{module.topic.topic_arn}}"],
+                "Sid": "PublishSns",
             },
         ]

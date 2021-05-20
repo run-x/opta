@@ -22,8 +22,8 @@ class TestK8sServiceProcessor:
         mocked_process = mocker.patch(
             "opta.module_processors.aws_k8s_service.AWSK8sModuleProcessor.process"
         )
-        AwsK8sServiceProcessor(app_module, layer).process(5)
-        mocked_process.assert_called_once_with(5)
+        AwsK8sServiceProcessor(app_module, layer).process(10)
+        mocked_process.assert_called_once_with(10)
         assert app_module.data["secrets"] == [
             {"name": "BALONEY", "value": ""},
             {"name": "database_db_user", "value": "${{module.database.db_user}}"},
@@ -69,6 +69,33 @@ class TestK8sServiceProcessor:
                         "arn:aws:s3:::bucket2/*",
                         "arn:aws:s3:::bucket3/*",
                     ],
+                },
+                {
+                    "Action": [
+                        "sqs:SendMessage",
+                        "sqs:SendMessageBatch",
+                        "sqs:GetQueueUrl",
+                        "sqs:GetQueueAttributes",
+                    ],
+                    "Effect": "Allow",
+                    "Resource": ["${{module.queue.queue_arn}}"],
+                    "Sid": "PublishQueues",
+                },
+                {
+                    "Action": [
+                        "sqs:ReceiveMessage",
+                        "sqs:GetQueueUrl",
+                        "sqs:GetQueueAttributes",
+                    ],
+                    "Effect": "Allow",
+                    "Resource": ["${{module.queue.queue_arn}}"],
+                    "Sid": "WriteQueues",
+                },
+                {
+                    "Action": ["sns:Publish"],
+                    "Effect": "Allow",
+                    "Resource": ["${{module.topic.topic_arn}}"],
+                    "Sid": "PublishSns",
                 },
             ],
         }
