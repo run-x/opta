@@ -538,6 +538,42 @@ modules:
       zone_id: str
       mail_from_prefix: optional
 
+  aws-sqs:
+    cloud: aws
+    location: aws-sqs
+    variables:
+      env_name: str
+      layer_name: str
+      module_name: str
+      kms_key_id: str
+      fifo: optional
+      content_based_deduplication: optional
+      delay_seconds: optional
+      message_retention_seconds: optional
+      receive_wait_time_seconds: optional
+    outputs:
+      queue_arn:
+        export: true
+      queue_id:
+        export: true
+
+
+  aws-sns:
+    cloud: aws
+    location: aws-sns
+    variables:
+      env_name: str
+      layer_name: str
+      module_name: str
+      kms_key_id: str
+      fifo: optional
+      content_based_deduplication: optional
+      sqs_subscribers: optional
+    outputs:
+      topic_arn:
+        export: true
+
+
   postgres:
     alias:
       google: gcp-postgres

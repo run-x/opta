@@ -22,6 +22,8 @@ from opta.module_processors.aws_iam_role import AwsIamRoleProcessor
 from opta.module_processors.aws_iam_user import AwsIamUserProcessor
 from opta.module_processors.aws_k8s_base import AwsK8sBaseProcessor
 from opta.module_processors.aws_k8s_service import AwsK8sServiceProcessor
+from opta.module_processors.aws_sns import AwsSnsProcessor
+from opta.module_processors.aws_sqs import AwsSqsProcessor
 from opta.module_processors.base import ModuleProcessor
 from opta.module_processors.datadog import DatadogProcessor
 from opta.module_processors.gcp_gke import GcpGkeProcessor
@@ -248,6 +250,10 @@ class Layer:
                 AwsEksProcessor(module, self).process(module_idx)
             elif module_type == "aws-ses":
                 AwsEmailProcessor(module, self).process(module_idx)
+            elif module_type == "aws-sqs":
+                AwsSqsProcessor(module, self).process(module_idx)
+            elif module_type == "aws-sns":
+                AwsSnsProcessor(module, self).process(module_idx)
             else:
                 ModuleProcessor(module, self).process(module_idx)
         if self.parent is not None and self.parent.get_module("runx") is not None:
@@ -291,6 +297,10 @@ class Layer:
                 AwsEksProcessor(module, self).post_hook(module_idx, exception)
             elif module_type == "aws-ses":
                 AwsEmailProcessor(module, self).post_hook(module_idx, exception)
+            elif module_type == "aws-sqs":
+                AwsSqsProcessor(module, self).post_hook(module_idx, exception)
+            elif module_type == "aws-sns":
+                AwsSnsProcessor(module, self).post_hook(module_idx, exception)
             else:
                 ModuleProcessor(module, self).post_hook(module_idx, exception)
         if self.parent is not None and self.parent.get_module("runx") is not None:

@@ -22,6 +22,8 @@ modules:
       - s3: ["write"]
       - redis
       - db
+      - topic
+      - queue
     secrets:
       - API_KEY
       - SECRET_1
@@ -32,3 +34,9 @@ modules:
     bucket_name: "{parent_name}-{layer_name}"
   - name: redis
     type: aws-redis
+  - name: queue
+    type: aws-sqs
+  - name: topic
+    type: aws-sns
+    sqs_subscribers:
+      - "${{module.queue.queue_arn}}"
