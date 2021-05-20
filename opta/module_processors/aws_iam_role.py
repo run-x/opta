@@ -17,6 +17,9 @@ class AwsIamRoleProcessor(ModuleProcessor):
             )
         self.read_buckets: List[str] = []
         self.write_buckets: List[str] = []
+        self.publish_queues: List[str] = []
+        self.subscribe_queues: List[str] = []
+        self.publish_topics: List[str] = []
         super(AwsIamRoleProcessor, self).__init__(module, layer)
 
     def process(self, module_idx: int) -> None:
@@ -107,6 +110,10 @@ class AwsIamRoleProcessor(ModuleProcessor):
             # TODO: Add support for SNS, SQS, KINESIS,
             if module_type == "aws-s3":
                 self.handle_s3_link(module, link_permissions)
+            elif module_type == "aws-sqs":
+                self.handle_sqs_link(module, link_permissions)
+            elif module_type == "aws-sns":
+                self.handle_sns_link(module, link_permissions)
             else:
                 raise Exception(
                     f"Unsupported module type for k8s service link: {module_type}"
@@ -119,10 +126,54 @@ class AwsIamRoleProcessor(ModuleProcessor):
             iam_statements.append(
                 AWS.prepare_write_buckets_iam_statements(self.write_buckets)
             )
+        if self.publish_queues:
+            iam_statements.append(
+                AWS.prepare_publish_queues_iam_statements(self.publish_queues)
+            )
+        if self.subscribe_queues:
+            iam_statements.append(
+                AWS.prepare_subscribe_queues_iam_statements(self.subscribe_queues)
+            )
+        if self.publish_topics:
+            iam_statements.append(
+                AWS.prepare_publish_sns_iam_statements(self.publish_topics)
+            )
         self.module.data["iam_policy"] = {
             "Version": "2012-10-17",
             "Statement": iam_statements,
         }
+
+    def handle_sqs_link(
+        self, linked_module: "Module", link_permissions: List[str]
+    ) -> None:
+        # If not specified, bucket should get write permissions
+        if link_permissions is None or len(link_permissions) == 0:
+            link_permissions = ["publish", "subscribe"]
+        for permission in link_permissions:
+            if permission == "publish":
+                self.publish_queues.append(
+                    f"${{{{module.{linked_module.name}.queue_arn}}}}"
+                )
+            elif permission == "subscribe":
+                self.subscribe_queues.append(
+                    f"${{{{module.{linked_module.name}.queue_arn}}}}"
+                )
+            else:
+                raise Exception(f"Invalid permission {permission}")
+
+    def handle_sns_link(
+        self, linked_module: "Module", link_permissions: List[str]
+    ) -> None:
+        # If not specified, bucket should get write permissions
+        if link_permissions is None or len(link_permissions) == 0:
+            link_permissions = ["publish"]
+        for permission in link_permissions:
+            if permission == "publish":
+                self.publish_topics.append(
+                    f"${{{{module.{linked_module.name}.topic_arn}}}}"
+                )
+            else:
+                raise Exception(f"Invalid permission {permission}")
 
     def handle_s3_link(
         self, linked_module: "Module", link_permissions: List[str]
