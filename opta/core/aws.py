@@ -113,6 +113,8 @@ class AWS:
                 "sqs:SendMessageBatch",
                 "sqs:GetQueueUrl",
                 "sqs:GetQueueAttributes",
+                "sqs:DeleteMessageBatch",
+                "sqs:DeleteMessage",
             ],
             "Effect": "Allow",
             "Resource": [queue_arn for queue_arn in queue_arns],
@@ -121,7 +123,7 @@ class AWS:
     @staticmethod
     def prepare_subscribe_queues_iam_statements(queue_arns: List[str]) -> dict:
         return {
-            "Sid": "WriteQueues",
+            "Sid": "SubscribeQueues",
             "Action": ["sqs:ReceiveMessage", "sqs:GetQueueUrl", "sqs:GetQueueAttributes"],
             "Effect": "Allow",
             "Resource": [queue_arn for queue_arn in queue_arns],

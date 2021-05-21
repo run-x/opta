@@ -1,7 +1,10 @@
 from typing import TYPE_CHECKING
 
+import yaml
+
 from opta.exceptions import UserErrors
 from opta.module_processors.base import ModuleProcessor
+from opta.utils import logger
 
 if TYPE_CHECKING:
     from opta.layer import Layer
@@ -22,5 +25,10 @@ class HelmChartProcessor(ModuleProcessor):
         if "repository" in self.module.data and "version" not in self.module.data:
             raise UserErrors(
                 "If you specify a remote repository you must give a version."
+            )
+        values = self.module.data.get("values", {})
+        if values:
+            logger.debug(
+                f"These are the values passed in from the opta yaml:\n{yaml.dump(values)}"
             )
         super(HelmChartProcessor, self).process(module_idx)

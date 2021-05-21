@@ -556,6 +556,8 @@ modules:
         export: true
       queue_id:
         export: true
+      queue_name:
+        export: true
 
 
   aws-sns:
