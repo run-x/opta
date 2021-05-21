@@ -26,11 +26,11 @@ resource "aws_iam_user_policy" "pass_role_to_self" {
 data "aws_iam_policy_document" "pass_role_to_self" {
   statement {
     sid = "AllowToPassSelf"
-    effect = "Allow",
+    effect = "Allow"
     actions = [
       "iam:GetRole",
       "iam:PassRole"
-    ],
+    ]
     resources = [aws_iam_user.user.arn]
   }
 }

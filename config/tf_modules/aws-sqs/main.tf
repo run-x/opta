@@ -40,4 +40,23 @@ data "aws_iam_policy_document" "sqs_queue_policy" {
 
     sid = "__default_statement_ID"
   }
+
+  statement {
+    actions = [
+      "SQS:*"
+    ]
+
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["sns.amazonaws.com"]
+    }
+
+    resources = [
+      aws_sqs_queue.terraform_queue.arn,
+    ]
+
+    sid = "sns_access"
+  }
 }
