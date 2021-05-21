@@ -58,6 +58,7 @@ jobs:
           verbose: true
 
   test_cli:
+    if: ${{ github.event.pull_request.head.repo.full_name == 'run-x/opta' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
