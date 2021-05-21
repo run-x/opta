@@ -11,7 +11,7 @@ from requests import codes, post
 
 from opta.constants import OPTA_DISABLE_REPORTING, SESSION_ID, VERSION
 
-CLIENT_TOKEN = "pub40d867605951d2a30fb8020e193ee7e5"
+CLIENT_TOKEN = "pub40d867605951d2a30fb8020e193ee7e5"  # nosec
 DEFAULT_CACHE_SIZE = 10
 
 

@@ -77,7 +77,7 @@ def _fetch_children_layers(layer: "Layer") -> List["Layer"]:
     # Keep track of children layers as we find them.
     children_layers = []
     for config_path in opta_configs:
-        config_data = yaml.load(open(config_path), Loader=yaml.Loader)
+        config_data = yaml.load(open(config_path), Loader=yaml.SafeLoader)
 
         # If the config has no 'environments' field, then it cannot be
         # a child/service layer.

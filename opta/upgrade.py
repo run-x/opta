@@ -13,7 +13,9 @@ UPGRADE_INSTRUCTIONS_URL = "https://docs.runx.dev/docs/installation/"
 
 
 def _should_check_for_version_upgrade() -> bool:
-    return (VERSION != DEV_VERSION) and (random.random() < UPGRADE_CHECK_PROBABILITY)
+    return (VERSION != DEV_VERSION) and (
+        random.random() < UPGRADE_CHECK_PROBABILITY  # nosec
+    )
 
 
 def _get_latest_version() -> str:

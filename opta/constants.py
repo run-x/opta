@@ -19,8 +19,8 @@ tf_modules_path = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), "config", "tf_modules"
 )
 
-REGISTRY = yaml.load(open(registry_path), Loader=yaml.Loader)
-DEBUG_TREE = yaml.load(open(debugger_path), Loader=yaml.Loader)
+REGISTRY = yaml.load(open(registry_path), Loader=yaml.SafeLoader)
+DEBUG_TREE = yaml.load(open(debugger_path), Loader=yaml.SafeLoader)
 VERSION = open(version_path).read().strip()
 DEV_VERSION = "dev"
 

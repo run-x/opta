@@ -1,7 +1,7 @@
 import os.path
 import sys
 from importlib.util import find_spec
-from subprocess import CalledProcessError
+from subprocess import CalledProcessError  # nosec
 
 import click
 from click_didyoumean import DYMGroup

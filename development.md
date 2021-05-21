@@ -1,5 +1,8 @@
 Setup
 =====
+**For new contributors**: please first fork the repository to your own account
+
+
 ```
 pip install pipenv
 pipenv install --dev

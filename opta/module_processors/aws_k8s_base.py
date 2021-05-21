@@ -57,15 +57,19 @@ class AwsK8sBaseProcessor(AWSK8sModuleProcessor):
         opta_arns_config_map: V1ConfigMap = v1.read_namespaced_config_map(
             "opta-arns", "default"
         )
-        admin_arns = yaml.load(opta_arns_config_map.data["adminArns"], Loader=yaml.Loader)
+        admin_arns = yaml.load(
+            opta_arns_config_map.data["adminArns"], Loader=yaml.SafeLoader
+        )
         current_data = aws_auth_config_map.data
-        old_map_roles = yaml.load(current_data["mapRoles"], Loader=yaml.Loader)
+        old_map_roles = yaml.load(current_data["mapRoles"], Loader=yaml.SafeLoader)
         new_map_roles = [
             old_map_role
             for old_map_role in old_map_roles
             if not old_map_role["username"].startswith("opta-managed")
         ]
-        old_map_users = yaml.load(current_data.get("mapUsers", "[]"), Loader=yaml.Loader)
+        old_map_users = yaml.load(
+            current_data.get("mapUsers", "[]"), Loader=yaml.SafeLoader
+        )
         new_map_users = [
             old_map_user
             for old_map_user in old_map_users
