@@ -63,6 +63,33 @@ data "aws_iam_policy_document" "kms_policy" {
       variable = "kms:GrantIsForAWSResource"
     }
   }
+  statement {
+    sid    = "Allow events access"
+    effect = "Allow"
+    principals {
+      identifiers = ["events.amazonaws.com"]
+      type        = "Service"
+    }
+    actions = [
+      "kms:Decrypt",
+      "kms:GenerateDataKey*"
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "Allow s3 access"
+    effect = "Allow"
+    principals {
+      identifiers = ["s3.amazonaws.com"]
+      type        = "Service"
+    }
+    actions = [
+      "kms:Decrypt",
+      "kms:GenerateDataKey*"
+    ]
+    resources = ["*"]
+  }
 }
 
 resource "aws_kms_key" "key" {

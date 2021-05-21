@@ -56,7 +56,9 @@ class Module:
         pattern = "^[A-Za-z0-9]*$"
         return bool(re.match(pattern, name))
 
-    def gen_tf(self, depends_on: Optional[List[str]] = None) -> Dict[Any, Any]:
+    def gen_tf(
+        self, depends_on: Optional[List[str]] = None, output_prefix: Optional[str] = None
+    ) -> Dict[Any, Any]:
         if self.module_dir_path == "":
             return {}
         module_blk: Dict[Any, Any] = {
@@ -81,7 +83,8 @@ class Module:
                     entry: Dict[Any, Any] = {"value": f"${{{{module.{self.name}.{k} }}}}"}
                     if v.get("sensitive", False):
                         entry["sensitive"] = True
-                    module_blk["output"].update({k: entry})
+                    output_key = k if output_prefix is None else f"{output_prefix}_{k}"
+                    module_blk["output"].update({output_key: entry})
         if depends_on is not None:
             module_blk["module"][self.name]["depends_on"] = depends_on
 

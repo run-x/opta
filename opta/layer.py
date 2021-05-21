@@ -262,7 +262,15 @@ class Layer:
             )
         previous_module_reference = None
         for module in self.modules[0 : module_idx + 1]:
-            ret = deep_merge(module.gen_tf(depends_on=previous_module_reference), ret)
+            output_prefix = (
+                None if len(self.get_module_by_type(module.type)) == 1 else module.name
+            )
+            ret = deep_merge(
+                module.gen_tf(
+                    depends_on=previous_module_reference, output_prefix=output_prefix
+                ),
+                ret,
+            )
             if module.desc.get("halt"):
                 previous_module_reference = [f"module.{module.name}"]
 

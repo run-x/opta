@@ -34,6 +34,15 @@ data "aws_iam_policy_document" "iam_trusts" {
       }
     }
   }
+
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+    principals {
+      identifiers = ["events.amazonaws.com"]
+      type = "Service"
+    }
+  }
 }
 
 resource "aws_iam_role" "role" {
@@ -50,4 +59,21 @@ resource "aws_iam_role_policy_attachment" "extra_policies_attachment" {
   count = length(var.extra_iam_policies)
   policy_arn = var.extra_iam_policies[count.index]
   role = aws_iam_role.role.name
+}
+
+resource "aws_iam_role_policy" "pass_role_to_self" {
+  role = aws_iam_role.role.id
+  policy = data.aws_iam_policy_document.pass_role_to_self.json
+}
+
+data "aws_iam_policy_document" "pass_role_to_self" {
+  statement {
+    sid = "AllowToPassSelf"
+    effect = "Allow"
+    actions = [
+      "iam:GetRole",
+      "iam:PassRole"
+    ]
+    resources = [aws_iam_role.role.arn]
+  }
 }
