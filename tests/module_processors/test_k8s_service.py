@@ -76,6 +76,8 @@ class TestK8sServiceProcessor:
                         "sqs:SendMessageBatch",
                         "sqs:GetQueueUrl",
                         "sqs:GetQueueAttributes",
+                        "sqs:DeleteMessageBatch",
+                        "sqs:DeleteMessage",
                     ],
                     "Effect": "Allow",
                     "Resource": ["${{module.queue.queue_arn}}"],
@@ -89,7 +91,7 @@ class TestK8sServiceProcessor:
                     ],
                     "Effect": "Allow",
                     "Resource": ["${{module.queue.queue_arn}}"],
-                    "Sid": "WriteQueues",
+                    "Sid": "SubscribeQueues",
                 },
                 {
                     "Action": ["sns:Publish"],

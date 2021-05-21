@@ -146,6 +146,8 @@ class TestAwsIamRoleProcessor:
                     "sqs:SendMessageBatch",
                     "sqs:GetQueueUrl",
                     "sqs:GetQueueAttributes",
+                    "sqs:DeleteMessageBatch",
+                    "sqs:DeleteMessage",
                 ],
                 "Effect": "Allow",
                 "Resource": ["${{module.queue.queue_arn}}"],
@@ -159,7 +161,7 @@ class TestAwsIamRoleProcessor:
                 ],
                 "Effect": "Allow",
                 "Resource": ["${{module.queue.queue_arn}}"],
-                "Sid": "WriteQueues",
+                "Sid": "SubscribeQueues",
             },
             {
                 "Action": ["sns:Publish"],
