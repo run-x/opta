@@ -1,5 +1,0 @@
-1. Have maintainers need to approve before running tests for a PR that run the code (you can do linting before)
-2. Disallow people from changing the ci gitops file (e.g. only use what is in master)
-3. Call and poll an external entity to test out e2e tests, publish images or do anything which requires credentials
-
-https://docs.github.com/en/actions/managing-workflow-runs/reviewing-deployments
