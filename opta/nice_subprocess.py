@@ -1,5 +1,11 @@
 import signal
-from subprocess import PIPE, CalledProcessError, CompletedProcess, Popen, TimeoutExpired
+from subprocess import (  # nosec
+    PIPE,
+    CalledProcessError,
+    CompletedProcess,
+    Popen,
+    TimeoutExpired,
+)
 from typing import Optional, Union
 
 try:
@@ -10,7 +16,7 @@ except ModuleNotFoundError:
     _mswindows = False
 
 
-def nice_run(  # type: ignore
+def nice_run(  # type: ignore # nosec
     *popenargs,
     input: Optional[Union[str, bytes]] = None,
     capture_output: bool = False,

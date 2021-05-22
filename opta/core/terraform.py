@@ -2,7 +2,7 @@ import json
 import logging
 import os
 import time
-from subprocess import DEVNULL, PIPE
+from subprocess import DEVNULL, PIPE  # nosec
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
 
 import boto3

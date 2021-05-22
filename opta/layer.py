@@ -109,13 +109,13 @@ class Layer:
             config_path = os.path.join(t, file_path)
             with open(config_path) as f:
                 config_string = f.read()
-            conf = yaml.load(config_string, Loader=yaml.Loader)
+            conf = yaml.load(config_string, Loader=yaml.SafeLoader)
         elif path.exists(config):
             config_path = config
             logger.debug(f"Loaded the following configfile:\n{open(config_path).read()}")
             with open(config_path) as f:
                 config_string = f.read()
-            conf = yaml.load(config_string, Loader=yaml.Loader)
+            conf = yaml.load(config_string, Loader=yaml.SafeLoader)
         else:
             raise UserErrors(f"File {config} not found")
 

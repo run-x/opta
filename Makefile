@@ -7,3 +7,6 @@ lint:
 
 test:
 	pipenv run pytest .
+
+security_tests:
+	pipenv run bandit -r ./opta
