@@ -16,6 +16,10 @@
   </a>
 
   <img src="https://img.shields.io/github/commit-activity/w/run-x/opta.svg?style=plastic" alt="Commit Activity" />
+
+  <a href="https://github.com/PyCQA/bandit">
+    <img src="https://img.shields.io/badge/security-bandit-yellow.svg" alt="Security" />
+  </a>
   
 </p>
 <p align="center">
