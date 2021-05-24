@@ -6,7 +6,16 @@ from typing import TYPE_CHECKING, List, Optional, Set, Tuple
 
 import pytz
 from colored import attr, fg
-from kubernetes.client import ApiException, CoreV1Api, V1Event, V1ObjectReference, V1Pod
+from kubernetes.client import (
+    ApiException,
+    AppsV1Api,
+    CoreV1Api,
+    V1Deployment,
+    V1DeploymentList,
+    V1Event,
+    V1ObjectReference,
+    V1Pod,
+)
 from kubernetes.config import load_kube_config
 from kubernetes.watch import Watch
 
@@ -193,6 +202,18 @@ def _get_root_layer(layer: "Layer") -> "Layer":
         layer = layer.parent
 
     return layer
+
+
+def current_image_tag(layer: "Layer",) -> Optional[str]:
+    load_kube_config()
+    apps_client = AppsV1Api()
+    deployment_list: V1DeploymentList = apps_client.list_namespaced_deployment(
+        namespace=layer.name
+    )
+    if len(deployment_list.items) > 0:
+        deployment: V1Deployment = deployment_list.items[0]
+        return deployment.spec.template.spec.containers[0].image.split(":")[1]
+    return None
 
 
 def tail_module_log(
