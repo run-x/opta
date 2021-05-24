@@ -144,6 +144,7 @@ def _apply(
             current_tag is not None
             and image_tag is None
             and service_module.data.get("image", "") == "AUTO"
+            and not test
         ):
             response = (
                 True
