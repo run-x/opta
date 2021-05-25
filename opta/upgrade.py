@@ -41,11 +41,14 @@ def check_version_upgrade() -> None:
         logger.debug(e, exc_info=True)
         logger.info("Unable to find latest version.")
         return
-    if semver.VersionInfo.parse(VERSION).compare(latest_version) < 0:
-        logger.warning(
-            "New version available.\n"
-            f"You have {VERSION} installed. Latest version is {latest_version}.\n"
-            f"Upgrade instructions are available at {UPGRADE_INSTRUCTIONS_URL}."
-        )
-    else:
-        logger.info("You are running the latest version of opta.")
+    try:
+        if semver.VersionInfo.parse(VERSION).compare(latest_version) < 0:
+            logger.warning(
+                "New version available.\n"
+                f"You have {VERSION} installed. Latest version is {latest_version}.\n"
+                f"Upgrade instructions are available at {UPGRADE_INSTRUCTIONS_URL}."
+            )
+        else:
+            logger.info("You are running the latest version of opta.")
+    except Exception as e:
+        logger.debug(f"Semver check failed with error {e}")
