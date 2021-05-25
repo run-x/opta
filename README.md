@@ -23,9 +23,11 @@
   
 </p>
 <p align="center">
-  <a href="https://docs.runx.dev/docs">Documentation</a> |
+  <a href="https://docs.opta.dev/docs">Documentation</a> |
 <a href="https://discord.gg/BXjmBhkwvB">
     Discord Community
+  </a> | <a href="https://opta.dev/">
+    Website
   </a>
   </p>
 
