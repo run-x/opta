@@ -1,7 +1,11 @@
 import os
 import time
 
-import yaml
+from ruamel.yaml import YAML
+
+yaml = YAML(
+    typ="safe"
+)  # Duplicate because constants can't import utils and yaml really is a util
 
 schema_dir_path = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), "config", "schema"
@@ -19,8 +23,8 @@ tf_modules_path = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), "config", "tf_modules"
 )
 
-REGISTRY = yaml.load(open(registry_path), Loader=yaml.SafeLoader)
-DEBUG_TREE = yaml.load(open(debugger_path), Loader=yaml.SafeLoader)
+REGISTRY = yaml.load(open(registry_path))
+DEBUG_TREE = yaml.load(open(debugger_path))
 VERSION = open(version_path).read().strip()
 DEV_VERSION = "dev"
 

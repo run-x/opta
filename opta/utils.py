@@ -9,9 +9,13 @@ from textwrap import dedent
 from time import sleep
 from typing import Any, Dict, Generator, List, Tuple
 
+from ruamel.yaml import YAML
+
 from opta.constants import DEV_VERSION, VERSION
 from opta.datadog_logging import DatadogLogHandler
 from opta.special_formatter import PartialFormatter
+
+yaml = YAML(typ="safe")
 
 
 def initialize_logger() -> Tuple[Logger, QueueListener, DatadogLogHandler]:

@@ -9,7 +9,6 @@ from types import SimpleNamespace
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 import git
-import yaml
 
 from opta.constants import REGISTRY
 from opta.core.validator import validate_yaml
@@ -32,7 +31,7 @@ from opta.module_processors.gcp_k8s_service import GcpK8sServiceProcessor
 from opta.module_processors.helm_chart import HelmChartProcessor
 from opta.module_processors.runx import RunxProcessor
 from opta.plugins.derived_providers import DerivedProviders
-from opta.utils import deep_merge, hydrate, logger
+from opta.utils import deep_merge, hydrate, logger, yaml
 
 AWS_PROVIDER_VERSION = "3.38.0"
 GCP_PROVIDER_VERSION = "3.66.1"
@@ -109,13 +108,13 @@ class Layer:
             config_path = os.path.join(t, file_path)
             with open(config_path) as f:
                 config_string = f.read()
-            conf = yaml.load(config_string, Loader=yaml.SafeLoader)
+            conf = yaml.load(config_string)
         elif path.exists(config):
             config_path = config
             logger.debug(f"Loaded the following configfile:\n{open(config_path).read()}")
             with open(config_path) as f:
                 config_string = f.read()
-            conf = yaml.load(config_string, Loader=yaml.SafeLoader)
+            conf = yaml.load(config_string)
         else:
             raise UserErrors(f"File {config} not found")
 

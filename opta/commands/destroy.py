@@ -2,7 +2,6 @@ from typing import List, Optional
 
 import boto3
 import click
-import yaml
 from google.cloud import storage  # type: ignore
 from google.cloud.exceptions import NotFound
 
@@ -11,7 +10,7 @@ from opta.core.gcp import GCP
 from opta.core.generator import gen_all
 from opta.core.terraform import Terraform
 from opta.layer import Layer
-from opta.utils import fmt_msg, logger
+from opta.utils import fmt_msg, logger, yaml
 
 
 @click.command(hidden=True)
@@ -77,7 +76,7 @@ def _fetch_children_layers(layer: "Layer") -> List["Layer"]:
     # Keep track of children layers as we find them.
     children_layers = []
     for config_path in opta_configs:
-        config_data = yaml.load(open(config_path), Loader=yaml.SafeLoader)
+        config_data = yaml.load(open(config_path))
 
         # If the config has no 'environments' field, then it cannot be
         # a child/service layer.

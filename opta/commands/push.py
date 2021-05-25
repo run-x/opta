@@ -3,7 +3,6 @@ from typing import Optional, Tuple
 
 import boto3
 import click
-import yaml
 from botocore.config import Config
 
 from opta.amplitude import amplitude_client
@@ -13,7 +12,7 @@ from opta.core.terraform import get_terraform_outputs
 from opta.exceptions import UserErrors
 from opta.layer import Layer
 from opta.nice_subprocess import nice_run
-from opta.utils import fmt_msg, is_tool
+from opta.utils import fmt_msg, is_tool, yaml
 
 
 def get_push_tag(local_image: str, tag_override: Optional[str]) -> str:
@@ -88,7 +87,7 @@ def push_to_docker(
 #
 # If the config file has the "environments" field, then it is a child/service layer.
 def is_service_config(config: str) -> bool:
-    config_data = yaml.load(open(config), Loader=yaml.SafeLoader)
+    config_data = yaml.load(open(config))
     return "environments" in config_data
 
 
