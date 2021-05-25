@@ -1,25 +1,23 @@
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
-from opta.core.aws import AWS
 from opta.exceptions import UserErrors
-from opta.module_processors.base import ModuleProcessor, get_eks_module_refs
+from opta.module_processors.base import (
+    AWSIamAssembler,
+    ModuleProcessor,
+    get_eks_module_refs,
+)
 
 if TYPE_CHECKING:
     from opta.layer import Layer
     from opta.module import Module
 
 
-class AwsIamRoleProcessor(ModuleProcessor):
+class AwsIamRoleProcessor(ModuleProcessor, AWSIamAssembler):
     def __init__(self, module: "Module", layer: "Layer"):
         if module.data["type"] != "aws-iam-role":
             raise Exception(
                 f"The module {module.name} was expected to be of type aws iam role"
             )
-        self.read_buckets: List[str] = []
-        self.write_buckets: List[str] = []
-        self.publish_queues: List[str] = []
-        self.subscribe_queues: List[str] = []
-        self.publish_topics: List[str] = []
         super(AwsIamRoleProcessor, self).__init__(module, layer)
 
     def process(self, module_idx: int) -> None:
@@ -118,74 +116,8 @@ class AwsIamRoleProcessor(ModuleProcessor):
                 raise Exception(
                     f"Unsupported module type for k8s service link: {module_type}"
                 )
-        if self.read_buckets:
-            iam_statements.append(
-                AWS.prepare_read_buckets_iam_statements(self.read_buckets)
-            )
-        if self.write_buckets:
-            iam_statements.append(
-                AWS.prepare_write_buckets_iam_statements(self.write_buckets)
-            )
-        if self.publish_queues:
-            iam_statements.append(
-                AWS.prepare_publish_queues_iam_statements(self.publish_queues)
-            )
-        if self.subscribe_queues:
-            iam_statements.append(
-                AWS.prepare_subscribe_queues_iam_statements(self.subscribe_queues)
-            )
-        if self.publish_topics:
-            iam_statements.append(
-                AWS.prepare_publish_sns_iam_statements(self.publish_topics)
-            )
+        iam_statements += self.prepare_iam_statements()
         self.module.data["iam_policy"] = {
             "Version": "2012-10-17",
             "Statement": iam_statements,
         }
-
-    def handle_sqs_link(
-        self, linked_module: "Module", link_permissions: List[str]
-    ) -> None:
-        # If not specified, bucket should get write permissions
-        if link_permissions is None or len(link_permissions) == 0:
-            link_permissions = ["publish", "subscribe"]
-        for permission in link_permissions:
-            if permission == "publish":
-                self.publish_queues.append(
-                    f"${{{{module.{linked_module.name}.queue_arn}}}}"
-                )
-            elif permission == "subscribe":
-                self.subscribe_queues.append(
-                    f"${{{{module.{linked_module.name}.queue_arn}}}}"
-                )
-            else:
-                raise Exception(f"Invalid permission {permission}")
-
-    def handle_sns_link(
-        self, linked_module: "Module", link_permissions: List[str]
-    ) -> None:
-        # If not specified, bucket should get write permissions
-        if link_permissions is None or len(link_permissions) == 0:
-            link_permissions = ["publish"]
-        for permission in link_permissions:
-            if permission == "publish":
-                self.publish_topics.append(
-                    f"${{{{module.{linked_module.name}.topic_arn}}}}"
-                )
-            else:
-                raise Exception(f"Invalid permission {permission}")
-
-    def handle_s3_link(
-        self, linked_module: "Module", link_permissions: List[str]
-    ) -> None:
-        bucket_name = linked_module.data["bucket_name"]
-        # If not specified, bucket should get write permissions
-        if link_permissions is None or len(link_permissions) == 0:
-            link_permissions = ["write"]
-        for permission in link_permissions:
-            if permission == "read":
-                self.read_buckets.append(bucket_name)
-            elif permission == "write":
-                self.write_buckets.append(bucket_name)
-            else:
-                raise Exception(f"Invalid permission {permission}")

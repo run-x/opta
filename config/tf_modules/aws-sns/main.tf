@@ -1,6 +1,6 @@
 resource "aws_sns_topic" "topic" {
   name            = "${var.env_name}-${var.layer_name}-${var.module_name}"
-  kms_master_key_id = var.kms_key_id
+  kms_master_key_id = aws_kms_key.key.id
   fifo_topic = var.fifo
   content_based_deduplication = var.content_based_deduplication
   delivery_policy = <<EOF

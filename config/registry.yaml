@@ -545,7 +545,6 @@ modules:
       env_name: str
       layer_name: str
       module_name: str
-      kms_key_id: str
       fifo: optional
       content_based_deduplication: optional
       delay_seconds: optional
@@ -567,7 +566,6 @@ modules:
       env_name: str
       layer_name: str
       module_name: str
-      kms_key_id: str
       fifo: optional
       content_based_deduplication: optional
       sqs_subscribers: optional

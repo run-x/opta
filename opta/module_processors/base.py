@@ -1,5 +1,6 @@
-from typing import TYPE_CHECKING, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
+from opta.core.aws import AWS
 from opta.exceptions import UserErrors
 
 if TYPE_CHECKING:
@@ -11,6 +12,7 @@ class ModuleProcessor:
     def __init__(self, module: "Module", layer: "Layer") -> None:
         self.layer = layer
         self.module = module
+        super(ModuleProcessor, self).__init__()
 
     def process(self, module_idx: int) -> None:
         if self.module.data.get("root_only", False) and self.layer.parent is not None:
@@ -43,6 +45,104 @@ class GcpK8sModuleProcessor(ModuleProcessor):
 
     def process(self, module_idx: int) -> None:
         super(GcpK8sModuleProcessor, self).process(module_idx)
+
+
+class AWSIamAssembler:
+    def __init__(self, *args: Any, **kwargs: Any):
+        self.read_buckets: list[str] = []
+        self.write_buckets: list[str] = []
+        self.publish_queues: list[str] = []
+        self.subscribe_queues: list[str] = []
+        self.publish_topics: list[str] = []
+        self.kms_write_keys: list[str] = []
+        self.kms_read_keys: list[str] = []
+        super(AWSIamAssembler, self).__init__()
+
+    def prepare_iam_statements(self) -> List[dict]:
+        iam_statements = []
+        if self.read_buckets:
+            iam_statements.append(
+                AWS.prepare_read_buckets_iam_statements(self.read_buckets)
+            )
+        if self.write_buckets:
+            iam_statements.append(
+                AWS.prepare_write_buckets_iam_statements(self.write_buckets)
+            )
+        if self.publish_queues:
+            iam_statements.append(
+                AWS.prepare_publish_queues_iam_statements(self.publish_queues)
+            )
+        if self.subscribe_queues:
+            iam_statements.append(
+                AWS.prepare_subscribe_queues_iam_statements(self.subscribe_queues)
+            )
+        if self.publish_topics:
+            iam_statements.append(
+                AWS.prepare_publish_sns_iam_statements(self.publish_topics)
+            )
+        if self.kms_write_keys:
+            iam_statements.append(
+                AWS.prepare_kms_write_keys_statements(self.kms_write_keys)
+            )
+        if self.kms_read_keys:
+            iam_statements.append(
+                AWS.prepare_kms_read_keys_statements(self.kms_read_keys)
+            )
+        return iam_statements
+
+    def handle_sqs_link(
+        self, linked_module: "Module", link_permissions: List[str]
+    ) -> None:
+        # If not specified, bucket should get write permissions
+        if link_permissions is None or len(link_permissions) == 0:
+            link_permissions = ["publish", "subscribe"]
+        for permission in link_permissions:
+            if permission == "publish":
+                self.publish_queues.append(
+                    f"${{{{module.{linked_module.name}.queue_arn}}}}"
+                )
+                self.kms_write_keys.append(
+                    f"${{{{module.{linked_module.name}.kms_arn}}}}"
+                )
+            elif permission == "subscribe":
+                self.subscribe_queues.append(
+                    f"${{{{module.{linked_module.name}.queue_arn}}}}"
+                )
+                self.kms_read_keys.append(f"${{{{module.{linked_module.name}.kms_arn}}}}")
+            else:
+                raise Exception(f"Invalid permission {permission}")
+
+    def handle_sns_link(
+        self, linked_module: "Module", link_permissions: List[str]
+    ) -> None:
+        # If not specified, bucket should get write permissions
+        if link_permissions is None or len(link_permissions) == 0:
+            link_permissions = ["publish"]
+        for permission in link_permissions:
+            if permission == "publish":
+                self.publish_topics.append(
+                    f"${{{{module.{linked_module.name}.topic_arn}}}}"
+                )
+                self.kms_write_keys.append(
+                    f"${{{{module.{linked_module.name}.kms_arn}}}}"
+                )
+            else:
+                raise Exception(f"Invalid permission {permission}")
+
+    def handle_s3_link(
+        self, linked_module: "Module", link_permissions: List[str]
+    ) -> None:
+        bucket_name = linked_module.data["bucket_name"]
+        # If not specified, bucket should get write permissions
+        if link_permissions is None or len(link_permissions) == 0:
+            link_permissions = ["write"]
+        for permission in link_permissions:
+            if permission == "read":
+                self.read_buckets.append(bucket_name)
+            elif permission == "write":
+                self.write_buckets.append(bucket_name)
+            else:
+                raise Exception(f"Invalid permission {permission}")
 
 
 def get_eks_module_refs(layer: "Layer", module_idx: int) -> Tuple[str, str, str]:

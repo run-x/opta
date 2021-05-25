@@ -9,3 +9,7 @@ output "queue_id" {
 output "queue_name" {
   value = aws_sqs_queue.terraform_queue.name
 }
+
+output "kms_arn" {
+  value = aws_kms_key.key.arn
+}

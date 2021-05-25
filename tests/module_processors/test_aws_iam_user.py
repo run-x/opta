@@ -142,4 +142,16 @@ class TestAwsIamUserProcessor:
                 "Resource": ["${{module.topic.topic_arn}}"],
                 "Sid": "PublishSns",
             },
+            {
+                "Action": ["kms:GenerateDataKey", "kms:Decrypt"],
+                "Effect": "Allow",
+                "Resource": ["${{module.queue.kms_arn}}", "${{module.topic.kms_arn}}"],
+                "Sid": "KMSWrite",
+            },
+            {
+                "Action": ["kms:Decrypt"],
+                "Effect": "Allow",
+                "Resource": ["${{module.queue.kms_arn}}"],
+                "Sid": "KMSRead",
+            },
         ]

@@ -1,25 +1,19 @@
 from typing import TYPE_CHECKING, List
 
-from opta.core.aws import AWS
 from opta.exceptions import UserErrors
-from opta.module_processors.base import AWSK8sModuleProcessor
+from opta.module_processors.base import AWSIamAssembler, AWSK8sModuleProcessor
 
 if TYPE_CHECKING:
     from opta.layer import Layer
     from opta.module import Module
 
 
-class AwsK8sServiceProcessor(AWSK8sModuleProcessor):
+class AwsK8sServiceProcessor(AWSK8sModuleProcessor, AWSIamAssembler):
     def __init__(self, module: "Module", layer: "Layer"):
         if (module.aliased_type or module.type) != "aws-k8s-service":
             raise Exception(
                 f"The module {module.name} was expected to be of type aws k8s service"
             )
-        self.read_buckets: list[str] = []
-        self.write_buckets: list[str] = []
-        self.publish_queues: list[str] = []
-        self.subscribe_queues: list[str] = []
-        self.publish_topics: list[str] = []
         super(AwsK8sServiceProcessor, self).__init__(module, layer)
 
     def process(self, module_idx: int) -> None:
@@ -76,7 +70,6 @@ class AwsK8sServiceProcessor(AWSK8sModuleProcessor):
                 raise Exception(
                     f"Unsupported module type for k8s service link: {module_type}"
                 )
-
         iam_statements = [
             {
                 "Sid": "DescribeCluster",
@@ -85,26 +78,7 @@ class AwsK8sServiceProcessor(AWSK8sModuleProcessor):
                 "Resource": ["*"],
             }
         ]
-        if self.read_buckets:
-            iam_statements.append(
-                AWS.prepare_read_buckets_iam_statements(self.read_buckets)
-            )
-        if self.write_buckets:
-            iam_statements.append(
-                AWS.prepare_write_buckets_iam_statements(self.write_buckets)
-            )
-        if self.publish_queues:
-            iam_statements.append(
-                AWS.prepare_publish_queues_iam_statements(self.publish_queues)
-            )
-        if self.subscribe_queues:
-            iam_statements.append(
-                AWS.prepare_subscribe_queues_iam_statements(self.subscribe_queues)
-            )
-        if self.publish_topics:
-            iam_statements.append(
-                AWS.prepare_publish_sns_iam_statements(self.publish_topics)
-            )
+        iam_statements += self.prepare_iam_statements()
         self.module.data["iam_policy"] = {
             "Version": "2012-10-17",
             "Statement": iam_statements,
@@ -112,38 +86,6 @@ class AwsK8sServiceProcessor(AWSK8sModuleProcessor):
         if "image_tag" in self.layer.variables:
             self.module.data["tag"] = self.layer.variables["image_tag"]
         super(AwsK8sServiceProcessor, self).process(module_idx)
-
-    def handle_sqs_link(
-        self, linked_module: "Module", link_permissions: List[str]
-    ) -> None:
-        # If not specified, bucket should get write permissions
-        if link_permissions is None or len(link_permissions) == 0:
-            link_permissions = ["publish", "subscribe"]
-        for permission in link_permissions:
-            if permission == "publish":
-                self.publish_queues.append(
-                    f"${{{{module.{linked_module.name}.queue_arn}}}}"
-                )
-            elif permission == "subscribe":
-                self.subscribe_queues.append(
-                    f"${{{{module.{linked_module.name}.queue_arn}}}}"
-                )
-            else:
-                raise Exception(f"Invalid permission {permission}")
-
-    def handle_sns_link(
-        self, linked_module: "Module", link_permissions: List[str]
-    ) -> None:
-        # If not specified, bucket should get write permissions
-        if link_permissions is None or len(link_permissions) == 0:
-            link_permissions = ["publish"]
-        for permission in link_permissions:
-            if permission == "publish":
-                self.publish_topics.append(
-                    f"${{{{module.{linked_module.name}.topic_arn}}}}"
-                )
-            else:
-                raise Exception(f"Invalid permission {permission}")
 
     def handle_rds_link(
         self, linked_module: "Module", link_permissions: List[str]
@@ -201,18 +143,3 @@ class AwsK8sServiceProcessor(AWSK8sModuleProcessor):
                 "are for manipulating the docdb cluster itself, which "
                 "I don't think is what you're looking for."
             )
-
-    def handle_s3_link(
-        self, linked_module: "Module", link_permissions: List[str]
-    ) -> None:
-        bucket_name = linked_module.data["bucket_name"]
-        # If not specified, bucket should get write permissions
-        if link_permissions is None or len(link_permissions) == 0:
-            link_permissions = ["write"]
-        for permission in link_permissions:
-            if permission == "read":
-                self.read_buckets.append(bucket_name)
-            elif permission == "write":
-                self.write_buckets.append(bucket_name)
-            else:
-                raise Exception(f"Invalid permission {permission}")
