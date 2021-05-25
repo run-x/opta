@@ -22,7 +22,7 @@ def _get_latest_version() -> str:
     logger.debug(f"Querying {LATEST_VERSION_FILE_URL}")
     resp = requests.get(LATEST_VERSION_FILE_URL)
     resp.raise_for_status()
-    return resp.text.strip()
+    return resp.text.strip().strip("v")
 
 
 def check_version_upgrade() -> None:
