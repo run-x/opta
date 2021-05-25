@@ -15,10 +15,6 @@ variable "module_name" {
   type = string
 }
 
-variable "kms_key_id" {
-  type = string
-}
-
 variable "fifo" {
   type = bool
   default = false

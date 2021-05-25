@@ -1,6 +1,6 @@
 resource "aws_sqs_queue" "terraform_queue" {
   name                      = var.fifo? "${var.env_name}-${var.layer_name}-${var.module_name}.fifo" : "${var.env_name}-${var.layer_name}-${var.module_name}"
-  kms_master_key_id                 = var.kms_key_id
+  kms_master_key_id                 = aws_kms_key.key.id
   fifo_queue                  = var.fifo
   content_based_deduplication = var.content_based_deduplication
   delay_seconds             = var.delay_seconds

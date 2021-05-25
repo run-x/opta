@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from opta.module_processors.base import ModuleProcessor, get_aws_base_module_refs
+from opta.module_processors.base import ModuleProcessor
 
 if TYPE_CHECKING:
     from opta.layer import Layer
@@ -16,6 +16,4 @@ class AwsSnsProcessor(ModuleProcessor):
         super(AwsSnsProcessor, self).__init__(module, layer)
 
     def process(self, module_idx: int) -> None:
-        aws_base_module_refs = get_aws_base_module_refs(self.layer)
-        self.module.data["kms_key_id"] = aws_base_module_refs["kms_account_key_id"]
         super(AwsSnsProcessor, self).process(module_idx)

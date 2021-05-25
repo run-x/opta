@@ -139,6 +139,24 @@ class AWS:
         }
 
     @staticmethod
+    def prepare_kms_write_keys_statements(kms_arns: List[str]) -> dict:
+        return {
+            "Sid": "KMSWrite",
+            "Action": ["kms:GenerateDataKey", "kms:Decrypt"],
+            "Effect": "Allow",
+            "Resource": [kms_arn for kms_arn in kms_arns],
+        }
+
+    @staticmethod
+    def prepare_kms_read_keys_statements(kms_arns: List[str]) -> dict:
+        return {
+            "Sid": "KMSRead",
+            "Action": ["kms:Decrypt"],
+            "Effect": "Allow",
+            "Resource": [kms_arn for kms_arn in kms_arns],
+        }
+
+    @staticmethod
     def delete_bucket(bucket_name: str) -> None:
         # Before a bucket can be deleted, all of the objects inside must be removed.
         bucket = boto3.resource("s3").Bucket(bucket_name)
