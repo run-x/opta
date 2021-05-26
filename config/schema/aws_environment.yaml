@@ -3,5 +3,5 @@ org_name: str()
 providers:
   aws:
     region: str()
-    account_id: int()
+    account_id: aws_id()
 modules: list(module())

@@ -91,6 +91,16 @@ class GcpOpta(Opta):
     environment_schema_path = path.join(schema_dir_path, "gcp_environment.yaml")
 
 
+class AwsId(Validator):
+    tag = "aws_id"
+
+    def _is_valid(self, value: Any) -> bool:
+        # import pdb
+        #
+        # pdb.set_trace()
+        return True
+
+
 def _get_yamale_errors(
     data: Any, schema_path: str, module_validator: Any = None
 ) -> List[str]:
@@ -115,6 +125,7 @@ vanilla_validators = DefaultValidators.copy()
 vanilla_validators[Opta.tag] = Opta
 aws_validators = DefaultValidators.copy()
 aws_validators[AwsOpta.tag] = AwsOpta
+aws_validators[AwsId.tag] = AwsId
 gcp_validators = DefaultValidators.copy()
 gcp_validators[GcpOpta.tag] = GcpOpta
 
