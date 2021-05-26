@@ -13,6 +13,7 @@ from opta.core.gcp import GCP
 from opta.core.generator import gen, gen_opta_resource_tags
 from opta.core.kubernetes import (
     configure_kubectl,
+    current_image_tag,
     get_cluster_name,
     tail_module_log,
     tail_namespace_events,
@@ -102,7 +103,6 @@ def _apply(
     _check_terraform_version()
     amplitude_client.send_event(amplitude_client.START_GEN_EVENT)
     layer = Layer.load_from_yaml(config, env)
-    layer.variables["image_tag"] = image_tag
 
     # We need a region with at least 3 AZs for leader election during failover.
     # Also EKS historically had problems with regions that have fewer than 3 AZs.
@@ -129,6 +129,35 @@ def _apply(
         GCP(layer).upload_opta_config(config)
     else:
         raise Exception(f"Cannot handle upload config for cloud {layer.cloud}")
+
+    service_modules = (
+        layer.get_module_by_type("k8s-service")
+        if layer.cloud == "aws"
+        else layer.get_module_by_type("gcp-k8s-service")
+    )
+
+    if len(service_modules) > 0 and (
+        Terraform.downloaded_state.get(layer.name, False)
+        or Terraform.download_state(layer)
+        and get_cluster_name(layer) is not None
+    ):
+        configure_kubectl(layer)
+
+        for service_module in service_modules:
+            current_tag = current_image_tag(layer)
+            if (
+                current_tag is not None
+                and image_tag is None
+                and service_module.data.get("image", "") == "AUTO"
+                and not test
+            ):
+                if click.confirm(
+                    f"WARNING There is an existing deployment (tag={current_tag}) and the pods will be killed as you "
+                    f"did not specify an image tag. Would you like to keep the existing deployment alive? (y/n)",
+                ):
+                    image_tag = current_tag
+
+    layer.variables["image_tag"] = image_tag
 
     existing_modules: Set[str] = set()
     first_loop = True
@@ -185,7 +214,6 @@ def _apply(
                 )
                 and get_cluster_name(layer) is not None
             ):
-                configure_kubectl(layer)
                 service_module = service_modules[0]
                 # Tailing logs
                 logger.info(
