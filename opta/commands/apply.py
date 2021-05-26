@@ -161,8 +161,6 @@ def _apply(
                 )
                 if response:
                     image_tag = current_tag
-                else:
-                    raise RuntimeError("Aborting")
 
     layer.variables["image_tag"] = image_tag
 
