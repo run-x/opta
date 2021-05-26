@@ -212,7 +212,8 @@ def current_image_tag(layer: "Layer",) -> Optional[str]:
     )
     if len(deployment_list.items) > 0:
         deployment: V1Deployment = deployment_list.items[0]
-        return deployment.spec.template.spec.containers[0].image.split(":")[1]
+        image_parts = deployment.spec.template.spec.containers[0].image.split(":")
+        return image_parts[1] if len(image_parts) > 1 else None
     return None
 
 

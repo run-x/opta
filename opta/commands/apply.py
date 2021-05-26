@@ -135,29 +135,34 @@ def _apply(
         if layer.cloud == "aws"
         else layer.get_module_by_type("gcp-k8s-service")
     )
-    if len(service_modules) > 0:
+
+    if len(service_modules) > 0 and (
+        Terraform.downloaded_state.get(layer.name, False)
+        or Terraform.download_state(layer)
+        and get_cluster_name(layer) is not None
+    ):
         configure_kubectl(layer)
 
-    for service_module in service_modules:
-        current_tag = current_image_tag(layer)
-        if (
-            current_tag is not None
-            and image_tag is None
-            and service_module.data.get("image", "") == "AUTO"
-            and not test
-        ):
-            response = (
-                True
-                if auto_approve
-                else click.confirm(
-                    f"WARNING There is an existing deployment (tag={current_tag}) and the pods will be killed as you "
-                    f"did not specify an image tag. Would you like to keep the existing deployment alive? (y/n)",
+        for service_module in service_modules:
+            current_tag = current_image_tag(layer)
+            if (
+                current_tag is not None
+                and image_tag is None
+                and service_module.data.get("image", "") == "AUTO"
+                and not test
+            ):
+                response = (
+                    True
+                    if auto_approve
+                    else click.confirm(
+                        f"WARNING There is an existing deployment (tag={current_tag}) and the pods will be killed as you "
+                        f"did not specify an image tag. Would you like to keep the existing deployment alive? (y/n)",
+                    )
                 )
-            )
-            if response:
-                image_tag = current_tag
-            else:
-                raise RuntimeError("Aborting")
+                if response:
+                    image_tag = current_tag
+                else:
+                    raise RuntimeError("Aborting")
 
     layer.variables["image_tag"] = image_tag
 
