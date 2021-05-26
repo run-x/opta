@@ -151,15 +151,10 @@ def _apply(
                 and service_module.data.get("image", "") == "AUTO"
                 and not test
             ):
-                response = (
-                    True
-                    if auto_approve
-                    else click.confirm(
-                        f"WARNING There is an existing deployment (tag={current_tag}) and the pods will be killed as you "
-                        f"did not specify an image tag. Would you like to keep the existing deployment alive? (y/n)",
-                    )
-                )
-                if response:
+                if click.confirm(
+                    f"WARNING There is an existing deployment (tag={current_tag}) and the pods will be killed as you "
+                    f"did not specify an image tag. Would you like to keep the existing deployment alive? (y/n)",
+                ):
                     image_tag = current_tag
 
     layer.variables["image_tag"] = image_tag
