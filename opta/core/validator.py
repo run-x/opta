@@ -59,7 +59,7 @@ class Opta(Validator):
 
     tag = "opta"
     constaints: List = []
-    module_validator: Optional[Type[Module]] = None
+    extra_validators: List[Type[Validator]] = []
     environment_schema_path: Optional[str] = None
 
     def _is_valid(self, value: Any) -> bool:
@@ -78,35 +78,35 @@ class Opta(Validator):
         else:
             schema_path = path.join(schema_dir_path, "service.yaml")
 
-        return _get_yamale_errors(value, schema_path, self.module_validator)
-
-
-class AwsOpta(Opta):
-    module_validator = AwsModule
-    environment_schema_path = path.join(schema_dir_path, "aws_environment.yaml")
-
-
-class GcpOpta(Opta):
-    module_validator = GcpModule
-    environment_schema_path = path.join(schema_dir_path, "gcp_environment.yaml")
+        return _get_yamale_errors(value, schema_path, self.extra_validators)
 
 
 class AwsId(Validator):
     tag = "aws_id"
 
     def _is_valid(self, value: Any) -> bool:
-        # import pdb
-        #
-        # pdb.set_trace()
-        return True
+        str_value = str(value)
+
+        return str_value.isdigit() and len(str_value) == 12
+
+
+class AwsOpta(Opta):
+    extra_validators = [AwsModule, AwsId]
+    environment_schema_path = path.join(schema_dir_path, "aws_environment.yaml")
+
+
+class GcpOpta(Opta):
+    extra_validators = [GcpModule]
+    environment_schema_path = path.join(schema_dir_path, "gcp_environment.yaml")
 
 
 def _get_yamale_errors(
-    data: Any, schema_path: str, module_validator: Any = None
+    data: Any, schema_path: str, extra_validators: Optional[List[Type[Validator]]] = None
 ) -> List[str]:
+    extra_validators = extra_validators or []
     validators = DefaultValidators.copy()
-    if module_validator is not None:
-        validators[module_validator.tag] = module_validator
+    for validator in extra_validators:
+        validators[validator.tag] = validator
 
     schema = yamale.make_schema(schema_path, validators=validators)
     formatted_data = [(data, None)]
@@ -125,7 +125,6 @@ vanilla_validators = DefaultValidators.copy()
 vanilla_validators[Opta.tag] = Opta
 aws_validators = DefaultValidators.copy()
 aws_validators[AwsOpta.tag] = AwsOpta
-aws_validators[AwsId.tag] = AwsId
 gcp_validators = DefaultValidators.copy()
 gcp_validators[GcpOpta.tag] = GcpOpta
 

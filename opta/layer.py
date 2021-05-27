@@ -139,6 +139,9 @@ class Layer:
         providers = conf.pop("providers", {})
         if "aws" in providers:
             providers["aws"]["version"] = AWS_PROVIDER_VERSION
+            account_id = str(providers["aws"]["account_id"])
+            account_id = "0" * (12 - len(account_id)) + account_id
+            providers["aws"]["account_id"] = account_id
         if "google" in providers:
             providers["google"]["version"] = GCP_PROVIDER_VERSION
         if environments:
