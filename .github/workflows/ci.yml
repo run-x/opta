@@ -111,6 +111,7 @@ jobs:
           python ../opta/cli.py output --env staging
       - name: Test apply command
         run: |
+          aws s3api create-bucket
           source $(pipenv --venv)/bin/activate
           export PYTHONPATH=$(pwd)
           cd test-service
