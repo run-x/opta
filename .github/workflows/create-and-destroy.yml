@@ -45,15 +45,15 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.DEPLOYER_AWS_ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.DEPLOYER_AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ secrets.AWS_OPTA_CI_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_OPTA_CI_SECRET_KEY }}
           aws-region: us-east-1
       - name: Deploy opta environment
         run: |
           source $(pipenv --venv)/bin/activate
           export PYTHONPATH=$(pwd)
           python ./opta/cli.py apply \
-          --config runx-infra/staging/opta-ci.yml \
+          --config runx-infra/opta-ci/opta.yml \
           --auto-approve \
           --refresh
       - name: Login to Amazon ECR
@@ -94,5 +94,5 @@ jobs:
           source $(pipenv --venv)/bin/activate
           export PYTHONPATH=$(pwd)
           yes | python ./opta/cli.py destroy \
-          --config runx-infra/staging/opta-ci.yml \
+          --config runx-infra/opta-ci/opta.yml \
           --auto-approve
