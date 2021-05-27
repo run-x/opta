@@ -139,6 +139,7 @@ class Layer:
         providers = conf.pop("providers", {})
         if "aws" in providers:
             providers["aws"]["version"] = AWS_PROVIDER_VERSION
+            providers["aws"]["account_id"] = providers["aws"].get("account_id", "")
             account_id = str(providers["aws"]["account_id"])
             account_id = "0" * (12 - len(account_id)) + account_id
             providers["aws"]["account_id"] = account_id
