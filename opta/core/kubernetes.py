@@ -148,7 +148,7 @@ def _aws_configure_kubectl(layer: "Layer") -> None:
     env_aws_region, env_aws_account_ids = _aws_get_cluster_env(root_layer)
 
     # Make sure the current account points to the cluster environment
-    if int(current_aws_account_id) not in env_aws_account_ids:
+    if str(current_aws_account_id) not in env_aws_account_ids:
         raise UserErrors(
             fmt_msg(
                 f"""
@@ -187,7 +187,7 @@ def get_cluster_name(layer: "Layer") -> Optional[str]:
     return cluster_name
 
 
-def _aws_get_cluster_env(root_layer: "Layer") -> Tuple[str, List[int]]:
+def _aws_get_cluster_env(root_layer: "Layer") -> Tuple[str, List[str]]:
     aws_provider = root_layer.providers["aws"]
     return aws_provider["region"], aws_provider["allowed_account_ids"]
 
