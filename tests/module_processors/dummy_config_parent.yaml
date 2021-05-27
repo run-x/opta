@@ -3,7 +3,7 @@ org_name: opta-tests
 providers:
   aws:
     region: us-east-1
-    account_id: 889760294590
+    account_id: 011111111111
 modules:
   - type: aws-base
   - type: aws-dns

@@ -1,10 +1,8 @@
 from typing import TYPE_CHECKING
 
-import yaml
-
 from opta.exceptions import UserErrors
 from opta.module_processors.base import ModuleProcessor
-from opta.utils import logger
+from opta.utils import logger, yaml
 
 if TYPE_CHECKING:
     from opta.layer import Layer

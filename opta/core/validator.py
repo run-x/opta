@@ -59,7 +59,7 @@ class Opta(Validator):
 
     tag = "opta"
     constaints: List = []
-    module_validator: Optional[Type[Module]] = None
+    extra_validators: List[Type[Validator]] = []
     environment_schema_path: Optional[str] = None
 
     def _is_valid(self, value: Any) -> bool:
@@ -78,27 +78,37 @@ class Opta(Validator):
         else:
             schema_path = path.join(schema_dir_path, "service.yaml")
 
-        return _get_yamale_errors(value, schema_path, self.module_validator)
+        return _get_yamale_errors(value, schema_path, self.extra_validators)
+
+
+class AwsId(Validator):
+    tag = "aws_id"
+
+    def _is_valid(self, value: Any) -> bool:
+        str_value = str(value)
+
+        return str_value.isdigit()
 
 
 class AwsOpta(Opta):
-    module_validator = AwsModule
+    extra_validators = [AwsModule, AwsId]
     environment_schema_path = path.join(schema_dir_path, "aws_environment.yaml")
 
 
 class GcpOpta(Opta):
-    module_validator = GcpModule
+    extra_validators = [GcpModule]
     environment_schema_path = path.join(schema_dir_path, "gcp_environment.yaml")
 
 
 def _get_yamale_errors(
-    data: Any, schema_path: str, module_validator: Any = None
+    data: Any, schema_path: str, extra_validators: Optional[List[Type[Validator]]] = None
 ) -> List[str]:
+    extra_validators = extra_validators or []
     validators = DefaultValidators.copy()
-    if module_validator is not None:
-        validators[module_validator.tag] = module_validator
+    for validator in extra_validators:
+        validators[validator.tag] = validator
 
-    schema = yamale.make_schema(schema_path, validators=validators)
+    schema = yamale.make_schema(schema_path, validators=validators, parser="ruamel")
     formatted_data = [(data, None)]
 
     # This is an array of `ValidationResult`s, each of which has an
@@ -119,9 +129,15 @@ gcp_validators = DefaultValidators.copy()
 gcp_validators[GcpOpta.tag] = GcpOpta
 
 main_schema_path = path.join(schema_dir_path, "opta.yaml")
-vanilla_main_schema = yamale.make_schema(main_schema_path, validators=vanilla_validators)
-aws_main_schema = yamale.make_schema(main_schema_path, validators=aws_validators)
-gcp_main_schema = yamale.make_schema(main_schema_path, validators=gcp_validators)
+vanilla_main_schema = yamale.make_schema(
+    main_schema_path, validators=vanilla_validators, parser="ruamel"
+)
+aws_main_schema = yamale.make_schema(
+    main_schema_path, validators=aws_validators, parser="ruamel"
+)
+gcp_main_schema = yamale.make_schema(
+    main_schema_path, validators=gcp_validators, parser="ruamel"
+)
 
 
 def _print_success(config_file_path: str) -> None:
@@ -144,7 +160,7 @@ def _print_errors(errors: List[str]) -> None:
 
 
 def validate_yaml(config_file_path: str, cloud: str) -> Literal[True]:
-    data = yamale.make_data(config_file_path)
+    data = yamale.make_data(config_file_path, parser="ruamel")
     if cloud == "aws":
         yamale_result = yamale.validate(aws_main_schema, data, _raise_error=False)
     elif cloud == "google":
