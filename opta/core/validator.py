@@ -87,7 +87,7 @@ class AwsId(Validator):
     def _is_valid(self, value: Any) -> bool:
         str_value = str(value)
 
-        return str_value.isdigit() and len(str_value) <= 12
+        return str_value.isdigit()
 
 
 class AwsOpta(Opta):
