@@ -41,7 +41,7 @@ def test_configure_kubectl(mocker: MockFixture) -> None:
     mocker.patch("opta.core.kubernetes._get_root_layer")
     mocker.patch(
         "opta.core.kubernetes._aws_get_cluster_env",
-        return_value=("us-east-1", [fake_aws_account_id]),
+        return_value=("us-east-1", [f"{fake_aws_account_id}"]),
     )
     # Mock fetching the cluster name
     mocker.patch(
