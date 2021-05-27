@@ -87,7 +87,7 @@ class AwsId(Validator):
     def _is_valid(self, value: Any) -> bool:
         str_value = str(value)
 
-        return str_value.isdigit() and len(str_value) == 12
+        return str_value.isdigit() and len(str_value) <= 12
 
 
 class AwsOpta(Opta):
@@ -108,7 +108,7 @@ def _get_yamale_errors(
     for validator in extra_validators:
         validators[validator.tag] = validator
 
-    schema = yamale.make_schema(schema_path, validators=validators)
+    schema = yamale.make_schema(schema_path, validators=validators, parser="ruamel")
     formatted_data = [(data, None)]
 
     # This is an array of `ValidationResult`s, each of which has an
@@ -129,9 +129,15 @@ gcp_validators = DefaultValidators.copy()
 gcp_validators[GcpOpta.tag] = GcpOpta
 
 main_schema_path = path.join(schema_dir_path, "opta.yaml")
-vanilla_main_schema = yamale.make_schema(main_schema_path, validators=vanilla_validators)
-aws_main_schema = yamale.make_schema(main_schema_path, validators=aws_validators)
-gcp_main_schema = yamale.make_schema(main_schema_path, validators=gcp_validators)
+vanilla_main_schema = yamale.make_schema(
+    main_schema_path, validators=vanilla_validators, parser="ruamel"
+)
+aws_main_schema = yamale.make_schema(
+    main_schema_path, validators=aws_validators, parser="ruamel"
+)
+gcp_main_schema = yamale.make_schema(
+    main_schema_path, validators=gcp_validators, parser="ruamel"
+)
 
 
 def _print_success(config_file_path: str) -> None:
@@ -154,7 +160,7 @@ def _print_errors(errors: List[str]) -> None:
 
 
 def validate_yaml(config_file_path: str, cloud: str) -> Literal[True]:
-    data = yamale.make_data(config_file_path)
+    data = yamale.make_data(config_file_path, parser="ruamel")
     if cloud == "aws":
         yamale_result = yamale.validate(aws_main_schema, data, _raise_error=False)
     elif cloud == "google":
