@@ -36,6 +36,11 @@ def destroy(config: str, env: Optional[str], auto_approve: bool) -> None:
 
     # Any child layers should be destroyed first before the current layer.
     children_layers = _fetch_children_layers(layer)
+    if children_layers:
+        logger.info(
+            f"Got the following children layers which we are going to destroy first: "
+            f"{[x.name for x in children_layers]}"
+        )
     destroy_order = [*children_layers, layer]
 
     tf_flags: List[str] = []
@@ -55,6 +60,7 @@ def destroy(config: str, env: Optional[str], auto_approve: bool) -> None:
     for layer in destroy_order:
         gen_all(layer)
         Terraform.init("-reconfigure")
+        logger.info(f"Destroying layer {layer.name}")
         Terraform.destroy_all(layer, *tf_flags)
 
 
