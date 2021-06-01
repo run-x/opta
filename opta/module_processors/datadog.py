@@ -38,7 +38,7 @@ class DatadogProcessor(ModuleProcessor):
             field_selector=f"metadata.name={self.layer.name}"
         )
         if len(namespaces.items) == 0:
-            self.v1.create_namespace_if_not_exists(
+            self.v1.create_namespace(
                 body=V1Namespace(metadata=V1ObjectMeta(name=self.layer.name))
             )
         try:
@@ -51,7 +51,7 @@ class DatadogProcessor(ModuleProcessor):
             else:
                 api_key = base64.b64decode(secret.data["DATADOG_API_KEY"]).decode("utf-8")
         except ApiException:
-            self.v1.create_namespace_if_not_existsd_secret(
+            self.v1.create_namespace(
                 namespace=self.layer.name,
                 body=V1Secret(
                     metadata=V1ObjectMeta(name="secret"),
