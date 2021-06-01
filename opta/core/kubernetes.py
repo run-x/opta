@@ -227,7 +227,7 @@ def create_namespace_if_not_exists(layer_name: str) -> None:
     v1 = CoreV1Api()
     namespaces = v1.list_namespace(field_selector=f"metadata.name={layer_name}")
     if len(namespaces.items) == 0:
-        v1.create_namespace_if_not_exists(
+        v1.create_namespace(
             body=V1Namespace(
                 metadata=V1ObjectMeta(
                     name=layer_name, annotations={"linkerd.io/inject": "enabled"}
@@ -243,7 +243,7 @@ def create_manual_secrets_if_not_exists(layer_name: str) -> None:
         layer_name, field_selector="metadata.name=manual-secrets"
     )
     if len(manual_secrets.items) == 0:
-        v1.create_namespace_if_not_existsd_secret(
+        v1.create_namespaced_secret(
             layer_name, body=V1Secret(metadata=V1ObjectMeta(name="manual-secrets"))
         )
 
