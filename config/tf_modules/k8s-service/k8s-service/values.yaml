@@ -3,7 +3,8 @@ fullnameOverride: ""
 uriComponents: []
 iamRoleArn: ""
 envVars: []
-secrets: []
+linkSecrets: []
+manualSecrets: []
 port: {}
 
 serviceAccount:

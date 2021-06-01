@@ -23,6 +23,9 @@ class ModuleProcessor:
         self.module.data["layer_name"] = self.layer.name
         self.module.data["module_name"] = self.module.name
 
+    def pre_hook(self, module_idx: int) -> None:
+        pass
+
     def post_hook(self, module_idx: int, exception: Optional[Exception]) -> None:
         pass
 

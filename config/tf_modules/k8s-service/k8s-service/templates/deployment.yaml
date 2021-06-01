@@ -54,19 +54,24 @@ spec:
           env:
             - name: RDS_CA_PATH # This is the path to the public key for the docdb tls
               value: "/config/rds_ca.pem"
-            {{- if or (.Values.envVars) (.Values.secrets) }}
             {{ range .Values.envVars }}
             - name: {{ .name | quote }}
               value: {{ .value | quote }}
             {{ end }}
-            {{ range $val := .Values.secrets }}
+            {{ range $val := .Values.linkSecrets }}
             - name: {{ $val.name | quote }}
               valueFrom:
                 secretKeyRef:
                   name: secret
                   key: {{ $val.name | quote }}
             {{ end }}
-            {{- end }}
+            {{ range $val := .Values.manualSecrets }}
+            - name: {{ $val | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: manual-secrets
+                  key: {{ $val | quote }}
+            {{ end }}
           {{/* No probes for grpc at the moment */}}
           {{ if not (hasKey .Values.port "grpc") }}
           livenessProbe:

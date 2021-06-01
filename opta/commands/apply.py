@@ -177,6 +177,7 @@ def _apply(
             untouched_modules = existing_modules - configured_modules
             configured_modules = configured_modules.union(untouched_modules)
 
+        layer.pre_hook(module_idx)
         targets = list(map(lambda x: f"-target=module.{x}", sorted(configured_modules)))
         if test:
             Terraform.plan("-lock=false", *targets)

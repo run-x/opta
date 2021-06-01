@@ -24,8 +24,7 @@ class TestK8sServiceProcessor:
         )
         AwsK8sServiceProcessor(app_module, layer).process(10)
         mocked_process.assert_called_once_with(10)
-        assert app_module.data["secrets"] == [
-            {"name": "BALONEY", "value": ""},
+        assert app_module.data["link_secrets"] == [
             {"name": "database_db_user", "value": "${{module.database.db_user}}"},
             {"name": "database_db_name", "value": "${{module.database.db_name}}"},
             {"name": "database_db_password", "value": "${{module.database.db_password}}"},
@@ -38,6 +37,9 @@ class TestK8sServiceProcessor:
             {"name": "docdb_db_user", "value": "${{module.docdb.db_user}}"},
             {"name": "docdb_db_host", "value": "${{module.docdb.db_host}}"},
             {"name": "docdb_db_password", "value": "${{module.docdb.db_password}}"},
+        ]
+        assert app_module.data["manual_secrets"] == [
+            "BALONEY",
         ]
         assert app_module.data["iam_policy"] == {
             "Version": "2012-10-17",

@@ -1,10 +1,10 @@
 {{- if ne ((keys .Values.port) | len) 1 }}
   {{- fail "Port must specify either a single tcp port (for websockets) or a single http port" }}
-{{- end }}
-{{- if not ( or (hasKey .Values.port "tcp") ( or (hasKey .Values.port "http") (hasKey .Values.port "grpc"))) }}
+  {{- end }}
+  {{- if not ( or (hasKey .Values.port "tcp") ( or (hasKey .Values.port "http") (hasKey .Values.port "grpc"))) }}
   {{- fail "Port must specify either a single tcp port (for websockets) or a single http port" }}
-{{- end }}
-{{- if .Values.deployPods }}
+  {{- end }}
+  {{- if .Values.deployPods }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -12,12 +12,12 @@ metadata:
   labels:
     tags.datadoghq.com/service: {{ include "k8s-service.serviceName" . }}-{{ include "k8s-service.namespaceName" . }}
     tags.datadoghq.com/version: {{ .Values.version | quote }}
-    {{- include "k8s-service.labels" . | nindent 4 }}
+  {{- include "k8s-service.labels" . | nindent 4 }}
   namespace: {{ include "k8s-service.namespaceName" . }}
 spec:
   selector:
     matchLabels:
-      {{- include "k8s-service.selectorLabels" . | nindent 6 }}
+  {{- include "k8s-service.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
@@ -42,31 +42,36 @@ spec:
           ports:
             - name: main
               protocol: TCP
-            {{- if hasKey .Values.port "http" }}
+              {{- if hasKey .Values.port "http" }}
               containerPort: {{ .Values.port.http }}
-            {{- end }}
-            {{- if hasKey .Values.port "tcp" }}
+              {{- end }}
+              {{- if hasKey .Values.port "tcp" }}
               containerPort: {{ .Values.port.tcp }}
-            {{- end }}
-            {{- if hasKey .Values.port "grpc" }}
+              {{- end }}
+              {{- if hasKey .Values.port "grpc" }}
               containerPort: {{ .Values.port.grpc }}
-            {{- end }}
+          {{- end }}
           env:
             - name: RDS_CA_PATH # This is the path to the public key for the docdb tls
               value: "/config/rds_ca.pem"
-            {{- if or (.Values.envVars) (.Values.secrets) }}
             {{ range .Values.envVars }}
             - name: {{ .name | quote }}
               value: {{ .value | quote }}
             {{ end }}
-            {{ range $val := .Values.secrets }}
+            {{ range $val := .Values.linkSecrets }}
             - name: {{ $val.name | quote }}
               valueFrom:
                 secretKeyRef:
                   name: secret
                   key: {{ $val.name | quote }}
             {{ end }}
-            {{- end }}
+            {{ range $val := .Values.manualSecrets }}
+            - name: {{ $val | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: manual-secrets
+                  key: {{ $val | quote }}
+          {{ end }}
           {{/* No probes for grpc at the moment */}}
           {{ if not (hasKey .Values.port "grpc") }}
           livenessProbe:
@@ -79,7 +84,7 @@ spec:
             httpGet:
               port: main
               path: {{ .Values.livenessProbePath }}
-            {{ end }}
+          {{ end }}
           readinessProbe:
             initialDelaySeconds: 30
             periodSeconds: 10
@@ -91,13 +96,13 @@ spec:
             httpGet:
               port: main
               path: {{ .Values.readinessProbePath }}
-            {{ end }}
+          {{ end }}
           {{ end }}
           resources:
             limits:
-              {{- toYaml .Values.containerResourceLimits | nindent 14 }}
+            {{- toYaml .Values.containerResourceLimits | nindent 14 }}
             requests:
-              {{- toYaml .Values.containerResourceRequests | nindent 14 }}
+      {{- toYaml .Values.containerResourceRequests | nindent 14 }}
       volumes:
         - name: config
           configMap:
@@ -105,4 +110,4 @@ spec:
             items:
               - key: "rds_ca.pem"
                 path: "rds_ca.pem"
-{{- end }}
+  {{- end }}

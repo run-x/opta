@@ -24,8 +24,7 @@ class TestGCPK8sServiceProcessor:
         )
         GcpK8sServiceProcessor(app_module, layer).process(5)
         mocked_process.assert_called_once_with(5)
-        assert app_module.data["secrets"] == [
-            {"name": "BALONEY", "value": ""},
+        assert app_module.data["link_secrets"] == [
             {"name": "database_db_user", "value": "${{module.database.db_user}}"},
             {"name": "database_db_name", "value": "${{module.database.db_name}}"},
             {"name": "database_db_password", "value": "${{module.database.db_password}}"},
@@ -35,6 +34,9 @@ class TestGCPK8sServiceProcessor:
                 "name": "redis_cache_auth_token",
                 "value": "${{module.redis.cache_auth_token}}",
             },
+        ]
+        assert app_module.data["manual_secrets"] == [
+            "BALONEY",
         ]
         assert app_module.data["read_buckets"] == ["${{module.bucket1.bucket_name}}"]
         assert app_module.data["write_buckets"] == [
