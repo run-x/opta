@@ -164,7 +164,8 @@ modules:
       port: optional
       tag: optional
       env_vars: optional
-      secrets: optional
+      manual_secrets: optional
+      link_secrets: optional
       autoscaling_target_cpu_percentage: optional
       autoscaling_target_mem_percentage: optional
       liveness_probe_path: optional
@@ -458,7 +459,8 @@ modules:
       port: optional
       tag: optional
       env_vars: optional
-      secrets: optional
+      manual_secrets: optional
+      link_secrets: optional
       autoscaling_target_cpu_percentage: optional
       autoscaling_target_mem_percentage: optional
       liveness_probe_path: optional

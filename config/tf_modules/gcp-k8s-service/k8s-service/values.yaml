@@ -3,7 +3,8 @@ fullnameOverride: ""
 uriComponents: []
 googleServiceAccount: ""
 envVars: []
-secrets: []
+linkSecrets: []
+manualSecrets: []
 port: {}
 
 serviceAccount:

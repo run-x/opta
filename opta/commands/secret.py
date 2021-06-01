@@ -1,15 +1,17 @@
-import base64
 import re
 from typing import Optional
 
 import click
 from click_didyoumean import DYMGroup
-from kubernetes.client import CoreV1Api
-from kubernetes.config import load_kube_config
 
 from opta.amplitude import amplitude_client
 from opta.core.generator import gen_all
-from opta.core.kubernetes import configure_kubectl
+from opta.core.kubernetes import (
+    configure_kubectl,
+    create_namespace_if_not_exists,
+    get_secrets,
+    update_manual_secrets,
+)
 from opta.core.terraform import fetch_terraform_state_resources
 from opta.exceptions import UserErrors
 from opta.layer import Layer
@@ -38,15 +40,15 @@ def view(secret: str, env: Optional[str], config: str) -> None:
     _raise_if_no_k8s_cluster_exists(layer)
 
     configure_kubectl(layer)
-    load_kube_config()
-    v1 = CoreV1Api()
-    api_response = v1.read_namespaced_secret("secret", layer.name)
-    if secret not in api_response.data:
+    create_namespace_if_not_exists(layer.name)
+    secrets = get_secrets(layer.name)
+    if secret not in secrets:
         raise UserErrors(
-            f"Secret {secret} was not specified for the app. You sure you set it in your yaml?"
+            f"We couldn't find a secret named {secret}. You either need to add it to your opta.yml file or if it's"
+            f" already there - update it via secret update."
         )
 
-    print(base64.b64decode(api_response.data[secret]).decode("utf-8"))
+    print(secrets[secret])
 
 
 @secret.command(name="list")
@@ -60,15 +62,9 @@ def list_command(env: Optional[str], config: str) -> None:
     _raise_if_no_k8s_cluster_exists(layer)
 
     configure_kubectl(layer)
-    load_kube_config()
-    v1 = CoreV1Api()
-    api_response = v1.read_namespaced_secret("secret", layer.name)
-    if api_response.data is None:
-        print(
-            "No secrets found, you can make some by adding them in you opta file k8s service"
-        )
-        return
-    for key in api_response.data:
+    create_namespace_if_not_exists(layer.name)
+    secrets = get_secrets(layer.name)
+    for key in secrets:
         print(key)
 
 
@@ -84,12 +80,9 @@ def update(secret: str, value: str, env: Optional[str], config: str) -> None:
     _raise_if_no_k8s_cluster_exists(layer)
 
     configure_kubectl(layer)
+    create_namespace_if_not_exists(layer.name)
     amplitude_client.send_event(amplitude_client.UPDATE_SECRET_EVENT)
-    secret_value = base64.b64encode(value.encode("utf-8")).decode("utf-8")
-    patch = [{"op": "replace", "path": f"/data/{secret}", "value": secret_value}]
-    load_kube_config()
-    v1 = CoreV1Api()
-    v1.patch_namespaced_secret("secret", layer.name, patch)
+    update_manual_secrets(layer.name, {secret: str(value)})
 
     print("Success")
 

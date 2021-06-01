@@ -279,9 +279,49 @@ class Layer:
 
         return hydrate(ret, self.metadata_hydration())
 
+    def pre_hook(self, module_idx: int) -> None:
+        for module in self.modules[0 : module_idx + 1]:
+            module_type = module.aliased_type or module.type
+            if module_type == "aws-k8s-service":
+                AwsK8sServiceProcessor(module, self).pre_hook(module_idx)
+            elif module_type == "aws-k8s-base":
+                AwsK8sBaseProcessor(module, self).pre_hook(module_idx)
+            elif module_type == "datadog":
+                DatadogProcessor(module, self).pre_hook(module_idx)
+            elif module_type == "gcp-k8s-base":
+                GcpK8sBaseProcessor(module, self).pre_hook(module_idx)
+            elif module_type == "gcp-k8s-service":
+                GcpK8sServiceProcessor(module, self).pre_hook(module_idx)
+            elif module_type == "gcp-gke":
+                GcpGkeProcessor(module, self).pre_hook(module_idx)
+            elif module_type == "aws-dns":
+                AwsDnsProcessor(module, self).pre_hook(module_idx)
+            elif module_type == "runx":
+                RunxProcessor(module, self).pre_hook(module_idx)
+            elif module_type == "helm-chart":
+                HelmChartProcessor(module, self).pre_hook(module_idx)
+            elif module_type == "aws-iam-role":
+                AwsIamRoleProcessor(module, self).pre_hook(module_idx)
+            elif module_type == "aws-iam-user":
+                AwsIamUserProcessor(module, self).pre_hook(module_idx)
+            elif module_type == "aws-eks":
+                AwsEksProcessor(module, self).pre_hook(module_idx)
+            elif module_type == "aws-ses":
+                AwsEmailProcessor(module, self).pre_hook(module_idx)
+            elif module_type == "aws-sqs":
+                AwsSqsProcessor(module, self).pre_hook(module_idx)
+            elif module_type == "aws-sns":
+                AwsSnsProcessor(module, self).pre_hook(module_idx)
+            else:
+                ModuleProcessor(module, self).pre_hook(module_idx)
+        if self.parent is not None and self.parent.get_module("runx") is not None:
+            RunxProcessor(self.parent.get_module("runx"), self).pre_hook(  # type:ignore
+                module_idx
+            )
+
     def post_hook(self, module_idx: int, exception: Optional[Exception]) -> None:
         for module in self.modules[0 : module_idx + 1]:
-            module_type = module.data["type"]
+            module_type = module.aliased_type or module.type
             if module_type == "aws-k8s-service":
                 AwsK8sServiceProcessor(module, self).post_hook(module_idx, exception)
             elif module_type == "aws-k8s-base":

@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING, List
 
+from opta.core.kubernetes import create_namespace_if_not_exists, get_manual_secrets
 from opta.exceptions import UserErrors
 from opta.module_processors.base import AWSIamAssembler, AWSK8sModuleProcessor
 
@@ -16,20 +17,21 @@ class AwsK8sServiceProcessor(AWSK8sModuleProcessor, AWSIamAssembler):
             )
         super(AwsK8sServiceProcessor, self).__init__(module, layer)
 
+    def pre_hook(self, module_idx: int) -> None:
+        create_namespace_if_not_exists(self.layer.name)
+        manual_secrets = get_manual_secrets(self.layer.name)
+        for secret_name in self.module.data.get("secrets", []):
+            if secret_name not in manual_secrets:
+                raise UserErrors(
+                    f"Secret {secret_name} has not been set via opta secret update! Please do so before applying the "
+                    f"K8s service w/ a new secret."
+                )
+        super(AwsK8sServiceProcessor, self).pre_hook(module_idx)
+
     def process(self, module_idx: int) -> None:
         # Update the secrets
-        transformed_secrets = []
-        if "original_secrets" in self.module.data:
-            secrets = self.module.data["original_secrets"]
-        else:
-            secrets = self.module.data.get("secrets", [])
-            self.module.data["original_secrets"] = secrets
-        for secret in secrets:
-            if type(secret) is str:
-                transformed_secrets.append({"name": secret, "value": ""})
-            else:
-                raise Exception("Secret must be string or dict")
-        self.module.data["secrets"] = transformed_secrets
+        self.module.data["manual_secrets"] = self.module.data.get("secrets", [])
+        self.module.data["link_secrets"] = self.module.data.get("link_secrets", [])
 
         if isinstance(self.module.data.get("public_uri"), str):
             self.module.data["public_uri"] = [self.module.data["public_uri"]]
@@ -85,13 +87,19 @@ class AwsK8sServiceProcessor(AWSK8sModuleProcessor, AWSIamAssembler):
         }
         if "image_tag" in self.layer.variables:
             self.module.data["tag"] = self.layer.variables["image_tag"]
+        seen = set()
+        self.module.data["link_secrets"] = [
+            seen.add(obj["name"]) or obj  # type: ignore
+            for obj in self.module.data["link_secrets"]
+            if obj["name"] not in seen
+        ]
         super(AwsK8sServiceProcessor, self).process(module_idx)
 
     def handle_rds_link(
         self, linked_module: "Module", link_permissions: List[str]
     ) -> None:
         for key in ["db_user", "db_name", "db_password", "db_host"]:
-            self.module.data["secrets"].append(
+            self.module.data["link_secrets"].append(
                 {
                     "name": f"{linked_module.name}_{key}",
                     "value": f"${{{{module.{linked_module.name}.{key}}}}}",
@@ -110,7 +118,7 @@ class AwsK8sServiceProcessor(AWSK8sModuleProcessor, AWSIamAssembler):
         self, linked_module: "Module", link_permissions: List[str]
     ) -> None:
         for key in ["cache_host", "cache_auth_token"]:
-            self.module.data["secrets"].append(
+            self.module.data["link_secrets"].append(
                 {
                     "name": f"{linked_module.name}_{key}",
                     "value": f"${{{{module.{linked_module.name}.{key}}}}}",
@@ -129,7 +137,7 @@ class AwsK8sServiceProcessor(AWSK8sModuleProcessor, AWSIamAssembler):
         self, linked_module: "Module", link_permissions: List[str]
     ) -> None:
         for key in ["db_user", "db_host", "db_password"]:
-            self.module.data["secrets"].append(
+            self.module.data["link_secrets"].append(
                 {
                     "name": f"{linked_module.name}_{key}",
                     "value": f"${{{{module.{linked_module.name}.{key}}}}}",

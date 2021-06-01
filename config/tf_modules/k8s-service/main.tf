@@ -34,7 +34,8 @@ resource "helm_release" "k8s-service" {
       livenessProbePath: var.healthcheck_path == null || var.liveness_probe_path != "/healthcheck"? var.liveness_probe_path : var.healthcheck_path,
       readinessProbePath: var.healthcheck_path == null || var.readiness_probe_path != "/healthcheck"? var.readiness_probe_path : var.healthcheck_path,
       envVars: var.env_vars,
-      secrets: var.secrets,
+      linkSecrets: var.link_secrets,
+      manualSecrets: var.manual_secrets,
       uriComponents: local.uri_components,
       layerName: var.layer_name,
       moduleName: var.module_name
