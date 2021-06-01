@@ -35,7 +35,9 @@ class TestSecretManager:
         mocker.patch("opta.commands.secret._raise_if_no_k8s_cluster_exists")
         mocker.patch("opta.commands.secret.configure_kubectl")
 
-        mocked_create_namespace = mocker.patch("opta.commands.secret.create_namespace")
+        mocked_create_namespace_if_not_exists = mocker.patch(
+            "opta.commands.secret.create_namespace_if_not_exists"
+        )
         mocked_get_manual_secrets = mocker.patch(
             "opta.commands.secret.get_manual_secrets"
         )
@@ -55,7 +57,7 @@ class TestSecretManager:
             view, ["dummysecret", "--env", "dummyenv", "--config", "dummyconfig"],
         )
         assert result.exit_code == 0
-        mocked_create_namespace.assert_called_once_with("dummy_layer")
+        mocked_create_namespace_if_not_exists.assert_called_once_with("dummy_layer")
         mocked_get_manual_secrets.assert_called_once_with("dummy_layer")
         mocked_get_linked_secrets.assert_called_once_with("dummy_layer")
         mocked_layer.assert_called_once_with("dummyconfig", "dummyenv")
@@ -69,7 +71,9 @@ class TestSecretManager:
         mocker.patch("opta.commands.secret._raise_if_no_k8s_cluster_exists")
         mocker.patch("opta.commands.secret.configure_kubectl")
 
-        mocked_create_namespace = mocker.patch("opta.commands.secret.create_namespace")
+        mocked_create_namespace_if_not_exists = mocker.patch(
+            "opta.commands.secret.create_namespace_if_not_exists"
+        )
         mocked_get_manual_secrets = mocker.patch(
             "opta.commands.secret.get_manual_secrets"
         )
@@ -89,7 +93,7 @@ class TestSecretManager:
             list_command, ["--env", "dummyenv", "--config", "dummyconfig"],
         )
         assert result.exit_code == 0
-        mocked_create_namespace.assert_called_once_with("dummy_layer")
+        mocked_create_namespace_if_not_exists.assert_called_once_with("dummy_layer")
         mocked_get_manual_secrets.assert_called_once_with("dummy_layer")
         mocked_get_linked_secrets.assert_called_once_with("dummy_layer")
         mocked_layer.assert_called_once_with("dummyconfig", "dummyenv")
@@ -102,9 +106,11 @@ class TestSecretManager:
 
     def test_update(self, mocker: MockFixture, mocked_layer: Any) -> None:
         mocker.patch("opta.commands.secret.gen_all")
-        mocked_create_namespace = mocker.patch("opta.commands.secret.create_namespace")
-        mocked_create_manual_secrets = mocker.patch(
-            "opta.commands.secret.create_manual_secrets"
+        mocked_create_namespace_if_not_exists = mocker.patch(
+            "opta.commands.secret.create_namespace_if_not_exists"
+        )
+        mocked_create_manual_secrets_if_not_exists = mocker.patch(
+            "opta.commands.secret.create_manual_secrets_if_not_exists"
         )
         mocked_update_manual_secrets = mocker.patch(
             "opta.commands.secret.update_manual_secrets"
@@ -131,8 +137,8 @@ class TestSecretManager:
             ],
         )
         assert result.exit_code == 0
-        mocked_create_namespace.assert_called_once_with("dummy_layer")
-        mocked_create_manual_secrets.assert_called_once_with("dummy_layer")
+        mocked_create_namespace_if_not_exists.assert_called_once_with("dummy_layer")
+        mocked_create_manual_secrets_if_not_exists.assert_called_once_with("dummy_layer")
         mocked_update_manual_secrets.assert_called_once_with(
             "dummy_layer", {"dummysecret": "dummysecretvalue"}
         )

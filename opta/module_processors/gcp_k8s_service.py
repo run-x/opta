@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, List
 
-from opta.core.kubernetes import create_namespace, get_manual_secrets
+from opta.core.kubernetes import create_namespace_if_not_exists, get_manual_secrets
 from opta.exceptions import UserErrors
 from opta.module_processors.base import GcpK8sModuleProcessor
 
@@ -20,7 +20,7 @@ class GcpK8sServiceProcessor(GcpK8sModuleProcessor):
         super(GcpK8sServiceProcessor, self).__init__(module, layer)
 
     def pre_hook(self, module_idx: int) -> None:
-        create_namespace(self.layer.name)
+        create_namespace_if_not_exists(self.layer.name)
         manual_secrets = get_manual_secrets(self.layer.name)
         for secret_name in self.module.data.get("secrets", []):
             if secret_name not in manual_secrets:

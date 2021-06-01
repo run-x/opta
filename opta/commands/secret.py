@@ -8,16 +8,14 @@ from opta.amplitude import amplitude_client
 from opta.core.generator import gen_all
 from opta.core.kubernetes import (
     configure_kubectl,
-    create_manual_secrets,
-    create_namespace,
-    get_linked_secrets,
-    get_manual_secrets,
+    create_namespace_if_not_exists,
+    get_secrets,
     update_manual_secrets,
 )
 from opta.core.terraform import fetch_terraform_state_resources
 from opta.exceptions import UserErrors
 from opta.layer import Layer
-from opta.utils import deep_merge, fmt_msg
+from opta.utils import fmt_msg
 
 
 @click.group(cls=DYMGroup)
@@ -42,8 +40,8 @@ def view(secret: str, env: Optional[str], config: str) -> None:
     _raise_if_no_k8s_cluster_exists(layer)
 
     configure_kubectl(layer)
-    create_namespace(layer.name)
-    secrets = deep_merge(get_manual_secrets(layer.name), get_linked_secrets(layer.name))
+    create_namespace_if_not_exists(layer.name)
+    secrets = get_secrets(layer.name)
     if secret not in secrets:
         raise UserErrors(
             f"Secret {secret} was not specified for the app. You sure you set it in your yaml?"
@@ -63,8 +61,8 @@ def list_command(env: Optional[str], config: str) -> None:
     _raise_if_no_k8s_cluster_exists(layer)
 
     configure_kubectl(layer)
-    create_namespace(layer.name)
-    secrets = deep_merge(get_manual_secrets(layer.name), get_linked_secrets(layer.name))
+    create_namespace_if_not_exists(layer.name)
+    secrets = get_secrets(layer.name)
     for key in secrets:
         print(key)
 
@@ -81,8 +79,7 @@ def update(secret: str, value: str, env: Optional[str], config: str) -> None:
     _raise_if_no_k8s_cluster_exists(layer)
 
     configure_kubectl(layer)
-    create_namespace(layer.name)
-    create_manual_secrets(layer.name)
+    create_namespace_if_not_exists(layer.name)
     amplitude_client.send_event(amplitude_client.UPDATE_SECRET_EVENT)
     update_manual_secrets(layer.name, {secret: str(value)})
 
