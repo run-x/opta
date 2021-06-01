@@ -38,14 +38,8 @@ class TestSecretManager:
         mocked_create_namespace_if_not_exists = mocker.patch(
             "opta.commands.secret.create_namespace_if_not_exists"
         )
-        mocked_get_manual_secrets = mocker.patch(
-            "opta.commands.secret.get_manual_secrets"
-        )
-        mocked_get_manual_secrets.return_value = {"dummysecret": "1", "b": "2"}
-        mocked_get_linked_secrets = mocker.patch(
-            "opta.commands.secret.get_linked_secrets"
-        )
-        mocked_get_linked_secrets.return_value = {"c": "3"}
+        mocked_get_secrets = mocker.patch("opta.commands.secret.get_secrets")
+        mocked_get_secrets.return_value = {"dummysecret": "1", "b": "2", "c": "3"}
 
         mocked_amplitude_client = mocker.patch(
             "opta.commands.secret.amplitude_client", spec=AmplitudeClient
@@ -58,8 +52,7 @@ class TestSecretManager:
         )
         assert result.exit_code == 0
         mocked_create_namespace_if_not_exists.assert_called_once_with("dummy_layer")
-        mocked_get_manual_secrets.assert_called_once_with("dummy_layer")
-        mocked_get_linked_secrets.assert_called_once_with("dummy_layer")
+        mocked_get_secrets.assert_called_once_with("dummy_layer")
         mocked_layer.assert_called_once_with("dummyconfig", "dummyenv")
         mocked_amplitude_client.send_event.assert_called_once_with(
             amplitude_client.VIEW_SECRET_EVENT
@@ -74,14 +67,8 @@ class TestSecretManager:
         mocked_create_namespace_if_not_exists = mocker.patch(
             "opta.commands.secret.create_namespace_if_not_exists"
         )
-        mocked_get_manual_secrets = mocker.patch(
-            "opta.commands.secret.get_manual_secrets"
-        )
-        mocked_get_manual_secrets.return_value = {"dummysecret": "1", "b": "2"}
-        mocked_get_linked_secrets = mocker.patch(
-            "opta.commands.secret.get_linked_secrets"
-        )
-        mocked_get_linked_secrets.return_value = {"c": "3"}
+        mocked_get_secrets = mocker.patch("opta.commands.secret.get_secrets")
+        mocked_get_secrets.return_value = {"dummysecret": "1", "b": "2", "c": "3"}
 
         mocked_amplitude_client = mocker.patch(
             "opta.commands.secret.amplitude_client", spec=AmplitudeClient
@@ -94,23 +81,19 @@ class TestSecretManager:
         )
         assert result.exit_code == 0
         mocked_create_namespace_if_not_exists.assert_called_once_with("dummy_layer")
-        mocked_get_manual_secrets.assert_called_once_with("dummy_layer")
-        mocked_get_linked_secrets.assert_called_once_with("dummy_layer")
+        mocked_get_secrets.assert_called_once_with("dummy_layer")
         mocked_layer.assert_called_once_with("dummyconfig", "dummyenv")
         mocked_amplitude_client.send_event.assert_called_once_with(
             amplitude_client.LIST_SECRETS_EVENT
         )
         mocked_print.assert_has_calls(
-            [mocker.call("c"), mocker.call("dummysecret"), mocker.call("b")]
+            [mocker.call("dummysecret"), mocker.call("b"), mocker.call("c")]
         )
 
     def test_update(self, mocker: MockFixture, mocked_layer: Any) -> None:
         mocker.patch("opta.commands.secret.gen_all")
         mocked_create_namespace_if_not_exists = mocker.patch(
             "opta.commands.secret.create_namespace_if_not_exists"
-        )
-        mocked_create_manual_secrets_if_not_exists = mocker.patch(
-            "opta.commands.secret.create_manual_secrets_if_not_exists"
         )
         mocked_update_manual_secrets = mocker.patch(
             "opta.commands.secret.update_manual_secrets"
@@ -138,7 +121,6 @@ class TestSecretManager:
         )
         assert result.exit_code == 0
         mocked_create_namespace_if_not_exists.assert_called_once_with("dummy_layer")
-        mocked_create_manual_secrets_if_not_exists.assert_called_once_with("dummy_layer")
         mocked_update_manual_secrets.assert_called_once_with(
             "dummy_layer", {"dummysecret": "dummysecretvalue"}
         )

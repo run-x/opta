@@ -44,7 +44,8 @@ def view(secret: str, env: Optional[str], config: str) -> None:
     secrets = get_secrets(layer.name)
     if secret not in secrets:
         raise UserErrors(
-            f"Secret {secret} was not specified for the app. You sure you set it in your yaml?"
+            f"We couldn't find a secret named {secret}. You either need to add it to your opta.yml file or if it's"
+            f" already there - update it via secret update."
         )
 
     print(secrets[secret])
