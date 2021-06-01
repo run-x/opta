@@ -51,7 +51,7 @@ class DatadogProcessor(ModuleProcessor):
             else:
                 api_key = base64.b64decode(secret.data["DATADOG_API_KEY"]).decode("utf-8")
         except ApiException:
-            self.v1.create_namespace(
+            self.v1.create_namespaced_secret(
                 namespace=self.layer.name,
                 body=V1Secret(
                     metadata=V1ObjectMeta(name="secret"),
