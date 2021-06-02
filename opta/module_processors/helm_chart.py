@@ -1,5 +1,7 @@
 from typing import TYPE_CHECKING
 
+from ruamel.yaml.compat import StringIO
+
 from opta.exceptions import UserErrors
 from opta.module_processors.base import ModuleProcessor
 from opta.utils import logger, yaml
@@ -26,7 +28,9 @@ class HelmChartProcessor(ModuleProcessor):
             )
         values = self.module.data.get("values", {})
         if values:
+            stream = StringIO()
+            yaml.dump(values, stream)
             logger.debug(
-                f"These are the values passed in from the opta yaml:\n{yaml.dump(values)}"
+                f"These are the values passed in from the opta yaml:\n{stream.getvalue()}"
             )
         super(HelmChartProcessor, self).process(module_idx)
