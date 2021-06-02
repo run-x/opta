@@ -342,6 +342,7 @@ class Terraform:
             except GoogleClientError as e:
                 if e.code == 404:
                     # The object does not exist.
+                    os.remove(state_file)
                     return False
                 raise
         else:
