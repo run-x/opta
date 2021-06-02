@@ -36,9 +36,11 @@ class TestKubernetes:
         layer = mocker.Mock(spec=Layer)
         layer.parent = None
         layer.cloud = "aws"
+        layer.name = "blah"
         layer.providers = {
             "aws": {"region": "us-east-1", "allowed_account_ids": ["111111111111"]}
         }
+        layer.root.return_value = layer
         mocked_terraform_output = mocker.patch(
             "opta.core.kubernetes.get_terraform_outputs",
             return_value={"k8s_cluster_name": "mocked_cluster_name"},

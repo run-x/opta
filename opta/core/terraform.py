@@ -21,7 +21,7 @@ from opta.core.aws import AWS, get_aws_resource_id
 from opta.core.gcp import GCP
 from opta.exceptions import MissingState, UserErrors
 from opta.nice_subprocess import nice_run
-from opta.utils import deep_merge, fmt_msg, logger, yaml
+from opta.utils import deep_merge, fmt_msg, logger
 
 if TYPE_CHECKING:
     from opta.layer import Layer
@@ -349,10 +349,10 @@ class Terraform:
             raise UserErrors("Need to get state from S3 or GCS")
 
         with open(state_file, "r") as file:
-            raw_state = file.read().replace("\n", "")
+            raw_state = file.read().strip()
         os.remove(state_file)
         if raw_state != "":
-            cls.downloaded_state[layer.name] = yaml.load(raw_state)
+            cls.downloaded_state[layer.name] = json.loads(raw_state)
             return True
         return False
 

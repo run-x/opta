@@ -19,20 +19,8 @@ class TestSecretManager:
         mocked_load_layer.return_value = mocked_layer
         return mocked_load_layer
 
-    def test_eks_cluster_doesnt_exist(
-        self, mocker: MockFixture, mocked_layer: Any
-    ) -> None:
-        mocker.patch("opta.commands.secret.gen_all")
-        mocker.patch(
-            "opta.commands.secret.fetch_terraform_state_resources", return_value={}
-        )
-        runner = CliRunner()
-        result = runner.invoke(update, ["dummysecret", "dummysecretvalue"])
-        assert "there was no K8s cluster found in the opta state" in str(result.exception)
-
     def test_view(self, mocker: MockFixture, mocked_layer: Any) -> None:  # noqa
         mocker.patch("opta.commands.secret.gen_all")
-        mocker.patch("opta.commands.secret._raise_if_no_k8s_cluster_exists")
         mocker.patch("opta.commands.secret.configure_kubectl")
 
         mocked_create_namespace_if_not_exists = mocker.patch(
@@ -61,7 +49,6 @@ class TestSecretManager:
     def test_list_secrets(self, mocker: MockFixture, mocked_layer: Any) -> None:
         mocked_print = mocker.patch("builtins.print")
         mocker.patch("opta.commands.secret.gen_all")
-        mocker.patch("opta.commands.secret._raise_if_no_k8s_cluster_exists")
         mocker.patch("opta.commands.secret.configure_kubectl")
 
         mocked_create_namespace_if_not_exists = mocker.patch(
@@ -99,7 +86,6 @@ class TestSecretManager:
             "opta.commands.secret.update_manual_secrets"
         )
 
-        mocker.patch("opta.commands.secret._raise_if_no_k8s_cluster_exists")
         mocker.patch("opta.commands.secret.configure_kubectl")
 
         mocked_amplitude_client = mocker.patch(

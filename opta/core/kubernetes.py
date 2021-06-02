@@ -107,7 +107,9 @@ def _gcp_configure_kubectl(layer: "Layer") -> None:
     cluster_name = get_cluster_name(root_layer)
 
     if cluster_name is None:
-        raise Exception("The GKE cluster name could not be determined.")
+        raise Exception(
+            "The GKE cluster name could not be determined -- please make sure it has been applied in the environment."
+        )
 
     # Update kubeconfig with the cluster details, and also switches context
     nice_run(
@@ -168,7 +170,9 @@ def _aws_configure_kubectl(layer: "Layer") -> None:
     cluster_name = get_cluster_name(root_layer)
 
     if cluster_name is None:
-        raise Exception("The EKS cluster name could not be determined.")
+        raise Exception(
+            "The EKS cluster name could not be determined -- please make sure it has been applied in the environment."
+        )
 
     # Update kubeconfig with the cluster details, and also switches context
     nice_run(
