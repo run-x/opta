@@ -590,7 +590,6 @@ class Terraform:
 
 def get_terraform_outputs(layer: "Layer") -> dict:
     """ Fetch terraform outputs from existing TF file """
-    Terraform.init()
     current_outputs = Terraform.get_outputs(layer)
     parent_outputs = _fetch_parent_outputs(layer)
     return deep_merge(current_outputs, parent_outputs)

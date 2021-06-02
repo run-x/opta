@@ -168,7 +168,7 @@ def _aws_configure_kubectl(layer: "Layer") -> None:
     cluster_name = get_cluster_name(root_layer)
 
     if cluster_name is None:
-        raise UserErrors("The EKS cluster name could not be determined.")
+        raise Exception("The EKS cluster name could not be determined.")
 
     # Update kubeconfig with the cluster details, and also switches context
     nice_run(
