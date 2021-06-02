@@ -90,7 +90,7 @@ def _gcp_configure_kubectl(layer: "Layer") -> None:
         )
     current_project_id = out.strip()
 
-    root_layer = _get_root_layer(layer)
+    root_layer = layer.root()
     env_gcp_region, env_gcp_project = _gcp_get_cluster_env(root_layer)
     if env_gcp_project != current_project_id:
         raise UserErrors(
@@ -104,7 +104,7 @@ def _gcp_configure_kubectl(layer: "Layer") -> None:
             )
         )
 
-    cluster_name = get_cluster_name(layer)
+    cluster_name = get_cluster_name(root_layer)
 
     if cluster_name is None:
         raise Exception("The GKE cluster name could not be determined.")
@@ -149,7 +149,7 @@ def _aws_configure_kubectl(layer: "Layer") -> None:
     current_aws_account_id = aws_caller_identity["Account"]
 
     # Get the environment's account details from the opta config
-    root_layer = _get_root_layer(layer)
+    root_layer = layer.root()
     env_aws_region, env_aws_account_ids = _aws_get_cluster_env(root_layer)
 
     # Make sure the current account points to the cluster environment
@@ -165,10 +165,10 @@ def _aws_configure_kubectl(layer: "Layer") -> None:
             )
         )
 
-    cluster_name = get_cluster_name(layer)
+    cluster_name = get_cluster_name(root_layer)
 
     if cluster_name is None:
-        raise Exception("The EKS cluster name could not be determined.")
+        raise UserErrors("The EKS cluster name could not be determined.")
 
     # Update kubeconfig with the cluster details, and also switches context
     nice_run(
@@ -200,13 +200,6 @@ def _aws_get_cluster_env(root_layer: "Layer") -> Tuple[str, List[str]]:
 def _gcp_get_cluster_env(root_layer: "Layer") -> Tuple[str, str]:
     googl_provider = root_layer.providers["google"]
     return googl_provider["region"], googl_provider["project"]
-
-
-def _get_root_layer(layer: "Layer") -> "Layer":
-    while layer.parent is not None:
-        layer = layer.parent
-
-    return layer
 
 
 def current_image_tag(layer: "Layer",) -> Optional[str]:
