@@ -78,13 +78,10 @@ class AWS:
         if resp["ResponseMetadata"]["HTTPStatusCode"] != 204:
             raise Exception(f"Failed to delete opta config in {bucket}/{config_path}.")
 
-        s3_client = boto3.client("s3")
-        resp = s3_client.delete_object(Bucket=bucket, Key=self.layer.name)
-        if resp["ResponseMetadata"]["HTTPStatusCode"] != 204:
-            raise Exception(
-                f"Failed to delete opta config in {bucket}/{self.layer.name}."
-            )
+        logger.info("Deleted opta config from s3")
 
+    def delete_remote_state(self) -> None:
+        bucket = self.layer.state_storage()
         providers = self.layer.gen_providers(0)
         dynamodb_table = providers["terraform"]["backend"]["s3"]["dynamodb_table"]
 
@@ -95,7 +92,15 @@ class AWS:
             TableName=dynamodb_table,
             Key={"LockID": {"S": f"{bucket}/{self.layer.name}-md5"}},
         )
-        logger.info("Deleted opta config from s3")
+
+        s3_client = boto3.client("s3")
+        resp = s3_client.delete_object(Bucket=bucket, Key=self.layer.name)
+
+        if resp["ResponseMetadata"]["HTTPStatusCode"] != 204:
+            raise Exception(
+                f"Failed to delete opta tf state in {bucket}/{self.layer.name}."
+            )
+        logger.info(f"Deleted opta tf state for {self.layer.name}")
 
     @staticmethod
     def prepare_read_buckets_iam_statements(bucket_names: List[str]) -> dict:

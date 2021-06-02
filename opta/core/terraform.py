@@ -189,9 +189,13 @@ class Terraform:
 
         # After the layer is completely deleted, remove the opta config from the state bucket.
         if layer.cloud == "aws":
-            AWS(layer).delete_opta_config()
+            aws = AWS(layer)
+            aws.delete_opta_config()
+            aws.delete_remote_state()
         elif layer.cloud == "google":
-            GCP(layer).delete_opta_config()
+            gcp = GCP(layer)
+            gcp.delete_opta_config()
+            gcp.delete_remote_state()
         else:
             raise Exception(
                 f"Can not handle opta config deletion for cloud {layer.cloud}"
