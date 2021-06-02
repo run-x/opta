@@ -6,6 +6,7 @@ from botocore.config import Config
 from kubernetes.client import CoreV1Api, V1ConfigMap
 from kubernetes.config import load_kube_config
 from mypy_boto3_elbv2 import ElasticLoadBalancingv2Client
+from ruamel.yaml.compat import StringIO
 
 from opta.core.aws import AWS
 from opta.core.kubernetes import configure_kubectl
@@ -91,9 +92,13 @@ class AwsK8sBaseProcessor(AWSK8sModuleProcessor):
                 )
             else:
                 raise UserErrors(f"Invalid arn for IAM role or user: {arn}")
-        aws_auth_config_map.data["mapRoles"] = yaml.dump(new_map_roles)
+        stream = StringIO()
+        yaml.dump(new_map_roles, stream)
+        aws_auth_config_map.data["mapRoles"] = stream.getvalue()
         if len(new_map_users) > 0:
-            aws_auth_config_map.data["mapUsers"] = yaml.dump(new_map_users)
+            stream = StringIO()
+            yaml.dump(new_map_users, stream)
+            aws_auth_config_map.data["mapUsers"] = stream.getvalue()
         v1.replace_namespaced_config_map(
             "aws-auth", "kube-system", body=aws_auth_config_map
         )
