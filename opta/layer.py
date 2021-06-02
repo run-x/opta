@@ -33,9 +33,6 @@ from opta.module_processors.runx import RunxProcessor
 from opta.plugins.derived_providers import DerivedProviders
 from opta.utils import deep_merge, hydrate, logger, yaml
 
-AWS_PROVIDER_VERSION = "3.38.0"
-GCP_PROVIDER_VERSION = "3.66.1"
-
 
 class Layer:
     def __init__(
@@ -138,13 +135,10 @@ class Layer:
         org_name = conf.pop("org_name", None)
         providers = conf.pop("providers", {})
         if "aws" in providers:
-            providers["aws"]["version"] = AWS_PROVIDER_VERSION
             providers["aws"]["account_id"] = providers["aws"].get("account_id", "")
             account_id = str(providers["aws"]["account_id"])
             account_id = "0" * (12 - len(account_id)) + account_id
             providers["aws"]["account_id"] = account_id
-        if "google" in providers:
-            providers["google"]["version"] = GCP_PROVIDER_VERSION
         if environments:
             potential_envs: Dict[str, Tuple] = {}
             for env_meta in environments:
