@@ -1,4 +1,3 @@
-import re
 from typing import Optional
 
 import click
@@ -12,10 +11,8 @@ from opta.core.kubernetes import (
     get_secrets,
     update_manual_secrets,
 )
-from opta.core.terraform import fetch_terraform_state_resources
 from opta.exceptions import UserErrors
 from opta.layer import Layer
-from opta.utils import fmt_msg
 
 
 @click.group(cls=DYMGroup)
@@ -37,7 +34,6 @@ def view(secret: str, env: Optional[str], config: str) -> None:
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(amplitude_client.VIEW_SECRET_EVENT)
     gen_all(layer)
-    _raise_if_no_k8s_cluster_exists(layer)
 
     configure_kubectl(layer)
     create_namespace_if_not_exists(layer.name)
@@ -59,7 +55,6 @@ def list_command(env: Optional[str], config: str) -> None:
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(amplitude_client.LIST_SECRETS_EVENT)
     gen_all(layer)
-    _raise_if_no_k8s_cluster_exists(layer)
 
     configure_kubectl(layer)
     create_namespace_if_not_exists(layer.name)
@@ -77,7 +72,6 @@ def update(secret: str, value: str, env: Optional[str], config: str) -> None:
     """Update a given secret of a k8s service with a new value"""
     layer = Layer.load_from_yaml(config, env)
     gen_all(layer)
-    _raise_if_no_k8s_cluster_exists(layer)
 
     configure_kubectl(layer)
     create_namespace_if_not_exists(layer.name)
@@ -85,32 +79,3 @@ def update(secret: str, value: str, env: Optional[str], config: str) -> None:
     update_manual_secrets(layer.name, {secret: str(value)})
 
     print("Success")
-
-
-def _raise_if_no_k8s_cluster_exists(layer: "Layer") -> None:
-    terraform_state = fetch_terraform_state_resources(layer)
-    terraform_state_resources = terraform_state.keys()
-
-    if layer.cloud == "aws":
-        pattern = re.compile(
-            r"^module\..+\.aws_eks_cluster\.cluster|^data\.aws_eks_cluster_auth\.k8s"
-        )
-    elif layer.cloud == "google":
-        pattern = re.compile(
-            r"module\..+\.google_container_cluster\.primary|^data\.google_container_cluster\.k8s"
-        )
-    else:
-        # Don't fail if the cloud vendor is not supported in this check.
-        return
-
-    k8s_cluster = list(filter(pattern.match, terraform_state_resources))
-    if len(k8s_cluster) == 0:
-        raise UserErrors(
-            fmt_msg(
-                """
-                Cannot set/view secrets because there was no K8s cluster found in the opta state.
-                ~Please make sure to create the opta environment first with *opta apply*.
-                ~See the following docs: https://docs.runx.dev/docs/getting-started/#environment-creation
-                """
-            )
-        )

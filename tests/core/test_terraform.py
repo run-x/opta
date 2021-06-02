@@ -133,12 +133,17 @@ class TestTerraform:
         mocked_boto_client = mocker.patch(
             "opta.core.terraform.boto3.client", return_value=mocked_s3_client
         )
+        read_data = '{"a": 1}'
+        mocked_file = mocker.mock_open(read_data=read_data)
+        mocker.patch("opta.core.terraform.os.remove")
+        mocked_open = mocker.patch("opta.core.terraform.open", mocked_file)
 
         assert Terraform.download_state(layer)
         layer.gen_providers.assert_called_once_with(0)
         mocked_s3_client.download_file.assert_called_once_with(
-            "opta-tf-state-test-dev1", "dev1", "./terraform.tfstate"
+            "opta-tf-state-test-dev1", "dev1", "./tmp.tfstate"
         )
+        mocked_open.assert_called_once_with("./tmp.tfstate", "r")
         patched_init.assert_not_called()
         mocked_boto_client.assert_called_once_with("s3")
 
@@ -171,8 +176,9 @@ class TestTerraform:
         )
         mocked_bucket_object = mocker.Mock()
         mocked_storage_client.get_bucket.return_value = mocked_bucket_object
-        read_data = ""
+        read_data = '{"a": 1}'
         mocked_file = mocker.mock_open(read_data=read_data)
+        mocker.patch("opta.core.terraform.os.remove")
         mocked_open = mocker.patch("opta.core.terraform.open", mocked_file)
 
         assert Terraform.download_state(layer)
@@ -185,7 +191,10 @@ class TestTerraform:
         mocked_storage_client.get_bucket.assert_called_once_with(
             "opta-tf-state-test-dev1"
         )
-        mocked_open.assert_called_once_with("./terraform.tfstate", "wb")
+        mocked_open.assert_has_calls(
+            [mocker.call("./tmp.tfstate", "wb"), mocker.call("./tmp.tfstate", "r")],
+            any_order=True,
+        )
         mocked_storage_client.download_blob_to_file.assert_called_once_with(
             mocker.ANY, mocker.ANY
         )

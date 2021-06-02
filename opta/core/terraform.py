@@ -19,7 +19,7 @@ from oauth2client.client import GoogleCredentials
 from opta.amplitude import amplitude_client
 from opta.core.aws import AWS, get_aws_resource_id
 from opta.core.gcp import GCP
-from opta.exceptions import UserErrors
+from opta.exceptions import MissingState, UserErrors
 from opta.nice_subprocess import nice_run
 from opta.utils import deep_merge, fmt_msg, logger
 
@@ -31,8 +31,7 @@ EXTRA_ENV = (
 
 
 class Terraform:
-    # True if terraform.tfstate is downloaded.
-    downloaded_state: Dict[str, bool] = {}
+    downloaded_state: Dict[str, Dict[Any, Any]] = {}
 
     @classmethod
     def init(cls, *tf_flags: str) -> None:
@@ -42,13 +41,7 @@ class Terraform:
     # Get outputs of the current terraform state
     @classmethod
     def get_outputs(cls, layer: "Layer") -> dict:
-        if not cls.downloaded_state.get(layer.name, False):
-            success = cls.download_state(layer)
-            if not success:
-                raise UserErrors(
-                    "Could not fetch remote terraform state, assuming no resources exist yet."
-                )
-        state = cls.get_state()
+        state = cls.get_state(layer)
         outputs = state.get("outputs", {})
         cleaned_outputs = {}
         for k, v in outputs.items():
@@ -65,13 +58,12 @@ class Terraform:
 
     # Get the full terraform state.
     @classmethod
-    def get_state(cls) -> dict:
-        for state_file in ["./terraform.tfstate", "terraform.tfstate.backup"]:
-            with open(state_file, "r") as file:
-                raw_state = file.read().replace("\n", "")
-            if raw_state != "":
-                return json.loads(raw_state)
-        raise UserErrors("Terraform statefiles not found")
+    def get_state(cls, layer: "Layer") -> dict:
+        if layer.name in cls.downloaded_state:
+            return cls.downloaded_state[layer.name]
+        if cls.download_state(layer):
+            return cls.downloaded_state[layer.name]
+        raise MissingState(f"Unable to download state for layer {layer.name}")
 
     @classmethod
     def apply(
@@ -197,9 +189,13 @@ class Terraform:
 
         # After the layer is completely deleted, remove the opta config from the state bucket.
         if layer.cloud == "aws":
-            AWS(layer).delete_opta_config()
+            aws = AWS(layer)
+            aws.delete_opta_config()
+            aws.delete_remote_state()
         elif layer.cloud == "google":
-            GCP(layer).delete_opta_config()
+            gcp = GCP(layer)
+            gcp.delete_opta_config()
+            gcp.delete_remote_state()
         else:
             raise Exception(
                 f"Can not handle opta config deletion for cloud {layer.cloud}"
@@ -274,14 +270,13 @@ class Terraform:
 
     @classmethod
     def get_existing_module_resources(cls, layer: "Layer") -> List[str]:
-        if not cls.downloaded_state.get(layer.name, False):
-            success = cls.download_state(layer)
-            if not success:
-                logger.info(
-                    "Could not fetch remote terraform state, assuming no resources exist yet."
-                )
-                return []
-        state = cls.get_state()
+        try:
+            state = cls.get_state(layer)
+        except MissingState:
+            logger.info(
+                "Could not fetch remote terraform state, assuming no resources exist yet."
+            )
+            return []
         resources = state.get("resources", [])
         module_resources: List[str] = []
         resource: dict
@@ -316,7 +311,7 @@ class Terraform:
             )
             return False
 
-        state_file: str = "./terraform.tfstate"
+        state_file: str = "./tmp.tfstate"
         providers = layer.gen_providers(0)
         if "s3" in providers.get("terraform", {}).get("backend", {}):
             bucket = providers["terraform"]["backend"]["s3"]["bucket"]
@@ -331,6 +326,7 @@ class Terraform:
             except ClientError as e:
                 if e.response["Error"]["Code"] == "404":
                     # The object does not exist.
+                    logger.debug("Did not find terraform state file")
                     return False
                 raise
         elif "gcs" in providers.get("terraform", {}).get("backend", {}):
@@ -346,13 +342,19 @@ class Terraform:
             except GoogleClientError as e:
                 if e.code == 404:
                     # The object does not exist.
+                    os.remove(state_file)
                     return False
                 raise
         else:
             raise UserErrors("Need to get state from S3 or GCS")
 
-        cls.downloaded_state[layer.name] = True
-        return True
+        with open(state_file, "r") as file:
+            raw_state = file.read().strip()
+        os.remove(state_file)
+        if raw_state != "":
+            cls.downloaded_state[layer.name] = json.loads(raw_state)
+            return True
+        return False
 
     @classmethod
     def _aws_delete_state_storage(cls, layer: "Layer") -> None:
@@ -587,18 +589,16 @@ class Terraform:
             cls._create_gcp_state_storage(providers)
 
 
-def get_terraform_outputs(layer: "Layer", pull_state: bool = True) -> dict:
+def get_terraform_outputs(layer: "Layer") -> dict:
     """ Fetch terraform outputs from existing TF file """
-    if not pull_state:
-        Terraform.init()
     current_outputs = Terraform.get_outputs(layer)
-    parent_outputs = _fetch_parent_outputs(pull_state)
+    parent_outputs = _fetch_parent_outputs(layer)
     return deep_merge(current_outputs, parent_outputs)
 
 
-def _fetch_parent_outputs(pull_state: bool = True) -> dict:
+def _fetch_parent_outputs(layer: "Layer") -> dict:
     # Fetch the terraform state
-    state = Terraform.get_state()
+    state = Terraform.get_state(layer)
 
     # Fetch any parent remote states
     resources = state.get("resources", [])
@@ -627,7 +627,7 @@ def _fetch_parent_outputs(pull_state: bool = True) -> dict:
 
 def fetch_terraform_state_resources(layer: "Layer") -> dict:
     Terraform.download_state(layer)
-    state = Terraform.get_state()
+    state = Terraform.get_state(layer)
 
     resources = state.get("resources", [])
 

@@ -136,11 +136,7 @@ def _apply(
         else layer.get_module_by_type("gcp-k8s-service")
     )
 
-    if len(service_modules) > 0 and (
-        Terraform.downloaded_state.get(layer.name, False)
-        or Terraform.download_state(layer)
-        and get_cluster_name(layer) is not None
-    ):
+    if len(service_modules) > 0 and (get_cluster_name(layer.root()) is not None):
         configure_kubectl(layer)
 
         for service_module in service_modules:
@@ -207,14 +203,7 @@ def _apply(
                 if layer.cloud == "aws"
                 else layer.get_module_by_type("gcp-k8s-service", module_idx)
             )
-            if (
-                len(service_modules) != 0
-                and (
-                    Terraform.downloaded_state.get(layer.name, False)
-                    or Terraform.download_state(layer)
-                )
-                and get_cluster_name(layer) is not None
-            ):
+            if len(service_modules) != 0 and get_cluster_name(layer.root()) is not None:
                 service_module = service_modules[0]
                 # Tailing logs
                 logger.info(

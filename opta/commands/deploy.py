@@ -6,7 +6,7 @@ from opta.amplitude import amplitude_client
 from opta.commands.apply import _apply
 from opta.commands.push import _push, get_push_tag, is_service_config
 from opta.core.terraform import Terraform
-from opta.exceptions import UserErrors
+from opta.exceptions import MissingState, UserErrors
 from opta.layer import Layer
 from opta.utils import fmt_msg, logger
 
@@ -52,12 +52,7 @@ def deploy(
     layer = Layer.load_from_yaml(config, env)
     try:
         outputs = Terraform.get_outputs(layer)
-    except UserErrors as e:
-        if (
-            str(e)
-            != "Could not fetch remote terraform state, assuming no resources exist yet."
-        ):
-            raise
+    except MissingState:
         outputs = {}
     if "docker_repo_url" not in outputs:
         logger.info(
