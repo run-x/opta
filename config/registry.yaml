@@ -1,6 +1,10 @@
 backends:
   aws:
     terraform:
+      required_providers:
+        aws:
+          source: "hashicorp/aws"
+          version: "3.38.0"
       backend:
         s3:
           bucket: "{state_storage}"
@@ -9,6 +13,10 @@ backends:
           region: "{provider[region]}"
   google:
     terraform:
+      required_providers:
+        google:
+          source: "hashicorp/google"
+          version: "3.66.1"
       backend:
         gcs:
           bucket: "{state_storage}"
