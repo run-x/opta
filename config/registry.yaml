@@ -424,6 +424,27 @@ modules:
         desc: |
           Postgres database
         url: https://console.cloud.google.com/sql/instances/{id}/overview?folder=&organizationId=&project={gcp_project}
+  gcp-mysql:
+    cloud: google
+    location: gcp-mysql
+    variables:
+      env_name: str
+      layer_name: str
+      module_name: str
+      instance_tier: optional
+      engine_version: optional
+      safety: optional
+    outputs:
+      db_user: str
+      db_password: str
+      db_host: str
+      db_name: str
+    inspect:
+      google_sql_database_instance:
+        name: RDS
+        desc: |
+          Mysql database
+        url: https://console.cloud.google.com/sql/instances/{id}/overview?folder=&organizationId=&project={gcp_project}
   gcp-redis:
     cloud: google
     location: gcp-redis
@@ -618,3 +639,7 @@ modules:
     alias:
       google: gcp-dns
       aws: aws-dns
+
+  mysql:
+    alias:
+      google: gcp-mysql
