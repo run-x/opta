@@ -5,10 +5,10 @@ resource "aws_subnet" "private_subnets" {
   vpc_id               = aws_vpc.vpc.id
 
   tags = {
-    Name      = "opta-${var.layer_name}-private-${data.aws_availability_zones.current.zone_ids[count.index]}"
+    Name                                           = "opta-${var.layer_name}-private-${data.aws_availability_zones.current.zone_ids[count.index]}"
     "kubernetes.io/cluster/opta-${var.layer_name}" = "shared"
-    type = "private"
-    terraform = "true"
+    type                                           = "private"
+    terraform                                      = "true"
   }
 }
 
@@ -41,7 +41,7 @@ resource "aws_nat_gateway" "nat_gateways" {
   allocation_id = aws_eip.nat_eips[count.index].id
   subnet_id     = aws_subnet.public_subnets[count.index].id
   tags = {
-    Name = "opta-${var.layer_name}-${data.aws_availability_zones.current.zone_ids[count.index]}"
+    Name      = "opta-${var.layer_name}-${data.aws_availability_zones.current.zone_ids[count.index]}"
     terraform = "true"
   }
 }

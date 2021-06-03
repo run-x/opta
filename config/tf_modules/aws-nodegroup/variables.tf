@@ -7,15 +7,15 @@ data "aws_eks_cluster" "main" {
 locals {
   default_labels = var.use_gpu ? {
     node_group_name = "opta-${var.layer_name}-${var.module_name}"
-    gpu: "true"
-  } : {
+    gpu : "true"
+    } : {
     node_group_name = "opta-${var.layer_name}-${var.module_name}"
   }
 }
 
 variable "env_name" {
   description = "Env name"
-  type = string
+  type        = string
 }
 
 variable "layer_name" {
@@ -25,7 +25,7 @@ variable "layer_name" {
 
 variable "module_name" {
   description = "Module name"
-  type = string
+  type        = string
 }
 
 variable "max_nodes" {
@@ -49,12 +49,12 @@ variable "node_instance_type" {
 }
 
 variable "use_gpu" {
-  type = bool
+  type    = bool
   default = false
 }
 
 variable "labels" {
-  type = map(string)
+  type    = map(string)
   default = {}
 }
 

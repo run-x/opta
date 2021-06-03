@@ -4,7 +4,7 @@ data "google_storage_project_service_account" "gcs_account" {}
 
 variable "env_name" {
   description = "Env name"
-  type = string
+  type        = string
 }
 
 variable "layer_name" {
@@ -14,7 +14,7 @@ variable "layer_name" {
 
 variable "module_name" {
   description = "Module name"
-  type = string
+  type        = string
 }
 
 variable "private_ipv4_cidr_block" {
@@ -24,11 +24,11 @@ variable "private_ipv4_cidr_block" {
 }
 
 variable "cluster_ipv4_cidr_block" {
-  type = string
+  type    = string
   default = "10.0.32.0/19"
 }
 
 variable "services_ipv4_cidr_block" {
-  type = string
+  type    = string
   default = "10.0.64.0/20"
 }

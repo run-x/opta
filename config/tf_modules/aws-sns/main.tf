@@ -1,9 +1,9 @@
 resource "aws_sns_topic" "topic" {
-  name            = "${var.env_name}-${var.layer_name}-${var.module_name}"
-  kms_master_key_id = aws_kms_key.key.id
-  fifo_topic = var.fifo
+  name                        = "${var.env_name}-${var.layer_name}-${var.module_name}"
+  kms_master_key_id           = aws_kms_key.key.id
+  fifo_topic                  = var.fifo
   content_based_deduplication = var.content_based_deduplication
-  delivery_policy = <<EOF
+  delivery_policy             = <<EOF
 {
   "http": {
     "defaultHealthyRetryPolicy": {
@@ -64,7 +64,7 @@ data "aws_iam_policy_document" "sns_topic_policy" {
 
 ## SQS Subscriptions
 resource "aws_sns_topic_subscription" "user_updates_sqs_target" {
-  count = length(var.sqs_subscribers)
+  count     = length(var.sqs_subscribers)
   topic_arn = aws_sns_topic.topic.arn
   protocol  = "sqs"
   endpoint  = var.sqs_subscribers[count.index]

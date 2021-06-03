@@ -1,42 +1,42 @@
 resource "google_compute_global_address" "load_balancer" {
-  name    = "opta-${var.layer_name}"
+  name = "opta-${var.layer_name}"
 }
 
 resource "google_compute_health_check" "healthcheck" {
-  name               = "opta-${var.layer_name}"
+  name = "opta-${var.layer_name}"
   https_health_check {
     port_specification = "USE_SERVING_PORT"
-    request_path = "/healthz"
+    request_path       = "/healthz"
   }
 }
 
 resource "google_compute_backend_service" "backend_service" {
-  name        = "opta-${var.layer_name}"
-  port_name   = "https"
-  protocol    = "HTTP2"
+  name      = "opta-${var.layer_name}"
+  port_name = "https"
+  protocol  = "HTTP2"
 
   health_checks = [google_compute_health_check.healthcheck.id]
 
   dynamic "backend" {
     for_each = local.negs
     content {
-      balancing_mode = "RATE"
+      balancing_mode        = "RATE"
       max_rate_per_endpoint = 50
-      group = backend.value
+      group                 = backend.value
     }
   }
   depends_on = [helm_release.ingress-nginx, google_compute_health_check.healthcheck]
 }
 
 resource "google_compute_url_map" "http" {
-  name        = "opta-${var.layer_name}"
+  name            = "opta-${var.layer_name}"
   default_service = var.delegated ? null : google_compute_backend_service.backend_service.id
   dynamic "default_url_redirect" {
     for_each = var.delegated ? [1] : []
     content {
-      redirect_response_code = "MOVED_PERMANENTLY_DEFAULT"  // 301 redirect
+      redirect_response_code = "MOVED_PERMANENTLY_DEFAULT" // 301 redirect
       strip_query            = false
-      https_redirect         = true  // this is the magic
+      https_redirect         = true // this is the magic
     }
   }
 }
@@ -49,7 +49,7 @@ resource "google_compute_url_map" "https" {
 
 
 resource "google_compute_target_http_proxy" "proxy" {
-  name = "opta-${var.layer_name}"
+  name    = "opta-${var.layer_name}"
   url_map = google_compute_url_map.http.name
 }
 
@@ -76,7 +76,7 @@ resource "google_compute_global_forwarding_rule" "https" {
 }
 
 resource "google_dns_record_set" "default" {
-  count = var.hosted_zone_name == null? 0 : 1
+  count        = var.hosted_zone_name == null ? 0 : 1
   name         = data.google_dns_managed_zone.public[0].dns_name
   type         = "A"
   ttl          = 3600
@@ -85,7 +85,7 @@ resource "google_dns_record_set" "default" {
 }
 
 resource "google_dns_record_set" "wildcard" {
-  count = var.hosted_zone_name == null? 0 : 1
+  count        = var.hosted_zone_name == null ? 0 : 1
   name         = "*.${data.google_dns_managed_zone.public[0].dns_name}"
   type         = "A"
   ttl          = 3600
@@ -94,6 +94,6 @@ resource "google_dns_record_set" "wildcard" {
 }
 
 data "google_dns_managed_zone" "public" {
-  count = var.hosted_zone_name == null? 0 : 1
-  name = var.hosted_zone_name
+  count = var.hosted_zone_name == null ? 0 : 1
+  name  = var.hosted_zone_name
 }

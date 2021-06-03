@@ -60,8 +60,8 @@ resource "aws_route53_record" "amazonses_dkim_record" {
 
 data "aws_iam_policy_document" "sender" {
   statement {
-    sid = "SendEmail"
-    actions = ["ses:Send*"]
+    sid       = "SendEmail"
+    actions   = ["ses:Send*"]
     resources = ["*"]
     condition {
       test     = "StringLike"
@@ -72,6 +72,6 @@ data "aws_iam_policy_document" "sender" {
 }
 
 resource "aws_iam_policy" "sender" {
-  name = "${var.env_name}-${var.layer_name}-${var.module_name}-sender"
+  name   = "${var.env_name}-${var.layer_name}-${var.module_name}-sender"
   policy = data.aws_iam_policy_document.sender.json
 }

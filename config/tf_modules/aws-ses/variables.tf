@@ -2,7 +2,7 @@ data "aws_region" "current" {}
 
 variable "env_name" {
   description = "Env name"
-  type = string
+  type        = string
 }
 
 variable "layer_name" {
@@ -12,7 +12,7 @@ variable "layer_name" {
 
 variable "module_name" {
   description = "Module name"
-  type = string
+  type        = string
 }
 
 variable "domain" {
@@ -24,6 +24,6 @@ variable "zone_id" {
 }
 
 variable "mail_from_prefix" {
-  type = string
+  type    = string
   default = "mail"
 }

@@ -4,7 +4,7 @@ data "google_compute_network" "vpc" {
 
 variable "env_name" {
   description = "Env name"
-  type = string
+  type        = string
 }
 
 variable "layer_name" {
@@ -14,20 +14,20 @@ variable "layer_name" {
 
 variable "module_name" {
   description = "Module name"
-  type = string
+  type        = string
 }
 
 variable "engine_version" {
-  type = string
+  type    = string
   default = "11"
 }
 
 variable "instance_tier" {
-  type = string
+  type    = string
   default = "db-f1-micro"
 }
 
 variable "safety" {
-  type = bool
+  type    = bool
   default = false
 }

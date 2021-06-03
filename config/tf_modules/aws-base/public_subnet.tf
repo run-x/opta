@@ -6,10 +6,10 @@ resource "aws_subnet" "public_subnets" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name                         = "opta-${var.layer_name}-public-${data.aws_availability_zones.current.zone_ids[count.index]}"
+    Name                                           = "opta-${var.layer_name}-public-${data.aws_availability_zones.current.zone_ids[count.index]}"
     "kubernetes.io/cluster/opta-${var.layer_name}" = "shared"
-    type = "public"
-    terraform                    = "true"
+    type                                           = "public"
+    terraform                                      = "true"
   }
 }
 

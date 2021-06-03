@@ -7,6 +7,6 @@ output "db_user" {
 }
 
 output "db_password" {
-  value = aws_docdb_cluster.cluster.master_password
+  value     = aws_docdb_cluster.cluster.master_password
   sensitive = true
 }

@@ -10,12 +10,12 @@ data "aws_iam_policy_document" "autoscaler" {
       "ec2:DescribeLaunchTemplateVersions"
     ]
     resources = ["*"]
-    sid = "autoscaling"
+    sid       = "autoscaling"
   }
 }
 
 resource "aws_iam_policy" "autoscaler" {
-  name = "opta-${var.env_name}-k8s-autoscaler"
+  name   = "opta-${var.env_name}-k8s-autoscaler"
   policy = data.aws_iam_policy_document.autoscaler.json
 }
 
@@ -39,36 +39,36 @@ data "aws_iam_policy_document" "trust_k8s_openid" {
 
 resource "aws_iam_role" "autoscaler" {
   assume_role_policy = data.aws_iam_policy_document.trust_k8s_openid.json
-  name = "opta-${var.env_name}-k8s-autoscaler"
+  name               = "opta-${var.env_name}-k8s-autoscaler"
 }
 
 resource "aws_iam_role_policy_attachment" "autoscaler" {
   policy_arn = aws_iam_policy.autoscaler.arn
-  role = aws_iam_role.autoscaler.name
+  role       = aws_iam_role.autoscaler.name
 }
 
 resource "helm_release" "autoscaler" {
-  chart = "cluster-autoscaler"
-  name = "cluster-autoscaler"
+  chart      = "cluster-autoscaler"
+  name       = "cluster-autoscaler"
   repository = "https://kubernetes.github.io/autoscaler"
   values = [
     yamlencode({
-      autoDiscovery: {
-        clusterName: var.eks_cluster_name
+      autoDiscovery : {
+        clusterName : var.eks_cluster_name
       },
-      rbac: {
-        serviceAccount: {
-          annotations: {
-            "eks.amazonaws.com/role-arn": aws_iam_role.autoscaler.arn
+      rbac : {
+        serviceAccount : {
+          annotations : {
+            "eks.amazonaws.com/role-arn" : aws_iam_role.autoscaler.arn
           }
-          name: "autoscaler"
+          name : "autoscaler"
         }
       }
-      awsRegion: data.aws_region.current.name
+      awsRegion : data.aws_region.current.name
     })
   ]
-  namespace = "autoscaler"
+  namespace        = "autoscaler"
   create_namespace = true
-  cleanup_on_fail = true
-  atomic = true
+  cleanup_on_fail  = true
+  atomic           = true
 }
