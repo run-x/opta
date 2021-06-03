@@ -370,6 +370,7 @@ class Terraform:
         dynamodb_table = providers["terraform"]["backend"]["s3"]["dynamodb_table"]
         region = providers["terraform"]["backend"]["s3"]["region"]
         AWS.delete_dynamodb_table(dynamodb_table, region)
+        logger.info("Successfully deleted AWS state storage")
 
     @classmethod
     def _gcp_delete_state_storage(cls, layer: "Layer") -> None:
@@ -382,6 +383,7 @@ class Terraform:
         try:
             bucket_obj = gcs_client.get_bucket(bucket_name)
             bucket_obj.delete(force=True)
+            logger.info("Successfully deleted GCP state storage")
         except NotFound:
             logger.warn("State bucket was already deleted")
 
