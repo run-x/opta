@@ -96,7 +96,7 @@ resource "aws_kms_key" "key" {
   description = "Base key for account"
   policy      = data.aws_iam_policy_document.kms_policy.json
   tags = {
-    Name = "opta-${var.layer_name}"
+    Name      = "opta-${var.layer_name}"
     terraform = "true"
   }
 }

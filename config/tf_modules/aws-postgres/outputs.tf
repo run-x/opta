@@ -3,7 +3,7 @@ output "db_user" {
 }
 
 output "db_password" {
-  value = aws_rds_cluster.db_cluster.master_password
+  value     = aws_rds_cluster.db_cluster.master_password
   sensitive = true
 }
 

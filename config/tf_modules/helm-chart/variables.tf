@@ -1,5 +1,5 @@
 variable "repository" {
-  type = string
+  type    = string
   default = null
 }
 
@@ -8,32 +8,32 @@ variable "chart" {
 }
 
 variable "namespace" {
-  type = string
+  type    = string
   default = "default"
 }
 
 variable "create_namespace" {
-  type = bool
+  type    = bool
   default = false
 }
 
 variable "atomic" {
-  type = bool
+  type    = bool
   default = true
 }
 
 variable "cleanup_on_fail" {
-  type = bool
+  type    = bool
   default = true
 }
 
 variable "chart_version" {
-  type = string
+  type    = string
   default = null
 }
 
 variable "values_file" {
-  type = string
+  type    = string
   default = null
 }
 
@@ -43,7 +43,7 @@ variable "values" {
 
 variable "env_name" {
   description = "Env name"
-  type = string
+  type        = string
 }
 
 variable "layer_name" {
@@ -53,16 +53,16 @@ variable "layer_name" {
 
 variable "module_name" {
   description = "Module name"
-  type = string
+  type        = string
 }
 
 variable "timeout" {
-  type = number
+  type    = number
   default = 300
 }
 
 variable "dependency_update" {
-  type = bool
+  type    = bool
   default = true
 }
 

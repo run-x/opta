@@ -1,10 +1,10 @@
 resource "helm_release" "opta_base" {
-  chart = "${path.module}/opta-base"
-  name = "opta-base"
+  chart     = "${path.module}/opta-base"
+  name      = "opta-base"
   namespace = "default"
   values = [
     yamlencode({
-      adminArns: var.admin_arns
+      adminArns : var.admin_arns
     })
   ]
   depends_on = [

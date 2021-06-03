@@ -1,6 +1,6 @@
 resource "google_storage_bucket" "bucket" {
-  name          = var.bucket_name
-  location      = data.google_client_config.current.region
+  name     = var.bucket_name
+  location = data.google_client_config.current.region
   encryption {
     default_kms_key_name = data.google_kms_crypto_key.kms.id
   }

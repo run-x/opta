@@ -7,7 +7,7 @@ resource "random_id" "cert_suffix" {
 
 resource "google_compute_managed_ssl_certificate" "certificate" {
   count = var.delegated ? 1 : 0
-  name = "opta-${var.layer_name}-${random_id.cert_suffix.hex}"
+  name  = "opta-${var.layer_name}-${random_id.cert_suffix.hex}"
 
   managed {
     domains = concat([var.domain], local.full_subdomains)

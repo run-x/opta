@@ -1,7 +1,7 @@
 resource "google_container_node_pool" "default" {
-  name       = "opta-${var.layer_name}-default"
-  cluster    = google_container_cluster.primary.name
-  location = data.google_client_config.current.region
+  name               = "opta-${var.layer_name}-default"
+  cluster            = google_container_cluster.primary.name
+  location           = data.google_client_config.current.region
   initial_node_count = var.min_nodes
 
   autoscaling {
@@ -10,7 +10,7 @@ resource "google_container_node_pool" "default" {
   }
 
   management {
-    auto_repair = true
+    auto_repair  = true
     auto_upgrade = true
   }
 
@@ -18,7 +18,7 @@ resource "google_container_node_pool" "default" {
     preemptible  = false
     machine_type = var.node_instance_type
     disk_size_gb = var.node_disk_size
-    tags = ["opta-${var.layer_name}-nodes"]
+    tags         = ["opta-${var.layer_name}-nodes"]
 
     service_account = google_service_account.gke_node.email
     oauth_scopes = [

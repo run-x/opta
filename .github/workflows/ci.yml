@@ -40,6 +40,15 @@ jobs:
           source $(pipenv --venv)/bin/activate
       - name: Security
         run: make security_tests
+  terraform_format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run terraform format
+        run: |
+          terraform version
+          terraform fmt -recursive -check ./config/tf_modules
+
   python:
     runs-on: ubuntu-latest
     steps:

@@ -55,8 +55,8 @@ resource "tls_locally_signed_cert" "issuer_cert" {
 
 
 resource "helm_release" "linkerd" {
-  chart = "linkerd2"
-  name = "linkerd"
+  chart      = "linkerd2"
+  name       = "linkerd"
   repository = "https://helm.linkerd.io/stable"
   # Version 2.10.0 is not backwards compatible.
   version = "2.9.4"
@@ -81,7 +81,7 @@ resource "helm_release" "linkerd" {
     value = tls_private_key.issuer_key.private_key_pem
   }
 
-  values = var.high_availability ?  [
+  values = var.high_availability ? [
     file("${path.module}/values-ha.yaml") # Adding the high-availability default values.
   ] : []
 }

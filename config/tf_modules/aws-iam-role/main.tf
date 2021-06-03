@@ -1,5 +1,5 @@
 resource "aws_iam_policy" "vanilla_policy" {
-  name = "${var.env_name}-${var.layer_name}-${var.module_name}"
+  name   = "${var.env_name}-${var.layer_name}-${var.module_name}"
   policy = jsonencode(var.iam_policy)
 }
 
@@ -30,7 +30,7 @@ data "aws_iam_policy_document" "iam_trusts" {
       effect  = "Allow"
       principals {
         identifiers = [statement.value]
-        type = "AWS"
+        type        = "AWS"
       }
     }
   }
@@ -40,35 +40,35 @@ data "aws_iam_policy_document" "iam_trusts" {
     actions = ["sts:AssumeRole"]
     principals {
       identifiers = ["events.amazonaws.com"]
-      type = "Service"
+      type        = "Service"
     }
   }
 }
 
 resource "aws_iam_role" "role" {
   assume_role_policy = data.aws_iam_policy_document.iam_trusts.json
-  name = "${var.env_name}-${var.layer_name}-${var.module_name}"
+  name               = "${var.env_name}-${var.layer_name}-${var.module_name}"
 }
 
 resource "aws_iam_role_policy_attachment" "vanilla_role_attachment" {
   policy_arn = aws_iam_policy.vanilla_policy.arn
-  role = aws_iam_role.role.name
+  role       = aws_iam_role.role.name
 }
 
 resource "aws_iam_role_policy_attachment" "extra_policies_attachment" {
-  count = length(var.extra_iam_policies)
+  count      = length(var.extra_iam_policies)
   policy_arn = var.extra_iam_policies[count.index]
-  role = aws_iam_role.role.name
+  role       = aws_iam_role.role.name
 }
 
 resource "aws_iam_role_policy" "pass_role_to_self" {
-  role = aws_iam_role.role.id
+  role   = aws_iam_role.role.id
   policy = data.aws_iam_policy_document.pass_role_to_self.json
 }
 
 data "aws_iam_policy_document" "pass_role_to_self" {
   statement {
-    sid = "AllowToPassSelf"
+    sid    = "AllowToPassSelf"
     effect = "Allow"
     actions = [
       "iam:GetRole",

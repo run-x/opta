@@ -1,6 +1,6 @@
 variable "env_name" {
   description = "Env name"
-  type = string
+  type        = string
 }
 
 variable "layer_name" {
@@ -10,21 +10,21 @@ variable "layer_name" {
 
 variable "module_name" {
   description = "Module name"
-  type = string
+  type        = string
 }
 
 variable "kubernetes_trusts" {
   type = list(object({
-    open_id_url = string
-    open_id_arn = string
+    open_id_url  = string
+    open_id_arn  = string
     service_name = string
-    namespace = string
+    namespace    = string
   }))
   default = []
 }
 
 variable "allowed_iams" {
-  type = list(string)
+  type    = list(string)
   default = []
 }
 
@@ -32,6 +32,6 @@ variable "iam_policy" {
 }
 
 variable "extra_iam_policies" {
-  type = list(string)
+  type    = list(string)
   default = []
 }
