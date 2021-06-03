@@ -49,7 +49,9 @@ def view(secret: str, env: Optional[str], config: str) -> None:
 
 @secret.command(name="list")
 @click.option("--env", default=None, help="The env to use when loading the config file")
-@click.option("-c", "--config", default="opta.yml", help="Opta config file", show_default=True)
+@click.option(
+    "-c", "--config", default="opta.yml", help="Opta config file", show_default=True
+)
 def list_command(env: Optional[str], config: str) -> None:
     """List the secrets setup for the given k8s service module"""
     layer = Layer.load_from_yaml(config, env)
@@ -67,7 +69,9 @@ def list_command(env: Optional[str], config: str) -> None:
 @click.argument("secret")
 @click.argument("value")
 @click.option("--env", default=None, help="The env to use when loading the config file")
-@click.option("-c", "--config", default="opta.yml", help="Opta config file", show_default=True)
+@click.option(
+    "-c", "--config", default="opta.yml", help="Opta config file", show_default=True
+)
 def update(secret: str, value: str, env: Optional[str], config: str) -> None:
     """Update a given secret of a k8s service with a new value"""
     layer = Layer.load_from_yaml(config, env)
