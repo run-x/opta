@@ -282,6 +282,7 @@ modules:
       bucket_name: str
       block_public: optional
       bucket_policy: optional
+      cors_rule: optional
     outputs:
       bucket_id:
         export: true
