@@ -28,6 +28,6 @@ variable "bucket_policy" {
 }
 
 variable "cors_rule" {
-  type = any
+  type    = any
   default = null
 }
