@@ -22,11 +22,14 @@ modules:
       - gcs: ["write"]
       - redis
       - db
+      - mysqldb
     secrets:
       - API_KEY
       - SECRET_1
   - name: db
     type: gcp-postgres
+  - name: mysqldb
+    type: mysql
   - name: gcs
     type: gcp-gcs
     bucket_name: "{parent_name}-{layer_name}"

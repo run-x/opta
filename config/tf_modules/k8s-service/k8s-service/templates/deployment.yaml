@@ -25,7 +25,8 @@ spec:
         tags.datadoghq.com/service: {{ include "k8s-service.serviceName" . }}-{{ include "k8s-service.namespaceName" . }}
         tags.datadoghq.com/version: {{ .Values.version | quote }}
       annotations:
-        config.linkerd.io/skip-outbound-ports: "8126,5432"
+        {{/* https://linkerd.io/2.9/features/protocol-detection/#configuring-protocol-detection */}}
+        config.linkerd.io/skip-outbound-ports: "8126,5432,3306"
         ad.datadoghq.com/linkerd-proxy.check_names: '["linkerd"]'
         ad.datadoghq.com/linkerd-proxy.init_configs: '[{}]'
         ad.datadoghq.com/linkerd-proxy.instances: '[{"prometheus_url": "http://%%host%%:4191/metrics"}]'

@@ -12,7 +12,7 @@ resource "random_password" "root_auth" {
 # We currently do not wish to tangle with the google-beta provider so we are skipping this feature for now.
 resource "google_sql_database_instance" "instance" {
   name                = "opta-${var.layer_name}-${var.module_name}-${random_id.key_suffix.hex}"
-  database_version    = "POSTGRES_${var.engine_version}"
+  database_version    = "MYSQL_${var.engine_version}"
   deletion_protection = var.safety
 
   settings {
@@ -26,8 +26,9 @@ resource "google_sql_database_instance" "instance" {
       private_network = data.google_compute_network.vpc.id
     }
     backup_configuration {
-      enabled    = true
-      start_time = "23:00"
+      enabled            = true
+      binary_log_enabled = true
+      start_time         = "23:00"
     }
   }
 
@@ -43,7 +44,7 @@ resource "google_sql_database" "main" {
 
 resource "google_sql_user" "root" {
   instance = google_sql_database_instance.instance.name
-  name     = "postgres"
+  name     = "mysql"
   password = random_password.root_auth.result
 
   deletion_policy = "ABANDON"
