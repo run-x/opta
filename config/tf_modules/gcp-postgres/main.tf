@@ -7,7 +7,9 @@ resource "random_password" "root_auth" {
   special = false
 }
 
-# TODO: add encryption key name once out of beta
+# TODO: currently we are not performing disk encryption as the feature is currently in beta. You may read more about it
+# here: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/sql_database_instance#encryption_key_name
+# We currently do not wish to tangle with the google-beta provider so we are skipping this feature for now.
 resource "google_sql_database_instance" "instance" {
   name                = "opta-${var.layer_name}-${var.module_name}-${random_id.key_suffix.hex}"
   database_version    = "POSTGRES_${var.engine_version}"
