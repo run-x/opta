@@ -6,7 +6,9 @@ module_name: str(required=False)
 bucket_name: str(required=True)
 block_public: any(required=False)
 bucket_policy: any(required=False)
-cors_rule: 
+cors_rule: include('cors', required=False)
+---
+cors:
   allowed_origins: list(str(), required=False)
   allowed_headers: list(str(), required=False)
   allowed_methods: list(str(), required=False)

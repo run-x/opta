@@ -10,7 +10,7 @@ resource "aws_s3_bucket" "bucket" {
   force_destroy = true
 
   dynamic "cors_rule" {
-    for_each = [var.cors_rule]
+    for_each = var.cors_rule != null ? [var.cors_rule] : []
     content {
       allowed_headers = try(cors_rule.value["allowed_headers"], [])
       allowed_methods = try(cors_rule.value["allowed_methods"], [])
