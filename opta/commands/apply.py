@@ -102,9 +102,7 @@ def _apply(
 ) -> None:
     _check_terraform_version()
     layer = Layer.load_from_yaml(config, env)
-    import pdb
 
-    pdb.set_trace()
     amplitude_client.send_event(
         amplitude_client.START_GEN_EVENT,
         event_properties={"org_name": layer.org_name, "layer_name": layer.name},
