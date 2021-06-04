@@ -8,6 +8,17 @@ resource "aws_s3_bucket" "bucket" {
     }
   }
   force_destroy = true
+
+  dynamic "cors_rule" {
+    for_each = [var.cors_rule]
+    content {
+      allowed_headers = try(cors_rule.value["allowed_headers"], [])
+      allowed_methods = try(cors_rule.value["allowed_methods"], [])
+      allowed_origins = try(cors_rule.value["allowed_origins"], [])
+      expose_headers  = try(cors_rule.value["expose_headers"], [])
+      max_age_seconds = try(cors_rule.value["max_age_seconds"], 0)
+    }
+  }
 }
 
 resource "aws_s3_bucket_public_access_block" "block" {
