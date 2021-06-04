@@ -101,8 +101,12 @@ def _apply(
     auto_approve: bool,
 ) -> None:
     _check_terraform_version()
-    amplitude_client.send_event(amplitude_client.START_GEN_EVENT)
     layer = Layer.load_from_yaml(config, env)
+
+    amplitude_client.send_event(
+        amplitude_client.START_GEN_EVENT,
+        event_properties={"org_name": layer.org_name, "layer_name": layer.name},
+    )
 
     # We need a region with at least 3 AZs for leader election during failover.
     # Also EKS historically had problems with regions that have fewer than 3 AZs.
@@ -180,7 +184,12 @@ def _apply(
             print("Plan ran successfully, not applying since this is a test.")
         else:
             amplitude_client.send_event(
-                amplitude_client.APPLY_EVENT, event_properties={"module_idx": module_idx}
+                amplitude_client.APPLY_EVENT,
+                event_properties={
+                    "module_idx": module_idx,
+                    "org_name": layer.org_name,
+                    "layer_name": layer.name,
+                },
             )
             logger.info("Planning your changes (might take a minute)")
             Terraform.plan(
