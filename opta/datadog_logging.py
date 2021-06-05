@@ -9,9 +9,9 @@ from getmac import get_mac_address
 from git.config import GitConfigParser
 from requests import codes, post
 
-from opta.constants import SESSION_ID, VERSION
+from opta.constants import OPTA_DISABLE_REPORTING, SESSION_ID, VERSION
 
-CLIENT_TOKEN = "pub40d867605951d2a30fb8020e193ee7e5"
+CLIENT_TOKEN = "pub40d867605951d2a30fb8020e193ee7e5"  # nosec
 DEFAULT_CACHE_SIZE = 10
 
 
@@ -56,15 +56,20 @@ class DatadogLogHandler(Handler):
                 "content-type": "text/plain;charset=UTF-8",
                 "accept": "*/*",
             }
-            response = post(
-                url=f"https://browser-http-intake.logs.datadoghq.com/v1/input/{CLIENT_TOKEN}",
-                params=parameters,
-                headers=headers,
-                data="\n".join(map(lambda x: json.dumps(x), self.cache)).encode("utf-8"),
-                timeout=5,
-            )
-            if response.status_code != codes.ok:
-                print("For some reason we could not send the logs to datadog")
+            if os.environ.get(OPTA_DISABLE_REPORTING) is None:
+                response = post(
+                    url=f"https://browser-http-intake.logs.datadoghq.com/v1/input/{CLIENT_TOKEN}",
+                    params=parameters,
+                    headers=headers,
+                    data="\n".join(map(lambda x: json.dumps(x), self.cache)).encode(
+                        "utf-8"
+                    ),
+                    timeout=5,
+                )
+                if response.status_code != codes.ok:
+                    print("For some reason we could not send the logs to datadog")
+                else:
+                    self.cache = []
             else:
                 self.cache = []
 

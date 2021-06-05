@@ -1,3 +1,4 @@
+import base64
 import datetime
 import json
 import time
@@ -6,7 +7,20 @@ from typing import TYPE_CHECKING, List, Optional, Set, Tuple
 
 import pytz
 from colored import attr, fg
-from kubernetes.client import ApiException, CoreV1Api, V1Event, V1ObjectReference, V1Pod
+from kubernetes.client import (
+    ApiException,
+    AppsV1Api,
+    CoreV1Api,
+    V1Deployment,
+    V1DeploymentList,
+    V1Event,
+    V1Namespace,
+    V1ObjectMeta,
+    V1ObjectReference,
+    V1Pod,
+    V1Secret,
+    V1SecretList,
+)
 from kubernetes.config import load_kube_config
 from kubernetes.watch import Watch
 
@@ -14,7 +28,7 @@ from opta.core.gcp import GCP
 from opta.core.terraform import get_terraform_outputs
 from opta.exceptions import UserErrors
 from opta.nice_subprocess import nice_run
-from opta.utils import fmt_msg, is_tool, logger
+from opta.utils import deep_merge, fmt_msg, is_tool, logger
 
 if TYPE_CHECKING:
     from opta.layer import Layer
@@ -76,7 +90,7 @@ def _gcp_configure_kubectl(layer: "Layer") -> None:
         )
     current_project_id = out.strip()
 
-    root_layer = _get_root_layer(layer)
+    root_layer = layer.root()
     env_gcp_region, env_gcp_project = _gcp_get_cluster_env(root_layer)
     if env_gcp_project != current_project_id:
         raise UserErrors(
@@ -90,14 +104,12 @@ def _gcp_configure_kubectl(layer: "Layer") -> None:
             )
         )
 
-    # Get the cluster name from the outputs.
-    outputs = get_terraform_outputs(layer)
-    cluster_name = outputs.get("parent.k8s_cluster_name") or outputs.get(
-        "k8s_cluster_name"
-    )
+    cluster_name = get_cluster_name(root_layer)
 
     if cluster_name is None:
-        raise Exception("The GKE cluster name could not be determined.")
+        raise Exception(
+            "The GKE cluster name could not be determined -- please make sure it has been applied in the environment."
+        )
 
     # Update kubeconfig with the cluster details, and also switches context
     nice_run(
@@ -139,11 +151,11 @@ def _aws_configure_kubectl(layer: "Layer") -> None:
     current_aws_account_id = aws_caller_identity["Account"]
 
     # Get the environment's account details from the opta config
-    root_layer = _get_root_layer(layer)
+    root_layer = layer.root()
     env_aws_region, env_aws_account_ids = _aws_get_cluster_env(root_layer)
 
     # Make sure the current account points to the cluster environment
-    if int(current_aws_account_id) not in env_aws_account_ids:
+    if str(current_aws_account_id) not in env_aws_account_ids:
         raise UserErrors(
             fmt_msg(
                 f"""
@@ -155,14 +167,12 @@ def _aws_configure_kubectl(layer: "Layer") -> None:
             )
         )
 
-    # Get the cluster name from the outputs.
-    outputs = get_terraform_outputs(layer)
-    cluster_name = outputs.get("parent.k8s_cluster_name") or outputs.get(
-        "k8s_cluster_name"
-    )
+    cluster_name = get_cluster_name(root_layer)
 
     if cluster_name is None:
-        raise Exception("The EKS cluster name could not be determined.")
+        raise Exception(
+            "The EKS cluster name could not be determined -- please make sure it has been applied in the environment."
+        )
 
     # Update kubeconfig with the cluster details, and also switches context
     nice_run(
@@ -178,7 +188,15 @@ def _aws_configure_kubectl(layer: "Layer") -> None:
     )
 
 
-def _aws_get_cluster_env(root_layer: "Layer") -> Tuple[str, List[int]]:
+def get_cluster_name(layer: "Layer") -> Optional[str]:
+    outputs = get_terraform_outputs(layer)
+    cluster_name = outputs.get("parent.k8s_cluster_name") or outputs.get(
+        "k8s_cluster_name"
+    )
+    return cluster_name
+
+
+def _aws_get_cluster_env(root_layer: "Layer") -> Tuple[str, List[str]]:
     aws_provider = root_layer.providers["aws"]
     return aws_provider["region"], aws_provider["allowed_account_ids"]
 
@@ -188,11 +206,98 @@ def _gcp_get_cluster_env(root_layer: "Layer") -> Tuple[str, str]:
     return googl_provider["region"], googl_provider["project"]
 
 
-def _get_root_layer(layer: "Layer") -> "Layer":
-    while layer.parent is not None:
-        layer = layer.parent
+def current_image_tag(layer: "Layer",) -> Optional[str]:
+    load_kube_config()
+    apps_client = AppsV1Api()
+    deployment_list: V1DeploymentList = apps_client.list_namespaced_deployment(
+        namespace=layer.name
+    )
+    if len(deployment_list.items) > 0:
+        deployment: V1Deployment = deployment_list.items[0]
+        image_parts = deployment.spec.template.spec.containers[0].image.split(":")
+        return image_parts[1] if len(image_parts) > 1 else None
+    return None
 
-    return layer
+
+def create_namespace_if_not_exists(layer_name: str) -> None:
+    load_kube_config()
+    v1 = CoreV1Api()
+    namespaces = v1.list_namespace(field_selector=f"metadata.name={layer_name}")
+    if len(namespaces.items) == 0:
+        v1.create_namespace(
+            body=V1Namespace(
+                metadata=V1ObjectMeta(
+                    name=layer_name, annotations={"linkerd.io/inject": "enabled"}
+                )
+            )
+        )
+
+
+def create_manual_secrets_if_not_exists(layer_name: str) -> None:
+    load_kube_config()
+    v1 = CoreV1Api()
+    manual_secrets: V1SecretList = v1.list_namespaced_secret(
+        layer_name, field_selector="metadata.name=manual-secrets"
+    )
+    if len(manual_secrets.items) == 0:
+        v1.create_namespaced_secret(
+            layer_name, body=V1Secret(metadata=V1ObjectMeta(name="manual-secrets"))
+        )
+
+
+def get_manual_secrets(layer_name: str) -> dict:
+    load_kube_config()
+    v1 = CoreV1Api()
+    try:
+        api_response = v1.read_namespaced_secret("manual-secrets", layer_name)
+    except ApiException as e:
+        if e.status == 404:
+            return {}
+        raise e
+    return (
+        {}
+        if api_response.data is None
+        else {
+            k: base64.b64decode(v).decode("utf-8") for k, v in api_response.data.items()
+        }
+    )
+
+
+def update_manual_secrets(layer_name: str, new_values: dict) -> None:
+    load_kube_config()
+    v1 = CoreV1Api()
+    create_manual_secrets_if_not_exists(layer_name)
+    current_secret_object: V1Secret = v1.read_namespaced_secret(
+        "manual-secrets", layer_name
+    )
+    current_secret_object.data = current_secret_object.data or {}
+    for k, v in new_values.items():
+        current_secret_object.data[k] = base64.b64encode(v.encode("utf-8")).decode(
+            "utf-8"
+        )
+    v1.replace_namespaced_secret("manual-secrets", layer_name, current_secret_object)
+
+
+def get_linked_secrets(layer_name: str) -> dict:
+    load_kube_config()
+    v1 = CoreV1Api()
+    try:
+        api_response = v1.read_namespaced_secret("secret", layer_name)
+    except ApiException as e:
+        if e.status == 404:
+            return {}
+        raise e
+    return (
+        {}
+        if api_response.data is None
+        else {
+            k: base64.b64decode(v).decode("utf-8") for k, v in api_response.data.items()
+        }
+    )
+
+
+def get_secrets(layer_name: str) -> dict:
+    return deep_merge(get_manual_secrets(layer_name), get_linked_secrets(layer_name))
 
 
 def tail_module_log(
@@ -243,13 +348,15 @@ def tail_pod_log(
                 since_seconds=seconds,
             ):
                 print(f"{fg(color_idx)}{pod.metadata.name} {logline}{attr(0)}")
-        except ApiException as e:
-            if e.status == 404:
-                print(
-                    f"{fg(color_idx)}Server {pod.metadata.name} has been terminated{attr(0)}"
-                )
-                return
-            elif retry_count < 10:
+        except Exception as e:
+            if type(e) == ApiException:
+                if e.status == 404:  # type: ignore
+                    print(
+                        f"{fg(color_idx)}Server {pod.metadata.name} has been terminated{attr(0)}"
+                    )
+                    return
+
+            if retry_count < 5:
                 print(
                     f"{fg(color_idx)}Couldn't get logs, waiting a bit and retrying{attr(0)}"
                 )
@@ -260,11 +367,6 @@ def tail_pod_log(
                     f"Got the following error while trying to fetch the logs for pod {pod.metadata.name} in namespace {namespace}: {e}"
                 )
                 return
-        except Exception as e:
-            logger.error(
-                f"Got the following error while trying to fetch the logs for pod {pod.metadata.name} in namespace {namespace}: {e}"
-            )
-            return
 
 
 def tail_namespace_events(

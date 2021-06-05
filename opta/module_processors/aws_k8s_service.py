@@ -1,37 +1,40 @@
 from typing import TYPE_CHECKING, List
 
+from opta.core.kubernetes import create_namespace_if_not_exists, get_manual_secrets
 from opta.exceptions import UserErrors
-from opta.module_processors.base import AWSK8sModuleProcessor
+from opta.module_processors.base import AWSIamAssembler, AWSK8sModuleProcessor
 
 if TYPE_CHECKING:
     from opta.layer import Layer
     from opta.module import Module
 
 
-class K8sServiceProcessor(AWSK8sModuleProcessor):
+class AwsK8sServiceProcessor(AWSK8sModuleProcessor, AWSIamAssembler):
     def __init__(self, module: "Module", layer: "Layer"):
-        if module.data["type"] != "k8s-service":
+        if (module.aliased_type or module.type) != "aws-k8s-service":
             raise Exception(
-                f"The module {module.name} was expected to be of type k8s service"
+                f"The module {module.name} was expected to be of type aws k8s service"
             )
-        self.read_buckets: list[str] = []
-        self.write_buckets: list[str] = []
-        super(K8sServiceProcessor, self).__init__(module, layer)
+        super(AwsK8sServiceProcessor, self).__init__(module, layer)
+
+    def pre_hook(self, module_idx: int) -> None:
+        create_namespace_if_not_exists(self.layer.name)
+        manual_secrets = get_manual_secrets(self.layer.name)
+        for secret_name in self.module.data.get("secrets", []):
+            if secret_name not in manual_secrets:
+                raise UserErrors(
+                    f"Secret {secret_name} has not been set via opta secret update! Please do so before applying the "
+                    f"K8s service w/ a new secret."
+                )
+        super(AwsK8sServiceProcessor, self).pre_hook(module_idx)
 
     def process(self, module_idx: int) -> None:
         # Update the secrets
-        transformed_secrets = []
-        if "original_secrets" in self.module.data:
-            secrets = self.module.data["original_secrets"]
-        else:
-            secrets = self.module.data.get("secrets", [])
-            self.module.data["original_secrets"] = secrets
-        for secret in secrets:
-            if type(secret) is str:
-                transformed_secrets.append({"name": secret, "value": ""})
-            else:
-                raise Exception("Secret must be string or dict")
-        self.module.data["secrets"] = transformed_secrets
+        self.module.data["manual_secrets"] = self.module.data.get("secrets", [])
+        self.module.data["link_secrets"] = self.module.data.get("link_secrets", [])
+
+        if isinstance(self.module.data.get("public_uri"), str):
+            self.module.data["public_uri"] = [self.module.data["public_uri"]]
 
         # Handle links
         for link_data in self.module.data.get("links", []):
@@ -52,7 +55,7 @@ class K8sServiceProcessor(AWSK8sModuleProcessor):
                     "make sure that the module you're referencing is listed before the k8s "
                     "app one"
                 )
-            module_type = module.data["type"]
+            module_type = module.aliased_type or module.type
             if module_type == "aws-postgres":
                 self.handle_rds_link(module, link_permissions)
             elif module_type == "aws-redis":
@@ -61,11 +64,14 @@ class K8sServiceProcessor(AWSK8sModuleProcessor):
                 self.handle_docdb_link(module, link_permissions)
             elif module_type == "aws-s3":
                 self.handle_s3_link(module, link_permissions)
+            elif module_type == "aws-sqs":
+                self.handle_sqs_link(module, link_permissions)
+            elif module_type == "aws-sns":
+                self.handle_sns_link(module, link_permissions)
             else:
                 raise Exception(
                     f"Unsupported module type for k8s service link: {module_type}"
                 )
-
         iam_statements = [
             {
                 "Sid": "DescribeCluster",
@@ -74,55 +80,26 @@ class K8sServiceProcessor(AWSK8sModuleProcessor):
                 "Resource": ["*"],
             }
         ]
-        if self.read_buckets:
-            iam_statements.append(
-                {
-                    "Sid": "ReadBuckets",
-                    "Action": ["s3:GetObject*", "s3:ListBucket"],
-                    "Effect": "Allow",
-                    "Resource": [
-                        f"arn:aws:s3:::{bucket_name}" for bucket_name in self.read_buckets
-                    ]
-                    + [
-                        f"arn:aws:s3:::{bucket_name}/*"
-                        for bucket_name in self.read_buckets
-                    ],
-                }
-            )
-        if self.write_buckets:
-            iam_statements.append(
-                {
-                    "Sid": "WriteBuckets",
-                    "Action": [
-                        "s3:GetObject*",
-                        "s3:PutObject*",
-                        "s3:DeleteObject*",
-                        "s3:ListBucket",
-                    ],
-                    "Effect": "Allow",
-                    "Resource": [
-                        f"arn:aws:s3:::{bucket_name}"
-                        for bucket_name in self.write_buckets
-                    ]
-                    + [
-                        f"arn:aws:s3:::{bucket_name}/*"
-                        for bucket_name in self.write_buckets
-                    ],
-                }
-            )
+        iam_statements += self.prepare_iam_statements()
         self.module.data["iam_policy"] = {
             "Version": "2012-10-17",
             "Statement": iam_statements,
         }
         if "image_tag" in self.layer.variables:
             self.module.data["tag"] = self.layer.variables["image_tag"]
-        super(K8sServiceProcessor, self).process(module_idx)
+        seen = set()
+        self.module.data["link_secrets"] = [
+            seen.add(obj["name"]) or obj  # type: ignore
+            for obj in self.module.data["link_secrets"]
+            if obj["name"] not in seen
+        ]
+        super(AwsK8sServiceProcessor, self).process(module_idx)
 
     def handle_rds_link(
         self, linked_module: "Module", link_permissions: List[str]
     ) -> None:
         for key in ["db_user", "db_name", "db_password", "db_host"]:
-            self.module.data["secrets"].append(
+            self.module.data["link_secrets"].append(
                 {
                     "name": f"{linked_module.name}_{key}",
                     "value": f"${{{{module.{linked_module.name}.{key}}}}}",
@@ -141,7 +118,7 @@ class K8sServiceProcessor(AWSK8sModuleProcessor):
         self, linked_module: "Module", link_permissions: List[str]
     ) -> None:
         for key in ["cache_host", "cache_auth_token"]:
-            self.module.data["secrets"].append(
+            self.module.data["link_secrets"].append(
                 {
                     "name": f"{linked_module.name}_{key}",
                     "value": f"${{{{module.{linked_module.name}.{key}}}}}",
@@ -160,7 +137,7 @@ class K8sServiceProcessor(AWSK8sModuleProcessor):
         self, linked_module: "Module", link_permissions: List[str]
     ) -> None:
         for key in ["db_user", "db_host", "db_password"]:
-            self.module.data["secrets"].append(
+            self.module.data["link_secrets"].append(
                 {
                     "name": f"{linked_module.name}_{key}",
                     "value": f"${{{{module.{linked_module.name}.{key}}}}}",
@@ -174,18 +151,3 @@ class K8sServiceProcessor(AWSK8sModuleProcessor):
                 "are for manipulating the docdb cluster itself, which "
                 "I don't think is what you're looking for."
             )
-
-    def handle_s3_link(
-        self, linked_module: "Module", link_permissions: List[str]
-    ) -> None:
-        bucket_name = linked_module.data["bucket_name"]
-        # If not specified, bucket should get write permissions
-        if link_permissions is None or len(link_permissions) == 0:
-            link_permissions = ["write"]
-        for permission in link_permissions:
-            if permission == "read":
-                self.read_buckets.append(bucket_name)
-            elif permission == "write":
-                self.write_buckets.append(bucket_name)
-            else:
-                raise Exception(f"Invalid permission {permission}")

@@ -45,15 +45,15 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.DEPLOYER_AWS_ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.DEPLOYER_AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ secrets.AWS_OPTA_CI_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_OPTA_CI_SECRET_KEY }}
           aws-region: us-east-1
       - name: Deploy opta environment
         run: |
           source $(pipenv --venv)/bin/activate
           export PYTHONPATH=$(pwd)
           python ./opta/cli.py apply \
-          --config runx-infra/staging/opta-ci.yml \
+          --config runx-infra/opta-ci/opta.yml \
           --auto-approve \
           --refresh
       - name: Login to Amazon ECR
@@ -61,6 +61,14 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
       - name: Build test-service image
         run: docker build -t app:latest -f test-service/Dockerfile test-service/
+      - name: Set secret
+        run: |
+          source $(pipenv --venv)/bin/activate
+          export PYTHONPATH=$(pwd)
+          python ./opta/cli.py secret update \
+          --env ci \
+          --config test-service/opta.yml \
+          FAKE_SECRET foo
       - name: Deploy test-service
         run: |
           source $(pipenv --venv)/bin/activate
@@ -71,14 +79,6 @@ jobs:
           --config test-service/opta.yml \
           --tag ${{ github.sha }} \
           --auto-approve
-      - name: Set secret
-        run: |
-          source $(pipenv --venv)/bin/activate
-          export PYTHONPATH=$(pwd)
-          python ./opta/cli.py secret update \
-          --env ci \
-          --config test-service/opta.yml \
-          foo bar
       - name: View secret and check value
         run: |
           source $(pipenv --venv)/bin/activate
@@ -86,13 +86,13 @@ jobs:
           secret_value=$(python ./opta/cli.py secret view \
           --env ci \
           --config test-service/opta.yml \
-          foo | tail -1)
+          FAKE_SECRET | tail -1)
           echo "This was the found secret value: ${secret_value}"
-          [[ "$secret_value" =~ .*"bar".* ]] || exit 1
+          [[ "$secret_value" =~ .*"foo".* ]] || exit 1
       - name: Destroy environment (and test service)
         run: |
           source $(pipenv --venv)/bin/activate
           export PYTHONPATH=$(pwd)
           yes | python ./opta/cli.py destroy \
-          --config runx-infra/staging/opta-ci.yml \
+          --config runx-infra/opta-ci/opta.yml \
           --auto-approve

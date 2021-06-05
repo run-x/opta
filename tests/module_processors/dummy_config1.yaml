@@ -32,3 +32,32 @@ modules:
       - bucket2:
           - write
       - bucket3
+      - queue
+      - topic
+  - name: deployeruser
+    type: aws-iam-user
+    extra_iam_policies:
+      - "arn:aws:iam::aws:policy/AdministratorAccess"
+    links:
+      - bucket1: ["write"]
+      - bucket2: ["read"]
+      - queue
+      - topic
+  - name: deployerrole
+    type: aws-iam-role
+    extra_iam_policies:
+      - "arn:aws:iam::aws:policy/AdministratorAccess"
+    allowed_iams:
+      - "${{module.deployeruser.user_arn}}"
+    allowed_k8s_services:
+      - namespace: "*"
+        service_name: "*"
+    links:
+      - bucket1: ["write"]
+      - bucket2: ["read"]
+      - queue
+      - topic
+  - name: queue
+    type: aws-sqs
+  - name: topic
+    type: aws-sns

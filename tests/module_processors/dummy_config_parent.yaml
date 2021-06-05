@@ -3,7 +3,7 @@ org_name: opta-tests
 providers:
   aws:
     region: us-east-1
-    account_id: 889760294590
+    account_id: 011111111111
 modules:
   - type: aws-base
   - type: aws-dns
@@ -13,3 +13,5 @@ modules:
     max_nodes: 6
   - type: k8s-base
   - type: datadog
+  - type: runx
+  - type: aws-ses

@@ -1,6 +1,6 @@
 variable "env_name" {
   description = "Env name"
-  type = string
+  type        = string
 }
 
 variable "layer_name" {
@@ -10,15 +10,15 @@ variable "layer_name" {
 
 variable "module_name" {
   description = "Module name"
-  type = string
+  type        = string
 }
 
 variable "engine_version" {
-  type = string
+  type    = string
   default = "4.0.0"
 }
 
 variable "instance_class" {
-  type = string
+  type    = string
   default = "db.r5.large"
 }

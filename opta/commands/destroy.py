@@ -2,8 +2,7 @@ from typing import List, Optional
 
 import boto3
 import click
-import yaml
-from google.cloud import storage
+from google.cloud import storage  # type: ignore
 from google.cloud.exceptions import NotFound
 
 from opta.amplitude import amplitude_client
@@ -11,7 +10,7 @@ from opta.core.gcp import GCP
 from opta.core.generator import gen_all
 from opta.core.terraform import Terraform
 from opta.layer import Layer
-from opta.utils import fmt_msg, logger
+from opta.utils import fmt_msg, logger, yaml
 
 
 @click.command(hidden=True)
@@ -29,9 +28,9 @@ def destroy(config: str, env: Optional[str], auto_approve: bool) -> None:
     """Destroy all opta resources from the current config"""
     amplitude_client.send_event(amplitude_client.DESTROY_EVENT)
     layer = Layer.load_from_yaml(config, env)
-    if not Terraform.verify_storage(layer):
+    if not Terraform.download_state(layer):
         logger.info(
-            "State storage not found. This is expected if destroy ran successfully before."
+            "The opta state could not be found. This may happen if destroy ran successfully before."
         )
         return
 
@@ -77,7 +76,7 @@ def _fetch_children_layers(layer: "Layer") -> List["Layer"]:
     # Keep track of children layers as we find them.
     children_layers = []
     for config_path in opta_configs:
-        config_data = yaml.load(open(config_path), Loader=yaml.Loader)
+        config_data = yaml.load(open(config_path))
 
         # If the config has no 'environments' field, then it cannot be
         # a child/service layer.

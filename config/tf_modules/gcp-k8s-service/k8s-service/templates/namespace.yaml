@@ -1,7 +1,10 @@
+{{- $existingNamespace := (lookup "v1" "Namespace" "" ( include "k8s-service.namespaceName" . ) ) -}}
+  {{- if and ( $existingNamespace ) ( hasKey $existingNamespace.metadata.annotations "meta.helm.sh/release-name" ) }}
 apiVersion: v1
 kind: Namespace
 metadata:
   name: {{ include "k8s-service.namespaceName" . }}
   annotations:
     linkerd.io/inject: enabled
+  {{- end }}
 ---

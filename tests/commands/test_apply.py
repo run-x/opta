@@ -6,6 +6,7 @@ from pytest_mock import MockFixture
 
 from opta.commands.apply import apply
 from opta.constants import TF_PLAN_PATH
+from opta.core.kubernetes import tail_module_log, tail_namespace_events
 from opta.layer import Layer
 from opta.module import Module
 
@@ -23,7 +24,10 @@ def basic_mocks(mocker: MockFixture) -> None:
     )
 
     # Mock opta config
-    fake_module = Module("test", data={"type": "k8s-service", "name": "fakemodule"})
+    mocked_layer = mocker.Mock()
+    mocked_layer.name = "test"
+    mocked_layer.cloud = "aws"
+    fake_module = Module(mocked_layer, data={"type": "k8s-service", "name": "fakemodule"})
     mocker.patch("opta.commands.apply.gen", return_value=iter([(0, [fake_module], 1)]))
     mocker.patch("opta.commands.apply.AWS")
 
@@ -33,6 +37,8 @@ def mocked_layer(mocker: MockFixture) -> Any:
     mocked_layer_class = mocker.patch("opta.commands.apply.Layer")
     mocked_layer = mocker.Mock(spec=Layer)
     mocked_layer.variables = {}
+    mocked_layer.name = "blah"
+    mocked_layer.org_name = "blahorg"
     mocked_layer.cloud = "aws"
     mocked_layer.gen_providers = lambda x: {"provider": {"aws": {"region": "us-east-1"}}}
     mocked_layer_class.load_from_yaml.return_value = mocked_layer
@@ -46,10 +52,16 @@ def test_apply(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None
     mocker.patch(
         "opta.commands.apply._fetch_availability_zones", return_value=["a", "b", "c"]
     )
+    mocker.patch("opta.commands.apply.Terraform.downloaded_state")
+    mocker.patch("opta.commands.apply.get_cluster_name")
+    mocker.patch("opta.commands.apply.Terraform.download_state")
     tf_apply = mocker.patch("opta.commands.apply.Terraform.apply")
     tf_plan = mocker.patch("opta.commands.apply.Terraform.plan")
     tf_show = mocker.patch("opta.commands.apply.Terraform.show")
     tf_create_storage = mocker.patch("opta.commands.apply.Terraform.create_state_storage")
+    mocked_thread = mocker.patch("opta.commands.apply.Thread")
+    mocked_layer.get_module_by_type.return_value = [mocker.Mock()]
+    mocker.patch("opta.commands.apply.current_image_tag", return_value="abc")
 
     # Terraform apply should be called with the configured module (fake_module) and the remote state
     # module (deleted_module) as targets.
@@ -72,7 +84,24 @@ def test_apply(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None
         abort=True,
     )
     tf_show.assert_called_once_with(TF_PLAN_PATH)
+    mocked_layer.get_module_by_type.assert_has_calls(
+        [mocker.call("k8s-service"), mocker.call("k8s-service", 0)]
+    )
     tf_create_storage.assert_called_once_with(mocked_layer)
+    mocked_thread.assert_has_calls(
+        [
+            mocker.call(
+                target=tail_module_log,
+                args=(mocked_layer, mocker.ANY, 10, 2),
+                daemon=True,
+            ),
+            mocker.call().start(),
+            mocker.call(
+                target=tail_namespace_events, args=(mocked_layer, 0, 1), daemon=True,
+            ),
+            mocker.call().start(),
+        ]
+    )
 
 
 def test_auto_approve(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None:
@@ -81,10 +110,16 @@ def test_auto_approve(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) 
     mocker.patch(
         "opta.commands.apply._fetch_availability_zones", return_value=["a", "b", "c"]
     )
+    mocker.patch("opta.commands.apply.Terraform.downloaded_state")
+    mocker.patch("opta.commands.apply.Terraform.download_state")
+    mocker.patch("opta.commands.apply.get_cluster_name")
     tf_apply = mocker.patch("opta.commands.apply.Terraform.apply")
     tf_plan = mocker.patch("opta.commands.apply.Terraform.plan")
     tf_show = mocker.patch("opta.commands.apply.Terraform.show")
     tf_create_storage = mocker.patch("opta.commands.apply.Terraform.create_state_storage")
+    mocked_thread = mocker.patch("opta.commands.apply.Thread")
+    mocked_layer.get_module_by_type.return_value = [mocker.Mock()]
+    mocker.patch("opta.commands.apply.current_image_tag", return_value="abc")
 
     # Terraform apply should be called with the configured module (fake_module) and the remote state
     # module (deleted_module) as targets.
@@ -104,7 +139,24 @@ def test_auto_approve(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) 
     )
     mocked_click.confirm.assert_not_called()
     tf_show.assert_called_once_with(TF_PLAN_PATH)
+    mocked_layer.get_module_by_type.assert_has_calls(
+        [mocker.call("k8s-service"), mocker.call("k8s-service", 0)]
+    )
     tf_create_storage.assert_called_once_with(mocked_layer)
+    mocked_thread.assert_has_calls(
+        [
+            mocker.call(
+                target=tail_module_log,
+                args=(mocked_layer, mocker.ANY, 10, 2),
+                daemon=True,
+            ),
+            mocker.call().start(),
+            mocker.call(
+                target=tail_namespace_events, args=(mocked_layer, 0, 1), daemon=True,
+            ),
+            mocker.call().start(),
+        ]
+    )
 
 
 def test_fail_on_2_azs(mocker: MockFixture, mocked_layer: Any) -> None:

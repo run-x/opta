@@ -1,0 +1,42 @@
+environments:
+  - name: staging
+    path: "../env/opta.yml"
+    variables:
+      max_containers: 2
+name: service-1
+modules:
+  - name: app
+    type: k8s-service
+    image: kennethreitz/httpbin
+    min_containers: 2
+    max_containers: "{vars.max_containers}"
+    liveness_probe_path: "/get"
+    readiness_probe_path: "/get"
+    port:
+      http: 80
+    env_vars:
+      - name: A
+        value: B
+    public_uri: "subdomain1.{parent.domain}"
+    links:
+      - s3: ["write"]
+      - redis
+      - db
+      - topic
+      - queue
+    secrets:
+      - API_KEY
+      - SECRET_1
+  - name: db
+    type: aws-postgres
+  - name: s3
+    type: aws-s3
+    bucket_name: "{parent_name}-{layer_name}"
+  - name: redis
+    type: aws-redis
+  - name: queue
+    type: aws-sqs
+  - name: topic
+    type: aws-sns
+    sqs_subscribers:
+      - "${{module.queue.queue_arn}}"

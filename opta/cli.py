@@ -1,9 +1,10 @@
 import os.path
 import sys
 from importlib.util import find_spec
-from subprocess import CalledProcessError
+from subprocess import CalledProcessError  # nosec
 
 import click
+from click_didyoumean import DYMGroup
 
 import opta.sentry  # noqa: F401 This leads to initialization of sentry sdk
 from opta.amplitude import amplitude_client
@@ -22,10 +23,11 @@ from opta.commands.shell import shell
 from opta.commands.validate import validate
 from opta.commands.version import version
 from opta.exceptions import UserErrors
+from opta.upgrade import check_version_upgrade
 from opta.utils import dd_handler, dd_listener, logger
 
 
-@click.group()
+@click.group(cls=DYMGroup)
 def cli() -> None:
     """Welcome to opta, runx's cli!"""
     pass
@@ -88,6 +90,11 @@ if __name__ == "__main__":
         logger.exception(e)
         sys.exit(1)
     finally:
+        # NOTE: Statements after the cli() invocation in the try clause are not executed.
+        # A quick glance at click documentation did not show why that is the case or any workarounds.
+        # Therefore adding this version check in the finally clause for now.
+        check_version_upgrade()
+
         dd_listener.stop()
         dd_handler.flush()
         if os.environ.get("OPTA_DEBUG") is None:

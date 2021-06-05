@@ -5,7 +5,7 @@ import pytest
 from pytest_mock import MockFixture
 
 from opta.layer import Layer
-from opta.module_processors.k8s_service import K8sServiceProcessor
+from opta.module_processors.aws_k8s_service import AwsK8sServiceProcessor
 
 
 class TestK8sServiceProcessor:
@@ -20,12 +20,11 @@ class TestK8sServiceProcessor:
         )
         app_module = layer.get_module("app", 6)
         mocked_process = mocker.patch(
-            "opta.module_processors.k8s_service.AWSK8sModuleProcessor.process"
+            "opta.module_processors.aws_k8s_service.AWSK8sModuleProcessor.process"
         )
-        K8sServiceProcessor(app_module, layer).process(5)
-        mocked_process.assert_called_once_with(5)
-        assert app_module.data["secrets"] == [
-            {"name": "BALONEY", "value": ""},
+        AwsK8sServiceProcessor(app_module, layer).process(10)
+        mocked_process.assert_called_once_with(10)
+        assert app_module.data["link_secrets"] == [
             {"name": "database_db_user", "value": "${{module.database.db_user}}"},
             {"name": "database_db_name", "value": "${{module.database.db_name}}"},
             {"name": "database_db_password", "value": "${{module.database.db_password}}"},
@@ -38,6 +37,9 @@ class TestK8sServiceProcessor:
             {"name": "docdb_db_user", "value": "${{module.docdb.db_user}}"},
             {"name": "docdb_db_host", "value": "${{module.docdb.db_host}}"},
             {"name": "docdb_db_password", "value": "${{module.docdb.db_password}}"},
+        ]
+        assert app_module.data["manual_secrets"] == [
+            "BALONEY",
         ]
         assert app_module.data["iam_policy"] == {
             "Version": "2012-10-17",
@@ -70,6 +72,50 @@ class TestK8sServiceProcessor:
                         "arn:aws:s3:::bucket3/*",
                     ],
                 },
+                {
+                    "Action": [
+                        "sqs:SendMessage",
+                        "sqs:SendMessageBatch",
+                        "sqs:GetQueueUrl",
+                        "sqs:GetQueueAttributes",
+                        "sqs:DeleteMessageBatch",
+                        "sqs:DeleteMessage",
+                    ],
+                    "Effect": "Allow",
+                    "Resource": ["${{module.queue.queue_arn}}"],
+                    "Sid": "PublishQueues",
+                },
+                {
+                    "Action": [
+                        "sqs:ReceiveMessage",
+                        "sqs:GetQueueUrl",
+                        "sqs:GetQueueAttributes",
+                    ],
+                    "Effect": "Allow",
+                    "Resource": ["${{module.queue.queue_arn}}"],
+                    "Sid": "SubscribeQueues",
+                },
+                {
+                    "Action": ["sns:Publish"],
+                    "Effect": "Allow",
+                    "Resource": ["${{module.topic.topic_arn}}"],
+                    "Sid": "PublishSns",
+                },
+                {
+                    "Action": ["kms:GenerateDataKey", "kms:Decrypt"],
+                    "Effect": "Allow",
+                    "Resource": [
+                        "${{module.queue.kms_arn}}",
+                        "${{module.topic.kms_arn}}",
+                    ],
+                    "Sid": "KMSWrite",
+                },
+                {
+                    "Action": ["kms:Decrypt"],
+                    "Effect": "Allow",
+                    "Resource": ["${{module.queue.kms_arn}}"],
+                    "Sid": "KMSRead",
+                },
             ],
         }
 
@@ -86,7 +132,7 @@ class TestK8sServiceProcessor:
         app_module.data["links"] = []
         app_module.data["links"].append({"database": "read"})
         with pytest.raises(Exception):
-            K8sServiceProcessor(app_module, layer).process(5)
+            AwsK8sServiceProcessor(app_module, layer).process(5)
 
     def test_bad_redis_permission(self):
         layer = Layer.load_from_yaml(
@@ -101,7 +147,7 @@ class TestK8sServiceProcessor:
         app_module.data["links"] = []
         app_module.data["links"].append({"redis": "read"})
         with pytest.raises(Exception):
-            K8sServiceProcessor(app_module, layer).process(5)
+            AwsK8sServiceProcessor(app_module, layer).process(5)
 
     def test_bad_docdb_permission(self):
         layer = Layer.load_from_yaml(
@@ -116,7 +162,7 @@ class TestK8sServiceProcessor:
         app_module.data["links"] = []
         app_module.data["links"].append({"docdb": "read"})
         with pytest.raises(Exception):
-            K8sServiceProcessor(app_module, layer).process(6)
+            AwsK8sServiceProcessor(app_module, layer).process(6)
 
     def test_bad_s3_permission(self):
         layer = Layer.load_from_yaml(
@@ -131,4 +177,4 @@ class TestK8sServiceProcessor:
         app_module.data["links"] = []
         app_module.data["links"].append({"bucket1": "blah"})
         with pytest.raises(Exception):
-            K8sServiceProcessor(app_module, layer).process(6)
+            AwsK8sServiceProcessor(app_module, layer).process(6)

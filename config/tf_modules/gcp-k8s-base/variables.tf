@@ -1,17 +1,15 @@
 locals {
-  target_ports = var.delegated ? { http: "http", https: "http" } : { http: "http" }
-  container_ports = var.delegated ? { http: 80, https: 443 } : { http: 80, https: 443 }
-  config = { ssl-redirect: false }
-  annotations = var.delegated? "{\"exposed_ports\": {\"80\":{\"name\": \"opta-${var.layer_name}-http\"}, \"443\":{\"name\": \"opta-${var.layer_name}-https\"}}}" : "{\"exposed_ports\": {\"80\":{\"name\": \"opta-${var.layer_name}-http\"}}}"
-  negs = var.delegated ? concat(local.http_delegated_negs, local.https_delegated_negs) : local.http_delegated_negs
-  http_delegated_negs = formatlist("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/networkEndpointGroups/opta-staging-http", data.google_client_config.current.project, var.zone_names)
-  https_delegated_negs = formatlist("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/networkEndpointGroups/opta-staging-https", data.google_client_config.current.project, var.zone_names)
+  target_ports    = { http : "http", https : "https" }
+  container_ports = { http : 80, https : 443 }
+  config          = { ssl-redirect : false }
+  annotations     = "{\"exposed_ports\": { \"443\":{\"name\": \"opta-${var.layer_name}-https\"}}}"
+  negs            = formatlist("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/networkEndpointGroups/opta-%s-https", data.google_client_config.current.project, var.zone_names, var.layer_name)
 }
 
 data "google_client_config" "current" {}
 
 data "google_container_cluster" "main" {
-  name = "opta-${var.env_name}"
+  name     = "opta-${var.env_name}"
   location = data.google_client_config.current.region
 }
 data "google_compute_network" "vpc" {
@@ -20,7 +18,7 @@ data "google_compute_network" "vpc" {
 
 variable "env_name" {
   description = "Env name"
-  type = string
+  type        = string
 }
 
 variable "layer_name" {
@@ -30,30 +28,30 @@ variable "layer_name" {
 
 variable "module_name" {
   description = "Module name"
-  type = string
+  type        = string
 }
 
 variable "high_availability" {
-  type = bool
+  type    = bool
   default = true
 }
 
 variable "delegated" {
-  type = bool
+  type    = bool
   default = false
 }
 
 variable "cert_self_link" {
-  type = string
+  type    = string
   default = null
 }
 
 variable "hosted_zone_name" {
-  type = string
+  type    = string
   default = null
 }
 
 variable "zone_names" {
-  type = list(string)
+  type    = list(string)
   default = []
 }

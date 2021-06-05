@@ -1,6 +1,10 @@
 backends:
   aws:
     terraform:
+      required_providers:
+        aws:
+          source: "hashicorp/aws"
+          version: "3.38.0"
       backend:
         s3:
           bucket: "{state_storage}"
@@ -9,6 +13,10 @@ backends:
           region: "{provider[region]}"
   google:
     terraform:
+      required_providers:
+        google:
+          source: "hashicorp/google"
+          version: "3.66.1"
       backend:
         gcs:
           bucket: "{state_storage}"
@@ -16,6 +24,7 @@ backends:
 
 modules:
   aws-base:
+    cloud: aws
     location: aws-base
     halt: true
     root_only: true
@@ -61,6 +70,7 @@ modules:
         desc: Servers in this subnet do not have direct access to the Internet (must use a proxy).
         url: https://console.aws.amazon.com/vpc/home?region={aws_region}#SubnetDetails:subnetId={id}
   aws-nodegroup:
+    cloud: aws
     location: aws-nodegroup
     halt: false
     root_only: true
@@ -80,6 +90,7 @@ modules:
         desc: Managed Kubernetes service.
         url: https://console.aws.amazon.com/eks/home?region={aws_region}#/clusters/{name}
   aws-eks:
+    cloud: aws
     location: aws-eks
     halt: true
     root_only: true
@@ -87,6 +98,8 @@ modules:
       env_name: str
       layer_name: str
       module_name: str
+      private_subnet_ids: str
+      kms_account_key_arn: str
       max_nodes: optional
       min_nodes: optional
       node_disk_size: optional
@@ -124,6 +137,7 @@ modules:
             token: "${{data.aws_eks_cluster_auth.k8s.token}}"
             cluster_ca_certificate: "${{base64decode({module_source}.k8s_ca_data)}}"
   datadog:
+    cloud: any
     location: datadog
     root_only: true
     variables:
@@ -131,7 +145,8 @@ modules:
       layer_name: str
       module_name: str
       api_key: optional
-  k8s-base:
+  aws-k8s-base:
+    cloud: aws
     location: k8s-base
     root_only: true
     variables:
@@ -141,10 +156,13 @@ modules:
       openid_provider_url: str
       openid_provider_arn: str
       high_availability: optional
+      eks_cluster_name: str
       domain: optional
       cert_arn: optional
+      admin_arns: optional
     outputs: {}
-  k8s-service:
+  aws-k8s-service:
+    cloud: aws
     location: k8s-service
     variables:
       env_name: str
@@ -154,7 +172,8 @@ modules:
       port: optional
       tag: optional
       env_vars: optional
-      secrets: optional
+      manual_secrets: optional
+      link_secrets: optional
       autoscaling_target_cpu_percentage: optional
       autoscaling_target_mem_percentage: optional
       liveness_probe_path: optional
@@ -166,7 +185,7 @@ modules:
       openid_provider_url: str
       openid_provider_arn: str
       iam_policy: optional
-      additional_iam_roles: optional
+      additional_iam_policies: optional
       min_containers: optional
       max_containers: optional
     outputs:
@@ -178,6 +197,7 @@ modules:
         desc: Secure and scalable Kubernetes service packaged into a helm chart
         url: https://app.datadoghq.com/apm/service/{k8s-moduleName}-{k8s-layerName}/
   aws-documentdb:
+    cloud: aws
     location: aws-documentdb
     variables:
       env_name: str
@@ -195,6 +215,7 @@ modules:
         desc: DocumentDB is a NoSQL database that exposes a similar API to MongoDB.
         url: https://console.aws.amazon.com/docdb/home?region={aws_region}#cluster-details/{cluster_identifier}
   aws-postgres:
+    cloud: aws
     location: aws-postgres
     variables:
       env_name: str
@@ -204,10 +225,13 @@ modules:
       instance_class: optional
       safety: optional
     outputs:
-      db_user: str
+      db_user:
+        export: true
       db_password: str
-      db_host: str
-      db_name: str
+      db_host:
+        export: true
+      db_name:
+        export: true
     inspect:
       aws_rds_cluster:
         name: RDS
@@ -216,6 +240,7 @@ modules:
           (Postgres, MySQL, SQL Server, ...)
         url: https://console.aws.amazon.com/rds/home?region={aws_region}#database:id={id};is-cluster=true
   aws-redis:
+    cloud: aws
     location: aws-redis
     variables:
       env_name: str
@@ -224,9 +249,11 @@ modules:
       node_type: optional
       redis_version: optional
     outputs:
-      cache_host: str
+      cache_host:
+        export: true
       cache_auth_token: str
   aws-dns:
+    cloud: aws
     location: aws-dns
     variables:
       env_name: str
@@ -246,6 +273,7 @@ modules:
       domain:
         export: true
   aws-s3:
+    cloud: aws
     location: aws-s3
     variables:
       env_name: str
@@ -254,6 +282,7 @@ modules:
       bucket_name: str
       block_public: optional
       bucket_policy: optional
+      cors_rule: optional
     outputs:
       bucket_id:
         export: true
@@ -266,6 +295,7 @@ modules:
         url: https://s3.console.aws.amazon.com/s3/buckets/{id}?region={aws_region}&tab=objects
 
   gcp-base:
+    cloud: google
     location: gcp-base
     halt: true
     root_only: true
@@ -294,6 +324,7 @@ modules:
         google_client_config:
           provider: {}
   gcp-dns:
+    cloud: google
     location: gcp-dns
     variables:
       env_name: str
@@ -316,6 +347,7 @@ modules:
       cert_self_link:
         export: true
   gcp-gke:
+    cloud: google
     location: gcp-gke
     halt: true
     root_only: true
@@ -357,6 +389,7 @@ modules:
             token: "${{data.google_client_config.provider.access_token}}"
             cluster_ca_certificate: "${{base64decode({module_source}.k8s_ca_data)}}"
   gcp-k8s-base:
+    cloud: google
     location: gcp-k8s-base
     root_only: true
     variables:
@@ -368,8 +401,11 @@ modules:
       cert_self_link: optional
       delegated: optional
       zone_names: optional
-    outputs: {}
+    outputs:
+      load_balancer_raw_ip:
+        export: true
   gcp-postgres:
+    cloud: google
     location: gcp-postgres
     variables:
       env_name: str
@@ -389,7 +425,29 @@ modules:
         desc: |
           Postgres database
         url: https://console.cloud.google.com/sql/instances/{id}/overview?folder=&organizationId=&project={gcp_project}
+  gcp-mysql:
+    cloud: google
+    location: gcp-mysql
+    variables:
+      env_name: str
+      layer_name: str
+      module_name: str
+      instance_tier: optional
+      engine_version: optional
+      safety: optional
+    outputs:
+      db_user: str
+      db_password: str
+      db_host: str
+      db_name: str
+    inspect:
+      google_sql_database_instance:
+        name: RDS
+        desc: |
+          Mysql database
+        url: https://console.cloud.google.com/sql/instances/{id}/overview?folder=&organizationId=&project={gcp_project}
   gcp-redis:
+    cloud: google
     location: gcp-redis
     variables:
       env_name: str
@@ -402,6 +460,7 @@ modules:
       cache_host: str
       cache_auth_token: str
   gcp-gcs:
+    cloud: google
     location: gcp-gcs
     variables:
       env_name: str
@@ -420,6 +479,7 @@ modules:
         desc: Distributed object storage
         url: https://console.cloud.google.com/storage/browser/{id}
   gcp-k8s-service:
+    cloud: google
     location: gcp-k8s-service
     variables:
       env_name: str
@@ -429,7 +489,8 @@ modules:
       port: optional
       tag: optional
       env_vars: optional
-      secrets: optional
+      manual_secrets: optional
+      link_secrets: optional
       autoscaling_target_cpu_percentage: optional
       autoscaling_target_mem_percentage: optional
       liveness_probe_path: optional
@@ -450,3 +511,136 @@ modules:
         name: K8s Service
         desc: Secure and scalable Kubernetes service packaged into a helm chart
         url: https://app.datadoghq.com/apm/service/{k8s-moduleName}-{k8s-layerName}/
+  runx:
+    cloud: any
+    location: ""
+  helm-chart:
+    cloud: any
+    location: helm-chart
+    variables:
+      env_name: str
+      layer_name: str
+      module_name: str
+      chart: str
+      repository: optional
+      namespace: optional
+      create_namespace: optional
+      atomic: optional
+      cleanup_on_fail: optional
+      chart_version: optional
+      values_file: optional
+      values: optional
+      timeout: optional
+      dependency_update: optional
+  aws-iam-role:
+    cloud: aws
+    location: aws-iam-role
+    variables:
+      env_name: str
+      layer_name: str
+      module_name: str
+      kubernetes_trusts: optional
+      allowed_iams: optional
+      iam_policy: str
+      extra_iam_policies: optional
+    outputs:
+      role_arn:
+        export: true
+  aws-iam-user:
+    cloud: aws
+    location: aws-iam-user
+    variables:
+      env_name: str
+      layer_name: str
+      module_name: str
+      iam_policy: str
+      extra_iam_policies: optional
+    outputs:
+      user_arn:
+        export: true
+
+  aws-ses:
+    cloud: aws
+    location: aws-ses
+    variables:
+      env_name: str
+      layer_name: str
+      module_name: str
+      domain: str
+      zone_id: str
+      mail_from_prefix: optional
+
+  aws-sqs:
+    cloud: aws
+    location: aws-sqs
+    variables:
+      env_name: str
+      layer_name: str
+      module_name: str
+      fifo: optional
+      content_based_deduplication: optional
+      delay_seconds: optional
+      message_retention_seconds: optional
+      receive_wait_time_seconds: optional
+    outputs:
+      queue_arn:
+        export: true
+      queue_id:
+        export: true
+      queue_name:
+        export: true
+
+
+  aws-sns:
+    cloud: aws
+    location: aws-sns
+    variables:
+      env_name: str
+      layer_name: str
+      module_name: str
+      fifo: optional
+      content_based_deduplication: optional
+      sqs_subscribers: optional
+    outputs:
+      topic_arn:
+        export: true
+
+
+  postgres:
+    alias:
+      google: gcp-postgres
+      aws: aws-postgres
+
+  redis:
+    alias:
+      google: gcp-redis
+      aws: aws-redis
+
+  k8s-service:
+    alias:
+      google: gcp-k8s-service
+      aws: aws-k8s-service
+
+  base:
+    alias:
+      google: gcp-base
+      aws: aws-base
+
+  k8s-base:
+    alias:
+      google: gcp-k8s-base
+      aws: aws-k8s-base
+
+  k8s-cluster:
+    alias:
+      google: gcp-gke
+      aws: aws-eks
+
+  dns:
+    alias:
+      google: gcp-dns
+      aws: aws-dns
+
+  mysql:
+    alias:
+      google: gcp-mysql

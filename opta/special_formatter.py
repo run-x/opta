@@ -15,7 +15,7 @@ class PartialFormatter(string.Formatter):
             val = super().get_field(field_name, args, kwargs)
         except (KeyError, AttributeError):
             logger.debug(
-                f"Did not find field {field_name} whent trying to format. Odds are "
+                f"Did not find field {field_name} when trying to format. Odds are "
                 "this is just setting it to an empty default and you can ignore this"
             )
             val = None, field_name

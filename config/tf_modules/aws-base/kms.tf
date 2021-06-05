@@ -31,6 +31,20 @@ data "aws_iam_policy_document" "kms_policy" {
   }
 
   statement {
+    sid    = "Allow sns access"
+    effect = "Allow"
+    principals {
+      identifiers = ["sns.amazonaws.com"]
+      type        = "Service"
+    }
+    actions = [
+      "kms:Decrypt",
+      "kms:GenerateDataKey*"
+    ]
+    resources = ["*"]
+  }
+
+  statement {
     sid    = "Allow attachment of persistent resources"
     effect = "Allow"
     principals {
@@ -49,13 +63,40 @@ data "aws_iam_policy_document" "kms_policy" {
       variable = "kms:GrantIsForAWSResource"
     }
   }
+  statement {
+    sid    = "Allow events access"
+    effect = "Allow"
+    principals {
+      identifiers = ["events.amazonaws.com"]
+      type        = "Service"
+    }
+    actions = [
+      "kms:Decrypt",
+      "kms:GenerateDataKey*"
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "Allow s3 access"
+    effect = "Allow"
+    principals {
+      identifiers = ["s3.amazonaws.com"]
+      type        = "Service"
+    }
+    actions = [
+      "kms:Decrypt",
+      "kms:GenerateDataKey*"
+    ]
+    resources = ["*"]
+  }
 }
 
 resource "aws_kms_key" "key" {
   description = "Base key for account"
   policy      = data.aws_iam_policy_document.kms_policy.json
   tags = {
-    Name = "opta-${var.layer_name}"
+    Name      = "opta-${var.layer_name}"
     terraform = "true"
   }
 }

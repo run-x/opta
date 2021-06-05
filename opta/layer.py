@@ -9,22 +9,29 @@ from types import SimpleNamespace
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 import git
-import yaml
 
-from opta.commands.validate import validate_yaml
 from opta.constants import REGISTRY
+from opta.core.validator import validate_yaml
 from opta.exceptions import UserErrors
 from opta.module import Module
 from opta.module_processors.aws_dns import AwsDnsProcessor
+from opta.module_processors.aws_eks import AwsEksProcessor
+from opta.module_processors.aws_email import AwsEmailProcessor
+from opta.module_processors.aws_iam_role import AwsIamRoleProcessor
+from opta.module_processors.aws_iam_user import AwsIamUserProcessor
+from opta.module_processors.aws_k8s_base import AwsK8sBaseProcessor
+from opta.module_processors.aws_k8s_service import AwsK8sServiceProcessor
+from opta.module_processors.aws_sns import AwsSnsProcessor
+from opta.module_processors.aws_sqs import AwsSqsProcessor
 from opta.module_processors.base import ModuleProcessor
 from opta.module_processors.datadog import DatadogProcessor
 from opta.module_processors.gcp_gke import GcpGkeProcessor
 from opta.module_processors.gcp_k8s_base import GcpK8sBaseProcessor
 from opta.module_processors.gcp_k8s_service import GcpK8sServiceProcessor
-from opta.module_processors.k8s_base import K8sBaseProcessor
-from opta.module_processors.k8s_service import K8sServiceProcessor
+from opta.module_processors.helm_chart import HelmChartProcessor
+from opta.module_processors.runx import RunxProcessor
 from opta.plugins.derived_providers import DerivedProviders
-from opta.utils import deep_merge, hydrate, logger
+from opta.utils import deep_merge, hydrate, logger, yaml
 
 
 class Layer:
@@ -36,12 +43,14 @@ class Layer:
         modules_data: List[Any],
         parent: Optional[Layer] = None,
         variables: Optional[Dict[str, Any]] = None,
+        original_spec: str = "",
     ):
         if not Layer.valid_name(name):
             raise UserErrors(
                 "Invalid layer, can only contain letters, dashes and numbers!"
             )
         self.name = name
+        self.original_spec = original_spec
         self.parent = parent
         if parent is None and org_name is None:
             raise UserErrors("Config must have org name or a parent who has an org name")
@@ -66,7 +75,7 @@ class Layer:
         self.variables = variables or {}
         self.modules = []
         for module_data in modules_data:
-            self.modules.append(Module(self.name, module_data, self.parent,))
+            self.modules.append(Module(self, module_data, self.parent,))
         module_names: set = set()
         for module in self.modules:
             if module.name in module_names:
@@ -77,6 +86,7 @@ class Layer:
 
     @classmethod
     def load_from_yaml(cls, config: str, env: Optional[str]) -> Layer:
+        t = None
         if config.startswith("git@"):
             logger.debug("Loading layer from git...")
             git_url, file_path = config.split("//")
@@ -93,28 +103,42 @@ class Layer:
             # Clone into temporary dir
             git.Repo.clone_from(git_url, t, branch=branch, depth=1)
             config_path = os.path.join(t, file_path)
-            validate_yaml(config_path)
-            conf = yaml.load(open(config_path), Loader=yaml.Loader)
-            shutil.rmtree(t)
+            with open(config_path) as f:
+                config_string = f.read()
+            conf = yaml.load(config_string)
         elif path.exists(config):
-            logger.debug(f"Loaded the following configfile:\n{open(config).read()}")
-            validate_yaml(config)
-            conf = yaml.load(open(config), Loader=yaml.Loader)
+            config_path = config
+            logger.debug(f"Loaded the following configfile:\n{open(config_path).read()}")
+            with open(config_path) as f:
+                config_string = f.read()
+            conf = yaml.load(config_string)
         else:
             raise UserErrors(f"File {config} not found")
 
+        conf["original_spec"] = config_string
         conf["path"] = config
-        return cls.load_from_dict(conf, env)
+
+        layer = cls.load_from_dict(conf, env)
+        validate_yaml(config_path, layer.cloud)
+        if t is not None:
+            shutil.rmtree(t)
+        return layer
 
     @classmethod
     def load_from_dict(cls, conf: Dict[Any, Any], env: Optional[str]) -> Layer:
         modules_data = conf.get("modules", [])
         environments = conf.pop("environments", None)
+        original_spec = conf.pop("original_spec", "")
         name = conf.pop("name", None)
         if name is None:
             raise UserErrors("Config must have name")
         org_name = conf.pop("org_name", None)
         providers = conf.pop("providers", {})
+        if "aws" in providers:
+            providers["aws"]["account_id"] = providers["aws"].get("account_id", "")
+            account_id = str(providers["aws"]["account_id"])
+            account_id = "0" * (12 - len(account_id)) + account_id
+            providers["aws"]["account_id"] = account_id
         if environments:
             potential_envs: Dict[str, Tuple] = {}
             for env_meta in environments:
@@ -147,9 +171,15 @@ class Layer:
             current_variables = env_meta.get("variables", {})
             current_variables = deep_merge(current_variables, env_meta.get("vars", {}))
             return cls(
-                name, org_name, providers, modules_data, current_parent, current_variables
+                name,
+                org_name,
+                providers,
+                modules_data,
+                current_parent,
+                current_variables,
+                original_spec,
             )
-        return cls(name, org_name, providers, modules_data)
+        return cls(name, org_name, providers, modules_data, original_spec=original_spec)
 
     @staticmethod
     def valid_name(name: str) -> bool:
@@ -176,7 +206,7 @@ class Layer:
         module_idx = module_idx or len(self.modules) - 1
         modules = []
         for module in self.modules[0 : module_idx + 1]:
-            if module.data["type"] == module_type:
+            if module.type == module_type or module.aliased_type == module_type:
                 modules.append(module)
         return modules
 
@@ -190,11 +220,11 @@ class Layer:
     def gen_tf(self, module_idx: int) -> Dict[Any, Any]:
         ret: Dict[Any, Any] = {}
         for module in self.modules[0 : module_idx + 1]:
-            module_type = module.data["type"]
-            if module_type == "k8s-service":
-                K8sServiceProcessor(module, self).process(module_idx)
-            elif module_type == "k8s-base":
-                K8sBaseProcessor(module, self).process(module_idx)
+            module_type = module.aliased_type or module.type
+            if module_type == "aws-k8s-service":
+                AwsK8sServiceProcessor(module, self).process(module_idx)
+            elif module_type == "aws-k8s-base":
+                AwsK8sBaseProcessor(module, self).process(module_idx)
             elif module_type == "datadog":
                 DatadogProcessor(module, self).process(module_idx)
             elif module_type == "gcp-k8s-base":
@@ -205,15 +235,123 @@ class Layer:
                 GcpGkeProcessor(module, self).process(module_idx)
             elif module_type == "aws-dns":
                 AwsDnsProcessor(module, self).process(module_idx)
+            elif module_type == "runx":
+                RunxProcessor(module, self).process(module_idx)
+            elif module_type == "helm-chart":
+                HelmChartProcessor(module, self).process(module_idx)
+            elif module_type == "aws-iam-role":
+                AwsIamRoleProcessor(module, self).process(module_idx)
+            elif module_type == "aws-iam-user":
+                AwsIamUserProcessor(module, self).process(module_idx)
+            elif module_type == "aws-eks":
+                AwsEksProcessor(module, self).process(module_idx)
+            elif module_type == "aws-ses":
+                AwsEmailProcessor(module, self).process(module_idx)
+            elif module_type == "aws-sqs":
+                AwsSqsProcessor(module, self).process(module_idx)
+            elif module_type == "aws-sns":
+                AwsSnsProcessor(module, self).process(module_idx)
             else:
                 ModuleProcessor(module, self).process(module_idx)
+        if self.parent is not None and self.parent.get_module("runx") is not None:
+            RunxProcessor(self.parent.get_module("runx"), self).process(  # type:ignore
+                module_idx
+            )
         previous_module_reference = None
         for module in self.modules[0 : module_idx + 1]:
-            ret = deep_merge(module.gen_tf(depends_on=previous_module_reference), ret)
+            output_prefix = (
+                None if len(self.get_module_by_type(module.type)) == 1 else module.name
+            )
+            ret = deep_merge(
+                module.gen_tf(
+                    depends_on=previous_module_reference, output_prefix=output_prefix
+                ),
+                ret,
+            )
             if module.desc.get("halt"):
                 previous_module_reference = [f"module.{module.name}"]
 
         return hydrate(ret, self.metadata_hydration())
+
+    def pre_hook(self, module_idx: int) -> None:
+        for module in self.modules[0 : module_idx + 1]:
+            module_type = module.aliased_type or module.type
+            if module_type == "aws-k8s-service":
+                AwsK8sServiceProcessor(module, self).pre_hook(module_idx)
+            elif module_type == "aws-k8s-base":
+                AwsK8sBaseProcessor(module, self).pre_hook(module_idx)
+            elif module_type == "datadog":
+                DatadogProcessor(module, self).pre_hook(module_idx)
+            elif module_type == "gcp-k8s-base":
+                GcpK8sBaseProcessor(module, self).pre_hook(module_idx)
+            elif module_type == "gcp-k8s-service":
+                GcpK8sServiceProcessor(module, self).pre_hook(module_idx)
+            elif module_type == "gcp-gke":
+                GcpGkeProcessor(module, self).pre_hook(module_idx)
+            elif module_type == "aws-dns":
+                AwsDnsProcessor(module, self).pre_hook(module_idx)
+            elif module_type == "runx":
+                RunxProcessor(module, self).pre_hook(module_idx)
+            elif module_type == "helm-chart":
+                HelmChartProcessor(module, self).pre_hook(module_idx)
+            elif module_type == "aws-iam-role":
+                AwsIamRoleProcessor(module, self).pre_hook(module_idx)
+            elif module_type == "aws-iam-user":
+                AwsIamUserProcessor(module, self).pre_hook(module_idx)
+            elif module_type == "aws-eks":
+                AwsEksProcessor(module, self).pre_hook(module_idx)
+            elif module_type == "aws-ses":
+                AwsEmailProcessor(module, self).pre_hook(module_idx)
+            elif module_type == "aws-sqs":
+                AwsSqsProcessor(module, self).pre_hook(module_idx)
+            elif module_type == "aws-sns":
+                AwsSnsProcessor(module, self).pre_hook(module_idx)
+            else:
+                ModuleProcessor(module, self).pre_hook(module_idx)
+        if self.parent is not None and self.parent.get_module("runx") is not None:
+            RunxProcessor(self.parent.get_module("runx"), self).pre_hook(  # type:ignore
+                module_idx
+            )
+
+    def post_hook(self, module_idx: int, exception: Optional[Exception]) -> None:
+        for module in self.modules[0 : module_idx + 1]:
+            module_type = module.aliased_type or module.type
+            if module_type == "aws-k8s-service":
+                AwsK8sServiceProcessor(module, self).post_hook(module_idx, exception)
+            elif module_type == "aws-k8s-base":
+                AwsK8sBaseProcessor(module, self).post_hook(module_idx, exception)
+            elif module_type == "datadog":
+                DatadogProcessor(module, self).post_hook(module_idx, exception)
+            elif module_type == "gcp-k8s-base":
+                GcpK8sBaseProcessor(module, self).post_hook(module_idx, exception)
+            elif module_type == "gcp-k8s-service":
+                GcpK8sServiceProcessor(module, self).post_hook(module_idx, exception)
+            elif module_type == "gcp-gke":
+                GcpGkeProcessor(module, self).post_hook(module_idx, exception)
+            elif module_type == "aws-dns":
+                AwsDnsProcessor(module, self).post_hook(module_idx, exception)
+            elif module_type == "runx":
+                RunxProcessor(module, self).post_hook(module_idx, exception)
+            elif module_type == "helm-chart":
+                HelmChartProcessor(module, self).post_hook(module_idx, exception)
+            elif module_type == "aws-iam-role":
+                AwsIamRoleProcessor(module, self).post_hook(module_idx, exception)
+            elif module_type == "aws-iam-user":
+                AwsIamUserProcessor(module, self).post_hook(module_idx, exception)
+            elif module_type == "aws-eks":
+                AwsEksProcessor(module, self).post_hook(module_idx, exception)
+            elif module_type == "aws-ses":
+                AwsEmailProcessor(module, self).post_hook(module_idx, exception)
+            elif module_type == "aws-sqs":
+                AwsSqsProcessor(module, self).post_hook(module_idx, exception)
+            elif module_type == "aws-sns":
+                AwsSnsProcessor(module, self).post_hook(module_idx, exception)
+            else:
+                ModuleProcessor(module, self).post_hook(module_idx, exception)
+        if self.parent is not None and self.parent.get_module("runx") is not None:
+            RunxProcessor(self.parent.get_module("runx"), self).post_hook(  # type:ignore
+                module_idx, exception
+            )
 
     def metadata_hydration(self) -> Dict[Any, Any]:
         parent_name = self.parent.name if self.parent is not None else "nil"
@@ -291,6 +429,14 @@ class Layer:
         # that is awk, so transform it during the mapping.
         if provider_name == "aws" and "account_id" in provider_data:
             aws_account_id = provider_data.pop("account_id")
+            if str(aws_account_id) not in (
+                self.original_spec
+                + ("" if self.parent is None else self.parent.original_spec)
+            ):
+                raise UserErrors(
+                    "The AWS account id which opta parsed is different than the one in the original yaml. "
+                    "Odds are this is because the account starts with a leading 0, which we'll fix soon."
+                )
             provider_data["allowed_account_ids"] = [aws_account_id]
 
     # Get the root-most layer

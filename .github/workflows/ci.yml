@@ -25,6 +25,30 @@ jobs:
           source $(pipenv --venv)/bin/activate
       - name: Lint
         run: ./scripts/lint.py
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install python dependencies
+        run: |
+          pip install pipenv
+          pipenv install --deploy --dev
+          source $(pipenv --venv)/bin/activate
+      - name: Security
+        run: make security_tests
+  terraform_format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run terraform format
+        run: |
+          terraform version
+          terraform fmt -recursive -check ./config/tf_modules
+
   python:
     runs-on: ubuntu-latest
     steps:
@@ -58,6 +82,7 @@ jobs:
           verbose: true
 
   test_cli:
+    if: ${{ github.event.pull_request.head.repo.full_name == 'run-x/opta' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -98,6 +123,7 @@ jobs:
           source $(pipenv --venv)/bin/activate
           export PYTHONPATH=$(pwd)
           cd test-service
+          terraform version
           python ../opta/cli.py apply --env staging --test
       - name: Configure GCP credentials
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@v0.2.1
@@ -119,7 +145,8 @@ jobs:
           python ../opta/cli.py apply --config opta-gcp.yml --env staging --test
 
   deploy_test_service:
-    # if: ${{ github.ref == 'refs/heads/main' }}
+    if: ${{ github.ref == 'refs/heads/main' }}
+    needs: test_cli
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

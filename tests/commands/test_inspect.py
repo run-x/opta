@@ -55,8 +55,10 @@ def test_inspect(mocker: MockFixture) -> None:
 
     # Mock reading opta resources.
     mocker.patch("opta.module.Module._read_tf_module_config")
+    mocked_layer = mocker.Mock()
+    mocked_layer.name = ""
     fake_module = Module(
-        data={"type": "fake-module", "name": "testmodule"}, layer_name=""
+        data={"type": "fake-module", "name": "testmodule"}, layer=mocked_layer
     )
     fake_resource = Resource(fake_module, "test_resource", "test", {})
     mocker.patch(

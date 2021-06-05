@@ -1,11 +1,11 @@
 variable "node_type" {
-  type = string
+  type    = string
   default = "cache.m4.large"
 }
 
 variable "env_name" {
   description = "Env name"
-  type = string
+  type        = string
 }
 
 variable "layer_name" {
@@ -15,10 +15,10 @@ variable "layer_name" {
 
 variable "module_name" {
   description = "Module name"
-  type = string
+  type        = string
 }
 
 variable "redis_version" {
-  type = string
+  type    = string
   default = "6.x"
 }

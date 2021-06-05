@@ -1,37 +1,98 @@
-[![codecov](https://codecov.io/gh/run-x/runxc/branch/main/graph/badge.svg?token=OA3PXV0HYX)](https://codecov.io/gh/run-x/runxc)
+<h1 align="center">Opta</h1>
+<p align="center">Run your containerized workloads on any cloud, without devops.</p>
 
-Development
-==========
-Scripts
-----------
-- Install pre-commit hook for linting:
-  - `cp scripts/pre-commit .git/hooks/pre-commit`
+<p align="center">
+  <a href="https://github.com/run-x/opta/releases/latest">
+    <img src="https://img.shields.io/github/release/run-x/opta.svg" alt="Current Release" />
+  </a>
+  <a href="https://github.com/run-x/opta/actions/workflows/ci.yml">
+    <img src="https://github.com/run-x/opta/actions/workflows/ci.yml/badge.svg" alt="Tests" />
+  </a>
+  <a href="https://codecov.io/gh/run-x/opta">
+    <img src="https://codecov.io/gh/run-x/opta/branch/main/graph/badge.svg?token=OA3PXV0HYX">
+  </a>
+  <a href="http://www.apache.org/licenses/LICENSE-2.0.html">
+    <img src="https://img.shields.io/badge/LICENSE-Apache2.0-ff69b4.svg" alt="License" />
+  </a>
 
-Packaging
-=========
-- Create a new release with a new tag (0.<x>.<y>)
-- This will trigger the `package` github action, which creates the binary and upload it to S3
-- Update the `latest` file to point to the new release in the S3 bucket
-- In the release, provide the s3 urls and also write a changelog based on the commits since the last release
-- Update the docs website to point to this latest release
+  <img src="https://img.shields.io/github/commit-activity/w/run-x/opta.svg?style=plastic" alt="Commit Activity" />
 
-Concepts
-========
+  <a href="https://github.com/PyCQA/bandit">
+    <img src="https://img.shields.io/badge/security-bandit-yellow.svg" alt="Security" />
+  </a>
+  
+</p>
+<p align="center">
+  <a href="https://docs.opta.dev/">Documentation</a> |
+<a href="https://join.slack.com/t/opta-group/shared_invite/zt-r1p9k1iv-4MP1IMZCT9mwwwdJH0HRyA">
+    Slack Community
+  </a> | <a href="https://opta.dev/">
+    Website
+  </a>
+  </p>
 
-Linking
--------
-If you use `_link` in a resource, it will map to the outputs of the target
-module
+# Introduction
+Opta is a platform for running containerized workloads on the cloud. It
+abstracts away the complexity of networking, IAM, kubernetes, and various other
+components - giving you a clean cloud agnostic interface to deploy and run your
+containers.
+It's all configuration driven so you always get a repeatable copy of your
+infrastructure.
+# Why Opta
+* No devops expertise required
+* Multi Cloud (AWS, GCP, Azure)
+* Progressively configurable
+* No lock in
+* Complete security
+# Quick start
+Install: 
 
-Env outputs
------------
-If a module has an input variable with the same name as an env output, it'll
-  automatically be connected to the env value
+`/bin/bash -c "$(curl -fsSL https://docs.runx.dev/install.sh)"`
 
-Terminology
------------
-*Module* - A module is a reusable piece of infrastructure currently described as a terraform module
+Create environment:
+```
+name: staging
+org_name: <something unique>
+providers:
+  aws:
+    region: us-east-1
+    account_id: XXXX
+modules:
+  - type: base
+  - type: k8s-cluster
+  - type: k8s-base
+```
+Create service:
+```
+name: hello-world
+environments:
+  - name: staging
+    path: "staging/opta.yml"
+modules:
+  - name: app
+    type: k8s-service
+    port:
+      http: 80
+    image: docker.io/kennethreitz/httpbin:latest
+    healthcheck_path: "/get"
+```
+Deploy: 
 
-*Block* - A block is a group of modules to be deployed in parallel, depending only on previous blocks
+`opta apply`
+# Features
+* Hardened, best practice configurations
+* Easily create/update/destroy multiple environments
+* Built in integrations with observability tools
+* Built in service mesh
+* Built in auto-scaling
+* Supports non-k8s resources like RDS, Cloud SQL, DocumentDB etc
 
-*Layer* - A layer is a set of blocks managed by the same IAM permissions/team (i.e. 1 opta yaml)
+# Community Users
+* https://github.com/flyteorg/flyte
+* https://canvasapp.com/
+* https://biocogniv.com/
+* https://planaday.com/
+* You?
+
+# Development
+[Dev guide](https://github.com/run-x/opta/blob/main/development.md)

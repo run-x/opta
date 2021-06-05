@@ -1,10 +1,11 @@
+data "aws_region" "current" {}
+
 locals {
-  target_ports = var.cert_arn == "" ? { http: "http" } : { http: "http", https: "special" }
-  container_ports = var.cert_arn == "" ? { http: 80, https: 443 } : { http: 80, https: 443, special: 8000 }
-  config = var.cert_arn == "" ? { ssl-redirect: false } : {
-    ssl-redirect: false
-    server-snippet: <<EOF
-          listen 8000;
+  target_ports    = var.cert_arn == "" ? { http : "http" } : { http : "http", https : "https" }
+  container_ports = var.cert_arn == "" ? { http : 80, https : 443 } : { http : 80, https : 443 }
+  config = var.cert_arn == "" ? { ssl-redirect : false } : {
+    ssl-redirect : false
+    server-snippet : <<EOF
           if ( $server_port = 80 ) {
              return 308 https://$host$request_uri;
           }
@@ -12,15 +13,13 @@ locals {
   }
 }
 
-data "aws_region" "current" {}
-
-data "aws_eks_cluster" "main" {
-  name = "opta-${var.env_name}"
+variable "eks_cluster_name" {
+  type = string
 }
 
 variable "env_name" {
   description = "Env name"
-  type = string
+  type        = string
 }
 
 variable "layer_name" {
@@ -30,16 +29,16 @@ variable "layer_name" {
 
 variable "module_name" {
   description = "Module name"
-  type = string
+  type        = string
 }
 
 variable "domain" {
-  type = string
+  type    = string
   default = ""
 }
 
 variable "cert_arn" {
-  type = string
+  type    = string
   default = ""
 }
 
@@ -52,19 +51,11 @@ variable "openid_provider_arn" {
 }
 
 variable "high_availability" {
-  type = bool
+  type    = bool
   default = true
 }
 
-data "aws_vpc" "main" {
-  tags = {
-    Name = "opta-${var.env_name}"
-  }
-}
-
-data "aws_subnet_ids" "public" {
-  vpc_id = data.aws_vpc.main.id
-  tags = {
-    type = "public"
-  }
+variable "admin_arns" {
+  type    = list(string)
+  default = []
 }

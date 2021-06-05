@@ -2,11 +2,13 @@ BASIC_APPLY = (
     {
         "name": "dev1",
         "org_name": "test",
-        "providers": {"aws": {"account_id": "abc", "region": "us-east-1"}},
+        "providers": {"aws": {"account_id": "111111111111", "region": "us-east-1"}},
         "modules": [{"name": "core", "type": "aws-base"}],
     },
     {
-        "provider": {"aws": {"allowed_account_ids": ["abc"], "region": "us-east-1"}},
+        "provider": {
+            "aws": {"allowed_account_ids": ["111111111111"], "region": "us-east-1"}
+        },
         "terraform": {
             "backend": {
                 "s3": {
@@ -15,7 +17,10 @@ BASIC_APPLY = (
                     "dynamodb_table": "opta-tf-state-test-dev1",
                     "region": "us-east-1",
                 }
-            }
+            },
+            "required_providers": {
+                "aws": {"source": "hashicorp/aws", "version": "3.38.0"}
+            },
         },
         "module": {
             "core": {

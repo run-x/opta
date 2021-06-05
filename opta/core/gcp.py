@@ -5,7 +5,7 @@ import google.auth.transport.requests
 from google.auth import default
 from google.auth.credentials import Credentials
 from google.auth.exceptions import DefaultCredentialsError, GoogleAuthError
-from google.cloud import storage
+from google.cloud import storage  # type: ignore
 from google.cloud.exceptions import NotFound
 from google.oauth2 import service_account
 from googleapiclient import discovery
@@ -100,6 +100,18 @@ class GCP:
         except NotFound:
             logger.warn(f"Did not find opta config {config_path} to delete")
         logger.info("Deleted opta config from gcs")
+
+    def delete_remote_state(self) -> None:
+        bucket = self.layer.state_storage()
+        tfstate_path = f"{self.layer.name}/default.tfstate"
+        credentials, project_id = self.get_credentials()
+        gcs_client = storage.Client(project=project_id, credentials=credentials)
+        bucket_object = gcs_client.get_bucket(bucket)
+        try:
+            bucket_object.delete_blob(tfstate_path)
+        except NotFound:
+            logger.warn(f"Did not find opta tf state {tfstate_path} to delete")
+        logger.info(f"Deleted opta tf state for {self.layer.name}")
 
     def get_current_zones(self, max_number: int = 3) -> List[str]:
         credentials, project_id = self.get_credentials()

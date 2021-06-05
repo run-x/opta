@@ -9,6 +9,8 @@ main.tf.json
 *tags_override.tf.json
 .idea
 __pycache__
+dist
+build
 .coverage
 coverage.xml
 

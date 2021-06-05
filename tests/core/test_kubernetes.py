@@ -36,9 +36,11 @@ class TestKubernetes:
         layer = mocker.Mock(spec=Layer)
         layer.parent = None
         layer.cloud = "aws"
+        layer.name = "blah"
         layer.providers = {
-            "aws": {"region": "us-east-1", "allowed_account_ids": [111111111111]}
+            "aws": {"region": "us-east-1", "allowed_account_ids": ["111111111111"]}
         }
+        layer.root.return_value = layer
         mocked_terraform_output = mocker.patch(
             "opta.core.kubernetes.get_terraform_outputs",
             return_value={"k8s_cluster_name": "mocked_cluster_name"},
@@ -134,7 +136,7 @@ class TestKubernetes:
             ApiException(status=400),
             ApiException(status=400),
             ApiException(status=400),
-            ApiException(status=400),
+            Exception(),
             ApiException(status=400),
         ]
         mocked_pod = mocker.Mock(spec=V1Pod)
@@ -155,6 +157,17 @@ class TestKubernetes:
                 mocker.call(16),
             ]
         )
+        assert mocked_time.sleep.call_count == 5
+
+        # Tailing should not retry upon encountering a 404 API exception.
+        mocked_watch.stream.side_effect = [
+            "hello_world",
+            ApiException(status=400),
+            ApiException(status=404),
+        ]
+        mocked_time = mocker.patch("opta.core.kubernetes.time")
+        tail_pod_log("mocked_namespace", mocked_pod, 2, 3)
+        assert mocked_time.sleep.call_count == 1
 
     def test_tail_namespace_events(self, mocker: MockFixture) -> None:
         mocker.patch("opta.core.kubernetes.load_kube_config")

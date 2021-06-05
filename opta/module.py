@@ -1,7 +1,7 @@
 import json
 import os
 import re
-from typing import Any, Dict, Iterable, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional
 
 import hcl2
 
@@ -11,21 +11,36 @@ from opta.resource import Resource
 from opta.utils import deep_merge
 
 TAGS_OVERRIDE_FILE = "tags_override.tf.json"
+if TYPE_CHECKING:
+    from opta.layer import Layer
 
 
 class Module:
-    def __init__(self, layer_name: str, data: Dict[Any, Any], parent_layer: Any = None):
+    def __init__(
+        self, layer: "Layer", data: Dict[Any, Any], parent_layer: Optional["Layer"] = None
+    ):
         if "type" not in data:
             raise UserErrors("Module data must always have a type")
         self.type = data["type"]
-        self.layer_name = layer_name
-        self.data = data
+        if self.type not in REGISTRY["modules"]:
+            raise UserErrors(f"{self.type} is not a valid module type")
+        self.aliased_type: Optional[str] = None
+        self.layer_name = layer.name
+        self.desc = REGISTRY["modules"][self.type]
+        if "alias" in self.desc:
+            cloud = layer.cloud
+            if cloud not in self.desc["alias"]:
+                raise UserErrors(
+                    f"Alias module type {self.type} currently does not support cloud {cloud}"
+                )
+            self.aliased_type = self.desc["alias"][cloud]
+            self.desc = REGISTRY["modules"][self.aliased_type]
+        self.data: Dict[Any, Any] = data
         self.parent_layer = parent_layer
-        self.name = data.get("name", self.type.replace("-", ""))
+        self.name: str = data.get("name", self.type.replace("-", ""))
         if not Module.valid_name(self.name):
             raise UserErrors("Invalid module name, can only contain letters and numbers!")
-        self.desc = REGISTRY["modules"][self.type]
-        self.halt = REGISTRY["modules"][self.type].get("halt", False)
+        self.halt = REGISTRY["modules"][self.aliased_type or self.type].get("halt", False)
         self.module_dir_path = self.translate_location(self.desc["location"])
 
     def outputs(self) -> Iterable[str]:
@@ -41,7 +56,11 @@ class Module:
         pattern = "^[A-Za-z0-9]*$"
         return bool(re.match(pattern, name))
 
-    def gen_tf(self, depends_on: Optional[List[str]] = None) -> Dict[Any, Any]:
+    def gen_tf(
+        self, depends_on: Optional[List[str]] = None, output_prefix: Optional[str] = None
+    ) -> Dict[Any, Any]:
+        if self.module_dir_path == "":
+            return {}
         module_blk: Dict[Any, Any] = {
             "module": {self.name: {"source": self.module_dir_path}},
             "output": {},
@@ -61,9 +80,11 @@ class Module:
         if "outputs" in self.desc:
             for k, v in self.desc["outputs"].items():
                 if "export" in v and v["export"]:
-                    module_blk["output"].update(
-                        {k: {"value": f"${{{{module.{self.name}.{k} }}}}"}}
-                    )
+                    entry: Dict[Any, Any] = {"value": f"${{{{module.{self.name}.{k} }}}}"}
+                    if v.get("sensitive", False):
+                        entry["sensitive"] = True
+                    output_key = k if output_prefix is None else f"{output_prefix}_{k}"
+                    module_blk["output"].update({output_key: entry})
         if depends_on is not None:
             module_blk["module"][self.name]["depends_on"] = depends_on
 
@@ -97,25 +118,33 @@ class Module:
             override_config["resource"].append(
                 {resource.type: {resource.name: {"tags": resource_tags}}}
             )
+        if override_config["resource"] == []:
+            return
 
         with open(f"{self.module_dir_path}/{TAGS_OVERRIDE_FILE}", "w") as f:
             json.dump(override_config, f, ensure_ascii=False, indent=2)
 
     def translate_location(self, loc: str) -> str:
+        if loc == "":
+            return ""
         relative_path = os.path.relpath(
             os.path.join(
                 os.path.dirname(os.path.dirname(__file__)), "config", "tf_modules", loc
             ),
             os.getcwd(),
         )
-        # Note: This breaks should runxc ever be prefixed with "."
-        if "." != relative_path[0]:
+
+        # Terraform requires the module paths to be relative so add a ./ when
+        # that's not the output of os.path.relpath
+        if not (relative_path.startswith("./") or relative_path.startswith("../")):
             relative_path = f"./{relative_path}"
 
         return relative_path
 
     # Get the list of resources created by the current module.
     def get_terraform_resources(self) -> List[Resource]:
+        if self.module_dir_path == "":
+            return []
         tf_config = self._read_tf_module_config()
         terraform_resources: List[Resource] = []
         for _, tf_file_config in tf_config.items():

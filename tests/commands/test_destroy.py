@@ -21,7 +21,7 @@ def test_destroy(mocker: MockFixture) -> None:
     mocker.patch("opta.commands.destroy.amplitude_client.send_event")
     mocker.patch("opta.commands.destroy.Terraform.init")
     mocker.patch("opta.commands.destroy.Terraform.destroy_all")
-    mocker.patch("opta.commands.destroy.Terraform.verify_storage", return_value=True)
+    mocker.patch("opta.commands.destroy.Terraform.download_state", return_value=True)
 
     mocker.patch(
         "opta.commands.destroy._aws_download_all_opta_configs",

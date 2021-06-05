@@ -9,9 +9,13 @@ from textwrap import dedent
 from time import sleep
 from typing import Any, Dict, Generator, List, Tuple
 
-from opta.constants import VERSION
+from ruamel.yaml import YAML
+
+from opta.constants import DEV_VERSION, VERSION
 from opta.datadog_logging import DatadogLogHandler
 from opta.special_formatter import PartialFormatter
+
+yaml = YAML(typ="safe")
 
 
 def initialize_logger() -> Tuple[Logger, QueueListener, DatadogLogHandler]:
@@ -39,7 +43,7 @@ def initialize_logger() -> Tuple[Logger, QueueListener, DatadogLogHandler]:
 
 logger, dd_listener, dd_handler = initialize_logger()
 # Don't send logs to datadog during tests
-if hasattr(sys, "_called_from_test") or VERSION == "dev":
+if hasattr(sys, "_called_from_test") or VERSION == DEV_VERSION:
     dd_handler.setLevel(logging.CRITICAL)
 
 fmt = PartialFormatter("")

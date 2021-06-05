@@ -11,8 +11,8 @@
 //}
 
 resource "google_container_cluster" "primary" {
-  name     = "opta-${var.layer_name}"
-  location = data.google_client_config.current.region
+  name           = "opta-${var.layer_name}"
+  location       = data.google_client_config.current.region
   node_locations = var.node_zone_names
 
   # We can't create a cluster with no node pool defined, but we want to only use
@@ -21,7 +21,7 @@ resource "google_container_cluster" "primary" {
   remove_default_node_pool = true
   initial_node_count       = 1
 
-  network = var.vpc_self_link
+  network    = var.vpc_self_link
   subnetwork = var.private_subnet_self_link
   workload_identity_config {
     identity_namespace = "${data.google_client_config.current.project}.svc.id.goog"
@@ -33,7 +33,7 @@ resource "google_container_cluster" "primary" {
   }
 
   database_encryption {
-    state = "ENCRYPTED"
+    state    = "ENCRYPTED"
     key_name = data.google_kms_crypto_key.kms.self_link
   }
 
@@ -46,7 +46,7 @@ resource "google_container_cluster" "primary" {
     channel = var.gke_channel
   }
   ip_allocation_policy {
-    cluster_secondary_range_name = "gke-pods"
+    cluster_secondary_range_name  = "gke-pods"
     services_secondary_range_name = "gke-services"
   }
 }

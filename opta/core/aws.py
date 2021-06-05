@@ -1,13 +1,24 @@
 from time import sleep
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Optional, TypedDict
 
 import boto3
 from botocore.config import Config
+from mypy_boto3_dynamodb import DynamoDBClient
 
 from opta.utils import fmt_msg, logger
 
 if TYPE_CHECKING:
     from opta.layer import Layer
+
+
+class AwsArn(TypedDict):
+    arn: str
+    partition: str
+    service: str
+    region: str
+    account: str
+    resource: str
+    resource_type: Optional[str]
 
 
 class AWS:
@@ -69,6 +80,105 @@ class AWS:
 
         logger.info("Deleted opta config from s3")
 
+    def delete_remote_state(self) -> None:
+        bucket = self.layer.state_storage()
+        providers = self.layer.gen_providers(0)
+        dynamodb_table = providers["terraform"]["backend"]["s3"]["dynamodb_table"]
+
+        dynamodb_client: DynamoDBClient = boto3.client(
+            "dynamodb", config=Config(region_name=self.region)
+        )
+        dynamodb_client.delete_item(
+            TableName=dynamodb_table,
+            Key={"LockID": {"S": f"{bucket}/{self.layer.name}-md5"}},
+        )
+
+        s3_client = boto3.client("s3")
+        resp = s3_client.delete_object(Bucket=bucket, Key=self.layer.name)
+
+        if resp["ResponseMetadata"]["HTTPStatusCode"] != 204:
+            raise Exception(
+                f"Failed to delete opta tf state in {bucket}/{self.layer.name}."
+            )
+        logger.info(f"Deleted opta tf state for {self.layer.name}")
+
+    @staticmethod
+    def prepare_read_buckets_iam_statements(bucket_names: List[str]) -> dict:
+        return {
+            "Sid": "ReadBuckets",
+            "Action": ["s3:GetObject*", "s3:ListBucket"],
+            "Effect": "Allow",
+            "Resource": [f"arn:aws:s3:::{bucket_name}" for bucket_name in bucket_names]
+            + [f"arn:aws:s3:::{bucket_name}/*" for bucket_name in bucket_names],
+        }
+
+    @staticmethod
+    def prepare_write_buckets_iam_statements(bucket_names: List[str]) -> dict:
+        return {
+            "Sid": "WriteBuckets",
+            "Action": [
+                "s3:GetObject*",
+                "s3:PutObject*",
+                "s3:DeleteObject*",
+                "s3:ListBucket",
+            ],
+            "Effect": "Allow",
+            "Resource": [f"arn:aws:s3:::{bucket_name}" for bucket_name in bucket_names]
+            + [f"arn:aws:s3:::{bucket_name}/*" for bucket_name in bucket_names],
+        }
+
+    @staticmethod
+    def prepare_publish_queues_iam_statements(queue_arns: List[str]) -> dict:
+        return {
+            "Sid": "PublishQueues",
+            "Action": [
+                "sqs:SendMessage",
+                "sqs:SendMessageBatch",
+                "sqs:GetQueueUrl",
+                "sqs:GetQueueAttributes",
+                "sqs:DeleteMessageBatch",
+                "sqs:DeleteMessage",
+            ],
+            "Effect": "Allow",
+            "Resource": [queue_arn for queue_arn in queue_arns],
+        }
+
+    @staticmethod
+    def prepare_subscribe_queues_iam_statements(queue_arns: List[str]) -> dict:
+        return {
+            "Sid": "SubscribeQueues",
+            "Action": ["sqs:ReceiveMessage", "sqs:GetQueueUrl", "sqs:GetQueueAttributes"],
+            "Effect": "Allow",
+            "Resource": [queue_arn for queue_arn in queue_arns],
+        }
+
+    @staticmethod
+    def prepare_publish_sns_iam_statements(topic_arns: List[str]) -> dict:
+        return {
+            "Sid": "PublishSns",
+            "Action": ["sns:Publish"],
+            "Effect": "Allow",
+            "Resource": [topic_arn for topic_arn in topic_arns],
+        }
+
+    @staticmethod
+    def prepare_kms_write_keys_statements(kms_arns: List[str]) -> dict:
+        return {
+            "Sid": "KMSWrite",
+            "Action": ["kms:GenerateDataKey", "kms:Decrypt"],
+            "Effect": "Allow",
+            "Resource": [kms_arn for kms_arn in kms_arns],
+        }
+
+    @staticmethod
+    def prepare_kms_read_keys_statements(kms_arns: List[str]) -> dict:
+        return {
+            "Sid": "KMSRead",
+            "Action": ["kms:Decrypt"],
+            "Effect": "Allow",
+            "Resource": [kms_arn for kms_arn in kms_arns],
+        }
+
     @staticmethod
     def delete_bucket(bucket_name: str) -> None:
         # Before a bucket can be deleted, all of the objects inside must be removed.
@@ -101,6 +211,25 @@ class AWS:
                 sleep(5)
 
         raise Exception("Failed to delete after 20 retries, quitting.")
+
+    @staticmethod
+    def parse_arn(arn: str) -> AwsArn:
+        # http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html
+        elements = arn.split(":", 5)
+        result: AwsArn = {
+            "arn": elements[0],
+            "partition": elements[1],
+            "service": elements[2],
+            "region": elements[3],
+            "account": elements[4],
+            "resource": elements[5],
+            "resource_type": None,
+        }
+        if "/" in result["resource"]:
+            result["resource_type"], result["resource"] = result["resource"].split("/", 1)
+        elif ":" in result["resource"]:
+            result["resource_type"], result["resource"] = result["resource"].split(":", 1)
+        return result
 
 
 # AWS Resource ARNs can be one of the following 3 formats:

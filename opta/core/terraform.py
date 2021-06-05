@@ -1,7 +1,8 @@
 import json
 import logging
+import os
 import time
-from subprocess import DEVNULL, PIPE
+from subprocess import DEVNULL, PIPE  # nosec
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
 
 import boto3
@@ -9,7 +10,7 @@ from botocore.config import Config
 from botocore.exceptions import ClientError
 from google.api_core.exceptions import ClientError as GoogleClientError
 from google.api_core.exceptions import Conflict
-from google.cloud import storage
+from google.cloud import storage  # type: ignore
 from google.cloud.exceptions import NotFound
 from googleapiclient import discovery
 from googleapiclient.errors import HttpError
@@ -18,47 +19,51 @@ from oauth2client.client import GoogleCredentials
 from opta.amplitude import amplitude_client
 from opta.core.aws import AWS, get_aws_resource_id
 from opta.core.gcp import GCP
-from opta.exceptions import UserErrors
+from opta.exceptions import MissingState, UserErrors
 from opta.nice_subprocess import nice_run
-from opta.utils import deep_merge, logger
+from opta.utils import deep_merge, fmt_msg, logger
 
 if TYPE_CHECKING:
     from opta.layer import Layer
+EXTRA_ENV = (
+    {"KUBE_CONFIG_PATH": "~/.kube/config"} if os.path.isfile("~/.kube/config") else {}
+)
 
 
 class Terraform:
-    # True if terraform.tfstate is downloaded.
-    downloaded_state: Dict[str, bool] = {}
+    downloaded_state: Dict[str, Dict[Any, Any]] = {}
 
     @classmethod
     def init(cls, *tf_flags: str) -> None:
-        nice_run(["terraform", "init", *tf_flags], check=True)
+        kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
+        nice_run(["terraform", "init", *tf_flags], check=True, **kwargs)
 
     # Get outputs of the current terraform state
     @classmethod
     def get_outputs(cls, layer: "Layer") -> dict:
-        if not cls.downloaded_state.get(layer.name, False):
-            success = cls.download_state(layer)
-            if not success:
-                raise UserErrors(
-                    "Could not fetch remote terraform state, assuming no resources exist yet."
-                )
-        state = cls.get_state()
+        state = cls.get_state(layer)
         outputs = state.get("outputs", {})
         cleaned_outputs = {}
         for k, v in outputs.items():
             cleaned_outputs[k] = v.get("value")
         return cleaned_outputs
 
+    @classmethod
+    def get_version(cls) -> str:
+        out = nice_run(
+            ["terraform", "version", "-json"], check=True, capture_output=True
+        ).stdout.decode("utf-8")
+        terraform_data = json.loads(out)
+        return terraform_data["terraform_version"]
+
     # Get the full terraform state.
     @classmethod
-    def get_state(cls) -> dict:
-        for state_file in ["./terraform.tfstate", "terraform.tfstate.backup"]:
-            with open(state_file, "r") as file:
-                raw_state = file.read().replace("\n", "")
-            if raw_state != "":
-                return json.loads(raw_state)
-        raise UserErrors("Terraform statefiles not found")
+    def get_state(cls, layer: "Layer") -> dict:
+        if layer.name in cls.downloaded_state:
+            return cls.downloaded_state[layer.name]
+        if cls.download_state(layer):
+            return cls.downloaded_state[layer.name]
+        raise MissingState(f"Unable to download state for layer {layer.name}")
 
     @classmethod
     def apply(
@@ -70,13 +75,17 @@ class Terraform:
     ) -> None:
         if not no_init:
             cls.init()
-        kwargs: Dict[str, Any] = {}
+        kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
         if quiet:
             kwargs["stderr"] = PIPE
             kwargs["stdout"] = DEVNULL
 
         try:
-            nice_run(["terraform", "apply", *tf_flags], check=True, **kwargs)
+            nice_run(
+                ["terraform", "apply", "-compact-warnings", *tf_flags],
+                check=True,
+                **kwargs,
+            )
         except Exception as e:
             logging.error(e)
             logging.info("Terraform apply failed, would rollback, but skipping for now..")
@@ -115,13 +124,17 @@ class Terraform:
 
     @classmethod
     def import_resource(cls, tf_resource_address: str, aws_resource_id: str) -> None:
+        kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
         nice_run(
-            ["terraform", "import", tf_resource_address, aws_resource_id], check=True
+            ["terraform", "import", tf_resource_address, aws_resource_id],
+            check=True,
+            **kwargs,
         )
 
     @classmethod
     def refresh(cls, *tf_flags: str) -> None:
-        nice_run(["terraform", "refresh", *tf_flags], check=True)
+        kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
+        nice_run(["terraform", "refresh", *tf_flags], check=True, **kwargs)
 
     @classmethod
     def destroy_resources(
@@ -138,6 +151,7 @@ class Terraform:
         # This includes fetching the latest EKS cluster auth token, which is
         # necessary for destroying many k8s resources.
         cls.refresh()
+        kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
 
         for module in reversed(layer.modules):
             module_address_prefix = f"module.{module.name}"
@@ -150,11 +164,16 @@ class Terraform:
                 continue
 
             resource_targets = [f"-target={resource}" for resource in module_resources]
-            nice_run(["terraform", "destroy", *resource_targets, *tf_flags], check=True)
+            nice_run(
+                ["terraform", "destroy", *resource_targets, *tf_flags],
+                check=True,
+                **kwargs,
+            )
 
     @classmethod
     def destroy_all(cls, layer: "Layer", *tf_flags: str) -> None:
         existing_modules = Terraform.get_existing_modules(layer)
+        kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
 
         for module in reversed(layer.modules):
             module_address_prefix = f"module.{module.name}"
@@ -165,13 +184,18 @@ class Terraform:
             nice_run(
                 ["terraform", "destroy", f"-target={module_address_prefix}", *tf_flags],
                 check=True,
+                **kwargs,
             )
 
         # After the layer is completely deleted, remove the opta config from the state bucket.
         if layer.cloud == "aws":
-            AWS(layer).delete_opta_config()
+            aws = AWS(layer)
+            aws.delete_opta_config()
+            aws.delete_remote_state()
         elif layer.cloud == "google":
-            GCP(layer).delete_opta_config()
+            gcp = GCP(layer)
+            gcp.delete_opta_config()
+            gcp.delete_remote_state()
         else:
             raise Exception(
                 f"Can not handle opta config deletion for cloud {layer.cloud}"
@@ -188,7 +212,8 @@ class Terraform:
     # Remove a resource from the terraform state, but does not destroy it.
     @classmethod
     def remove_from_state(cls, resource_address: str) -> None:
-        nice_run(["terraform", "state", "rm", resource_address])
+        kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
+        nice_run(["terraform", "state", "rm", resource_address], **kwargs)
 
     @classmethod
     def verify_storage(cls, layer: "Layer") -> bool:
@@ -217,7 +242,7 @@ class Terraform:
         try:
             s3.get_bucket_encryption(Bucket=bucket,)
         except ClientError as e:
-            if e.response["Error"]["Code"] != "NoSuchBucket":
+            if e.response["Error"]["Code"] == "NoSuchBucket":
                 return False
             raise e
         return True
@@ -225,15 +250,18 @@ class Terraform:
     @classmethod
     def plan(cls, *tf_flags: str, quiet: Optional[bool] = False) -> None:
         cls.init()
-        kwargs: Dict[str, Any] = {}
+        kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
         if quiet:
             kwargs["stderr"] = PIPE
             kwargs["stdout"] = DEVNULL
-        nice_run(["terraform", "plan", *tf_flags], check=True, **kwargs)
+        nice_run(
+            ["terraform", "plan", "-compact-warnings", *tf_flags], check=True, **kwargs
+        )
 
     @classmethod
     def show(cls, *tf_flags: str) -> None:
-        nice_run(["terraform", "show", *tf_flags], check=True)
+        kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
+        nice_run(["terraform", "show", *tf_flags], check=True, **kwargs)
 
     @classmethod
     def get_existing_modules(cls, layer: "Layer") -> Set[str]:
@@ -242,14 +270,13 @@ class Terraform:
 
     @classmethod
     def get_existing_module_resources(cls, layer: "Layer") -> List[str]:
-        if not cls.downloaded_state.get(layer.name, False):
-            success = cls.download_state(layer)
-            if not success:
-                logger.info(
-                    "Could not fetch remote terraform state, assuming no resources exist yet."
-                )
-                return []
-        state = cls.get_state()
+        try:
+            state = cls.get_state(layer)
+        except MissingState:
+            logger.info(
+                "Could not fetch remote terraform state, assuming no resources exist yet."
+            )
+            return []
         resources = state.get("resources", [])
         module_resources: List[str] = []
         resource: dict
@@ -272,7 +299,19 @@ class Terraform:
 
     @classmethod
     def download_state(cls, layer: "Layer") -> bool:
-        state_file: str = "./terraform.tfstate"
+        if not cls.verify_storage(layer):
+            logger.info(
+                fmt_msg(
+                    """
+                    We store state in S3/GCP buckets. Since the state bucket was not found,
+                    ~this probably means that you either haven't created your opta resources yet,
+                    ~or you previously successfully destroyed your opta resources (including the state bucket).
+                    """
+                )
+            )
+            return False
+
+        state_file: str = "./tmp.tfstate"
         providers = layer.gen_providers(0)
         if "s3" in providers.get("terraform", {}).get("backend", {}):
             bucket = providers["terraform"]["backend"]["s3"]["bucket"]
@@ -287,6 +326,7 @@ class Terraform:
             except ClientError as e:
                 if e.response["Error"]["Code"] == "404":
                     # The object does not exist.
+                    logger.debug("Did not find terraform state file")
                     return False
                 raise
         elif "gcs" in providers.get("terraform", {}).get("backend", {}):
@@ -302,13 +342,19 @@ class Terraform:
             except GoogleClientError as e:
                 if e.code == 404:
                     # The object does not exist.
+                    os.remove(state_file)
                     return False
                 raise
         else:
             raise UserErrors("Need to get state from S3 or GCS")
 
-        cls.downloaded_state[layer.name] = True
-        return True
+        with open(state_file, "r") as file:
+            raw_state = file.read().strip()
+        os.remove(state_file)
+        if raw_state != "":
+            cls.downloaded_state[layer.name] = json.loads(raw_state)
+            return True
+        return False
 
     @classmethod
     def _aws_delete_state_storage(cls, layer: "Layer") -> None:
@@ -324,6 +370,7 @@ class Terraform:
         dynamodb_table = providers["terraform"]["backend"]["s3"]["dynamodb_table"]
         region = providers["terraform"]["backend"]["s3"]["region"]
         AWS.delete_dynamodb_table(dynamodb_table, region)
+        logger.info("Successfully deleted AWS state storage")
 
     @classmethod
     def _gcp_delete_state_storage(cls, layer: "Layer") -> None:
@@ -336,6 +383,7 @@ class Terraform:
         try:
             bucket_obj = gcs_client.get_bucket(bucket_name)
             bucket_obj.delete(force=True)
+            logger.info("Successfully deleted GCP state storage")
         except NotFound:
             logger.warn("State bucket was already deleted")
 
@@ -350,9 +398,9 @@ class Terraform:
                 f"We got {project_name} as the project name in opta, but {project_id} in the google credentials"
             )
         gcs_client = storage.Client(project=project_id, credentials=credentials)
-
         try:
-            gcs_client.get_bucket(bucket_name)
+            bucket = gcs_client.get_bucket(bucket_name)
+            bucket_project_number = bucket.project_number
         except GoogleClientError as e:
             if e.code == 403:
                 raise UserErrors(
@@ -369,7 +417,8 @@ class Terraform:
                 )
             logger.info("GCS bucket for terraform state not found, creating a new one")
             try:
-                gcs_client.create_bucket(bucket_name, location=region)
+                bucket = gcs_client.create_bucket(bucket_name, location=region)
+                bucket_project_number = bucket.project_number
             except Conflict:
                 raise UserErrors(
                     f"It looks like a gcs bucket with the name {bucket_name} was created recently, but then deleted "
@@ -393,6 +442,7 @@ class Terraform:
             "redis.googleapis.com",
             "compute.googleapis.com",
             "secretmanager.googleapis.com",
+            "cloudresourcemanager.googleapis.com",
         ]:
             request = service.services().enable(
                 name=f"projects/{project_name}/services/{service_name}"
@@ -415,6 +465,21 @@ class Terraform:
             time.sleep(120)
         else:
             logger.info("No new API found that needs to be enabled")
+        service = discovery.build(
+            "cloudresourcemanager", "v1", credentials=credentials, static_discovery=False,
+        )
+        request = service.projects().get(projectId=project_id)
+        response = request.execute()
+
+        if response["projectNumber"] != str(bucket_project_number):
+            raise UserErrors(
+                f"State storage bucket {bucket_name}, has already been created, but it was created in another project. "
+                f"Current project's number {response['projectNumber']}. Bucket's project number: {bucket_project_number}. "
+                "You do, however, have access to view that bucket, so it sounds like you already run this opta apply in "
+                "your org, but on a different project."
+                "Note: project number is NOT project id. It is yet another globally unique identifier for your project "
+                "I kid you not, go ahead and look it up."
+            )
 
     @classmethod
     def _create_aws_state_storage(cls, providers: dict) -> None:
@@ -526,18 +591,16 @@ class Terraform:
             cls._create_gcp_state_storage(providers)
 
 
-def get_terraform_outputs(layer: "Layer", pull_state: bool = True) -> dict:
+def get_terraform_outputs(layer: "Layer") -> dict:
     """ Fetch terraform outputs from existing TF file """
-    if not pull_state:
-        Terraform.init()
     current_outputs = Terraform.get_outputs(layer)
-    parent_outputs = _fetch_parent_outputs(pull_state)
+    parent_outputs = _fetch_parent_outputs(layer)
     return deep_merge(current_outputs, parent_outputs)
 
 
-def _fetch_parent_outputs(pull_state: bool = True) -> dict:
+def _fetch_parent_outputs(layer: "Layer") -> dict:
     # Fetch the terraform state
-    state = Terraform.get_state()
+    state = Terraform.get_state(layer)
 
     # Fetch any parent remote states
     resources = state.get("resources", [])
@@ -566,7 +629,7 @@ def _fetch_parent_outputs(pull_state: bool = True) -> dict:
 
 def fetch_terraform_state_resources(layer: "Layer") -> dict:
     Terraform.download_state(layer)
-    state = Terraform.get_state()
+    state = Terraform.get_state(layer)
 
     resources = state.get("resources", [])
 

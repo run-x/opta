@@ -3,14 +3,18 @@ data "google_client_config" "current" {}
 
 
 locals {
-  public_uri_parts = split("/", var.public_uri)
-  domain = var.domain == ""? trim(local.public_uri_parts[0], ".") : trim(var.domain, ".")
-  path_prefix = length(local.public_uri_parts) > 1 ? "/${join("/",slice(local.public_uri_parts, 1, length(local.public_uri_parts)))}" : "/"
+  uri_components = [for s in var.public_uri : {
+    domain : trim(split("/", s)[0], "."),
+    pathPrefix : (length(split("/", s)) > 1 ? "/${join("/", slice(split("/", s), 1, length(split("/", s))))}" : "/")
+  }]
+  env_short    = substr(var.env_name, 0, 9)
+  layer_short  = substr(var.layer_name, 0, 9)
+  module_short = substr(var.module_name, 0, 9)
 }
 
 variable "env_name" {
   description = "Env name"
-  type = string
+  type        = string
 }
 
 variable "layer_name" {
@@ -20,102 +24,107 @@ variable "layer_name" {
 
 variable "module_name" {
   description = "Module name"
-  type = string
+  type        = string
 }
 
 variable "port" {
   description = "Port to be exposed as :80"
-  type = map(number)
+  type        = map(number)
 }
 
 variable "image" {
   description = "External Image to be deployed"
-  type = string
+  type        = string
 }
 
 variable "tag" {
   description = "Tag of image to be deployed"
-  type = string
-  default = null
+  type        = string
+  default     = null
 }
 
 variable "min_containers" {
   description = "Min value for HPA autoscaling"
-  type = string
-  default = 1
+  type        = string
+  default     = 1
 }
 
 variable "max_containers" {
   description = "Max value for HPA autoscaling"
-  type = string
-  default = 3
+  type        = string
+  default     = 3
 }
 
 variable "autoscaling_target_cpu_percentage" {
   description = "Percentage of requested cpu after which autoscaling kicks in"
-  default = 80
+  default     = 80
 }
 
 variable "autoscaling_target_mem_percentage" {
   description = "Percentage of requested memory after which autoscaling kicks in"
-  default = 80
+  default     = 80
 }
 
 variable "liveness_probe_path" {
   description = "Url path for liveness probe"
-  type = string
-  default = "/healthcheck"
+  type        = string
+  default     = "/healthcheck"
 }
 
 variable "readiness_probe_path" {
   description = "Url path for readiness probe"
-  type = string
-  default = "/healthcheck"
+  type        = string
+  default     = "/healthcheck"
 }
 
 variable "healthcheck_path" {
-  type = string
+  type    = string
   default = null
 }
 
 variable "resource_request" {
-  type = map
+  type = map(any)
   default = {
-    cpu: 100
-    memory: 128
+    cpu : 100
+    memory : 128
   }
 }
 
 variable "env_vars" {
   description = "Environment variables to pass to the container"
   type = list(object({
-    name = string
+    name  = string
     value = string
   }))
   default = []
 }
 
 variable "public_uri" {
-  type = string
-  default = ""
+  type    = list(string)
+  default = []
 }
 
 variable "domain" {
-  type = string
+  type    = string
   default = ""
 }
 
-variable "secrets" {
-  type = list(map(string))
+variable "link_secrets" {
+  type    = list(map(string))
+  default = []
+}
+
+variable "manual_secrets" {
+  type    = list(string)
   default = []
 }
 
 variable "read_buckets" {
-  type = list(string)
+  type    = list(string)
   default = []
 }
 
 variable "write_buckets" {
-  type = list(string)
+  type    = list(string)
   default = []
 }

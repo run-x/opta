@@ -1,10 +1,10 @@
 nameOverride: ""
 fullnameOverride: ""
-domain: ""
-pathPrefix: "/"
+uriComponents: []
 googleServiceAccount: ""
 envVars: []
-secrets: []
+linkSecrets: []
+manualSecrets: []
 port: {}
 
 serviceAccount:

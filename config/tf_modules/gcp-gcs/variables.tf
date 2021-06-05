@@ -11,12 +11,12 @@ data "google_kms_key_ring" "key_ring" {
 
 data "google_kms_crypto_key" "kms" {
   key_ring = data.google_kms_key_ring.key_ring.self_link
-  name = "opta-${var.env_name}-${data.google_secret_manager_secret_version.kms_suffix.secret_data}"
+  name     = "opta-${var.env_name}-${data.google_secret_manager_secret_version.kms_suffix.secret_data}"
 }
 
 variable "env_name" {
   description = "Env name"
-  type = string
+  type        = string
 }
 
 variable "layer_name" {
@@ -26,7 +26,7 @@ variable "layer_name" {
 
 variable "module_name" {
   description = "Module name"
-  type = string
+  type        = string
 }
 
 variable "bucket_name" {
@@ -34,6 +34,6 @@ variable "bucket_name" {
 }
 
 variable "block_public" {
-  type = bool
+  type    = bool
   default = true
 }

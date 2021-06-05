@@ -1,15 +1,30 @@
-name: staging-2
-org_name: jd-opta
+name: live-example
+org_name: runx
 providers:
   aws:
     region: us-east-1
     account_id: 889760294590
 modules:
+  - type: runx
   - type: aws-base
   - type: aws-dns
-    domain: staging2.runx.dev
+    domain: example.runx.dev
     delegated: true
+  - name: deployeruser
+    type: aws-iam-user
+    extra_iam_policies:
+      - "arn:aws:iam::aws:policy/AdministratorAccess"
+  - name: deployerrole
+    type: aws-iam-role
+    extra_iam_policies:
+      - "arn:aws:iam::aws:policy/AdministratorAccess"
+    allowed_iams:
+      - "${{module.deployeruser.user_arn}}"
   - type: aws-eks
-    max_nodes: 6
+    max_nodes: 12
   - type: k8s-base
+    admin_arns:
+      - "${{module.deployeruser.user_arn}}"
+      - "${{module.deployerrole.role_arn}}"
   - type: datadog
+  - type: aws-ses # Needs to be done after dns delegation -- emails are super hardcore about domain ownership.
