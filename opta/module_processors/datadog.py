@@ -26,8 +26,12 @@ class DatadogProcessor(ModuleProcessor):
             try:
                 configure_kubectl(layer)
                 break
-            except Exception:
+            except Exception as err:
+                logger.exception(err)
                 logger.info("Retrying attempt to talk to K8s cluster...")
+        else:
+            raise Exception("Couldn't connect to the K8s cluster")
+
         load_kube_config()
         self.v1 = CoreV1Api()
         super(DatadogProcessor, self).__init__(module, layer)
