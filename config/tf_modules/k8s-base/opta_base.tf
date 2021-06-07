@@ -5,7 +5,6 @@ resource "helm_release" "opta_base" {
   values = [
     yamlencode({
       adminArns : var.admin_arns
-      version : 1
     })
   ]
   depends_on = [
