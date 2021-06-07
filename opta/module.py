@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional
 
 import hcl2
 
-from opta.constants import REGISTRY
+from opta.constants import REGISTRY, VERSION
 from opta.exceptions import UserErrors
 from opta.resource import Resource
 from opta.utils import deep_merge
@@ -112,6 +112,7 @@ class Module:
                     "opta": "true",
                     "layer": self.layer_name,
                     "tf_address": f"module.{self.name}.{resource.type}.{resource.name}",
+                    "opta_version": VERSION,
                 },
             )
 
