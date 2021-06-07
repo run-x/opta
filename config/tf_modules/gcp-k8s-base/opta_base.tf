@@ -4,7 +4,7 @@ resource "helm_release" "opta_base" {
   namespace = "default"
   values = [
     yamlencode({
-      version: 1
+      version : 1
     })
   ]
   depends_on = [
