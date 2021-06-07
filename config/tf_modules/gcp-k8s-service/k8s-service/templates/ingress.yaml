@@ -27,8 +27,8 @@ spec:
         - {{ if not (eq $val.domain "all" ) }}
           {{ $val.domain | quote }}
           {{ else }}
-          "*"
-      {{ end }}
+          {{ include "k8s-service.serviceName" $ }}.{{ include "k8s-service.namespaceName" $ }}
+          {{ end }}
       secretName: self-signed
   rules:
     - {{ if not (eq $val.domain "all" ) }}
