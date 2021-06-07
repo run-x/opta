@@ -18,4 +18,4 @@ modules:
     readiness_probe_path: "/get"
     port:
       http: 80
-    public_uri: "subdomain1.{parent.domain}"
+    public_uri: all

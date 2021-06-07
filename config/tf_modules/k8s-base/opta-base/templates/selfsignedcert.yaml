@@ -1,6 +1,35 @@
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
+  name: opta-base
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: opta-ca
+  namespace: cert-manager
+spec:
+  isCA: true
+  commonName: osm-system
+  secretName: opta-ca
+  issuerRef:
+    name: opta-base
+    kind: ClusterIssuer
+    group: cert-manager.io
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: opta-ca
+spec:
+  ca:
+    secretName: opta-ca
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
   name: opta-selfsigned
 spec:
   selfSigned: {}
