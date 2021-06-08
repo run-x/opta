@@ -47,7 +47,7 @@ infrastructure.
 # Quick start
 Install: 
 
-`/bin/bash -c "$(curl -fsSL https://docs.runx.dev/install.sh)"`
+`/bin/bash -c "$(curl -fsSL https://docs.opta.dev/install.sh)"`
 
 Create environment:
 ```
