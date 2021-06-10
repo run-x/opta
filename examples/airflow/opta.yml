@@ -1,0 +1,49 @@
+name: airflow
+environments:
+  - name: aws-staging
+    path: "../environments/aws-env.yml"
+  - name: gcp-staging
+    path: "../environments/gcp-env.yml"
+modules:
+  - name: db
+    type: postgres
+  - name: redis
+    type: redis
+  - type: helm-chart
+    repository: https://airflow.apache.org
+    chart: airflow
+    namespace: airflow
+    version: 1.0.0
+    create_namespace: true
+    wait: false
+    atomic: false
+    values:
+      postgresql:
+        enabled: false
+      redis:
+        enabled: false
+      statsd:
+        enabled: false
+      data:
+        metadataConnection:
+          host: "${{module.db.db_host}}"
+          db: "${{module.db.db_name}}"
+          user: "${{module.db.db_user}}"
+          pass: "${{module.db.db_password}}"
+        brokerUrl: "rediss://:${{module.redis.cache_auth_token}}@${{module.redis.cache_host}}"
+      airflow:
+        config:
+          AIRFLOW__WEBSERVER__BASE_URL: "http://airflow.{parent.domain}"
+          AIRFLOW__CELERY__FLOWER_URL_PREFIX: "/flower"
+      ingress:
+        enabled: true
+        web:
+          path: ""
+          host: "airflow.{parent.domain}"
+          annotations:
+            kubernetes.io/ingress.class: "nginx"
+        flower:
+          path: "/flower"
+          host: "airflow.{parent.domain}"
+          annotations:
+            kubernetes.io/ingress.class: "nginx"
