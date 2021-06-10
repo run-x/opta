@@ -38,6 +38,16 @@ components - giving you a clean cloud agnostic interface to deploy and run your
 containers.
 It's all configuration driven so you always get a repeatable copy of your
 infrastructure.
+
+
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=nja_EfpGexE"><img src="https://img.youtube.com/vi/nja_EfpGexE/0.jpg"></a>
+  </br>
+  <span><i>Demo Video</i></span>
+  
+</p>
+
+
 # Why Opta
 * No devops expertise required
 * Multi Cloud (AWS, GCP, Azure)
