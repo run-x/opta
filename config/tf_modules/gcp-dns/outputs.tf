@@ -11,7 +11,8 @@ output "name_servers" {
 }
 
 output "domain" {
-  value = google_dns_managed_zone.public.dns_name
+  // This comes out with a trailing . which causes problems downstream
+  value = trim(google_dns_managed_zone.public.dns_name, ".")
 }
 
 output "delegated" {

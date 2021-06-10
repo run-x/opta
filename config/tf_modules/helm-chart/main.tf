@@ -14,7 +14,9 @@ resource "helm_release" "remote_chart" {
   ]
   timeout           = var.timeout
   dependency_update = var.dependency_update
+  wait              = var.wait
 }
+
 
 resource "helm_release" "local_chart" {
   count            = var.repository == null ? 1 : 0
