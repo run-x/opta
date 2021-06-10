@@ -526,6 +526,7 @@ modules:
       namespace: optional
       create_namespace: optional
       atomic: optional
+      wait: optional
       cleanup_on_fail: optional
       chart_version: optional
       values_file: optional

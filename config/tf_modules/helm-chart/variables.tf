@@ -22,6 +22,11 @@ variable "atomic" {
   default = true
 }
 
+variable "wait" {
+  type    = bool
+  default = true
+}
+
 variable "cleanup_on_fail" {
   type    = bool
   default = true
