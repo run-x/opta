@@ -171,7 +171,9 @@ jobs:
 
   deploy_test_service:
     if: ${{ github.ref == 'refs/heads/main' }}
-    needs: test_cli
+    needs:
+    - test_cli_aws
+    - test_cli_gcp
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
