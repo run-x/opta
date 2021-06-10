@@ -126,7 +126,7 @@ jobs:
           terraform version
           python ../opta/cli.py apply --env staging --test
       - name: Configure GCP credentials
-        uses: google-github-actions/setup-gcloud
+        uses: google-github-actions/setup-gcloud@master
         with:
           service_account_key: ${{ secrets.CI_GKE_SA_KEY }}
           project_id: gcpoptatest123
