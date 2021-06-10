@@ -89,6 +89,9 @@ modules:
 Deploy: 
 
 `opta apply`
+
+### Check out more [examples](https://github.com/run-x/opta/tree/main/examples)
+
 # Features
 * Hardened, best practice configurations
 * Easily create/update/destroy multiple environments
