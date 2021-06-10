@@ -25,13 +25,10 @@ modules:
     links:
       - redis
       - db
-      - mysqldb
     secrets:
       - API_KEY
       - SECRET_1
   - name: db
     type: postgres
-  - name: mysqldb
-    type: mysql
   - name: redis
     type: redis
