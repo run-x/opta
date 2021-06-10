@@ -202,8 +202,9 @@ class Terraform:
             )
 
         # If this is the env layer, delete the state bucket & dynamo table as well.
-        if layer == layer.root():
-            logger.debug(f"Deleting the state storage for {layer.name}...")
+        if layer.name == layer.root().name:
+
+            logger.info(f"Deleting the state storage for {layer.name}...")
             if layer.cloud == "aws":
                 cls._aws_delete_state_storage(layer)
             elif layer.cloud == "google":
