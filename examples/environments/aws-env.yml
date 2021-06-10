@@ -5,11 +5,10 @@ providers:
     region: us-east-1
     account_id: 889760294590
 modules:
-  - type: runx
-  - type: aws-base
-  - type: aws-dns
+  - type: base
+  - type: dns
     domain: example.runx.dev
-    delegated: true
+    delegated: false
   - name: deployeruser
     type: aws-iam-user
     extra_iam_policies:
@@ -20,11 +19,10 @@ modules:
       - "arn:aws:iam::aws:policy/AdministratorAccess"
     allowed_iams:
       - "${{module.deployeruser.user_arn}}"
-  - type: aws-eks
+  - type: k8s-cluster
     max_nodes: 12
   - type: k8s-base
     admin_arns:
       - "${{module.deployeruser.user_arn}}"
       - "${{module.deployerrole.role_arn}}"
   - type: datadog
-  - type: aws-ses # Needs to be done after dns delegation -- emails are super hardcore about domain ownership.

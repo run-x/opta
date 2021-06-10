@@ -1,6 +1,10 @@
 environments:
-  - name: staging
-    path: "../env/opta.yml"
+  - name: aws-staging
+    path: "../environments/aws-env.yml"
+    variables:
+      max_nodes: 2
+  - name: gcp-staging
+    path: "../environments/gcp-env.yml"
     variables:
       max_nodes: 2
 name: grpc-service

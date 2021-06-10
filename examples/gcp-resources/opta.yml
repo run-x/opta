@@ -1,0 +1,37 @@
+environments:
+  - name: gcp-staging
+    path: "../environments/gcp-env.yml"
+    variables:
+      max_nodes: 2
+name: service-1
+modules:
+  - name: app
+    type: k8s-service
+    image: kennethreitz/httpbin
+    min_containers: 2
+    max_containers: "{vars.max_nodes}"
+    liveness_probe_path: "/get"
+    readiness_probe_path: "/get"
+    port:
+      http: 80
+    env_vars:
+      - name: A
+        value: B
+    public_uri: "subdomain1.{parent.domain}"
+    links:
+      - gcs: ["write"]
+      - redis
+      - db
+      - mysqldb
+    secrets:
+      - API_KEY
+      - SECRET_1
+  - name: db
+    type: postgres
+  - name: mysqldb
+    type: mysql
+  - name: gcs
+    type: gcp-gcs
+    bucket_name: "{parent_name}-{layer_name}"
+  - name: redis
+    type: redis

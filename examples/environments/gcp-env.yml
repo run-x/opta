@@ -5,14 +5,13 @@ providers:
     region: us-central1
     project: gcp-opta-live-example
 modules:
-  - type: runx
-  - type: gcp-base
-  - type: gcp-dns
+  - type: base
+  - type: dns
     domain: gcp-example.runx.dev
-    delegated: true
+    delegated: false
     subdomains:
       - subdomain1
       - subdomain2
-  - type: gcp-gke
+  - type: k8s-cluster
     max_nodes: 6
-  - type: gcp-k8s-base
+  - type: k8s-base

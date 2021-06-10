@@ -14,12 +14,13 @@ def test_validate_service() -> None:
         os.path.dirname(os.path.dirname(__file__)),
         "..",
         "examples",
-        "aws",
         "http-service",
         "opta.yml",
     )
     runner = CliRunner()
-    result = runner.invoke(cli, ["validate", "-c", test_service_file_path])
+    result = runner.invoke(
+        cli, ["validate", "-c", test_service_file_path, "--env", "aws-staging"]
+    )
 
     assert result.exit_code == 0
 
@@ -29,9 +30,8 @@ def test_validate_env() -> None:
         os.path.dirname(os.path.dirname(__file__)),
         "..",
         "examples",
-        "aws",
-        "env",
-        "opta.yml",
+        "environments",
+        "aws-env.yml",
     )
     runner = CliRunner()
     result = runner.invoke(cli, ["validate", "-c", test_env_file_path])
