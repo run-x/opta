@@ -140,13 +140,6 @@ gcp_main_schema = yamale.make_schema(
 )
 
 
-def _print_success(config_file_path: str) -> None:
-    print(fg("green"), end="")
-    print(attr("bold"), end="")
-    print(f"{config_file_path} is a valid opta file!")
-    print(attr("reset"), end="")
-
-
 def _print_errors(errors: List[str]) -> None:
     print(fg("red"), end="")
     print(attr("bold"), end="")
@@ -171,9 +164,7 @@ def validate_yaml(config_file_path: str, cloud: str) -> Literal[True]:
     for result in yamale_result:
         errors.extend(result.errors)
 
-    if len(errors) == 0:
-        _print_success(config_file_path)
-    else:
+    if len(errors) > 0:
         _print_errors(errors)
         raise UserErrors(f"{config_file_path} is not a valid Opta file.")
 
