@@ -48,7 +48,8 @@ def view(secret: str, env: Optional[str], config: str) -> None:
 
 
 @secret.command(name="list")
-@click.option("-e", "--env", default=None, help="The env to use when loading the config file")
+@click.option(
+    "-e", "--env", default=None, help="The env to use when loading the config file")
 @click.option(
     "-c", "--config", default="opta.yml", help="Opta config file", show_default=True
 )
@@ -68,7 +69,8 @@ def list_command(env: Optional[str], config: str) -> None:
 @secret.command()
 @click.argument("secret")
 @click.argument("value")
-@click.option("-e", "--env", default=None, help="The env to use when loading the config file")
+@click.option(
+    "-e", "--env", default=None, help="The env to use when loading the config file")
 @click.option(
     "-c", "--config", default="opta.yml", help="Opta config file", show_default=True
 )
