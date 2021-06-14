@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, Any, List
 
 from opta.core.kubernetes import create_namespace_if_not_exists, get_manual_secrets
 from opta.exceptions import UserErrors
@@ -96,12 +96,25 @@ class AwsK8sServiceProcessor(AWSK8sModuleProcessor, AWSIamAssembler):
         super(AwsK8sServiceProcessor, self).process(module_idx)
 
     def handle_rds_link(
-        self, linked_module: "Module", link_permissions: List[str]
+        self, linked_module: "Module", link_permissions: List[Any]
     ) -> None:
-        for key in ["db_user", "db_name", "db_password", "db_host"]:
+        required_db_vars = ["db_user", "db_name", "db_password", "db_host"]
+        renamed_vars = {}
+        if len(link_permissions) > 0:
+            renamed_vars = link_permissions.pop()
+            if not isinstance(renamed_vars, dict) or set(renamed_vars.keys()) != set(
+                required_db_vars
+            ):
+                raise UserErrors(
+                    f"To rename db variables you must provide aliases for these fields: {required_db_vars}"
+                )
+            if not all(map(lambda x: isinstance(x, str), renamed_vars.values())):
+                raise UserErrors("DB variable rename must be only to another string")
+
+        for key in required_db_vars:
             self.module.data["link_secrets"].append(
                 {
-                    "name": f"{linked_module.name}_{key}",
+                    "name": renamed_vars.get(key, f"{linked_module.name}_{key}"),
                     "value": f"${{{{module.{linked_module.name}.{key}}}}}",
                 }
             )
@@ -115,12 +128,26 @@ class AwsK8sServiceProcessor(AWSK8sModuleProcessor, AWSIamAssembler):
             )
 
     def handle_redis_link(
-        self, linked_module: "Module", link_permissions: List[str]
+        self, linked_module: "Module", link_permissions: List[Any]
     ) -> None:
-        for key in ["cache_host", "cache_auth_token"]:
+        required_redis_vars = ["cache_host", "cache_auth_token"]
+        renamed_vars = {}
+
+        if len(link_permissions) > 0:
+            renamed_vars = link_permissions.pop()
+            if not isinstance(renamed_vars, dict) or set(renamed_vars.keys()) != set(
+                required_redis_vars
+            ):
+                raise UserErrors(
+                    f"To rename redis variables you must provide aliases for these fields: {required_redis_vars}"
+                )
+            if not all(map(lambda x: isinstance(x, str), renamed_vars.values())):
+                raise UserErrors("Redis variable rename must be only to another string")
+
+        for key in required_redis_vars:
             self.module.data["link_secrets"].append(
                 {
-                    "name": f"{linked_module.name}_{key}",
+                    "name": renamed_vars.get(key, f"{linked_module.name}_{key}"),
                     "value": f"${{{{module.{linked_module.name}.{key}}}}}",
                 }
             )
@@ -134,12 +161,26 @@ class AwsK8sServiceProcessor(AWSK8sModuleProcessor, AWSIamAssembler):
             )
 
     def handle_docdb_link(
-        self, linked_module: "Module", link_permissions: List[str]
+        self, linked_module: "Module", link_permissions: List[Any]
     ) -> None:
-        for key in ["db_user", "db_host", "db_password"]:
+        required_docdb_vars = ["db_user", "db_host", "db_password"]
+        renamed_vars = {}
+
+        if len(link_permissions) > 0:
+            renamed_vars = link_permissions.pop()
+            if not isinstance(renamed_vars, dict) or set(renamed_vars.keys()) != set(
+                required_docdb_vars
+            ):
+                raise UserErrors(
+                    f"To rename docdb variables you must provide aliases for these fields: {required_docdb_vars}"
+                )
+            if not all(map(lambda x: isinstance(x, str), renamed_vars.values())):
+                raise UserErrors("Docdb variable rename must be only to another string")
+
+        for key in required_docdb_vars:
             self.module.data["link_secrets"].append(
                 {
-                    "name": f"{linked_module.name}_{key}",
+                    "name": renamed_vars.get(key, f"{linked_module.name}_{key}"),
                     "value": f"${{{{module.{linked_module.name}.{key}}}}}",
                 }
             )

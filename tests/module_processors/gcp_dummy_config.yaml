@@ -24,8 +24,20 @@ modules:
     links:
       - database
       - redis
+      - database2:
+          - db_user: DBUSER2
+            db_host: DBHOST2
+            db_name: DBNAME2
+            db_password: BLAH
+      - redis2:
+          - cache_host: CACHEHOST2
+            cache_auth_token: CACHEAUTH2
       - bucket1:
           - read
       - bucket2:
           - write
       - bucket3
+  - name: database2
+    type: postgres
+  - name: redis2
+    type: redis

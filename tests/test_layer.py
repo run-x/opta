@@ -110,83 +110,83 @@ class TestLayer:
         assert layer.name == "dummy-config-1"
         assert layer.parent is not None
         assert layer.parent == layer.root()
-        assert len(layer.modules) == 11
-        assert layer.pre_hook(10) is None
-        assert layer.post_hook(10, None) is None
+        assert len(layer.modules) == 14
+        assert layer.pre_hook(13) is None
+        assert layer.post_hook(13, None) is None
 
         mocked_k8s_service_processor.assert_has_calls(
             [
                 mocker.call(mocker.ANY, layer),
-                mocker.call().pre_hook(10),
+                mocker.call().pre_hook(13),
                 mocker.call(mocker.ANY, layer),
-                mocker.call().post_hook(10, None),
+                mocker.call().post_hook(13, None),
             ]
         )
         mocked_base_processor.assert_has_calls(
             [
                 mocker.call(mocker.ANY, layer),
-                mocker.call().pre_hook(10),
+                mocker.call().pre_hook(13),
                 mocker.call(mocker.ANY, layer),
-                mocker.call().pre_hook(10),
+                mocker.call().pre_hook(13),
                 mocker.call(mocker.ANY, layer),
-                mocker.call().pre_hook(10),
+                mocker.call().pre_hook(13),
                 mocker.call(mocker.ANY, layer),
-                mocker.call().pre_hook(10),
+                mocker.call().pre_hook(13),
                 mocker.call(mocker.ANY, layer),
-                mocker.call().pre_hook(10),
+                mocker.call().pre_hook(13),
                 mocker.call(mocker.ANY, layer),
-                mocker.call().pre_hook(10),
+                mocker.call().pre_hook(13),
                 mocker.call(mocker.ANY, layer),
-                mocker.call().post_hook(10, None),
+                mocker.call().post_hook(13, None),
                 mocker.call(mocker.ANY, layer),
-                mocker.call().post_hook(10, None),
+                mocker.call().post_hook(13, None),
                 mocker.call(mocker.ANY, layer),
-                mocker.call().post_hook(10, None),
+                mocker.call().post_hook(13, None),
                 mocker.call(mocker.ANY, layer),
-                mocker.call().post_hook(10, None),
+                mocker.call().post_hook(13, None),
                 mocker.call(mocker.ANY, layer),
-                mocker.call().post_hook(10, None),
+                mocker.call().post_hook(13, None),
                 mocker.call(mocker.ANY, layer),
-                mocker.call().post_hook(10, None),
+                mocker.call().post_hook(13, None),
             ]
         )
         mocked_aws_iam_role_processor.assert_has_calls(
             [
                 mocker.call(mocker.ANY, layer),
-                mocker.call().pre_hook(10),
+                mocker.call().pre_hook(13),
                 mocker.call(mocker.ANY, layer),
-                mocker.call().post_hook(10, None),
+                mocker.call().post_hook(13, None),
             ]
         )
         mocked_aws_iam_user_processor.assert_has_calls(
             [
                 mocker.call(mocker.ANY, layer),
-                mocker.call().pre_hook(10),
+                mocker.call().pre_hook(13),
                 mocker.call(mocker.ANY, layer),
-                mocker.call().post_hook(10, None),
+                mocker.call().post_hook(13, None),
             ]
         )
         mocked_aws_sns_processor.assert_has_calls(
             [
                 mocker.call(mocker.ANY, layer),
-                mocker.call().pre_hook(10),
+                mocker.call().pre_hook(13),
                 mocker.call(mocker.ANY, layer),
-                mocker.call().post_hook(10, None),
+                mocker.call().post_hook(13, None),
             ]
         )
         mocked_aws_sqs_processor.assert_has_calls(
             [
                 mocker.call(mocker.ANY, layer),
-                mocker.call().pre_hook(10),
+                mocker.call().pre_hook(13),
                 mocker.call(mocker.ANY, layer),
-                mocker.call().post_hook(10, None),
+                mocker.call().post_hook(13, None),
             ]
         )
         mocked_runx_processor.assert_has_calls(
             [
                 mocker.call(mocker.ANY, layer),
-                mocker.call().pre_hook(10),
+                mocker.call().pre_hook(13),
                 mocker.call(mocker.ANY, layer),
-                mocker.call().post_hook(10, None),
+                mocker.call().post_hook(13, None),
             ]
         )
