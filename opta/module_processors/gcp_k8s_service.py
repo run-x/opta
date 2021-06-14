@@ -81,6 +81,7 @@ class GcpK8sServiceProcessor(GcpK8sModuleProcessor):
         ]
         super(GcpK8sServiceProcessor, self).process(module_idx)
 
+    # TODO: consolidated repeated credential link code
     def handle_rds_link(
         self, linked_module: "Module", link_permissions: List[str]
     ) -> None:
