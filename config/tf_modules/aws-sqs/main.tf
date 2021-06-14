@@ -59,4 +59,23 @@ data "aws_iam_policy_document" "sqs_queue_policy" {
 
     sid = "sns_access"
   }
+
+  statement {
+    actions = [
+      "SQS:*"
+    ]
+
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["events.amazonaws.com"]
+    }
+
+    resources = [
+      aws_sqs_queue.terraform_queue.arn,
+    ]
+
+    sid = "events_access"
+  }
 }
