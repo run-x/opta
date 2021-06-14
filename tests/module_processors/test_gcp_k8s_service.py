@@ -18,12 +18,13 @@ class TestGCPK8sServiceProcessor:
             ),
             None,
         )
-        app_module = layer.get_module("app", 6)
+        idx = len(layer.modules)
+        app_module = layer.get_module("app", idx)
         mocked_process = mocker.patch(
             "opta.module_processors.gcp_k8s_service.GcpK8sModuleProcessor.process"
         )
-        GcpK8sServiceProcessor(app_module, layer).process(5)
-        mocked_process.assert_called_once_with(5)
+        GcpK8sServiceProcessor(app_module, layer).process(idx)
+        mocked_process.assert_called_once_with(idx)
         assert app_module.data["link_secrets"] == [
             {"name": "database_db_user", "value": "${{module.database.db_user}}"},
             {"name": "database_db_name", "value": "${{module.database.db_name}}"},
@@ -34,6 +35,12 @@ class TestGCPK8sServiceProcessor:
                 "name": "redis_cache_auth_token",
                 "value": "${{module.redis.cache_auth_token}}",
             },
+            {"name": "DBUSER2", "value": "${{module.database2.db_user}}"},
+            {"name": "DBNAME2", "value": "${{module.database2.db_name}}"},
+            {"name": "BLAH", "value": "${{module.database2.db_password}}"},
+            {"name": "DBHOST2", "value": "${{module.database2.db_host}}"},
+            {"name": "CACHEHOST2", "value": "${{module.redis2.cache_host}}"},
+            {"name": "CACHEAUTH2", "value": "${{module.redis2.cache_auth_token}}"},
         ]
         assert app_module.data["manual_secrets"] == [
             "BALONEY",
@@ -53,11 +60,12 @@ class TestGCPK8sServiceProcessor:
             ),
             None,
         )
-        app_module = layer.get_module("app", 6)
+        idx = len(layer.modules)
+        app_module = layer.get_module("app", idx)
         app_module.data["links"] = []
         app_module.data["links"].append({"database": "read"})
         with pytest.raises(Exception):
-            GcpK8sServiceProcessor(app_module, layer).process(5)
+            GcpK8sServiceProcessor(app_module, layer).process(idx)
 
     def test_bad_redis_permission(self):
         layer = Layer.load_from_yaml(
@@ -68,11 +76,12 @@ class TestGCPK8sServiceProcessor:
             ),
             None,
         )
-        app_module = layer.get_module("app", 6)
+        idx = len(layer.modules)
+        app_module = layer.get_module("app", idx)
         app_module.data["links"] = []
         app_module.data["links"].append({"redis": "read"})
         with pytest.raises(Exception):
-            GcpK8sServiceProcessor(app_module, layer).process(5)
+            GcpK8sServiceProcessor(app_module, layer).process(idx)
 
     def test_bad_gcs_permission(self):
         layer = Layer.load_from_yaml(
@@ -83,8 +92,9 @@ class TestGCPK8sServiceProcessor:
             ),
             None,
         )
-        app_module = layer.get_module("app", 6)
+        idx = len(layer.modules)
+        app_module = layer.get_module("app", idx)
         app_module.data["links"] = []
         app_module.data["links"].append({"bucket1": "blah"})
         with pytest.raises(Exception):
-            GcpK8sServiceProcessor(app_module, layer).process(6)
+            GcpK8sServiceProcessor(app_module, layer).process(idx)

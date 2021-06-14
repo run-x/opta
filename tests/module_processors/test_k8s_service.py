@@ -18,12 +18,13 @@ class TestK8sServiceProcessor:
             ),
             None,
         )
-        app_module = layer.get_module("app", 6)
+        idx = len(layer.modules)
+        app_module = layer.get_module("app", idx)
         mocked_process = mocker.patch(
             "opta.module_processors.aws_k8s_service.AWSK8sModuleProcessor.process"
         )
-        AwsK8sServiceProcessor(app_module, layer).process(10)
-        mocked_process.assert_called_once_with(10)
+        AwsK8sServiceProcessor(app_module, layer).process(idx)
+        mocked_process.assert_called_once_with(idx)
         assert app_module.data["link_secrets"] == [
             {"name": "database_db_user", "value": "${{module.database.db_user}}"},
             {"name": "database_db_name", "value": "${{module.database.db_name}}"},
@@ -37,6 +38,15 @@ class TestK8sServiceProcessor:
             {"name": "docdb_db_user", "value": "${{module.docdb.db_user}}"},
             {"name": "docdb_db_host", "value": "${{module.docdb.db_host}}"},
             {"name": "docdb_db_password", "value": "${{module.docdb.db_password}}"},
+            {"name": "DBUSER2", "value": "${{module.database2.db_user}}"},
+            {"name": "DBNAME2", "value": "${{module.database2.db_name}}"},
+            {"name": "BLAH", "value": "${{module.database2.db_password}}"},
+            {"name": "DBHOST2", "value": "${{module.database2.db_host}}"},
+            {"name": "CACHEHOST2", "value": "${{module.redis2.cache_host}}"},
+            {"name": "CACHEAUTH2", "value": "${{module.redis2.cache_auth_token}}"},
+            {"name": "DOCDBUSER2", "value": "${{module.docdb2.db_user}}"},
+            {"name": "DOCDBHOST2", "value": "${{module.docdb2.db_host}}"},
+            {"name": "DOCDBPASSWORD2", "value": "${{module.docdb2.db_password}}"},
         ]
         assert app_module.data["manual_secrets"] == [
             "BALONEY",
@@ -128,7 +138,8 @@ class TestK8sServiceProcessor:
             ),
             None,
         )
-        app_module = layer.get_module("app", 6)
+        idx = len(layer.modules)
+        app_module = layer.get_module("app", idx)
         app_module.data["links"] = []
         app_module.data["links"].append({"database": "read"})
         with pytest.raises(Exception):
@@ -143,7 +154,8 @@ class TestK8sServiceProcessor:
             ),
             None,
         )
-        app_module = layer.get_module("app", 6)
+        idx = len(layer.modules)
+        app_module = layer.get_module("app", idx)
         app_module.data["links"] = []
         app_module.data["links"].append({"redis": "read"})
         with pytest.raises(Exception):
@@ -158,11 +170,12 @@ class TestK8sServiceProcessor:
             ),
             None,
         )
-        app_module = layer.get_module("app", 6)
+        idx = len(layer.modules)
+        app_module = layer.get_module("app", idx)
         app_module.data["links"] = []
         app_module.data["links"].append({"docdb": "read"})
         with pytest.raises(Exception):
-            AwsK8sServiceProcessor(app_module, layer).process(6)
+            AwsK8sServiceProcessor(app_module, layer).process(idx)
 
     def test_bad_s3_permission(self):
         layer = Layer.load_from_yaml(
@@ -173,8 +186,9 @@ class TestK8sServiceProcessor:
             ),
             None,
         )
-        app_module = layer.get_module("app", 6)
+        idx = len(layer.modules)
+        app_module = layer.get_module("app", idx)
         app_module.data["links"] = []
         app_module.data["links"].append({"bucket1": "blah"})
         with pytest.raises(Exception):
-            AwsK8sServiceProcessor(app_module, layer).process(6)
+            AwsK8sServiceProcessor(app_module, layer).process(idx)
