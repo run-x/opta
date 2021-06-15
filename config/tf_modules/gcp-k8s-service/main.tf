@@ -39,7 +39,7 @@ resource "helm_release" "k8s-service" {
       uriComponents : local.uri_components,
       layerName : var.layer_name,
       moduleName : var.module_name,
-      environmentName: var.env_name,
+      environmentName : var.env_name,
       googleServiceAccount : google_service_account.k8s_service.email
     })
   ]
