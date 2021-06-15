@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, List
+from typing import TYPE_CHECKING, Any, Dict, List, Union
 
 from opta.core.kubernetes import create_namespace_if_not_exists, get_manual_secrets
 from opta.exceptions import UserErrors
@@ -35,6 +35,12 @@ class AwsK8sServiceProcessor(AWSK8sModuleProcessor, AWSIamAssembler):
 
         if isinstance(self.module.data.get("public_uri"), str):
             self.module.data["public_uri"] = [self.module.data["public_uri"]]
+
+        current_envars: Union[List, Dict[str, str]] = self.module.data.get("env_vars", [])
+        if isinstance(current_envars, dict):
+            self.module.data["env_vars"] = [
+                {"name": x, "value": y} for x, y in current_envars.items()
+            ]
 
         # Handle links
         for link_data in self.module.data.get("links", []):
