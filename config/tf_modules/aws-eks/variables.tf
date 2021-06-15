@@ -49,7 +49,7 @@ variable "k8s_version" {
 }
 
 variable "spot_instances" {
-  type = bool
+  type    = bool
   default = false
 }
 

@@ -49,7 +49,7 @@ variable "node_instance_type" {
 }
 
 variable "spot_instances" {
-  type = bool
+  type    = bool
   default = false
 }
 
