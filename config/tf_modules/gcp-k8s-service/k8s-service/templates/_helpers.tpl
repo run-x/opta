@@ -36,6 +36,7 @@ Common labels
 {{- define "k8s-service.labels" -}}
 helm.sh/chart: {{ include "k8s-service.chart" . }}
 {{ include "k8s-service.selectorLabels" . }}
+{{ include "k8s-service.optaLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -48,6 +49,12 @@ Selector labels
 {{- define "k8s-service.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "k8s-service.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{- define "k8s-service.optaLabels" -}}
+opta.dev/module-name: {{ .Values.moduleName }}
+opta.dev/layer-name: {{ .Values.layerName }}
+opta.dev/environment-name: {{ .Values.environmentName }}
 {{- end }}
 
 {{/*Namespace name*/}}

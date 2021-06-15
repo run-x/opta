@@ -38,7 +38,8 @@ resource "helm_release" "k8s-service" {
       manualSecrets : var.manual_secrets,
       uriComponents : local.uri_components,
       layerName : var.layer_name,
-      moduleName : var.module_name
+      moduleName : var.module_name,
+      environmentName : var.env_name,
       iamRoleArn : aws_iam_role.k8s_service.arn
     })
   ]
