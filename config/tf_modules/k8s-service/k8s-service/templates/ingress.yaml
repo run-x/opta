@@ -4,6 +4,8 @@ kind: Ingress
 metadata:
   name:  {{ include "k8s-service.fullname" $ }}-{{ $index }}
   namespace: {{ include "k8s-service.namespaceName" $ }}
+  labels:
+    {{- include "k8s-service.labels" . | nindent 4 }}
   annotations:
     {{- if not (eq $val.pathPrefix "/") }}
     nginx.ingress.kubernetes.io/rewrite-target: /$2
