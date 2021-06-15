@@ -19,6 +19,8 @@ modules:
     bucket_name: "bucket3"
   - name: app
     type: gcp-k8s-service
+    env_vars:
+      A: B
     secrets:
       - BALONEY
     links:

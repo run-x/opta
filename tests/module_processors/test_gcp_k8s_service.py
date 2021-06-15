@@ -25,6 +25,7 @@ class TestGCPK8sServiceProcessor:
         )
         GcpK8sServiceProcessor(app_module, layer).process(idx)
         mocked_process.assert_called_once_with(idx)
+        assert app_module.data["env_vars"] == [{"name": "A", "value": "B"}]
         assert app_module.data["link_secrets"] == [
             {"name": "database_db_user", "value": "${{module.database.db_user}}"},
             {"name": "database_db_name", "value": "${{module.database.db_name}}"},
