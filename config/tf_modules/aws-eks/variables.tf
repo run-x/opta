@@ -48,6 +48,11 @@ variable "k8s_version" {
   default = "1.18"
 }
 
+variable "spot_instances" {
+  type    = bool
+  default = false
+}
+
 variable "control_plane_security_groups" {
   description = "List of security groups to give control plane access to"
   type        = list(string)

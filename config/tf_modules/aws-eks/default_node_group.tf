@@ -35,11 +35,22 @@ resource "aws_iam_role_policy_attachment" "node_group_AmazonEC2ContainerRegistry
   role       = aws_iam_role.node_group.name
 }
 
+resource "random_id" "key_suffix" {
+  byte_length = 8
+  keepers = {
+    spot_instances     = var.spot_instances
+    node_disk_size     = var.node_disk_size
+    node_instance_type = var.node_instance_type
+  }
+}
+
 resource "aws_eks_node_group" "node_group" {
   cluster_name    = aws_eks_cluster.cluster.name
-  node_group_name = "opta-${var.layer_name}-default"
+  node_group_name = "opta-${var.layer_name}-default-${random_id.key_suffix.hex}"
   node_role_arn   = aws_iam_role.node_group.arn
   subnet_ids      = aws_eks_cluster.cluster.vpc_config[0].subnet_ids
+  capacity_type   = var.spot_instances ? "SPOT" : "ON_DEMAND"
+
 
   # Yes, Graviton2 AL2_ARM_64 option is available, but I'm not considering it right now because it's really new, and
   # the release post mentioned the need to be multi-arched ready, which I'm not dealing with.
@@ -66,7 +77,8 @@ resource "aws_eks_node_group" "node_group" {
 
   # Optional: Allow external changes without Terraform plan difference
   lifecycle {
-    ignore_changes = [scaling_config[0].desired_size]
+    ignore_changes        = [scaling_config[0].desired_size, node_group_name]
+    create_before_destroy = true
   }
 
   tags = {

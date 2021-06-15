@@ -83,6 +83,7 @@ modules:
       node_disk_size: optional
       node_instance_type: optional
       uge_gpu: optional
+      spot_instances: optional
     outputs: {}
     inspect:
       aws_eks_node_group:
@@ -106,6 +107,7 @@ modules:
       node_instance_type: optional
       k8s_version: optional
       control_plane_security_groups: optional
+      spot_instances: optional
     outputs:
       k8s_endpoint:
         export: true

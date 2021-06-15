@@ -48,6 +48,11 @@ variable "node_instance_type" {
   default = "t3.medium"
 }
 
+variable "spot_instances" {
+  type    = bool
+  default = false
+}
+
 variable "use_gpu" {
   type    = bool
   default = false
