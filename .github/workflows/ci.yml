@@ -45,7 +45,6 @@ jobs:
         uses: hashicorp/setup-terraform@v1
         with:
           terraform_version: 0.15.5
-          terraform_wrapper: false
       - name: Test output command
         run: |
           source $(pipenv --venv)/bin/activate
