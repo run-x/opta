@@ -47,7 +47,7 @@ jobs:
       - name: Pin terraform version
         uses: hashicorp/setup-terraform@v1
         with:
-          terraform_version: 0.15.5
+          terraform_version: 1.0.0
           terraform_wrapper: false
       - name: Run terraform format
         run: |
@@ -61,7 +61,7 @@ jobs:
       - name: Pin terraform version
         uses: hashicorp/setup-terraform@v1
         with:
-          terraform_version: 0.15.5
+          terraform_version: 1.0.0
           terraform_wrapper: false
       - name: Set up Python 3.8
         uses: actions/setup-python@v2
@@ -100,7 +100,7 @@ jobs:
       - name: Pin terraform version
         uses: hashicorp/setup-terraform@v1
         with:
-          terraform_version: 0.15.5
+          terraform_version: 1.0.0
           terraform_wrapper: false
       - name: Checkout test-service repo
         uses: actions/checkout@v2
@@ -149,7 +149,7 @@ jobs:
       - name: Pin terraform version
         uses: hashicorp/setup-terraform@v1
         with:
-          terraform_version: 0.15.5
+          terraform_version: 1.0.0
           terraform_wrapper: false
       - name: Checkout test-service repo
         uses: actions/checkout@v2
@@ -200,7 +200,7 @@ jobs:
       - name: Pin terraform version
         uses: hashicorp/setup-terraform@v1
         with:
-          terraform_version: 0.15.5
+          terraform_version: 1.0.0
           terraform_wrapper: false
       - name: Deploy the AWS and GCP test-service and wait for success
         run: ./scripts/dispatch_workflow.sh test-service cicd.yml

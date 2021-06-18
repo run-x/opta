@@ -13,7 +13,7 @@ jobs:
       - name: Pin terraform version
         uses: hashicorp/setup-terraform@v1
         with:
-          terraform_version: 0.15.5
+          terraform_version: 1.0.0
           terraform_wrapper: false
       # This test cannot be run concurrently because it is
       # creating and destroying real resources in the us-east-2 region.
@@ -109,7 +109,7 @@ jobs:
       - name: Pin terraform version
         uses: hashicorp/setup-terraform@v1
         with:
-          terraform_version: 0.15.5
+          terraform_version: 1.0.0
           terraform_wrapper: false
         # This test cannot be run concurrently because it is
         # creating and destroying real resources in a particular gcp account and region.
