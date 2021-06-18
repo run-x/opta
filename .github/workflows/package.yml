@@ -9,6 +9,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Pin terraform version
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 0.15.5
+          terraform_wrapper: false
       - name: Create and destroy test-service and opta environment
         run: ./scripts/dispatch_workflow.sh opta create-and-destroy.yml
         env:
