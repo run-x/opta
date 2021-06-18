@@ -19,3 +19,6 @@ variable "api_key" {
   default     = null
 }
 
+variable "values" {
+  default = {}
+}

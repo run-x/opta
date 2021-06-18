@@ -10,6 +10,11 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
+      - name: Pin terraform version
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 0.15.5
+          terraform_wrapper: false
       # This test cannot be run concurrently because it is
       # creating and destroying real resources in the us-east-2 region.
       # Wait for any previous builds of this workflow to finish.
@@ -101,6 +106,11 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
+      - name: Pin terraform version
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 0.15.5
+          terraform_wrapper: false
         # This test cannot be run concurrently because it is
         # creating and destroying real resources in a particular gcp account and region.
         # Wait for any previous builds of this workflow to finish.

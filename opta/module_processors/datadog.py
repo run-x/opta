@@ -7,6 +7,7 @@ from kubernetes.config import load_kube_config
 from requests import codes, get
 
 from opta.core.kubernetes import configure_kubectl
+from opta.exceptions import UserErrors
 from opta.module_processors.base import ModuleProcessor
 from opta.utils import exp_backoff, logger
 
@@ -67,17 +68,17 @@ class DatadogProcessor(ModuleProcessor):
         super(DatadogProcessor, self).process(module_idx)
 
     def create_secret(self) -> str:
-        while True:
-            value = click.prompt(
-                "Please enter your datadog api key (from https://app.datadoghq.com/account/settings#api)",
-                type=str,
-            )
-            if self.validate_api_key(value):
-                break
-            logger.warn(
+        value = self.module.data.get("api_key") or click.prompt(
+            "Please enter your datadog api key (from https://app.datadoghq.com/account/settings#api)",
+            type=str,
+        )
+
+        if not self.validate_api_key(value):
+            raise UserErrors(
                 "The api key which you passed was invalid, please provide a valid api key from "
                 "https://app.datadoghq.com/account/settings#api"
             )
+
         secret_value = base64.b64encode(value.encode("utf-8")).decode("utf-8")
         patch = [
             {"op": "replace", "path": "/data/DATADOG_API_KEY", "value": secret_value}
