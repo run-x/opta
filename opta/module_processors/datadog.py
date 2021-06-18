@@ -68,20 +68,12 @@ class DatadogProcessor(ModuleProcessor):
         super(DatadogProcessor, self).process(module_idx)
 
     def create_secret(self) -> str:
-        value = self.module.data.get("api_key")
-        if value is None:
-            while True:
-                value = click.prompt(
-                    "Please enter your datadog api key (from https://app.datadoghq.com/account/settings#api)",
-                    type=str,
-                )
-                if self.validate_api_key(value):
-                    break
-                logger.warn(
-                    "The api key which you passed was invalid, please provide a valid api key from "
-                    "https://app.datadoghq.com/account/settings#api"
-                )
-        elif not self.validate_api_key(value):
+        value = self.module.data.get("api_key") or click.prompt(
+            "Please enter your datadog api key (from https://app.datadoghq.com/account/settings#api)",
+            type=str,
+        )
+
+        if not self.validate_api_key(value):
             raise UserErrors(
                 "The api key which you passed was invalid, please provide a valid api key from "
                 "https://app.datadoghq.com/account/settings#api"
