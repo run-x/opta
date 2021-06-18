@@ -59,7 +59,8 @@ resource "helm_release" "datadog" {
           mutateUnlabelled : true
         }
       }
-    })
+    }),
+    yamlencode(var.values)
   ]
 
 
