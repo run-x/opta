@@ -71,4 +71,5 @@ resource "helm_release" "autoscaler" {
   create_namespace = true
   cleanup_on_fail  = true
   atomic           = true
+  wait_for_jobs    = false
 }
