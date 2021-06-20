@@ -31,9 +31,19 @@ variable "module_name" {
   type        = string
 }
 
-variable "high_availability" {
+variable "nginx_high_availability" {
+  type    = bool
+  default = false
+}
+
+variable "linkerd_enabled" {
   type    = bool
   default = true
+}
+
+variable "linkerd_high_availability" {
+  type    = bool
+  default = false
 }
 
 variable "delegated" {

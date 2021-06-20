@@ -157,7 +157,9 @@ modules:
       module_name: str
       openid_provider_url: str
       openid_provider_arn: str
-      high_availability: optional
+      nginx_high_availability: optional
+      linkerd_high_availability: optional
+      linkerd_enabled: optional
       eks_cluster_name: str
       domain: optional
       cert_arn: optional
@@ -398,7 +400,9 @@ modules:
       env_name: str
       layer_name: str
       module_name: str
-      high_availability: optional
+      nginx_high_availability: optional
+      linkerd_high_availability: optional
+      linkerd_enabled: optional
       hosted_zone_name: optional
       cert_self_link: optional
       delegated: optional
