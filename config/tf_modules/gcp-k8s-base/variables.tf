@@ -32,12 +32,12 @@ variable "module_name" {
 }
 
 variable "nginx_high_availability" {
-  type = bool
+  type    = bool
   default = false
 }
 
 variable "linkerd_enabled" {
-  type = bool
+  type    = bool
   default = true
 }
 

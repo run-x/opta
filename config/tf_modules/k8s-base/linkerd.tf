@@ -55,7 +55,7 @@ resource "tls_locally_signed_cert" "issuer_cert" {
 
 
 resource "helm_release" "linkerd" {
-  count = var.linkerd_enabled ? 1 : 0
+  count      = var.linkerd_enabled ? 1 : 0
   chart      = "linkerd2"
   name       = "linkerd"
   repository = "https://helm.linkerd.io/stable"
