@@ -24,6 +24,14 @@ modules:
         enabled: false
       statsd:
         enabled: false
+      flower:
+        enabled: false
+      # Remove extraEnv if you don't want to load the example DAGs
+      extraEnv: |-
+        - name: AIRFLOW__CORE__LOAD_EXAMPLES
+          value: "true"
+      workers:
+        replicas: 1 # Change this if you want more workers
       data:
         metadataConnection:
           host: "${{module.db.db_host}}"
@@ -34,16 +42,10 @@ modules:
       airflow:
         config:
           AIRFLOW__WEBSERVER__BASE_URL: "http://airflow.{parent.domain}"
-          AIRFLOW__CELERY__FLOWER_URL_PREFIX: "/flower"
       ingress:
         enabled: true
         web:
           path: ""
-          host: "airflow.{parent.domain}"
-          annotations:
-            kubernetes.io/ingress.class: "nginx"
-        flower:
-          path: "/flower"
           host: "airflow.{parent.domain}"
           annotations:
             kubernetes.io/ingress.class: "nginx"
