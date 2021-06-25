@@ -14,12 +14,11 @@ EXAMPLES_DIR = path.join(path.dirname(__file__), "init_templates")
 
 
 def _write_result(file_path: str, result: dict) -> None:
-    print(f"About to write to {file_path}:\n")
     print("--------------------------------------------\n")
+    print(f"\n\nAbout to write to {path.relpath(file_path)}:\n")
 
     yaml_str = yaml.dump(result, sort_keys=False)
     print(yaml_str)
-    print("--------------------------------------------")
 
     ok = input("\n\nIs this OK? (yes) ") or "yes"
     if ok == "no":
@@ -38,12 +37,12 @@ def init() -> None:
 @init.command()
 @click.argument("cloud_provider", type=click.Choice(["aws", "gcp"]))
 @click.option(
-    "-n",
-    "--name",
+    "-f",
+    "--file-name",
     default="opta.yaml",
     help="The name of the file that this command will output",
 )
-def env(cloud_provider: Optional[str], name: str) -> None:
+def env(cloud_provider: Optional[str], file_name: str) -> None:
     print(
         """This utility will walk you through creating an opta configuration file.
 It only covers the minimal configuration necessary to get an opta environment
@@ -59,7 +58,7 @@ Press ^C at any time to quit.
     else:
         res = gcpTemplate.run()
 
-    _write_result(file_path=name, result=res)
+    _write_result(file_path=file_name, result=res)
 
 
 SERVICE_TEMPLATES: Dict[str, Template] = {
@@ -70,7 +69,7 @@ SERVICE_TEMPLATES: Dict[str, Template] = {
 @init.command()
 @click.argument("template_name", type=click.Choice(SERVICE_TEMPLATES.keys()))
 @click.option(
-    "-n",
+    "-f",
     "--file-name",
     default="opta.yaml",
     help="The name of the file that this command will output",
