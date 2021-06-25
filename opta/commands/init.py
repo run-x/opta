@@ -14,8 +14,8 @@ EXAMPLES_DIR = path.join(path.dirname(__file__), "init_templates")
 
 
 def _write_result(file_path: str, result: dict) -> None:
-    print("\n\n--------------------------------------------\n")
     print(f"About to write to {file_path}:\n")
+    print("--------------------------------------------\n")
 
     yaml_str = yaml.dump(result, sort_keys=False)
     print(yaml_str)
