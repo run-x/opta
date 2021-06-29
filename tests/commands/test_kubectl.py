@@ -9,6 +9,10 @@ from opta.layer import Layer
 
 
 def test_configure_kubectl(mocker: MockFixture) -> None:
+    # Opta file check
+    mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
+    mocked_os_path_exists.return_value = True
+
     # Mock tf file generation
     mocked_layer_class = mocker.patch("opta.commands.kubectl.Layer")
     mocked_layer = mocker.Mock(spec=Layer)
@@ -34,8 +38,12 @@ def test_configure_kubectl(mocker: MockFixture) -> None:
     mocker.patch(
         "opta.core.kubernetes.nice_run",
         side_effect=[
-            CompletedProcess(None, 0, mocked_caller_identity.encode("utf-8")),  # type: ignore
-            CompletedProcess(None, 0, mocked_update_kubeconfig.encode("utf-8")),  # type: ignore
+            CompletedProcess(
+                None, 0, mocked_caller_identity.encode("utf-8")  # type: ignore
+            ),
+            CompletedProcess(
+                None, 0, mocked_update_kubeconfig.encode("utf-8")  # type: ignore
+            ),
         ],
     )
 
@@ -67,8 +75,12 @@ def test_configure_kubectl(mocker: MockFixture) -> None:
     mocker.patch(
         "opta.core.kubernetes.nice_run",
         side_effect=[
-            CompletedProcess(None, 0, mocked_caller_identity.encode("utf-8")),  # type: ignore
-            CompletedProcess(None, 0, mocked_update_kubeconfig.encode("utf-8")),  # type: ignore
+            CompletedProcess(
+                None, 0, mocked_caller_identity.encode("utf-8")  # type: ignore
+            ),
+            CompletedProcess(
+                None, 0, mocked_update_kubeconfig.encode("utf-8")  # type: ignore
+            ),
         ],
     )
     result = runner.invoke(configure_kubectl, [])

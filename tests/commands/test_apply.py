@@ -47,6 +47,9 @@ def mocked_layer(mocker: MockFixture) -> Any:
 
 
 def test_apply(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None:
+    mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
+    mocked_os_path_exists.return_value = True
+
     mocked_click = mocker.patch("opta.commands.apply.click")
     mocker.patch("opta.commands.apply.configure_kubectl")
     mocker.patch(
@@ -105,6 +108,9 @@ def test_apply(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None
 
 
 def test_auto_approve(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None:
+    mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
+    mocked_os_path_exists.return_value = True
+
     mocked_click = mocker.patch("opta.commands.apply.click")
     mocker.patch("opta.commands.apply.configure_kubectl")
     mocker.patch(
@@ -160,6 +166,9 @@ def test_auto_approve(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) 
 
 
 def test_fail_on_2_azs(mocker: MockFixture, mocked_layer: Any) -> None:
+    mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
+    mocked_os_path_exists.return_value = True
+
     # Opta needs a region with at least 3 AZs, fewer should fail.
     mocker.patch(
         "opta.commands.apply._fetch_availability_zones",

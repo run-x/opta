@@ -20,6 +20,10 @@ class TestSecretManager:
         return mocked_load_layer
 
     def test_view(self, mocker: MockFixture, mocked_layer: Any) -> None:  # noqa
+        # Opta file check
+        mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
+        mocked_os_path_exists.return_value = True
+
         mocker.patch("opta.commands.secret.gen_all")
         mocker.patch("opta.commands.secret.configure_kubectl")
 
@@ -78,6 +82,10 @@ class TestSecretManager:
         )
 
     def test_update(self, mocker: MockFixture, mocked_layer: Any) -> None:
+        # Opta file check
+        mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
+        mocked_os_path_exists.return_value = True
+
         mocker.patch("opta.commands.secret.gen_all")
         mocked_create_namespace_if_not_exists = mocker.patch(
             "opta.commands.secret.create_namespace_if_not_exists"
