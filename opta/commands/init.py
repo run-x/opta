@@ -9,6 +9,7 @@ from opta.commands.init_templates.environment.aws.template import awsTemplate
 from opta.commands.init_templates.environment.gcp.template import gcpTemplate
 from opta.commands.init_templates.service.k8s.template import k8sServiceTemplate
 from opta.commands.init_templates.template import Template
+from opta.exceptions import UserErrors
 
 EXAMPLES_DIR = path.join(path.dirname(__file__), "init_templates")
 
@@ -85,7 +86,7 @@ SERVICE_TEMPLATES: Dict[str, Template] = {
     default="opta.yml",
     help="The name of the file that this command will output (defaults to opta.yml)",
 )
-def service(template_name: str, file_name: str, environment_file: Optional[str]) -> None:
+def service(template_name: str, file_name: str, environment_file: str) -> None:
     """Creates a starting point for your opta service configuration file."""
     print(
         """This utility will walk you through creating an opta configuration file.
@@ -96,26 +97,21 @@ to https://docs.opta.dev/.
 Press ^C at any time to quit.
     """
     )
+    with open(environment_file) as f:
+        env_dict = yaml.safe_load(f)
+        if not env_dict.get("name"):
+            raise UserErrors("Environment file is missing a name.")
 
-    env_dict: Optional[dict] = None
-
-    template = SERVICE_TEMPLATES[template_name]
-    res = template.run()
-
-    try:
-        if environment_file:
-            with open(environment_file) as f:
-                env_dict = yaml.safe_load(f)
-            if env_dict:
-                res["environments"] = [
-                    {
-                        "name": env_dict["name"],
-                        "path": path.relpath(environment_file),
-                        "variables": {},
-                    }
-                ]
-    except Exception:
-        print("Unable to find or process environment file. Ignoring for now...")
+        template = SERVICE_TEMPLATES[template_name]
+        res = template.run()
+        if env_dict:
+            res["environments"] = [
+                {
+                    "name": env_dict["name"],
+                    "path": path.relpath(environment_file),
+                    "variables": {},
+                }
+            ]
 
     _write_result(file_name, res)
     pass
