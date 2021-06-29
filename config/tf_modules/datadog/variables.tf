@@ -22,3 +22,8 @@ variable "api_key" {
 variable "values" {
   default = {}
 }
+
+variable "timeout" {
+  type    = number
+  default = 600
+}

@@ -147,6 +147,8 @@ modules:
       layer_name: str
       module_name: str
       api_key: optional
+      timeout: optional
+      values: optional
   aws-k8s-base:
     cloud: aws
     location: k8s-base

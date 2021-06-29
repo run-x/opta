@@ -74,5 +74,6 @@ resource "helm_release" "datadog" {
   atomic           = true
   cleanup_on_fail  = true
   recreate_pods    = true
+  timeout          = var.timeout
 }
 
