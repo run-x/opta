@@ -160,6 +160,7 @@ modules:
       openid_provider_url: str
       openid_provider_arn: str
       nginx_high_availability: optional
+      nginx_config: optional
       linkerd_high_availability: optional
       linkerd_enabled: optional
       eks_cluster_name: str
@@ -403,6 +404,7 @@ modules:
       layer_name: str
       module_name: str
       nginx_high_availability: optional
+      nginx_config: optional
       linkerd_high_availability: optional
       linkerd_enabled: optional
       hosted_zone_name: optional

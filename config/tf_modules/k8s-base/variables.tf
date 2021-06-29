@@ -3,14 +3,14 @@ data "aws_region" "current" {}
 locals {
   target_ports    = var.cert_arn == "" ? { http : "http" } : { http : "http", https : "https" }
   container_ports = var.cert_arn == "" ? { http : 80, https : 443 } : { http : 80, https : 443 }
-  config = var.cert_arn == "" ? { ssl-redirect : false } : {
+  config = merge((var.cert_arn == "" ? { ssl-redirect : false } : {
     ssl-redirect : false
     server-snippet : <<EOF
           if ( $server_port = 80 ) {
              return 308 https://$host$request_uri;
           }
           EOF
-  }
+  }), var.nginx_config)
 }
 
 variable "eks_cluster_name" {
@@ -68,4 +68,8 @@ variable "linkerd_high_availability" {
 variable "admin_arns" {
   type    = list(string)
   default = []
+}
+
+variable "nginx_config" {
+  default = {}
 }
