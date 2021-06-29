@@ -21,7 +21,7 @@ from opta.core.kubernetes import (
 from opta.core.terraform import Terraform
 from opta.exceptions import UserErrors
 from opta.layer import Layer
-from opta.utils import fmt_msg, is_tool, logger
+from opta.utils import check_opta_file_exists, fmt_msg, is_tool, logger
 
 
 @click.command()
@@ -73,6 +73,7 @@ def apply(
     test: bool,
     auto_approve: bool,
 ) -> None:
+    check_opta_file_exists(config)
     """Initialize your environment or service to match the config file"""
     _apply(config, env, refresh, max_module, image_tag, test, auto_approve)
 

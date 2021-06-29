@@ -8,7 +8,7 @@ from opta.commands.push import _push, get_push_tag, is_service_config
 from opta.core.terraform import Terraform
 from opta.exceptions import MissingState, UserErrors
 from opta.layer import Layer
-from opta.utils import fmt_msg, logger
+from opta.utils import check_opta_file_exists, fmt_msg, logger
 
 
 @click.command()
@@ -35,6 +35,8 @@ def deploy(
     image: str, config: str, env: Optional[str], tag: Optional[str], auto_approve: bool
 ) -> None:
     """Push your new image to the cloud and deploy it in your environment"""
+
+    check_opta_file_exists(config)
     if not is_service_config(config):
         raise UserErrors(
             fmt_msg(

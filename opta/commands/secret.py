@@ -13,6 +13,7 @@ from opta.core.kubernetes import (
 )
 from opta.exceptions import UserErrors
 from opta.layer import Layer
+from opta.utils import check_opta_file_exists
 
 
 @click.group(cls=DYMGroup)
@@ -31,6 +32,8 @@ def secret() -> None:
 )
 def view(secret: str, env: Optional[str], config: str) -> None:
     """View a given secret of a k8s service"""
+
+    check_opta_file_exists(config)
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(amplitude_client.VIEW_SECRET_EVENT)
     gen_all(layer)
@@ -78,6 +81,8 @@ def list_command(env: Optional[str], config: str) -> None:
 )
 def update(secret: str, value: str, env: Optional[str], config: str) -> None:
     """Update a given secret of a k8s service with a new value"""
+
+    check_opta_file_exists(config)
     layer = Layer.load_from_yaml(config, env)
     gen_all(layer)
 

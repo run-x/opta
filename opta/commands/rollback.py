@@ -5,6 +5,7 @@ import click
 from opta.core.generator import gen_all
 from opta.core.terraform import Terraform
 from opta.layer import Layer
+from opta.utils import check_opta_file_exists
 
 
 # Rollback automatically runs when terraform apply fails.
@@ -16,6 +17,8 @@ from opta.layer import Layer
 )
 def rollback(config: str, env: Optional[str]) -> None:
     """Destroy any stale opta resources in the current layer"""
+
+    check_opta_file_exists(config)
     layer = Layer.load_from_yaml(config, env)
     gen_all(layer)
     Terraform.rollback(layer)

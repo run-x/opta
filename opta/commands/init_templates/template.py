@@ -1,6 +1,6 @@
 import copy
 from os import path
-from typing import Callable, List, Optional
+from typing import Any, Callable, List, Optional
 
 import yaml
 from colored import attr, fg
@@ -21,11 +21,13 @@ class TemplateVariable:
         applier: Callable[[dict, str], dict],  # applies the change to a template
         validator: Optional[Callable[[str], bool]] = None,  # validates the variable
         error_message: Optional[str] = None,
+        default_value: Optional[Any] = None,
     ):
         self.prompt = prompt
         self.applier = applier
         self.validator = validator
         self.error_message = error_message
+        self.default_value = default_value
 
     def validate(self, v: str) -> bool:
         if self.validator is None:
@@ -47,7 +49,13 @@ class Template:
         for variable in self.variables:
             success = False
             while not success:
-                val = input(f"{variable.prompt}: ")
+                if variable.default_value:
+                    val = (
+                        input(f"{variable.prompt}: ({variable.default_value}) ").strip()
+                        or variable.default_value
+                    )
+                else:
+                    val = input(f"{variable.prompt}: ").strip()
                 success = variable.validate(val)
                 if success:
                     result = variable.apply(result, val)

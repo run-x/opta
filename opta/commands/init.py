@@ -30,7 +30,14 @@ def _write_result(file_path: str, result: dict) -> None:
 
 @click.group(cls=DYMGroup)
 def init() -> None:
-    """Commands for creating an initial opta file"""
+    """
+    This command initializes an opta configuration file. You can create an environment
+    configuration file by using the command `opta init env <cloud-provider>` and a service
+    file by using the command `opta init service <environment_file> <template_name>`.
+
+    In order to see the full list of available templates, you can
+    run `opta init env --help` or `opta init service --help` respectively.
+    """
     pass
 
 
@@ -39,10 +46,11 @@ def init() -> None:
 @click.option(
     "-f",
     "--file-name",
-    default="opta.yaml",
-    help="The name of the file that this command will output",
+    default="opta.yml",
+    help="The name of the file that this command will output (defaults to opta.yml)",
 )
 def env(cloud_provider: Optional[str], file_name: str) -> None:
+    """Creates a starting point for your opta environment configuration file."""
     print(
         """This utility will walk you through creating an opta configuration file.
 It only covers the minimal configuration necessary to get an opta environment
@@ -67,22 +75,18 @@ SERVICE_TEMPLATES: Dict[str, Template] = {
 
 
 @init.command()
+@click.argument(
+    "environment_file", type=click.Path(exists=True),
+)
 @click.argument("template_name", type=click.Choice(SERVICE_TEMPLATES.keys()))
 @click.option(
     "-f",
     "--file-name",
-    default="opta.yaml",
-    help="The name of the file that this command will output",
+    default="opta.yml",
+    help="The name of the file that this command will output (defaults to opta.yml)",
 )
-@click.option(
-    "-e",
-    "--environment-file",
-    type=click.Path(exists=True),
-    help="The name of the opta environment you would like to deploy this service in",
-)
-def service(
-    template_name: Optional[str], file_name: str, environment_file: Optional[str]
-) -> None:
+def service(template_name: str, file_name: str, environment_file: Optional[str]) -> None:
+    """Creates a starting point for your opta service configuration file."""
     print(
         """This utility will walk you through creating an opta configuration file.
 It only covers the minimal configuration necessary to get an opta service
@@ -95,7 +99,7 @@ Press ^C at any time to quit.
 
     env_dict: Optional[dict] = None
 
-    template = SERVICE_TEMPLATES["k8s"]
+    template = SERVICE_TEMPLATES[template_name]
     res = template.run()
 
     try:

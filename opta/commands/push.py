@@ -12,7 +12,7 @@ from opta.core.terraform import get_terraform_outputs
 from opta.exceptions import UserErrors
 from opta.layer import Layer
 from opta.nice_subprocess import nice_run
-from opta.utils import fmt_msg, is_tool, yaml
+from opta.utils import check_opta_file_exists, fmt_msg, is_tool, yaml
 
 
 def get_push_tag(local_image: str, tag_override: Optional[str]) -> str:
@@ -103,6 +103,8 @@ def is_service_config(config: str) -> bool:
     help="The image tag associated with your docker container. Defaults to your local image tag.",
 )
 def push(image: str, config: str, env: Optional[str], tag: Optional[str]) -> None:
+
+    check_opta_file_exists(config)
     if not is_service_config(config):
         raise UserErrors(
             fmt_msg(

@@ -46,4 +46,5 @@ awsRegionVariable = TemplateVariable(
     applier=apply,
     validator=validate,
     error_message=f"Must be one of\n{region_string}",
+    default_value="us-east-1",
 )
