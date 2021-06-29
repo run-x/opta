@@ -161,3 +161,39 @@ class TestInitEnv:
         - type: k8s-base
         """
         assert _sanitize(expected_result) in _sanitize(result.output)
+
+
+class TestInitService:
+    def test_basic_init(self, mocker: MockFixture) -> None:
+        mocked_input = mocker.patch("opta.commands.init_templates.template.input")
+
+        runner = CliRunner()
+        mocked_input.side_effect = [
+            "my-new-service",
+        ]
+
+        example_env_config_path = os.path.join(
+            os.path.dirname(__file__), "..", "..", "examples/environments/gcp-env.yml"
+        )
+        result = runner.invoke(cli, f"init service {example_env_config_path} k8s")
+        expected_result = """
+        environments:
+        - name: gcp-live-example
+        path: examples/environments/gcp-env.yml
+        variables: {}
+        name: my-new-service
+        modules:
+        - type: k8s-service
+        name: app
+        port:
+            http: 9000
+        image: AUTO
+        env_vars:
+        - name: APPENV
+            value: '{env}'
+        public_uri: '{parent.domain}'
+        resource_request:
+            cpu: 100
+            memory: 1024
+        """
+        assert _sanitize(expected_result) in _sanitize(result.output)
