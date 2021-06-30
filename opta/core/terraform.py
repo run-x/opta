@@ -362,7 +362,7 @@ class Terraform:
             )
             s3 = boto3.client("s3")
             try:
-                s3.download_file(bucket, key, state_file)
+                s3.download_file(Bucket=bucket, Key=key, Filename=state_file)
             except ClientError as e:
                 if e.response["Error"]["Code"] == "404":
                     # The object does not exist.
