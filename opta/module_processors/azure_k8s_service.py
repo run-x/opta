@@ -54,5 +54,7 @@ class AzureK8sServiceProcessor(ModuleProcessor):
             acr_module_source = "data.terraform_remote_state.parent.outputs"
 
         self.module.data["acr_registry_name"] = f"${{{{{acr_module_source}.acr_name}}}}"
+        if "image_tag" in self.layer.variables:
+            self.module.data["tag"] = self.layer.variables["image_tag"]
 
         super(AzureK8sServiceProcessor, self).process(module_idx)

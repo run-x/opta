@@ -1,7 +1,10 @@
 from typing import TYPE_CHECKING, Any, Optional
 
+from azure.core.exceptions import ResourceNotFoundError
 from azure.identity import DefaultAzureCredential
 from azure.storage.blob import ContainerClient
+
+from opta.utils import logger
 
 if TYPE_CHECKING:
     from opta.layer import Layer
@@ -33,7 +36,7 @@ class Azure:
             credential=credentials,
         )
         config_path = f"opta_config/{self.layer.name}"
-        storage_client.upload_blob(name=config_path, data=config_data)
+        storage_client.upload_blob(name=config_path, data=config_data, overwrite=True)
 
     def delete_opta_config(self) -> None:
         providers = self.layer.gen_providers(0)
@@ -50,4 +53,27 @@ class Azure:
             credential=credentials,
         )
         config_path = f"opta_config/{self.layer.name}"
-        storage_client.delete_blob(config_path, delete_snapshots=True)
+        try:
+            storage_client.delete_blob(config_path, delete_snapshots="include")
+        except ResourceNotFoundError:
+            logger.info("Remote opta config was already deleted")
+
+    def delete_remote_state(self) -> None:
+        providers = self.layer.gen_providers(0)
+        credentials = self.get_credentials()
+
+        storage_account_name = providers["terraform"]["backend"]["azurerm"][
+            "storage_account_name"
+        ]
+        container_name = providers["terraform"]["backend"]["azurerm"]["container_name"]
+
+        storage_client = ContainerClient(
+            account_url=f"https://{storage_account_name}.blob.core.windows.net",
+            container_name=container_name,
+            credential=credentials,
+        )
+        config_path = f"{self.layer.name}"
+        try:
+            storage_client.delete_blob(config_path, delete_snapshots="include")
+        except ResourceNotFoundError:
+            logger.info("Remote opta state was already deleted")

@@ -149,6 +149,8 @@ def _azure_configure_kubectl(layer: "Layer") -> None:
             rg_name,
             "--name",
             cluster_name,
+            "--admin",
+            "--overwrite-existing",
         ]
     )
 

@@ -210,6 +210,10 @@ class Terraform:
             gcp = GCP(layer)
             gcp.delete_opta_config()
             gcp.delete_remote_state()
+        elif layer.cloud == "azurerm":
+            azure = Azure(layer)
+            azure.delete_opta_config()
+            azure.delete_remote_state()
         else:
             raise Exception(
                 f"Can not handle opta config deletion for cloud {layer.cloud}"
