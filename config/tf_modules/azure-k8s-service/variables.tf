@@ -1,4 +1,13 @@
-data "aws_caller_identity" "current" {}
+data "azurerm_resource_group" "opta" {
+  name = "opta-${var.env_name}"
+}
+data "azurerm_subscription" "current" {}
+data "azurerm_client_config" "current" {}
+
+data "azurerm_container_registry" "opta" {
+  name = var.acr_registry_name
+  resource_group_name = data.azurerm_resource_group.opta.name
+}
 
 locals {
   uri_components = [for s in var.public_uri : {
@@ -114,8 +123,6 @@ variable "manual_secrets" {
   default = []
 }
 
-
-variable "additional_role_assignments" {
-  type    = list(map(string))
-  default = []
+variable "acr_registry_name" {
+  type = string
 }

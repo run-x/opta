@@ -54,6 +54,8 @@ modules:
         export: true
       acr_name:
         export: true
+      acr_login_url:
+        export: true
   azure-dns:
     cloud: azure
     location: azure-dns
@@ -121,6 +123,36 @@ modules:
       delegated: optional
       hosted_zone_name: optional
     outputs: {}
+  azure-k8s-service:
+    cloud: google
+    location: azure-k8s-service
+    variables:
+      env_name: str
+      layer_name: str
+      module_name: str
+      acr_registry_name: str
+      image: str
+      port: optional
+      tag: optional
+      env_vars: optional
+      manual_secrets: optional
+      link_secrets: optional
+      autoscaling_target_cpu_percentage: optional
+      autoscaling_target_mem_percentage: optional
+      liveness_probe_path: optional
+      readiness_probe_path: optional
+      healthcheck_path: optional
+      resource_request: optional
+      public_uri: optional
+      domain: optional
+    outputs:
+      docker_repo_url:
+        export: true
+    inspect:
+      helm_release.k8s-service:
+        name: K8s Service
+        desc: Secure and scalable Kubernetes service packaged into a helm chart
+        url: https://app.datadoghq.com/apm/service/{k8s-moduleName}-{k8s-layerName}/
   aws-base:
     cloud: aws
     location: aws-base
@@ -729,6 +761,7 @@ modules:
     alias:
       google: gcp-k8s-service
       aws: aws-k8s-service
+      azurerm: azure-k8s-service
 
   base:
     alias:
