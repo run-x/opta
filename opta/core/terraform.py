@@ -557,7 +557,7 @@ class Terraform:
             container = storage_client.blob_containers.get(
                 resource_group_name, storage_account_name, container_name
             )
-            print("container exists")
+            print(f"container {container.name} exists")
         except ResourceNotFoundError:
             print("Need to create container")
             container = storage_client.blob_containers.create(
