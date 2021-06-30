@@ -141,7 +141,7 @@ class TestTerraform:
         assert Terraform.download_state(layer)
         layer.gen_providers.assert_called_once_with(0)
         mocked_s3_client.download_file.assert_called_once_with(
-            "opta-tf-state-test-dev1", "dev1", "./tmp.tfstate"
+            Bucket="opta-tf-state-test-dev1", Key="dev1", Filename="./tmp.tfstate"
         )
         mocked_open.assert_called_once_with("./tmp.tfstate", "r")
         patched_init.assert_not_called()
@@ -237,7 +237,7 @@ class TestTerraform:
 
         Terraform.create_state_storage(layer)
 
-        layer.gen_providers.assert_called_once_with(0)
+        layer.gen_providers.assert_called_once_with(0, clean=False)
         mocked_dynamodb_client.create_table.assert_called_once_with(
             TableName="opta-tf-state-test-dev1",
             KeySchema=[{"AttributeName": "LockID", "KeyType": "HASH"}],

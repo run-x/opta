@@ -227,7 +227,7 @@ def get_cluster_name(layer: "Layer") -> Optional[str]:
 
 def _aws_get_cluster_env(root_layer: "Layer") -> Tuple[str, List[str]]:
     aws_provider = root_layer.providers["aws"]
-    return aws_provider["region"], aws_provider["allowed_account_ids"]
+    return aws_provider["region"], [aws_provider["account_id"]]
 
 
 def _gcp_get_cluster_env(root_layer: "Layer") -> Tuple[str, str]:

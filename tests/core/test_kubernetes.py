@@ -37,9 +37,7 @@ class TestKubernetes:
         layer.parent = None
         layer.cloud = "aws"
         layer.name = "blah"
-        layer.providers = {
-            "aws": {"region": "us-east-1", "allowed_account_ids": ["111111111111"]}
-        }
+        layer.providers = {"aws": {"region": "us-east-1", "account_id": "111111111111"}}
         layer.root.return_value = layer
         mocked_terraform_output = mocker.patch(
             "opta.core.kubernetes.get_terraform_outputs",
@@ -82,9 +80,7 @@ class TestKubernetes:
         layer = mocker.Mock(spec=Layer)
         layer.name = "mocked_layer"
         layer.parent = None
-        layer.providers = {
-            "aws": {"region": "us-east-1", "allowed_account_ids": [111111111111]}
-        }
+        layer.providers = {"aws": {"region": "us-east-1", "account_id": "111111111111"}}
         mocked_pod_1 = mocker.Mock(spec=V1Pod)
         mocked_pod_1.metadata = mocker.Mock()
         mocked_pod_1.metadata.name = "pod1"
@@ -182,9 +178,7 @@ class TestKubernetes:
         layer = mocker.Mock(spec=Layer)
         layer.name = "mocked_layer"
         layer.parent = None
-        layer.providers = {
-            "aws": {"region": "us-east-1", "allowed_account_ids": [111111111111]}
-        }
+        layer.providers = {"aws": {"region": "us-east-1", "account_id": "111111111111"}}
         mocked_old_events = mocker.Mock(spec=V1EventList)
         mocked_event_1 = mocker.Mock(spec=V1Event)
         mocked_event_1.last_timestamp = datetime.datetime.now(
