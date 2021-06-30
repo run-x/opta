@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import hashlib
 import os
 import re
 import shutil
 import tempfile
 from os import path
 from types import SimpleNamespace
-from typing import Any, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
 
 import git
 
@@ -23,6 +24,8 @@ from opta.module_processors.aws_k8s_base import AwsK8sBaseProcessor
 from opta.module_processors.aws_k8s_service import AwsK8sServiceProcessor
 from opta.module_processors.aws_sns import AwsSnsProcessor
 from opta.module_processors.aws_sqs import AwsSqsProcessor
+from opta.module_processors.azure_base import AzureBaseProcessor
+from opta.module_processors.azure_k8s_base import AzureK8sBaseProcessor
 from opta.module_processors.base import ModuleProcessor
 from opta.module_processors.datadog import DatadogProcessor
 from opta.module_processors.gcp_gke import GcpGkeProcessor
@@ -35,6 +38,26 @@ from opta.utils import deep_merge, hydrate, logger, yaml
 
 
 class Layer:
+    PROCESSOR_DICT: Dict[str, Type[ModuleProcessor]] = {
+        "aws-k8s-service": AwsK8sServiceProcessor,
+        "aws-k8s-base": AwsK8sBaseProcessor,
+        "datadog": DatadogProcessor,
+        "gcp-k8s-base": GcpK8sBaseProcessor,
+        "gcp-k8s-service": GcpK8sServiceProcessor,
+        "gcp-gke": GcpGkeProcessor,
+        "aws-dns": AwsDnsProcessor,
+        "runx": RunxProcessor,
+        "helm-chart": HelmChartProcessor,
+        "aws-iam-role": AwsIamRoleProcessor,
+        "aws-iam-user": AwsIamUserProcessor,
+        "aws-eks": AwsEksProcessor,
+        "aws-ses": AwsEmailProcessor,
+        "aws-sqs": AwsSqsProcessor,
+        "aws-sns": AwsSnsProcessor,
+        "azure-base": AzureBaseProcessor,
+        "azure-k8s-base": AzureK8sBaseProcessor,
+    }
+
     def __init__(
         self,
         name: str,
@@ -70,8 +93,10 @@ class Layer:
             self.cloud = "google"
         elif "aws" in total_base_providers:
             self.cloud = "aws"
+        elif "azurerm" in total_base_providers:
+            self.cloud = "azurerm"
         else:
-            raise UserErrors("No cloud provider (AWS or GCP) found")
+            raise UserErrors("No cloud provider (AWS, GCP, or Azure) found")
         self.variables = variables or {}
         self.modules = []
         for module_data in modules_data:
@@ -221,38 +246,8 @@ class Layer:
         ret: Dict[Any, Any] = {}
         for module in self.modules[0 : module_idx + 1]:
             module_type = module.aliased_type or module.type
-            if module_type == "aws-k8s-service":
-                AwsK8sServiceProcessor(module, self).process(module_idx)
-            elif module_type == "aws-k8s-base":
-                AwsK8sBaseProcessor(module, self).process(module_idx)
-            elif module_type == "datadog":
-                DatadogProcessor(module, self).process(module_idx)
-            elif module_type == "gcp-k8s-base":
-                GcpK8sBaseProcessor(module, self).process(module_idx)
-            elif module_type == "gcp-k8s-service":
-                GcpK8sServiceProcessor(module, self).process(module_idx)
-            elif module_type == "gcp-gke":
-                GcpGkeProcessor(module, self).process(module_idx)
-            elif module_type == "aws-dns":
-                AwsDnsProcessor(module, self).process(module_idx)
-            elif module_type == "runx":
-                RunxProcessor(module, self).process(module_idx)
-            elif module_type == "helm-chart":
-                HelmChartProcessor(module, self).process(module_idx)
-            elif module_type == "aws-iam-role":
-                AwsIamRoleProcessor(module, self).process(module_idx)
-            elif module_type == "aws-iam-user":
-                AwsIamUserProcessor(module, self).process(module_idx)
-            elif module_type == "aws-eks":
-                AwsEksProcessor(module, self).process(module_idx)
-            elif module_type == "aws-ses":
-                AwsEmailProcessor(module, self).process(module_idx)
-            elif module_type == "aws-sqs":
-                AwsSqsProcessor(module, self).process(module_idx)
-            elif module_type == "aws-sns":
-                AwsSnsProcessor(module, self).process(module_idx)
-            else:
-                ModuleProcessor(module, self).process(module_idx)
+            processor = self.PROCESSOR_DICT.get(module_type, ModuleProcessor)
+            processor(module, self).process(module_idx)
         if self.parent is not None and self.parent.get_module("runx") is not None:
             RunxProcessor(self.parent.get_module("runx"), self).process(  # type:ignore
                 module_idx
@@ -276,38 +271,8 @@ class Layer:
     def pre_hook(self, module_idx: int) -> None:
         for module in self.modules[0 : module_idx + 1]:
             module_type = module.aliased_type or module.type
-            if module_type == "aws-k8s-service":
-                AwsK8sServiceProcessor(module, self).pre_hook(module_idx)
-            elif module_type == "aws-k8s-base":
-                AwsK8sBaseProcessor(module, self).pre_hook(module_idx)
-            elif module_type == "datadog":
-                DatadogProcessor(module, self).pre_hook(module_idx)
-            elif module_type == "gcp-k8s-base":
-                GcpK8sBaseProcessor(module, self).pre_hook(module_idx)
-            elif module_type == "gcp-k8s-service":
-                GcpK8sServiceProcessor(module, self).pre_hook(module_idx)
-            elif module_type == "gcp-gke":
-                GcpGkeProcessor(module, self).pre_hook(module_idx)
-            elif module_type == "aws-dns":
-                AwsDnsProcessor(module, self).pre_hook(module_idx)
-            elif module_type == "runx":
-                RunxProcessor(module, self).pre_hook(module_idx)
-            elif module_type == "helm-chart":
-                HelmChartProcessor(module, self).pre_hook(module_idx)
-            elif module_type == "aws-iam-role":
-                AwsIamRoleProcessor(module, self).pre_hook(module_idx)
-            elif module_type == "aws-iam-user":
-                AwsIamUserProcessor(module, self).pre_hook(module_idx)
-            elif module_type == "aws-eks":
-                AwsEksProcessor(module, self).pre_hook(module_idx)
-            elif module_type == "aws-ses":
-                AwsEmailProcessor(module, self).pre_hook(module_idx)
-            elif module_type == "aws-sqs":
-                AwsSqsProcessor(module, self).pre_hook(module_idx)
-            elif module_type == "aws-sns":
-                AwsSnsProcessor(module, self).pre_hook(module_idx)
-            else:
-                ModuleProcessor(module, self).pre_hook(module_idx)
+            processor = self.PROCESSOR_DICT.get(module_type, ModuleProcessor)
+            processor(module, self).pre_hook(module_idx)
         if self.parent is not None and self.parent.get_module("runx") is not None:
             RunxProcessor(self.parent.get_module("runx"), self).pre_hook(  # type:ignore
                 module_idx
@@ -316,38 +281,8 @@ class Layer:
     def post_hook(self, module_idx: int, exception: Optional[Exception]) -> None:
         for module in self.modules[0 : module_idx + 1]:
             module_type = module.aliased_type or module.type
-            if module_type == "aws-k8s-service":
-                AwsK8sServiceProcessor(module, self).post_hook(module_idx, exception)
-            elif module_type == "aws-k8s-base":
-                AwsK8sBaseProcessor(module, self).post_hook(module_idx, exception)
-            elif module_type == "datadog":
-                DatadogProcessor(module, self).post_hook(module_idx, exception)
-            elif module_type == "gcp-k8s-base":
-                GcpK8sBaseProcessor(module, self).post_hook(module_idx, exception)
-            elif module_type == "gcp-k8s-service":
-                GcpK8sServiceProcessor(module, self).post_hook(module_idx, exception)
-            elif module_type == "gcp-gke":
-                GcpGkeProcessor(module, self).post_hook(module_idx, exception)
-            elif module_type == "aws-dns":
-                AwsDnsProcessor(module, self).post_hook(module_idx, exception)
-            elif module_type == "runx":
-                RunxProcessor(module, self).post_hook(module_idx, exception)
-            elif module_type == "helm-chart":
-                HelmChartProcessor(module, self).post_hook(module_idx, exception)
-            elif module_type == "aws-iam-role":
-                AwsIamRoleProcessor(module, self).post_hook(module_idx, exception)
-            elif module_type == "aws-iam-user":
-                AwsIamUserProcessor(module, self).post_hook(module_idx, exception)
-            elif module_type == "aws-eks":
-                AwsEksProcessor(module, self).post_hook(module_idx, exception)
-            elif module_type == "aws-ses":
-                AwsEmailProcessor(module, self).post_hook(module_idx, exception)
-            elif module_type == "aws-sqs":
-                AwsSqsProcessor(module, self).post_hook(module_idx, exception)
-            elif module_type == "aws-sns":
-                AwsSnsProcessor(module, self).post_hook(module_idx, exception)
-            else:
-                ModuleProcessor(module, self).post_hook(module_idx, exception)
+            processor = self.PROCESSOR_DICT.get(module_type, ModuleProcessor)
+            processor(module, self).post_hook(module_idx, exception)
         if self.parent is not None and self.parent.get_module("runx") is not None:
             RunxProcessor(self.parent.get_module("runx"), self).post_hook(  # type:ignore
                 module_idx, exception
@@ -376,19 +311,24 @@ class Layer:
     def state_storage(self) -> str:
         if self.parent is not None:
             return self.parent.state_storage()
+        elif self.cloud == "azurerm":
+            name_hash = hashlib.md5(
+                f"{self.org_name}{self.name}".encode("utf-8")
+            ).hexdigest()[0:16]
+            return f"opta{name_hash}"
         else:
             return f"opta-tf-state-{self.org_name}-{self.name}"
 
-    def gen_providers(self, module_idx: int) -> Dict[Any, Any]:
+    def gen_providers(self, module_idx: int, clean: bool = True) -> Dict[Any, Any]:
         ret: Dict[Any, Any] = {"provider": {}}
         providers = self.providers
         if self.parent is not None:
             providers = deep_merge(providers, self.parent.providers)
         for k, v in providers.items():
-            self.handle_special_providers(k, v)
-            ret["provider"][k] = v
+            new_v = self.handle_special_providers(k, v, clean)
+            ret["provider"][k] = new_v
             if k in REGISTRY["backends"]:
-                hydration = deep_merge(self.metadata_hydration(), {"provider": v})
+                hydration = deep_merge(self.metadata_hydration(), {"provider": new_v})
                 ret["terraform"] = hydrate(
                     REGISTRY["backends"][k]["terraform"], hydration
                 )
@@ -424,20 +364,24 @@ class Layer:
         return ret
 
     # Special logic for mapping the opta config to the provider block
-    def handle_special_providers(self, provider_name: str, provider_data: dict) -> None:
+    def handle_special_providers(
+        self, provider_name: str, provider_data: dict, clean: bool
+    ) -> dict:
+        new_provider_data = provider_data.copy()
         # Terraform requires an array of AWS account ids, but having the customer specify
         # that is awk, so transform it during the mapping.
-        if provider_name == "aws" and "account_id" in provider_data:
-            aws_account_id = provider_data.pop("account_id")
-            if str(aws_account_id) not in (
-                self.original_spec
-                + ("" if self.parent is None else self.parent.original_spec)
-            ):
-                raise UserErrors(
-                    "The AWS account id which opta parsed is different than the one in the original yaml. "
-                    "Odds are this is because the account starts with a leading 0, which we'll fix soon."
-                )
-            provider_data["allowed_account_ids"] = [aws_account_id]
+        if provider_name == "aws" and "account_id" in new_provider_data:
+            aws_account_id = new_provider_data.pop("account_id")
+            new_provider_data["allowed_account_ids"] = [aws_account_id]
+
+        if provider_name == "azurerm":
+            new_provider_data["features"] = {}
+
+        # TODO(ankur): Very ugly
+        if clean and provider_name == "azurerm":
+            new_provider_data.pop("location")
+
+        return new_provider_data
 
     # Get the root-most layer
     def root(self) -> "Layer":

@@ -4,8 +4,15 @@ import os
 import time
 from subprocess import DEVNULL, PIPE  # nosec
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
+from uuid import uuid4
 
 import boto3
+from azure.core.exceptions import ResourceExistsError, ResourceNotFoundError
+from azure.identity import DefaultAzureCredential
+from azure.mgmt.authorization import AuthorizationManagementClient
+from azure.mgmt.resource import ResourceManagementClient
+from azure.mgmt.storage import StorageManagementClient
+from azure.storage.blob import BlobServiceClient
 from botocore.config import Config
 from botocore.exceptions import ClientError
 from google.api_core.exceptions import ClientError as GoogleClientError
@@ -18,6 +25,7 @@ from oauth2client.client import GoogleCredentials
 
 from opta.amplitude import amplitude_client
 from opta.core.aws import AWS, get_aws_resource_id
+from opta.core.azure import Azure
 from opta.core.gcp import GCP
 from opta.exceptions import MissingState, UserErrors
 from opta.nice_subprocess import nice_run
@@ -228,8 +236,33 @@ class Terraform:
             return cls._aws_verify_storage(layer)
         elif layer.cloud == "google":
             return cls._gcp_verify_storage(layer)
+        elif layer.cloud == "azurerm":
+            return cls._azure_verify_storage(layer)
         else:
             raise Exception(f"Can not verify state storage for cloud {layer.cloud}")
+
+    @classmethod
+    def _azure_verify_storage(cls, layer: "Layer") -> bool:
+        credentials = Azure.get_credentials()
+        providers = layer.gen_providers(0)
+
+        resource_group_name = providers["terraform"]["backend"]["azurerm"][
+            "resource_group_name"
+        ]
+        storage_account_name = providers["terraform"]["backend"]["azurerm"][
+            "storage_account_name"
+        ]
+        container_name = providers["terraform"]["backend"]["azurerm"]["container_name"]
+        subscription_id = providers["provider"]["azurerm"]["subscription_id"]
+
+        storage_client = StorageManagementClient(credentials, subscription_id)
+        try:
+            storage_client.blob_containers.get(
+                resource_group_name, storage_account_name, container_name
+            )
+            return True
+        except ResourceNotFoundError:
+            return False
 
     @classmethod
     def _gcp_verify_storage(cls, layer: "Layer") -> bool:
@@ -310,9 +343,9 @@ class Terraform:
             logger.info(
                 fmt_msg(
                     """
-                    We store state in S3/GCP buckets. Since the state bucket was not found,
+                    We store state in S3/GCP buckets/Azure Storage. Since the state bucket was not found,
                     ~this probably means that you either haven't created your opta resources yet,
-                    ~or you previously successfully destroyed your opta resources (including the state bucket).
+                    ~or you previously successfully destroyed your opta resources.
                     """
                 )
             )
@@ -352,8 +385,32 @@ class Terraform:
                     os.remove(state_file)
                     return False
                 raise
+        elif "azurerm" in providers.get("terraform", {}).get("backend", {}):
+            storage_account_name = providers["terraform"]["backend"]["azurerm"][
+                "storage_account_name"
+            ]
+            container_name = providers["terraform"]["backend"]["azurerm"][
+                "container_name"
+            ]
+            key = providers["terraform"]["backend"]["azurerm"]["key"]
+
+            credentials = Azure.get_credentials()
+            try:
+                blob = (
+                    BlobServiceClient(
+                        f"https://{storage_account_name}.blob.core.windows.net/",
+                        credential=credentials,
+                    )
+                    .get_container_client(container_name)
+                    .get_blob_client(key)
+                )
+                with open(state_file, "wb") as file_obj:
+                    blob_data = blob.download_blob()
+                    blob_data.readinto(file_obj)
+            except ResourceNotFoundError:
+                return False
         else:
-            raise UserErrors("Need to get state from S3 or GCS")
+            raise UserErrors("Need to get state from S3 or GCS or Azure storage")
 
         with open(state_file, "r") as file:
             raw_state = file.read().strip()
@@ -393,6 +450,120 @@ class Terraform:
             logger.info("Successfully deleted GCP state storage")
         except NotFound:
             logger.warn("State bucket was already deleted")
+
+    @classmethod
+    def _create_azure_state_storage(cls, providers: dict) -> None:
+        resource_group_name = providers["terraform"]["backend"]["azurerm"][
+            "resource_group_name"
+        ]
+
+        region = providers["provider"]["azurerm"]["location"]
+        subscription_id = providers["provider"]["azurerm"]["subscription_id"]
+        storage_account_name = providers["terraform"]["backend"]["azurerm"][
+            "storage_account_name"
+        ]
+        container_name = providers["terraform"]["backend"]["azurerm"]["container_name"]
+
+        # Create RG
+        credential = DefaultAzureCredential()
+        resource_client = ResourceManagementClient(credential, subscription_id)
+        rg_result = resource_client.resource_groups.create_or_update(
+            resource_group_name, {"location": region}
+        )
+
+        print(
+            f"Provisioned resource group {rg_result.name} in the {rg_result.location} region"
+        )
+        authorization_client = AuthorizationManagementClient(
+            credential, subscription_id, api_version="2018-01-01-preview"
+        )
+
+        owner_role_name = "Owner"
+        owner_role = list(
+            authorization_client.role_definitions.list(
+                rg_result.id, filter="roleName eq '{}'".format(owner_role_name)
+            )
+        )[0]
+
+        storage_role_name = "Storage Blob Data Owner"
+        storage_role = list(
+            authorization_client.role_definitions.list(
+                rg_result.id, filter="roleName eq '{}'".format(storage_role_name)
+            )
+        )[0]
+
+        key_vault_role_name = "Key Vault Administrator"
+        key_vault_role = list(
+            authorization_client.role_definitions.list(
+                rg_result.id, filter="roleName eq '{}'".format(key_vault_role_name)
+            )
+        )[0]
+
+        role_assignments = authorization_client.role_assignments.list_for_resource_group(
+            rg_result.name
+        )
+        for role_assignment in role_assignments:
+            if role_assignment.role_definition_id == owner_role.id:
+                try:
+                    authorization_client.role_assignments.create(
+                        scope=f"/subscriptions/{subscription_id}/resourceGroups/{rg_result.name}",
+                        role_assignment_name=uuid4(),
+                        parameters={
+                            "role_definition_id": storage_role.id,
+                            "principal_id": role_assignment.principal_id,
+                        },
+                    )
+                except ResourceExistsError:
+                    pass
+                try:
+                    authorization_client.role_assignments.create(
+                        scope=f"/subscriptions/{subscription_id}/resourceGroups/{rg_result.name}",
+                        role_assignment_name=uuid4(),
+                        parameters={
+                            "role_definition_id": key_vault_role.id,
+                            "principal_id": role_assignment.principal_id,
+                        },
+                    )
+                except ResourceExistsError:
+                    pass
+
+        # Create SA
+        storage_client = StorageManagementClient(credential, subscription_id)
+        try:
+            storage_client.storage_accounts.get_properties(
+                resource_group_name, storage_account_name
+            )
+            print(f"Storage account {storage_account_name} already exists!")
+        except ResourceNotFoundError:
+            print("Need to create storage account")
+            # create sa
+            poller = storage_client.storage_accounts.begin_create(
+                resource_group_name,
+                storage_account_name,
+                {
+                    "location": region,
+                    "kind": "StorageV2",
+                    "sku": {"name": "Standard_LRS"},
+                },
+            )
+
+            account_result = poller.result()
+            print(f"Provisioned storage account {account_result.name}")
+            # TODO(ankur): assign Storage Blob Data Contributor to this SA,
+            # otherwise it doesn't work
+
+        # create container
+        try:
+            container = storage_client.blob_containers.get(
+                resource_group_name, storage_account_name, container_name
+            )
+            print("container exists")
+        except ResourceNotFoundError:
+            print("Need to create container")
+            container = storage_client.blob_containers.create(
+                resource_group_name, storage_account_name, container_name, {}
+            )
+            print(f"Provisioned container {container.name}")
 
     @classmethod
     def _create_gcp_state_storage(cls, providers: dict) -> None:
@@ -591,11 +762,13 @@ class Terraform:
         """
         Idempotently create remote storage for tf state
         """
-        providers = layer.gen_providers(0)
+        providers = layer.gen_providers(0, clean=False)
         if "s3" in providers.get("terraform", {}).get("backend", {}):
             cls._create_aws_state_storage(providers)
         if "gcs" in providers.get("terraform", {}).get("backend", {}):
             cls._create_gcp_state_storage(providers)
+        if "azurerm" in providers.get("terraform", {}).get("backend", {}):
+            cls._create_azure_state_storage(providers)
 
 
 def get_terraform_outputs(layer: "Layer") -> dict:

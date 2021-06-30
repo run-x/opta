@@ -1,0 +1,5 @@
+type: regex('azure-base')
+name: str(required=False)
+env_name: str(required=False)
+layer_name: str(required=False)
+module_name: str(required=False)

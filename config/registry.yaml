@@ -21,8 +21,106 @@ backends:
         gcs:
           bucket: "{state_storage}"
           prefix: "{layer_name}"
+  azurerm:
+    terraform:
+      required_providers:
+        azurerm:
+          source: "hashicorp/azurerm"
+          version: "2.65.0"
+      backend:
+        azurerm:
+          resource_group_name: "opta-{env}"
+          storage_account_name: "{state_storage}"
+          container_name: "tfstate"
+          key: "{layer_name}"
 
 modules:
+  azure-base:
+    cloud: azure
+    location: azure-base
+    halt: true
+    root_only: true
+    variables:
+      env_name: str
+      layer_name: str
+      module_name: str
+      location: str
+    outputs:
+      vpc_id:
+        export: true
+      private_subnet_id:
+        export: true
+      acr_id:
+        export: true
+      acr_name:
+        export: true
+  azure-dns:
+    cloud: azure
+    location: azure-dns
+    variables:
+      env_name: str
+      layer_name: str
+      module_name: str
+      domain: str
+      delegated: optional
+    outputs:
+      zone_id:
+        export: true
+      name_servers:
+        export: true
+      domain:
+        export: true
+      delegated:
+        export: true
+  azure-aks:
+    cloud: azure
+    location: azure-aks
+    halt: true
+    root_only: true
+    variables:
+      env_name: str
+      layer_name: str
+      module_name: str
+      max_nodes: optional
+      min_nodes: optional
+      node_disk_size: optional
+      node_instance_type: optional
+      admin_group_object_ids: optional
+      kubernetes_version: optional
+    outputs:
+      k8s_endpoint:
+        export: true
+      k8s_ca_data:
+        export: true
+      client_cert:
+        export: true
+      client_key:
+        export: true
+      # This output is used by the configure-kubectl cmd
+      k8s_cluster_name:
+        export: true
+    providers:
+      provider:
+        helm:
+          kubernetes:
+            host: "${{{module_source}.k8s_endpoint}}"
+            client_certificate: "${{base64decode({module_source}.client_cert)}}"
+            client_key: "${{base64decode({module_source}.client_key)}}"
+            cluster_ca_certificate: "${{base64decode({module_source}.k8s_ca_data)}}"
+  azure-k8s-base:
+    cloud: aws
+    location: azure-k8s-base
+    root_only: true
+    variables:
+      env_name: str
+      layer_name: str
+      module_name: str
+      nginx_high_availability: optional
+      linkerd_high_availability: optional
+      linkerd_enabled: optional
+      delegated: optional
+      hosted_zone_name: optional
+    outputs: {}
   aws-base:
     cloud: aws
     location: aws-base
@@ -636,21 +734,25 @@ modules:
     alias:
       google: gcp-base
       aws: aws-base
+      azurerm: azure-base
 
   k8s-base:
     alias:
       google: gcp-k8s-base
       aws: aws-k8s-base
+      azurerm: azure-k8s-base
 
   k8s-cluster:
     alias:
       google: gcp-gke
       aws: aws-eks
+      azurerm: azure-aks
 
   dns:
     alias:
       google: gcp-dns
       aws: aws-dns
+      azurerm: azure-dns
 
   mysql:
     alias:
