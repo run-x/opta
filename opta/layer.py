@@ -26,6 +26,7 @@ from opta.module_processors.aws_sns import AwsSnsProcessor
 from opta.module_processors.aws_sqs import AwsSqsProcessor
 from opta.module_processors.azure_base import AzureBaseProcessor
 from opta.module_processors.azure_k8s_base import AzureK8sBaseProcessor
+from opta.module_processors.azure_k8s_service import AzureK8sServiceProcessor
 from opta.module_processors.base import ModuleProcessor
 from opta.module_processors.datadog import DatadogProcessor
 from opta.module_processors.gcp_gke import GcpGkeProcessor
@@ -56,6 +57,7 @@ class Layer:
         "aws-sns": AwsSnsProcessor,
         "azure-base": AzureBaseProcessor,
         "azure-k8s-base": AzureK8sBaseProcessor,
+        "azure-k8s-service": AzureK8sServiceProcessor,
     }
 
     def __init__(
@@ -346,6 +348,7 @@ class Layer:
                                     config,
                                     {
                                         "layer_name": self.parent.name,
+                                        "env": self.get_env(),
                                         "state_storage": self.state_storage(),
                                         "provider": self.parent.providers.get(k, {}),
                                     },
