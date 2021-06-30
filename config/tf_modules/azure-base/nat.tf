@@ -22,7 +22,7 @@ resource "azurerm_nat_gateway" "opta" {
 }
 
 resource "azurerm_nat_gateway_public_ip_prefix_association" "opta" {
-  nat_gateway_id       = azurerm_nat_gateway.opta.id
+  nat_gateway_id      = azurerm_nat_gateway.opta.id
   public_ip_prefix_id = azurerm_public_ip_prefix.opta.id
 }
 

@@ -5,7 +5,7 @@ data "azurerm_subscription" "current" {}
 data "azurerm_client_config" "current" {}
 
 data "azurerm_container_registry" "opta" {
-  name = var.acr_registry_name
+  name                = var.acr_registry_name
   resource_group_name = data.azurerm_resource_group.opta.name
 }
 

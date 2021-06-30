@@ -1,4 +1,4 @@
-data azurerm_dns_zone "opta" {
+data "azurerm_dns_zone" "opta" {
   name = var.hosted_zone_name
 }
 
@@ -7,7 +7,7 @@ resource "azurerm_public_ip" "opta" {
   resource_group_name = data.azurerm_resource_group.opta.name
   location            = data.azurerm_resource_group.opta.location
   allocation_method   = "Static"
-  sku = "Standard"
+  sku                 = "Standard"
   lifecycle {
     ignore_changes = [
       location
@@ -16,36 +16,36 @@ resource "azurerm_public_ip" "opta" {
 }
 
 data "azurerm_network_security_group" "opta" {
-  name = "opta-${var.env_name}-default"
+  name                = "opta-${var.env_name}-default"
   resource_group_name = data.azurerm_resource_group.opta.name
 }
 
 resource "azurerm_network_security_rule" "allow_http_to_lb" {
   network_security_group_name = data.azurerm_network_security_group.opta.name
-  resource_group_name = data.azurerm_resource_group.opta.name
-  name                       = "allowhttppublictolb"
-  priority                   = 102
-  direction                  = "Inbound"
-  access                     = "Allow"
-  protocol                   = "Tcp"
-  source_address_prefix = "*"
-  source_port_range = "*"
-  destination_port_range     = "80"
-  destination_address_prefix = azurerm_public_ip.opta.ip_address
+  resource_group_name         = data.azurerm_resource_group.opta.name
+  name                        = "allowhttppublictolb"
+  priority                    = 102
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_address_prefix       = "*"
+  source_port_range           = "*"
+  destination_port_range      = "80"
+  destination_address_prefix  = azurerm_public_ip.opta.ip_address
 }
 
 resource "azurerm_network_security_rule" "allow_https_to_lb" {
   network_security_group_name = data.azurerm_network_security_group.opta.name
-  resource_group_name = data.azurerm_resource_group.opta.name
-  name                       = "allowhttpspublictolb"
-  priority                   = 103
-  direction                  = "Inbound"
-  access                     = "Allow"
-  protocol                   = "Tcp"
-  source_address_prefix = "*"
-  source_port_range = "*"
-  destination_port_range     = "443"
-  destination_address_prefix = azurerm_public_ip.opta.ip_address
+  resource_group_name         = data.azurerm_resource_group.opta.name
+  name                        = "allowhttpspublictolb"
+  priority                    = 103
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_address_prefix       = "*"
+  source_port_range           = "*"
+  destination_port_range      = "443"
+  destination_address_prefix  = azurerm_public_ip.opta.ip_address
 }
 
 
@@ -111,14 +111,14 @@ resource "helm_release" "ingress-nginx" {
         }
         containerPort : local.container_ports
         service : {
-          loadBalancerIP: azurerm_public_ip.opta.ip_address
+          loadBalancerIP : azurerm_public_ip.opta.ip_address
           loadBalancerSourceRanges : ["0.0.0.0/0"]
           externalTrafficPolicy : "Local"
           enableHttps : true
           targetPorts : local.target_ports
-          annotations: {
-            "service.beta.kubernetes.io/azure-load-balancer-resource-group": data.azurerm_resource_group.opta.name
-            "service.beta.kubernetes.io/azure-dns-label-name": "opta-${var.env_name}-${random_id.dns_label.hex}"
+          annotations : {
+            "service.beta.kubernetes.io/azure-load-balancer-resource-group" : data.azurerm_resource_group.opta.name
+            "service.beta.kubernetes.io/azure-dns-label-name" : "opta-${var.env_name}-${random_id.dns_label.hex}"
           }
         }
       }

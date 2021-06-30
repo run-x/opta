@@ -4,8 +4,8 @@ resource "random_id" "acr_suffix" {
 
 resource "azurerm_container_registry" "acr" {
   name                = "opta${random_id.acr_suffix.hex}"
-  location                    = data.azurerm_resource_group.opta.location
-  resource_group_name         = data.azurerm_resource_group.opta.name
+  location            = data.azurerm_resource_group.opta.location
+  resource_group_name = data.azurerm_resource_group.opta.name
   sku                 = "Premium"
 
   identity {
@@ -26,9 +26,9 @@ resource "azurerm_container_registry" "acr" {
 }
 
 resource "azurerm_user_assigned_identity" "acr_uai" {
-  location                    = data.azurerm_resource_group.opta.location
-  resource_group_name         = data.azurerm_resource_group.opta.name
-  name = "registry-uai"
+  location            = data.azurerm_resource_group.opta.location
+  resource_group_name = data.azurerm_resource_group.opta.name
+  name                = "registry-uai"
 }
 
 resource "azurerm_role_assignment" "acr_encryption" {

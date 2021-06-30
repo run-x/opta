@@ -314,7 +314,7 @@ class Layer:
         if self.parent is not None:
             return self.parent.state_storage()
         elif self.cloud == "azurerm":
-            name_hash = hashlib.md5(
+            name_hash = hashlib.md5(  # nosec
                 f"{self.org_name}{self.name}".encode("utf-8")
             ).hexdigest()[0:16]
             return f"opta{name_hash}"
