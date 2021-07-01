@@ -1,5 +1,16 @@
 resource "azurerm_user_assigned_identity" "opta" {
-  name                = "aks-example-identity"
+  name                = "opta-${var.env_name}-aks"
+  location            = data.azurerm_resource_group.opta.location
+  resource_group_name = data.azurerm_resource_group.opta.name
+  lifecycle {
+    ignore_changes = [
+      location
+    ]
+  }
+}
+
+resource "azurerm_user_assigned_identity" "agent_pool" {
+  name                = "opta-${var.env_name}-aks-agent-pool"
   location            = data.azurerm_resource_group.opta.location
   resource_group_name = data.azurerm_resource_group.opta.name
   lifecycle {
@@ -10,8 +21,14 @@ resource "azurerm_user_assigned_identity" "opta" {
 }
 
 resource "azurerm_role_assignment" "opta" {
-  scope                = data.azurerm_subnet.opta.id
+  scope                = data.azurerm_resource_group.opta.id
   role_definition_name = "Network Contributor"
+  principal_id         = azurerm_user_assigned_identity.opta.principal_id
+}
+
+resource "azurerm_role_assignment" "k8s_assign_identities" {
+  scope                = data.azurerm_resource_group.opta.id
+  role_definition_name = "Managed Identity Operator"
   principal_id         = azurerm_user_assigned_identity.opta.principal_id
 }
 
@@ -19,6 +36,12 @@ resource "azurerm_role_assignment" "azurerm_container_registry" {
   scope                = data.azurerm_resource_group.opta.id
   role_definition_name = "AcrPull"
   principal_id         = azurerm_user_assigned_identity.opta.principal_id
+}
+
+resource "azurerm_role_assignment" "azurerm_container_registry_agent_pool" {
+  scope                = data.azurerm_resource_group.opta.id
+  role_definition_name = "AcrPull"
+  principal_id         = azurerm_user_assigned_identity.agent_pool.principal_id
 }
 
 
@@ -62,6 +85,12 @@ resource "azurerm_kubernetes_cluster" "main" {
     user_assigned_identity_id = azurerm_user_assigned_identity.opta.id
   }
 
+  kubelet_identity {
+    client_id = azurerm_user_assigned_identity.agent_pool.client_id
+    user_assigned_identity_id = azurerm_user_assigned_identity.agent_pool.id
+    object_id = azurerm_user_assigned_identity.agent_pool.principal_id
+  }
+
   lifecycle {
     ignore_changes = [
       default_node_pool["node_count"],
@@ -71,5 +100,8 @@ resource "azurerm_kubernetes_cluster" "main" {
 
   depends_on = [
     azurerm_role_assignment.opta,
+    azurerm_role_assignment.azurerm_container_registry,
+    azurerm_role_assignment.k8s_assign_identities,
+    azurerm_role_assignment.azurerm_container_registry_agent_pool
   ]
 }

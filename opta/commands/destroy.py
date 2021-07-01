@@ -77,6 +77,9 @@ def _fetch_children_layers(layer: "Layer") -> List["Layer"]:
         opta_configs = _aws_download_all_opta_configs(bucket_name)
     elif layer.cloud == "google":
         opta_configs = _gcp_download_all_opta_configs(bucket_name)
+    elif layer.cloud == "azurerm":
+        # WIP
+        opta_configs = []
     else:
         raise Exception(f"Not handling deletion for cloud {layer.cloud}")
     # Keep track of children layers as we find them.

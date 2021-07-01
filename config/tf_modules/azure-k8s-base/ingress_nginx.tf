@@ -3,7 +3,7 @@ data "azurerm_dns_zone" "opta" {
 }
 
 resource "azurerm_public_ip" "opta" {
-  name                = "opta-${var.env_name}-${var.layer_name}-public"
+  name                = "opta-${var.env_name}-k8s-lb-public"
   resource_group_name = data.azurerm_resource_group.opta.name
   location            = data.azurerm_resource_group.opta.location
   allocation_method   = "Static"
