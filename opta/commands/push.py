@@ -67,7 +67,7 @@ def get_gcr_auth_info(layer: Layer) -> Tuple[str, str]:
 def get_acr_auth_info(layer: Layer) -> Tuple[str, str]:
     acr_name = get_terraform_outputs(layer.root()).get("acr_name")
     if acr_name is None:
-        raise UserErrors("Could not find acr_name")
+        raise Exception("Could not find acr_name")
     token = nice_run(
         [
             "az",

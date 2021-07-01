@@ -1,7 +1,7 @@
 locals {
   target_ports    = { http : "http", https : "https" }
   container_ports = { http : 80, https : 443 }
-  config          = { ssl-redirect : false }
+  config          = merge({ ssl-redirect : false }, var.nginx_config)
 }
 
 data "azurerm_subscription" "current" {}
@@ -47,4 +47,8 @@ variable "delegated" {
 variable "hosted_zone_name" {
   type    = string
   default = null
+}
+
+variable "nginx_config" {
+  default = {}
 }

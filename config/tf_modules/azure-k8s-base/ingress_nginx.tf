@@ -10,7 +10,8 @@ resource "azurerm_public_ip" "opta" {
   sku                 = "Standard"
   lifecycle {
     ignore_changes = [
-      location
+      location,
+      domain_name_label
     ]
   }
 }
