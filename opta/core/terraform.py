@@ -8,7 +8,6 @@ from uuid import uuid4
 
 import boto3
 from azure.core.exceptions import ResourceExistsError, ResourceNotFoundError
-from azure.identity import DefaultAzureCredential
 from azure.mgmt.authorization import AuthorizationManagementClient
 from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.storage import StorageManagementClient
@@ -469,7 +468,7 @@ class Terraform:
         container_name = providers["terraform"]["backend"]["azurerm"]["container_name"]
 
         # Create RG
-        credential = DefaultAzureCredential()
+        credential = Azure.get_credentials()
         resource_client = ResourceManagementClient(credential, subscription_id)
         rg_result = resource_client.resource_groups.create_or_update(
             resource_group_name, {"location": region}
