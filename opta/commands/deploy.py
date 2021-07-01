@@ -54,7 +54,7 @@ def deploy(
         outputs = Terraform.get_outputs(layer)
     except MissingState:
         outputs = {}
-    if "docker_repo_url" not in outputs:
+    if "docker_repo_url" not in outputs or outputs["docker_repo_url"] == "":
         logger.info(
             "Did not find docker repository in state, so applying once to create it before deployment"
         )

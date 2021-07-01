@@ -16,6 +16,63 @@ from opta.layer import Layer
 
 
 class TestKubernetes:
+    def test_azure_configure_kubectl(self, mocker: MockFixture) -> None:
+        mocked_is_tool = mocker.patch(
+            "opta.core.kubernetes.is_tool", side_effect=[True, True]
+        )
+        layer = mocker.Mock(spec=Layer)
+        layer.parent = None
+        layer.cloud = "azurerm"
+        layer.name = "blah"
+        layer.providers = {
+            "azurerm": {
+                "location": "centralus",
+                "tenant_id": "blahbc17-blah-blah-blah-blah291d395b",
+                "subscription_id": "blah99ae-blah-blah-blah-blahd2a04788",
+            }
+        }
+        layer.root.return_value = layer
+        layer.gen_providers.return_value = {
+            "terraform": {
+                "backend": {"azurerm": {"resource_group_name": "dummy_resource_group"}}
+            },
+            "provider": {
+                "azurerm": {
+                    "location": "centralus",
+                    "tenant_id": "blahbc17-blah-blah-blah-blah291d395b",
+                    "subscription_id": "blah99ae-blah-blah-blah-blahd2a04788",
+                }
+            },
+        }
+        mocked_terraform_output = mocker.patch(
+            "opta.core.kubernetes.get_terraform_outputs",
+            return_value={"k8s_cluster_name": "mocked_cluster_name"},
+        )
+        mocked_nice_run = mocker.patch("opta.core.kubernetes.nice_run",)
+
+        configure_kubectl(layer)
+
+        mocked_terraform_output.assert_called_once_with(layer)
+        mocked_is_tool.assert_has_calls([mocker.call("kubectl"), mocker.call("az")])
+        mocked_nice_run.assert_has_calls(
+            [
+                mocker.call(
+                    [
+                        "az",
+                        "aks",
+                        "get-credentials",
+                        "--resource-group",
+                        "dummy_resource_group",
+                        "--name",
+                        "mocked_cluster_name",
+                        "--admin",
+                        "--overwrite-existing",
+                    ],
+                    check=True,
+                ),
+            ]
+        )
+
     def test_configure_kubectl(self, mocker: MockFixture) -> None:
         mocked_is_tool = mocker.patch(
             "opta.core.kubernetes.is_tool", side_effect=[True, True]
@@ -37,9 +94,7 @@ class TestKubernetes:
         layer.parent = None
         layer.cloud = "aws"
         layer.name = "blah"
-        layer.providers = {
-            "aws": {"region": "us-east-1", "allowed_account_ids": ["111111111111"]}
-        }
+        layer.providers = {"aws": {"region": "us-east-1", "account_id": "111111111111"}}
         layer.root.return_value = layer
         mocked_terraform_output = mocker.patch(
             "opta.core.kubernetes.get_terraform_outputs",
@@ -82,9 +137,7 @@ class TestKubernetes:
         layer = mocker.Mock(spec=Layer)
         layer.name = "mocked_layer"
         layer.parent = None
-        layer.providers = {
-            "aws": {"region": "us-east-1", "allowed_account_ids": [111111111111]}
-        }
+        layer.providers = {"aws": {"region": "us-east-1", "account_id": "111111111111"}}
         mocked_pod_1 = mocker.Mock(spec=V1Pod)
         mocked_pod_1.metadata = mocker.Mock()
         mocked_pod_1.metadata.name = "pod1"
@@ -182,9 +235,7 @@ class TestKubernetes:
         layer = mocker.Mock(spec=Layer)
         layer.name = "mocked_layer"
         layer.parent = None
-        layer.providers = {
-            "aws": {"region": "us-east-1", "allowed_account_ids": [111111111111]}
-        }
+        layer.providers = {"aws": {"region": "us-east-1", "account_id": "111111111111"}}
         mocked_old_events = mocker.Mock(spec=V1EventList)
         mocked_event_1 = mocker.Mock(spec=V1Event)
         mocked_event_1.last_timestamp = datetime.datetime.now(

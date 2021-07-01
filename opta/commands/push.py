@@ -64,6 +64,29 @@ def get_gcr_auth_info(layer: Layer) -> Tuple[str, str]:
     return "oauth2accesstoken", credentials.token
 
 
+def get_acr_auth_info(layer: Layer) -> Tuple[str, str]:
+    acr_name = get_terraform_outputs(layer.root()).get("acr_name")
+    if acr_name is None:
+        raise Exception("Could not find acr_name")
+    token = nice_run(
+        [
+            "az",
+            "acr",
+            "login",
+            "--name",
+            acr_name,
+            "--expose-token",
+            "--output",
+            "tsv",
+            "--query",
+            "accessToken",
+        ],
+        check=True,
+        capture_output=True,
+    ).stdout.decode("utf-8")
+    return "00000000-0000-0000-0000-000000000000", token
+
+
 def push_to_docker(
     username: str,
     password: str,
@@ -130,6 +153,8 @@ def _push(image: str, config: str, env: Optional[str], tag: Optional[str]) -> No
         username, password = get_ecr_auth_info(layer)
     elif layer.cloud == "google":
         username, password = get_gcr_auth_info(layer)
+    elif layer.cloud == "azurerm":
+        username, password = get_acr_auth_info(layer)
     else:
         raise Exception(f"No support for pushing image to provider {layer.cloud}")
     push_to_docker(username, password, image, registry_url, tag)

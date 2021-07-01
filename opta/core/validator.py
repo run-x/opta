@@ -54,6 +54,10 @@ class GcpModule(Module):
     cloud = "google"
 
 
+class AzureModule(Module):
+    cloud = "azurerm"
+
+
 class Opta(Validator):
     """Opta Yaml Validator"""
 
@@ -73,7 +77,7 @@ class Opta(Validator):
 
         if "org_name" in value:
             if self.environment_schema_path is None:
-                raise UserErrors("We currently only support AWS and GCP")
+                raise UserErrors("We currently only support AWS, GCP, and Azure")
             schema_path = self.environment_schema_path
         else:
             schema_path = path.join(schema_dir_path, "service.yaml")
@@ -98,6 +102,11 @@ class AwsOpta(Opta):
 class GcpOpta(Opta):
     extra_validators = [GcpModule]
     environment_schema_path = path.join(schema_dir_path, "gcp_environment.yaml")
+
+
+class AureOpta(Opta):
+    extra_validators = [AzureModule]
+    environment_schema_path = path.join(schema_dir_path, "azure_environment.yaml")
 
 
 def _get_yamale_errors(
@@ -127,6 +136,8 @@ aws_validators = DefaultValidators.copy()
 aws_validators[AwsOpta.tag] = AwsOpta
 gcp_validators = DefaultValidators.copy()
 gcp_validators[GcpOpta.tag] = GcpOpta
+azure_validators = DefaultValidators.copy()
+azure_validators[AureOpta.tag] = AureOpta
 
 main_schema_path = path.join(schema_dir_path, "opta.yaml")
 vanilla_main_schema = yamale.make_schema(
@@ -137,6 +148,9 @@ aws_main_schema = yamale.make_schema(
 )
 gcp_main_schema = yamale.make_schema(
     main_schema_path, validators=gcp_validators, parser="ruamel"
+)
+azure_main_schema = yamale.make_schema(
+    main_schema_path, validators=azure_validators, parser="ruamel"
 )
 
 
@@ -158,6 +172,8 @@ def validate_yaml(config_file_path: str, cloud: str) -> Literal[True]:
         yamale_result = yamale.validate(aws_main_schema, data, _raise_error=False)
     elif cloud == "google":
         yamale_result = yamale.validate(gcp_main_schema, data, _raise_error=False)
+    elif cloud == "azurerm":
+        yamale_result = yamale.validate(azure_main_schema, data, _raise_error=False)
     else:
         yamale_result = yamale.validate(vanilla_main_schema, data, _raise_error=False)
     errors = []

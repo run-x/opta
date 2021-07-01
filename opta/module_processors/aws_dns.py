@@ -176,7 +176,7 @@ class AwsDnsProcessor(ModuleProcessor):
                     "Certificate body can only have one certificate-- additional ones must go in the chain."
                 )
             try:
-                cert_obj = load_certificate(FILETYPE_PEM, cert_body)
+                cert_obj = load_certificate(FILETYPE_PEM, cert_body.encode("utf-8"))
                 return cert_obj, cert_body
             except Error:
                 logger.warning("Certificate body is not correct pem cert.")
@@ -202,7 +202,9 @@ class AwsDnsProcessor(ModuleProcessor):
                 )
                 continue
             try:
-                cert_chain_obj = load_certificate(FILETYPE_PEM, cert_chain)
+                cert_chain_obj = load_certificate(
+                    FILETYPE_PEM, cert_chain.encode("utf-8")
+                )
                 return cert_chain_obj, cert_chain
             except Error:
                 logger.warning("certificate chain is not correct pem cert")

@@ -77,6 +77,9 @@ def _fetch_children_layers(layer: "Layer") -> List["Layer"]:
         opta_configs = _aws_download_all_opta_configs(bucket_name)
     elif layer.cloud == "google":
         opta_configs = _gcp_download_all_opta_configs(bucket_name)
+    elif layer.cloud == "azurerm":
+        # WIP
+        opta_configs = []
     else:
         raise Exception(f"Not handling deletion for cloud {layer.cloud}")
     # Keep track of children layers as we find them.
@@ -117,7 +120,7 @@ def _aws_download_all_opta_configs(bucket_name: str) -> List[str]:
         config_name = config_path[len(s3_config_dir) :]
         local_config_path = f"tmp.opta.{config_name}"
         with open(local_config_path, "wb") as f:
-            s3_client.download_fileobj(bucket_name, config_path, f)
+            s3_client.download_fileobj(Bucket=bucket_name, Key=config_path, Fileobj=f)
 
         configs.append(local_config_path)
 

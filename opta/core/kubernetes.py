@@ -54,6 +54,8 @@ def configure_kubectl(layer: "Layer") -> None:
         _aws_configure_kubectl(layer)
     elif layer.cloud == "google":
         _gcp_configure_kubectl(layer)
+    elif layer.cloud == "azurerm":
+        _azure_configure_kubectl(layer)
 
 
 def _gcp_configure_kubectl(layer: "Layer") -> None:
@@ -121,6 +123,36 @@ def _gcp_configure_kubectl(layer: "Layer") -> None:
             cluster_name,
             f"--region={env_gcp_region}",
         ]
+    )
+
+
+def _azure_configure_kubectl(layer: "Layer") -> None:
+    root_layer = layer.root()
+    providers = root_layer.gen_providers(0)
+    if not is_tool("az"):
+        raise UserErrors("Please install az CLI first")
+
+    rg_name = providers["terraform"]["backend"]["azurerm"]["resource_group_name"]
+    cluster_name = get_cluster_name(root_layer)
+
+    if not cluster_name:
+        raise Exception(
+            "The AKS cluster name could not be determined -- please make sure it has been applied in the environment."
+        )
+
+    nice_run(
+        [
+            "az",
+            "aks",
+            "get-credentials",
+            "--resource-group",
+            rg_name,
+            "--name",
+            cluster_name,
+            "--admin",
+            "--overwrite-existing",
+        ],
+        check=True,
     )
 
 
@@ -198,7 +230,7 @@ def get_cluster_name(layer: "Layer") -> Optional[str]:
 
 def _aws_get_cluster_env(root_layer: "Layer") -> Tuple[str, List[str]]:
     aws_provider = root_layer.providers["aws"]
-    return aws_provider["region"], aws_provider["allowed_account_ids"]
+    return aws_provider["region"], [aws_provider["account_id"]]
 
 
 def _gcp_get_cluster_env(root_layer: "Layer") -> Tuple[str, str]:

@@ -19,11 +19,17 @@ class TestLayer:
             None,
         )
         mocked_datadog_processor = mocker.patch("opta.layer.DatadogProcessor")
+        layer.PROCESSOR_DICT["datadog"] = mocked_datadog_processor
         mocked_k8s_base_processor = mocker.patch("opta.layer.AwsK8sBaseProcessor")
+        layer.PROCESSOR_DICT["aws-k8s-base"] = mocked_k8s_base_processor
         mocked_eks_processor = mocker.patch("opta.layer.AwsEksProcessor")
+        layer.PROCESSOR_DICT["aws-eks"] = mocked_eks_processor
         mocked_dns_processor = mocker.patch("opta.layer.AwsDnsProcessor")
+        layer.PROCESSOR_DICT["aws-dns"] = mocked_dns_processor
         mocked_runx_processor = mocker.patch("opta.layer.RunxProcessor")
+        layer.PROCESSOR_DICT["runx"] = mocked_runx_processor
         mocked_aws_email_processor = mocker.patch("opta.layer.AwsEmailProcessor")
+        layer.PROCESSOR_DICT["aws-ses"] = mocked_aws_email_processor
         mocked_base_processor = mocker.patch("opta.layer.ModuleProcessor")
 
         assert layer.name == "dummy-parent"
@@ -100,12 +106,18 @@ class TestLayer:
             "dummy-env",
         )
         mocked_k8s_service_processor = mocker.patch("opta.layer.AwsK8sServiceProcessor")
-        mocked_base_processor = mocker.patch("opta.layer.ModuleProcessor")
+        layer.PROCESSOR_DICT["aws-k8s-service"] = mocked_k8s_service_processor
         mocked_aws_iam_role_processor = mocker.patch("opta.layer.AwsIamRoleProcessor")
+        layer.PROCESSOR_DICT["aws-iam-role"] = mocked_aws_iam_role_processor
         mocked_aws_iam_user_processor = mocker.patch("opta.layer.AwsIamUserProcessor")
+        layer.PROCESSOR_DICT["aws-iam-user"] = mocked_aws_iam_user_processor
         mocked_aws_sns_processor = mocker.patch("opta.layer.AwsSnsProcessor")
+        layer.PROCESSOR_DICT["aws-sns"] = mocked_aws_sns_processor
         mocked_aws_sqs_processor = mocker.patch("opta.layer.AwsSqsProcessor")
+        layer.PROCESSOR_DICT["aws-sqs"] = mocked_aws_sqs_processor
         mocked_runx_processor = mocker.patch("opta.layer.RunxProcessor")
+        layer.PROCESSOR_DICT["runx"] = mocked_runx_processor
+        mocked_base_processor = mocker.patch("opta.layer.ModuleProcessor")
 
         assert layer.name == "dummy-config-1"
         assert layer.parent is not None

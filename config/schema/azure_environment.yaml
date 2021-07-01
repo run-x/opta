@@ -1,0 +1,8 @@
+name: str()
+org_name: str()
+providers:
+  azurerm:
+    location: str()
+    tenant_id: str()
+    subscription_id: str()
+modules: list(module())

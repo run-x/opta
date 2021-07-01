@@ -65,7 +65,7 @@ class AWS:
         config_path = f"opta_config/{self.layer.name}"
 
         s3_client = boto3.client("s3")
-        s3_client.upload_file(config, bucket, config_path)
+        s3_client.upload_file(Filename=config, Bucket=bucket, Key=config_path)
         logger.debug("Uploaded opta config to s3")
 
     def delete_opta_config(self) -> None:

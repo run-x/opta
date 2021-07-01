@@ -1,0 +1,19 @@
+environments:
+  - path: "./azure_dummy_config_parent.yaml"
+    name: "dummy-env"
+    variables: {}
+name: azure-dummy-config
+modules:
+  - name: app
+    type: k8s-service
+    env_vars:
+      A: B
+    secrets:
+      - BALONEY
+    image: kennethreitz/httpbin
+    min_containers: 2
+    max_containers: "{vars.max_containers}"
+    liveness_probe_path: "/get"
+    readiness_probe_path: "/get"
+    port:
+      http: 80
