@@ -423,3 +423,187 @@ class TestTerraform:
                 "type": "test_resource",
             }
         }
+
+    def test_azure_verify_storage(self, mocker: MockFixture) -> None:
+        layer = mocker.Mock(spec=Layer)
+        layer.parent = None
+        layer.cloud = "azurerm"
+        layer.name = "blah"
+        layer.providers = {
+            "azurerm": {
+                "location": "centralus",
+                "tenant_id": "blahbc17-blah-blah-blah-blah291d395b",
+                "subscription_id": "blah99ae-blah-blah-blah-blahd2a04788",
+            }
+        }
+        layer.root.return_value = layer
+        layer.gen_providers.return_value = {
+            "terraform": {
+                "backend": {
+                    "azurerm": {
+                        "resource_group_name": "dummy_resource_group",
+                        "storage_account_name": "dummy_storage_account",
+                        "container_name": "dummy_container_name",
+                    }
+                }
+            },
+            "provider": {
+                "azurerm": {
+                    "location": "centralus",
+                    "tenant_id": "blahbc17-blah-blah-blah-blah291d395b",
+                    "subscription_id": "blah99ae-blah-blah-blah-blahd2a04788",
+                }
+            },
+        }
+        mocked_azure = mocker.patch("opta.core.terraform.Azure")
+        mocked_credentials = mocker.Mock()
+        mocked_azure.get_credentials.return_value = mocked_credentials
+        mocked_storage_client_instance = mocker.Mock()
+        mocked_storage_client = mocker.patch(
+            "opta.core.terraform.StorageManagementClient",
+            return_value=mocked_storage_client_instance,
+        )
+
+        assert Terraform._azure_verify_storage(layer)
+
+        mocked_azure.get_credentials.assert_called_once_with()
+        mocked_storage_client.assert_called_once_with(
+            mocked_credentials, "blah99ae-blah-blah-blah-blahd2a04788"
+        )
+        mocked_storage_client_instance.blob_containers.get.assert_called_once_with(
+            "dummy_resource_group", "dummy_storage_account", "dummy_container_name"
+        )
+
+    def test_create_azure_state_storage(self, mocker: MockFixture) -> None:
+        layer = mocker.Mock(spec=Layer)
+        layer.parent = None
+        layer.cloud = "azurerm"
+        layer.name = "blah"
+        layer.providers = {
+            "azurerm": {
+                "location": "centralus",
+                "tenant_id": "blahbc17-blah-blah-blah-blah291d395b",
+                "subscription_id": "blah99ae-blah-blah-blah-blahd2a04788",
+            }
+        }
+        layer.root.return_value = layer
+        layer.gen_providers.return_value = {
+            "terraform": {
+                "backend": {
+                    "azurerm": {
+                        "resource_group_name": "dummy_resource_group",
+                        "storage_account_name": "dummy_storage_account",
+                        "container_name": "dummy_container_name",
+                    }
+                }
+            },
+            "provider": {
+                "azurerm": {
+                    "location": "centralus",
+                    "tenant_id": "blahbc17-blah-blah-blah-blah291d395b",
+                    "subscription_id": "blah99ae-blah-blah-blah-blahd2a04788",
+                }
+            },
+        }
+        mocked_azure = mocker.patch("opta.core.terraform.Azure")
+        mocked_credentials = mocker.Mock()
+        mocked_azure.get_credentials.return_value = mocked_credentials
+        mocked_resource_client_instance = mocker.Mock()
+        mocked_resource_client = mocker.patch(
+            "opta.core.terraform.ResourceManagementClient",
+            return_value=mocked_resource_client_instance,
+        )
+        mocked_rg_result = mocker.Mock()
+        mocked_rg_result.name = "dummy_resource_group"
+        mocked_rg_result.id = "resource_group_id"
+        mocked_resource_client_instance.resource_groups.create_or_update.return_value = (
+            mocked_rg_result
+        )
+
+        mocked_authorization_management_client_instance = mocker.Mock()
+        mocked_authorization_management_client = mocker.patch(
+            "opta.core.terraform.AuthorizationManagementClient",
+            return_value=mocked_authorization_management_client_instance,
+        )
+        mocked_owner_role = mocker.Mock()
+        mocked_owner_role.id = "owner_role_id"
+        storage_role = mocker.Mock()
+        storage_role.id = "storage_role_id"
+        key_vault_role = mocker.Mock()
+        key_vault_role.id = "key_vault_role_id"
+        mocked_authorization_management_client_instance.role_definitions.list.side_effect = [
+            [mocked_owner_role],
+            [storage_role],
+            [key_vault_role],
+        ]
+        role_assignment = mocker.Mock()
+        role_assignment.role_definition_id = "owner_role_id"
+        mocked_authorization_management_client_instance.role_assignments.list_for_resource_group.return_value = [
+            role_assignment
+        ]
+
+        mocked_storage_client_instance = mocker.Mock()
+        mocked_storage_client = mocker.patch(
+            "opta.core.terraform.StorageManagementClient",
+            return_value=mocked_storage_client_instance,
+        )
+
+        Terraform.create_state_storage(layer)
+
+        mocked_azure.get_credentials.assert_called_once_with()
+        mocked_resource_client.assert_called_once_with(
+            mocked_credentials, "blah99ae-blah-blah-blah-blahd2a04788"
+        )
+        mocked_authorization_management_client.assert_called_once_with(
+            mocked_credentials,
+            "blah99ae-blah-blah-blah-blahd2a04788",
+            api_version="2018-01-01-preview",
+        )
+        mocked_resource_client_instance.resource_groups.create_or_update.assert_called_once_with(
+            "dummy_resource_group", {"location": "centralus"}
+        )
+        mocked_authorization_management_client_instance.role_definitions.list.assert_has_calls(
+            [
+                mocker.call("resource_group_id", filter="roleName eq 'Owner'"),
+                mocker.call(
+                    "resource_group_id", filter="roleName eq 'Storage Blob Data Owner'"
+                ),
+                mocker.call(
+                    "resource_group_id", filter="roleName eq 'Key Vault Administrator'"
+                ),
+            ],
+            any_order=True,
+        )
+        mocked_authorization_management_client_instance.role_assignments.list_for_resource_group.assert_called_once_with(
+            "dummy_resource_group"
+        )
+        mocked_authorization_management_client_instance.role_assignments.create.assert_has_calls(
+            [
+                mocker.call(
+                    scope="/subscriptions/blah99ae-blah-blah-blah-blahd2a04788/resourceGroups/dummy_resource_group",
+                    role_assignment_name=mocker.ANY,
+                    parameters={
+                        "role_definition_id": storage_role.id,
+                        "principal_id": role_assignment.principal_id,
+                    },
+                ),
+                mocker.call(
+                    scope="/subscriptions/blah99ae-blah-blah-blah-blahd2a04788/resourceGroups/dummy_resource_group",
+                    role_assignment_name=mocker.ANY,
+                    parameters={
+                        "role_definition_id": key_vault_role.id,
+                        "principal_id": role_assignment.principal_id,
+                    },
+                ),
+            ],
+            any_order=True,
+        )
+        mocked_storage_client.assert_called_once_with(
+            mocked_credentials, "blah99ae-blah-blah-blah-blahd2a04788"
+        )
+        mocked_storage_client_instance.storage_accounts.get_properties.assert_called_once_with(
+            "dummy_resource_group", "dummy_storage_account"
+        )
+        mocked_storage_client_instance.blob_containers.get.assert_called_once_with(
+            "dummy_resource_group", "dummy_storage_account", "dummy_container_name"
+        )
