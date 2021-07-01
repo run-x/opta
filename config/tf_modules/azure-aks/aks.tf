@@ -86,9 +86,9 @@ resource "azurerm_kubernetes_cluster" "main" {
   }
 
   kubelet_identity {
-    client_id = azurerm_user_assigned_identity.agent_pool.client_id
+    client_id                 = azurerm_user_assigned_identity.agent_pool.client_id
     user_assigned_identity_id = azurerm_user_assigned_identity.agent_pool.id
-    object_id = azurerm_user_assigned_identity.agent_pool.principal_id
+    object_id                 = azurerm_user_assigned_identity.agent_pool.principal_id
   }
 
   lifecycle {
