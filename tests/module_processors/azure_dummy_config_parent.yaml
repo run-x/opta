@@ -1,0 +1,16 @@
+name: azure-dummy-parent
+org_name: opta-tests
+providers:
+  azurerm:
+    location: centralus
+    tenant_id: blahbc17-blah-blah-blah-blah291d395b
+    subscription_id: blah99ae-blah-blah-blah-blahd2a04788
+modules:
+  - type: base
+  - type: dns
+    domain: azure-example.runx.dev
+    delegated: false
+  - type: k8s-cluster
+    admin_group_object_ids: ["blah9136-blah-blah-blah-blah8b33c18e"]
+    max_nodes: 6
+  - type: k8s-base

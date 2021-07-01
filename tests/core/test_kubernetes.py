@@ -16,6 +16,63 @@ from opta.layer import Layer
 
 
 class TestKubernetes:
+    def test_azure_configure_kubectl(self, mocker: MockFixture) -> None:
+        mocked_is_tool = mocker.patch(
+            "opta.core.kubernetes.is_tool", side_effect=[True, True]
+        )
+        layer = mocker.Mock(spec=Layer)
+        layer.parent = None
+        layer.cloud = "azurerm"
+        layer.name = "blah"
+        layer.providers = {
+            "azurerm": {
+                "location": "centralus",
+                "tenant_id": "blahbc17-blah-blah-blah-blah291d395b",
+                "subscription_id": "blah99ae-blah-blah-blah-blahd2a04788",
+            }
+        }
+        layer.root.return_value = layer
+        layer.gen_providers.return_value = {
+            "terraform": {
+                "backend": {"azurerm": {"resource_group_name": "dummy_resource_group"}}
+            },
+            "provider": {
+                "azurerm": {
+                    "location": "centralus",
+                    "tenant_id": "blahbc17-blah-blah-blah-blah291d395b",
+                    "subscription_id": "blah99ae-blah-blah-blah-blahd2a04788",
+                }
+            },
+        }
+        mocked_terraform_output = mocker.patch(
+            "opta.core.kubernetes.get_terraform_outputs",
+            return_value={"k8s_cluster_name": "mocked_cluster_name"},
+        )
+        mocked_nice_run = mocker.patch("opta.core.kubernetes.nice_run",)
+
+        configure_kubectl(layer)
+
+        mocked_terraform_output.assert_called_once_with(layer)
+        mocked_is_tool.assert_has_calls([mocker.call("kubectl"), mocker.call("az")])
+        mocked_nice_run.assert_has_calls(
+            [
+                mocker.call(
+                    [
+                        "az",
+                        "aks",
+                        "get-credentials",
+                        "--resource-group",
+                        "dummy_resource_group",
+                        "--name",
+                        "mocked_cluster_name",
+                        "--admin",
+                        "--overwrite-existing",
+                    ],
+                    check=True,
+                ),
+            ]
+        )
+
     def test_configure_kubectl(self, mocker: MockFixture) -> None:
         mocked_is_tool = mocker.patch(
             "opta.core.kubernetes.is_tool", side_effect=[True, True]
