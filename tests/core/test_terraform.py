@@ -199,6 +199,75 @@ class TestTerraform:
             mocker.ANY, mocker.ANY
         )
 
+    def test_azure_download_state(self, mocker: MockFixture) -> None:
+        layer = mocker.Mock(spec=Layer)
+        layer.parent = None
+        layer.cloud = "azurerm"
+        layer.name = "blah"
+        layer.providers = {
+            "azurerm": {
+                "location": "centralus",
+                "tenant_id": "blahbc17-blah-blah-blah-blah291d395b",
+                "subscription_id": "blah99ae-blah-blah-blah-blahd2a04788",
+            }
+        }
+        layer.root.return_value = layer
+        layer.gen_providers.return_value = {
+            "terraform": {
+                "backend": {
+                    "azurerm": {
+                        "resource_group_name": "dummy_resource_group",
+                        "storage_account_name": "dummy_storage_account",
+                        "container_name": "dummy_container_name",
+                        "key": "dummy_key",
+                    }
+                }
+            },
+            "provider": {
+                "azurerm": {
+                    "location": "centralus",
+                    "tenant_id": "blahbc17-blah-blah-blah-blah291d395b",
+                    "subscription_id": "blah99ae-blah-blah-blah-blahd2a04788",
+                }
+            },
+        }
+        mocked_azure = mocker.patch("opta.core.terraform.Azure")
+        mocked_credentials = mocker.Mock()
+        mocked_azure.get_credentials.return_value = mocked_credentials
+        mocker.patch(
+            "opta.core.terraform.Terraform._azure_verify_storage", return_value=True
+        )
+        mocked_blob_service_client_instance = mocker.Mock()
+        mocked_blob_service_client = mocker.patch(
+            "opta.core.terraform.BlobServiceClient",
+            return_value=mocked_blob_service_client_instance,
+        )
+        mocked_container_client = mocker.Mock()
+        mocked_blob_service_client_instance.get_container_client.return_value = (
+            mocked_container_client
+        )
+        mocked_blob_client = mocker.Mock()
+        mocked_container_client.get_blob_client.return_value = mocked_blob_client
+        read_data = '{"a": 1}'
+        mocked_file = mocker.mock_open(read_data=read_data)
+        mocker.patch("opta.core.terraform.os.remove")
+        mocked_open = mocker.patch("opta.core.terraform.open", mocked_file)
+
+        assert Terraform.download_state(layer)
+
+        mocked_blob_service_client.assert_called_once_with(
+            "https://dummy_storage_account.blob.core.windows.net/",
+            credential=mocked_credentials,
+        )
+        mocked_blob_service_client_instance.get_container_client.assert_called_once_with(
+            "dummy_container_name"
+        )
+        mocked_container_client.get_blob_client.assert_called_once_with("dummy_key")
+        mocked_open.assert_has_calls(
+            [mocker.call("./tmp.tfstate", "wb"), mocker.call("./tmp.tfstate", "r")],
+            any_order=True,
+        )
+
     def test_create_aws_state_storage(self, mocker: MockFixture) -> None:
         layer = mocker.Mock(spec=Layer)
         layer.gen_providers.return_value = {

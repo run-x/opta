@@ -7,6 +7,7 @@ from pytest_mock import MockFixture
 
 from opta.cli import cli
 from opta.commands.push import (
+    get_acr_auth_info,
     get_ecr_auth_info,
     get_gcr_auth_info,
     get_registry_url,
@@ -83,6 +84,45 @@ def test_get_gcr_auth_info(mocker: MockFixture) -> None:
     )
     assert get_gcr_auth_info(mocked_layer) == ("oauth2accesstoken", "blah",)
     patched_gcp.assert_called_once_with()
+
+
+def test_get_acr_auth_info(mocker: MockFixture) -> None:
+    mocked_layer = mocker.Mock(spec=Layer)
+    mocked_layer.root.return_value = mocked_layer
+    mocked_get_terraform_output = mocker.patch(
+        "opta.commands.push.get_terraform_outputs", return_value={"acr_name": "blah"}
+    )
+    mocked_nice_run_output = mocker.Mock()
+    mocked_nice_run = mocker.patch(
+        "opta.commands.push.nice_run", return_value=mocked_nice_run_output
+    )
+    mocked_nice_run_output.stdout = "dummy_token".encode("utf-8")
+
+    assert get_acr_auth_info(mocked_layer) == (
+        "00000000-0000-0000-0000-000000000000",
+        "dummy_token",
+    )
+    mocked_get_terraform_output.assert_called_once_with(mocked_layer)
+    mocked_nice_run.assert_has_calls(
+        [
+            mocker.call(
+                [
+                    "az",
+                    "acr",
+                    "login",
+                    "--name",
+                    "blah",
+                    "--expose-token",
+                    "--output",
+                    "tsv",
+                    "--query",
+                    "accessToken",
+                ],
+                check=True,
+                capture_output=True,
+            ),
+        ]
+    )
 
 
 def test_valid_input(mocker: MockFixture) -> None:
