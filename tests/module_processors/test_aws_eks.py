@@ -1,10 +1,8 @@
 # type: ignore
 import os
 
-import pytest
 from pytest_mock import MockFixture
 
-from opta.exceptions import UserErrors
 from opta.layer import Layer
 from opta.module_processors.aws_eks import AwsEksProcessor
 
@@ -57,7 +55,7 @@ class TestAwsEksModuleProcessor:
                 {
                     "AutoScalingGroupName": "dummy_name2",
                     "Tags": [
-                        {"Key": f"kubernetes.io/cluster/silly", "Value": "owned",},
+                        {"Key": "kubernetes.io/cluster/silly", "Value": "owned"},
                         {
                             "Key": "eks:nodegroup-name",
                             "Value": f"{cluster_name}-default-897896",

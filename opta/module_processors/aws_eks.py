@@ -23,7 +23,9 @@ class AwsEksProcessor(ModuleProcessor):
 
     def post_hook(self, module_idx: int, exception: Optional[Exception]) -> None:
         if exception is not None or not self.module.data.get("enable_metrics", False):
-            logger.info("Not enabling metrics for default node group's autoscaling group")
+            logger.debug(
+                "Not enabling metrics for default node group's autoscaling group"
+            )
             return
         providers = self.layer.gen_providers(0)
         region = providers["provider"]["aws"]["region"]
@@ -47,7 +49,7 @@ class AwsEksProcessor(ModuleProcessor):
                     f"{cluster_name}-default"
                 ):
                     group_name = group["AutoScalingGroupName"]
-                    logger.info(f"Enabling metrics for autoscaling group {group_name}")
+                    logger.debug(f"Enabling metrics for autoscaling group {group_name}")
                     autoscaling_client.enable_metrics_collection(
                         AutoScalingGroupName=group_name, Granularity="1Minute"
                     )
