@@ -54,7 +54,7 @@ class AwsEksProcessor(ModuleProcessor):
                         AutoScalingGroupName=group_name, Granularity="1Minute"
                     )
                 return None
-            if current_token == "":
+            if current_token == "":  # nosec
                 break
 
     def process(self, module_idx: int) -> None:
