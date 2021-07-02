@@ -26,6 +26,6 @@ resource "azurerm_private_endpoint" "opta" {
     name                           = "opta-${var.layer_name}-${var.module_name}-${random_id.key_suffix.hex}"
     is_manual_connection           = false
     private_connection_resource_id = azurerm_redis_cache.opta.id
-    subresource_names = ["redisCache"]
+    subresource_names              = ["redisCache"]
   }
 }
