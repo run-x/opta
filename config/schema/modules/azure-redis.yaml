@@ -1,0 +1,8 @@
+type: regex('azure-redis')
+name: str(required=False)
+env_name: str(required=False)
+layer_name: str(required=False)
+module_name: str(required=False)
+sku_name: str(required=False)
+family: str(required=False)
+capacity: int(required=False)

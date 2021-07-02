@@ -110,7 +110,7 @@ modules:
             client_key: "${{base64decode({module_source}.client_key)}}"
             cluster_ca_certificate: "${{base64decode({module_source}.k8s_ca_data)}}"
   azure-k8s-base:
-    cloud: aws
+    cloud: azure
     location: azure-k8s-base
     root_only: true
     variables:
@@ -124,7 +124,7 @@ modules:
       hosted_zone_name: optional
     outputs: {}
   azure-k8s-service:
-    cloud: google
+    cloud: azure
     location: azure-k8s-service
     variables:
       env_name: str
@@ -153,6 +153,34 @@ modules:
         name: K8s Service
         desc: Secure and scalable Kubernetes service packaged into a helm chart
         url: https://app.datadoghq.com/apm/service/{k8s-moduleName}-{k8s-layerName}/
+  azure-postgres:
+    cloud: azure
+    location: azure-postgres
+    variables:
+      env_name: str
+      layer_name: str
+      module_name: str
+      sku_name: optional
+      engine_version: optional
+    outputs:
+      db_user: str
+      db_password: str
+      db_host: str
+      db_name: str
+  azure-redis:
+    cloud: azure
+    location: azure-redis
+    variables:
+      env_name: str
+      layer_name: str
+      module_name: str
+      sku_name: optional
+      family: optional
+      capacity: optional
+    outputs:
+      cache_host:
+        export: true
+      cache_auth_token: str
   aws-base:
     cloud: aws
     location: aws-base
@@ -751,11 +779,13 @@ modules:
     alias:
       google: gcp-postgres
       aws: aws-postgres
+      azurerm: azure-postgres
 
   redis:
     alias:
       google: gcp-redis
       aws: aws-redis
+      azurerm: azure-redis
 
   k8s-service:
     alias:
