@@ -2,6 +2,12 @@ data "azurerm_resource_group" "main" {
   name = "opta-${var.env_name}"
 }
 
+data "azurerm_subnet" "opta" {
+  name                 = "opta-${var.env_name}-subnet"
+  resource_group_name  = data.azurerm_resource_group.main.name
+  virtual_network_name = "opta-${var.env_name}"
+}
+
 variable "env_name" {
   description = "Env name"
   type        = string
@@ -22,12 +28,7 @@ variable "engine_version" {
   default = "11"
 }
 
-variable "instance_tier" {
+variable "sku_name" {
   type    = string
-  default = "db-f1-micro"
-}
-
-variable "safety" {
-  type    = bool
-  default = false
+  default = "GP_Gen5_4"
 }
