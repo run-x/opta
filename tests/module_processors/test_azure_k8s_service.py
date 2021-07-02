@@ -25,7 +25,23 @@ class TestAzureK8sServiceProcessor:
         AzureK8sServiceProcessor(app_module, layer).process(idx)
         mocked_process.assert_called_once_with(idx)
         assert app_module.data["env_vars"] == [{"name": "A", "value": "B"}]
-        assert app_module.data["link_secrets"] == []
+        assert app_module.data["link_secrets"] == [
+            {"name": "database_db_user", "value": "${{module.database.db_user}}"},
+            {"name": "database_db_name", "value": "${{module.database.db_name}}"},
+            {"name": "database_db_password", "value": "${{module.database.db_password}}"},
+            {"name": "database_db_host", "value": "${{module.database.db_host}}"},
+            {"name": "redis_cache_host", "value": "${{module.redis.cache_host}}"},
+            {
+                "name": "redis_cache_auth_token",
+                "value": "${{module.redis.cache_auth_token}}",
+            },
+            {"name": "DBUSER2", "value": "${{module.database2.db_user}}"},
+            {"name": "DBNAME2", "value": "${{module.database2.db_name}}"},
+            {"name": "BLAH", "value": "${{module.database2.db_password}}"},
+            {"name": "DBHOST2", "value": "${{module.database2.db_host}}"},
+            {"name": "CACHEHOST2", "value": "${{module.redis2.cache_host}}"},
+            {"name": "CACHEAUTH2", "value": "${{module.redis2.cache_auth_token}}"},
+        ]
         assert app_module.data["manual_secrets"] == [
             "BALONEY",
         ]

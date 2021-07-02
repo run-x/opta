@@ -4,12 +4,31 @@ environments:
     variables: {}
 name: azure-dummy-config
 modules:
+  - name: database
+    type: postgres
+  - name: redis
+    type: redis
+  - name: database2
+    type: postgres
+  - name: redis2
+    type: redis
   - name: app
     type: k8s-service
     env_vars:
       A: B
     secrets:
       - BALONEY
+    links:
+      - database
+      - redis
+      - database2:
+          - db_user: DBUSER2
+            db_host: DBHOST2
+            db_name: DBNAME2
+            db_password: BLAH
+      - redis2:
+          - cache_host: CACHEHOST2
+            cache_auth_token: CACHEAUTH2
     image: kennethreitz/httpbin
     min_containers: 2
     max_containers: "{vars.max_containers}"
