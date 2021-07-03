@@ -28,6 +28,8 @@
     Slack Community
   </a> | <a href="https://opta.dev/">
     Website
+  </a> | <a href="mailto:info@runx.dev">
+    Email: info@runx.dev
   </a>
   </p>
 
