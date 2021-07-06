@@ -18,5 +18,5 @@ accountIdVariable = TemplateVariable(
     prompt="aws account id",
     applier=apply,
     validator=validate,
-    error_message="invalid account id",
+    error_message="invalid account id: must be a string of 12 digits",
 )

@@ -45,7 +45,7 @@ indented_regions = [f"\t{region}" for region in REGIONS]
 region_string = "\n".join(indented_regions)
 
 gcpRegionVariable = TemplateVariable(
-    prompt="gcp region",
+    prompt="gcp region (you can see a full list at https://cloud.google.com/compute/docs/regions-zones) ",
     applier=apply,
     validator=validate,
     error_message=f"Must be one of\n{region_string}",
