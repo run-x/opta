@@ -66,25 +66,13 @@ class TestInitEnv:
             modules:
             - type: base
             - type: dns
-            delegated: false
             domain: my.dns.domain
-            - name: deployeruser
-            type: aws-iam-user
-            extra_iam_policies:
-            - arn:aws:iam::aws:policy/AdministratorAccess
-            - name: deployerrole
-            type: aws-iam-role
-            extra_iam_policies:
-            - arn:aws:iam::aws:policy/AdministratorAccess
-            allowed_iams:
-            - ${{module.deployeruser.user_arn}}
+            delegated: false
             - type: k8s-cluster
             max_nodes: 12
             - type: k8s-base
-            admin_arns:
-            - ${{module.deployeruser.user_arn}}
-            - ${{module.deployerrole.role_arn}}
         """
+        print(result.output)
         assert _sanitize(expected_result) in _sanitize(result.output)
 
     def test_use_aws_defaults(self, mocker: MockFixture) -> None:
@@ -110,25 +98,13 @@ class TestInitEnv:
             modules:
             - type: base
             - type: dns
-            delegated: false
             domain: my.dns.domain
-            - name: deployeruser
-            type: aws-iam-user
-            extra_iam_policies:
-            - arn:aws:iam::aws:policy/AdministratorAccess
-            - name: deployerrole
-            type: aws-iam-role
-            extra_iam_policies:
-            - arn:aws:iam::aws:policy/AdministratorAccess
-            allowed_iams:
-            - ${{{{module.deployeruser.user_arn}}}}
+            delegated: false
             - type: k8s-cluster
             max_nodes: 12
             - type: k8s-base
-            admin_arns:
-            - ${{{{module.deployeruser.user_arn}}}}
-            - ${{{{module.deployerrole.role_arn}}}}
         """
+        print(result.output)
         assert _sanitize(expected_result) in _sanitize(result.output)
 
     def test_use_gcp_defaults(self, mocker: MockFixture) -> None:
