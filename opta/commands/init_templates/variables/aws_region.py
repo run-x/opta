@@ -42,7 +42,7 @@ indented_regions = [f"\t{region}" for region in REGIONS]
 region_string = "\n".join(indented_regions)
 
 awsRegionVariable = TemplateVariable(
-    prompt="aws region (you can see a full list at https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html)",
+    prompt="AWS region (you can see a full list at https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html)",
     applier=apply,
     validator=validate,
     error_message=f"Must be one of\n{region_string}",

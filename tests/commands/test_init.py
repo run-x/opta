@@ -72,7 +72,6 @@ class TestInitEnv:
             max_nodes: 12
             - type: k8s-base
         """
-        print(result.output)
         assert _sanitize(expected_result) in _sanitize(result.output)
 
     def test_use_aws_defaults(self, mocker: MockFixture) -> None:
@@ -104,7 +103,6 @@ class TestInitEnv:
             max_nodes: 12
             - type: k8s-base
         """
-        print(result.output)
         assert _sanitize(expected_result) in _sanitize(result.output)
 
     def test_use_gcp_defaults(self, mocker: MockFixture) -> None:

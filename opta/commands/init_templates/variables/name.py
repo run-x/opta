@@ -12,7 +12,7 @@ def apply(d: dict, v: str) -> dict:
 
 
 nameVariable = TemplateVariable(
-    prompt="name",
+    prompt="Name",
     applier=apply,
     validator=Layer.valid_name,
     error_message="Invalid name: can only contain letters, dashes and numbers",
