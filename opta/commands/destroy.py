@@ -10,7 +10,7 @@ from opta.core.gcp import GCP
 from opta.core.generator import gen_all
 from opta.core.terraform import Terraform
 from opta.layer import Layer
-from opta.utils import fmt_msg, logger, yaml
+from opta.utils import check_opta_file_exists, fmt_msg, logger, yaml
 
 
 @click.command(hidden=True)
@@ -26,6 +26,8 @@ from opta.utils import fmt_msg, logger, yaml
 )
 def destroy(config: str, env: Optional[str], auto_approve: bool) -> None:
     """Destroy all opta resources from the current config"""
+
+    check_opta_file_exists(config)
     amplitude_client.send_event(amplitude_client.DESTROY_EVENT)
     layer = Layer.load_from_yaml(config, env)
     if not Terraform.download_state(layer):

@@ -8,6 +8,7 @@ from opta.core.generator import gen_all
 from opta.core.kubernetes import configure_kubectl, tail_module_log
 from opta.exceptions import UserErrors
 from opta.layer import Layer
+from opta.utils import check_opta_file_exists
 
 
 @click.command()
@@ -28,6 +29,7 @@ from opta.layer import Layer
 def logs(env: Optional[str], config: str, seconds: Optional[int]) -> None:
     """Get stream of logs from your service"""
 
+    check_opta_file_exists(config)
     # Configure kubectl
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(amplitude_client.SHELL_EVENT)

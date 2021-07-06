@@ -1,0 +1,14 @@
+name: ""
+org_name: ""
+providers:
+  aws:
+    region: ""
+    account_id: ""
+modules:
+  - type: base
+  - type: dns
+    domain: ""
+    delegated: false
+  - type: k8s-cluster
+    max_nodes: 12
+  - type: k8s-base

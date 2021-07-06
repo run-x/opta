@@ -10,6 +10,7 @@ from opta.core.kubernetes import configure_kubectl
 from opta.exceptions import UserErrors
 from opta.layer import Layer
 from opta.nice_subprocess import nice_run
+from opta.utils import check_opta_file_exists
 
 
 @click.command()
@@ -22,6 +23,7 @@ from opta.nice_subprocess import nice_run
 def shell(env: Optional[str], config: str) -> None:
     """Get a bash shell into one of the pods in your service"""
 
+    check_opta_file_exists(config)
     # Configure kubectl
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(amplitude_client.SHELL_EVENT)

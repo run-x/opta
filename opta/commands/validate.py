@@ -3,6 +3,7 @@ from typing import Optional
 import click
 
 from opta.layer import Layer
+from opta.utils import check_opta_file_exists
 
 
 @click.command(hidden=True)
@@ -15,4 +16,5 @@ from opta.layer import Layer
     show_default=True,
 )
 def validate(config: str, env: Optional[str]) -> None:
+    check_opta_file_exists(config)
     Layer.load_from_yaml(config, env)
