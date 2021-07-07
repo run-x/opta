@@ -1,0 +1,11 @@
+name: ""
+org_name: "" # Add your own name/org_name -- the name + org_name must be universally unique
+providers:
+  azurerm:
+    location: centralus
+    tenant_id: ""
+    subscription_id: ""
+modules:
+  - type: base
+  - type: k8s-cluster
+  - type: k8s-base
