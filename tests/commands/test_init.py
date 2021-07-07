@@ -43,6 +43,34 @@ class TestInitEnv:
         """
         assert _sanitize(expected_result) in _sanitize(result.output)
 
+    def test_init_azure(self, mocker: MockFixture) -> None:
+        mocked_input = mocker.patch("opta.commands.init_templates.template.input")
+
+        runner = CliRunner()
+        mocked_input.side_effect = [
+            "opta",
+            "run-x",
+            "",
+            "tenant-id",
+            "subscription-id",
+        ]
+        result = runner.invoke(cli, "init env azure")
+        expected_result = """
+            name: opta
+            org_name: run-x
+            providers:
+                azurerm:
+                    location: centralus
+                    tenant_id: tenant-id
+                    subscription_id: subscription-id
+            modules:
+            - type: base
+            - type: k8s-cluster
+            - type: k8s-base
+        """
+        print(result.output)
+        assert _sanitize(expected_result) in _sanitize(result.output)
+
     def test_init_aws(self, mocker: MockFixture) -> None:
         mocked_input = mocker.patch("opta.commands.init_templates.template.input")
 

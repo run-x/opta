@@ -1,11 +1,12 @@
 from os import path
-from typing import Dict, Optional
+from typing import Dict
 
 import click
 import yaml
 from click_didyoumean import DYMGroup
 
 from opta.commands.init_templates.environment.aws.template import awsTemplate
+from opta.commands.init_templates.environment.azure.template import azureTemplate
 from opta.commands.init_templates.environment.gcp.template import gcpTemplate
 from opta.commands.init_templates.service.k8s.template import k8sServiceTemplate
 from opta.commands.init_templates.template import Template
@@ -42,15 +43,22 @@ def init() -> None:
     pass
 
 
+ENVIRONMENT_TEMPLATES: Dict[str, Template] = {
+    "aws": awsTemplate,
+    "gcp": gcpTemplate,
+    "azure": azureTemplate,
+}
+
+
 @init.command()
-@click.argument("cloud_provider", type=click.Choice(["aws", "gcp"]))
+@click.argument("cloud_provider", type=click.Choice(ENVIRONMENT_TEMPLATES.keys()))
 @click.option(
     "-f",
     "--file-name",
     default="opta.yml",
     help="The name of the file that this command will output (defaults to opta.yml)",
 )
-def env(cloud_provider: Optional[str], file_name: str) -> None:
+def env(cloud_provider: str, file_name: str) -> None:
     """Creates a starting point for your opta environment configuration file."""
     print(
         """This utility will walk you through creating an opta configuration file.
@@ -62,10 +70,8 @@ Press ^C at any time to quit.
     """
     )
 
-    if cloud_provider == "aws":
-        res = awsTemplate.run()
-    else:
-        res = gcpTemplate.run()
+    template = ENVIRONMENT_TEMPLATES[cloud_provider]
+    res = template.run()
 
     _write_result(file_path=file_name, result=res)
 
