@@ -68,7 +68,6 @@ class TestInitEnv:
             - type: k8s-cluster
             - type: k8s-base
         """
-        print(result.output)
         assert _sanitize(expected_result) in _sanitize(result.output)
 
     def test_init_aws(self, mocker: MockFixture) -> None:
