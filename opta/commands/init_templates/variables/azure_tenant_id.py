@@ -8,4 +8,7 @@ def apply(d: dict, v: str) -> dict:
     return d
 
 
-azureTenantIdVariant = TemplateVariable(prompt="Azure tenant ID", applier=apply,)
+azureTenantIdVariant = TemplateVariable(
+    prompt="Azure tenant ID (see https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-create-new-tenant)",
+    applier=apply,
+)
