@@ -40,5 +40,5 @@ azureLocationVariable = TemplateVariable(
     applier=apply,
     validator=validate,
     error_message=f"Must be one of\n{location_string}",
-    default_value="uscentral",
+    default_value="centralus",
 )
