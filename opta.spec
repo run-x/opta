@@ -11,9 +11,7 @@ a = Analysis(['opta/cli.py'],
              datas=[
                ('./config', 'config'),
                ('roots.pem', 'grpc/_cython/_credentials/'),
-               ('opta/commands/init_templates/environment/aws/opta.yml', 'opta/commands/init_templates/environment/aws'),
-               ('opta/commands/init_templates/environment/gcp/opta.yml', 'opta/commands/init_templates/environment/gcp'),
-               ('opta/commands/init_templates/environment/azure/opta.yml', 'opta/commands/init_templates/environment/azure'),
+               ('opta/commands/init_templates', 'opta/commands/init_templates')
              ] + collect_data_files('hcl2'),
              hiddenimports=[],
              hookspath=[],
