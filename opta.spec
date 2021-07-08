@@ -8,7 +8,11 @@ block_cipher = None
 a = Analysis(['opta/cli.py'],
              pathex=[],
              binaries=[],
-             datas=[('./config', 'config'), ('roots.pem', 'grpc/_cython/_credentials/')] + collect_data_files('hcl2'),
+             datas=[
+               ('./config', 'config'),
+               ('roots.pem', 'grpc/_cython/_credentials/'),
+               ('opta/commands/init_templates', 'opta/commands/init_templates')
+             ] + collect_data_files('hcl2'),
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
