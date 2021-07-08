@@ -9,8 +9,9 @@ from opta.amplitude import amplitude_client
 from opta.core.gcp import GCP
 from opta.core.generator import gen_all
 from opta.core.terraform import Terraform
+from opta.exceptions import UserErrors
 from opta.layer import Layer
-from opta.utils import check_opta_file_exists, fmt_msg, logger, yaml
+from opta.utils import check_opta_file_exists, fmt_msg, logger
 
 
 @click.command(hidden=True)
@@ -39,11 +40,13 @@ def destroy(config: str, env: Optional[str], auto_approve: bool) -> None:
     # Any child layers should be destroyed first before the current layer.
     children_layers = _fetch_children_layers(layer)
     if children_layers:
-        logger.info(
-            f"Got the following children layers which we are going to destroy first: "
-            f"{[x.name for x in children_layers]}"
+        # TODO: ideally we can just automatically destroy them but it's
+        # complicated...
+        logger.error(
+            "Found the following services that depend on this environment. Please run `opta destroy` on them first!\n"
+            + "\n".join(children_layers)
         )
-    destroy_order = [*children_layers, layer]
+        raise UserErrors("Dependant services found!")
 
     tf_flags: List[str] = []
     if auto_approve:
@@ -59,15 +62,14 @@ def destroy(config: str, env: Optional[str], auto_approve: bool) -> None:
         )
         tf_flags.append("-auto-approve")
 
-    for layer in destroy_order:
-        gen_all(layer)
-        Terraform.init("-reconfigure")
-        logger.info(f"Destroying layer {layer.name}")
-        Terraform.destroy_all(layer, *tf_flags)
+    gen_all(layer)
+    Terraform.init("-reconfigure")
+    logger.info(f"Destroying {layer.name}")
+    Terraform.destroy_all(layer, *tf_flags)
 
 
 # Fetch all the children layers of the current layer.
-def _fetch_children_layers(layer: "Layer") -> List["Layer"]:
+def _fetch_children_layers(layer: "Layer") -> List[str]:
     # Only environment layers have children (service) layers.
     # If the current layer has a parent, it is *not* an environment layer.
     if layer.parent is not None:
@@ -76,38 +78,21 @@ def _fetch_children_layers(layer: "Layer") -> List["Layer"]:
     # Download all the opta config files in the bucket
     bucket_name = layer.state_storage()
     if layer.cloud == "aws":
-        opta_configs = _aws_download_all_opta_configs(bucket_name)
+        opta_configs = _aws_get_configs(bucket_name)
     elif layer.cloud == "google":
-        opta_configs = _gcp_download_all_opta_configs(bucket_name)
+        opta_configs = _gcp_get_configs(bucket_name)
     elif layer.cloud == "azurerm":
         # WIP
         opta_configs = []
     else:
         raise Exception(f"Not handling deletion for cloud {layer.cloud}")
-    # Keep track of children layers as we find them.
-    children_layers = []
-    for config_path in opta_configs:
-        config_data = yaml.load(open(config_path))
 
-        # If the config has no 'environments' field, then it cannot be
-        # a child/service layer.
-        if "environments" not in config_data:
-            continue
-
-        # Try all the possible environments for this config
-        envs = [env["name"] for env in config_data["environments"]]
-        for env in envs:
-            # Load the child layer, and check if its parent is the current layer.
-            child_layer = Layer.load_from_yaml(config_path, env)
-            if child_layer.parent and child_layer.parent.name == layer.name:
-                children_layers.append(child_layer)
-
-    return children_layers
+    return opta_configs
 
 
 # Download all the opta config files from the specified bucket and return
 # a list of temporary file paths to access them.
-def _aws_download_all_opta_configs(bucket_name: str) -> List[str]:
+def _aws_get_configs(bucket_name: str) -> List[str]:
     # Opta configs for every layer are saved in the opta_config/ directory
     # in the state bucket.
     s3_config_dir = "opta_config/"
@@ -116,20 +101,12 @@ def _aws_download_all_opta_configs(bucket_name: str) -> List[str]:
     resp = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=s3_config_dir)
     s3_config_paths = [obj["Key"] for obj in resp.get("Contents", [])]
 
-    configs = []
-    # Download every opta config file and write each to a temp file.
-    for config_path in s3_config_paths:
-        config_name = config_path[len(s3_config_dir) :]
-        local_config_path = f"tmp.opta.{config_name}"
-        with open(local_config_path, "wb") as f:
-            s3_client.download_fileobj(Bucket=bucket_name, Key=config_path, Fileobj=f)
-
-        configs.append(local_config_path)
+    configs = [config_path[len(s3_config_dir) :] for config_path in s3_config_paths]
 
     return configs
 
 
-def _gcp_download_all_opta_configs(bucket_name: str) -> List[str]:
+def _gcp_get_configs(bucket_name: str) -> List[str]:
     gcs_config_dir = "opta_config/"
     credentials, project_id = GCP.get_credentials()
     gcs_client = storage.Client(project=project_id, credentials=credentials)
@@ -143,7 +120,5 @@ def _gcp_download_all_opta_configs(bucket_name: str) -> List[str]:
     blobs: List[storage.Blob] = list(
         gcs_client.list_blobs(bucket_object, prefix=gcs_config_dir)
     )
-    configs: List[str] = []
-    for blob in blobs:
-        configs.append(blob.download_as_bytes().decode("utf-8"))
+    configs = [blob.name[len(gcs_config_dir) :] for blob in blobs]
     return configs
