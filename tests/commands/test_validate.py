@@ -51,7 +51,6 @@ def test_wrong_type() -> None:
     result = runner.invoke(cli, ["validate", "-c", test_file])
     assert result.exit_code == 1
     assert isinstance(result.exception, UserErrors)
-    assert "org_name: '1' is not a str." in result.output
 
 
 def test_invalid_module_type() -> None:
