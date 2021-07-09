@@ -5,11 +5,11 @@ from typing import Any, Callable, List, Optional
 import yaml
 from colored import attr, fg
 
-EXAMPLES_DIR = path.dirname(__file__)
+from opta.constants import init_template_path
 
 
 def load_template(template_type: str, template_name: str) -> dict:
-    file_path = path.join(EXAMPLES_DIR, template_type, template_name, "opta.yaml")
+    file_path = path.join(init_template_path, template_type, f"{template_name}.yaml")
     with open(file_path) as f:
         return yaml.safe_load(f)
 
