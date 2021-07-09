@@ -7,6 +7,9 @@ yaml = YAML(
     typ="safe"
 )  # Duplicate because constants can't import utils and yaml really is a util
 
+init_template_path = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)), "config", "init_templates"
+)
 schema_dir_path = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), "config", "schema"
 )
