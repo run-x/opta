@@ -68,6 +68,7 @@ def deploy(
             image_tag=None,
             test=False,
             auto_approve=auto_approve,
+            stdout_logs=False,
         )
     _push(image=image, config=config, env=env, tag=tag)
     image_tag = get_push_tag(image, tag)
