@@ -26,7 +26,7 @@
   <a href="https://docs.opta.dev/">Documentation</a> |
 <a href="https://join.slack.com/t/opta-group/shared_invite/zt-r1p9k1iv-4MP1IMZCT9mwwwdJH0HRyA">
     Slack Community
-  </a> | <a href="https://opta.dev/">
+  </a> | <a href="https://runx.dev/">
     Website
   </a> | <a href="mailto:info@runx.dev">
     Email: info@runx.dev
@@ -51,11 +51,15 @@ infrastructure.
 
 
 # Why Opta
-* No devops expertise required
-* Multi Cloud (AWS, GCP, Azure)
-* Progressively configurable
-* No lock in
-* Complete security
+Over the last 10 years, our team has built and led DevOps teams at world-class 
+companies like Lyft, Twitter, Facebook and Flexport. We have always believed 
+that Devops is a force multiplier - a well built infrastructure can empower the 
+engineers and greatly accelerate product delivery. Opta was borne out of these 
+experiences. 
+
+Opta's goal is to provide a robust production-ready platform for every organization
+and introduce radical automation to DevOps.
+
 # Quick start
 Install: 
 
@@ -95,19 +99,19 @@ Deploy:
 ### Check out more [examples](https://github.com/run-x/opta/tree/main/examples)
 
 # Features
-* Hardened, best practice configurations
-* Easily create/update/destroy multiple environments
-* Built in integrations with observability tools
-* Built in service mesh
-* Built in auto-scaling
-* Supports non-k8s resources like RDS, Cloud SQL, DocumentDB etc
+* Continuous Deployment for containerized workloads
+* Hardened network and security configurations
+* Support for multiple environments (like Dev/QA/Staging/Prod)
+* Integrations with observability tools (like Datadog/LogDNA/Prometheus/SumoLogic)
+* Support for non-kubernetes resources like RDS, Cloud SQL, DocumentDB etc
+* Built-in auto-scaling and high availability (HA)
+* Support for spot instances
 
 # Community Users
 * https://github.com/flyteorg/flyte
 * https://canvasapp.com/
 * https://biocogniv.com/
-* https://planaday.com/
-* You?
+* ... And many more! Join us in <a href="https://join.slack.com/t/opta-group/shared_invite/zt-r1p9k1iv-4MP1IMZCT9mwwwdJH0HRyA">Slack</a>.
 
 # Development
 [Dev guide](https://github.com/run-x/opta/blob/main/development.md)
