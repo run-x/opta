@@ -1,5 +1,5 @@
 <h1 align="center">Opta</h1>
-<p align="center">Run your containerized workloads on any cloud, without devops.</p>
+<p align="center">Supercharge DevOps on any cloud</p>
 
 <p align="center">
   <a href="https://github.com/run-x/opta/releases/latest">
@@ -60,6 +60,16 @@ experiences.
 Opta's goal is to provide a robust production-ready platform for every organization
 and introduce radical automation to DevOps.
 
+# Features
+* Continuous Deployment for containerized workloads
+* Hardened network and security configurations
+* Support for multiple environments (like Dev/QA/Staging/Prod)
+* Integrations with observability tools (like Datadog/LogDNA/Prometheus/SumoLogic)
+* Support for non-kubernetes resources like RDS, Cloud SQL, DocumentDB etc
+* Built-in auto-scaling and high availability (HA)
+* Support for spot instances
+
+
 # Quick start
 Install: 
 
@@ -97,15 +107,6 @@ Deploy:
 `opta apply`
 
 ### Check out more [examples](https://github.com/run-x/opta/tree/main/examples)
-
-# Features
-* Continuous Deployment for containerized workloads
-* Hardened network and security configurations
-* Support for multiple environments (like Dev/QA/Staging/Prod)
-* Integrations with observability tools (like Datadog/LogDNA/Prometheus/SumoLogic)
-* Support for non-kubernetes resources like RDS, Cloud SQL, DocumentDB etc
-* Built-in auto-scaling and high availability (HA)
-* Support for spot instances
 
 # Community Users
 * https://github.com/flyteorg/flyte
