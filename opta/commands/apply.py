@@ -213,7 +213,11 @@ def _apply(
                 if layer.cloud == "aws"
                 else layer.get_module_by_type("gcp-k8s-service", module_idx)
             )
-            if len(service_modules) != 0 and get_cluster_name(layer.root()) is not None and stdout_logs:
+            if (
+                len(service_modules) != 0
+                and get_cluster_name(layer.root()) is not None
+                and stdout_logs
+            ):
                 service_module = service_modules[0]
                 # Tailing logs
                 logger.info(

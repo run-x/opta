@@ -167,6 +167,7 @@ def test_deploy_ecr_apply(mocker: MockFixture) -> None:
                 image_tag=None,
                 test=False,
                 auto_approve=False,
+                stdout_logs=False,
             ),
             mocker.call(
                 config="app/opta.yml",
