@@ -1,5 +1,5 @@
-<h1 align="center">Opta</h1>
-<p align="center">Supercharge DevOps on any cloud</p>
+<p align="center"><img src="https://user-images.githubusercontent.com/855699/125824286-149ea52e-ef45-4f41-9579-8dba9bca38ac.png" width="250"><br/>
+Supercharge DevOps on any cloud</p>
 
 <p align="center">
   <a href="https://github.com/run-x/opta/releases/latest">
