@@ -76,5 +76,5 @@ variable "control_plane_security_groups" {
 
 variable "node_launch_template" {
   default = {}
-  type = map(string)
+  type    = map(string)
 }

@@ -46,9 +46,9 @@ resource "random_id" "key_suffix" {
 }
 
 resource "aws_launch_template" "eks_node" {
-  count = (length(var.node_launch_template) > 0) ? 1 : 0
+  count         = (length(var.node_launch_template) > 0) ? 1 : 0
   instance_type = var.node_instance_type
-  name_prefix = "opta-${var.layer_name}"
+  name_prefix   = "opta-${var.layer_name}"
   # https://github.com/hashicorp/terraform-provider-aws/issues/15118
 
   block_device_mappings {
@@ -59,7 +59,7 @@ resource "aws_launch_template" "eks_node" {
     }
   }
 
-  user_data = base64encode(join("\n" ,[local.user_data_prefix, try(var.node_launch_template["user_data"], ""), local.user_data_suffix]))
+  user_data = base64encode(join("\n", [local.user_data_prefix, try(var.node_launch_template["user_data"], ""), local.user_data_suffix]))
 }
 
 
@@ -97,7 +97,7 @@ resource "aws_eks_node_group" "node_group" {
   dynamic "launch_template" {
     for_each = (length(aws_launch_template.eks_node) > 0) ? [1] : []
     content {
-      id = aws_launch_template.eks_node[0].id
+      id      = aws_launch_template.eks_node[0].id
       version = aws_launch_template.eks_node[0].latest_version
     }
   }
