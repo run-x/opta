@@ -58,3 +58,7 @@ variable "control_plane_security_groups" {
   type        = list(string)
   default     = []
 }
+
+variable "node_launch_template" {
+  default = {}
+}

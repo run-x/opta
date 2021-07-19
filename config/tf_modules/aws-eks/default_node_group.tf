@@ -44,9 +44,32 @@ resource "random_id" "key_suffix" {
   }
 }
 
+resource "aws_launch_template" "eks_node" {
+  count = (length(var.node_launch_template) > 0) ? 1 : 0
+  instance_type = var.node_instance_type
+  name_prefix = "opta-${var.layer_name}"
+  dynamic "instance_market_options" {
+    for_each = var.spot_instances ? [1] : []
+    content {
+      market_type = "spot"
+    }
+  }
+
+  block_device_mappings {
+    device_name = "/dev/sda1"
+
+    ebs {
+      volume_size = 20
+    }
+  }
+
+  user_data = base64encode(try(var.node_launch_template.user_data, ""))
+}
+
+
 resource "aws_eks_node_group" "node_group" {
   cluster_name    = aws_eks_cluster.cluster.name
-  node_group_name = "opta-${var.layer_name}-default-${random_id.key_suffix.hex}"
+  node_group_name = "opta-${var.layer_name}-meow"
   node_role_arn   = aws_iam_role.node_group.arn
   subnet_ids      = aws_eks_cluster.cluster.vpc_config[0].subnet_ids
   capacity_type   = var.spot_instances ? "SPOT" : "ON_DEMAND"
@@ -73,7 +96,16 @@ resource "aws_eks_node_group" "node_group" {
     aws_iam_role_policy_attachment.node_group_AmazonEKSWorkerNodePolicy,
     aws_iam_role_policy_attachment.node_group_AmazonEKS_CNI_Policy,
     aws_iam_role_policy_attachment.node_group_AmazonEC2ContainerRegistryReadOnly,
+    aws_launch_template.eks_node,
   ]
+
+  dynamic "launch_template" {
+    for_each = (length(aws_launch_template.eks_node) > 0) ? [1] : []
+    content {
+      id = aws_launch_template.eks_node[0].id
+      version = aws_launch_template.eks_node[0].latest_version
+    }
+  }
 
   # Optional: Allow external changes without Terraform plan difference
   lifecycle {
