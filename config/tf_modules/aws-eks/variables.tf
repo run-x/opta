@@ -1,6 +1,7 @@
 data "aws_region" "current" {}
 
 locals {
+  # https://docs.aws.amazon.com/eks/latest/userguide/launch-templates.html#launch-template-user-data
   user_data_prefix = <<EOT
 MIME-Version: 1.0
 Content-Type: multipart/mixed; boundary="==MYBOUNDARY=="
