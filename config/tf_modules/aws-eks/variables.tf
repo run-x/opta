@@ -1,5 +1,20 @@
 data "aws_region" "current" {}
 
+locals {
+  user_data_prefix = <<EOT
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="==MYBOUNDARY=="
+
+--==MYBOUNDARY==
+Content-Type: text/x-shellscript; charset="us-ascii"
+
+#!/bin/bash
+EOT
+  user_data_suffix = <<EOT
+--==MYBOUNDARY==--
+EOT
+}
+
 variable "kms_account_key_arn" {
   type = string
 }
@@ -61,4 +76,5 @@ variable "control_plane_security_groups" {
 
 variable "node_launch_template" {
   default = {}
+  type = map(string)
 }

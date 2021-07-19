@@ -1,9 +1,9 @@
-name: live-example
+name: live-example-dev
 org_name: runx
 providers:
   aws:
     region: us-east-1
-    account_id: 889760294590
+    account_id: 445935066876
 modules:
   - type: base
   - type: dns
@@ -20,9 +20,21 @@ modules:
     allowed_iams:
       - "${{module.deployeruser.user_arn}}"
   - type: k8s-cluster
+    spot_instances: true
     max_nodes: 12
+    enable_metrics: true
+    node_launch_template:
+      user_data: |
+        if ( lsblk | fgrep -q nvme1n1 ); then
+           mkfs.ext4 /dev/nvme1n1
+           systemctl stop docker
+           mkdir -p /var/lib/docker
+           mount /dev/nvme1n1 /var/lib/docker
+           chmod 711 /var/lib/docker
+           systemctl start docker
+        fi
   - type: k8s-base
     admin_arns:
       - "${{module.deployeruser.user_arn}}"
       - "${{module.deployerrole.role_arn}}"
-  - type: datadog
+  #- type: datadog
