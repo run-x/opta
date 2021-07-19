@@ -78,6 +78,7 @@ resource "azurerm_kubernetes_cluster" "main" {
     max_count           = var.max_nodes
     min_count           = var.min_nodes
     vnet_subnet_id      = data.azurerm_subnet.opta.id
+    os_disk_size_gb     = var.node_disk_size
   }
 
   identity {
