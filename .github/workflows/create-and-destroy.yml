@@ -99,6 +99,9 @@ jobs:
           source $(pipenv --venv)/bin/activate
           export PYTHONPATH=$(pwd)
           yes | python ./opta/cli.py destroy \
+          --config test-service/opta.yml \
+          --auto-approve
+          yes | python ./opta/cli.py destroy \
           --config runx-infra/opta-ci/opta.yml \
           --auto-approve
   create-and-destroy-gcp:
@@ -191,6 +194,9 @@ jobs:
         run: |
           source $(pipenv --venv)/bin/activate
           export PYTHONPATH=$(pwd)
+          yes | python ./opta/cli.py destroy \
+          --config test-service/opta-gcp.yml \
+          --auto-approve
           yes | python ./opta/cli.py destroy \
           --config runx-infra/opta-ci/gcp.yml \
           --auto-approve
