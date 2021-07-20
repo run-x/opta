@@ -41,8 +41,27 @@ resource "random_id" "key_suffix" {
     spot_instances     = var.spot_instances
     node_disk_size     = var.node_disk_size
     node_instance_type = var.node_instance_type
+    launch_template    = try(var.node_launch_template["user_data"], "")
   }
 }
+
+resource "aws_launch_template" "eks_node" {
+  count         = (length(var.node_launch_template) > 0) ? 1 : 0
+  instance_type = var.node_instance_type
+  name_prefix   = "opta-${var.layer_name}"
+  # https://github.com/hashicorp/terraform-provider-aws/issues/15118
+
+  block_device_mappings {
+    device_name = "/dev/sda1"
+
+    ebs {
+      volume_size = var.node_disk_size
+    }
+  }
+
+  user_data = base64encode(try(var.node_launch_template["user_data"], ""))
+}
+
 
 resource "aws_eks_node_group" "node_group" {
   cluster_name    = aws_eks_cluster.cluster.name
@@ -57,8 +76,8 @@ resource "aws_eks_node_group" "node_group" {
   # https://aws.amazon.com/blogs/containers/eks-on-graviton-generally-available/
   ami_type = "AL2_x86_64"
 
-  disk_size      = var.node_disk_size
-  instance_types = [var.node_instance_type]
+  disk_size      = (length(var.node_launch_template) > 0) ? null : var.node_disk_size
+  instance_types = (length(var.node_launch_template) > 0) ? [] : [var.node_instance_type]
   labels         = { node_group_name = "opta-${var.layer_name}-default" }
 
   scaling_config {
@@ -74,6 +93,14 @@ resource "aws_eks_node_group" "node_group" {
     aws_iam_role_policy_attachment.node_group_AmazonEKS_CNI_Policy,
     aws_iam_role_policy_attachment.node_group_AmazonEC2ContainerRegistryReadOnly,
   ]
+
+  dynamic "launch_template" {
+    for_each = (length(aws_launch_template.eks_node) > 0) ? [1] : []
+    content {
+      id      = aws_launch_template.eks_node[0].id
+      version = aws_launch_template.eks_node[0].latest_version
+    }
+  }
 
   # Optional: Allow external changes without Terraform plan difference
   lifecycle {

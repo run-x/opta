@@ -11,3 +11,7 @@ k8s_version: str(required=False)
 control_plane_security_groups: any(required=False)
 spot_instances: bool(required=False)
 enable_metrics: bool(required=False)
+node_launch_template: any(include('node_launch_template'), required=False)
+---
+node_launch_template:
+  user_data: str(required=False)

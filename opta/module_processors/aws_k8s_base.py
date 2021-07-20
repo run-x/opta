@@ -10,6 +10,7 @@ from ruamel.yaml.compat import StringIO
 
 from opta.core.aws import AWS
 from opta.core.kubernetes import configure_kubectl
+from opta.core.terraform import Terraform
 from opta.exceptions import UserErrors
 from opta.module_processors.base import AWSK8sModuleProcessor
 from opta.utils import yaml
@@ -49,6 +50,7 @@ class AwsK8sBaseProcessor(AWSK8sModuleProcessor):
     def add_admin_roles(self) -> None:
         if self.module.data.get("admin_arns") is None:
             return
+        Terraform.download_state(self.layer)
         configure_kubectl(self.layer)
         load_kube_config()
         v1 = CoreV1Api()
