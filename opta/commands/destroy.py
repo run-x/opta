@@ -16,7 +16,7 @@ from opta.layer import Layer
 from opta.utils import check_opta_file_exists, fmt_msg, logger
 
 
-@click.command(hidden=True)
+@click.command()
 @click.option("-c", "--config", default="opta.yml", help="Opta config file.")
 @click.option(
     "-e", "--env", default=None, help="The env to use when loading the config file."
