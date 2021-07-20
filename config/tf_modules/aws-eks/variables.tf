@@ -1,21 +1,5 @@
 data "aws_region" "current" {}
 
-locals {
-  # https://docs.aws.amazon.com/eks/latest/userguide/launch-templates.html#launch-template-user-data
-  user_data_prefix = <<EOT
-MIME-Version: 1.0
-Content-Type: multipart/mixed; boundary="==MYBOUNDARY=="
-
---==MYBOUNDARY==
-Content-Type: text/x-shellscript; charset="us-ascii"
-
-#!/bin/bash
-EOT
-  user_data_suffix = <<EOT
---==MYBOUNDARY==--
-EOT
-}
-
 variable "kms_account_key_arn" {
   type = string
 }

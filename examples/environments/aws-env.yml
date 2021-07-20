@@ -25,6 +25,13 @@ modules:
     enable_metrics: true
     node_launch_template:
       user_data: |
+        MIME-Version: 1.0
+        Content-Type: multipart/mixed; boundary="==MYBOUNDARY=="
+
+        --==MYBOUNDARY==
+        Content-Type: text/x-shellscript; charset="us-ascii"
+
+        #!/bin/bash
         if ( lsblk | fgrep -q nvme1n1 ); then
            mkfs.ext4 /dev/nvme1n1
            systemctl stop docker
@@ -33,6 +40,7 @@ modules:
            chmod 711 /var/lib/docker
            systemctl start docker
         fi
+        --==MYBOUNDARY==--
   - type: k8s-base
     admin_arns:
       - "${{module.deployeruser.user_arn}}"

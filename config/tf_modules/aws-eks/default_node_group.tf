@@ -55,11 +55,11 @@ resource "aws_launch_template" "eks_node" {
     device_name = "/dev/sda1"
 
     ebs {
-      volume_size = var.node_disk_size + 10
+      volume_size = var.node_disk_size
     }
   }
 
-  user_data = base64encode(join("\n", [local.user_data_prefix, try(var.node_launch_template["user_data"], ""), local.user_data_suffix]))
+  user_data = base64encode(try(var.node_launch_template["user_data"], ""))
 }
 
 
