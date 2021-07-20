@@ -196,7 +196,7 @@ jobs:
           source $(pipenv --venv)/bin/activate
           export PYTHONPATH=$(pwd)
           yes | python ./opta/cli.py destroy \
-          --env ci \
+          --env gcp-release \
           --config test-service/opta-gcp.yml \
           --auto-approve
           yes | python ./opta/cli.py destroy \
