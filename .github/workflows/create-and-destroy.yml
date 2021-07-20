@@ -99,6 +99,7 @@ jobs:
           source $(pipenv --venv)/bin/activate
           export PYTHONPATH=$(pwd)
           yes | python ./opta/cli.py destroy \
+          --env ci \
           --config test-service/opta.yml \
           --auto-approve
           yes | python ./opta/cli.py destroy \
@@ -195,6 +196,7 @@ jobs:
           source $(pipenv --venv)/bin/activate
           export PYTHONPATH=$(pwd)
           yes | python ./opta/cli.py destroy \
+          --env ci \
           --config test-service/opta-gcp.yml \
           --auto-approve
           yes | python ./opta/cli.py destroy \
