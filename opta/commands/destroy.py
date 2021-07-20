@@ -2,10 +2,12 @@ from typing import List, Optional
 
 import boto3
 import click
+from azure.storage.blob import ContainerClient
 from google.cloud import storage  # type: ignore
 from google.cloud.exceptions import NotFound
 
 from opta.amplitude import amplitude_client
+from opta.core.azure import Azure
 from opta.core.gcp import GCP
 from opta.core.generator import gen_all
 from opta.core.terraform import Terraform
@@ -76,25 +78,42 @@ def _fetch_children_layers(layer: "Layer") -> List[str]:
         return []
 
     # Download all the opta config files in the bucket
-    bucket_name = layer.state_storage()
     if layer.cloud == "aws":
-        opta_configs = _aws_get_configs(bucket_name)
+        opta_configs = _aws_get_configs(layer)
     elif layer.cloud == "google":
-        opta_configs = _gcp_get_configs(bucket_name)
+        opta_configs = _gcp_get_configs(layer)
     elif layer.cloud == "azurerm":
-        # WIP
-        opta_configs = []
+        opta_configs = _azure_get_configs(layer)
     else:
         raise Exception(f"Not handling deletion for cloud {layer.cloud}")
 
     return opta_configs
 
 
-# Download all the opta config files from the specified bucket and return
-# a list of temporary file paths to access them.
-def _aws_get_configs(bucket_name: str) -> List[str]:
+# Get the names for all services for this environment based on the bucket file paths
+def _azure_get_configs(layer: "Layer") -> List[str]:
+    providers = layer.gen_providers(0)
+    credentials = Azure.get_credentials()
+    storage_account_name = providers["terraform"]["backend"]["azurerm"][
+        "storage_account_name"
+    ]
+    container_name = providers["terraform"]["backend"]["azurerm"]["container_name"]
+    storage_client = ContainerClient(
+        account_url=f"https://{storage_account_name}.blob.core.windows.net",
+        container_name=container_name,
+        credential=credentials,
+    )
+    prefix = "opta_config/"
+    blobs = storage_client.list_blobs(name_starts_with=prefix)
+    configs = [blob.name[len(prefix) :] for blob in blobs]
+    configs.remove(layer.name)
+    return configs
+
+
+def _aws_get_configs(layer: "Layer") -> List[str]:
     # Opta configs for every layer are saved in the opta_config/ directory
     # in the state bucket.
+    bucket_name = layer.state_storage()
     s3_config_dir = "opta_config/"
     s3_client = boto3.client("s3")
 
@@ -102,11 +121,12 @@ def _aws_get_configs(bucket_name: str) -> List[str]:
     s3_config_paths = [obj["Key"] for obj in resp.get("Contents", [])]
 
     configs = [config_path[len(s3_config_dir) :] for config_path in s3_config_paths]
-
+    configs.remove(layer.name)
     return configs
 
 
-def _gcp_get_configs(bucket_name: str) -> List[str]:
+def _gcp_get_configs(layer: "Layer") -> List[str]:
+    bucket_name = layer.state_storage()
     gcs_config_dir = "opta_config/"
     credentials, project_id = GCP.get_credentials()
     gcs_client = storage.Client(project=project_id, credentials=credentials)
@@ -121,4 +141,5 @@ def _gcp_get_configs(bucket_name: str) -> List[str]:
         gcs_client.list_blobs(bucket_object, prefix=gcs_config_dir)
     )
     configs = [blob.name[len(gcs_config_dir) :] for blob in blobs]
+    configs.remove(layer.name)
     return configs
