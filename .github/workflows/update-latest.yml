@@ -1,9 +1,10 @@
-name: Update latest Opta version
-on: workflow_dispatch
-  inputs:
-    version:
-      description: Opta version to mark as latest
-      required: true
+name: Update Latest Version
+on: 
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Opta version to mark as latest
+        required: true
 jobs:
   update_s3_file:
     runs-on: ubuntu-latest
