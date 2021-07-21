@@ -60,7 +60,7 @@ jobs:
           make build-binary
       - name: Deploy opta environment
         run: |
-          ./dist/opta/opta apply \
+          OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
           --config runx-infra/opta-ci/opta.yml \
           --auto-approve \
           --refresh
@@ -71,13 +71,13 @@ jobs:
         run: docker build -t app:latest -f test-service/Dockerfile test-service/
       - name: Set secret
         run: |
-          ./dist/opta/opta secret update \
+          OPTA_DISABLE_REPORTING=true ./dist/opta/opta secret update \
           --env ci \
           --config test-service/opta.yml \
           FAKE_SECRET foo
       - name: Deploy test-service
         run: |
-          ./dist/opta/opta deploy \
+          OPTA_DISABLE_REPORTING=true ./dist/opta/opta deploy \
           --image app:latest \
           --env ci \
           --config test-service/opta.yml \
@@ -85,7 +85,7 @@ jobs:
           --auto-approve
       - name: View secret and check value
         run: |
-          secret_value=$(./dist/opta/opta secret view \
+          secret_value=$(OPTA_DISABLE_REPORTING=true ./dist/opta/opta secret view \
           --env ci \
           --config test-service/opta.yml \
           FAKE_SECRET | tail -1)
@@ -93,11 +93,11 @@ jobs:
           [[ "$secret_value" =~ .*"foo".* ]] || exit 1
       - name: Destroy environment (and test service)
         run: |
-          yes | ./dist/opta/opta destroy \
+          yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
           --env ci \
           --config test-service/opta.yml \
           --auto-approve
-          yes | ./dist/opta/opta destroy \
+          yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
           --config runx-infra/opta-ci/opta.yml \
           --auto-approve
   create-and-destroy-gcp:
@@ -155,7 +155,7 @@ jobs:
           make build-binary
       - name: Deploy opta environment
         run: |
-          ./dist/opta/opta apply \
+          OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
           --config runx-infra/opta-ci/gcp.yml \
           --auto-approve \
           --refresh
@@ -163,13 +163,13 @@ jobs:
         run: docker build -t app:latest -f test-service/Dockerfile test-service/
       - name: Set secret
         run: |
-          ./dist/opta/opta secret update \
+          OPTA_DISABLE_REPORTING=true ./dist/opta/opta secret update \
           --env gcp-release \
           --config test-service/opta-gcp.yml \
           FAKE_SECRET foo
       - name: Deploy test-service
         run: |
-          ./dist/opta/opta deploy \
+          OPTA_DISABLE_REPORTING=true ./dist/opta/opta deploy \
           --image app:latest \
           --env gcp-release \
           --config test-service/opta-gcp.yml \
@@ -177,7 +177,7 @@ jobs:
           --auto-approve
       - name: View secret and check value
         run: |
-          secret_value=$(./dist/opta/opta secret view \
+          secret_value=$(OPTA_DISABLE_REPORTING=true ./dist/opta/opta secret view \
           --env gcp-release \
           --config test-service/opta-gcp.yml \
           FAKE_SECRET | tail -1)
@@ -185,10 +185,10 @@ jobs:
           [[ "$secret_value" =~ .*"foo".* ]] || exit 1
       - name: Destroy environment (and test service)
         run: |
-          yes | ./dist/opta/opta destroy \
+          yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
           --env gcp-release \
           --config test-service/opta-gcp.yml \
           --auto-approve
-          yes | ./dist/opta/opta destroy \
+          yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
           --config runx-infra/opta-ci/gcp.yml \
           --auto-approve
