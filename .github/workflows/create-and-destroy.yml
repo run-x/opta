@@ -53,11 +53,14 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_OPTA_CI_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_OPTA_CI_SECRET_KEY }}
           aws-region: us-east-1
-      - name: Deploy opta environment
+      - name: Build binary
         run: |
           source $(pipenv --venv)/bin/activate
           export PYTHONPATH=$(pwd)
-          python ./opta/cli.py apply \
+          make build-binary
+      - name: Deploy opta environment
+        run: |
+          OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
           --config runx-infra/opta-ci/opta.yml \
           --auto-approve \
           --refresh
@@ -68,17 +71,13 @@ jobs:
         run: docker build -t app:latest -f test-service/Dockerfile test-service/
       - name: Set secret
         run: |
-          source $(pipenv --venv)/bin/activate
-          export PYTHONPATH=$(pwd)
-          python ./opta/cli.py secret update \
+          OPTA_DISABLE_REPORTING=true ./dist/opta/opta secret update \
           --env ci \
           --config test-service/opta.yml \
           FAKE_SECRET foo
       - name: Deploy test-service
         run: |
-          source $(pipenv --venv)/bin/activate
-          export PYTHONPATH=$(pwd)
-          python ./opta/cli.py deploy \
+          OPTA_DISABLE_REPORTING=true ./dist/opta/opta deploy \
           --image app:latest \
           --env ci \
           --config test-service/opta.yml \
@@ -86,9 +85,7 @@ jobs:
           --auto-approve
       - name: View secret and check value
         run: |
-          source $(pipenv --venv)/bin/activate
-          export PYTHONPATH=$(pwd)
-          secret_value=$(python ./opta/cli.py secret view \
+          secret_value=$(OPTA_DISABLE_REPORTING=true ./dist/opta/opta secret view \
           --env ci \
           --config test-service/opta.yml \
           FAKE_SECRET | tail -1)
@@ -96,13 +93,11 @@ jobs:
           [[ "$secret_value" =~ .*"foo".* ]] || exit 1
       - name: Destroy environment (and test service)
         run: |
-          source $(pipenv --venv)/bin/activate
-          export PYTHONPATH=$(pwd)
-          yes | python ./opta/cli.py destroy \
+          yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
           --env ci \
           --config test-service/opta.yml \
           --auto-approve
-          yes | python ./opta/cli.py destroy \
+          yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
           --config runx-infra/opta-ci/opta.yml \
           --auto-approve
   create-and-destroy-gcp:
@@ -153,11 +148,14 @@ jobs:
           service_account_key: ${{ secrets.CI_GKE_SA_KEY }}
           project_id: opta-ci-1
           export_default_credentials: true
-      - name: Deploy opta environment
+      - name: Build binary
         run: |
           source $(pipenv --venv)/bin/activate
           export PYTHONPATH=$(pwd)
-          python ./opta/cli.py apply \
+          make build-binary
+      - name: Deploy opta environment
+        run: |
+          OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
           --config runx-infra/opta-ci/gcp.yml \
           --auto-approve \
           --refresh
@@ -165,17 +163,13 @@ jobs:
         run: docker build -t app:latest -f test-service/Dockerfile test-service/
       - name: Set secret
         run: |
-          source $(pipenv --venv)/bin/activate
-          export PYTHONPATH=$(pwd)
-          python ./opta/cli.py secret update \
+          OPTA_DISABLE_REPORTING=true ./dist/opta/opta secret update \
           --env gcp-release \
           --config test-service/opta-gcp.yml \
           FAKE_SECRET foo
       - name: Deploy test-service
         run: |
-          source $(pipenv --venv)/bin/activate
-          export PYTHONPATH=$(pwd)
-          python ./opta/cli.py deploy \
+          OPTA_DISABLE_REPORTING=true ./dist/opta/opta deploy \
           --image app:latest \
           --env gcp-release \
           --config test-service/opta-gcp.yml \
@@ -183,9 +177,7 @@ jobs:
           --auto-approve
       - name: View secret and check value
         run: |
-          source $(pipenv --venv)/bin/activate
-          export PYTHONPATH=$(pwd)
-          secret_value=$(python ./opta/cli.py secret view \
+          secret_value=$(OPTA_DISABLE_REPORTING=true ./dist/opta/opta secret view \
           --env gcp-release \
           --config test-service/opta-gcp.yml \
           FAKE_SECRET | tail -1)
@@ -193,12 +185,10 @@ jobs:
           [[ "$secret_value" =~ .*"foo".* ]] || exit 1
       - name: Destroy environment (and test service)
         run: |
-          source $(pipenv --venv)/bin/activate
-          export PYTHONPATH=$(pwd)
-          yes | python ./opta/cli.py destroy \
+          yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
           --env gcp-release \
           --config test-service/opta-gcp.yml \
           --auto-approve
-          yes | python ./opta/cli.py destroy \
+          yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
           --config runx-infra/opta-ci/gcp.yml \
           --auto-approve
