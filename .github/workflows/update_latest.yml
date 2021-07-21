@@ -1,0 +1,22 @@
+name: Update latest Opta version
+on: workflow_dispatch
+  inputs:
+    version:
+      description: Opta version to mark as latest
+      required: true
+jobs:
+  update_s3_file:
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ github.event.inputs.version }}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_S3_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_S3_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      - name: Upload to S3
+        run: |
+          echo $VERSION > latest
+          aws s3 cp latest s3://dev-runx-opta-binaries/latest --acl public-read
