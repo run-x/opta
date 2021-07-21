@@ -14,9 +14,7 @@ jobs:
       - name: validate version
         run: |
           /bin/bash -c "$(curl -fsSL https://docs.opta.dev/install.sh)"
-          export VERSION_FOUND=$(opta version | head -n 1)
-          echo $VERSION
-          echo $VERSION_FOUND
+          export VERSION_FOUND=$(/home/runner/.opta/opta version | head -n 1)
           if [ "v$VERSION" = "$VERSION_FOUND" ]; then
               echo "Valid version"
           else
