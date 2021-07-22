@@ -28,6 +28,7 @@ from opta.module_processors.azure_base import AzureBaseProcessor
 from opta.module_processors.azure_k8s_base import AzureK8sBaseProcessor
 from opta.module_processors.azure_k8s_service import AzureK8sServiceProcessor
 from opta.module_processors.base import ModuleProcessor
+from opta.module_processors.byo_cert import BYOCert
 from opta.module_processors.datadog import DatadogProcessor
 from opta.module_processors.gcp_gke import GcpGkeProcessor
 from opta.module_processors.gcp_k8s_base import GcpK8sBaseProcessor
@@ -58,6 +59,7 @@ class Layer:
         "azure-base": AzureBaseProcessor,
         "azure-k8s-base": AzureK8sBaseProcessor,
         "azure-k8s-service": AzureK8sServiceProcessor,
+        "byo-cert": BYOCert,
     }
 
     def __init__(

@@ -121,8 +121,12 @@ modules:
       linkerd_high_availability: optional
       linkerd_enabled: optional
       delegated: optional
-      hosted_zone_name: optional
-    outputs: {}
+      private_key: optional
+      certificate_body: optional
+      certificate_chain: optional
+    outputs:
+      load_balancer_raw_ip:
+        export: true
   azure-k8s-service:
     cloud: azure
     location: azure-k8s-service
@@ -308,6 +312,17 @@ modules:
       api_key: optional
       timeout: optional
       values: optional
+  byo-cert:
+    cloud: any
+    location: byo-cert
+    root_only: true
+    variables:
+      env_name: str
+      layer_name: str
+      module_name: str
+      private_key: str
+      certificate_body: str
+      certificate_chain: str
   aws-k8s-base:
     cloud: aws
     location: k8s-base

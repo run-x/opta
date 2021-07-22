@@ -1,7 +1,3 @@
-data "azurerm_dns_zone" "opta" {
-  name = var.hosted_zone_name
-}
-
 resource "azurerm_public_ip" "opta" {
   name                = "opta-${var.env_name}-k8s-lb-public"
   resource_group_name = data.azurerm_resource_group.opta.name
@@ -59,12 +55,13 @@ resource "helm_release" "ingress-nginx" {
   name             = "ingress-nginx"
   repository       = "https://kubernetes.github.io/ingress-nginx"
   namespace        = "ingress-nginx"
-  create_namespace = true
+  create_namespace = false
   atomic           = true
   cleanup_on_fail  = true
   values = [
     yamlencode({
       controller : {
+        extraArgs: var.private_key == "" ? {} : { default-ssl-certificate: "ingress-nginx/secret-tls" }
         config : local.config
         podAnnotations : {
           "linkerd.io/inject" : "enabled"
@@ -126,6 +123,7 @@ resource "helm_release" "ingress-nginx" {
     })
   ]
   depends_on = [
-    helm_release.linkerd
+    helm_release.linkerd,
+    helm_release.opta_base
   ]
 }

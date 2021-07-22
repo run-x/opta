@@ -16,16 +16,19 @@ class AzureK8sBaseProcessor(ModuleProcessor):
         super(AzureK8sBaseProcessor, self).__init__(module, layer)
 
     def process(self, module_idx: int) -> None:
-        azure_dns_module = None
+        byo_cert_module = None
         for module in self.layer.modules:
-            if (module.aliased_type or module.type) == "azure-dns":
-                azure_dns_module = module
+            if (module.aliased_type or module.type) == "byo-cert":
+                byo_cert_module = module
                 break
-        if azure_dns_module is not None:
+        if byo_cert_module is not None:
             self.module.data[
-                "hosted_zone_name"
-            ] = f"${{{{module.{azure_dns_module.name}.domain}}}}"
+                "private_key"
+            ] = f"${{{{module.{byo_cert_module.name}.private_key}}}}"
             self.module.data[
-                "delegated"
-            ] = f"${{{{module.{azure_dns_module.name}.delegated}}}}"
+                "certificate_body"
+            ] = f"${{{{module.{byo_cert_module.name}.certificate_body}}}}"
+            self.module.data[
+                "certificate_chain"
+            ] = f"${{{{module.{byo_cert_module.name}.certificate_chain}}}}"
         super(AzureK8sBaseProcessor, self).process(module_idx)

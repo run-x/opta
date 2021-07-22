@@ -1,0 +1,8 @@
+type: regex('byo-cert')
+env_name: str(required=False)
+layer_name: str(required=False)
+module_name: str(required=False)
+domain: str(required=True)
+private_key_file: str(required=True)
+certificate_body_file: str(required=True)
+certificate_chain_file: str(required=True)

@@ -1,7 +1,7 @@
 locals {
   target_ports    = { http : "http", https : "https" }
   container_ports = { http : 80, https : 443 }
-  config          = merge({ ssl-redirect : false }, var.nginx_config)
+  config          = merge({ ssl-redirect : var.private_key == "" ? false : true }, var.nginx_config)
 }
 
 data "azurerm_subscription" "current" {}
@@ -39,15 +39,21 @@ variable "linkerd_high_availability" {
   default = false
 }
 
-variable "delegated" {
-  type    = bool
-  default = false
+variable "private_key" {
+  type    = string
+  default = ""
 }
 
-variable "hosted_zone_name" {
-  type    = string
-  default = null
+variable "certificate_body" {
+  type = string
+  default = ""
 }
+
+variable "certificate_chain" {
+  type = string
+  default = ""
+}
+
 
 variable "nginx_config" {
   default = {}
