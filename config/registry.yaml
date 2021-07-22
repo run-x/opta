@@ -312,9 +312,9 @@ modules:
       api_key: optional
       timeout: optional
       values: optional
-  byo-cert:
+  external-ssl-cert:
     cloud: any
-    location: byo-cert
+    location: external-ssl-cert
     root_only: true
     variables:
       env_name: str

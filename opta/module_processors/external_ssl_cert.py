@@ -1,3 +1,4 @@
+import os
 from typing import TYPE_CHECKING, List, Tuple
 
 from OpenSSL.crypto import (
@@ -18,9 +19,9 @@ if TYPE_CHECKING:
     from opta.module import Module
 
 
-class BYOCert(ModuleProcessor):
+class ExternalSSLCert(ModuleProcessor):
     def __init__(self, module: "Module", layer: "Layer"):
-        super(BYOCert, self).__init__(module, layer)
+        super(ExternalSSLCert, self).__init__(module, layer)
 
     def process(self, module_idx: int) -> None:
         private_key_obj, private_key_str = self.fetch_private_key()
@@ -41,10 +42,12 @@ class BYOCert(ModuleProcessor):
             raise UserErrors(
                 f"You provided a domain of {self.module.data['domain']} but the cert is only for domains {domains_list}"
             )
-        super(BYOCert, self).process(module_idx)
+        super(ExternalSSLCert, self).process(module_idx)
 
     def fetch_private_key(self) -> Tuple[PKey, str]:
-        private_key_file: str = self.module.data["private_key_file"]
+        private_key_file: str = os.path.join(
+            os.path.dirname(self.layer.path), self.module.data["private_key_file"]
+        )
         try:
             with open(private_key_file, "r") as f:
                 privkey = f.read()
@@ -59,7 +62,9 @@ class BYOCert(ModuleProcessor):
             raise UserErrors("private key is not correct pem private key")
 
     def fetch_cert_body(self) -> Tuple[X509, str]:
-        certificate_body_file: str = self.module.data["certificate_body_file"]
+        certificate_body_file: str = os.path.join(
+            os.path.dirname(self.layer.path), self.module.data["certificate_body_file"]
+        )
         try:
             with open(certificate_body_file, "r") as f:
                 cert_body = f.read()
@@ -78,7 +83,9 @@ class BYOCert(ModuleProcessor):
             raise UserErrors("Certificate body is not correct pem cert.")
 
     def fetch_cert_chain(self) -> Tuple[X509, str]:
-        certificate_chain_file: str = self.module.data["certificate_chain_file"]
+        certificate_chain_file: str = os.path.join(
+            os.path.dirname(self.layer.path), self.module.data["certificate_chain_file"]
+        )
         try:
             with open(certificate_chain_file, "r") as f:
                 cert_chain = f.read()

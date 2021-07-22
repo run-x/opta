@@ -18,7 +18,7 @@ class AzureK8sBaseProcessor(ModuleProcessor):
     def process(self, module_idx: int) -> None:
         byo_cert_module = None
         for module in self.layer.modules:
-            if (module.aliased_type or module.type) == "byo-cert":
+            if (module.aliased_type or module.type) == "external-ssl-cert":
                 byo_cert_module = module
                 break
         if byo_cert_module is not None:
