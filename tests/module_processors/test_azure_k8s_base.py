@@ -24,5 +24,3 @@ class TestAzureK8sBaseProcessor:
         )
         AzureK8sBaseProcessor(k8s_base_module, layer).process(idx)
         mocked_process.assert_called_once_with(idx)
-        assert k8s_base_module.data["hosted_zone_name"] == "${{module.dns.domain}}"
-        assert k8s_base_module.data["delegated"] == "${{module.dns.delegated}}"
