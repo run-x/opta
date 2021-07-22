@@ -7,9 +7,11 @@ providers:
     subscription_id: 0fca99ae-5717-4a86-a891-6d64d2a04788
 modules:
   - type: base
-  - type: dns
-    domain: azure-example.runx.dev
-    delegated: false
+  - type: external-ssl-cert
+    domain: "baloney.runx.dev"
+    private_key_file: "./privkey.pem"
+    certificate_body_file: "./cert_body.pem"
+    certificate_chain_file: "./cert_chain.pem"
   - type: k8s-cluster
     admin_group_object_ids: ["35959136-eccf-44ec-beed-559a8b33c18e"]
     max_nodes: 6

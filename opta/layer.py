@@ -29,6 +29,7 @@ from opta.module_processors.azure_k8s_base import AzureK8sBaseProcessor
 from opta.module_processors.azure_k8s_service import AzureK8sServiceProcessor
 from opta.module_processors.base import ModuleProcessor
 from opta.module_processors.datadog import DatadogProcessor
+from opta.module_processors.external_ssl_cert import ExternalSSLCert
 from opta.module_processors.gcp_gke import GcpGkeProcessor
 from opta.module_processors.gcp_k8s_base import GcpK8sBaseProcessor
 from opta.module_processors.gcp_k8s_service import GcpK8sServiceProcessor
@@ -58,6 +59,7 @@ class Layer:
         "azure-base": AzureBaseProcessor,
         "azure-k8s-base": AzureK8sBaseProcessor,
         "azure-k8s-service": AzureK8sServiceProcessor,
+        "external-ssl-cert": ExternalSSLCert,
     }
 
     def __init__(
@@ -66,6 +68,7 @@ class Layer:
         org_name: Optional[str],
         providers: Dict[Any, Any],
         modules_data: List[Any],
+        path: str,
         parent: Optional[Layer] = None,
         variables: Optional[Dict[str, Any]] = None,
         original_spec: str = "",
@@ -77,6 +80,7 @@ class Layer:
         self.name = name
         self.original_spec = original_spec
         self.parent = parent
+        self.path = path
         if parent is None and org_name is None:
             raise UserErrors("Config must have org name or a parent who has an org name")
         self.org_name = org_name
@@ -156,6 +160,7 @@ class Layer:
         modules_data = conf.get("modules", [])
         environments = conf.pop("environments", None)
         original_spec = conf.pop("original_spec", "")
+        path = conf["path"]
         name = conf.pop("name", None)
         if name is None:
             raise UserErrors("Config must have name")
@@ -172,9 +177,7 @@ class Layer:
                 env_name = env_meta["name"]
                 parent_path: str = env_meta["path"]
                 if not parent_path.startswith("git@") and not parent_path.startswith("/"):
-                    parent_path = os.path.join(
-                        os.path.dirname(conf["path"]), env_meta["path"]
-                    )
+                    parent_path = os.path.join(os.path.dirname(path), env_meta["path"])
                 current_parent = cls.load_from_yaml(parent_path, None)
                 if current_parent.parent is not None:
                     raise UserErrors(
@@ -202,11 +205,14 @@ class Layer:
                 org_name,
                 providers,
                 modules_data,
+                path,
                 current_parent,
                 current_variables,
                 original_spec,
             )
-        return cls(name, org_name, providers, modules_data, original_spec=original_spec)
+        return cls(
+            name, org_name, providers, modules_data, path, original_spec=original_spec
+        )
 
     @staticmethod
     def valid_name(name: str) -> bool:
