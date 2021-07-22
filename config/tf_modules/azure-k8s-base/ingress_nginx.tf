@@ -61,7 +61,7 @@ resource "helm_release" "ingress-nginx" {
   values = [
     yamlencode({
       controller : {
-        extraArgs: var.private_key == "" ? {} : { default-ssl-certificate: "ingress-nginx/secret-tls" }
+        extraArgs : var.private_key == "" ? {} : { default-ssl-certificate : "ingress-nginx/secret-tls" }
         config : local.config
         podAnnotations : {
           "linkerd.io/inject" : "enabled"

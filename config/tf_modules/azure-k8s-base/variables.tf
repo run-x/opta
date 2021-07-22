@@ -1,7 +1,9 @@
 locals {
   target_ports    = { http : "http", https : "https" }
   container_ports = { http : 80, https : 443 }
-  config          = merge({ ssl-redirect : var.private_key == "" ? false : true }, var.nginx_config)
+  //  https://github.com/kubernetes/ingress-nginx/issues/4628
+  config = merge({ ssl-redirect : var.private_key == "" ? false : true
+  force-ssl-redirect : var.private_key == "" ? false : true }, var.nginx_config)
 }
 
 data "azurerm_subscription" "current" {}
@@ -45,12 +47,12 @@ variable "private_key" {
 }
 
 variable "certificate_body" {
-  type = string
+  type    = string
   default = ""
 }
 
 variable "certificate_chain" {
-  type = string
+  type    = string
   default = ""
 }
 

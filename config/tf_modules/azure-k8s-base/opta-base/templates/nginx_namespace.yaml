@@ -1,0 +1,8 @@
+{{- $existingNamespace := (lookup "v1" "Namespace" "" "ingress-nginx" ) -}}
+{{- if and ( $existingNamespace ) ( hasKey $existingNamespace.metadata "annotations" ) }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ingress-nginx
+{{- end }}
+---
