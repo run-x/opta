@@ -38,7 +38,7 @@ variable "min_nodes" {
 
 variable "node_disk_size" {
   type    = number
-  default = 20
+  default = 30
 }
 
 variable "kubernetes_version" {
