@@ -244,6 +244,10 @@ jobs:
           source $(pipenv --venv)/bin/activate
           export PYTHONPATH=$(pwd)
           make build-binary
+      - name: Azure Login
+        uses: Azure/login@v1.1
+        with:
+          creds: '{"clientId":"${{ secrets.AZURE_CI_CD_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_CI_CD_CLIENT_SECRET }}","subscriptionId":"${{ secrets.AZURE_CI_CD_SUBSCRIPTION_ID }}","tenantId":"${{ secrets.AZURE_CI_CD_TENANT_ID }}"}'
       - name: Deploy opta environment
         run: |
           OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
