@@ -12,3 +12,7 @@ output "certificate_chain" {
   value     = var.certificate_chain
   sensitive = true
 }
+
+output "domain" {
+  value = var.domain
+}

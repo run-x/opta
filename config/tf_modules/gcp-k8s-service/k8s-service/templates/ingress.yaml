@@ -24,14 +24,6 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
     {{- end }}
 spec:
-  tls:
-    - hosts:
-        - {{ if not (eq $val.domain "all" ) }}
-          {{ $val.domain | quote }}
-          {{ else }}
-          {{ include "k8s-service.serviceName" $ }}.{{ include "k8s-service.namespaceName" $ }}
-          {{ end }}
-      secretName: self-signed
   rules:
     - {{ if not (eq $val.domain "all" ) }}
       host: {{ $val.domain }}

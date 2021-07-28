@@ -11,6 +11,7 @@ resource "helm_release" "ingress-nginx" {
   values = [
     yamlencode({
       controller : {
+        extraArgs : var.private_key == "" ? {} : { default-ssl-certificate : "ingress-nginx/secret-tls" }
         config : local.config
         podAnnotations : {
           "linkerd.io/inject" : "enabled"
@@ -60,13 +61,13 @@ resource "helm_release" "ingress-nginx" {
         service : {
           loadBalancerSourceRanges : ["0.0.0.0/0"]
           externalTrafficPolicy : "Local"
-          enableHttps : var.cert_arn == "" ? false : true
+          enableHttps : var.cert_arn == "" && var.private_key == "" ? false : true
           targetPorts : local.target_ports
           annotations : {
             "service.beta.kubernetes.io/aws-load-balancer-backend-protocol" : "ssl"
             "service.beta.kubernetes.io/aws-load-balancer-proxy-protocol" : "*"
             "service.beta.kubernetes.io/aws-load-balancer-type" : "nlb"
-            "service.beta.kubernetes.io/aws-load-balancer-ssl-ports" : var.cert_arn == "" ? "" : "https"
+            "service.beta.kubernetes.io/aws-load-balancer-ssl-ports" : var.cert_arn == "" && var.private_key == "" ? "" : "https"
             "service.beta.kubernetes.io/aws-load-balancer-ssl-cert" : var.cert_arn
             "external-dns.alpha.kubernetes.io/hostname" : var.domain == "" ? "" : join(",", [var.domain, "*.${var.domain}"])
           }
@@ -75,6 +76,7 @@ resource "helm_release" "ingress-nginx" {
     })
   ]
   depends_on = [
-    helm_release.linkerd
+    helm_release.linkerd,
+    helm_release.opta_base
   ]
 }

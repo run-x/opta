@@ -19,7 +19,7 @@ BASIC_APPLY = (
                 }
             },
             "required_providers": {
-                "aws": {"source": "hashicorp/aws", "version": "3.38.0"}
+                "aws": {"source": "hashicorp/aws", "version": "3.51.0"}
             },
         },
         "module": {

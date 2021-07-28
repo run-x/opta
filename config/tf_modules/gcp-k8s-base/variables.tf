@@ -66,6 +66,21 @@ variable "zone_names" {
   default = []
 }
 
+variable "private_key" {
+  type    = string
+  default = ""
+}
+
+variable "certificate_body" {
+  type    = string
+  default = ""
+}
+
+variable "certificate_chain" {
+  type    = string
+  default = ""
+}
+
 variable "nginx_config" {
   default = {}
 }

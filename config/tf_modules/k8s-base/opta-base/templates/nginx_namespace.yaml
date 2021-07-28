@@ -1,0 +1,16 @@
+{{- $existingNamespace := (lookup "v1" "Namespace" "" "ingress-nginx" ) -}}
+{{ $result := false }}
+{{- if  $existingNamespace }}
+  {{- if ( hasKey $existingNamespace.metadata "annotations"  ) }}
+    {{- if ( hasKey $existingNamespace.metadata.annotations "meta.helm.sh/release-name"  ) }}
+      {{ $result := true }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- if or ( not $existingNamespace ) ( $result ) }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ingress-nginx
+{{- end }}
+---
