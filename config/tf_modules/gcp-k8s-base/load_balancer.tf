@@ -1,6 +1,6 @@
 resource "google_compute_ssl_certificate" "external" {
-  count = var.private_key != "" ? 1 : 0
-  name = "opta-${var.layer_name}"
+  count       = var.private_key != "" ? 1 : 0
+  name        = "opta-${var.layer_name}"
   certificate = join("\n", [var.certificate_body, var.certificate_chain])
   private_key = var.private_key
 }
