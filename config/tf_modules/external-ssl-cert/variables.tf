@@ -24,3 +24,7 @@ variable "certificate_body" {
 variable "certificate_chain" {
   type = string
 }
+
+variable "domain" {
+  type = string
+}

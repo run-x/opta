@@ -56,24 +56,6 @@ modules:
         export: true
       acr_login_url:
         export: true
-  azure-dns:
-    cloud: azure
-    location: azure-dns
-    variables:
-      env_name: str
-      layer_name: str
-      module_name: str
-      domain: str
-      delegated: optional
-    outputs:
-      zone_id:
-        export: true
-      name_servers:
-        export: true
-      domain:
-        export: true
-      delegated:
-        export: true
   azure-aks:
     cloud: azure
     location: azure-aks
@@ -322,6 +304,10 @@ modules:
       private_key: str
       certificate_body: str
       certificate_chain: str
+      domain: str
+    outputs:
+      domain:
+        export: true
   aws-k8s-base:
     cloud: aws
     location: k8s-base
@@ -836,7 +822,6 @@ modules:
     alias:
       google: gcp-dns
       aws: aws-dns
-      azurerm: azure-dns
 
   mysql:
     alias:
