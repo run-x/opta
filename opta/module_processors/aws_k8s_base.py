@@ -29,6 +29,22 @@ class AwsK8sBaseProcessor(AWSK8sModuleProcessor):
         super(AwsK8sBaseProcessor, self).__init__(module, layer)
 
     def process(self, module_idx: int) -> None:
+        byo_cert_module = None
+        for module in self.layer.modules:
+            if (module.aliased_type or module.type) == "external-ssl-cert":
+                byo_cert_module = module
+                break
+        if byo_cert_module is not None:
+            self.module.data[
+                "private_key"
+            ] = f"${{{{module.{byo_cert_module.name}.private_key}}}}"
+            self.module.data[
+                "certificate_body"
+            ] = f"${{{{module.{byo_cert_module.name}.certificate_body}}}}"
+            self.module.data[
+                "certificate_chain"
+            ] = f"${{{{module.{byo_cert_module.name}.certificate_chain}}}}"
+
         aws_dns_module = None
         for module in self.layer.modules:
             if (module.aliased_type or module.type) == "aws-dns":
@@ -118,7 +134,7 @@ class AwsK8sBaseProcessor(AWSK8sModuleProcessor):
                 LoadBalancerArn=current_load_balancer["LoadBalancerArn"]
             )
             for listener in listeners["Listeners"]:
-                if listener["Port"] == 443:
+                if listener["Port"] == 443 and len(listener.get("Certificates", [])) > 0:
                     client.modify_listener(
                         ListenerArn=listener["ListenerArn"], AlpnPolicy=["HTTP2Preferred"]
                     )

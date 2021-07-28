@@ -1,15 +1,11 @@
 data "aws_region" "current" {}
 
 locals {
-  target_ports    = var.cert_arn == "" ? { http : "http" } : { http : "http", https : "https" }
-  container_ports = var.cert_arn == "" ? { http : 80, https : 443 } : { http : 80, https : 443 }
-  config = merge((var.cert_arn == "" ? { ssl-redirect : false } : {
-    ssl-redirect : false
-    server-snippet : <<EOF
-          if ( $server_port = 80 ) {
-             return 308 https://$host$request_uri;
-          }
-          EOF
+  target_ports    = var.cert_arn == "" && var.private_key == "" ? { http : "http" } : { http : "http", https : "https" }
+  container_ports = { http : 80, https : 443 }
+  config = merge((var.cert_arn == ""  && var.private_key == "" ? { ssl-redirect : false } : {
+    ssl-redirect : true
+    force-ssl-redirect : true
   }), var.nginx_config)
 }
 
@@ -68,6 +64,21 @@ variable "linkerd_high_availability" {
 variable "admin_arns" {
   type    = list(string)
   default = []
+}
+
+variable "private_key" {
+  type    = string
+  default = ""
+}
+
+variable "certificate_body" {
+  type    = string
+  default = ""
+}
+
+variable "certificate_chain" {
+  type    = string
+  default = ""
 }
 
 variable "nginx_config" {

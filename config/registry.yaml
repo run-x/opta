@@ -4,7 +4,7 @@ backends:
       required_providers:
         aws:
           source: "hashicorp/aws"
-          version: "3.38.0"
+          version: "3.51.0"
       backend:
         s3:
           bucket: "{state_storage}"
@@ -16,7 +16,7 @@ backends:
       required_providers:
         google:
           source: "hashicorp/google"
-          version: "3.66.1"
+          version: "3.77.0"
       backend:
         gcs:
           bucket: "{state_storage}"
@@ -120,7 +120,6 @@ modules:
       nginx_high_availability: optional
       linkerd_high_availability: optional
       linkerd_enabled: optional
-      delegated: optional
       private_key: optional
       certificate_body: optional
       certificate_chain: optional
@@ -341,6 +340,9 @@ modules:
       domain: optional
       cert_arn: optional
       admin_arns: optional
+      private_key: optional
+      certificate_body: optional
+      certificate_chain: optional
     outputs: {}
   aws-k8s-service:
     cloud: aws
@@ -585,6 +587,9 @@ modules:
       cert_self_link: optional
       delegated: optional
       zone_names: optional
+      private_key: optional
+      certificate_body: optional
+      certificate_chain: optional
     outputs:
       load_balancer_raw_ip:
         export: true
