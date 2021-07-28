@@ -30,8 +30,8 @@ class TestGenerator:
         mocker.patch("opta.layer.yaml.load", return_value=opta_config)
         layer = Layer.load_from_yaml("", None)
         gen_all(layer)
-        print(json.load(open(test_gen_file_path)))
-        assert gen_tf_file == json.load(open(test_gen_file_path))
+        real_output = json.load(open(test_gen_file_path))
+        assert gen_tf_file == real_output
 
         # Make sure generation does not work without org name.
 
