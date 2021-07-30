@@ -9,6 +9,33 @@ resource "aws_s3_bucket" "bucket" {
   }
   force_destroy = true
 
+  versioning {
+    enabled = true
+  }
+
+  logging {
+    target_bucket = "opta-${var.env_name}-logging-bucket"
+    target_prefix = "log/"
+  }
+
+  lifecycle_rule {
+    enabled = true
+
+    noncurrent_version_transition {
+      days          = 30
+      storage_class = "STANDARD_IA"
+    }
+
+    noncurrent_version_transition {
+      days          = 60
+      storage_class = "GLACIER"
+    }
+
+    noncurrent_version_expiration {
+      days = 90
+    }
+  }
+
   dynamic "cors_rule" {
     for_each = var.cors_rule != null ? [var.cors_rule] : []
     content {

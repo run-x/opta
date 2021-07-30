@@ -31,3 +31,8 @@ variable "cors_rule" {
   type    = any
   default = null
 }
+
+variable "lifecycle_rules" {
+  type    = list(any)
+  default = []
+}

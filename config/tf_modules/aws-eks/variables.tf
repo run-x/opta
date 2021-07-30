@@ -1,5 +1,9 @@
 data "aws_region" "current" {}
 
+data "aws_kms_key" "env_key" {
+  key_id = var.kms_account_key_arn
+}
+
 variable "kms_account_key_arn" {
   type = string
 }
