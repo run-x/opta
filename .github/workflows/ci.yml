@@ -66,7 +66,7 @@ jobs:
       - name: Run regula
         run: |
           cd config
-          ./regula run --include config.rego
+          ./regula run --include config.rego tf_modules
 
   python:
     runs-on: ubuntu-latest
