@@ -110,8 +110,8 @@ data "aws_iam_policy_document" "kms_policy" {
 }
 
 resource "aws_kms_key" "key" {
-  description = "Base key for account"
-  policy      = data.aws_iam_policy_document.kms_policy.json
+  description         = "Base key for account"
+  policy              = data.aws_iam_policy_document.kms_policy.json
   enable_key_rotation = true
   tags = {
     Name      = "opta-${var.layer_name}"

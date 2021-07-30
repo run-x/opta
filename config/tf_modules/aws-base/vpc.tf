@@ -20,8 +20,8 @@ resource "aws_flow_log" "vpc" {
 }
 
 resource "aws_cloudwatch_log_group" "vpc_flow_log" {
-  name = "opta-${var.env_name}-vpc-flow"
-  kms_key_id = aws_kms_key.key.arn
+  name              = "opta-${var.env_name}-vpc-flow"
+  kms_key_id        = aws_kms_key.key.arn
   retention_in_days = 90
 }
 

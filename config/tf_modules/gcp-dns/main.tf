@@ -3,22 +3,22 @@ resource "google_dns_managed_zone" "public" {
   dns_name    = "${var.domain}."
   description = "Opta DNS for environment ${var.layer_name}"
   dnssec_config {
-    kind = "dns#managedZoneDnsSecConfig"
+    kind          = "dns#managedZoneDnsSecConfig"
     non_existence = "nsec3"
-    state = "on"
+    state         = "on"
     default_key_specs {
-      algorithm = "rsasha256"
+      algorithm  = "rsasha256"
       key_length = 2048
-      key_type = "keySigning"
-      kind = "dns#dnsKeySpec"
+      key_type   = "keySigning"
+      kind       = "dns#dnsKeySpec"
     }
     default_key_specs {
-      algorithm = "rsasha256"
+      algorithm  = "rsasha256"
       key_length = 1024
-      key_type = "zoneSigning"
-      kind = "dns#dnsKeySpec"
+      key_type   = "zoneSigning"
+      kind       = "dns#dnsKeySpec"
     }
   }
-  lifecycle {ignore_changes = [dnssec_config]}
+  lifecycle { ignore_changes = [dnssec_config] }
 }
 
