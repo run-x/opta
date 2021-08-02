@@ -36,3 +36,7 @@ variable "lifecycle_rules" {
   type    = list(any)
   default = []
 }
+
+variable "s3_log_bucket_name" {
+  type = string
+}

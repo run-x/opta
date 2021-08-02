@@ -14,7 +14,7 @@ resource "aws_s3_bucket" "bucket" {
   }
 
   logging {
-    target_bucket = "opta-${var.env_name}-logging-bucket"
+    target_bucket = var.s3_log_bucket_name
     target_prefix = "log/"
   }
 

@@ -22,6 +22,7 @@ from opta.module_processors.aws_iam_role import AwsIamRoleProcessor
 from opta.module_processors.aws_iam_user import AwsIamUserProcessor
 from opta.module_processors.aws_k8s_base import AwsK8sBaseProcessor
 from opta.module_processors.aws_k8s_service import AwsK8sServiceProcessor
+from opta.module_processors.aws_s3 import AwsS3Processor
 from opta.module_processors.aws_sns import AwsSnsProcessor
 from opta.module_processors.aws_sqs import AwsSqsProcessor
 from opta.module_processors.azure_base import AzureBaseProcessor
@@ -60,6 +61,7 @@ class Layer:
         "azure-k8s-base": AzureK8sBaseProcessor,
         "azure-k8s-service": AzureK8sServiceProcessor,
         "external-ssl-cert": ExternalSSLCert,
+        "aws-s3": AwsS3Processor,
     }
 
     def __init__(
