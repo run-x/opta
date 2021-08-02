@@ -40,3 +40,8 @@ variable "lifecycle_rules" {
 variable "s3_log_bucket_name" {
   type = string
 }
+
+variable "same_region_replication" {
+  type    = bool
+  default = false
+}

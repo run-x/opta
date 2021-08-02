@@ -46,6 +46,22 @@ resource "aws_s3_bucket" "bucket" {
       max_age_seconds = try(cors_rule.value["max_age_seconds"], 0)
     }
   }
+
+  dynamic "replication_configuration" {
+    for_each = var.same_region_replication ? [1] : []
+    content {
+      role = aws_iam_role.replication[0].arn
+      rules {
+        id     = "default"
+        status = "Enabled"
+
+        destination {
+          bucket        = aws_s3_bucket.replica[0].arn
+          storage_class = "STANDARD"
+        }
+      }
+    }
+  }
 }
 
 resource "aws_s3_bucket_public_access_block" "block" {

@@ -453,6 +453,7 @@ modules:
       module_name: str
       bucket_name: str
       s3_log_bucket_name: str
+      same_region_replication: optional
       block_public: optional
       bucket_policy: optional
       cors_rule: optional

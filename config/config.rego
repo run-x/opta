@@ -15,6 +15,11 @@ waivers[waiver] {
     "rule_id": "FG_R00274",
     "resource_id": "aws_s3_bucket.log_bucket"
   }
+} {
+  waiver := {
+    "rule_id": "FG_R00100",
+    "resource_id": "aws_s3_bucket.bucket"
+  }
 }
 
 rules[rule] {
