@@ -179,6 +179,8 @@ modules:
       private_ipv4_cidr_blocks: optional
       public_ipv4_cidr_blocks: optional
     outputs:
+      s3_log_bucket_id:
+        export: true
       kms_account_key_arn:
         export: true
       kms_account_key_id:
@@ -316,6 +318,7 @@ modules:
       env_name: str
       layer_name: str
       module_name: str
+      s3_log_bucket_id: str
       openid_provider_url: str
       openid_provider_arn: str
       nginx_high_availability: optional

@@ -67,7 +67,11 @@ resource "helm_release" "ingress-nginx" {
             "service.beta.kubernetes.io/aws-load-balancer-backend-protocol" : "ssl"
             "service.beta.kubernetes.io/aws-load-balancer-proxy-protocol" : "*"
             "service.beta.kubernetes.io/aws-load-balancer-type" : "nlb"
+            "service.beta.kubernetes.io/aws-load-balancer-access-log-enabled" : true
+            "service.beta.kubernetes.io/aws-load-balancer-access-log-s3-bucket-name" : var.s3_log_bucket_id
+            "service.beta.kubernetes.io/aws-load-balancer-access-log-s3-bucket-prefix" : "opta-k8s-cluster"
             "service.beta.kubernetes.io/aws-load-balancer-ssl-ports" : var.cert_arn == "" && var.private_key == "" ? "" : "https"
+            "service.beta.kubernetes.io/aws-load-balancer-ssl-negotiation-policy" : "ELBSecurityPolicy-TLS-1-2-2017-01"
             "service.beta.kubernetes.io/aws-load-balancer-ssl-cert" : var.cert_arn
             "external-dns.alpha.kubernetes.io/hostname" : var.domain == "" ? "" : join(",", [var.domain, "*.${var.domain}"])
           }

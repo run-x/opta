@@ -90,11 +90,29 @@ data "aws_iam_policy_document" "kms_policy" {
     ]
     resources = ["*"]
   }
+
+  statement {
+    sid    = "Allow cloudwatch log access"
+    effect = "Allow"
+    principals {
+      identifiers = ["logs.${data.aws_region.current.name}.amazonaws.com"]
+      type        = "Service"
+    }
+    actions = [
+      "kms:Encrypt*",
+      "kms:Decrypt*",
+      "kms:ReEncrypt*",
+      "kms:GenerateDataKey*",
+      "kms:Describe*"
+    ]
+    resources = ["*"]
+  }
 }
 
 resource "aws_kms_key" "key" {
-  description = "Base key for account"
-  policy      = data.aws_iam_policy_document.kms_policy.json
+  description         = "Base key for account"
+  policy              = data.aws_iam_policy_document.kms_policy.json
+  enable_key_rotation = true
   tags = {
     Name      = "opta-${var.layer_name}"
     terraform = "true"

@@ -12,7 +12,7 @@ resource "aws_eks_cluster" "cluster" {
   encryption_config {
     resources = ["secrets"]
     provider {
-      key_arn = var.kms_account_key_arn
+      key_arn = data.aws_kms_key.env_key.arn
     }
   }
 
@@ -42,9 +42,13 @@ resource "aws_security_group_rule" "control_plane_access" {
 }
 
 resource "aws_cloudwatch_log_group" "cluster_logs" {
-  name              = "/eks/opta-${var.layer_name}/cluster"
+  name              = "/aws/eks/opta-${var.layer_name}/cluster"
+  kms_key_id        = data.aws_kms_key.env_key.arn
   retention_in_days = 7
   tags = {
     terraform = "true"
+  }
+  lifecycle {
+    ignore_changes = [name]
   }
 }
