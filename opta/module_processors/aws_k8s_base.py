@@ -55,6 +55,16 @@ class AwsK8sBaseProcessor(AWSK8sModuleProcessor):
             self.module.data[
                 "cert_arn"
             ] = f"${{{{module.{aws_dns_module.name}.cert_arn}}}}"
+
+        aws_base_module = None
+        for module in self.layer.modules:
+            if (module.aliased_type or module.type) == "aws-base":
+                aws_base_module = module
+                break
+        if aws_base_module is not None:
+            self.module.data[
+                "s3_log_bucket_id"
+            ] = f"${{{{module.{aws_base_module.name}.s3_log_bucket_id}}}}"
         super(AwsK8sBaseProcessor, self).process(module_idx)
 
     def post_hook(self, module_idx: int, exception: Optional[Exception]) -> None:

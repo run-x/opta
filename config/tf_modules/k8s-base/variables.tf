@@ -13,6 +13,10 @@ variable "eks_cluster_name" {
   type = string
 }
 
+variable "s3_log_bucket_id" {
+  type = string
+}
+
 variable "env_name" {
   description = "Env name"
   type        = string
