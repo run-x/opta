@@ -27,4 +27,44 @@ rules[rule] {
     "rule_id": "FG_R00007",
     "status": "DISABLED"
   }
+} {
+  rule := {
+    "rule_id": "FG_R00275",
+    "status": "DISABLED"
+  }
+} {  # The following rules are disabled until the PR to cleanup the soc2 on each respective cloud
+  rule := {
+    "rule_id": "FG_R00227",
+    "status": "DISABLED"
+  }
+} {
+  rule := {
+    "rule_id": "FG_R00286",
+    "status": "DISABLED"
+  }
+} {
+  rule := {
+    "rule_id": "FG_R00344",
+    "status": "DISABLED"
+  }
+} {
+  rule := {
+    "rule_id": "FG_R00378",
+    "status": "DISABLED"
+  }
+} {
+  rule := {
+    "rule_id": "FG_R00409",
+    "status": "DISABLED"
+  }
+} {
+  rule := {
+    "rule_id": "FG_R00421",
+    "status": "DISABLED"
+  }
+} {
+  rule := {
+    "rule_id": "FG_R00433",
+    "status": "DISABLED"
+  }
 }
