@@ -4,6 +4,7 @@ from typing import List, Optional, Set
 import boto3
 import click
 from botocore.config import Config
+from botocore.exceptions import ClientError
 from packaging import version
 
 from opta.amplitude import amplitude_client
@@ -19,8 +20,8 @@ from opta.core.kubernetes import (
     tail_module_log,
     tail_namespace_events,
 )
-from opta.core.terraform import Terraform
-from opta.exceptions import UserErrors
+from opta.core.terraform import Terraform, get_terraform_outputs
+from opta.exceptions import MissingState, UserErrors
 from opta.layer import Layer
 from opta.utils import check_opta_file_exists, fmt_msg, is_tool, logger
 
@@ -105,6 +106,8 @@ def _apply(
 ) -> None:
     _check_terraform_version()
     layer = Layer.load_from_yaml(config, env)
+
+    _verify_parent_layer(layer)
 
     amplitude_client.send_event(
         amplitude_client.START_GEN_EVENT,
@@ -255,3 +258,24 @@ def _fetch_availability_zones(aws_region: str) -> List[str]:
         Filters=[{"Name": "zone-type", "Values": ["availability-zone"]}]
     )
     return list(map(lambda az: az["ZoneName"], resp["AvailabilityZones"]))
+
+
+# Verify whether the parent layer exists or not
+def _verify_parent_layer(layer: Layer) -> None:
+    if layer.parent is None:
+        return
+    try:
+        get_terraform_outputs(layer.parent)
+    except ClientError as e:
+        if e.response["Error"]["Code"] == "AccessDenied":
+            raise UserErrors(
+                f"We were unable to fetch Environment details for the Env {layer.parent.name}, on your AWS account (opta needs this to store state). "
+                "Usually, it means that your AWS account has insufficient permissions. "
+                "Please fix these issues and try again!"
+            )
+    except MissingState as e:
+        raise MissingState(
+            f"{e.args[0]}, (opta needs this to download Environment state). "
+            "Usually, this means that the Environment mentioned in configuration file does not exist."
+            "Please create the mentioned Environment or use an existing one"
+        )

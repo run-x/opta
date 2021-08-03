@@ -1,12 +1,15 @@
 from typing import Any
 
+import pytest
+from botocore.exceptions import ClientError
 from click.testing import CliRunner, Result
 from pytest import fixture
 from pytest_mock import MockFixture
 
-from opta.commands.apply import apply
+from opta.commands.apply import _verify_parent_layer, apply
 from opta.constants import TF_PLAN_PATH
 from opta.core.kubernetes import tail_module_log, tail_namespace_events
+from opta.exceptions import MissingState, UserErrors
 from opta.layer import Layer
 from opta.module import Module
 
@@ -42,6 +45,7 @@ def mocked_layer(mocker: MockFixture) -> Any:
     mocked_layer.cloud = "aws"
     mocked_layer.gen_providers = lambda x: {"provider": {"aws": {"region": "us-east-1"}}}
     mocked_layer_class.load_from_yaml.return_value = mocked_layer
+    mocked_layer.parent = None
 
     return mocked_layer
 
@@ -179,3 +183,43 @@ def test_fail_on_2_azs(mocker: MockFixture, mocked_layer: Any) -> None:
     assert "Opta requires a region with at least *3* availability zones." in str(
         result.exception
     )
+
+
+def test_verify_parent_layer(mocker: MockFixture, mocked_layer: Any) -> None:
+    mocked_get_terraform_outputs = mocker.patch(
+        "opta.commands.apply.get_terraform_outputs"
+    )
+    mocked_layer.parent = mocker.Mock(spec=Layer)
+    _verify_parent_layer(mocked_layer)
+    mocked_get_terraform_outputs.assert_called_once_with(mocked_layer.parent)
+
+
+def test_verify_parent_layer_client_error(mocker: MockFixture, mocked_layer: Any) -> None:
+    mocked_get_terraform_outputs = mocker.patch(
+        "opta.commands.apply.get_terraform_outputs"
+    )
+    mocked_get_terraform_outputs.side_effect = ClientError(
+        error_response={"Error": {"Code": "AccessDenied", "Message": "Blah"}},
+        operation_name="Blah",
+    )
+    mocked_layer.parent = mocker.Mock(spec=Layer)
+    mocked_layer.parent.name = "Parent Name"
+    with pytest.raises(UserErrors):
+        _verify_parent_layer(mocked_layer)
+    mocked_get_terraform_outputs.assert_called_once_with(mocked_layer.parent)
+
+
+def test_verify_parent_layer_missing_state(
+    mocker: MockFixture, mocked_layer: Any
+) -> None:
+    mocked_get_terraform_outputs = mocker.patch(
+        "opta.commands.apply.get_terraform_outputs"
+    )
+    mocked_layer.parent = mocker.Mock(spec=Layer)
+    mocked_layer.parent.name = "Parent Name"
+    mocked_get_terraform_outputs.side_effect = MissingState(
+        f"Unable to download state for layer {mocked_layer.parent.name}"
+    )
+    with pytest.raises(UserErrors):
+        _verify_parent_layer(mocked_layer)
+    mocked_get_terraform_outputs.assert_called_once_with(mocked_layer.parent)
