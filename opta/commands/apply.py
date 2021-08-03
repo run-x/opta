@@ -21,7 +21,7 @@ from opta.core.kubernetes import (
     tail_namespace_events,
 )
 from opta.core.terraform import Terraform, get_terraform_outputs
-from opta.exceptions import UserErrors, MissingState
+from opta.exceptions import MissingState, UserErrors
 from opta.layer import Layer
 from opta.utils import check_opta_file_exists, fmt_msg, is_tool, logger
 
@@ -107,8 +107,7 @@ def _apply(
     _check_terraform_version()
     layer = Layer.load_from_yaml(config, env)
 
-    if layer.parent is not None:
-        _verify_parent_layer(layer, env)
+    _verify_parent_layer(layer)
 
     amplitude_client.send_event(
         amplitude_client.START_GEN_EVENT,
@@ -261,21 +260,22 @@ def _fetch_availability_zones(aws_region: str) -> List[str]:
     return list(map(lambda az: az["ZoneName"], resp["AvailabilityZones"]))
 
 
-# TODO: Need to add Specific Exceptions for GCP/Azure.
 # Verify whether the parent layer exists or not
-def _verify_parent_layer(layer: Layer, env: Optional[str]):
+def _verify_parent_layer(layer: Layer) -> None:
+    if layer.parent is None:
+        return
     try:
-        outputs = get_terraform_outputs(layer.parent)
+        get_terraform_outputs(layer.parent)
     except ClientError as e:
         if e.response["Error"]["Code"] == "AccessDenied":
             raise UserErrors(
-                f"We were unable to fetch Environment details for the Env {layer.parent.name} in {env}, on your AWS account (opta needs this to store state). "
+                f"We were unable to fetch Environment details for the Env {layer.parent.name}, on your AWS account (opta needs this to store state). "
                 "Usually, it means that your AWS account has insufficient permissions. "
                 "Please fix these issues and try again!"
             )
     except MissingState as e:
         raise MissingState(
-            f"{e.args[0]} in Env {env}, (opta needs this to download Environment state). "
+            f"{e.args[0]}, (opta needs this to download Environment state). "
             "Usually, this means that the Environment mentioned in configuration file does not exist."
             "Please create the mentioned Environment or use an existing one"
         )
