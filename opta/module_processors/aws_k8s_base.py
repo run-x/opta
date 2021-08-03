@@ -63,8 +63,8 @@ class AwsK8sBaseProcessor(AWSK8sModuleProcessor):
                 break
         if aws_base_module is not None:
             self.module.data[
-                "s3_log_bucket_id"
-            ] = f"${{{{module.{aws_base_module.name}.s3_log_bucket_id}}}}"
+                "s3_log_bucket_name"
+            ] = f"${{{{module.{aws_base_module.name}.s3_log_bucket_name}}}}"
         super(AwsK8sBaseProcessor, self).process(module_idx)
 
     def post_hook(self, module_idx: int, exception: Optional[Exception]) -> None:

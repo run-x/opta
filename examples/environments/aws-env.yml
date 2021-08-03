@@ -6,8 +6,13 @@ providers:
     account_id: 445935066876
 modules:
   - type: base
+#  - type: external-ssl-cert
+#    domain: "baloney.runx.dev"
+#    private_key_file: "./privkey.pem"
+#    certificate_body_file: "./cert_body.pem"
+#    certificate_chain_file: "./cert_chain.pem"
   - type: dns
-    domain: example.runx.dev
+    domain: baloney.runx.dev
     delegated: false
   - name: deployeruser
     type: aws-iam-user

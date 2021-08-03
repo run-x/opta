@@ -27,3 +27,8 @@ variable "safety" {
   type    = bool
   default = false
 }
+
+variable "multi_az" {
+  type    = bool
+  default = false
+}

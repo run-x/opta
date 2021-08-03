@@ -14,7 +14,7 @@ resource "aws_s3_bucket" "bucket" {
   }
 
   logging {
-    target_bucket = "opta-${var.env_name}-logging-bucket"
+    target_bucket = var.s3_log_bucket_name
     target_prefix = "log/"
   }
 
@@ -44,6 +44,22 @@ resource "aws_s3_bucket" "bucket" {
       allowed_origins = try(cors_rule.value["allowed_origins"], [])
       expose_headers  = try(cors_rule.value["expose_headers"], [])
       max_age_seconds = try(cors_rule.value["max_age_seconds"], 0)
+    }
+  }
+
+  dynamic "replication_configuration" {
+    for_each = var.same_region_replication ? [1] : []
+    content {
+      role = aws_iam_role.replication[0].arn
+      rules {
+        id     = "default"
+        status = "Enabled"
+
+        destination {
+          bucket        = aws_s3_bucket.replica[0].arn
+          storage_class = "STANDARD"
+        }
+      }
     }
   }
 }

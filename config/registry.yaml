@@ -179,7 +179,7 @@ modules:
       private_ipv4_cidr_blocks: optional
       public_ipv4_cidr_blocks: optional
     outputs:
-      s3_log_bucket_id:
+      s3_log_bucket_name:
         export: true
       kms_account_key_arn:
         export: true
@@ -318,7 +318,7 @@ modules:
       env_name: str
       layer_name: str
       module_name: str
-      s3_log_bucket_id: str
+      s3_log_bucket_name: str
       openid_provider_url: str
       openid_provider_arn: str
       nginx_high_availability: optional
@@ -396,6 +396,7 @@ modules:
       engine_version: optional
       instance_class: optional
       safety: optional
+      multi_az: optional
     outputs:
       db_user:
         export: true
@@ -452,6 +453,8 @@ modules:
       layer_name: str
       module_name: str
       bucket_name: str
+      s3_log_bucket_name: str
+      same_region_replication: optional
       block_public: optional
       bucket_policy: optional
       cors_rule: optional
