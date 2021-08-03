@@ -23,18 +23,13 @@ variable "block_public" {
 }
 
 variable "bucket_policy" {
-  type    = map(any)
+  type    = any
   default = null
 }
 
 variable "cors_rule" {
   type    = any
   default = null
-}
-
-variable "lifecycle_rules" {
-  type    = list(any)
-  default = []
 }
 
 variable "s3_log_bucket_name" {

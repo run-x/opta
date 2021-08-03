@@ -715,6 +715,27 @@ class Terraform:
                     "RestrictPublicBuckets": True,
                 },
             )
+            s3.put_bucket_versioning(
+                Bucket=bucket_name, VersioningConfiguration={"Status": "Enabled"},
+            )
+            s3.put_bucket_lifecycle(
+                Bucket=bucket_name,
+                LifecycleConfiguration={
+                    "Rules": [
+                        {
+                            "ID": "default",
+                            "Prefix": "/",
+                            "Status": "Enabled",
+                            "NoncurrentVersionTransition": {
+                                "NoncurrentDays": 30,
+                                "StorageClass": "GLACIER",
+                            },
+                            "NoncurrentVersionExpiration": {"NoncurrentDays": 60},
+                            "AbortIncompleteMultipartUpload": {"DaysAfterInitiation": 10},
+                        },
+                    ]
+                },
+            )
 
         try:
             dynamodb.describe_table(TableName=dynamodb_table)
