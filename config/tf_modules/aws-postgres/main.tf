@@ -32,7 +32,7 @@ resource "aws_rds_cluster" "db_cluster" {
 }
 
 resource "aws_rds_cluster_instance" "db_instance" {
-  count                           = 1
+  count                           = var.multi_az ? 2 : 1
   identifier                      = "opta-${var.layer_name}-${var.module_name}-${count.index}"
   cluster_identifier              = aws_rds_cluster.db_cluster.id
   instance_class                  = var.instance_class

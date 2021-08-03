@@ -8,7 +8,7 @@ output "db_password" {
 }
 
 output "db_host" {
-  value = aws_rds_cluster_instance.db_instance[0].endpoint
+  value = aws_rds_cluster.db_cluster.endpoint
 }
 
 output "db_name" {

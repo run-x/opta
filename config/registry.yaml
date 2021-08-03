@@ -396,6 +396,7 @@ modules:
       engine_version: optional
       instance_class: optional
       safety: optional
+      multi_az: optional
     outputs:
       db_user:
         export: true
