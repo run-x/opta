@@ -7,7 +7,11 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
 from uuid import uuid4
 
 import boto3
-from azure.core.exceptions import ResourceExistsError, ResourceNotFoundError
+from azure.core.exceptions import (
+    HttpResponseError,
+    ResourceExistsError,
+    ResourceNotFoundError,
+)
 from azure.mgmt.authorization import AuthorizationManagementClient
 from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.storage import StorageManagementClient
@@ -470,9 +474,22 @@ class Terraform:
         # Create RG
         credential = Azure.get_credentials()
         resource_client = ResourceManagementClient(credential, subscription_id)
-        rg_result = resource_client.resource_groups.create_or_update(
-            resource_group_name, {"location": region}
-        )
+        try:
+            rg_result = resource_client.resource_groups.create_or_update(
+                resource_group_name, {"location": region}
+            )
+        except ResourceNotFoundError as e:
+            if "SubscriptionNotFound" in e.message:
+                raise UserErrors(
+                    f"SubscriptionId {subscription_id} does not exists. Please check and use the correct Subscription Id. "
+                    "This is used for accessing the resources in the Resource Group."
+                )
+        except HttpResponseError as e:
+            if "InvalidSubscriptionId" in e.message:
+                raise UserErrors(
+                    f"Malformed or Invalid SubscriptionId {subscription_id} used. Please check and use the correct Subscription Id. "
+                    "This is used for accessing the resources in the Resource Group."
+                )
 
         print(
             f"Provisioned resource group {rg_result.name} in the {rg_result.location} region"
@@ -673,11 +690,18 @@ class Terraform:
         try:
             s3.get_bucket_encryption(Bucket=bucket_name,)
         except ClientError as e:
+            if e.response["Error"]["Code"] == "AuthFailure":
+                raise UserErrors(
+                    "The AWS Credentials are not configured properly.\n"
+                    "Visit https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html "
+                    "for more information."
+                )
             if e.response["Error"]["Code"] == "AccessDenied":
                 raise UserErrors(
-                    f"We were unable to access the S3 bucket, {bucket_name} on your AWS account (opta needs this to store state). "
-                    "Usually, it means that the name in your opta.yml is not unique. Try updating it to something else. "
-                    "It could also mean that your AWS account has insufficient permissions. "
+                    f"We were unable to access the S3 bucket, {bucket_name} on your AWS account (opta needs this to store state).\n"
+                    "Possible Issues: \n"
+                    " - Bucket name is not unique and might be present in some other Account. Try updating the name in Configuration file to something else.\n"
+                    " - It could also mean that your AWS account has insufficient permissions.\n"
                     "Please fix these issues and try again!"
                 )
             if e.response["Error"]["Code"] != "NoSuchBucket":
