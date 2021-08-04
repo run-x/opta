@@ -227,7 +227,7 @@ modules:
       min_nodes: optional
       node_disk_size: optional
       node_instance_type: optional
-      uge_gpu: optional
+      use_gpu: optional
       spot_instances: optional
     outputs: {}
     inspect:
