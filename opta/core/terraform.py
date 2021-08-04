@@ -557,15 +557,21 @@ class Terraform:
         except ResourceNotFoundError:
             print("Need to create storage account")
             # create sa
-            poller = storage_client.storage_accounts.begin_create(
-                resource_group_name,
-                storage_account_name,
-                {
-                    "location": region,
-                    "kind": "StorageV2",
-                    "sku": {"name": "Standard_LRS"},
-                },
-            )
+            try:
+                poller = storage_client.storage_accounts.begin_create(
+                    resource_group_name,
+                    storage_account_name,
+                    {
+                        "location": region,
+                        "kind": "StorageV2",
+                        "sku": {"name": "Standard_LRS"},
+                    },
+                )
+            except ResourceExistsError:
+                raise UserErrors(
+                    "The Storage Account name already exists in Another Subscription. "
+                    "Please change the Name or Org Name in Config."
+                )
 
             account_result = poller.result()
             print(f"Provisioned storage account {account_result.name}")
