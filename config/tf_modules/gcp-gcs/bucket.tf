@@ -4,7 +4,7 @@ resource "google_storage_bucket" "bucket" {
   encryption {
     default_kms_key_name = data.google_kms_crypto_key.kms.id
   }
-  force_destroy = true
+  force_destroy               = true
   uniform_bucket_level_access = true
 }
 

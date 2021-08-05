@@ -24,30 +24,30 @@ resource "google_sql_database_instance" "instance" {
     ip_configuration {
       ipv4_enabled    = false
       private_network = data.google_compute_network.vpc.id
-      require_ssl = true
+      require_ssl     = true
     }
     backup_configuration {
       enabled    = true
       start_time = "23:00"
     }
     database_flags {
-      name = "log_checkpoints"
+      name  = "log_checkpoints"
       value = "on"
     }
     database_flags {
-      name = "log_connections"
+      name  = "log_connections"
       value = "on"
     }
     database_flags {
-      name = "log_disconnections"
+      name  = "log_disconnections"
       value = "on"
     }
     database_flags {
-      name = "log_lock_waits"
+      name  = "log_lock_waits"
       value = "on"
     }
     database_flags {
-      name = "log_temp_files"
+      name  = "log_temp_files"
       value = 0
     }
   }

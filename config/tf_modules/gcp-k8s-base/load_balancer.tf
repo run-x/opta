@@ -18,8 +18,8 @@ resource "google_compute_health_check" "healthcheck" {
 }
 
 resource "google_compute_ssl_policy" "policy" {
-  name    = "opta-${var.layer_name}"
-  profile = "MODERN"
+  name            = "opta-${var.layer_name}"
+  profile         = "MODERN"
   min_tls_version = "TLS_1_2"
 }
 
@@ -71,7 +71,7 @@ resource "google_compute_target_https_proxy" "proxy" {
   name             = "opta-${var.layer_name}"
   url_map          = google_compute_url_map.https[0].name
   ssl_certificates = var.delegated ? [var.cert_self_link] : [google_compute_ssl_certificate.external[0].self_link]
-  ssl_policy = google_compute_ssl_policy.policy.self_link
+  ssl_policy       = google_compute_ssl_policy.policy.self_link
 }
 
 resource "google_compute_global_forwarding_rule" "http" {

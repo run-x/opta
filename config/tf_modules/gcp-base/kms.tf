@@ -23,8 +23,8 @@ resource "google_kms_key_ring" "keyring" {
 }
 
 resource "google_kms_crypto_key" "key" {
-  name     = "opta-${var.layer_name}-${random_id.key_suffix.hex}"
-  key_ring = google_kms_key_ring.keyring.id
+  name            = "opta-${var.layer_name}-${random_id.key_suffix.hex}"
+  key_ring        = google_kms_key_ring.keyring.id
   rotation_period = "7776000s"
 }
 

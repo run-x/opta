@@ -17,13 +17,13 @@ resource "google_compute_firewall" "firewall" {
 }
 
 resource "google_compute_firewall" "k8s_extra_rules" {
-  name = "opta-${var.layer_name}-k8s-cntrol-plane"
-  network = google_compute_network.vpc.id
+  name      = "opta-${var.layer_name}-k8s-cntrol-plane"
+  network   = google_compute_network.vpc.id
   direction = "INGRESS"
   allow {
     protocol = "tcp"
     ports    = ["8443"]
   }
   source_ranges = [var.k8s_master_ipv4_cidr_block]
-  target_tags = ["opta-${var.layer_name}-nodes"]
+  target_tags   = ["opta-${var.layer_name}-nodes"]
 }

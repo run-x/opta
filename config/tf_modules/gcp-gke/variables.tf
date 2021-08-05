@@ -57,7 +57,7 @@ variable "min_nodes" {
 }
 
 variable "k8s_master_ipv4_cidr_block" {
-  type    = string
+  type = string
 }
 
 variable "node_disk_size" {
