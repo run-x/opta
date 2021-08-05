@@ -494,10 +494,6 @@ modules:
         export: true
       private_subnet_self_link:
         export: true
-    providers:
-      data:
-        google_client_config:
-          provider: {}
   gcp-dns:
     cloud: google
     location: gcp-dns
@@ -556,12 +552,12 @@ modules:
         google_container_cluster:
           k8s:
             name: "${{{module_source}.k8s_cluster_name}}"
-            location: "${{data.google_client_config.provider.region}}"
+            location: "{region}"
       provider:
         helm:
           kubernetes:
-            host: "${{data.google_container_cluster.k8s.endpoint}}"
-            token: "${{data.google_client_config.provider.access_token}}"
+            host: "https://${{data.google_container_cluster.k8s.endpoint}}"
+            token: "{k8s_access_token}"
             cluster_ca_certificate: "${{base64decode({module_source}.k8s_ca_data)}}"
   gcp-k8s-base:
     cloud: google

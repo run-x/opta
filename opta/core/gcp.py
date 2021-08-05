@@ -23,8 +23,7 @@ class GCP:
 
     def __init__(self, layer: "Layer"):
         self.layer = layer
-        providers = layer.root().gen_providers(0)["provider"]
-        self.region = providers["google"]["region"]
+        self.region = layer.root().providers["google"]["region"]
 
     @classmethod
     def get_credentials(cls) -> Tuple[Credentials, str]:

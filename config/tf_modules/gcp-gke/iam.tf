@@ -35,4 +35,7 @@ resource "google_storage_bucket_iam_member" "viewer" {
   bucket = "artifacts.${data.google_client_config.current.project}.appspot.com"
   role   = "roles/storage.objectViewer"
   member = "serviceAccount:${google_service_account.gke_node.email}"
+  lifecycle {
+    ignore_changes = [bucket]
+  }
 }
