@@ -52,24 +52,4 @@ rules[rule] {
     "rule_id": "FG_R00344",
     "status": "DISABLED"
   }
-} {
-  rule := {
-    "rule_id": "FG_R00378",
-    "status": "DISABLED"
-  }
-} {
-  rule := {
-    "rule_id": "FG_R00409",
-    "status": "DISABLED"
-  }
-} {
-  rule := {
-    "rule_id": "FG_R00421",
-    "status": "DISABLED"
-  }
-} {
-  rule := {
-    "rule_id": "FG_R00433",
-    "status": "DISABLED"
-  }
 }

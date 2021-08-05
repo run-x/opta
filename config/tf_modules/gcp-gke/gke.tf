@@ -11,6 +11,7 @@ resource "google_container_cluster" "primary" {
 
   network    = var.vpc_self_link
   subnetwork = var.private_subnet_self_link
+  enable_shielded_nodes = true
   workload_identity_config {
     identity_namespace = "${data.google_client_config.current.project}.svc.id.goog"
   }
@@ -18,7 +19,7 @@ resource "google_container_cluster" "primary" {
   private_cluster_config {
     enable_private_nodes = true
     enable_private_endpoint = false
-    master_ipv4_cidr_block = "10.0.80.0/28"
+    master_ipv4_cidr_block = var.k8s_master_ipv4_cidr_block
   }
 
   network_policy {
@@ -44,6 +45,6 @@ resource "google_container_cluster" "primary" {
     services_secondary_range_name = "gke-services"
   }
   lifecycle {
-    ignore_changes = [location, private_cluster_config]
+    ignore_changes = [location, private_cluster_config, enable_shielded_nodes]
   }
 }
