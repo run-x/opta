@@ -336,7 +336,7 @@ class Layer:
 
     def gen_providers(self, module_idx: int, clean: bool = True) -> Dict[Any, Any]:
         ret: Dict[Any, Any] = {"provider": {}}
-        region = None
+        region: Optional[str] = None
         k8s_access_token = None
         if self.cloud == "google":
             gcp = GCP(self)
@@ -352,6 +352,8 @@ class Layer:
                 k8s_access_token = service_account_credentials.token
             else:
                 k8s_access_token = credentials.token
+            if k8s_access_token is None:
+                raise Exception("Was unable to get GCP access token")
         elif self.cloud == "aws":
             aws = AWS(self)
             region = aws.region
