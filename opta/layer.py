@@ -344,7 +344,10 @@ class Layer:
             credentials = gcp.get_credentials()[0]
             if isinstance(credentials, service_account.Credentials):
                 service_account_credentials: service_account.Credentials = credentials.with_scopes(
-                    ["https://www.googleapis.com/auth/userinfo.email"]
+                    [
+                        "https://www.googleapis.com/auth/userinfo.email",
+                        "https://www.googleapis.com/auth/cloud-platform",
+                    ]
                 )
                 service_account_credentials.refresh(
                     google.auth.transport.requests.Request()
