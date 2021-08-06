@@ -31,9 +31,8 @@ resource "helm_release" "k8s-service" {
       deployPods : (var.image != "AUTO") || (var.tag != null),
       image : var.image == "AUTO" ? (var.tag == null ? "" : "${data.google_container_registry_repository.root.repository_url}/${var.layer_name}/${var.module_name}:${var.tag}") : (var.tag == null ? var.image : "${var.image}:${var.tag}")
       version : var.tag == null ? "latest" : var.tag
-      livenessProbePath : var.healthcheck_path == null || var.liveness_probe_path != "/healthcheck" ? var.liveness_probe_path : var.healthcheck_path,
-      readinessProbePath : var.healthcheck_path == null || var.readiness_probe_path != "/healthcheck" ? var.readiness_probe_path : var.healthcheck_path,
-      healthcheck_path: var.healthcheck_path,
+      livenessProbePath : var.healthcheck_path == null || var.liveness_probe_path != null ? var.liveness_probe_path : var.healthcheck_path,
+      readinessProbePath : var.healthcheck_path == null || var.readiness_probe_path != null ? var.readiness_probe_path : var.healthcheck_path,
       envVars : var.env_vars,
       linkSecrets : var.link_secrets,
       manualSecrets : var.manual_secrets,
