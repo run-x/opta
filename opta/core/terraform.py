@@ -608,10 +608,11 @@ class Terraform:
         except GoogleClientError as e:
             if e.code == 403:
                 raise UserErrors(
-                    f"We were unable to access the gcs bucket, {bucket_name} on your gcp project (opta needs this to store state). "
-                    "Usually, it means that the name in your opta.yml is not unique. Try updating it to something else. "
-                    "It could also mean that your GCP user account has insufficient permissions. "
-                    "Please fix these issues and try again!"
+                    f"The Bucket Name: {bucket_name} (Opta needs to store state here) already exists.\n"
+                    "Possible Failures:\n"
+                    " - Bucket is present in some other project and User does not have access to the Project.\n"
+                    "Please change the name in the Opta Configuration file or please change the User Permissions.\n"
+                    "Please fix it and try again."
                 )
             elif e.code != 404:
                 raise UserErrors(
