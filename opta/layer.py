@@ -9,7 +9,13 @@ from os import path
 from types import SimpleNamespace
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
 
+import boto3
 import git
+from azure.core.exceptions import ClientAuthenticationError
+from azure.identity import DefaultAzureCredential
+from botocore.exceptions import ClientError
+from google.auth import default
+from google.auth.exceptions import DefaultCredentialsError
 
 from opta.constants import REGISTRY
 from opta.core.validator import validate_yaml
@@ -116,6 +122,7 @@ class Layer:
                     f"The module name {module.name} is used multiple time in the "
                     "layer. Module names must be unique per layer"
                 )
+        # self._verify_cloud_credentials()
 
     @classmethod
     def load_from_yaml(cls, config: str, env: Optional[str]) -> Layer:
@@ -401,3 +408,31 @@ class Layer:
             layer = layer.parent
 
         return layer
+
+    def _verify_cloud_credentials(self) -> None:
+        if self.cloud == "aws":
+            try:
+                boto3.client("sts").get_caller_identity()
+            except ClientError as e:
+                raise UserErrors(
+                    "The AWS Credentials are not configured properly.\n"
+                    f" - Code: {e.response['Error']['Code']} Error Message: {e.response['Error']['Message']}"
+                    "Visit `https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html` "
+                    "for more information."
+                )
+        if self.cloud == "google":
+            try:
+                default()
+            except DefaultCredentialsError:
+                raise UserErrors(
+                    "Google Cloud credentials are not configured properly.\n"
+                    "Visit `https://googleapis.dev/python/google-api-core/latest/auth.html#overview` "
+                    "for more information."
+                )
+        if self.cloud == "azurerm":
+            try:
+                DefaultAzureCredential()
+            except ClientAuthenticationError as e:
+                raise UserErrors(
+                    "Azure Cloud are not configured properly.\n" f" Error: {e.message}"
+                )
