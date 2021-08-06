@@ -32,3 +32,8 @@ variable "services_ipv4_cidr_block" {
   type    = string
   default = "10.0.64.0/20"
 }
+
+variable "k8s_master_ipv4_cidr_block" {
+  type    = string
+  default = "10.0.80.0/28"
+}

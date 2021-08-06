@@ -11,13 +11,17 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
 
 import boto3
 import git
+import google.auth.transport.requests
 from azure.core.exceptions import ClientAuthenticationError
 from azure.identity import DefaultAzureCredential
 from botocore.exceptions import ClientError
 from google.auth import default
 from google.auth.exceptions import DefaultCredentialsError
+from google.oauth2 import service_account
 
 from opta.constants import REGISTRY
+from opta.core.aws import AWS
+from opta.core.gcp import GCP
 from opta.core.validator import validate_yaml
 from opta.exceptions import UserErrors
 from opta.module import Module
@@ -315,6 +319,7 @@ class Layer:
                     for k in self.parent.outputs()
                 }
             )
+
         return {
             "parent": parent,
             "vars": SimpleNamespace(**self.variables),
@@ -338,6 +343,33 @@ class Layer:
 
     def gen_providers(self, module_idx: int, clean: bool = True) -> Dict[Any, Any]:
         ret: Dict[Any, Any] = {"provider": {}}
+        region: Optional[str] = None
+        k8s_access_token = None
+        if self.cloud == "google":
+            gcp = GCP(self)
+            region = gcp.region
+            credentials = gcp.get_credentials()[0]
+            if isinstance(credentials, service_account.Credentials):
+                service_account_credentials: service_account.Credentials = credentials.with_scopes(
+                    [
+                        "https://www.googleapis.com/auth/userinfo.email",
+                        "https://www.googleapis.com/auth/cloud-platform",
+                    ]
+                )
+                service_account_credentials.refresh(
+                    google.auth.transport.requests.Request()
+                )
+                k8s_access_token = service_account_credentials.token
+            else:
+                k8s_access_token = credentials.token
+            if k8s_access_token is None:
+                raise Exception("Was unable to get GCP access token")
+        elif self.cloud == "aws":
+            aws = AWS(self)
+            region = aws.region
+        elif self.cloud == "azurerm":
+            region = self.providers["azurerm"]["location"]
+        hydration = self.metadata_hydration()
         providers = self.providers
         if self.parent is not None:
             providers = deep_merge(providers, self.parent.providers)
@@ -345,9 +377,9 @@ class Layer:
             new_v = self.handle_special_providers(k, v, clean)
             ret["provider"][k] = new_v
             if k in REGISTRY["backends"]:
-                hydration = deep_merge(self.metadata_hydration(), {"provider": new_v})
                 ret["terraform"] = hydrate(
-                    REGISTRY["backends"][k]["terraform"], hydration
+                    REGISTRY["backends"][k]["terraform"],
+                    deep_merge(hydration, {"provider": new_v}),
                 )
 
                 if self.parent is not None:
@@ -366,6 +398,8 @@ class Layer:
                                         "env": self.get_env(),
                                         "state_storage": self.state_storage(),
                                         "provider": self.parent.providers.get(k, {}),
+                                        "region": region,
+                                        "k8s_access_token": k8s_access_token,
                                     },
                                 ),
                             }
@@ -373,10 +407,19 @@ class Layer:
                     }
 
         # Add derived providers like k8s from parent
-        ret = deep_merge(ret, DerivedProviders(self.parent, is_parent=True).gen_tf())
+        ret = deep_merge(
+            ret,
+            DerivedProviders(self.parent, is_parent=True).gen_tf(
+                {"region": region, "k8s_access_token": k8s_access_token}
+            ),
+        )
         # Add derived providers like k8s from own modules
         ret = deep_merge(
-            ret, DerivedProviders(self, is_parent=False).gen_tf(module_idx=module_idx)
+            ret,
+            DerivedProviders(self, is_parent=False).gen_tf(
+                {"region": region, "k8s_access_token": k8s_access_token},
+                module_idx=module_idx,
+            ),
         )
 
         return ret

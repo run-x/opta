@@ -24,6 +24,9 @@ resource "google_container_node_pool" "default" {
     oauth_scopes = [
       "https://www.googleapis.com/auth/cloud-platform",
     ]
+    metadata = {
+      disable-legacy-endpoints = true
+    }
 
     workload_metadata_config {
       node_metadata = "GKE_METADATA_SERVER"
@@ -31,5 +34,8 @@ resource "google_container_node_pool" "default" {
     labels = {
       node_pool_name = "opta-${var.layer_name}-default"
     }
+  }
+  lifecycle {
+    ignore_changes = [location]
   }
 }

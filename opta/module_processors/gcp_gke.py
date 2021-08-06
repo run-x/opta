@@ -29,5 +29,8 @@ class GcpGkeProcessor(ModuleProcessor):
         self.module.data[
             "private_subnet_self_link"
         ] = f"${{{{module.{gcp_base_module.name}.private_subnet_self_link}}}}"
+        self.module.data[
+            "k8s_master_ipv4_cidr_block"
+        ] = f"${{{{module.{gcp_base_module.name}.k8s_master_ipv4_cidr_block}}}}"
         self.module.data["node_zone_names"] = GCP(self.layer).get_current_zones()
         super(GcpGkeProcessor, self).process(module_idx)

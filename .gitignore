@@ -13,5 +13,5 @@ dist
 build
 .coverage
 coverage.xml
-
+.venv
 .vscode
