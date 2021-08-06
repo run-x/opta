@@ -481,6 +481,7 @@ modules:
       private_ipv4_cidr_blocks: optional
       cluster_ipv4_cidr_block: optional
       services_ipv4_cidr_block: optional
+      k8s_master_ipv4_cidr_block: optional
     outputs:
       kms_account_key_self_link:
         export: true
@@ -494,10 +495,8 @@ modules:
         export: true
       private_subnet_self_link:
         export: true
-    providers:
-      data:
-        google_client_config:
-          provider: {}
+      k8s_master_ipv4_cidr_block:
+        export: true
   gcp-dns:
     cloud: google
     location: gcp-dns
@@ -537,6 +536,7 @@ modules:
       gke_channel: optional
       vpc_self_link: str
       private_subnet_self_link: str
+      k8s_master_ipv4_cidr_block: true
       node_zone_names: optional
     outputs:
       k8s_endpoint:
@@ -556,12 +556,12 @@ modules:
         google_container_cluster:
           k8s:
             name: "${{{module_source}.k8s_cluster_name}}"
-            location: "${{data.google_client_config.provider.region}}"
+            location: "{region}"
       provider:
         helm:
           kubernetes:
-            host: "${{data.google_container_cluster.k8s.endpoint}}"
-            token: "${{data.google_client_config.provider.access_token}}"
+            host: "https://${{data.google_container_cluster.k8s.endpoint}}"
+            token: "{k8s_access_token}"
             cluster_ca_certificate: "${{base64decode({module_source}.k8s_ca_data)}}"
   gcp-k8s-base:
     cloud: google

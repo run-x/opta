@@ -24,8 +24,7 @@ class AwsArn(TypedDict):
 class AWS:
     def __init__(self, layer: "Layer"):
         self.layer = layer
-        providers = layer.root().gen_providers(0)["provider"]
-        self.region = providers["aws"]["region"]
+        self.region = layer.root().providers["aws"]["region"]
 
     # Fetches AWS resources tagged with "opta: true"
     # Works on most resources, but not all (ex. IAM, elasticache subnet groups)
