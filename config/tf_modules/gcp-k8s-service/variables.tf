@@ -70,13 +70,13 @@ variable "autoscaling_target_mem_percentage" {
 variable "liveness_probe_path" {
   description = "Url path for liveness probe"
   type        = string
-  default     = "/healthcheck"
+  default     = null
 }
 
 variable "readiness_probe_path" {
   description = "Url path for readiness probe"
   type        = string
-  default     = "/healthcheck"
+  default     = null
 }
 
 variable "healthcheck_path" {

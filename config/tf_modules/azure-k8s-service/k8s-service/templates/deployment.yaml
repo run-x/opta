@@ -76,6 +76,7 @@ spec:
             {{ end }}
           {{/* No probes for grpc at the moment */}}
           {{ if not (hasKey .Values.port "grpc") }}
+          {{ if .Values.livenessProbePath }}
           livenessProbe:
             initialDelaySeconds: 30
             {{ if hasKey .Values.port "tcp" }}
@@ -87,6 +88,8 @@ spec:
               port: main
               path: {{ .Values.livenessProbePath }}
             {{ end }}
+          {{ end }}
+          {{ if .Values.readinessProbePath }}
           readinessProbe:
             initialDelaySeconds: 30
             periodSeconds: 10
@@ -99,6 +102,7 @@ spec:
               port: main
               path: {{ .Values.readinessProbePath }}
             {{ end }}
+          {{ end }}
           {{ end }}
           resources:
             limits:
