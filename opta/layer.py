@@ -343,11 +343,15 @@ class Layer:
             region = gcp.region
             credentials = gcp.get_credentials()[0]
             if isinstance(credentials, service_account.Credentials):
-                credentials: service_account.Credentials = credentials.with_scopes(
+                service_account_credentials: service_account.Credentials = credentials.with_scopes(
                     ["https://www.googleapis.com/auth/userinfo.email"]
                 )
-                credentials.refresh(google.auth.transport.requests.Request())
-            k8s_access_token = credentials.token
+                service_account_credentials.refresh(
+                    google.auth.transport.requests.Request()
+                )
+                k8s_access_token = service_account_credentials.token
+            else:
+                k8s_access_token = credentials.token
         elif self.cloud == "aws":
             aws = AWS(self)
             region = aws.region
