@@ -10,6 +10,8 @@ from types import SimpleNamespace
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
 
 import git
+import google.auth.transport.requests
+from google.oauth2 import service_account
 
 from opta.constants import REGISTRY
 from opta.core.aws import AWS
@@ -339,7 +341,13 @@ class Layer:
         if self.cloud == "google":
             gcp = GCP(self)
             region = gcp.region
-            k8s_access_token = gcp.get_credentials()[0].token
+            credentials = gcp.get_credentials()[0]
+            if isinstance(credentials, service_account.Credentials):
+                credentials: service_account.Credentials = credentials.with_scopes(
+                    ["https://www.googleapis.com/auth/userinfo.email"]
+                )
+                credentials.refresh(google.auth.transport.requests.Request())
+            k8s_access_token = credentials.token
         elif self.cloud == "aws":
             aws = AWS(self)
             region = aws.region
