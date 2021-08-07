@@ -13,6 +13,7 @@ resource "azurerm_key_vault" "opta" {
   enabled_for_deployment          = true
   enabled_for_template_deployment = true
   purge_protection_enabled        = true
+  soft_delete_enabled = true
   lifecycle {
     ignore_changes = [location]
   }

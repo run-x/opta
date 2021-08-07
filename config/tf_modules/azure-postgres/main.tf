@@ -58,3 +58,26 @@ resource "azurerm_postgresql_database" "opta" {
   charset             = "UTF8"
   collation           = "English_United States.1252"
 }
+
+resource "azurerm_postgresql_configuration" "log_disconnections" {
+  name                = "log_disconnections"
+  resource_group_name = data.azurerm_resource_group.main.name
+  server_name         = azurerm_postgresql_server.opta.name
+  value               = "on"
+}
+
+
+resource "azurerm_postgresql_configuration" "log_duration" {
+  name                = "log_duration"
+  resource_group_name = data.azurerm_resource_group.main.name
+  server_name         = azurerm_postgresql_server.opta.name
+  value               = "on"
+}
+
+
+resource "azurerm_postgresql_configuration" "log_retention_days" {
+  name                = "log_retention_days"
+  resource_group_name = data.azurerm_resource_group.main.name
+  server_name         = azurerm_postgresql_server.opta.name
+  value               = "5"
+}

@@ -23,8 +23,7 @@ modules:
     port:
       http: 80
     env_vars:
-      - name: A
-        value: B
+      A: B
     public_uri: "subdomain1.{parent.domain}"
     links:
       - redis

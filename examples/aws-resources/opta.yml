@@ -28,9 +28,31 @@ modules:
       - SECRET_1
   - name: db
     type: aws-postgres
+    multi_az: true
   - name: s3
     type: aws-s3
+    same_region_replication: true
     bucket_name: "{parent_name}-{layer_name}"
+    bucket_policy: {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Sid": "denyInsecureTransport",
+          "Effect": "Deny",
+          "Principal": "*",
+          "Action": "s3:*",
+          "Resource": [
+              "arn:aws:s3:::{parent_name}-{layer_name}/*",
+              "arn:aws:s3:::{parent_name}-{layer_name}"
+          ],
+          "Condition": {
+            "Bool": {
+              "aws:SecureTransport": "false"
+            }
+          }
+        }
+      ]
+    }
   - name: redis
     type: aws-redis
   - name: queue
