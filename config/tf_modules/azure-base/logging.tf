@@ -3,15 +3,15 @@ resource "random_id" "logging_suffix" {
 }
 
 resource "azurerm_storage_account" "infra_logging" {
-  name                            = "optainfralogs${random_id.logging_suffix.hex}"
-  location                        = data.azurerm_resource_group.opta.location
-  resource_group_name             = data.azurerm_resource_group.opta.name
-  account_replication_type = "LRS"
-  account_tier = "Standard"
+  name                      = "optainfralogs${random_id.logging_suffix.hex}"
+  location                  = data.azurerm_resource_group.opta.location
+  resource_group_name       = data.azurerm_resource_group.opta.name
+  account_replication_type  = "LRS"
+  account_tier              = "Standard"
   enable_https_traffic_only = true
   network_rules {
     default_action = "Deny"
-    bypass = ["AzureServices"]
+    bypass         = ["AzureServices"]
   }
 }
 
@@ -26,7 +26,7 @@ resource "azurerm_monitor_diagnostic_setting" "infra_logging" {
 
     retention_policy {
       enabled = true
-      days = 180
+      days    = 180
     }
   }
 
@@ -40,9 +40,9 @@ resource "azurerm_monitor_diagnostic_setting" "infra_logging" {
 }
 
 data "azurerm_network_watcher" "default" {
-  name = "NetworkWatcher_${data.azurerm_resource_group.opta.location}"
+  name                = "NetworkWatcher_${data.azurerm_resource_group.opta.location}"
   resource_group_name = "NetworkWatcherRG"
-  depends_on = [azurerm_virtual_network.opta]
+  depends_on          = [azurerm_virtual_network.opta]
 }
 
 resource "azurerm_log_analytics_workspace" "watcher" {
@@ -54,7 +54,7 @@ resource "azurerm_log_analytics_workspace" "watcher" {
 
 resource "azurerm_network_watcher_flow_log" "vpc_flow_log" {
   network_watcher_name = data.azurerm_network_watcher.default.name
-  resource_group_name = "NetworkWatcherRG"
+  resource_group_name  = "NetworkWatcherRG"
 
   network_security_group_id = azurerm_network_security_group.opta.id
   storage_account_id        = azurerm_storage_account.infra_logging.id

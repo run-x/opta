@@ -24,28 +24,28 @@ resource "azurerm_role_assignment" "opta" {
   scope                = data.azurerm_resource_group.opta.id
   role_definition_name = "Network Contributor"
   principal_id         = azurerm_user_assigned_identity.opta.principal_id
-  lifecycle {ignore_changes = [scope]}
+  lifecycle { ignore_changes = [scope] }
 }
 
 resource "azurerm_role_assignment" "k8s_assign_identities" {
   scope                = data.azurerm_resource_group.opta.id
   role_definition_name = "Managed Identity Operator"
   principal_id         = azurerm_user_assigned_identity.opta.principal_id
-  lifecycle {ignore_changes = [scope]}
+  lifecycle { ignore_changes = [scope] }
 }
 
 resource "azurerm_role_assignment" "azurerm_container_registry" {
   scope                = data.azurerm_resource_group.opta.id
   role_definition_name = "AcrPull"
   principal_id         = azurerm_user_assigned_identity.opta.principal_id
-  lifecycle {ignore_changes = [scope]}
+  lifecycle { ignore_changes = [scope] }
 }
 
 resource "azurerm_role_assignment" "azurerm_container_registry_agent_pool" {
   scope                = data.azurerm_resource_group.opta.id
   role_definition_name = "AcrPull"
   principal_id         = azurerm_user_assigned_identity.agent_pool.principal_id
-  lifecycle {ignore_changes = [scope]}
+  lifecycle { ignore_changes = [scope] }
 }
 
 
