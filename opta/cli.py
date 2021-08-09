@@ -8,6 +8,7 @@ from click_didyoumean import DYMGroup
 
 import opta.sentry  # noqa: F401 This leads to initialization of sentry sdk
 from opta.amplitude import amplitude_client
+from opta.before_cli import before_cli
 from opta.cleanup_files import cleanup_files
 from opta.commands.apply import apply
 from opta.commands.deploy import deploy
@@ -79,6 +80,8 @@ if __name__ == "__main__":
         # However, we should still clean them up before the next command, or
         # else it may interfere with it.
         cleanup_files()
+        # Perform operations and actions before running CLI.
+        before_cli()
         cli()
     except CalledProcessError as e:
         logger.exception(e)
