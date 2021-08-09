@@ -361,7 +361,7 @@ class Layer:
             aws = AWS(self)
             region = aws.region
         elif self.cloud == "azurerm":
-            region = self.providers["azurerm"]["location"]
+            region = self.root().providers["azurerm"]["location"]
         hydration = self.metadata_hydration()
         providers = self.providers
         if self.parent is not None:
