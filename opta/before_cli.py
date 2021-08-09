@@ -3,12 +3,12 @@ from pathlib import Path
 
 import click
 
-from opta.constants import CI, data_analytics_prompt
+from opta.constants import CI, OPTA_DISABLE_REPORTING, data_analytics_prompt
 from opta.utils import logger
 
 
 def data_collection_flag() -> None:
-    if os.environ.get(CI) is not None:
+    if os.environ.get(CI) is not None or os.environ.get(OPTA_DISABLE_REPORTING):
         return
 
     if Path(data_analytics_prompt).is_file():
@@ -25,9 +25,8 @@ def data_collection_flag() -> None:
         "*       `https://docs.opta.dev/miscellaneous/analytics/`         *\n"
         "****************************IMPORTANT*****************************"
     )
-
-    if not click.confirm("Do you want to show this command the next time Opta is run?",):
-        open(data_analytics_prompt, "w").close()
+    click.confirm("Do you consent to runx tracking your data?", abort=True)
+    open(data_analytics_prompt, "w").close()
 
 
 def before_cli() -> None:
