@@ -1,7 +1,9 @@
 import os
 from pathlib import Path
 
-from opta.constants import CI, single_time_data_analytics_prompt
+import click
+
+from opta.constants import CI, data_analytics_prompt
 from opta.utils import logger
 
 
@@ -9,7 +11,7 @@ def data_collection_flag() -> None:
     if os.environ.get(CI) is not None:
         return
 
-    if Path(single_time_data_analytics_prompt).is_file():
+    if Path(data_analytics_prompt).is_file():
         return
 
     logger.info(
@@ -19,13 +21,13 @@ def data_collection_flag() -> None:
         "* give superior support for the users. Like with the stdout      *\n"
         "* users see, these reports do not hold ANY secrets or passwords. *\n"
         "*                                                                *\n"
-        "* This is a single time message and would not be shown again.    *\n"
-        "*                                                                *\n"
         "* For more information, please go through this Documentation     *\n"
         "*       `https://docs.opta.dev/miscellaneous/analytics/`         *\n"
         "****************************IMPORTANT*****************************"
     )
-    open(single_time_data_analytics_prompt, "w").close()
+
+    if not click.confirm("Do you want to show this command the next time Opta is run?",):
+        open(data_analytics_prompt, "w").close()
 
 
 def before_cli() -> None:

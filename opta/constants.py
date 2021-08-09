@@ -26,7 +26,7 @@ tf_modules_path = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), "config", "tf_modules"
 )
 
-single_time_data_analytics_prompt = os.path.join(
+data_analytics_prompt = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), ".data_analytics_prompt"
 )
 
