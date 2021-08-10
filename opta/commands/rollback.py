@@ -20,5 +20,6 @@ def rollback(config: str, env: Optional[str]) -> None:
 
     check_opta_file_exists(config)
     layer = Layer.load_from_yaml(config, env)
+    layer.verify_cloud_credentials()
     gen_all(layer)
     Terraform.rollback(layer)

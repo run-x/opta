@@ -25,6 +25,7 @@ def inspect(config: str, env: Optional[str]) -> None:
     check_opta_file_exists(config)
     amplitude_client.send_event(amplitude_client.INSPECT_EVENT)
     layer = Layer.load_from_yaml(config, env)
+    layer.verify_cloud_credentials()
     gen_all(layer)
     InspectCommand(layer).run()
 

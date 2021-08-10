@@ -32,6 +32,7 @@ def logs(env: Optional[str], config: str, seconds: Optional[int]) -> None:
     check_opta_file_exists(config)
     # Configure kubectl
     layer = Layer.load_from_yaml(config, env)
+    layer.verify_cloud_credentials()
     amplitude_client.send_event(amplitude_client.SHELL_EVENT)
     gen_all(layer)
     configure_kubectl(layer)

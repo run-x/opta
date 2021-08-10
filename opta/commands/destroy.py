@@ -33,6 +33,7 @@ def destroy(config: str, env: Optional[str], auto_approve: bool) -> None:
     check_opta_file_exists(config)
     amplitude_client.send_event(amplitude_client.DESTROY_EVENT)
     layer = Layer.load_from_yaml(config, env)
+    layer.verify_cloud_credentials()
     if not Terraform.download_state(layer):
         logger.info(
             "The opta state could not be found. This may happen if destroy ran successfully before."
