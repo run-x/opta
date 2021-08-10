@@ -149,6 +149,7 @@ def _push(image: str, config: str, env: Optional[str], tag: Optional[str]) -> No
     if not is_tool("docker"):
         raise Exception("Please install docker on your machine")
     layer = Layer.load_from_yaml(config, env)
+    layer.verify_cloud_credentials()
     gen_all(layer)
     registry_url = get_registry_url(layer)
     if layer.cloud == "aws":

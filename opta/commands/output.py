@@ -24,6 +24,7 @@ def output(config: str, env: Optional[str],) -> None:
     check_opta_file_exists(config)
     amplitude_client.send_event(amplitude_client.VIEW_OUTPUT_EVENT)
     layer = Layer.load_from_yaml(config, env)
+    layer.verify_cloud_credentials()
     gen_all(layer)
     outputs = get_terraform_outputs(layer)
     # Adding extra outputs

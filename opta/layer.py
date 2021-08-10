@@ -14,7 +14,7 @@ import git
 import google.auth.transport.requests
 from azure.core.exceptions import ClientAuthenticationError
 from azure.identity import DefaultAzureCredential
-from botocore.exceptions import ClientError
+from botocore.exceptions import ClientError, NoCredentialsError
 from google.auth import default
 from google.auth.exceptions import DefaultCredentialsError
 from google.oauth2 import service_account
@@ -126,7 +126,6 @@ class Layer:
                     f"The module name {module.name} is used multiple time in the "
                     "layer. Module names must be unique per layer"
                 )
-        # self._verify_cloud_credentials()
 
     @classmethod
     def load_from_yaml(cls, config: str, env: Optional[str]) -> Layer:
@@ -452,10 +451,16 @@ class Layer:
 
         return layer
 
-    def _verify_cloud_credentials(self) -> None:
+    def verify_cloud_credentials(self) -> None:
         if self.cloud == "aws":
             try:
                 boto3.client("sts").get_caller_identity()
+            except NoCredentialsError:
+                raise UserErrors(
+                    "Unable to locate credentials.\n"
+                    "Visit `https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html` "
+                    "for more information."
+                )
             except ClientError as e:
                 raise UserErrors(
                     "The AWS Credentials are not configured properly.\n"

@@ -52,6 +52,7 @@ def deploy(
 
     amplitude_client.send_event(amplitude_client.DEPLOY_EVENT)
     layer = Layer.load_from_yaml(config, env)
+    layer.verify_cloud_credentials()
     try:
         outputs = Terraform.get_outputs(layer)
     except MissingState:

@@ -106,6 +106,7 @@ def _apply(
 ) -> None:
     _check_terraform_version()
     layer = Layer.load_from_yaml(config, env)
+    layer.verify_cloud_credentials()
 
     _verify_parent_layer(layer)
 
