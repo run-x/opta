@@ -9,7 +9,7 @@ from getmac import get_mac_address
 from git.config import GitConfigParser
 from requests import codes, post
 
-from opta.constants import OPTA_DISABLE_REPORTING, SESSION_ID, VERSION
+from opta.constants import DEV_VERSION, OPTA_DISABLE_REPORTING, SESSION_ID, VERSION
 from opta.utils import logger, safe_run
 
 
@@ -62,8 +62,10 @@ class AmplitudeClient:
         event_properties: Optional[dict] = None,
         user_properties: Optional[dict] = None,
     ) -> None:
-        if hasattr(sys, "_called_from_test"):
-            logger.debug("Not sending amplitude cause we think we're in a pytest")
+        if hasattr(sys, "_called_from_test") or VERSION == DEV_VERSION:
+            logger.debug(
+                "Not sending amplitude cause we think we're in a pytest or in dev"
+            )
             return
         event_properties = event_properties or {}
         user_properties = user_properties or {}
