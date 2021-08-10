@@ -49,6 +49,7 @@ class TestDatadogLogHandler:
             "opta.datadog_logging.post", return_value=mocked_response
         )
         mocked_version = mocker.patch("opta.datadog_logging.VERSION")
+        print("Mock Version used for Linting purpose" + mocked_version)
         handler = DatadogLogHandler()
         cache_entry = {
             "date": int(time.time() * 1000),
