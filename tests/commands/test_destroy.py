@@ -43,6 +43,7 @@ def test_destroy_env_without_children(mocker: MockFixture) -> None:
     mocker.patch("opta.commands.destroy.Terraform.init")
     mocker.patch("opta.commands.destroy.Terraform.destroy_all")
     mocker.patch("opta.commands.destroy.Terraform.download_state", return_value=True)
+    mocker.patch("opta.commands.destroy.Layer.verify_cloud_credentials")
 
     mocker.patch(
         "opta.commands.destroy._aws_get_configs", return_value=[],
@@ -67,6 +68,7 @@ def test_destroy_service(mocker: MockFixture) -> None:
     mocker.patch("opta.commands.destroy.Terraform.init")
     mocker.patch("opta.commands.destroy.Terraform.destroy_all")
     mocker.patch("opta.commands.destroy.Terraform.download_state", return_value=True)
+    mocker.patch("opta.commands.destroy.Layer.verify_cloud_credentials")
 
     mocker.patch(
         "opta.commands.destroy._aws_get_configs", return_value=[],

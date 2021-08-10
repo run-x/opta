@@ -106,6 +106,7 @@ def _apply(
 ) -> None:
     _check_terraform_version()
     layer = Layer.load_from_yaml(config, env)
+    layer.verify_cloud_credentials()
 
     _verify_parent_layer(layer)
 
@@ -254,10 +255,12 @@ def _apply(
 # Fetch the AZs of a region with boto3
 def _fetch_availability_zones(aws_region: str) -> List[str]:
     client = boto3.client("ec2", config=Config(region_name=aws_region))
+    azs: List[str] = []
     resp = client.describe_availability_zones(
         Filters=[{"Name": "zone-type", "Values": ["availability-zone"]}]
     )
-    return list(map(lambda az: az["ZoneName"], resp["AvailabilityZones"]))
+    azs = list(map(lambda az: az["ZoneName"], resp["AvailabilityZones"]))
+    return azs
 
 
 # Verify whether the parent layer exists or not

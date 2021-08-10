@@ -22,6 +22,7 @@ def configure_kubectl(config: str, env: Optional[str]) -> None:
     check_opta_file_exists(config)
     amplitude_client.send_event(amplitude_client.CONFIGURE_KUBECTL_EVENT)
     layer = Layer.load_from_yaml(config, env)
+    layer.verify_cloud_credentials()
     gen_all(layer)
 
     configure(layer)
