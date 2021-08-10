@@ -256,18 +256,10 @@ def _apply(
 def _fetch_availability_zones(aws_region: str) -> List[str]:
     client = boto3.client("ec2", config=Config(region_name=aws_region))
     azs: List[str] = []
-    try:
-        resp = client.describe_availability_zones(
-            Filters=[{"Name": "zone-type", "Values": ["availability-zone"]}]
-        )
-        azs = list(map(lambda az: az["ZoneName"], resp["AvailabilityZones"]))
-    except ClientError as e:
-        if e.response["Error"]["Code"] == "AuthFailure":
-            raise UserErrors(
-                "The AWS Credentials are not configured properly.\n"
-                "Visit https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html "
-                "for more information."
-            )
+    resp = client.describe_availability_zones(
+        Filters=[{"Name": "zone-type", "Values": ["availability-zone"]}]
+    )
+    azs = list(map(lambda az: az["ZoneName"], resp["AvailabilityZones"]))
     return azs
 
 
