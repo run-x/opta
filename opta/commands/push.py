@@ -1,4 +1,5 @@
 import base64
+import re
 from typing import Optional, Tuple
 
 import boto3
@@ -6,6 +7,7 @@ import click
 from botocore.config import Config
 
 from opta.amplitude import amplitude_client
+from opta.constants import ESCAPE_REQUIRED
 from opta.core.gcp import GCP
 from opta.core.generator import gen_all
 from opta.core.terraform import get_terraform_outputs
@@ -22,6 +24,31 @@ def get_push_tag(local_image: str, tag_override: Optional[str]) -> str:
         )
     local_image_tag = local_image.split(":")[1]
     return tag_override or local_image_tag
+
+
+def get_image_digest(image_tag: str, docker_push_stdout: bytes) -> str:
+    image_digest_output = ""
+    image_tag_regex = image_tag + ":"
+
+    for regex_escape_required in ESCAPE_REQUIRED:
+        image_tag_regex = image_tag_regex.replace(
+            regex_escape_required, "\\" + regex_escape_required
+        )
+
+    for stdout in docker_push_stdout.decode("utf-8").split("\n"):
+        if re.search(image_tag_regex, stdout):
+            image_digest_output = stdout
+
+    if not image_digest_output.strip():
+        raise UserErrors(
+            "\n"
+            "|------------------------------ERROR------------------------------|\n"
+            "| Unable to find the Digest for the Image Tag provided.           |\n"
+            "|------------------------------ERROR------------------------------|"
+        )
+
+    image_digest = image_digest_output.split(" ")[2]
+    return image_digest
 
 
 def get_registry_url(layer: Layer) -> str:
@@ -93,7 +120,7 @@ def push_to_docker(
     local_image: str,
     registry_url: str,
     image_tag_override: Optional[str],
-) -> None:
+) -> Tuple[str, str]:
     image_tag = get_push_tag(local_image, image_tag_override)
     remote_image_name = f"{registry_url}:{image_tag}"
     nice_run(
@@ -102,7 +129,10 @@ def push_to_docker(
         check=True,
     )
     nice_run(["docker", "tag", local_image, remote_image_name], check=True)
-    nice_run(["docker", "push", remote_image_name], check=True)
+    push_record = nice_run(
+        ["docker", "push", remote_image_name], check=True, capture_output=True
+    )
+    return get_image_digest(image_tag, push_record.stdout), image_tag
 
 
 # Check if the config file is for a service or environment opta layer.
@@ -145,7 +175,9 @@ def push(image: str, config: str, env: Optional[str], tag: Optional[str]) -> Non
     _push(image, config, env, tag)
 
 
-def _push(image: str, config: str, env: Optional[str], tag: Optional[str]) -> None:
+def _push(
+    image: str, config: str, env: Optional[str], tag: Optional[str]
+) -> Tuple[str, str]:
     if not is_tool("docker"):
         raise Exception("Please install docker on your machine")
     layer = Layer.load_from_yaml(config, env)
@@ -160,4 +192,4 @@ def _push(image: str, config: str, env: Optional[str], tag: Optional[str]) -> No
         username, password = get_acr_auth_info(layer)
     else:
         raise Exception(f"No support for pushing image to provider {layer.cloud}")
-    push_to_docker(username, password, image, registry_url, tag)
+    return push_to_docker(username, password, image, registry_url, tag)

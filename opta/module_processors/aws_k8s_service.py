@@ -93,6 +93,9 @@ class AwsK8sServiceProcessor(AWSK8sModuleProcessor, AWSIamAssembler):
         }
         if "image_tag" in self.layer.variables:
             self.module.data["tag"] = self.layer.variables["image_tag"]
+
+        if "image_digest" in self.layer.variables:
+            self.module.data["digest"] = self.layer.variables["image_digest"]
         seen = set()
         self.module.data["link_secrets"] = [
             seen.add(obj["name"]) or obj  # type: ignore
