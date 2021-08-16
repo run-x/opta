@@ -103,6 +103,7 @@ def _apply(
     test: bool,
     auto_approve: bool,
     stdout_logs: bool = True,
+    image_digest: str = "",
 ) -> None:
     _check_terraform_version()
     layer = Layer.load_from_yaml(config, env)
@@ -149,6 +150,11 @@ def _apply(
         configure_kubectl(layer)
 
         for service_module in service_modules:
+            layer.variables["image_digest"] = (
+                image_digest
+                if service_module.data.get("image", "") == "AUTO" and image_digest.strip()
+                else None
+            )
             current_tag = current_image_tag(layer)
             if (
                 current_tag is not None
