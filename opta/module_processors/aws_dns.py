@@ -17,7 +17,7 @@ from OpenSSL.crypto import (
 )
 
 from opta.exceptions import UserErrors
-from opta.module_processors.base import ModuleProcessor
+from opta.module_processors.base import DNSModuleProcessor
 from opta.utils import logger
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ CERTIFICATE_CHAIN_FILE_NAME = "dns-certificate-chain.pem"
 CERTIFICATE_BODY_FILE_NAME = "dns-certificate-body.pem"
 
 
-class AwsDnsProcessor(ModuleProcessor):
+class AwsDnsProcessor(DNSModuleProcessor):
     def __init__(self, module: "Module", layer: "Layer"):
         if layer.parent is not None:
             raise UserErrors("AWS dns must be set on environment, not service")
@@ -38,6 +38,7 @@ class AwsDnsProcessor(ModuleProcessor):
     def process(self, module_idx: int) -> None:
         providers = self.layer.gen_providers(0)
         region = providers["provider"]["aws"]["region"]
+        self.validate_dns()
         if self.module.data.get("upload_cert"):
             ssm_client: SSMClient = boto3.client("ssm", config=Config(region_name=region))
             parameters = ssm_client.get_parameters_by_path(

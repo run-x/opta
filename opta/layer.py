@@ -41,6 +41,7 @@ from opta.module_processors.azure_k8s_service import AzureK8sServiceProcessor
 from opta.module_processors.base import ModuleProcessor
 from opta.module_processors.datadog import DatadogProcessor
 from opta.module_processors.external_ssl_cert import ExternalSSLCert
+from opta.module_processors.gcp_dns import GCPDnsProcessor
 from opta.module_processors.gcp_gke import GcpGkeProcessor
 from opta.module_processors.gcp_k8s_base import GcpK8sBaseProcessor
 from opta.module_processors.gcp_k8s_service import GcpK8sServiceProcessor
@@ -72,6 +73,7 @@ class Layer:
         "azure-k8s-service": AzureK8sServiceProcessor,
         "external-ssl-cert": ExternalSSLCert,
         "aws-s3": AwsS3Processor,
+        "gcp-dns": GCPDnsProcessor,
     }
 
     def __init__(
