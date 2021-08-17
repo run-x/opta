@@ -161,7 +161,7 @@ def _apply(
             < 0
         ):
             raise UserErrors(
-                f"Can not run with older version-- last run at {previous_config['date']} with version {old_opta_version}. Please update to that version or later"
+                f"ou're trying to run an older version of opta (last run was at {previous_config['date']} with version {old_opta_version}). Please update to the latest version and try again!"
             )
     cloud_client.upload_opta_config()
 
