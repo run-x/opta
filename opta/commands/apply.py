@@ -160,7 +160,9 @@ def _apply(
             )
             < 0
         ):
-            raise UserErrors()
+            raise UserErrors(
+                f"Can not run with older version-- last run at {previous_config['date']} with version {old_opta_version}. Please update to that version or later"
+            )
     cloud_client.upload_opta_config()
 
     service_modules = layer.get_module_by_type("k8s-service")
