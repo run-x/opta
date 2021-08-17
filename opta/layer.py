@@ -5,9 +5,10 @@ import os
 import re
 import shutil
 import tempfile
+from datetime import datetime
 from os import path
 from types import SimpleNamespace
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, TypedDict
 
 import boto3
 import git
@@ -19,7 +20,7 @@ from google.auth import default
 from google.auth.exceptions import DefaultCredentialsError
 from google.oauth2 import service_account
 
-from opta.constants import REGISTRY
+from opta.constants import REGISTRY, VERSION
 from opta.core.aws import AWS
 from opta.core.gcp import GCP
 from opta.core.validator import validate_yaml
@@ -49,6 +50,12 @@ from opta.module_processors.helm_chart import HelmChartProcessor
 from opta.module_processors.runx import RunxProcessor
 from opta.plugins.derived_providers import DerivedProviders
 from opta.utils import deep_merge, hydrate, logger, yaml
+
+
+class StructuredConfig(TypedDict):
+    opta_version: str
+    date: str
+    original_spec: str
 
 
 class Layer:
@@ -168,6 +175,13 @@ class Layer:
         if t is not None:
             shutil.rmtree(t)
         return layer
+
+    def structured_config(self) -> StructuredConfig:
+        return {
+            "opta_version": VERSION,
+            "date": datetime.utcnow().isoformat(),
+            "original_spec": self.original_spec,
+        }
 
     @classmethod
     def load_from_dict(cls, conf: Dict[Any, Any], env: Optional[str]) -> Layer:
