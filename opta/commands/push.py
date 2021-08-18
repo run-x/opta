@@ -1,5 +1,4 @@
 import base64
-import re
 from typing import Optional, Tuple
 
 import boto3
@@ -8,7 +7,6 @@ from botocore.config import Config
 from docker import from_env
 
 from opta.amplitude import amplitude_client
-from opta.constants import ESCAPE_REQUIRED
 from opta.core.gcp import GCP
 from opta.core.generator import gen_all
 from opta.core.terraform import get_terraform_outputs
