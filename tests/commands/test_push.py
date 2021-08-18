@@ -163,9 +163,7 @@ def test_valid_input(mocker: MockFixture) -> None:
                 check=True,
             ),
             mocker.call(
-                ["docker", "push", f"{REGISTRY_URL}:image_tag_override"],
-                check=True,
-                capture_output=True,
+                ["docker", "push", f"{REGISTRY_URL}:image_tag_override"], check=True,
             ),
         ]
     )
@@ -310,7 +308,6 @@ def test_with_tag_override(mocker: MockFixture) -> None:
                     "889760294590.dkr.ecr.us-east-1.amazonaws.com/github-runx-app:tag-override",
                 ],
                 check=True,
-                capture_output=True,
             ),
         ]
     )
