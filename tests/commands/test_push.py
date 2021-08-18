@@ -130,6 +130,7 @@ def test_get_acr_auth_info(mocker: MockFixture) -> None:
 
 
 def test_valid_input(mocker: MockFixture) -> None:
+    mocker.patch("opta.commands.push.get_image_digest")
     mocked_nice_run = mocker.patch("opta.commands.push.nice_run")
     push_to_docker(
         "username",
@@ -162,7 +163,7 @@ def test_valid_input(mocker: MockFixture) -> None:
                 check=True,
             ),
             mocker.call(
-                ["docker", "push", f"{REGISTRY_URL}:image_tag_override"], check=True
+                ["docker", "push", f"{REGISTRY_URL}:image_tag_override"], check=True,
             ),
         ]
     )
@@ -212,6 +213,7 @@ def test_no_tag_override(mocker: MockFixture) -> None:
         "username",
         "password",
     )
+    mocker.patch("opta.commands.push.get_image_digest")
 
     runner = CliRunner()
     result = runner.invoke(cli, ["push", "local_image:local_tag"])
@@ -265,6 +267,7 @@ def test_with_tag_override(mocker: MockFixture) -> None:
         "username",
         "password",
     )
+    mocker.patch("opta.commands.push.get_image_digest")
 
     runner = CliRunner()
     result = runner.invoke(

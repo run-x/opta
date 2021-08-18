@@ -110,6 +110,7 @@ def _apply(
     test: bool,
     auto_approve: bool,
     stdout_logs: bool = True,
+    image_digest: str = "",
 ) -> None:
     _check_terraform_version()
     layer = Layer.load_from_yaml(config, env)
@@ -154,7 +155,8 @@ def _apply(
     if previous_config is not None and "opta_version" in previous_config:
         old_opta_version = previous_config["opta_version"]
         if (
-            old_opta_version != DEV_VERSION
+            old_opta_version not in [DEV_VERSION, ""]
+            and VERSION not in [DEV_VERSION, ""]
             and semver.VersionInfo.parse(VERSION.strip("v")).compare(
                 old_opta_version.strip("v")
             )
@@ -171,6 +173,11 @@ def _apply(
         configure_kubectl(layer)
 
         for service_module in service_modules:
+            layer.variables["image_digest"] = (
+                image_digest
+                if service_module.data.get("image", "") == "AUTO" and image_digest.strip()
+                else None
+            )
             current_tag = current_image_tag(layer)
             if (
                 current_tag is not None

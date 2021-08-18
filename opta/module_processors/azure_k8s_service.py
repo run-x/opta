@@ -86,6 +86,9 @@ class AzureK8sServiceProcessor(ModuleProcessor):
         if "image_tag" in self.layer.variables:
             self.module.data["tag"] = self.layer.variables["image_tag"]
 
+        if "image_digest" in self.layer.variables:
+            self.module.data["digest"] = self.layer.variables["image_digest"]
+
         super(AzureK8sServiceProcessor, self).process(module_idx)
 
     # TODO: consolidated repeated credential link code

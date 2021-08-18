@@ -44,3 +44,6 @@ TF_FILE_PATH = "main.tf.json"
 TF_PLAN_PATH = "tf.plan"
 MAX_TERRAFORM_VERSION = "1.1.0"
 MIN_TERRAFORM_VERSION = "0.15.0"
+
+# List of chars to escape in regexes
+ESCAPE_REQUIRED = ["\\", ".", "+", "*", "?", "[", "]", "$", "^", "(", ")", "{", "}", "|"]

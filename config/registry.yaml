@@ -119,6 +119,7 @@ modules:
       image: str
       port: optional
       tag: optional
+      digest: optional
       env_vars: optional
       manual_secrets: optional
       link_secrets: optional
@@ -343,6 +344,7 @@ modules:
       image: str
       port: optional
       tag: optional
+      digest: optional
       env_vars: optional
       manual_secrets: optional
       link_secrets: optional
@@ -669,6 +671,7 @@ modules:
       image: str
       port: optional
       tag: optional
+      digest: optional
       env_vars: optional
       manual_secrets: optional
       link_secrets: optional
