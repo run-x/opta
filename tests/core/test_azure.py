@@ -49,6 +49,35 @@ class TestAzure:
         Azure.get_credentials()
         mocked_default_creds.assert_called_once_with()
 
+    def test_get_remote_config(self, mocker: MockFixture, azure_layer: Mock) -> None:
+        mocked_creds = mocker.Mock()
+        mocked_default_creds = mocker.patch(
+            "opta.core.azure.DefaultAzureCredential", return_value=mocked_creds
+        )
+
+        mocked_container_client_instance = mocker.Mock()
+        mocked_container_client_instance.download_blob = mocker.Mock()
+        download_stream_mock = mocker.Mock()
+        download_stream_mock.readall = mocker.Mock(return_value='{"a":1}')
+        mocked_container_client_instance.download_blob.return_value = download_stream_mock
+        mocked_container_client = mocker.patch(
+            "opta.core.azure.ContainerClient",
+            return_value=mocked_container_client_instance,
+        )
+
+        assert Azure(azure_layer).get_remote_config() == {"a": 1}
+
+        azure_layer.gen_providers.assert_called_once_with(0)
+        mocked_default_creds.assert_called_once_with()
+        mocked_container_client.assert_called_once_with(
+            account_url="https://dummy_storage_account.blob.core.windows.net",
+            container_name="dummy_container_name",
+            credential=mocked_creds,
+        )
+        mocked_container_client_instance.download_blob.assert_called_once_with(
+            f"opta_config/{azure_layer.name}"
+        )
+
     def test_upload_opta_config(self, mocker: MockFixture, azure_layer: Mock) -> None:
         mocked_creds = mocker.Mock()
         mocked_default_creds = mocker.patch(
@@ -60,8 +89,9 @@ class TestAzure:
             "opta.core.azure.ContainerClient",
             return_value=mocked_container_client_instance,
         )
+        azure_layer.structured_config = mocker.Mock(return_value={"a": 1})
 
-        Azure(azure_layer).upload_opta_config("blah")
+        Azure(azure_layer).upload_opta_config()
 
         azure_layer.gen_providers.assert_called_once_with(0)
         mocked_default_creds.assert_called_once_with()
@@ -71,7 +101,7 @@ class TestAzure:
             credential=mocked_creds,
         )
         mocked_container_client_instance.upload_blob.assert_called_once_with(
-            name=f"opta_config/{azure_layer.name}", data="blah", overwrite=True
+            name=f"opta_config/{azure_layer.name}", data='{"a": 1}', overwrite=True
         )
 
     def test_delete_opta_config(self, mocker: MockFixture, azure_layer: Mock) -> None:

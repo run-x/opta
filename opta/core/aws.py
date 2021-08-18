@@ -1,3 +1,4 @@
+import json
 from time import sleep
 from typing import TYPE_CHECKING, List, Optional, TypedDict
 
@@ -8,7 +9,7 @@ from mypy_boto3_dynamodb import DynamoDBClient
 from opta.utils import fmt_msg, logger
 
 if TYPE_CHECKING:
-    from opta.layer import Layer
+    from opta.layer import Layer, StructuredConfig
 
 
 class AwsArn(TypedDict):
@@ -58,13 +59,31 @@ class AWS:
 
         return resources_map
 
-    # Upload the current opta config to the state bucket, under opta_config/.
-    def upload_opta_config(self, config: str) -> None:
+    def get_remote_config(self) -> Optional["StructuredConfig"]:
         bucket = self.layer.state_storage()
         config_path = f"opta_config/{self.layer.name}"
 
         s3_client = boto3.client("s3")
-        s3_client.upload_file(Filename=config, Bucket=bucket, Key=config_path)
+        try:
+            obj = s3_client.get_object(Bucket=bucket, Key=config_path)
+            return json.loads(obj["Body"].read())
+        except Exception:  # Backwards compatibility
+            logger.debug(
+                "Could not successfully download and parse any pre-existing config"
+            )
+            return None
+
+    # Upload the current opta config to the state bucket, under opta_config/.
+    def upload_opta_config(self) -> None:
+        bucket = self.layer.state_storage()
+        config_path = f"opta_config/{self.layer.name}"
+
+        s3_client = boto3.client("s3")
+        s3_client.put_object(
+            Body=json.dumps(self.layer.structured_config()).encode("utf-8"),
+            Bucket=bucket,
+            Key=config_path,
+        )
         logger.debug("Uploaded opta config to s3")
 
     def delete_opta_config(self) -> None:
