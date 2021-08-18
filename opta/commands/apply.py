@@ -3,12 +3,19 @@ from typing import List, Optional, Set
 
 import boto3
 import click
+import semver
 from botocore.config import Config
 from botocore.exceptions import ClientError
 from packaging import version
 
 from opta.amplitude import amplitude_client
-from opta.constants import MAX_TERRAFORM_VERSION, MIN_TERRAFORM_VERSION, TF_PLAN_PATH
+from opta.constants import (
+    DEV_VERSION,
+    MAX_TERRAFORM_VERSION,
+    MIN_TERRAFORM_VERSION,
+    TF_PLAN_PATH,
+    VERSION,
+)
 from opta.core.aws import AWS
 from opta.core.azure import Azure
 from opta.core.gcp import GCP
@@ -22,7 +29,7 @@ from opta.core.kubernetes import (
 )
 from opta.core.terraform import Terraform, get_terraform_outputs
 from opta.exceptions import MissingState, UserErrors
-from opta.layer import Layer
+from opta.layer import Layer, StructuredConfig
 from opta.utils import check_opta_file_exists, fmt_msg, is_tool, logger
 
 
@@ -136,13 +143,28 @@ def _apply(
     Terraform.create_state_storage(layer)
     gen_opta_resource_tags(layer)
     if layer.cloud == "aws":
-        AWS(layer).upload_opta_config(config)
+        cloud_client = AWS(layer)
     elif layer.cloud == "google":
-        GCP(layer).upload_opta_config(config)
+        cloud_client = GCP(layer)
     elif layer.cloud == "azurerm":
-        Azure(layer).upload_opta_config(config)
+        cloud_client = Azure(layer)
     else:
         raise Exception(f"Cannot handle upload config for cloud {layer.cloud}")
+
+    previous_config: StructuredConfig = cloud_client.get_remote_config()
+    if previous_config is not None and "opta_version" in previous_config:
+        old_opta_version = previous_config["opta_version"]
+        if (
+            old_opta_version != DEV_VERSION
+            and semver.VersionInfo.parse(VERSION.strip("v")).compare(
+                old_opta_version.strip("v")
+            )
+            < 0
+        ):
+            raise UserErrors(
+                f"ou're trying to run an older version of opta (last run was at {previous_config['date']} with version {old_opta_version}). Please update to the latest version and try again!"
+            )
+    cloud_client.upload_opta_config()
 
     service_modules = layer.get_module_by_type("k8s-service")
 

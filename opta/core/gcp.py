@@ -1,3 +1,4 @@
+import json
 import os
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
@@ -14,7 +15,7 @@ from opta.exceptions import UserErrors
 from opta.utils import fmt_msg, logger
 
 if TYPE_CHECKING:
-    from opta.layer import Layer
+    from opta.layer import Layer, StructuredConfig
 
 
 class GCP:
@@ -77,15 +78,30 @@ class GCP:
             service_account_key = f.read()
         return service_account_key
 
+    def get_remote_config(self) -> Optional["StructuredConfig"]:
+        bucket = self.layer.state_storage()
+        config_path = f"opta_config/{self.layer.name}"
+        credentials, project_id = self.get_credentials()
+        gcs_client = storage.Client(project=project_id, credentials=credentials)
+        bucket_object = gcs_client.get_bucket(bucket)
+        try:
+            blob = storage.Blob(config_path, bucket_object)
+            return json.loads(blob.download_as_text())
+        except Exception:  # Backwards compatibility
+            logger.debug(
+                "Could not successfully download and parse any pre-existing config"
+            )
+            return None
+
     # Upload the current opta config to the state bucket, under opta_config/.
-    def upload_opta_config(self, config_data: str) -> None:
+    def upload_opta_config(self) -> None:
         bucket = self.layer.state_storage()
         config_path = f"opta_config/{self.layer.name}"
         credentials, project_id = self.get_credentials()
         gcs_client = storage.Client(project=project_id, credentials=credentials)
         bucket_object = gcs_client.get_bucket(bucket)
         blob = storage.Blob(config_path, bucket_object)
-        blob.upload_from_string(config_data)
+        blob.upload_from_string(json.dumps(self.layer.structured_config()))
         logger.debug("Uploaded opta config to gcs")
 
     def delete_opta_config(self) -> None:

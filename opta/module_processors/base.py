@@ -1,6 +1,10 @@
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
+from dns.rdtypes.ANY.NS import NS
+from dns.resolver import Answer, NoNameservers, query
+
 from opta.core.aws import AWS
+from opta.core.terraform import get_terraform_outputs
 from opta.exceptions import UserErrors
 
 if TYPE_CHECKING:
@@ -28,6 +32,36 @@ class ModuleProcessor:
 
     def post_hook(self, module_idx: int, exception: Optional[Exception]) -> None:
         pass
+
+
+class DNSModuleProcessor(ModuleProcessor):
+    def validate_dns(self) -> None:
+
+        if not self.module.data.get("delegated", False):
+            return
+
+        current_outputs = get_terraform_outputs(self.layer)
+        if "name_servers" not in current_outputs:
+            raise UserErrors(
+                "Did not find name_servers field in output. Please apply one with delegated set to false. (might take some time to propagate)"
+            )
+        expected_name_servers: List[str] = current_outputs["name_servers"]
+        expected_name_servers = [x.strip(".") for x in expected_name_servers]
+        try:
+            answers: Answer = query(self.module.data["domain"], "NS")  # type: ignore
+        except NoNameservers:
+            raise UserErrors(
+                f"Did not find any NS records for domain {self.module.data['domain']}. (might take some time to propagate)"
+            )
+        answer: NS
+        actual_name_servers = []
+        for answer in answers:
+            ns_server = answer.target.to_text(omit_final_dot=True)
+            actual_name_servers.append(ns_server)
+        if set(expected_name_servers) != set(actual_name_servers):
+            raise UserErrors(
+                f"Incorrect NS servers. Expected {expected_name_servers}, actual {actual_name_servers}. (might take some time to propagate)"
+            )
 
 
 class AWSK8sModuleProcessor(ModuleProcessor):

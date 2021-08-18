@@ -1,13 +1,14 @@
+import json
 from typing import TYPE_CHECKING, Any, Optional
 
 from azure.core.exceptions import ResourceNotFoundError
 from azure.identity import DefaultAzureCredential
-from azure.storage.blob import ContainerClient
+from azure.storage.blob import ContainerClient, StorageStreamDownloader
 
 from opta.utils import logger
 
 if TYPE_CHECKING:
-    from opta.layer import Layer
+    from opta.layer import Layer, StructuredConfig
 
 
 class Azure:
@@ -20,8 +21,7 @@ class Azure:
     def get_credentials(cls) -> Any:
         return DefaultAzureCredential()
 
-    # Upload the current opta config to the state bucket, under opta_config/.
-    def upload_opta_config(self, config_data: str) -> None:
+    def get_remote_config(self) -> Optional["StructuredConfig"]:
         providers = self.layer.gen_providers(0)
         credentials = self.get_credentials()
 
@@ -36,7 +36,39 @@ class Azure:
             credential=credentials,
         )
         config_path = f"opta_config/{self.layer.name}"
-        storage_client.upload_blob(name=config_path, data=config_data, overwrite=True)
+        try:
+            download_stream: StorageStreamDownloader = storage_client.download_blob(
+                config_path
+            )
+            data = download_stream.readall()
+            return json.loads(data)
+        except Exception:  # Backwards compatibility
+            logger.debug(
+                "Could not successfully download and parse any pre-existing config"
+            )
+            return None
+
+    # Upload the current opta config to the state bucket, under opta_config/.
+    def upload_opta_config(self) -> None:
+        providers = self.layer.gen_providers(0)
+        credentials = self.get_credentials()
+
+        storage_account_name = providers["terraform"]["backend"]["azurerm"][
+            "storage_account_name"
+        ]
+        container_name = providers["terraform"]["backend"]["azurerm"]["container_name"]
+
+        storage_client = ContainerClient(
+            account_url=f"https://{storage_account_name}.blob.core.windows.net",
+            container_name=container_name,
+            credential=credentials,
+        )
+        config_path = f"opta_config/{self.layer.name}"
+        storage_client.upload_blob(
+            name=config_path,
+            data=json.dumps(self.layer.structured_config()),
+            overwrite=True,
+        )
 
     def delete_opta_config(self) -> None:
         providers = self.layer.gen_providers(0)
