@@ -1,13 +1,12 @@
 import base64
-import re
 from typing import Optional, Tuple
 
 import boto3
 import click
 from botocore.config import Config
+from docker import from_env
 
 from opta.amplitude import amplitude_client
-from opta.constants import ESCAPE_REQUIRED
 from opta.core.gcp import GCP
 from opta.core.generator import gen_all
 from opta.core.terraform import get_terraform_outputs
@@ -26,29 +25,20 @@ def get_push_tag(local_image: str, tag_override: Optional[str]) -> str:
     return tag_override or local_image_tag
 
 
-def get_image_digest(image_tag: str, docker_push_stdout: bytes) -> str:
-    image_digest_output = ""
-    image_tag_regex = image_tag + ":"
+def get_image_digest(registry_url: str, image_tag: str) -> str:
+    docker_client = from_env()
+    current_image = docker_client.images.get(f"{registry_url}:{image_tag}")
+    current_digest: str
+    for current_digest in current_image.attrs["RepoDigests"]:
+        if current_digest.startswith(registry_url):
+            return current_digest.split("@")[1]
 
-    for regex_escape_required in ESCAPE_REQUIRED:
-        image_tag_regex = image_tag_regex.replace(
-            regex_escape_required, "\\" + regex_escape_required
-        )
-
-    for stdout in docker_push_stdout.decode("utf-8").split("\n"):
-        if re.search(image_tag_regex, stdout):
-            image_digest_output = stdout
-
-    if not image_digest_output.strip():
-        raise UserErrors(
-            "\n"
-            "|------------------------------ERROR------------------------------|\n"
-            "| Unable to find the Digest for the Image Tag provided.           |\n"
-            "|------------------------------ERROR------------------------------|"
-        )
-
-    image_digest = image_digest_output.split(" ")[2]
-    return image_digest
+    raise UserErrors(
+        "\n"
+        "|------------------------------ERROR------------------------------|\n"
+        "| Unable to find the Digest for the Image Tag provided.           |\n"
+        "|------------------------------ERROR------------------------------|"
+    )
 
 
 def get_registry_url(layer: Layer) -> str:
@@ -129,10 +119,8 @@ def push_to_docker(
         check=True,
     )
     nice_run(["docker", "tag", local_image, remote_image_name], check=True)
-    push_record = nice_run(
-        ["docker", "push", remote_image_name], check=True, capture_output=True
-    )
-    return get_image_digest(image_tag, push_record.stdout), image_tag
+    nice_run(["docker", "push", remote_image_name], check=True)
+    return get_image_digest(registry_url, image_tag), image_tag
 
 
 # Check if the config file is for a service or environment opta layer.
