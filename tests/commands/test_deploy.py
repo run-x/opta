@@ -15,7 +15,9 @@ def test_deploy_basic(mocker: MockFixture) -> None:
     mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
     mocked_os_path_exists.return_value = True
 
-    mock_push = mocker.patch("opta.commands.deploy._push")
+    mock_push = mocker.patch(
+        "opta.commands.deploy._push", return_value=("local_digest", "local_tag")
+    )
     mock_apply = mocker.patch("opta.commands.deploy._apply")
     mocked_layer_class = mocker.patch("opta.commands.deploy.Layer")
     mocked_layer = mocker.Mock(spec=Layer)
@@ -40,6 +42,7 @@ def test_deploy_basic(mocker: MockFixture) -> None:
         image_tag="local_tag",
         test=False,
         auto_approve=False,
+        image_digest="local_digest",
     )
     mock_terraform_outputs.assert_called_once_with(mocker.ANY)
 
@@ -48,7 +51,9 @@ def test_deploy_auto_approve(mocker: MockFixture) -> None:
     mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
     mocked_os_path_exists.return_value = True
 
-    mock_push = mocker.patch("opta.commands.deploy._push")
+    mock_push = mocker.patch(
+        "opta.commands.deploy._push", return_value=("local_digest", "local_tag")
+    )
     mock_apply = mocker.patch("opta.commands.deploy._apply")
     mocked_layer_class = mocker.patch("opta.commands.deploy.Layer")
     mocked_layer = mocker.Mock(spec=Layer)
@@ -75,6 +80,7 @@ def test_deploy_auto_approve(mocker: MockFixture) -> None:
         image_tag="local_tag",
         test=False,
         auto_approve=True,
+        image_digest="local_digest",
     )
     mock_terraform_outputs.assert_called_once_with(mocker.ANY)
 
@@ -83,7 +89,9 @@ def test_deploy_all_flags(mocker: MockFixture) -> None:
     mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
     mocked_os_path_exists.return_value = True
 
-    mock_push = mocker.patch("opta.commands.deploy._push")
+    mock_push = mocker.patch(
+        "opta.commands.deploy._push", return_value=("local_digest", "latest")
+    )
     mock_apply = mocker.patch("opta.commands.deploy._apply")
     mocked_layer_class = mocker.patch("opta.commands.deploy.Layer")
     mocked_layer = mocker.Mock(spec=Layer)
@@ -121,6 +129,7 @@ def test_deploy_all_flags(mocker: MockFixture) -> None:
         image_tag="latest",
         test=False,
         auto_approve=False,
+        image_digest="local_digest",
     )
 
 
@@ -128,7 +137,9 @@ def test_deploy_ecr_apply(mocker: MockFixture) -> None:
     mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
     mocked_os_path_exists.return_value = True
 
-    mock_push = mocker.patch("opta.commands.deploy._push")
+    mock_push = mocker.patch(
+        "opta.commands.deploy._push", return_value=("local_digest", "latest")
+    )
     mock_apply = mocker.patch("opta.commands.deploy._apply")
     mocked_layer_class = mocker.patch("opta.commands.deploy.Layer")
     mocked_layer = mocker.Mock(spec=Layer)
@@ -177,6 +188,7 @@ def test_deploy_ecr_apply(mocker: MockFixture) -> None:
                 image_tag="latest",
                 test=False,
                 auto_approve=False,
+                image_digest="local_digest",
             ),
         ]
     )
