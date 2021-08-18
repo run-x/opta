@@ -155,7 +155,8 @@ def _apply(
     if previous_config is not None and "opta_version" in previous_config:
         old_opta_version = previous_config["opta_version"]
         if (
-            old_opta_version != DEV_VERSION
+            old_opta_version not in [DEV_VERSION, ""]
+            and VERSION not in [DEV_VERSION, ""]
             and semver.VersionInfo.parse(VERSION.strip("v")).compare(
                 old_opta_version.strip("v")
             )
