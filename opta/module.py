@@ -26,7 +26,7 @@ class Module:
             raise UserErrors(f"{self.type} is not a valid module type")
         self.aliased_type: Optional[str] = None
         self.layer_name = layer.name
-        self.desc = REGISTRY["modules"][self.type]
+        self.desc = REGISTRY["modules"][self.type].copy()
         if "alias" in self.desc:
             cloud = layer.cloud
             if cloud not in self.desc["alias"]:

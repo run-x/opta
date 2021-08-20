@@ -285,6 +285,12 @@ modules:
             host: "${{{module_source}.k8s_endpoint}}"
             token: "${{data.aws_eks_cluster_auth.k8s.token}}"
             cluster_ca_certificate: "${{base64decode({module_source}.k8s_ca_data)}}"
+  custom-terraform:
+    cloud: any
+    location: custom-terraform
+    halt: true
+    variables:
+      path_to_module: str
   datadog:
     cloud: any
     location: datadog
