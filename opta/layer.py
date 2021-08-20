@@ -40,6 +40,7 @@ from opta.module_processors.azure_base import AzureBaseProcessor
 from opta.module_processors.azure_k8s_base import AzureK8sBaseProcessor
 from opta.module_processors.azure_k8s_service import AzureK8sServiceProcessor
 from opta.module_processors.base import ModuleProcessor
+from opta.module_processors.custom_terraform import CustomTerraformProcessor
 from opta.module_processors.datadog import DatadogProcessor
 from opta.module_processors.external_ssl_cert import ExternalSSLCert
 from opta.module_processors.gcp_dns import GCPDnsProcessor
@@ -81,6 +82,7 @@ class Layer:
         "external-ssl-cert": ExternalSSLCert,
         "aws-s3": AwsS3Processor,
         "gcp-dns": GCPDnsProcessor,
+        "custom-terraform": CustomTerraformProcessor,
     }
 
     def __init__(
