@@ -1,9 +1,5 @@
 import os
-import sys
 from pathlib import Path
-
-import click
-from click import Abort
 
 from opta.constants import CI, OPTA_DISABLE_REPORTING, data_analytics_prompt
 from opta.utils import logger
