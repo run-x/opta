@@ -798,7 +798,7 @@ class Terraform:
                     f"{e.response['Error']['Code']} error with the message "
                     f"{e.response['Error']['Message']}"
                 )
-            print("Autoscaling service linked role present")
+            logger.debug("Autoscaling service linked role present")
         try:
             iam.create_service_linked_role(
                 AWSServiceName="elasticloadbalancing.amazonaws.com",
@@ -810,7 +810,7 @@ class Terraform:
                     f"{e.response['Error']['Code']} error with the message "
                     f"{e.response['Error']['Message']}"
                 )
-            print("Load balancing service linked role present")
+            logger.debug("Load balancing service linked role present")
 
     @classmethod
     def create_state_storage(cls, layer: "Layer") -> None:
