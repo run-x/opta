@@ -17,6 +17,10 @@ def data_collection_flag() -> None:
         "Opta logs usage analytics to improve the user experience \n"
         "To disable it, checkout the instructions in the documentation: `https://docs.opta.dev. \n"
     )
+    try:
+        open(data_analytics_prompt, "w").close()
+    except:
+        pass
 
 
 def before_cli() -> None:
