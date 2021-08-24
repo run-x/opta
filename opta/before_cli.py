@@ -19,7 +19,7 @@ def data_collection_flag() -> None:
     )
     try:
         open(data_analytics_prompt, "w").close()
-    except:
+    except Exception:
         pass
 
 
