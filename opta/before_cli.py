@@ -1,9 +1,5 @@
 import os
-import sys
 from pathlib import Path
-
-import click
-from click import Abort
 
 from opta.constants import CI, OPTA_DISABLE_REPORTING, data_analytics_prompt
 from opta.utils import logger
@@ -18,29 +14,13 @@ def data_collection_flag() -> None:
 
     logger.info(
         "\n"
-        "|---------------------------IMPORTANT----------------------------|\n"
-        "| By default, Opta executions send metrics and logs back to RunX |\n"
-        "| to gain intelligence of the product’s usage, errors, and to    |\n"
-        "| give superior support for the users. Like with the stdout      |\n"
-        "| users see, these reports do not hold ANY secrets or passwords. |\n"
-        "|                                                                |\n"
-        "| For more information, and how to disable the Metric Collection |\n"
-        "| please go through this Documentation below.                    |\n"
-        "| `https://docs.opta.dev/miscellaneous/analytics/`               |\n"
-        "|---------------------------IMPORTANT----------------------------|\n"
+        "Opta logs usage analytics to improve the user experience \n"
+        "To disable it, checkout the instructions in the documentation: `https://docs.opta.dev. \n"
     )
     try:
-        click.confirm("Do you consent to RunX tracking your data?", abort=True)
         open(data_analytics_prompt, "w").close()
-    except Abort:
-        logger.error(
-            "\n"
-            "|-----------------------------ERROR------------------------------|\n"
-            "| Please follow the steps mentioned in the above Documentation   |\n"
-            "| to disable the Metrics and Logs Tracking and try again.        |\n"
-            "|-----------------------------ERROR------------------------------|\n"
-        )
-        sys.exit(0)
+    except Exception:
+        logger.debug("Failed to write analytics prompt file flag")
 
 
 def before_cli() -> None:
