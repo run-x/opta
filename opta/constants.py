@@ -26,10 +26,6 @@ tf_modules_path = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), "config", "tf_modules"
 )
 
-data_analytics_prompt = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)), ".data_analytics_prompt"
-)
-
 REGISTRY = yaml.load(open(registry_path))
 DEBUG_TREE = yaml.load(open(debugger_path))
 VERSION = open(version_path).read().strip()
@@ -39,7 +35,6 @@ SESSION_ID = int(time.time() * 1000)
 
 # Path of the generated tf file.
 OPTA_DISABLE_REPORTING = "OPTA_DISABLE_REPORTING"
-CI = "CI"
 TF_FILE_PATH = "main.tf.json"
 TF_PLAN_PATH = "tf.plan"
 MAX_TERRAFORM_VERSION = "1.1.0"
