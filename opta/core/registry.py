@@ -1,4 +1,5 @@
 import os
+import shutil
 from typing import Any, Dict, List
 
 from ruamel.yaml import YAML
@@ -6,6 +7,25 @@ from ruamel.yaml import YAML
 yaml = YAML(
     typ="safe"
 )  # Duplicate because constants can't import utils and yaml really is a util
+
+
+SERVICE_MODULE_INDEX = """---
+title: "Service"
+linkTitle: "Service"
+weight: 1
+description: This section provides the list of module types for the user to use in a service Opta yaml for this cloud, along with their inputs and outputs.
+---
+This section provides the list of module types for the user to use in a service Opta yaml for this cloud, along with their inputs and outputs.
+"""
+
+ENVIRONMENT_MODULE_INDEX = """---
+title: "Environment"
+linkTitle: "Environment"
+weight: 1
+description: This section provides the list of module types for the user to use in a environment Opta yaml for this cloud, along with their inputs and outputs.
+---
+This section provides the list of module types for the user to use in a environment Opta yaml for this cloud, along with their inputs and outputs.
+"""
 
 
 def make_registry_dict() -> Dict[Any, Any]:
@@ -59,7 +79,7 @@ def _make_module_docs(vanilla_text: str, module_dict: Dict[Any, Any]) -> str:
         output_lines.append(f"- {name} - {description}")
     input_lines_block = "\n".join(input_lines)
     output_lines_block = "\n".join(output_lines)
-    return f"{vanilla_text}\n\n## Fields\n\n##{input_lines_block}\n\n## Outputs\n\n{output_lines_block}"
+    return f"{vanilla_text}\n\n## Fields\n\n{input_lines_block}\n\n## Outputs\n\n{output_lines_block}"
 
 
 def _make_module_registry_dict(directory: str) -> Dict[Any, Any]:
@@ -85,17 +105,29 @@ def make_registry_docs(directory: str) -> None:
     registry_dict = make_registry_dict()
     base_path = os.path.join(directory, "Reference")
     if os.path.exists(base_path):
-        os.remove(base_path)
+        shutil.rmtree(base_path)
     os.makedirs(base_path)
-    with open(os.path.join(base_path, "index.md")) as f:
+    with open(os.path.join(base_path, "index.md"), "w") as f:
         f.write(registry_dict["text"])
-    for cloud in ["aws", "google", "azure"]:
+    for cloud in ["aws", "google", "azurerm"]:
         cloud_path = os.path.join(base_path, cloud)
         os.makedirs(cloud_path)
         cloud_dict = registry_dict[cloud]
-        with open(os.path.join(cloud_path, "index.md")) as f:
+        with open(os.path.join(cloud_path, "index.md"), "w") as f:
             f.write(cloud_dict["text"])
-        module_path = os.path.join(cloud_path, "modules")
+        environment_module_path = os.path.join(cloud_path, "environment_modules")
+        os.makedirs(environment_module_path)
+        with open(os.path.join(environment_module_path, "index.md"), "w") as f:
+            f.write(ENVIRONMENT_MODULE_INDEX)
+        service_module_path = os.path.join(cloud_path, "service_modules")
+        os.makedirs(service_module_path)
+        with open(os.path.join(service_module_path, "index.md"), "w") as f:
+            f.write(SERVICE_MODULE_INDEX)
         for module_name, module_dict in cloud_dict["modules"].items():
-            with open(os.path.join(module_path, f"{module_name}.md")) as f:
+            module_path = (
+                environment_module_path
+                if module_dict["environment_module"]
+                else service_module_path
+            )
+            with open(os.path.join(module_path, f"{module_name}.md"), "w") as f:
                 f.write(module_dict["text"])
