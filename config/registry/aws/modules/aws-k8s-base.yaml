@@ -1,5 +1,6 @@
 halt: false
 environment_module: true
+terraform_module: k8s-base
 inputs:
   - name: openid_provider_url
     user_facing: false

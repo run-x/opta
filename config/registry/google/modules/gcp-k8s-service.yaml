@@ -22,7 +22,7 @@ inputs:
     description: Buckets linked for reading
     default: []
   - name: write_buckets
-    user_facing: true
+    user_facing: false
     description: Buckets linked for writing
     default: []
   - name: image
@@ -98,10 +98,9 @@ inputs:
       memory: 128 # in megabytes
       ```
       CPU is given in millicores, and Memory is in megabytes.
-    default: {
-      "cpu" : 100
-        "memory" : 128
-    }
+    default:
+      cpu : 100
+      memory : 128
   - name: public_uri
     user_facing: true
     validator: any(str(), list(), required=False)

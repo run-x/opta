@@ -41,7 +41,7 @@ inputs:
     user_facing: true
     validator: str(required=False)
     description: The GKE K8s [release channel](https://cloud.google.com/kubernetes-engine/docs/concepts/release-channels) to bind the cluster too. Gives you automatic K8s version management for the lcuster and node pools.
-  default: REGULAR
+    default: REGULAR
 outputs:
   - name: k8s_endpoint
     export: true

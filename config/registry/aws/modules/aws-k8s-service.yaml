@@ -1,5 +1,6 @@
 halt: false
 environment_module: false
+terraform_module: k8s-service
 inputs:
   - name: openid_provider_url
     user_facing: false
@@ -102,10 +103,9 @@ inputs:
       memory: 128 # in megabytes
       ```
       CPU is given in millicores, and Memory is in megabytes.
-    default: {
-      "cpu" : 100
-      "memory" : 128
-    }
+    default:
+      cpu : 100
+      memory : 128
   - name: public_uri
     user_facing: true
     validator: any(str(), list(), required=False)
