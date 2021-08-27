@@ -1,0 +1,27 @@
+halt: true
+environment_module: false
+inputs:
+  - name: memory_size_gb
+    user_facing: true
+    validator: str(required=False)
+    description: The size in GB for the redis cache's memory
+    default: 2
+  - name: redis_version
+    user_facing: true
+    validator: str(required=False)
+    description: the redis version to use for this instance
+    default: "REDIS_5_0"
+  - name: high_availability
+    user_facing: true
+    validator: bool(required=False)
+    description: the redis version to use for this instance
+    default: true
+outputs:
+  - name: cache_host
+    export: true
+    description: The host through which to access the redis cache
+  - name: cache_auth_token
+    export: true
+    description: The security auth token for the redis cache
+output_providers: { }
+output_data: { }

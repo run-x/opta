@@ -1,0 +1,4 @@
+type: regex('custom-terraform')
+name: str(required=False)
+path_to_module: str(required=True)
+terraform_inputs: any(required=False)

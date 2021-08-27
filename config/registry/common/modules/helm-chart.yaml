@@ -1,0 +1,64 @@
+halt: false
+environment_module: false
+inputs:
+  - name: chart
+    user_facing: true
+    validator: str(required=True)
+    description: |
+      Name of the helm chart.
+      Note that you don't need to use `<repo_name>/<chart_name>` - as repo is specified separately. Just do `<chart_name>`.
+      If you're using a local chart, then this will be the path to the chart.
+    default: null
+  - name: repository
+    user_facing: true
+    validator: str(required=False)
+    description: The helm repository to use (null means local chart)
+    default: null
+  - name: namespace
+    user_facing: true
+    validator: str(required=False)
+    description: The kubernetes namespace to put the chart in
+    default: default
+  - name: create_namespace
+    user_facing: true
+    validator: bool(required=False)
+    description: Create namespace as well.
+    default: false
+  - name: atomic
+    user_facing: true
+    validator: bool(required=False)
+    description: If set, installation process purges chart on fail. The wait flag will be set automatically if atomic is used.
+    default: true
+  - name: cleanup_on_fail
+    user_facing: true
+    validator: bool(required=False)
+    description: Allow deletion of new resources created in this upgrade when upgrade fails
+    default: true
+  - name: version
+    user_facing: true
+    validator: str(required=False)
+    description: The version of the helm chart to install
+    default: null
+  - name: values_file
+    user_facing: true
+    validator: str(required=False)
+    description: Path to a values file.
+    default: null
+  - name: values
+    user_facing: true
+    validator: any(required=False)
+    description: Values override.
+    default: { }
+  - name: timeout
+    user_facing: true
+    validator: int(required=False)
+    description: Time in seconds to wait for any individual kubernetes operation (like Jobs for hooks).
+    default: 600
+  - name: dependency_update
+    user_facing: true
+    validator: bool(required=False)
+    description: Runs helm dependency update before installing the chart.
+    default: true
+outputs: { }
+output_providers: { }
+output_data: { }

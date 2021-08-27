@@ -1,0 +1,22 @@
+halt: false
+environment_module: false
+inputs:
+  - name: bucket_name
+    user_facing: true
+    validator: str(required=True)
+    description: The name of the bucket to create.
+    default: null
+  - name: block_public
+    user_facing: true
+    validator: bool(required=False)
+    description: Block all public access.
+    default: true
+outputs:
+  - name: bucket_id
+    export: true
+    description: The id of the bucket.
+  - name: bucket_name
+    export: true
+    description: The name of the bucket.
+output_providers: { }
+output_data: { }

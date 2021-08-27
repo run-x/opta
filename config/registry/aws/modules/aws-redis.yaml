@@ -1,0 +1,22 @@
+halt: true
+environment_module: false
+inputs:
+  - name: node_type
+    user_facing: true
+    validator: str(required=False)
+    description: This is the redis instance type used for the [instances](https://aws.amazon.com/elasticache/pricing/).
+    default: cache.m4.large
+  - name: redis_version
+    user_facing: true
+    validator: str(required=False)
+    description: the redis version to use for this instance
+    default: "6.x"
+outputs:
+  - name: cache_host
+    export: true
+    description: The host through which to access the redis cache
+  - name: cache_auth_token
+    export: true
+    description: The security auth token for the redis cache
+output_providers: { }
+output_data: { }

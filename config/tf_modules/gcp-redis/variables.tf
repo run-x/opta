@@ -2,11 +2,6 @@ data "google_compute_network" "vpc" {
   name = "opta-${var.env_name}"
 }
 
-variable "node_type" {
-  type    = string
-  default = "cache.m4.large"
-}
-
 variable "env_name" {
   description = "Env name"
   type        = string
