@@ -94,8 +94,22 @@ def _make_module_registry_dict(directory: str) -> Dict[Any, Any]:
         module_dict = yaml.load(open(os.path.join(directory, f"{module_name}.yaml")))
         with open(os.path.join(directory, f"{module_name}.md"), "r") as f:
             module_dict["text"] = _make_module_docs(f.read(), module_dict)
+        module_dict["validators"] = _make_module_validators(module_dict)
         modules_dict[module_name] = module_dict
     return modules_dict
+
+
+def _make_module_validators(module_dict: Dict) -> List[Dict]:
+    main_validator: Dict[Any, Any] = {
+        "type": "regex('aws-base')",
+        "name": "str(required=False)",
+    }
+    for input in module_dict["inputs"]:
+        main_validator[input["name"]] = input["validator"]
+
+    validator_list = [main_validator]
+    validator_list.extend(module_dict.get("extra_validators", []))
+    return validator_list
 
 
 def make_registry_docs(directory: str) -> None:
