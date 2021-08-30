@@ -8,7 +8,6 @@ yaml = YAML(
     typ="safe"
 )  # Duplicate because constants can't import utils and yaml really is a util
 
-
 SERVICE_MODULE_INDEX = """---
 title: "Service"
 linkTitle: "Service"
