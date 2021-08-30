@@ -112,7 +112,7 @@ inputs:
     validator: list(any(str(), map()), required=False)
     description: A list of extra IAM role policies not captured by Opta which you wish to give to your service.
     default: []
-extra_validators: |
+extra_validators:
   env-var:
     name: str(required=False)
     value: str()

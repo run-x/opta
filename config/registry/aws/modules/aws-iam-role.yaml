@@ -36,7 +36,7 @@ inputs:
     user_facing: false
     description: The json string for the IAM policy to grant to the role (crafted by the module processor based on the links)
     default: null
-extra_validators: |
+extra_validators:
   allowed-k8s-services:
     service_name: str(required=True)
     namespace: str(required=True)

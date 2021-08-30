@@ -1,12 +1,12 @@
 from collections.abc import Mapping
-from os import path
+from tempfile import NamedTemporaryFile
 from typing import Any, List, Literal, Optional, Type
 
 import yamale
 from colored import attr, fg
 from yamale.validators import DefaultValidators, Validator
 
-from opta.constants import REGISTRY, schema_dir_path
+from opta.constants import REGISTRY, yaml
 from opta.exceptions import UserErrors
 
 
@@ -25,25 +25,21 @@ class Module(Validator):
         if "type" not in value:
             return ["module must have a 'type' field"]
 
-        type = value["type"]
-        if "alias" in REGISTRY["modules"].get(type, {}):
-            if self.cloud is None or self.cloud not in REGISTRY["modules"][type]["alias"]:
-                raise UserErrors(
-                    f"Alias module is unsupported-- assumed cloud is {self.cloud}, supported alias for clouds is "
-                    f"{list(REGISTRY['modules'][type]['alias'].keys())}"
-                )
-            value["type"] = REGISTRY["modules"][type]["alias"][self.cloud]  # type:ignore
-            type = value["type"]
-        elif REGISTRY["modules"].get(type, {}).get("cloud", "") not in {
-            "any",
-            self.cloud,
-        }:
-            raise UserErrors(f"Module {type} is not supported for cloud {self.cloud}")
-        module_schema_path = path.join(schema_dir_path, "modules", f"{type}.yaml")
-        if not path.isfile(module_schema_path):
-            return [f"{type} is not a valid module type"]
+        if self.cloud is None:
+            raise Exception("Cloud needs to be specified for validation")
 
-        return _get_yamale_errors(value, module_schema_path)
+        type: str = value["type"]
+        if type in REGISTRY[self.cloud]["module_aliases"]:
+            value["type"] = REGISTRY[self.cloud]["module_aliases"]["alias"][  # type: ignore
+                type
+            ]
+            type = value["type"]
+        elif type not in REGISTRY[self.cloud]["modules"]:
+            raise UserErrors(f"Module {type} is not supported for cloud {self.cloud}")
+        module_schema_dicts = REGISTRY[self.cloud]["modules"][type]["validators"]
+        with NamedTemporaryFile() as f:
+            yaml.dump_all(module_schema_dicts, f)
+            return _get_yamale_errors(value, f.name)
 
 
 class AwsModule(Module):
@@ -64,7 +60,8 @@ class Opta(Validator):
     tag = "opta"
     constaints: List = []
     extra_validators: List[Type[Validator]] = []
-    environment_schema_path: Optional[str] = None
+    environment_schema_dict: Optional[dict] = None
+    service_schema_dicts: Optional[List[dict]] = None
 
     def _is_valid(self, value: Any) -> bool:
         if not isinstance(value, Mapping):
@@ -76,13 +73,17 @@ class Opta(Validator):
             return ["opta.yaml files should be a map"]
 
         if "org_name" in value:
-            if self.environment_schema_path is None:
+            if self.environment_schema_dict is None:
                 raise UserErrors("We currently only support AWS, GCP, and Azure")
-            schema_path = self.environment_schema_path
+            schema_dicts = [self.environment_schema_dict]
         else:
-            schema_path = path.join(schema_dir_path, "service.yaml")
+            if self.service_schema_dicts is None:
+                raise UserErrors("We currently only support AWS, GCP, and Azure")
+            schema_dicts = self.service_schema_dicts
 
-        return _get_yamale_errors(value, schema_path, self.extra_validators)
+        with NamedTemporaryFile() as f:
+            yaml.dump_all(schema_dicts, f)
+            return _get_yamale_errors(value, f.name, self.extra_validators)
 
 
 class AwsId(Validator):
@@ -96,17 +97,20 @@ class AwsId(Validator):
 
 class AwsOpta(Opta):
     extra_validators = [AwsModule, AwsId]
-    environment_schema_path = path.join(schema_dir_path, "aws_environment.yaml")
+    environment_schema_dict = REGISTRY["aws"]["validator"]
+    service_schema_dicts = REGISTRY["aws"]["service_validator"]
 
 
 class GcpOpta(Opta):
     extra_validators = [GcpModule]
-    environment_schema_path = path.join(schema_dir_path, "gcp_environment.yaml")
+    environment_schema_dict = REGISTRY["google"]["validator"]
+    service_schema_dicts = REGISTRY["google"]["service_validator"]
 
 
 class AureOpta(Opta):
     extra_validators = [AzureModule]
-    environment_schema_path = path.join(schema_dir_path, "azure_environment.yaml")
+    environment_schema_dict = REGISTRY["azurerm"]["validator"]
+    service_schema_dicts = REGISTRY["azurerm"]["service_validator"]
 
 
 def _get_yamale_errors(
@@ -139,19 +143,20 @@ gcp_validators[GcpOpta.tag] = GcpOpta
 azure_validators = DefaultValidators.copy()
 azure_validators[AureOpta.tag] = AureOpta
 
-main_schema_path = path.join(schema_dir_path, "opta.yaml")
-vanilla_main_schema = yamale.make_schema(
-    main_schema_path, validators=vanilla_validators, parser="ruamel"
-)
-aws_main_schema = yamale.make_schema(
-    main_schema_path, validators=aws_validators, parser="ruamel"
-)
-gcp_main_schema = yamale.make_schema(
-    main_schema_path, validators=gcp_validators, parser="ruamel"
-)
-azure_main_schema = yamale.make_schema(
-    main_schema_path, validators=azure_validators, parser="ruamel"
-)
+with NamedTemporaryFile() as f:
+    yaml.dump_all([REGISTRY["validator"]], f)
+    vanilla_main_schema = yamale.make_schema(
+        f.name, validators=vanilla_validators, parser="ruamel"
+    )
+    aws_main_schema = yamale.make_schema(
+        f.name, validators=aws_validators, parser="ruamel"
+    )
+    gcp_main_schema = yamale.make_schema(
+        f.name, validators=gcp_validators, parser="ruamel"
+    )
+    azure_main_schema = yamale.make_schema(
+        f.name, validators=azure_validators, parser="ruamel"
+    )
 
 
 def _print_errors(errors: List[str]) -> None:

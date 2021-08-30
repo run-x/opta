@@ -30,7 +30,7 @@ inputs:
     validator: include('cors', required=False)
     description: A custom cors policy.
     default: null
-extra_validators: |
+extra_validators:
   cors:
     allowed_origins: list(str(), required=False)
     allowed_headers: list(str(), required=False)

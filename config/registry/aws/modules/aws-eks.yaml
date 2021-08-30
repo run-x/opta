@@ -54,7 +54,7 @@ inputs:
     validator: any(include('node_launch_template'), required=False)
     description: Custom launch template for the underlying ec2s.
     default: {}
-extra_validators: |
+extra_validators:
   node_launch_template:
     user_data: str(required=False)
 outputs:

@@ -16,6 +16,15 @@ validator:
       region: str()
       account_id: aws_id()
   modules: list(module())
+service_validator:
+  - environments: list(include('env'), required=False)
+    name: str()
+    modules: list(module())
+  - env:
+      name: str()
+      path: str()
+      variables: map(required=False)
+      vars: map(required=False)
 module_aliases:
   postgres: aws-postgres
   redis: aws-redis
