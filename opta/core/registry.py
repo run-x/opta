@@ -105,6 +105,8 @@ def _make_module_validators(module_dict: Dict) -> List[Dict]:
         "name": "str(required=False)",
     }
     for input in module_dict["inputs"]:
+        if not input["user_facing"]:
+            continue
         main_validator[input["name"]] = input["validator"]
 
     validator_list = [main_validator]

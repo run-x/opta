@@ -37,8 +37,9 @@ class Module(Validator):
         elif type not in REGISTRY[self.cloud]["modules"]:
             raise UserErrors(f"Module {type} is not supported for cloud {self.cloud}")
         module_schema_dicts = REGISTRY[self.cloud]["modules"][type]["validators"]
-        with NamedTemporaryFile() as f:
+        with NamedTemporaryFile(mode="w") as f:
             yaml.dump_all(module_schema_dicts, f)
+            f.flush()
             return _get_yamale_errors(value, f.name)
 
 
@@ -81,8 +82,9 @@ class Opta(Validator):
                 raise UserErrors("We currently only support AWS, GCP, and Azure")
             schema_dicts = self.service_schema_dicts
 
-        with NamedTemporaryFile() as f:
+        with NamedTemporaryFile(mode="w") as f:
             yaml.dump_all(schema_dicts, f)
+            f.flush()
             return _get_yamale_errors(value, f.name, self.extra_validators)
 
 
@@ -143,8 +145,9 @@ gcp_validators[GcpOpta.tag] = GcpOpta
 azure_validators = DefaultValidators.copy()
 azure_validators[AureOpta.tag] = AureOpta
 
-with NamedTemporaryFile() as f:
-    yaml.dump_all([REGISTRY["validator"]], f)
+with NamedTemporaryFile(mode="w") as f:
+    yaml.dump(REGISTRY["validator"], f)
+    f.flush()
     vanilla_main_schema = yamale.make_schema(
         f.name, validators=vanilla_validators, parser="ruamel"
     )
