@@ -393,17 +393,15 @@ class Layer:
         for k, v in providers.items():
             new_v = self.handle_special_providers(k, v, clean)
             ret["provider"][k] = new_v
-            if k in REGISTRY["backends"]:
+            if k in REGISTRY:
                 ret["terraform"] = hydrate(
-                    REGISTRY["backends"][k]["terraform"],
+                    {x: REGISTRY[k][x] for x in ["required_providers", "backend"]},
                     deep_merge(hydration, {"provider": new_v}),
                 )
 
                 if self.parent is not None:
                     # Add remote state
-                    backend, config = list(
-                        REGISTRY["backends"][k]["terraform"]["backend"].items()
-                    )[0]
+                    backend, config = list(REGISTRY[k]["backend"].items())[0]
                     ret["data"] = {
                         "terraform_remote_state": {
                             "parent": {

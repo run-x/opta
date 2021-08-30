@@ -3,18 +3,14 @@ import time
 
 from ruamel.yaml import YAML
 
+from opta.core.registry import make_registry_dict
+
 yaml = YAML(
     typ="safe"
 )  # Duplicate because constants can't import utils and yaml really is a util
 
 init_template_path = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), "config", "init_templates"
-)
-schema_dir_path = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)), "config", "schema"
-)
-registry_path = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)), "config", "registry.yaml"
 )
 debugger_path = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), "config", "debugger.yaml"
@@ -26,7 +22,7 @@ tf_modules_path = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), "config", "tf_modules"
 )
 
-REGISTRY = yaml.load(open(registry_path))
+REGISTRY = make_registry_dict()
 DEBUG_TREE = yaml.load(open(debugger_path))
 VERSION = open(version_path).read().strip()
 DEV_VERSION = "dev"
