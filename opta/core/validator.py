@@ -30,7 +30,7 @@ class Module(Validator):
 
         type: str = value["type"]
         if type in REGISTRY[self.cloud]["module_aliases"]:
-            value["type"] = REGISTRY[self.cloud]["module_aliases"]["alias"][  # type: ignore
+            value["type"] = REGISTRY[self.cloud]["module_aliases"][  # type: ignore
                 type
             ]
             type = value["type"]
