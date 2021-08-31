@@ -101,7 +101,7 @@ def _make_module_registry_dict(directory: str) -> Dict[Any, Any]:
 
 def _make_module_validators(module_dict: Dict) -> List[Dict]:
     main_validator: Dict[Any, Any] = {
-        "type": "regex('aws-base')",
+        "type": "str(required=True)",
         "name": "str(required=False)",
     }
     for input in module_dict["inputs"]:
@@ -110,7 +110,8 @@ def _make_module_validators(module_dict: Dict) -> List[Dict]:
         main_validator[input["name"]] = input["validator"]
 
     validator_list = [main_validator]
-    validator_list.extend(module_dict.get("extra_validators", []))
+    if module_dict.get("extra_validators"):
+        validator_list.append(module_dict["extra_validators"])
     return validator_list
 
 

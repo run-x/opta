@@ -65,26 +65,28 @@ class Module:
             "module": {self.name: {"source": self.module_dir_path}},
             "output": {},
         }
-        for k, v in self.desc["variables"].items():
-            if k in self.data:
-                module_blk["module"][self.name][k] = self.data[k]
-            elif v == "optional":
-                continue
-            elif k == "module_name":
-                module_blk["module"][self.name][k] = self.name
-            elif k == "layer_name":
-                module_blk["module"][self.name][k] = self.layer_name
+        for input in self.desc["inputs"]:
+            input_name = input["name"]
+            if input_name in self.data:
+                module_blk["module"][self.name][input_name] = self.data[input_name]
+            elif input_name == "module_name":
+                module_blk["module"][self.name][input_name] = self.name
+            elif input_name == "layer_name":
+                module_blk["module"][self.name][input_name] = self.layer_name
             else:
-                raise Exception(f"Unable to hydrate {k}")
-
-        if "outputs" in self.desc:
-            for k, v in self.desc["outputs"].items():
-                if "export" in v and v["export"]:
-                    entry: Dict[Any, Any] = {"value": f"${{{{module.{self.name}.{k} }}}}"}
-                    if v.get("sensitive", False):
-                        entry["sensitive"] = True
-                    output_key = k if output_prefix is None else f"{output_prefix}_{k}"
-                    module_blk["output"].update({output_key: entry})
+                raise Exception(f"Unable to hydrate {input_name}")
+        for output in self.desc["outputs"]:
+            output_name = output["name"]
+            if output["export"]:
+                entry: Dict[Any, Any] = {
+                    "value": f"${{{{module.{self.name}.{output_name} }}}}"
+                }
+                output_key = (
+                    output_name
+                    if output_prefix is None
+                    else f"{output_prefix}_{output_name}"
+                )
+                module_blk["output"].update({output_key: entry})
         if depends_on is not None:
             module_blk["module"][self.name]["depends_on"] = depends_on
 
