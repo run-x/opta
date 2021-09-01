@@ -141,6 +141,7 @@ extra_validators:
   service_port:
     http: int(required=False)
     tcp: int(required=False)
+    grpc: int(required=False)
 outputs:
   - name: docker_repo_url
     export: true

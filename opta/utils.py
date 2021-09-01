@@ -57,6 +57,9 @@ def deep_merge(dict1: Dict[Any, Any], dict2: Dict[Any, Any]) -> Dict[Any, Any]:
             if isinstance(value, dict) and isinstance(dict2[key], dict):
                 dict2[key] = deep_merge(value, dict2[key])
             elif value != dict2[key]:
+                import pdb
+
+                pdb.set_trace()
                 raise Exception(f"Cant merge conflicting non-dict values (key: {key})")
         else:
             dict2[key] = value

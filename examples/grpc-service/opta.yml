@@ -1,9 +1,9 @@
 environments:
-  - name: aws-staging
+  - name: aws-example
     path: "../environments/aws-env.yml"
     variables:
       max_nodes: 2
-  - name: gcp-staging
+  - name: gcp-example
     path: "../environments/gcp-env.yml"
     variables:
       max_nodes: 2

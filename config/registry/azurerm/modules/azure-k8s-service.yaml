@@ -48,12 +48,12 @@ inputs: # (what users see)
     default: null
   - name: min_containers
     user_facing: true
-    validator: int(required=False)
+    validator: any(required=False)
     description: The minimum number of replicas your app can autoscale to.
     default: 1
   - name: max_containers
     user_facing: true
-    validator: int(required=False)
+    validator: any(required=False)
     description: The maximum number of replicas your app can autoscale to.
     default: 3
   - name: autoscaling_target_cpu_percentage
@@ -127,6 +127,7 @@ extra_validators:
   service_port:
     http: int(required=False)
     tcp: int(required=False)
+    grpc: int(required=False)
 outputs:
   - name: str
     export: bool # (show to users)
