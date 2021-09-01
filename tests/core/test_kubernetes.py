@@ -134,6 +134,9 @@ class TestKubernetes:
         mocked_watch_call = mocker.patch(
             "opta.core.kubernetes.Watch", return_value=mocked_watch
         )
+        mocked_is_past_datetime_utc = mocker.patch(
+            "opta.core.kubernetes.is_past_datetime_utc", return_value=False
+        )
         layer = mocker.Mock(spec=Layer)
         layer.name = "mocked_layer"
         layer.parent = None
@@ -158,6 +161,7 @@ class TestKubernetes:
         mocked_watch_call.assert_called_once_with()
         mocked_core_v1_api_call.assert_called_once_with()
         mocked_load_kube_config.assert_called_once_with()
+        mocked_is_past_datetime_utc.assert_called()
         thread_1.start.assert_called_once_with()
         thread_2.start.assert_called_once_with()
         mocked_thread.assert_has_calls(
