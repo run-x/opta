@@ -25,16 +25,16 @@ inputs:
     default: "11"
 outputs:
   - name: db_user
-    export: true
+    export: false
     description: The database user
   - name: db_password
     export: false
     description: The database password
   - name: db_host
-    export: true
+    export: false
     description: The database host
   - name: db_name
-    export: true
+    export: false
     description: The database ip
 output_providers: { }
 output_data: { }

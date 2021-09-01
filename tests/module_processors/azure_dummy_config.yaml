@@ -30,7 +30,6 @@ modules:
           - cache_host: CACHEHOST2
             cache_auth_token: CACHEAUTH2
     image: kennethreitz/httpbin
-    port: 8000
     min_containers: 2
     max_containers: "{vars.max_containers}"
     liveness_probe_path: "/get"

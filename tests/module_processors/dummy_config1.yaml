@@ -22,7 +22,8 @@ modules:
   - name: app
     type: k8s-service
     image: kennethreitz/httpbin
-    port: 8000
+    port:
+      http: 80
     env_vars:
       A: B
     secrets:
