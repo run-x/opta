@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+from datetime import datetime
 from logging import Logger
 from logging.handlers import QueueHandler, QueueListener
 from queue import Queue
@@ -172,3 +173,7 @@ def check_opta_file_exists(config_path: str) -> Literal[True]:
             )
         )
     return True
+
+
+def is_past_datetime_utc(date_time: datetime) -> bool:
+    return date_time < datetime.utcnow().replace(tzinfo=date_time.tzinfo)

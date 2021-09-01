@@ -28,7 +28,7 @@ from opta.core.gcp import GCP
 from opta.core.terraform import get_terraform_outputs
 from opta.exceptions import UserErrors
 from opta.nice_subprocess import nice_run
-from opta.utils import deep_merge, fmt_msg, is_tool, logger
+from opta.utils import deep_merge, fmt_msg, is_past_datetime_utc, is_tool, logger
 
 if TYPE_CHECKING:
     from opta.layer import Layer
@@ -350,6 +350,8 @@ def tail_module_log(
     ):
         pod: V1Pod = event["object"]
         color_idx = count % (256 - start_color_idx) + start_color_idx
+        if is_past_datetime_utc(pod.metadata.creation_timestamp):
+            continue
         if pod.metadata.name not in current_pods_monitored:
             current_pods_monitored.add(pod.metadata.name)
             new_thread = Thread(
