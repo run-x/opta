@@ -20,6 +20,7 @@ modules:
   - name: app
     type: gcp-k8s-service
     image: kennethreitz/httpbin
+    port: 8000
     env_vars:
       A: B
     secrets:
