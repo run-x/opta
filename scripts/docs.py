@@ -1,6 +1,6 @@
 import argparse
 
-from opta.core.registry import make_registry_docs
+from opta.registry import make_registry_docs
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("docs")

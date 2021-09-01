@@ -29,7 +29,7 @@ This section provides the list of module types for the user to use in a environm
 
 def make_registry_dict() -> Dict[Any, Any]:
     registry_path = os.path.join(
-        os.path.dirname(os.path.dirname(__file__)), "..", "config", "registry"
+        os.path.dirname(os.path.dirname(__file__)), "config", "registry"
     )
     registry_dict: Dict[Any, Any] = yaml.load(
         open(os.path.join(registry_path, "index.yaml"))

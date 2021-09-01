@@ -3,7 +3,7 @@ import time
 
 from ruamel.yaml import YAML
 
-from opta.core.registry import make_registry_dict
+from opta.registry import make_registry_dict
 
 yaml = YAML(
     typ="safe"
