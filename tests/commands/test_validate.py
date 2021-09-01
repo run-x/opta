@@ -19,7 +19,7 @@ def test_validate_service() -> None:
     )
     runner = CliRunner()
     result = runner.invoke(
-        cli, ["validate", "-c", test_service_file_path, "--env", "aws-staging"]
+        cli, ["validate", "-c", test_service_file_path, "--env", "aws-example"]
     )
 
     assert result.exit_code == 0

@@ -52,6 +52,9 @@ outputs:
   - name: public_subnets_ids
     export: true
     description: The IDs of the public [subnets](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html) we setup for your environment
+  - name: s3_log_bucket_name
+    export: true
+    description: The name of the default logging bucket provisioned by opta
 output_providers: { }
 output_data:
   aws_caller_identity:
