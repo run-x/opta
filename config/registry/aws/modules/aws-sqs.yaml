@@ -49,7 +49,7 @@ outputs:
     export: true
     description: ID of the queue jsut created
   - name: kms_arn
-    export: true
+    export: false
     description: Arn of the kms key created to encrypt this queue
 output_providers: { }
 output_data: { }

@@ -117,6 +117,9 @@ variable "domain" {
   default = ""
 }
 
+variable "secrets" {}
+variable "links" {}
+
 variable "link_secrets" {
   type    = list(map(string))
   default = []

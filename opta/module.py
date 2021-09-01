@@ -45,10 +45,10 @@ class Module:
 
     def outputs(self) -> Iterable[str]:
         ret = []
-        if "outputs" in self.desc:
-            for k, v in self.desc["outputs"].items():
-                if "export" in v and v["export"]:
-                    ret.append(k)
+        for output in self.desc["outputs"]:
+            output_name = output["name"]
+            if output["export"]:
+                ret.append(output_name)
         return ret
 
     @staticmethod
