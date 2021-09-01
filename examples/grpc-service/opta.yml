@@ -16,4 +16,4 @@ modules:
     max_containers: "{vars.max_nodes}"
     port:
       grpc: 9000
-    public_uri: "subdomain2.{parent.domain}"
+    public_uri: "grpc-example.{parent.domain}"

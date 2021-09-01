@@ -118,8 +118,8 @@ variable "domain" {
   default = ""
 }
 
-variable "secrets" {}
-variable "links" {}
+variable "secrets" {default = null}
+variable "links" {default = null}
 
 variable "link_secrets" {
   type    = list(map(string))
