@@ -47,13 +47,13 @@ inputs:
     default: null
 outputs:
   - name: private_key
-    export: true
+    export: false
     description: The content of the private key file
   - name: certificate_body
-    export: true
+    export: false
     description: The content of the certificate body file
   - name: certificate_chain
-    export: true
+    export: false
     description: The content of the certificate chain file
   - name: domain
     export: true
