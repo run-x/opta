@@ -1,6 +1,18 @@
 halt: false
 environment_module: false
 inputs: # (what users see)
+  - name: env_name
+    user_facing: false
+    description: Opta Environment name
+    default: None
+  - name: layer_name
+    user_facing: false
+    description: Opta Layer name
+    default: None
+  - name: module_name
+    user_facing: false
+    description: Opta Module name
+    default: None
   - name: acr_registry_name
     user_facing: false
     description: The name of the acr registry used by opta for this environment.

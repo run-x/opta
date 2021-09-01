@@ -22,6 +22,10 @@ variable "layer_name" {
   type        = string
 }
 
+variable "enable_metrics" {
+  type = bool
+}
+
 variable "module_name" {
   description = "Module name"
   type        = string

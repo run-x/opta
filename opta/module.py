@@ -73,6 +73,8 @@ class Module:
                 module_blk["module"][self.name][input_name] = self.name
             elif input_name == "layer_name":
                 module_blk["module"][self.name][input_name] = self.layer_name
+            elif not input["required"]:
+                continue
             else:
                 raise Exception(f"Unable to hydrate {input_name}")
         for output in self.desc["outputs"]:

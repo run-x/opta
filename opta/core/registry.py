@@ -94,6 +94,10 @@ def _make_module_registry_dict(directory: str) -> Dict[Any, Any]:
         module_dict = yaml.load(open(os.path.join(directory, f"{module_name}.yaml")))
         with open(os.path.join(directory, f"{module_name}.md"), "r") as f:
             module_dict["text"] = _make_module_docs(f.read(), module_dict)
+        for input in module_dict["inputs"]:
+            input["required"] = (
+                input["user_facing"] and "required=True" in input["validator"]
+            )
         module_dict["validators"] = _make_module_validators(module_dict)
         modules_dict[module_name] = module_dict
     return modules_dict

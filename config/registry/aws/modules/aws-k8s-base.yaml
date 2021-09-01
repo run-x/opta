@@ -2,6 +2,26 @@ halt: false
 environment_module: true
 terraform_module: k8s-base
 inputs:
+  - name: env_name
+    user_facing: false
+    description: Opta Environment name
+    default: None
+  - name: layer_name
+    user_facing: false
+    description: Opta Layer name
+    default: None
+  - name: module_name
+    user_facing: false
+    description: Opta Module name
+    default: None
+  - name: eks_cluster_name
+    user_facing: false
+    description: The eks cluster name
+    default: None
+  - name: s3_log_bucket_name
+    user_facing: false
+    description: The s3 log bucket name
+    default: None
   - name: openid_provider_url
     user_facing: false
     description: The url for the open id for the eks cluster

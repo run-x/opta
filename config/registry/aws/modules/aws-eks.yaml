@@ -1,6 +1,26 @@
 halt: true
 environment_module: true
 inputs:
+  - name: env_name
+    user_facing: false
+    description: Opta Environment name
+    default: None
+  - name: layer_name
+    user_facing: false
+    description: Opta Layer name
+    default: None
+  - name: module_name
+    user_facing: false
+    description: Opta Module name
+    default: None
+  - name: kms_account_key_arn
+    user_facing: false
+    description: KMS account key arn
+    default: None
+  - name: private_subnet_ids
+    user_facing: false
+    description: Private subnet ids
+    default: None
   - name: max_nodes
     user_facing: true
     validator: any(str(), int(), required=False)
