@@ -33,7 +33,7 @@ outputs:
     export: true
     description: The host through which to access the redis cache
   - name: cache_auth_token
-    export: true
+    export: false
     description: The security auth token for the redis cache
 output_providers: { }
 output_data: { }
