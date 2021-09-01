@@ -1,8 +1,0 @@
-type: regex('gcp-dns')
-name: str(required=False)
-env_name: str(required=False)
-layer_name: str(required=False)
-module_name: str(required=False)
-domain: str()
-delegated: any(required=False)
-subdomains: list(str(), required=False)

@@ -1,8 +1,0 @@
-type: regex('aws-base')
-name: str(required=False)
-env_name: str(required=False)
-layer_name: str(required=False)
-module_name: str(required=False)
-total_ipv4_cidr_block: any(required=False)
-private_ipv4_cidr_blocks: any(required=False)
-public_ipv4_cidr_blocks: any(required=False)

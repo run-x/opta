@@ -1,8 +1,0 @@
-name: str()
-org_name: regex('^[a-z0-9-]{,15}$', name="Valid identifier, regex='[a-z0-9-]{,15}'")
-providers:
-  azurerm:
-    location: str()
-    tenant_id: str()
-    subscription_id: str()
-modules: list(module())
