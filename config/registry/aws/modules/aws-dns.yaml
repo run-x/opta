@@ -24,7 +24,7 @@ inputs:
     description: Set to true once the extra [dns setup is complete](/miscellaneous/ingress) and it will add the ssl certs.
     default: false
   - name: upload_cert
-    user_facing: false
+    user_facing: true
     description: Deprecated
     default: false
   - name: cert_chain_included
