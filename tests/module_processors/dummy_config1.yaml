@@ -21,6 +21,7 @@ modules:
     bucket_name: "bucket3"
   - name: app
     type: k8s-service
+    image: kennethreitz/httpbin
     env_vars:
       A: B
     secrets:
