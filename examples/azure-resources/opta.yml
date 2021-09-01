@@ -1,11 +1,11 @@
 environments:
-  - name: gcp-staging
-    path: "../environments/gcp-env.yml"
+  - name: azure-staging
+    path: "../environments/azure-env.yml"
     variables:
       max_nodes: 2
 name: service-1
 modules:
-  - name: resourcetest
+  - name: app
     type: k8s-service
     image: kennethreitz/httpbin
     min_containers: 2
@@ -19,19 +19,12 @@ modules:
         value: B
     public_uri: "subdomain1.{parent.domain}"
     links:
-      - gcs: ["write"]
       - redis
       - db
-      - mysqldb
     secrets:
       - API_KEY
       - SECRET_1
   - name: db
     type: postgres
-  - name: mysqldb
-    type: mysql
-  - name: gcs
-    type: gcp-gcs
-    bucket_name: "{parent_name}-{layer_name}"
   - name: redis
     type: redis

@@ -9,7 +9,7 @@ environments:
       max_nodes: 2
 name: grpc-service
 modules:
-  - name: app
+  - name: blah
     type: k8s-service
     image: moul/grpcbin
     min_containers: 2
