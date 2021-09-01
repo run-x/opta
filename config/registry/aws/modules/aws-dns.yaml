@@ -26,6 +26,7 @@ inputs:
   - name: upload_cert
     user_facing: true
     description: Deprecated
+    validator: bool(required=False)
     default: false
   - name: cert_chain_included
     user_facing: false

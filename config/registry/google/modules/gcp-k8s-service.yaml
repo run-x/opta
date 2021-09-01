@@ -137,4 +137,4 @@ outputs:
     export: true
     description: Url to the docker repository created for images to be deployed in this env
 output_providers: { }
-output_data: valid_terraform_data_yaml
+output_data: { }
