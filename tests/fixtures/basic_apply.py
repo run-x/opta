@@ -28,6 +28,13 @@ BASIC_APPLY = (
                 "env_name": "dev1",
                 "layer_name": "dev1",
                 "module_name": "core",
+                "private_ipv4_cidr_blocks": [
+                    "10.0.128.0/21",
+                    "10.0.136.0/21",
+                    "10.0.144.0/21",
+                ],
+                "public_ipv4_cidr_blocks": ["10.0.0.0/21", "10.0.8.0/21", "10.0.16.0/21"],
+                "total_ipv4_cidr_block": "10.0.0.0/16",
             }
         },
         "output": {
