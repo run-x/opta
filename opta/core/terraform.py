@@ -191,7 +191,7 @@ class Terraform:
         cls.refresh()
 
         kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
-
+        idx = len(layer.modules) - 1
         for module in reversed(layer.modules):
             module_address_prefix = f"module.{module.name}"
 
@@ -203,6 +203,8 @@ class Terraform:
                 check=True,
                 **kwargs,
             )
+            layer.post_delete(idx)
+            idx -= 1
 
         # After the layer is completely deleted, remove the opta config from the state bucket.
         if layer.cloud == "aws":

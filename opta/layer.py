@@ -326,6 +326,12 @@ class Layer:
                 module_idx, exception
             )
 
+    def post_delete(self, module_idx: int) -> None:
+        module = self.modules[module_idx]
+        module_type = module.aliased_type or module.type
+        processor = self.PROCESSOR_DICT.get(module_type, ModuleProcessor)
+        processor(module, self).post_delete(module_idx)
+
     def metadata_hydration(self) -> Dict[Any, Any]:
         parent_name = self.parent.name if self.parent is not None else "nil"
         parent = None

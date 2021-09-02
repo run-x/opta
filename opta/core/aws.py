@@ -204,6 +204,10 @@ class AWS:
         bucket.objects.all().delete()
 
         # Delete the bucket itself
+        logger.info(
+            "Sleeping 10 seconds for eventual consistency in deleting all bucker resources"
+        )
+        sleep(10)
         client = boto3.client("s3")
         client.delete_bucket(Bucket=bucket_name)
         print(f"Bucket ({bucket_name}) successfully deleted.")
