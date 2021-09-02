@@ -24,7 +24,7 @@ Supercharge DevOps on any cloud</p>
 </p>
 <p align="center">
   <a href="https://docs.opta.dev/">Documentation</a> |
-<a href="https://join.slack.com/t/opta-group/shared_invite/zt-r1p9k1iv-4MP1IMZCT9mwwwdJH0HRyA">
+<a href="https://slack.opta.dev">
     Slack Community
   </a> | <a href="https://runx.dev/">
     Website
