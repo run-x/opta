@@ -3,10 +3,8 @@ title: "References"
 linkTitle: "References"
 weight: 5
 description: >
-Opta config reference
+  Opta config reference
 ---
-
-# What is an
 
 # What's an Opta module?
 

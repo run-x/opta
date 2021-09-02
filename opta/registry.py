@@ -65,9 +65,9 @@ def _make_module_docs(vanilla_text: str, module_dict: Dict[Any, Any]) -> str:
         default = input["default"]
         description = input["description"]
         if required:
-            input_lines.append(f"- {name} - Required. {description}")
+            input_lines.append(f"- `{name}` - Required. {description}")
         else:
-            input_lines.append(f"- {name} - Optional. {description} Default {default}")
+            input_lines.append(f"- `{name}` - Optional. {description} Default {default}")
 
     output: Dict[str, Any]
     for output in module_dict["outputs"]:
@@ -127,13 +127,13 @@ def make_registry_docs(directory: str) -> None:
     if os.path.exists(base_path):
         shutil.rmtree(base_path)
     os.makedirs(base_path)
-    with open(os.path.join(base_path, "index.md"), "w") as f:
+    with open(os.path.join(base_path, "_index.md"), "w") as f:
         f.write(registry_dict["text"])
     for cloud in ["aws", "google", "azurerm"]:
         cloud_path = os.path.join(base_path, cloud)
         os.makedirs(cloud_path)
         cloud_dict = registry_dict[cloud]
-        with open(os.path.join(cloud_path, "index.md"), "w") as f:
+        with open(os.path.join(cloud_path, "_index.md"), "w") as f:
             f.write(cloud_dict["text"])
         environment_module_path = os.path.join(cloud_path, "environment_modules")
         os.makedirs(environment_module_path)
@@ -141,7 +141,7 @@ def make_registry_docs(directory: str) -> None:
             f.write(ENVIRONMENT_MODULE_INDEX)
         service_module_path = os.path.join(cloud_path, "service_modules")
         os.makedirs(service_module_path)
-        with open(os.path.join(service_module_path, "index.md"), "w") as f:
+        with open(os.path.join(service_module_path, "_index.md"), "w") as f:
             f.write(SERVICE_MODULE_INDEX)
         for module_name, module_dict in cloud_dict["modules"].items():
             module_path = (

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import argparse
 
 from opta.registry import make_registry_docs
