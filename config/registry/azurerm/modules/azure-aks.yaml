@@ -52,7 +52,7 @@ inputs:
     user_facing: true
     validator: str(required=False)
     description: The ip to use for the internal coredns service
-    default: "10.0.128.0/20"
+    default: "10.0.128.10"
 outputs:
   - name: k8s_endpoint
     export: true

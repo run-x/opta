@@ -38,7 +38,7 @@ inputs:
     user_facing: true
     validator: any(str(), int(), required=False)
     description: The minimum number of nodes to be set by the autoscaler in for the default nodegroup.
-    default: 3
+    default: 1
   - name: node_disk_size
     user_facing: true
     validator: any(str(), int(), required=False)

@@ -44,7 +44,7 @@ inputs:
     user_facing: true
     validator: any(required=False)
     description: Additional configuration for nginx ingress. [Available options](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/#configuration-options)
-    default: false
+    default: {}
 outputs:
   - name: load_balancer_raw_ip
     export: bool

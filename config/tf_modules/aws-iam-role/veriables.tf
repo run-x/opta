@@ -35,3 +35,11 @@ variable "extra_iam_policies" {
   type    = list(string)
   default = []
 }
+
+variable "allowed_k8s_services" {
+  default = []
+}
+
+variable "links" {
+  default = []
+}

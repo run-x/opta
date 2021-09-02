@@ -13,7 +13,7 @@ inputs:
     user_facing: false
     description: Opta Module name
     default: None
-  - name: private_ipv4_cidr_blocks
+  - name: private_ipv4_cidr_block
     user_facing: true
     validator: str(required=False)
     description: Cidr block for the whole vpc.
