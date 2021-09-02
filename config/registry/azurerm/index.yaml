@@ -1,0 +1,35 @@
+required_providers:
+  azurerm:
+    source: "hashicorp/azurerm"
+    version: "2.65.0"
+backend:
+  azurerm:
+    resource_group_name: "opta-{env}"
+    storage_account_name: "{state_storage}"
+    container_name: "tfstate"
+    key: "{layer_name}"
+validator:
+  name: str()
+  org_name: regex('^[a-z0-9-]{,15}$', name="Valid identifier, regex='[a-z0-9-]{,15}'")
+  providers:
+    azurerm:
+      location: str()
+      tenant_id: str()
+      subscription_id: str()
+  modules: list(module())
+service_validator:
+  - environments: list(include('env'), required=False)
+    name: str()
+    modules: list(module())
+  - env:
+      name: str()
+      path: str()
+      variables: map(required=False)
+      vars: map(required=False)
+module_aliases:
+  postgres: azure-postgres
+  redis: azure-redis
+  k8s-service: azure-k8s-service
+  base: azure-base
+  k8s-base: azure-k8s-base
+  k8s-cluster: azure-aks

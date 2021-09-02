@@ -30,5 +30,5 @@ variable "engine_version" {
 
 variable "sku_name" {
   type    = string
-  default = "GP_Gen5_4"
+  default = "GP_Gen5_2"
 }

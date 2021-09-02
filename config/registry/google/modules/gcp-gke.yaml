@@ -1,0 +1,77 @@
+halt: true
+environment_module: true
+inputs:
+  - name: env_name
+    user_facing: false
+    description: Opta Environment name
+    default: None
+  - name: layer_name
+    user_facing: false
+    description: Opta Layer name
+    default: None
+  - name: module_name
+    user_facing: false
+    description: Opta Module name
+    default: None
+  - name: node_zone_names
+    user_facing: false
+    description: The names of the zones to put the nodes in.
+    default: null
+  - name: vpc_self_link
+    user_facing: false
+    description: The self link to the vpc to use.
+    default: null
+  - name: private_subnet_self_link
+    user_facing: false
+    description: The self link to the private subnet to use.
+    default: null
+  - name: k8s_master_ipv4_cidr_block
+    user_facing: false
+    description: The the cidr block for the control plane.
+    default: null
+  - name: max_nodes
+    user_facing: true
+    validator: any(str(), int(), required=False)
+    description: The maximum number of nodes to be set by the autoscaler in for the default nodegroup.
+    default: 5
+  - name: min_nodes
+    user_facing: true
+    validator: any(str(), int(), required=False)
+    description: The minimum number of nodes to be set by the autoscaler in for the default nodegroup.
+    default: 1
+  - name: node_disk_size
+    user_facing: true
+    validator: any(str(), int(), required=False)
+    description: The size of disk to give the nodes' vms in GB.
+    default: 20
+  - name: node_instance_type
+    user_facing: true
+    validator: str(required=False)
+    description: The [gcloud machine type](https://cloud.google.com/compute/docs/machine-types) for the nodes.
+    default: "n2-highcpu-4"
+  - name: gke_channel
+    user_facing: true
+    validator: str(required=False)
+    description: The GKE K8s [release channel](https://cloud.google.com/kubernetes-engine/docs/concepts/release-channels) to bind the cluster too. Gives you automatic K8s version management for the lcuster and node pools.
+    default: REGULAR
+outputs:
+  - name: k8s_endpoint
+    export: true
+    description: The endpoint to communicate to the kubernetes cluster through.
+  - name: k8s_ca_data
+    export: true
+    description: The certificate authority used by the kubernetes cluster for ssl.
+  - name: k8s_cluster_name
+    export: true
+    description: The name of the kubernetes cluster.
+output_providers:
+  helm:
+    kubernetes:
+      host: "https://${{data.google_container_cluster.k8s.endpoint}}"
+      token: "{k8s_access_token}"
+      cluster_ca_certificate: "${{base64decode({module_source}.k8s_ca_data)}}"
+output_data:
+  google_container_cluster:
+    k8s:
+      name: "${{{module_source}.k8s_cluster_name}}"
+      location: "{region}"

@@ -1,7 +1,0 @@
-type: regex('aws-redis')
-name: str(required=False)
-env_name: str(required=False)
-layer_name: str(required=False)
-module_name: str(required=False)
-node_type: any(required=False)
-redis_version: any(required=False)

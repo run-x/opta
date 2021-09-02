@@ -1,7 +1,0 @@
-type: regex('aws-iam-user')
-name: str(required=False)
-env_name: str(required=False)
-layer_name: str(required=False)
-module_name: str(required=False)
-extra_iam_policies: list(str(), required=False)
-links: list(any(str(), map()), required=False)

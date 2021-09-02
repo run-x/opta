@@ -1,0 +1,57 @@
+halt: false
+environment_module: true
+inputs:
+  - name: env_name
+    user_facing: false
+    description: Opta Environment name
+    default: None
+  - name: layer_name
+    user_facing: false
+    description: Opta Layer name
+    default: None
+  - name: module_name
+    user_facing: false
+    description: Opta Module name
+    default: None
+  - name: domain
+    user_facing: true
+    validator: str(required=True)
+    description: The domain you want (you will also get the subdomains for your use)
+    default: null
+  - name: delegated
+    user_facing: true
+    validator: bool(required=False)
+    description: Set to true once the extra [dns setup is complete](/miscellaneous/ingress) and it will add the ssl certs.
+    default: false
+  - name: upload_cert
+    user_facing: true
+    description: Deprecated
+    validator: bool(required=False)
+    default: false
+  - name: cert_chain_included
+    user_facing: false
+    description: Deprecated
+    default: false
+  - name: force_update
+    user_facing: false
+    description: Deprecated
+    default: false
+  - name: external_cert_arn
+    user_facing: false
+    description: Deprecated
+    default: ""
+outputs:
+  - name: zone_id
+    export: true
+    description: The ID of the hosted zone created
+  - name: name_servers
+    export: true
+    description: The name servers of your hosted zone (very important for the dns setup)
+  - name: domain
+    export: true
+    description: The domain again
+  - name: cert_arn
+    export: true
+    description: The arn of the ACM certificate which is used for ssl.
+output_providers: {}
+output_data: {}

@@ -1,0 +1,51 @@
+halt: false
+environment_module: true
+inputs:
+  - name: env_name
+    user_facing: false
+    description: Opta Environment name
+    default: None
+  - name: layer_name
+    user_facing: false
+    description: Opta Layer name
+    default: None
+  - name: module_name
+    user_facing: false
+    description: Opta Module name
+    default: None
+  - name: domain
+    user_facing: true
+    validator: str(required=True)
+    description: The domain you want (you will also get the subdomains for your use)
+    default: null
+  - name: delegated
+    user_facing: true
+    validator: bool(required=False)
+    description: The  Set to true once the extra [dns setup is complete](/miscellaneous/ingress) and it will add the ssl certs.
+    default: false
+  - name: subdomains
+    user_facing: true
+    validator: list(str(), required=False)
+    description: A list of subdomains to also get ssl certs for.
+    default: []
+outputs:
+  - name: zone_id
+    export: true
+    description: The ID of the hosted zone created
+  - name: zone_name
+    export: true
+    description: The name of the hosted zone created
+  - name: name_servers
+    export: true
+    description: The name servers of your hosted zone (very important for the dns setup)
+  - name: domain
+    export: true
+    description: The domain again
+  - name: delegated
+    export: true
+    description: Passing the delegated field forward
+  - name: cert_self_link
+    export: true
+    description: Self link to the certificate if delegated
+output_providers: {}
+output_data: {}

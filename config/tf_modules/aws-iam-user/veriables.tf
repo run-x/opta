@@ -20,3 +20,7 @@ variable "extra_iam_policies" {
   type    = list(string)
   default = []
 }
+
+variable "links" {
+  default = []
+}

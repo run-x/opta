@@ -1,19 +1,19 @@
 environments:
-  - name: aws-staging
+  - name: aws-example
     path: "../environments/aws-env.yml"
     variables:
       max_nodes: 2
-  - name: gcp-staging
+  - name: gcp-example
     path: "../environments/gcp-env.yml"
     variables:
       max_nodes: 2
 name: grpc-service
 modules:
-  - name: app
+  - name: blah
     type: k8s-service
     image: moul/grpcbin
     min_containers: 2
     max_containers: "{vars.max_nodes}"
     port:
       grpc: 9000
-    public_uri: "subdomain2.{parent.domain}"
+    public_uri: "grpc-example.{parent.domain}"

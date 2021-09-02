@@ -1,0 +1,60 @@
+halt: false
+environment_module: false
+inputs:
+  - name: env_name
+    user_facing: false
+    description: Opta Environment name
+    default: None
+  - name: layer_name
+    user_facing: false
+    description: Opta Layer name
+    default: None
+  - name: module_name
+    user_facing: false
+    description: Opta Module name
+    default: None
+  - name: s3_log_bucket_name
+    user_facing: false
+    description: Name of the access log bucket
+    default: null
+  - name: bucket_name
+    user_facing: true
+    validator: str(required=True)
+    description: The name of the bucket to create.
+    default: null
+  - name: same_region_replication
+    user_facing: true
+    validator: bool(required=False)
+    description: Create a same-region bucket for replica storage (needed for compliance). Can be added later without destroying the resource.
+    default: false
+  - name: block_public
+    user_facing: true
+    validator: bool(required=False)
+    description: Block all public access.
+    default: true
+  - name: bucket_policy
+    user_facing: true
+    validator: any(required=False)
+    description: A custom s3 policy json/yaml to add.
+    default: null
+  - name: cors_rule
+    user_facing: bool
+    validator: include('cors', required=False)
+    description: A custom cors policy.
+    default: null
+extra_validators:
+  cors:
+    allowed_origins: list(str(), required=False)
+    allowed_headers: list(str(), required=False)
+    allowed_methods: list(str(), required=False)
+    expose_headers: list(str(), required=False)
+    max_age_seconds: int(required=False)
+outputs:
+  - name: bucket_id
+    export: true
+    description: The id of the S3 bucket
+  - name: bucket_arn
+    export: true
+    description: The arn of the S3 bucket
+output_providers: { }
+output_data: { }

@@ -7,17 +7,20 @@ from opta.module import Module
 from opta.resource import Resource
 
 REGISTRY = {
-    "modules": {
-        "fake-module": {
-            "location": "fake-module",
-            "inspect": {
-                "test_resource.test": {
-                    "name": "Test resource",
-                    "url": "https://console.aws.amazon.com/test/{test_value}?region={aws_region}",
-                    "desc": "This is a test resource",
-                }
-            },
-        }
+    "aws": {
+        "module_aliases": [],
+        "modules": {
+            "fake-module": {
+                "location": "fake-module",
+                "inspect": {
+                    "test_resource.test": {
+                        "name": "Test resource",
+                        "url": "https://console.aws.amazon.com/test/{test_value}?region={aws_region}",
+                        "desc": "This is a test resource",
+                    }
+                },
+            }
+        },
     }
 }
 
@@ -61,6 +64,7 @@ def test_inspect(mocker: MockFixture) -> None:
     mocker.patch("opta.module.Module._read_tf_module_config")
     mocked_layer = mocker.Mock()
     mocked_layer.name = ""
+    mocked_layer.cloud = "aws"
     fake_module = Module(
         data={"type": "fake-module", "name": "testmodule"}, layer=mocked_layer
     )

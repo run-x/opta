@@ -1,0 +1,50 @@
+halt: false
+environment_module: false
+inputs:
+  - name: env_name
+    user_facing: false
+    description: Opta Environment name
+    default: None
+  - name: layer_name
+    user_facing: false
+    description: Opta Layer name
+    default: None
+  - name: module_name
+    user_facing: false
+    description: Opta Module name
+    default: None
+  - name: instance_class
+    user_facing: true
+    validator: str(required=False)
+    description: This is the RDS instance type used for the Aurora cluster [instances](https://aws.amazon.com/rds/instance-types/).
+    default: db.t3.medium
+  - name: engine_version
+    user_facing: true
+    validator: str(required=False)
+    description: The version of the database to use.
+    default: "11.9"
+  - name: multi_az
+    user_facing: true
+    validator: bool(required=False)
+    description: Enable read-write replication across different availability zones on the same reason (doubles the cost, but needed for compliance). Can be added and updated at a later date without need to recreate.
+    default: false
+  - name: safety
+    user_facing: true
+    validator: bool(required=False)
+    description: Add deletion protection to stop accidental db deletions
+    default: false
+outputs:
+  - name: db_user
+    export: false
+    description: The database user
+  - name: db_password
+    export: false
+    description: The database password
+  - name: db_host
+    export: false
+    description: The database host
+  - name: db_name
+    export: false
+    description: The database ip
+output_providers: { }
+output_data: { }

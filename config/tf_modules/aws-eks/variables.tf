@@ -22,6 +22,10 @@ variable "layer_name" {
   type        = string
 }
 
+variable "enable_metrics" {
+  type = bool
+}
+
 variable "module_name" {
   description = "Module name"
   type        = string
@@ -29,7 +33,7 @@ variable "module_name" {
 
 variable "max_nodes" {
   type    = number
-  default = 15
+  default = 5
 }
 
 variable "min_nodes" {

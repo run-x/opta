@@ -1,0 +1,59 @@
+halt: true
+environment_module: true
+inputs:
+  - name: env_name
+    user_facing: false
+    description: Opta Environment name
+    default: None
+  - name: layer_name
+    user_facing: false
+    description: Opta Layer name
+    default: None
+  - name: module_name
+    user_facing: false
+    description: Opta Module name
+    default: None
+  - name: private_ipv4_cidr_block
+    user_facing: true
+    validator: str(required=False)
+    description: Cidr block for private subnet. Don't need to worry about AZs in GCP
+    default: "10.0.0.0/19"
+  - name: cluster_ipv4_cidr_block
+    user_facing: true
+    validator: str(required=False)
+    description: This is the cidr block reserved for pod ips in the GKE cluster.
+    default: "10.0.32.0/19"
+  - name: services_ipv4_cidr_block
+    user_facing: true
+    validator: str(required=False)
+    description: This is the cidr block reserved for service cluster ips in the GKE cluster.
+    default: "10.0.64.0/20"
+  - name: k8s_master_ipv4_cidr_block
+    user_facing: true
+    validator: str(required=False)
+    description: This is the cidr block reserved for the master/control plane in the GKE cluster.
+    default: "10.0.80.0/28"
+outputs:
+  - name: kms_account_key_id
+    export: true
+    description: The id of the [KMS](https://cloud.google.com/security-key-management) key (this is what handles encryption for redis, gke, etc...)
+  - name: kms_account_key_self_link
+    export: true
+    description: The self link of the default KMS key (sometimes things need the ID, sometimes the ARN, so we're giving both)
+  - name: vpc_id
+    export: true
+    description: The ID of the [VPC](https://cloud.google.com/vpc/docs/vpc) we created for this environment
+  - name: vpc_self_link
+    export: true
+    description: str
+  - name: private_subnet_id
+    export: true
+    description: The ID of the private [subnet](https://cloud.google.com/vpc/docs/vpc#subnet-ranges) we setup for your environment
+  - name: private_subnet_self_link
+    export: true
+    description: Self lin to the private subnet
+  - name: k8s_master_ipv4_cidr_block
+    export: true
+    description: This is the cidr block reserved for the master/control plane in the GKE cluster.
+output_providers: { }
+output_data: { }

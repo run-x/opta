@@ -5,7 +5,7 @@ environments:
       max_nodes: 2
 name: service-1
 modules:
-  - name: app
+  - name: resourcetest
     type: k8s-service
     image: kennethreitz/httpbin
     min_containers: 2

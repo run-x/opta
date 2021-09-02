@@ -13,6 +13,21 @@ variable "module_name" {
   type        = string
 }
 
+variable "private_key_file" {
+  type    = string
+  default = ""
+}
+
+variable "certificate_body_file" {
+  type    = string
+  default = ""
+}
+
+variable "certificate_chain_file" {
+  type    = string
+  default = ""
+}
+
 variable "private_key" {
   type = string
 }

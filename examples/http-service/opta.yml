@@ -1,17 +1,17 @@
 environments:
-  - name: aws-staging
+  - name: aws-example
     path: "../environments/aws-env.yml"
     variables:
       max_containers: 2
-  - name: gcp-staging
+  - name: gcp-example
     path: "../environments/gcp-env.yml"
     variables:
       max_containers: 2
-  - name: azure-staging
+  - name: azure-example
     path: "../environments/azure-env.yml"
     variables:
       max_containers: 2
-name: service-1
+name: http-service
 modules:
   - name: app
     type: k8s-service
@@ -24,14 +24,5 @@ modules:
       http: 80
     env_vars:
       A: B
-    public_uri: "subdomain1.{parent.domain}"
-    links:
-      - redis
-      - db
-    secrets:
-      - API_KEY
-      - SECRET_1
-  - name: db
-    type: postgres
-  - name: redis
-    type: redis
+    public_uri: "http-example.{parent.domain}"
+

@@ -36,6 +36,6 @@ resource "google_container_node_pool" "default" {
     }
   }
   lifecycle {
-    ignore_changes = [location]
+    ignore_changes = [location, initial_node_count]
   }
 }

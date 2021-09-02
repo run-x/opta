@@ -1,9 +1,0 @@
-environments: list(include('env'), required=False)
-name: str()
-modules: list(module())
----
-env:
-  name: str()
-  path: str()
-  variables: map(required=False)
-  vars: map(required=False)

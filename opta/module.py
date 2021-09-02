@@ -22,33 +22,33 @@ class Module:
         if "type" not in data:
             raise UserErrors("Module data must always have a type")
         self.type = data["type"]
-        if self.type not in REGISTRY["modules"]:
-            raise UserErrors(f"{self.type} is not a valid module type")
         self.aliased_type: Optional[str] = None
+        if self.type in REGISTRY[layer.cloud]["module_aliases"]:
+            self.aliased_type = REGISTRY[layer.cloud]["module_aliases"][self.type]
+            self.desc = REGISTRY[layer.cloud]["modules"][self.aliased_type].copy()
+        elif self.type in REGISTRY[layer.cloud]["modules"]:
+            self.desc = REGISTRY[layer.cloud]["modules"][self.type].copy()
+        else:
+            raise UserErrors(f"{self.type} is not a valid module type")
         self.layer_name = layer.name
-        self.desc = REGISTRY["modules"][self.type].copy()
-        if "alias" in self.desc:
-            cloud = layer.cloud
-            if cloud not in self.desc["alias"]:
-                raise UserErrors(
-                    f"Alias module type {self.type} currently does not support cloud {cloud}"
-                )
-            self.aliased_type = self.desc["alias"][cloud]
-            self.desc = REGISTRY["modules"][self.aliased_type]
         self.data: Dict[Any, Any] = data
         self.parent_layer = parent_layer
         self.name: str = data.get("name", self.type.replace("-", ""))
         if not Module.valid_name(self.name):
             raise UserErrors("Invalid module name, can only contain letters and numbers!")
-        self.halt = REGISTRY["modules"][self.aliased_type or self.type].get("halt", False)
-        self.module_dir_path = self.translate_location(self.desc["location"])
+        self.halt = REGISTRY[layer.cloud]["modules"][self.aliased_type or self.type].get(
+            "halt", False
+        )
+        self.module_dir_path = self.translate_location(
+            self.desc.get("terraform_module", self.aliased_type or self.type)
+        )
 
     def outputs(self) -> Iterable[str]:
         ret = []
-        if "outputs" in self.desc:
-            for k, v in self.desc["outputs"].items():
-                if "export" in v and v["export"]:
-                    ret.append(k)
+        for output in self.desc["outputs"]:
+            output_name = output["name"]
+            if output["export"]:
+                ret.append(output_name)
         return ret
 
     @staticmethod
@@ -65,26 +65,30 @@ class Module:
             "module": {self.name: {"source": self.module_dir_path}},
             "output": {},
         }
-        for k, v in self.desc["variables"].items():
-            if k in self.data:
-                module_blk["module"][self.name][k] = self.data[k]
-            elif v == "optional":
-                continue
-            elif k == "module_name":
-                module_blk["module"][self.name][k] = self.name
-            elif k == "layer_name":
-                module_blk["module"][self.name][k] = self.layer_name
+        for input in self.desc["inputs"]:
+            input_name = input["name"]
+            if input_name in self.data:
+                module_blk["module"][self.name][input_name] = self.data[input_name]
+            elif input_name == "module_name":
+                module_blk["module"][self.name][input_name] = self.name
+            elif input_name == "layer_name":
+                module_blk["module"][self.name][input_name] = self.layer_name
+            elif not input["required"]:
+                module_blk["module"][self.name][input_name] = input["default"]
             else:
-                raise Exception(f"Unable to hydrate {k}")
-
-        if "outputs" in self.desc:
-            for k, v in self.desc["outputs"].items():
-                if "export" in v and v["export"]:
-                    entry: Dict[Any, Any] = {"value": f"${{{{module.{self.name}.{k} }}}}"}
-                    if v.get("sensitive", False):
-                        entry["sensitive"] = True
-                    output_key = k if output_prefix is None else f"{output_prefix}_{k}"
-                    module_blk["output"].update({output_key: entry})
+                raise Exception(f"Unable to hydrate {input_name}")
+        for output in self.desc["outputs"]:
+            output_name = output["name"]
+            if output["export"]:
+                entry: Dict[Any, Any] = {
+                    "value": f"${{{{module.{self.name}.{output_name} }}}}"
+                }
+                output_key = (
+                    output_name
+                    if output_prefix is None
+                    else f"{output_prefix}_{output_name}"
+                )
+                module_blk["output"].update({output_key: entry})
         if depends_on is not None:
             module_blk["module"][self.name]["depends_on"] = depends_on
 

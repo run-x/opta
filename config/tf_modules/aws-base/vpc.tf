@@ -19,10 +19,15 @@ resource "aws_flow_log" "vpc" {
   vpc_id          = aws_vpc.vpc.id
 }
 
+resource "random_id" "vpc_flow_log_suffix" {
+  byte_length = 8
+}
+
 resource "aws_cloudwatch_log_group" "vpc_flow_log" {
-  name              = "opta-${var.env_name}-vpc-flow"
+  name              = "opta-${var.env_name}-vpc-flow-${random_id.vpc_flow_log_suffix.hex}"
   kms_key_id        = aws_kms_key.key.arn
   retention_in_days = 90
+  lifecycle { ignore_changes = [name] }
 }
 
 resource "aws_iam_role" "vpc_flow_log" {
