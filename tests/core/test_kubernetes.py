@@ -134,8 +134,8 @@ class TestKubernetes:
         mocked_watch_call = mocker.patch(
             "opta.core.kubernetes.Watch", return_value=mocked_watch
         )
-        mocked_is_past_datetime_utc = mocker.patch(
-            "opta.core.kubernetes.is_past_datetime_utc", return_value=False
+        mocked_compare_datetime_thread = mocker.patch(
+            "opta.core.kubernetes.compare_datetime", side_effect=[1, 1]
         )
         layer = mocker.Mock(spec=Layer)
         layer.name = "mocked_layer"
@@ -161,7 +161,7 @@ class TestKubernetes:
         mocked_watch_call.assert_called_once_with()
         mocked_core_v1_api_call.assert_called_once_with()
         mocked_load_kube_config.assert_called_once_with()
-        mocked_is_past_datetime_utc.assert_called()
+        mocked_compare_datetime_thread.assert_called()
         thread_1.start.assert_called_once_with()
         thread_2.start.assert_called_once_with()
         mocked_thread.assert_has_calls(
@@ -176,6 +176,61 @@ class TestKubernetes:
                     args=("mocked_layer", mocked_pod_2, 3, 3),
                     daemon=True,
                 ),
+            ]
+        )
+
+    def test_tail_module_log_mute_old_pod_logs(self, mocker: MockFixture) -> None:
+        mocked_load_kube_config = mocker.patch("opta.core.kubernetes.load_kube_config")
+        mocked_core_v1_api = mocker.Mock(spec=CoreV1Api)
+        mocked_core_v1_api_call = mocker.patch(
+            "opta.core.kubernetes.CoreV1Api", return_value=mocked_core_v1_api
+        )
+        mocked_watch = mocker.Mock(spec=Watch)
+        mocked_watch_call = mocker.patch(
+            "opta.core.kubernetes.Watch", return_value=mocked_watch
+        )
+        mocked_compare_datetime_thread = mocker.patch(
+            "opta.core.kubernetes.compare_datetime", side_effect=[1, -1]
+        )
+        layer = mocker.Mock(spec=Layer)
+        layer.name = "mocked_layer"
+        layer.parent = None
+        layer.providers = {"aws": {"region": "us-east-1", "account_id": "111111111111"}}
+        mocked_pod_1 = mocker.Mock(spec=V1Pod)
+        mocked_pod_1.metadata = mocker.Mock()
+        mocked_pod_1.metadata.name = "pod1"
+        mocked_event_1 = {"object": mocked_pod_1}
+        thread_1 = mocker.Mock()
+        mocked_pod_2 = mocker.Mock(spec=V1Pod)
+        mocked_pod_2.metadata = mocker.Mock()
+        mocked_pod_2.metadata.name = "pod2"
+        mocked_event_2 = {"object": mocked_pod_2}
+        thread_2 = mocker.Mock()
+        mocked_watch.stream.return_value = [mocked_event_1, mocked_event_2]
+
+        mocked_thread = mocker.patch(
+            "opta.core.kubernetes.Thread", side_effect=[thread_1, thread_2]
+        )
+
+        tail_module_log(layer, "mocked_module_name", seconds=3, start_color_idx=2)
+        mocked_watch_call.assert_called_once_with()
+        mocked_core_v1_api_call.assert_called_once_with()
+        mocked_load_kube_config.assert_called_once_with()
+        thread_1.start.assert_called_once_with()
+        mocked_compare_datetime_thread.assert_called()
+        """
+        IMPORTANT:
+        POD#1 (New Pod) (Logs tailed)
+        POD#2 (Old Pod) (Logs Muted)
+        Hence the tail_pod_log method is only called for POD#1 and not POD#2
+        """
+        mocked_thread.assert_has_calls(
+            [
+                mocker.call(
+                    target=tail_pod_log,
+                    args=("mocked_layer", mocked_pod_1, 2, 3),
+                    daemon=True,
+                )
             ]
         )
 
