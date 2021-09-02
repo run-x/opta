@@ -1,7 +1,6 @@
 import logging
 import os
 import sys
-from datetime import datetime
 from logging import Logger
 from logging.handlers import QueueHandler, QueueListener
 from queue import Queue
@@ -173,21 +172,3 @@ def check_opta_file_exists(config_path: str) -> Literal[True]:
             )
         )
     return True
-
-
-def compare_datetime(date_time1: datetime, date_time2: datetime) -> int:
-    """
-    Compares date_time2 w.r.t. date_time1.
-    Note: Replacing the TZ Info of date_time1 with TZ Info of date_time2.
-
-    Returns:
-        int:    0:  when date_time1 is equal to date_time2
-                1:  when date_time1 is less than date_time2
-                -1: when date_time1 is greater than date_time2
-    """
-    date_time1.replace(tzinfo=date_time2.tzinfo)
-    if date_time1 == date_time2:
-        return 0
-    if date_time1 < date_time2:
-        return 1
-    return -1

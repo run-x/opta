@@ -125,6 +125,7 @@ class TestKubernetes:
         )
 
     def test_tail_module_log(self, mocker: MockFixture) -> None:
+        base_start_time_timestamp = datetime.datetime.utcnow().timestamp()
         mocked_load_kube_config = mocker.patch("opta.core.kubernetes.load_kube_config")
         mocked_core_v1_api = mocker.Mock(spec=CoreV1Api)
         mocked_core_v1_api_call = mocker.patch(
@@ -134,9 +135,6 @@ class TestKubernetes:
         mocked_watch_call = mocker.patch(
             "opta.core.kubernetes.Watch", return_value=mocked_watch
         )
-        mocked_compare_datetime_thread = mocker.patch(
-            "opta.core.kubernetes.compare_datetime", side_effect=[1, 1]
-        )
         layer = mocker.Mock(spec=Layer)
         layer.name = "mocked_layer"
         layer.parent = None
@@ -144,11 +142,17 @@ class TestKubernetes:
         mocked_pod_1 = mocker.Mock(spec=V1Pod)
         mocked_pod_1.metadata = mocker.Mock()
         mocked_pod_1.metadata.name = "pod1"
+        mocked_pod_1.metadata.creation_timestamp = datetime.datetime.fromtimestamp(
+            base_start_time_timestamp + 10000
+        ).replace(tzinfo=pytz.UTC)
         mocked_event_1 = {"object": mocked_pod_1}
         thread_1 = mocker.Mock()
         mocked_pod_2 = mocker.Mock(spec=V1Pod)
         mocked_pod_2.metadata = mocker.Mock()
         mocked_pod_2.metadata.name = "pod2"
+        mocked_pod_2.metadata.creation_timestamp = datetime.datetime.fromtimestamp(
+            base_start_time_timestamp + 10000
+        ).replace(tzinfo=pytz.UTC)
         mocked_event_2 = {"object": mocked_pod_2}
         thread_2 = mocker.Mock()
         mocked_watch.stream.return_value = [mocked_event_1, mocked_event_2]
@@ -161,7 +165,6 @@ class TestKubernetes:
         mocked_watch_call.assert_called_once_with()
         mocked_core_v1_api_call.assert_called_once_with()
         mocked_load_kube_config.assert_called_once_with()
-        mocked_compare_datetime_thread.assert_called()
         thread_1.start.assert_called_once_with()
         thread_2.start.assert_called_once_with()
         mocked_thread.assert_has_calls(
@@ -180,6 +183,7 @@ class TestKubernetes:
         )
 
     def test_tail_module_log_mute_old_pod_logs(self, mocker: MockFixture) -> None:
+        base_start_time_timestamp = datetime.datetime.utcnow().timestamp()
         mocked_load_kube_config = mocker.patch("opta.core.kubernetes.load_kube_config")
         mocked_core_v1_api = mocker.Mock(spec=CoreV1Api)
         mocked_core_v1_api_call = mocker.patch(
@@ -189,9 +193,6 @@ class TestKubernetes:
         mocked_watch_call = mocker.patch(
             "opta.core.kubernetes.Watch", return_value=mocked_watch
         )
-        mocked_compare_datetime_thread = mocker.patch(
-            "opta.core.kubernetes.compare_datetime", side_effect=[1, -1]
-        )
         layer = mocker.Mock(spec=Layer)
         layer.name = "mocked_layer"
         layer.parent = None
@@ -199,11 +200,17 @@ class TestKubernetes:
         mocked_pod_1 = mocker.Mock(spec=V1Pod)
         mocked_pod_1.metadata = mocker.Mock()
         mocked_pod_1.metadata.name = "pod1"
+        mocked_pod_1.metadata.creation_timestamp = datetime.datetime.fromtimestamp(
+            base_start_time_timestamp + 10000
+        ).replace(tzinfo=pytz.UTC)
         mocked_event_1 = {"object": mocked_pod_1}
         thread_1 = mocker.Mock()
         mocked_pod_2 = mocker.Mock(spec=V1Pod)
         mocked_pod_2.metadata = mocker.Mock()
         mocked_pod_2.metadata.name = "pod2"
+        mocked_pod_2.metadata.creation_timestamp = datetime.datetime.fromtimestamp(
+            base_start_time_timestamp - 10000
+        ).replace(tzinfo=pytz.UTC)
         mocked_event_2 = {"object": mocked_pod_2}
         thread_2 = mocker.Mock()
         mocked_watch.stream.return_value = [mocked_event_1, mocked_event_2]
@@ -217,7 +224,6 @@ class TestKubernetes:
         mocked_core_v1_api_call.assert_called_once_with()
         mocked_load_kube_config.assert_called_once_with()
         thread_1.start.assert_called_once_with()
-        mocked_compare_datetime_thread.assert_called()
         """
         IMPORTANT:
         POD#1 (New Pod) (Logs tailed)
