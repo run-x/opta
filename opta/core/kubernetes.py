@@ -343,6 +343,8 @@ def tail_module_log(
     v1 = CoreV1Api()
     watch = Watch()
     count = 0
+    """Using the UTC Time stamp as the Kubernetes uses the UTC Timestamps."""
+    start_time = datetime.datetime.utcnow().replace(tzinfo=pytz.UTC)
     for event in watch.stream(
         v1.list_namespaced_pod,
         namespace=layer.name,
@@ -350,6 +352,9 @@ def tail_module_log(
     ):
         pod: V1Pod = event["object"]
         color_idx = count % (256 - start_color_idx) + start_color_idx
+        if pod.metadata.creation_timestamp < start_time:
+            continue
+
         if pod.metadata.name not in current_pods_monitored:
             current_pods_monitored.add(pod.metadata.name)
             new_thread = Thread(
