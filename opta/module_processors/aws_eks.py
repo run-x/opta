@@ -45,6 +45,7 @@ class AwsEksProcessor(ModuleProcessor):
         vpc_id = vpc["VpcId"]
         dangling_enis: List[NetworkInterfaceTypeDef] = []
         next_token = None
+        logger.info("Seeking dangling enis from k8s cluster just destroyed")
         while True:
             if next_token is None:
                 describe_enis = client.describe_network_interfaces(
@@ -55,15 +56,21 @@ class AwsEksProcessor(ModuleProcessor):
                     Filters=[{"Name": "vpc-id", "Values": [vpc_id]}], NextToken=next_token
                 )
             for eni in describe_enis["NetworkInterfaces"]:
-                if eni["Description"] == f"Amazon EKS opta-{self.layer.name}":
+                if eni["Description"] == f"Amazon EKS opta-{self.layer.name}" or (
+                    eni["Description"].startswith("aws-K8S")
+                    and eni["Status"] == "available"
+                ):
                     logger.info(
-                        "Identified dangling EKS network interface, will delete now."
+                        f"Identified dangling EKS network interface {eni['NetworkInterfaceId']}"
                     )
                     dangling_enis.append(eni)
             next_token = describe_enis.get("NextToken", None)
             if next_token is None:
                 break
         for eni in dangling_enis:
+            logger.info(
+                f"Now deleting dangling network interface {eni['NetworkInterfaceId']}"
+            )
             client.delete_network_interface(NetworkInterfaceId=eni["NetworkInterfaceId"])
 
     def post_hook(self, module_idx: int, exception: Optional[Exception]) -> None:
