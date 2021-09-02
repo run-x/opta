@@ -205,7 +205,7 @@ class AWS:
 
         # Delete the bucket itself
         logger.info(
-            "Sleeping 10 seconds for eventual consistency in deleting all bucker resources"
+            "Sleeping 10 seconds for eventual consistency in deleting all bucket resources"
         )
         sleep(10)
         client = boto3.client("s3")
