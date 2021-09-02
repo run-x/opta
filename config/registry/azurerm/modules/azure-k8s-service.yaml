@@ -129,8 +129,8 @@ extra_validators:
     tcp: int(required=False)
     grpc: int(required=False)
 outputs:
-  - name: str
-    export: bool # (show to users)
-    description: str
+  - name: docker_repo_url
+    export: true
+    description: Url to the docker repository created for images to be deployed in this env
 output_providers: { }
 output_data: { }
