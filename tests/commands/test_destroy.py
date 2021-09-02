@@ -86,3 +86,21 @@ def test_destroy_service(mocker: MockFixture) -> None:
 
     assert len(args) == 1
     assert args[0].name == "dummy-config-1"
+
+
+def test_destroy_service_wrong_env(mocker: MockFixture) -> None:
+    mocker.patch("opta.commands.destroy.amplitude_client.send_event")
+    mocker.patch("opta.commands.destroy.Terraform.init")
+    mocker.patch("opta.commands.destroy.Terraform.destroy_all")
+    mocker.patch("opta.commands.destroy.Terraform.download_state", return_value=True)
+    mocker.patch("opta.commands.destroy.Layer.verify_cloud_credentials")
+
+    mocker.patch(
+        "opta.commands.destroy._aws_get_configs", return_value=[],
+    )
+
+    runner = CliRunner()
+    result = runner.invoke(destroy, ["--config", FAKE_SERVICE_CONFIG, "--env", "dummy"])
+
+    print(result.exception)
+    assert result.exit_code == 1
