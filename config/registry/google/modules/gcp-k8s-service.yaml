@@ -118,7 +118,7 @@ inputs:
     validator: any(str(), list(), required=False)
     description: |
       The full domain to expose your app under as well as path prefix. Must be the full parent domain or a subdomain referencing the parent as such: "dummy.{parent[domain]}/my/path/prefix"
-    default: null
+    default: []
   - name: links
     user_facing: true
     validator: list(any(str(), map()), required=False)

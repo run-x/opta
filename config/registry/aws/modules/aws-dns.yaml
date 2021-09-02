@@ -31,12 +31,15 @@ inputs:
   - name: cert_chain_included
     user_facing: false
     description: Deprecated
+    default: false
   - name: force_update
     user_facing: false
     description: Deprecated
+    default: false
   - name: external_cert_arn
     user_facing: false
     description: Deprecated
+    default: ""
 outputs:
   - name: zone_id
     export: true
