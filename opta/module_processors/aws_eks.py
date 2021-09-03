@@ -1,8 +1,10 @@
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 import boto3
 from botocore.config import Config
 from mypy_boto3_autoscaling import AutoScalingClient
+from mypy_boto3_ec2 import EC2Client
+from mypy_boto3_ec2.type_defs import NetworkInterfaceTypeDef
 
 from opta.exceptions import UserErrors
 from opta.module_processors.base import ModuleProcessor
@@ -20,6 +22,56 @@ class AwsEksProcessor(ModuleProcessor):
                 f"The module {module.name} was expected to be of type aws eks"
             )
         super(AwsEksProcessor, self).__init__(module, layer)
+
+    def post_delete(self, module_idx: int) -> None:
+        providers = self.layer.gen_providers(0)
+        region = providers["provider"]["aws"]["region"]
+        client: EC2Client = boto3.client("ec2", config=Config(region_name=region))
+        vpcs = client.describe_vpcs(
+            Filters=[
+                {"Name": "tag:layer", "Values": [self.layer.name]},
+                {"Name": "tag:opta", "Values": ["true"]},
+            ]
+        )["Vpcs"]
+        if len(vpcs) == 0:
+            logger.debug(f"Opta vpc for layer {self.layer.name} not found")
+            return
+        elif len(vpcs) > 1:
+            logger.debug(
+                f"Weird, found multiple vpcs for layer {self.layer.name}: {[x['VpcId'] for x in vpcs]}"
+            )
+            return
+        vpc = vpcs[0]
+        vpc_id = vpc["VpcId"]
+        dangling_enis: List[NetworkInterfaceTypeDef] = []
+        next_token = None
+        logger.info("Seeking dangling enis from k8s cluster just destroyed")
+        while True:
+            if next_token is None:
+                describe_enis = client.describe_network_interfaces(
+                    Filters=[{"Name": "vpc-id", "Values": [vpc_id]}]
+                )
+            else:
+                describe_enis = client.describe_network_interfaces(  # type: ignore
+                    Filters=[{"Name": "vpc-id", "Values": [vpc_id]}], NextToken=next_token
+                )
+            for eni in describe_enis["NetworkInterfaces"]:
+                if eni["Description"] == f"Amazon EKS opta-{self.layer.name}" or (
+                    eni["Description"].startswith("aws-K8S")
+                    and eni["Status"] == "available"
+                ):
+                    logger.info(
+                        f"Identified dangling EKS network interface {eni['NetworkInterfaceId']}"
+                    )
+                    dangling_enis.append(eni)
+            next_token = describe_enis.get("NextToken", None)
+            if next_token is None:
+                break
+        for eni in dangling_enis:
+            logger.info(
+                f"Now deleting dangling network interface {eni['NetworkInterfaceId']}"
+            )
+            client.delete_network_interface(NetworkInterfaceId=eni["NetworkInterfaceId"])
 
     def post_hook(self, module_idx: int, exception: Optional[Exception]) -> None:
         if exception is not None or not self.module.data.get("enable_metrics", False):

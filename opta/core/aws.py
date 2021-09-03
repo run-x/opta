@@ -96,6 +96,9 @@ class AWS:
         if resp["ResponseMetadata"]["HTTPStatusCode"] != 204:
             raise Exception(f"Failed to delete opta config in {bucket}/{config_path}.")
 
+        for version in self.get_all_versions(bucket, config_path):
+            s3_client.delete_object(Bucket=bucket, Key=config_path, VersionId=version)
+
         logger.info("Deleted opta config from s3")
 
     def delete_remote_state(self) -> None:
@@ -118,7 +121,20 @@ class AWS:
             raise Exception(
                 f"Failed to delete opta tf state in {bucket}/{self.layer.name}."
             )
+
+        for version in self.get_all_versions(bucket, self.layer.name):
+            s3_client.delete_object(Bucket=bucket, Key=self.layer.name, VersionId=version)
         logger.info(f"Deleted opta tf state for {self.layer.name}")
+
+    @staticmethod
+    def get_all_versions(bucket: str, filename: str) -> List[str]:
+        s3 = boto3.client("s3")
+        results = []
+        for k in ["Versions", "DeleteMarkers"]:
+            response = s3.list_object_versions(Bucket=bucket).get(k, [])  # type: ignore
+            to_delete = [r["VersionId"] for r in response if r["Key"] == filename]  # type: ignore
+            results.extend(to_delete)
+        return results
 
     @staticmethod
     def prepare_read_buckets_iam_statements(bucket_names: List[str]) -> dict:
@@ -204,6 +220,10 @@ class AWS:
         bucket.objects.all().delete()
 
         # Delete the bucket itself
+        logger.info(
+            "Sleeping 10 seconds for eventual consistency in deleting all bucket resources"
+        )
+        sleep(10)
         client = boto3.client("s3")
         client.delete_bucket(Bucket=bucket_name)
         print(f"Bucket ({bucket_name}) successfully deleted.")

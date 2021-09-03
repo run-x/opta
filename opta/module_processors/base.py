@@ -33,6 +33,9 @@ class ModuleProcessor:
     def post_hook(self, module_idx: int, exception: Optional[Exception]) -> None:
         pass
 
+    def post_delete(self, module_idx: int) -> None:
+        pass
+
 
 class DNSModuleProcessor(ModuleProcessor):
     def validate_dns(self) -> None:
