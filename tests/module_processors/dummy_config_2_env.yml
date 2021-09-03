@@ -1,0 +1,89 @@
+environments:
+  - path: "./dummy_config_parent.yaml"
+    name: "dummy-env"
+    variables: {}
+  - path: "./dummy_config_parent.yaml"
+    name: "dummy-env-2"
+    variables: { }
+name: dummy-config-1
+modules:
+  - name: database
+    type: aws-postgres
+  - name: redis
+    type: aws-redis
+  - name: docdb
+    type: aws-documentdb
+  - name: bucket1
+    type: aws-s3
+    bucket_name: "bucket1"
+  - name: bucket2
+    type: aws-s3
+    bucket_name: "bucket2"
+  - name: bucket3
+    type: aws-s3
+    bucket_name: "bucket3"
+  - name: app
+    type: k8s-service
+    image: kennethreitz/httpbin
+    port:
+      http: 80
+    env_vars:
+      A: B
+    secrets:
+      - BALONEY
+    links:
+      - database
+      - redis
+      - docdb
+      - database2:
+          - db_user: DBUSER2
+            db_host: DBHOST2
+            db_name: DBNAME2
+            db_password: BLAH
+      - redis2:
+          - cache_host: CACHEHOST2
+            cache_auth_token: CACHEAUTH2
+      - docdb2:
+          - db_user: DOCDBUSER2
+            db_host: DOCDBHOST2
+            db_password: DOCDBPASSWORD2
+      - bucket1:
+          - read
+      - bucket2:
+          - write
+      - bucket3
+      - queue
+      - topic
+  - name: deployeruser
+    type: aws-iam-user
+    extra_iam_policies:
+      - "arn:aws:iam::aws:policy/AdministratorAccess"
+    links:
+      - bucket1: ["write"]
+      - bucket2: ["read"]
+      - queue
+      - topic
+  - name: deployerrole
+    type: aws-iam-role
+    extra_iam_policies:
+      - "arn:aws:iam::aws:policy/AdministratorAccess"
+    allowed_iams:
+      - "${{module.deployeruser.user_arn}}"
+    allowed_k8s_services:
+      - namespace: "*"
+        service_name: "*"
+    links:
+      - bucket1: ["write"]
+      - bucket2: ["read"]
+      - queue
+      - topic
+  - name: queue
+    type: aws-sqs
+  - name: topic
+    type: aws-sns
+  - name: database2
+    type: postgres
+  - name: redis2
+    type: redis
+  - name: docdb2
+    type: aws-documentdb
