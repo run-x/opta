@@ -16,6 +16,12 @@ FAKE_SERVICE_CONFIG = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), "module_processors", "dummy_config1.yaml",
 )
 
+FAKE_SERVICE_CONFIG_MULTIPLE_ENV = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)),
+    "module_processors",
+    "dummy_config_2_env.yml",
+)
+
 
 def test_destroy_env_with_children(mocker: MockFixture) -> None:
     mocker.patch("opta.commands.destroy.amplitude_client.send_event")
@@ -86,3 +92,43 @@ def test_destroy_service(mocker: MockFixture) -> None:
 
     assert len(args) == 1
     assert args[0].name == "dummy-config-1"
+
+
+def test_destroy_service_single_env_wrong_input(mocker: MockFixture) -> None:
+    mocker.patch("opta.commands.destroy.amplitude_client.send_event")
+    mocker.patch("opta.commands.destroy.Terraform.init")
+    mocker.patch("opta.commands.destroy.Terraform.destroy_all")
+    mocker.patch("opta.commands.destroy.Terraform.download_state", return_value=True)
+    mocker.patch("opta.commands.destroy.Layer.verify_cloud_credentials")
+
+    mocker.patch(
+        "opta.commands.destroy._aws_get_configs", return_value=[],
+    )
+
+    runner = CliRunner()
+    """Actual ENV present in the Service YML is dummy-env"""
+    result = runner.invoke(destroy, ["--config", FAKE_SERVICE_CONFIG, "--env", "dummy"])
+
+    print(result.exception)
+    assert result.exit_code == 1
+
+
+def test_destroy_service_multiple_env_wrong_input(mocker: MockFixture) -> None:
+    mocker.patch("opta.commands.destroy.amplitude_client.send_event")
+    mocker.patch("opta.commands.destroy.Terraform.init")
+    mocker.patch("opta.commands.destroy.Terraform.destroy_all")
+    mocker.patch("opta.commands.destroy.Terraform.download_state", return_value=True)
+    mocker.patch("opta.commands.destroy.Layer.verify_cloud_credentials")
+
+    mocker.patch(
+        "opta.commands.destroy._aws_get_configs", return_value=[],
+    )
+
+    runner = CliRunner()
+    """Actual ENV present in the Service YML are (dummy-env, dummy-env-2)"""
+    result = runner.invoke(
+        destroy, ["--config", FAKE_SERVICE_CONFIG_MULTIPLE_ENV, "--env", "dummy"]
+    )
+
+    print(result.exception)
+    assert result.exit_code == 1

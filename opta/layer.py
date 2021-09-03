@@ -11,6 +11,7 @@ from types import SimpleNamespace
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, TypedDict
 
 import boto3
+import click
 import git
 import google.auth.transport.requests
 from azure.core.exceptions import ClientAuthenticationError
@@ -220,14 +221,22 @@ class Layer:
                     )
                 potential_envs[env_name] = (current_parent, env_meta)
 
-            if len(potential_envs) > 1 and env not in potential_envs:
+            if env is None:
+                if len(potential_envs) == 1:
+                    env = list(potential_envs.keys())[0]
+                else:
+                    """This is a repeatable prompt, which will not disappear until a valid choice is provided or SIGABRT
+                    is given. """
+                    env = click.prompt(
+                        "Choose an Environment for the Given set of choices",
+                        type=click.Choice(potential_envs.keys()),
+                    )
+            elif env not in potential_envs:
                 raise UserErrors(
                     f"Invalid --env flag, valid ones are {list(potential_envs.keys())}"
                 )
-            if env is None:
-                current_parent, env_meta = list(potential_envs.values())[0]
-            else:
-                current_parent, env_meta = potential_envs[env]
+
+            current_parent, env_meta = potential_envs[env]
             current_variables = env_meta.get("variables", {})
             current_variables = deep_merge(current_variables, env_meta.get("vars", {}))
             return cls(
