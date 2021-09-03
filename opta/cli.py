@@ -24,6 +24,7 @@ from opta.commands.shell import shell
 from opta.commands.validate import validate
 from opta.commands.version import version
 from opta.exceptions import UserErrors
+from opta.one_time import one_time
 from opta.upgrade import check_version_upgrade
 from opta.utils import dd_handler, dd_listener, logger
 
@@ -78,6 +79,7 @@ if __name__ == "__main__":
         # after the command.
         # However, we should still clean them up before the next command, or
         # else it may interfere with it.
+        one_time()
         cleanup_files()
         cli()
     except CalledProcessError as e:
@@ -86,9 +88,15 @@ if __name__ == "__main__":
             logger.error(e.stderr.decode("utf-8"))
         sys.exit(1)
     except UserErrors as e:
+        logger.info(
+            "If you need more help please reach out to the contributors in our slack channel at: slack.opta.dev"
+        )
         logger.error(e)
         sys.exit(1)
     except Exception as e:
+        logger.info(
+            "If you need more help please reach out to the contributors in our slack channel at: slack.opta.dev"
+        )
         logger.exception(e)
         sys.exit(1)
     finally:
