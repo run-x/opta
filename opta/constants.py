@@ -38,8 +38,6 @@ TF_PLAN_PATH = "tf.plan"
 MAX_TERRAFORM_VERSION = "1.1.0"
 MIN_TERRAFORM_VERSION = "0.15.0"
 
-ONE_TIME_LAUNCH = "FIRST_TIME_LAUNCH"
-
 CI = "CI"
 
 # List of chars to escape in regexes

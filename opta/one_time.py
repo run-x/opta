@@ -2,11 +2,11 @@ import os
 import sys
 from pathlib import Path
 
-from opta.constants import CI, ONE_TIME_LAUNCH, one_time_run
+from opta.constants import CI, one_time_run
 
 
 def one_time() -> None:
-    if os.environ.get(CI) is not None or os.environ.get(ONE_TIME_LAUNCH):
+    if os.environ.get(CI) is not None:
         return
 
     if Path(one_time_run).is_file():
@@ -19,10 +19,5 @@ def one_time() -> None:
 
     print(
         "\nHi there, thanks for Using Opta.\nWe hope you have a great experience using Opta."
+        "\nPlease reach out to us on slack.runx.dev for any queries."
     )
-
-    slack_prompt()
-
-
-def slack_prompt() -> None:
-    print("\nPlease reach out to us on slack.runx.dev for any queries.")
