@@ -46,12 +46,6 @@ variable "tag" {
   default     = null
 }
 
-variable "digest" {
-  description = "Digest of image to be deployed"
-  type        = string
-  default     = null
-}
-
 variable "min_containers" {
   description = "Min value for HPA autoscaling"
   type        = string

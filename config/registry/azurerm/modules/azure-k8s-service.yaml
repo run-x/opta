@@ -21,10 +21,6 @@ inputs: # (what users see)
     user_facing: false
     description: "Tag of image to be deployed"
     default: null
-  - name: digest
-    user_facing: false
-    description: "Digest of image to be deployed"
-    default: null
   - name: link_secrets
     user_facing: false
     description: "Secrets from links"

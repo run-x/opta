@@ -4,7 +4,7 @@ import click
 
 from opta.amplitude import amplitude_client
 from opta.commands.apply import _apply
-from opta.commands.push import _push, is_service_config
+from opta.commands.push import _push, get_push_tag, is_service_config
 from opta.core.terraform import Terraform
 from opta.exceptions import MissingState, UserErrors
 from opta.layer import Layer
@@ -71,7 +71,8 @@ def deploy(
             auto_approve=auto_approve,
             stdout_logs=False,
         )
-    image_digest, image_tag = _push(image=image, config=config, env=env, tag=tag)
+    _push(image=image, config=config, env=env, tag=tag)
+    image_tag = get_push_tag(image, tag)
     _apply(
         config=config,
         env=env,
@@ -80,5 +81,4 @@ def deploy(
         image_tag=image_tag,
         test=False,
         auto_approve=auto_approve,
-        image_digest=image_digest,
     )

@@ -56,7 +56,7 @@ boto3-stubs = {version = ">=1.17.44.0,<1.18", extras = ["essential", "ssm", "rou
 pyOpenSSL = ">=20.0.1,<20.1"
 semver = "~=2.13.0"
 dnspython = "2.1.0"
-docker = "5.0.0"
+
 [requires]
 python_version = "3.8"
 

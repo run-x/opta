@@ -4,7 +4,6 @@ from typing import Optional, Tuple
 import boto3
 import click
 from botocore.config import Config
-from docker import from_env
 
 from opta.amplitude import amplitude_client
 from opta.core.gcp import GCP
@@ -23,22 +22,6 @@ def get_push_tag(local_image: str, tag_override: Optional[str]) -> str:
         )
     local_image_tag = local_image.split(":")[1]
     return tag_override or local_image_tag
-
-
-def get_image_digest(registry_url: str, image_tag: str) -> str:
-    docker_client = from_env()
-    current_image = docker_client.images.get(f"{registry_url}:{image_tag}")
-    current_digest: str
-    for current_digest in current_image.attrs["RepoDigests"]:
-        if current_digest.startswith(registry_url):
-            return current_digest.split("@")[1]
-
-    raise UserErrors(
-        "\n"
-        "|------------------------------ERROR------------------------------|\n"
-        "| Unable to find the Digest for the Image Tag provided.           |\n"
-        "|------------------------------ERROR------------------------------|"
-    )
 
 
 def get_registry_url(layer: Layer) -> str:
@@ -110,7 +93,7 @@ def push_to_docker(
     local_image: str,
     registry_url: str,
     image_tag_override: Optional[str],
-) -> Tuple[str, str]:
+) -> None:
     image_tag = get_push_tag(local_image, image_tag_override)
     remote_image_name = f"{registry_url}:{image_tag}"
     nice_run(
@@ -120,7 +103,6 @@ def push_to_docker(
     )
     nice_run(["docker", "tag", local_image, remote_image_name], check=True)
     nice_run(["docker", "push", remote_image_name], check=True)
-    return get_image_digest(registry_url, image_tag), image_tag
 
 
 # Check if the config file is for a service or environment opta layer.
@@ -163,9 +145,7 @@ def push(image: str, config: str, env: Optional[str], tag: Optional[str]) -> Non
     _push(image, config, env, tag)
 
 
-def _push(
-    image: str, config: str, env: Optional[str], tag: Optional[str]
-) -> Tuple[str, str]:
+def _push(image: str, config: str, env: Optional[str], tag: Optional[str]) -> None:
     if not is_tool("docker"):
         raise Exception("Please install docker on your machine")
     layer = Layer.load_from_yaml(config, env)
@@ -180,4 +160,4 @@ def _push(
         username, password = get_acr_auth_info(layer)
     else:
         raise Exception(f"No support for pushing image to provider {layer.cloud}")
-    return push_to_docker(username, password, image, registry_url, tag)
+    push_to_docker(username, password, image, registry_url, tag)
