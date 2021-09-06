@@ -15,7 +15,7 @@ resource "helm_release" "k8s-service" {
       deployment_timestamp : timestamp()
       autoscaling : {
         minReplicas : var.min_containers,
-        maxReplicas : var.min_containers,
+        maxReplicas : var.max_containers,
         targetCPUUtilizationPercentage : var.autoscaling_target_cpu_percentage
         targetMemoryUtilizationPercentage : var.autoscaling_target_mem_percentage
       },
