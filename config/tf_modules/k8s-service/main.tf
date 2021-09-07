@@ -28,7 +28,7 @@ resource "helm_release" "k8s-service" {
         cpu : "${var.resource_request["cpu"]}m"
         memory : "${var.resource_request["memory"]}Mi"
       },
-      deployPods : (var.image != "AUTO") || (var.tag != null),
+      deployPods : (var.image != "AUTO") || (var.tag != null) || (var.digest != null),
       image : var.image == "AUTO" ? (var.digest != null ? "${aws_ecr_repository.repo[0].repository_url}@${var.digest}" : (var.tag == null ? "" : "${aws_ecr_repository.repo[0].repository_url}:${var.tag}")) : (var.tag == null ? var.image : "${var.image}:${var.tag}")
       version : var.tag == null ? "latest" : var.tag
       livenessProbePath : var.healthcheck_path == null || var.liveness_probe_path != null ? var.liveness_probe_path : var.healthcheck_path,
