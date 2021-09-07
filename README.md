@@ -75,6 +75,9 @@ Install:
 
 `/bin/bash -c "$(curl -fsSL https://docs.opta.dev/install.sh)"`
 
+To run an app with Opta, you need to first create an environment (like staging, prod etc.)
+This will set up the base infrastructure like VPCs, k8s clusters, DNS.
+
 Create environment:
 ```
 name: staging
@@ -88,6 +91,10 @@ modules:
   - type: k8s-cluster
   - type: k8s-base
 ```
+
+Once the environment is created, you can deploy a container which exposes some apis.
+In this example we are using the popular [httbin](https://httpbin.org/) container.
+
 Create service:
 ```
 name: hello-world
@@ -106,6 +113,7 @@ Deploy:
 
 `opta apply`
 
+** You can also use our [UI workflow tool](https://app.runx.dev/yaml-generator) to help generate these yaml files.
 ### Check out more [examples](https://github.com/run-x/opta/tree/main/examples)
 
 # Community Users
