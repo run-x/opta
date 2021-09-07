@@ -98,7 +98,7 @@ class PlanDisplayer:
         logger.info(
             f"Identified total severity of {SEVERITY_COLORS[plan_severity]}{plan_severity}{attr(0)}.\n"
             f"{SEVERITY_EXPLANATIONS[plan_severity]}\n"
-            "If you want extra help, please feel free to reach out to the Runx team at slack.opta.dev.\n"
+            "If you want extra help, please feel free to reach out to the Runx team at https://slack.opta.dev.\n"
             "Severity break down by module is as follows:"
         )
         for module_name, module_change in module_changes.items():
