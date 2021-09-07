@@ -69,7 +69,7 @@ inputs:
     user_facing: true
     validator: list(str(), required=False)
     description: ARNs for users/roles who should be K8s admins. The user running Opta is by default an admin.
-    default: false
+    default: [ ]
   - name: nginx_config
     user_facing: true
     validator: any(required=False)
