@@ -77,7 +77,7 @@ def deploy(
         env=env,
         refresh=False,
         max_module=None,
-        image_tag=image_tag,
+        image_tag=None,
         test=False,
         auto_approve=auto_approve,
         image_digest=image_digest,

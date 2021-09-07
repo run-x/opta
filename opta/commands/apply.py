@@ -22,7 +22,7 @@ from opta.core.gcp import GCP
 from opta.core.generator import gen, gen_opta_resource_tags
 from opta.core.kubernetes import (
     configure_kubectl,
-    current_image_tag,
+    current_image_digest_tag,
     get_cluster_name,
     tail_module_log,
     tail_namespace_events,
@@ -109,8 +109,8 @@ def _apply(
     image_tag: Optional[str],
     test: bool,
     auto_approve: bool,
+    image_digest: Optional[str] = None,
     stdout_logs: bool = True,
-    image_digest: str = "",
 ) -> None:
     _check_terraform_version()
     layer = Layer.load_from_yaml(config, env)
@@ -173,25 +173,27 @@ def _apply(
         configure_kubectl(layer)
 
         for service_module in service_modules:
-            layer.variables["image_digest"] = (
-                image_digest
-                if service_module.data.get("image", "") == "AUTO" and image_digest.strip()
-                else None
-            )
-            current_tag = current_image_tag(layer)
+            current_image_info = current_image_digest_tag(layer)
             if (
-                current_tag is not None
+                image_digest is None
+                and (
+                    current_image_info["tag"] is not None
+                    or current_image_info["digest"] is not None
+                )
                 and image_tag is None
                 and service_module.data.get("image", "") == "AUTO"
                 and not test
             ):
                 if click.confirm(
-                    f"WARNING There is an existing deployment (tag={current_tag}) and the pods will be killed as you "
+                    f"WARNING There is an existing deployment (tag={current_image_info['tag']}, "
+                    f"digest={current_image_info['digest']}) and the pods will be killed as you "
                     f"did not specify an image tag. Would you like to keep the existing deployment alive? (y/n)",
                 ):
-                    image_tag = current_tag
+                    image_tag = current_image_info["tag"]
+                    image_digest = current_image_info["digest"]
 
     layer.variables["image_tag"] = image_tag
+    layer.variables["image_digest"] = image_digest
 
     existing_modules: Set[str] = set()
     first_loop = True

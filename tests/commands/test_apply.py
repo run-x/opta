@@ -69,7 +69,10 @@ def test_apply(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None
     tf_create_storage = mocker.patch("opta.commands.apply.Terraform.create_state_storage")
     mocked_thread = mocker.patch("opta.commands.apply.Thread")
     mocked_layer.get_module_by_type.return_value = [mocker.Mock()]
-    mocker.patch("opta.commands.apply.current_image_tag", return_value="abc")
+    mocker.patch(
+        "opta.commands.apply.current_image_digest_tag",
+        return_value={"tag": "abc", "digest": None},
+    )
 
     # Terraform apply should be called with the configured module (fake_module) and the remote state
     # module (deleted_module) as targets.
@@ -130,7 +133,10 @@ def test_auto_approve(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) 
     tf_create_storage = mocker.patch("opta.commands.apply.Terraform.create_state_storage")
     mocked_thread = mocker.patch("opta.commands.apply.Thread")
     mocked_layer.get_module_by_type.return_value = [mocker.Mock()]
-    mocker.patch("opta.commands.apply.current_image_tag", return_value="abc")
+    mocker.patch(
+        "opta.commands.apply.current_image_digest_tag",
+        return_value={"tag": "abc", "digest": None},
+    )
 
     # Terraform apply should be called with the configured module (fake_module) and the remote state
     # module (deleted_module) as targets.

@@ -251,6 +251,26 @@ def current_image_tag(layer: "Layer",) -> Optional[str]:
     return None
 
 
+def current_image_digest_tag(layer: "Layer") -> dict:
+    image_info = {"digest": None, "tag": None}
+    load_kube_config()
+    apps_client = AppsV1Api()
+    deployment_list: V1DeploymentList = apps_client.list_namespaced_deployment(
+        namespace=layer.name
+    )
+    if len(deployment_list.items) > 0:
+        deployment: V1Deployment = deployment_list.items[0]
+        image_parts = deployment.spec.template.spec.containers[0].image.split("@")
+        if len(image_parts) == 2:
+            image_info["digest"] = image_parts[-1]
+            return image_info
+        image_parts = deployment.spec.template.spec.containers[0].image.split(":")
+        if len(image_parts) == 2:
+            image_info["tag"] = image_parts[-1]
+            return image_info
+    return image_info
+
+
 def create_namespace_if_not_exists(layer_name: str) -> None:
     load_kube_config()
     v1 = CoreV1Api()
