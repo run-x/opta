@@ -137,7 +137,7 @@ def make_registry_docs(directory: str) -> None:
             f.write(cloud_dict["text"])
         environment_module_path = os.path.join(cloud_path, "environment_modules")
         os.makedirs(environment_module_path)
-        with open(os.path.join(environment_module_path, "index.md"), "w") as f:
+        with open(os.path.join(environment_module_path, "_index.md"), "w") as f:
             f.write(ENVIRONMENT_MODULE_INDEX)
         service_module_path = os.path.join(cloud_path, "service_modules")
         os.makedirs(service_module_path)
