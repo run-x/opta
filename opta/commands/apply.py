@@ -27,6 +27,7 @@ from opta.core.kubernetes import (
     tail_module_log,
     tail_namespace_events,
 )
+from opta.core.plan_displayer import PlanDisplayer
 from opta.core.terraform import Terraform, get_terraform_outputs
 from opta.exceptions import MissingState, UserErrors
 from opta.layer import Layer, StructuredConfig
@@ -52,9 +53,6 @@ from opta.utils import check_opta_file_exists, fmt_msg, is_tool, logger
     hidden=True,
 )
 @click.option(
-    "--max-module", default=None, type=int, help="Max module to process", hidden=True
-)
-@click.option(
     "--image-tag",
     default=None,
     type=str,
@@ -73,18 +71,26 @@ from opta.utils import check_opta_file_exists, fmt_msg, is_tool, logger
     default=False,
     help="Automatically approve terraform plan.",
 )
+@click.option(
+    "--detailed-plan",
+    is_flag=True,
+    default=False,
+    help="Show full terraform plan in detail, not the opta provided summary",
+)
 def apply(
     config: str,
     env: Optional[str],
     refresh: bool,
-    max_module: Optional[int],
     image_tag: Optional[str],
     test: bool,
     auto_approve: bool,
+    detailed_plan: bool,
 ) -> None:
     check_opta_file_exists(config)
     """Initialize your environment or service to match the config file"""
-    _apply(config, env, refresh, max_module, image_tag, test, auto_approve)
+    _apply(
+        config, env, refresh, image_tag, test, auto_approve, detailed_plan=detailed_plan
+    )
 
 
 def _check_terraform_version() -> None:
@@ -105,12 +111,12 @@ def _apply(
     config: str,
     env: Optional[str],
     refresh: bool,
-    max_module: Optional[int],
     image_tag: Optional[str],
     test: bool,
     auto_approve: bool,
     image_digest: Optional[str] = None,
     stdout_logs: bool = True,
+    detailed_plan: bool = False,
 ) -> None:
     _check_terraform_version()
     layer = Layer.load_from_yaml(config, env)
@@ -235,7 +241,7 @@ def _apply(
                 *targets,
                 quiet=True,
             )
-            Terraform.show(TF_PLAN_PATH)
+            PlanDisplayer(layer).display(detailed_plan=detailed_plan)
 
             if not auto_approve:
                 click.confirm(

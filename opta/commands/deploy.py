@@ -31,8 +31,19 @@ from opta.utils import check_opta_file_exists, fmt_msg, logger
     default=False,
     help="Automatically approve terraform plan.",
 )
+@click.option(
+    "--detailed-plan",
+    is_flag=True,
+    default=False,
+    help="Show full terraform plan in detail, not the opta provided summary",
+)
 def deploy(
-    image: str, config: str, env: Optional[str], tag: Optional[str], auto_approve: bool
+    image: str,
+    config: str,
+    env: Optional[str],
+    tag: Optional[str],
+    auto_approve: bool,
+    detailed_plan: bool,
 ) -> None:
     """Push your new image to the cloud and deploy it in your environment"""
 
@@ -65,20 +76,20 @@ def deploy(
             config=config,
             env=env,
             refresh=False,
-            max_module=None,
             image_tag=None,
             test=False,
             auto_approve=auto_approve,
             stdout_logs=False,
+            detailed_plan=detailed_plan,
         )
     image_digest, image_tag = _push(image=image, config=config, env=env, tag=tag)
     _apply(
         config=config,
         env=env,
         refresh=False,
-        max_module=None,
         image_tag=None,
         test=False,
         auto_approve=auto_approve,
         image_digest=image_digest,
+        detailed_plan=detailed_plan,
     )

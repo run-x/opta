@@ -19,6 +19,7 @@ def basic_mocks(mocker: MockFixture) -> None:
     mocker.patch("opta.commands.apply.is_tool", return_value=True)
     mocker.patch("opta.commands.apply.amplitude_client.send_event")
     mocker.patch("opta.commands.apply.gen_opta_resource_tags")
+    mocker.patch("opta.commands.apply.PlanDisplayer")
 
     # Mock remote state
     mocker.patch(
@@ -65,7 +66,6 @@ def test_apply(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None
     mocker.patch("opta.commands.apply.Terraform.download_state")
     tf_apply = mocker.patch("opta.commands.apply.Terraform.apply")
     tf_plan = mocker.patch("opta.commands.apply.Terraform.plan")
-    tf_show = mocker.patch("opta.commands.apply.Terraform.show")
     tf_create_storage = mocker.patch("opta.commands.apply.Terraform.create_state_storage")
     mocked_thread = mocker.patch("opta.commands.apply.Thread")
     mocked_layer.get_module_by_type.return_value = [mocker.Mock()]
@@ -94,7 +94,6 @@ def test_apply(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None
         "The above are the planned changes for your opta run. Do you approve?",
         abort=True,
     )
-    tf_show.assert_called_once_with(TF_PLAN_PATH)
     mocked_layer.get_module_by_type.assert_has_calls(
         [mocker.call("k8s-service"), mocker.call("k8s-service", 0)]
     )
@@ -129,7 +128,6 @@ def test_auto_approve(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) 
     mocker.patch("opta.commands.apply.get_cluster_name")
     tf_apply = mocker.patch("opta.commands.apply.Terraform.apply")
     tf_plan = mocker.patch("opta.commands.apply.Terraform.plan")
-    tf_show = mocker.patch("opta.commands.apply.Terraform.show")
     tf_create_storage = mocker.patch("opta.commands.apply.Terraform.create_state_storage")
     mocked_thread = mocker.patch("opta.commands.apply.Thread")
     mocked_layer.get_module_by_type.return_value = [mocker.Mock()]
@@ -155,7 +153,6 @@ def test_auto_approve(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) 
         quiet=True,
     )
     mocked_click.confirm.assert_not_called()
-    tf_show.assert_called_once_with(TF_PLAN_PATH)
     mocked_layer.get_module_by_type.assert_has_calls(
         [mocker.call("k8s-service"), mocker.call("k8s-service", 0)]
     )

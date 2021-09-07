@@ -45,8 +45,11 @@ class Terraform:
     downloaded_state: Dict[str, Dict[Any, Any]] = {}
 
     @classmethod
-    def init(cls, *tf_flags: str) -> None:
+    def init(cls, quiet: Optional[bool] = False, *tf_flags: str) -> None:
         kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
+        if quiet:
+            kwargs["stderr"] = PIPE
+            kwargs["stdout"] = DEVNULL
         nice_run(["terraform", "init", *tf_flags], check=True, **kwargs)
 
     # Get outputs of the current terraform state
@@ -85,7 +88,7 @@ class Terraform:
         quiet: Optional[bool] = False,
     ) -> None:
         if not no_init:
-            cls.init()
+            cls.init(quiet)
         kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
         if quiet:
             kwargs["stderr"] = PIPE
@@ -298,7 +301,7 @@ class Terraform:
 
     @classmethod
     def plan(cls, *tf_flags: str, quiet: Optional[bool] = False) -> None:
-        cls.init()
+        cls.init(quiet)
         kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
         if quiet:
             kwargs["stderr"] = PIPE
@@ -306,6 +309,15 @@ class Terraform:
         nice_run(
             ["terraform", "plan", "-compact-warnings", *tf_flags], check=True, **kwargs
         )
+
+    @classmethod
+    def show_plan(cls) -> Dict[Any, Any]:
+        out = nice_run(
+            ["terraform", "show", "-no-color", "-json", "tf.plan"],
+            check=True,
+            capture_output=True,
+        ).stdout.decode("utf-8")
+        return json.loads(out)
 
     @classmethod
     def show(cls, *tf_flags: str) -> None:
