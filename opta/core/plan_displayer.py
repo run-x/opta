@@ -17,7 +17,7 @@ ACTION_TO_SEVERITY = {
 }
 SEVERITY_COLORS = {
     BENIGN_SEVERITY: fg("green"),
-    MODERATE_SEVERITY: fg("yellow"),
+    MODERATE_SEVERITY: fg("orange_4b"),
     SERIOUS_SEVERITY: fg("magenta"),
 }
 SEVERITY_EXPLANATIONS = {
@@ -94,7 +94,12 @@ class PlanDisplayer:
             "If you want extra help, please feel free to reach out to the Runx team at https://slack.opta.dev.\n"
             "Severity break down by module is as follows:"
         )
-        for module_name, module_change in module_changes.items():
+        module_changes_list = sorted(
+            [(k, v) for k, v in module_changes.items()],
+            key=lambda x: x[1]["severity"],
+            reverse=True,
+        )
+        for module_name, module_change in module_changes_list:
             current_severity = module_change["severity"]
             logger.info(
                 f"Module name: {module_name}. Severity: {SEVERITY_COLORS[current_severity]}{current_severity}{attr(0)}."
@@ -102,7 +107,12 @@ class PlanDisplayer:
             # No need to be verbose with benign changes
             if current_severity == BENIGN_SEVERITY:
                 continue
-            for resource_name, resource_change in module_change["resources"].items():
+            resource_changes_list = sorted(
+                [(k, v) for k, v in module_change["resources"].items()],
+                key=lambda x: x[1]["severity"],
+                reverse=True,
+            )
+            for resource_name, resource_change in resource_changes_list:
                 current_severity = resource_change["severity"]
                 logger.info(
                     f"  Resource name: {resource_name}. Action: {resource_change['action']}. "
