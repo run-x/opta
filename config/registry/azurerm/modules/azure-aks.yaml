@@ -27,7 +27,7 @@ inputs:
     user_facing: true
     validator: any(str(), int(), required=False)
     description: The size of disk in GB to give the virtual machines of the nodes.
-    default: 20
+    default: 30
   - name: node_instance_type
     user_facing: true
     validator: str(required=False)
