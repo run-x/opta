@@ -46,7 +46,7 @@ resource "random_id" "key_suffix" {
 
 resource "aws_eks_node_group" "node_group" {
   cluster_name    = data.aws_eks_cluster.main.name
-  node_group_name = "opta-${var.layer_name}-default-${random_id.key_suffix.hex}"
+  node_group_name = "opta-${var.layer_name}-${var.module_name}-${random_id.key_suffix.hex}"
   node_role_arn   = aws_iam_role.node_group.arn
   subnet_ids      = data.aws_eks_cluster.main.vpc_config[0].subnet_ids
   capacity_type   = var.spot_instances ? "SPOT" : "ON_DEMAND"
@@ -76,7 +76,7 @@ resource "aws_eks_node_group" "node_group" {
 
   # Optional: Allow external changes without Terraform plan difference
   lifecycle {
-    ignore_changes        = [scaling_config[0].desired_size, node_group_name]
+    ignore_changes        = [scaling_config[0].desired_size, node_group_name, subnet_ids]
     create_before_destroy = true
   }
 

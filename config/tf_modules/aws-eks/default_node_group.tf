@@ -104,7 +104,7 @@ resource "aws_eks_node_group" "node_group" {
 
   # Optional: Allow external changes without Terraform plan difference
   lifecycle {
-    ignore_changes        = [scaling_config[0].desired_size, node_group_name]
+    ignore_changes        = [scaling_config[0].desired_size, node_group_name, subnet_ids]
     create_before_destroy = true
   }
 
