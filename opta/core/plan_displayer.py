@@ -1,13 +1,8 @@
-from typing import TYPE_CHECKING
-
 from colored import attr, fg
 
 from opta.constants import TF_PLAN_PATH
 from opta.core.terraform import Terraform
 from opta.utils import logger
-
-if TYPE_CHECKING:
-    from opta.layer import Layer
 
 BENIGN_SEVERITY = "BENIGN"
 MODERATE_SEVERITY = "MODERATE"
@@ -53,10 +48,8 @@ def _max_severity(severity_1: str, severity_2: str) -> str:
 
 
 class PlanDisplayer:
-    def __init__(self, layer: "Layer"):
-        self.layer = layer
-
-    def display(self, detailed_plan: bool = False) -> None:
+    @staticmethod
+    def display(detailed_plan: bool = False) -> None:
         if detailed_plan:
             Terraform.show(TF_PLAN_PATH)
             return

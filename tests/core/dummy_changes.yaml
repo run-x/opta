@@ -1,0 +1,399 @@
+resource_changes:
+  - action_reason: replace_because_cannot_update
+    address: module.base.aws_ebs_default_kms_key.default
+    change:
+      actions:
+        - create
+        - delete
+      after:
+        key_arn: arn:aws:kms:us-east-1:445935066876:key/aaac2f57-1f39-405e-95fe-2cfbd24744d2
+      after_sensitive: {}
+      after_unknown:
+        id: true
+      before:
+        id: arn:aws:kms:us-east-1:445935066876:key/aaac2f57-1f39-405e-95fe-2cfbd24744d2
+        key_arn: arn:aws:kms:us-east-1:445935066876:key/7da1bd98-6dce-4cba-8b7b-a37b5c475101
+      before_sensitive: {}
+      replace_paths:
+        - - key_arn
+    mode: managed
+    module_address: module.base
+    name: default
+    provider_name: registry.terraform.io/hashicorp/aws
+    type: aws_ebs_default_kms_key
+  - address: module.base.aws_ebs_encryption_by_default.default
+    change:
+      actions:
+        - no-op
+      after:
+        enabled: true
+        id: terraform-20210802213104524500000001
+      after_sensitive: {}
+      after_unknown: {}
+      before:
+        enabled: true
+        id: terraform-20210802213104524500000001
+      before_sensitive: {}
+    mode: managed
+    module_address: module.base
+    name: default
+    provider_name: registry.terraform.io/hashicorp/aws
+    type: aws_ebs_encryption_by_default
+  - address: module.dns.aws_route53_zone.public
+    change:
+      actions:
+        - no-op
+      after:
+        comment: Managed by Terraform
+        delegation_set_id: ''
+        force_destroy: true
+        id: Z0590875IJFAYVYAZJ5G
+        name: baloney.runx.dev
+        name_servers:
+          - ns-115.awsdns-14.com
+          - ns-1482.awsdns-57.org
+          - ns-1731.awsdns-24.co.uk
+          - ns-689.awsdns-22.net
+        tags:
+          Name: opta-live-example-dev
+          layer: live-example-dev
+          opta: 'true'
+          opta-environment: live-example-dev
+          tf_address: module.dns.aws_route53_zone.public
+        tags_all:
+          Name: opta-live-example-dev
+          layer: live-example-dev
+          opta: 'true'
+          opta-environment: live-example-dev
+          tf_address: module.dns.aws_route53_zone.public
+        vpc: []
+        zone_id: Z0590875IJFAYVYAZJ5G
+      after_sensitive:
+        name_servers:
+          - false
+          - false
+          - false
+          - false
+        tags: {}
+        tags_all: {}
+        vpc: []
+      after_unknown: {}
+      before:
+        comment: Managed by Terraform
+        delegation_set_id: ''
+        force_destroy: true
+        id: Z0590875IJFAYVYAZJ5G
+        name: baloney.runx.dev
+        name_servers:
+          - ns-115.awsdns-14.com
+          - ns-1482.awsdns-57.org
+          - ns-1731.awsdns-24.co.uk
+          - ns-689.awsdns-22.net
+        tags:
+          Name: opta-live-example-dev
+          layer: live-example-dev
+          opta: 'true'
+          opta-environment: live-example-dev
+          tf_address: module.dns.aws_route53_zone.public
+        tags_all:
+          Name: opta-live-example-dev
+          layer: live-example-dev
+          opta: 'true'
+          opta-environment: live-example-dev
+          tf_address: module.dns.aws_route53_zone.public
+        vpc: []
+        zone_id: Z0590875IJFAYVYAZJ5G
+      before_sensitive:
+        name_servers:
+          - false
+          - false
+          - false
+          - false
+        tags: {}
+        tags_all: {}
+        vpc: []
+    mode: managed
+    module_address: module.dns
+    name: public
+    provider_name: registry.terraform.io/hashicorp/aws
+    type: aws_route53_zone
+  - address: module.k8sbase.aws_iam_policy.autoscaler
+    change:
+      actions:
+        - update
+      after:
+        arn: arn:aws:iam::445935066876:policy/opta-live-example-dev-k8s-autoscaler
+        description: ''
+        id: arn:aws:iam::445935066876:policy/opta-live-example-dev-k8s-autoscaler
+        name: opta-live-example-dev-k8s-autoscaler
+        name_prefix: null
+        path: /
+        policy_id: ANPAWPU6ND36FUKZQPWQO
+        tags:
+          layer: live-example-dev
+          opta: 'true'
+          tf_address: module.k8sbase.aws_iam_policy.autoscaler
+        tags_all:
+          layer: live-example-dev
+          opta: 'true'
+          tf_address: module.k8sbase.aws_iam_policy.autoscaler
+      after_sensitive:
+        tags: {}
+        tags_all: {}
+      after_unknown:
+        policy: true
+        tags: {}
+        tags_all: {}
+      before:
+        arn: arn:aws:iam::445935066876:policy/opta-live-example-dev-k8s-autoscaler
+        description: ''
+        id: arn:aws:iam::445935066876:policy/opta-live-example-dev-k8s-autoscaler
+        name: opta-live-example-dev-k8s-autoscaler
+        name_prefix: null
+        path: /
+        policy: "{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [\n    {\n    \
+        \  \"Sid\": \"autoscaling\",\n      \"Effect\": \"Allow\",\n      \"Action\"\
+        : [\n        \"ec2:DescribeLaunchTemplateVersions\",\n        \"autoscaling:TerminateInstanceInAutoScalingGroup\"\
+        ,\n        \"autoscaling:SetDesiredCapacity\",\n        \"autoscaling:DescribeTags\"\
+        ,\n        \"autoscaling:DescribeLaunchConfigurations\",\n        \"autoscaling:DescribeAutoScalingInstances\"\
+        ,\n        \"autoscaling:DescribeAutoScalingGroups\"\n      ],\n      \"Resource\"\
+        : \"*\"\n    }\n  ]\n}"
+        policy_id: ANPAWPU6ND36FUKZQPWQO
+        tags:
+          layer: live-example-dev
+          opta: 'true'
+          tf_address: module.k8sbase.aws_iam_policy.autoscaler
+        tags_all:
+          layer: live-example-dev
+          opta: 'true'
+          tf_address: module.k8sbase.aws_iam_policy.autoscaler
+      before_sensitive:
+        tags: {}
+        tags_all: {}
+    mode: managed
+    module_address: module.k8sbase
+    name: autoscaler
+    provider_name: registry.terraform.io/hashicorp/aws
+    type: aws_iam_policy
+  - address: module.k8sbase.aws_iam_policy.external_dns
+    change:
+      actions:
+        - update
+      after:
+        arn: arn:aws:iam::445935066876:policy/opta-live-example-dev-external-dns
+        description: ''
+        id: arn:aws:iam::445935066876:policy/opta-live-example-dev-external-dns
+        name: opta-live-example-dev-external-dns
+        name_prefix: null
+        path: /
+        policy_id: ANPAWPU6ND36PM3UUIVZV
+        tags:
+          layer: live-example-dev
+          opta: 'true'
+          tf_address: module.k8sbase.aws_iam_policy.external_dns
+        tags_all:
+          layer: live-example-dev
+          opta: 'true'
+          tf_address: module.k8sbase.aws_iam_policy.external_dns
+      after_sensitive:
+        tags: {}
+        tags_all: {}
+      after_unknown:
+        policy: true
+        tags: {}
+        tags_all: {}
+      before:
+        arn: arn:aws:iam::445935066876:policy/opta-live-example-dev-external-dns
+        description: ''
+        id: arn:aws:iam::445935066876:policy/opta-live-example-dev-external-dns
+        name: opta-live-example-dev-external-dns
+        name_prefix: null
+        path: /
+        policy: "{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [\n    {\n    \
+        \  \"Sid\": \"ChangeResourceRecordSets\",\n      \"Effect\": \"Allow\",\n\
+        \      \"Action\": \"route53:ChangeResourceRecordSets\",\n      \"Resource\"\
+        : \"arn:aws:route53:::hostedzone/*\"\n    },\n    {\n      \"Sid\": \"DescribeRoute53\"\
+        ,\n      \"Effect\": \"Allow\",\n      \"Action\": [\n        \"route53:ListResourceRecordSets\"\
+        ,\n        \"route53:ListHostedZones\"\n      ],\n      \"Resource\": \"*\"\
+        \n    }\n  ]\n}"
+        policy_id: ANPAWPU6ND36PM3UUIVZV
+        tags:
+          layer: live-example-dev
+          opta: 'true'
+          tf_address: module.k8sbase.aws_iam_policy.external_dns
+        tags_all:
+          layer: live-example-dev
+          opta: 'true'
+          tf_address: module.k8sbase.aws_iam_policy.external_dns
+      before_sensitive:
+        tags: {}
+        tags_all: {}
+    mode: managed
+    module_address: module.k8sbase
+    name: external_dns
+    provider_name: registry.terraform.io/hashicorp/aws
+    type: aws_iam_policy
+  - address: module.k8sbase.aws_iam_role.autoscaler
+    change:
+      actions:
+        - update
+      after:
+        arn: arn:aws:iam::445935066876:role/opta-live-example-dev-k8s-autoscaler
+        create_date: '2021-08-02T20:10:43Z'
+        description: ''
+        force_detach_policies: false
+        id: opta-live-example-dev-k8s-autoscaler
+        inline_policy:
+          - name: ''
+            policy: ''
+        managed_policy_arns:
+          - arn:aws:iam::445935066876:policy/opta-live-example-dev-k8s-autoscaler
+        max_session_duration: 3600
+        name: opta-live-example-dev-k8s-autoscaler
+        name_prefix: null
+        path: /
+        permissions_boundary: null
+        tags:
+          layer: live-example-dev
+          opta: 'true'
+          tf_address: module.k8sbase.aws_iam_role.autoscaler
+        tags_all:
+          layer: live-example-dev
+          opta: 'true'
+          tf_address: module.k8sbase.aws_iam_role.autoscaler
+        unique_id: AROAWPU6ND36AL3CHVO3G
+      after_sensitive:
+        inline_policy:
+          - {}
+        managed_policy_arns:
+          - false
+        tags: {}
+        tags_all: {}
+      after_unknown:
+        assume_role_policy: true
+        inline_policy:
+          - {}
+        managed_policy_arns:
+          - false
+        tags: {}
+        tags_all: {}
+      before:
+        arn: arn:aws:iam::445935066876:role/opta-live-example-dev-k8s-autoscaler
+        assume_role_policy: '{"Version":"2012-10-17","Statement":[{"Sid":"","Effect":"Allow","Principal":{"Federated":"arn:aws:iam::445935066876:oidc-provider/oidc.eks.us-east-1.amazonaws.com/id/CD680652372A21B639AF8970AA7A4816"},"Action":"sts:AssumeRoleWithWebIdentity","Condition":{"StringEquals":{"oidc.eks.us-east-1.amazonaws.com/id/CD680652372A21B639AF8970AA7A4816:sub":"system:serviceaccount:autoscaler:autoscaler"}}}]}'
+        create_date: '2021-08-02T20:10:43Z'
+        description: ''
+        force_detach_policies: false
+        id: opta-live-example-dev-k8s-autoscaler
+        inline_policy:
+          - name: ''
+            policy: ''
+        managed_policy_arns:
+          - arn:aws:iam::445935066876:policy/opta-live-example-dev-k8s-autoscaler
+        max_session_duration: 3600
+        name: opta-live-example-dev-k8s-autoscaler
+        name_prefix: null
+        path: /
+        permissions_boundary: null
+        tags:
+          layer: live-example-dev
+          opta: 'true'
+          tf_address: module.k8sbase.aws_iam_role.autoscaler
+        tags_all:
+          layer: live-example-dev
+          opta: 'true'
+          tf_address: module.k8sbase.aws_iam_role.autoscaler
+        unique_id: AROAWPU6ND36AL3CHVO3G
+      before_sensitive:
+        inline_policy:
+          - {}
+        managed_policy_arns:
+          - false
+        tags: {}
+        tags_all: {}
+    mode: managed
+    module_address: module.k8sbase
+    name: autoscaler
+    provider_name: registry.terraform.io/hashicorp/aws
+    type: aws_iam_role
+  - address: module.k8sbase.aws_iam_role.external_dns
+    change:
+      actions:
+        - update
+      after:
+        arn: arn:aws:iam::445935066876:role/opta-live-example-dev-external-dns
+        create_date: '2021-08-02T20:10:43Z'
+        description: ''
+        force_detach_policies: false
+        id: opta-live-example-dev-external-dns
+        inline_policy:
+          - name: ''
+            policy: ''
+        managed_policy_arns:
+          - arn:aws:iam::445935066876:policy/opta-live-example-dev-external-dns
+        max_session_duration: 3600
+        name: opta-live-example-dev-external-dns
+        name_prefix: null
+        path: /
+        permissions_boundary: null
+        tags:
+          layer: live-example-dev
+          opta: 'true'
+          tf_address: module.k8sbase.aws_iam_role.external_dns
+        tags_all:
+          layer: live-example-dev
+          opta: 'true'
+          tf_address: module.k8sbase.aws_iam_role.external_dns
+        unique_id: AROAWPU6ND36OQ7WB5YYV
+      after_sensitive:
+        inline_policy:
+          - {}
+        managed_policy_arns:
+          - false
+        tags: {}
+        tags_all: {}
+      after_unknown:
+        assume_role_policy: true
+        inline_policy:
+          - {}
+        managed_policy_arns:
+          - false
+        tags: {}
+        tags_all: {}
+      before:
+        arn: arn:aws:iam::445935066876:role/opta-live-example-dev-external-dns
+        assume_role_policy: '{"Version":"2012-10-17","Statement":[{"Sid":"","Effect":"Allow","Principal":{"Federated":"arn:aws:iam::445935066876:oidc-provider/oidc.eks.us-east-1.amazonaws.com/id/CD680652372A21B639AF8970AA7A4816"},"Action":"sts:AssumeRoleWithWebIdentity","Condition":{"StringEquals":{"oidc.eks.us-east-1.amazonaws.com/id/CD680652372A21B639AF8970AA7A4816:sub":"system:serviceaccount:external-dns:external-dns"}}}]}'
+        create_date: '2021-08-02T20:10:43Z'
+        description: ''
+        force_detach_policies: false
+        id: opta-live-example-dev-external-dns
+        inline_policy:
+          - name: ''
+            policy: ''
+        managed_policy_arns:
+          - arn:aws:iam::445935066876:policy/opta-live-example-dev-external-dns
+        max_session_duration: 3600
+        name: opta-live-example-dev-external-dns
+        name_prefix: null
+        path: /
+        permissions_boundary: null
+        tags:
+          layer: live-example-dev
+          opta: 'true'
+          tf_address: module.k8sbase.aws_iam_role.external_dns
+        tags_all:
+          layer: live-example-dev
+          opta: 'true'
+          tf_address: module.k8sbase.aws_iam_role.external_dns
+        unique_id: AROAWPU6ND36OQ7WB5YYV
+      before_sensitive:
+        inline_policy:
+          - {}
+        managed_policy_arns:
+          - false
+        tags: {}
+        tags_all: {}
+    mode: managed
+    module_address: module.k8sbase
+    name: external_dns
+    provider_name: registry.terraform.io/hashicorp/aws
+    type: aws_iam_role

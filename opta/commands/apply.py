@@ -241,7 +241,7 @@ def _apply(
                 *targets,
                 quiet=True,
             )
-            PlanDisplayer(layer).display(detailed_plan=detailed_plan)
+            PlanDisplayer.display(detailed_plan=detailed_plan)
 
             if not auto_approve:
                 click.confirm(
