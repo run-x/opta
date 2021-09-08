@@ -1,13 +1,13 @@
 import logging
 import os
 import sys
-from logging import Logger
+from logging import Formatter, Logger, LogRecord
 from logging.handlers import QueueHandler, QueueListener
 from queue import Queue
 from shutil import which
 from textwrap import dedent
 from time import sleep
-from typing import Any, Dict, Generator, List, Literal, Tuple
+from typing import Any, Dict, Generator, List, Literal, Optional, Tuple
 
 from ruamel.yaml import YAML
 
@@ -19,21 +19,49 @@ from opta.special_formatter import PartialFormatter
 yaml = YAML(typ="safe")
 
 
+class LogFormatMultiplexer(Formatter):
+    def __init__(
+        self,
+        debug_formatter: Optional[Formatter] = None,
+        info_formatter: Optional[Formatter] = None,
+        warning_formatter: Optional[Formatter] = None,
+        error_formatter: Optional[Formatter] = None,
+        critical_formatter: Optional[Formatter] = None,
+        default_formatter: Optional[Formatter] = None,
+    ):
+        self.default_formatter = default_formatter or Formatter(
+            "%(levelname)s: %(message)s"
+        )
+        self.formatter_mapping = {
+            "DEBUG": debug_formatter or self.default_formatter,
+            "INFO": info_formatter or self.default_formatter,
+            "WARNING": warning_formatter or self.default_formatter,
+            "ERROR": error_formatter or self.default_formatter,
+            "CRITICAL": critical_formatter or self.default_formatter,
+        }
+
+    def format(self, record: LogRecord) -> str:
+        return self.formatter_mapping.get(
+            record.levelname, self.default_formatter
+        ).format(record)
+
+
 def initialize_logger() -> Tuple[Logger, QueueListener, DatadogLogHandler]:
     logger = logging.getLogger("opta")
     logger.setLevel(logging.DEBUG)
     ch = logging.StreamHandler(sys.stdout)
     if os.environ.get("OPTA_DEBUG") is None:
         ch.setLevel(logging.INFO)
+        formatter = LogFormatMultiplexer(info_formatter=Formatter("%(message)s"))
     else:
         ch.setLevel(logging.DEBUG)
+        formatter = LogFormatMultiplexer()
     dd_queue: Queue = Queue(-1)
     queue_handler = QueueHandler(dd_queue)
     queue_handler.setLevel(logging.DEBUG)
     dd_handler = DatadogLogHandler()
     dd_handler.setLevel(logging.DEBUG)
     dd_listener = QueueListener(dd_queue, dd_handler)
-    formatter = logging.Formatter("%(levelname)s: %(message)s")
     ch.setFormatter(formatter)
     logger.addHandler(queue_handler)
     logger.addHandler(ch)
