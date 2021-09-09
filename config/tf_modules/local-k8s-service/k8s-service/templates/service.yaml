@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "k8s-service.serviceName" . }}
+  labels:
+    {{- include "k8s-service.labels" . | nindent 4 }}
+  namespace: {{ include "k8s-service.namespaceName" . }}
+spec:
+  ports:
+    - port: 80
+      targetPort: main
+      protocol: TCP
+      name: main
+  selector:
+    {{- include "k8s-service.selectorLabels" . | nindent 4 }}

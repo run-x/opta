@@ -1,0 +1,40 @@
+halt: false
+environment_module: false
+inputs:
+  - name: env_name
+    user_facing: false
+    description: Opta Environment name
+    default: None
+  - name: layer_name
+    user_facing: false
+    description: Opta Layer name
+    default: None
+  - name: module_name
+    user_facing: false
+    description: Opta Module name
+    default: None
+  - name: sku_name
+    user_facing: true
+    validator: str(required=False)
+    description:  The name of the SKU, follows the tier + family + cores pattern for Azure postgres [instances](https://docs.microsoft.com/en-us/azure/postgresql/concepts-pricing-tiers).
+    default: GP_Gen5_4
+  - name: engine_version
+    user_facing: true
+    validator: str(required=False)
+    description: The version of the database to use.
+    default: "11"
+outputs:
+  - name: db_user
+    export: false
+    description: The database user
+  - name: db_password
+    export: false
+    description: The database password
+  - name: db_host
+    export: false
+    description: The database host
+  - name: db_name
+    export: false
+    description: The database ip
+output_providers: { }
+output_data: { }

@@ -1,0 +1,47 @@
+halt: true
+environment_module: true
+inputs:
+  - name: env_name
+    user_facing: false
+    description: Opta Environment name
+    default: None
+  - name: layer_name
+    user_facing: false
+    description: Opta Layer name
+    default: None
+  - name: module_name
+    user_facing: false
+    description: Opta Module name
+    default: None
+  - name: private_ipv4_cidr_block
+    user_facing: true
+    validator: str(required=False)
+    description: Cidr block for the whole vpc.
+    default: "10.0.0.0/16"
+  - name: subnet_ipv4_cidr_block
+    user_facing: true
+    validator: str(required=False)
+    description: Cidr block for private subnet. Don't need to worry about AZs in Azure
+    default: "10.0.0.0/17"
+  - name: location
+    user_facing: false
+    description: Geographic location
+    default: null
+outputs:
+  - name: vpc_id
+    export: true
+    description:  The ID of the [Azure virtual network](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-overview) we created for this environment
+  - name: private_subnet_id
+    export: true
+    description: The ID of the private [subnet](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-subnet) we setup for your environment
+  - name: acr_id
+    export: true
+    description: The ID of the [Azure container registry](https://azure.microsoft.com/en-us/services/container-registry/) created for this environment
+  - name: acr_name
+    export: true
+    description: The name of the Azure container registry
+  - name: acr_login_url
+    export: true
+    description: The login url of the Azure container registry.
+output_providers: { }
+output_data: { }

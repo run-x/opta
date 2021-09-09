@@ -1,3 +1,4 @@
+from platform import system
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 from dns.rdtypes.ANY.NS import NS
@@ -87,6 +88,16 @@ class GcpK8sModuleProcessor(ModuleProcessor):
         super(GcpK8sModuleProcessor, self).process(module_idx)
 
 
+class LocalK8sModuleProcessor(ModuleProcessor):
+    def __init__(self, module: "Module", layer: "Layer"):
+        if system() not in ["Linux", "MacOS"]:
+            raise UserErrors("Opta is not built to support this host operating system.")
+        super(LocalK8sModuleProcessor, self).__init__(module, layer)
+
+    def process(self, module_idx: int) -> None:
+        super(LocalK8sModuleProcessor, self).process(module_idx)
+
+
 class AWSIamAssembler:
     def __init__(self, *args: Any, **kwargs: Any):
         self.read_buckets: list[str] = []
@@ -148,7 +159,9 @@ class AWSIamAssembler:
                 self.subscribe_queues.append(
                     f"${{{{module.{linked_module.name}.queue_arn}}}}"
                 )
-                self.kms_read_keys.append(f"${{{{module.{linked_module.name}.kms_arn}}}}")
+                self.kms_read_keys.append(
+                    f"${{{{module.{linked_module.name}.kms_arn}}}}"
+                )
             else:
                 raise Exception(f"Invalid permission {permission}")
 
