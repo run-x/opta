@@ -337,6 +337,7 @@ class Layer:
 
     def post_delete(self, module_idx: int) -> None:
         module = self.modules[module_idx]
+        logger.debug(f"Running post delete for module {module.name}")
         module_type = module.aliased_type or module.type
         processor = self.PROCESSOR_DICT.get(module_type, ModuleProcessor)
         processor(module, self).post_delete(module_idx)

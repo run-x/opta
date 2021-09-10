@@ -31,11 +31,13 @@ class AwsEksProcessor(ModuleProcessor):
         self.cleanup_dangling_enis(region)
 
     def cleanup_cloudwatch_log_group(self, region: str) -> None:
-        logger.info("Deleting dangling cloudwatch log groups")
+        logger.info(
+            "Seeking dangling cloudwatch log group for k8s cluster just destroyed."
+        )
         client: CloudWatchLogsClient = boto3.client(
             "logs", config=Config(region_name=region)
         )
-        log_group_name = f"/aws/eks/opta-${self.layer.name}/cluster"
+        log_group_name = f"/aws/eks/opta-{self.layer.name}/cluster"
         log_groups = client.describe_log_groups(logGroupNamePrefix=log_group_name)
         if len(log_groups["logGroups"]) == 0:
             return
