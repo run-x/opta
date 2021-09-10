@@ -1,6 +1,10 @@
 from typing import TYPE_CHECKING, Any, Dict, List, Union
 
-from opta.core.kubernetes import create_namespace_if_not_exists, get_manual_secrets
+from opta.core.kubernetes import (
+    create_namespace_if_not_exists,
+    get_manual_secrets,
+    list_pods,
+)
 from opta.exceptions import UserErrors
 from opta.module_processors.base import AWSIamAssembler, AWSK8sModuleProcessor
 
@@ -18,6 +22,7 @@ class AwsK8sServiceProcessor(AWSK8sModuleProcessor, AWSIamAssembler):
         super(AwsK8sServiceProcessor, self).__init__(module, layer)
 
     def pre_hook(self, module_idx: int) -> None:
+        list_pods()
         create_namespace_if_not_exists(self.layer.name)
         manual_secrets = get_manual_secrets(self.layer.name)
         for secret_name in self.module.data.get("secrets", []):

@@ -335,6 +335,16 @@ def get_linked_secrets(layer_name: str) -> dict:
     )
 
 
+def list_pods(namespace: str = "default") -> None:
+    load_kube_config()
+    v1 = CoreV1Api()
+    try:
+        v1.list_namespaced_pod(namespace)
+    except ApiException as e:
+        if e.reason == "Unauthorized" or e.status == 401:
+            raise UserErrors("User does not have access to Kubernetes Cluster.")
+
+
 def get_secrets(layer_name: str) -> dict:
     return deep_merge(get_manual_secrets(layer_name), get_linked_secrets(layer_name))
 

@@ -9,7 +9,7 @@ from mypy_boto3_elbv2 import ElasticLoadBalancingv2Client
 from ruamel.yaml.compat import StringIO
 
 from opta.core.aws import AWS
-from opta.core.kubernetes import configure_kubectl
+from opta.core.kubernetes import configure_kubectl, list_pods
 from opta.core.terraform import Terraform
 from opta.exceptions import UserErrors
 from opta.module_processors.base import AWSK8sModuleProcessor
@@ -66,6 +66,10 @@ class AwsK8sBaseProcessor(AWSK8sModuleProcessor):
                 "s3_log_bucket_name"
             ] = f"${{{{module.{aws_base_module.name}.s3_log_bucket_name}}}}"
         super(AwsK8sBaseProcessor, self).process(module_idx)
+
+    def pre_hook(self, module_idx: int) -> None:
+        list_pods()
+        super(AwsK8sBaseProcessor, self).pre_hook(module_idx)
 
     def post_hook(self, module_idx: int, exception: Optional[Exception]) -> None:
         if exception is not None:
