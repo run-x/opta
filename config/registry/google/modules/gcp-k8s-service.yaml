@@ -102,7 +102,7 @@ inputs:
     default: null
   - name: resource_request
     user_facing: true
-    validator: str(required=False)
+    validator: any(required=False)
     description: |
       See the [container resources]({{< relref "#container-resources" >}}) section. Default
       ```yaml
