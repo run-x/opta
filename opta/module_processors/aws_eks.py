@@ -5,6 +5,7 @@ from botocore.config import Config
 from mypy_boto3_autoscaling import AutoScalingClient
 from mypy_boto3_ec2 import EC2Client
 from mypy_boto3_ec2.type_defs import NetworkInterfaceTypeDef
+from mypy_boto3_logs import CloudWatchLogsClient
 
 from opta.exceptions import UserErrors
 from opta.module_processors.base import ModuleProcessor
@@ -26,6 +27,26 @@ class AwsEksProcessor(ModuleProcessor):
     def post_delete(self, module_idx: int) -> None:
         providers = self.layer.gen_providers(0)
         region = providers["provider"]["aws"]["region"]
+        self.cleanup_cloudwatch_log_group(region)
+        self.cleanup_dangling_enis(region)
+
+    def cleanup_cloudwatch_log_group(self, region: str) -> None:
+        logger.info(
+            "Seeking dangling cloudwatch log group for k8s cluster just destroyed."
+        )
+        client: CloudWatchLogsClient = boto3.client(
+            "logs", config=Config(region_name=region)
+        )
+        log_group_name = f"/aws/eks/opta-{self.layer.name}/cluster"
+        log_groups = client.describe_log_groups(logGroupNamePrefix=log_group_name)
+        if len(log_groups["logGroups"]) == 0:
+            return
+        logger.info(
+            f"Found dangling cloudwatch log group {log_group_name}. Deleting it now"
+        )
+        client.delete_log_group(logGroupName=log_group_name)
+
+    def cleanup_dangling_enis(self, region: str) -> None:
         client: EC2Client = boto3.client("ec2", config=Config(region_name=region))
         vpcs = client.describe_vpcs(
             Filters=[

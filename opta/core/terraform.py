@@ -199,6 +199,7 @@ class Terraform:
             module_address_prefix = f"module.{module.name}"
 
             if module.name not in existing_modules:
+                idx -= 1
                 continue
             cls.refresh(f"-target={module_address_prefix}")
             nice_run(

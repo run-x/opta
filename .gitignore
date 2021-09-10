@@ -2,6 +2,7 @@
 .terraform.lock.hcl
 .idea
 .DS_Store
+.first_time_run
 tf.plan
 terraform.tfstate
 terraform.tfstate.backup

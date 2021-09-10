@@ -68,6 +68,8 @@ class AwsK8sBaseProcessor(AWSK8sModuleProcessor):
         super(AwsK8sBaseProcessor, self).process(module_idx)
 
     def pre_hook(self, module_idx: int) -> None:
+        Terraform.download_state(self.layer)
+        configure_kubectl(self.layer)
         list_namespaces()
         super(AwsK8sBaseProcessor, self).pre_hook(module_idx)
 

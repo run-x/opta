@@ -88,16 +88,16 @@ if __name__ == "__main__":
             logger.error(e.stderr.decode("utf-8"))
         sys.exit(1)
     except UserErrors as e:
+        logger.error(e)
         logger.info(
             "If you need more help please reach out to the contributors in our slack channel at: slack.opta.dev"
         )
-        logger.error(e)
         sys.exit(1)
     except Exception as e:
+        logger.exception(e)
         logger.info(
             "If you need more help please reach out to the contributors in our slack channel at: slack.opta.dev"
         )
-        logger.exception(e)
         sys.exit(1)
     finally:
         # NOTE: Statements after the cli() invocation in the try clause are not executed.
