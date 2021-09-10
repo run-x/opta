@@ -5,7 +5,7 @@ on:
     types: [published]
 
 jobs:
-  create-destroy-tests:
+  create-destroy-tests-aws:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -15,7 +15,41 @@ jobs:
           terraform_version: 1.0.0
           terraform_wrapper: false
       - name: Create and destroy test-service and opta environment
-        run: ./scripts/dispatch_workflow.sh opta create-and-destroy.yml
+        run: ./scripts/dispatch_workflow.sh opta create-and-destroy-aws.yml
+        env:
+          github_token: ${{ secrets.ALL_GITHUB_TOKEN }}
+      # - name: Slack alert if failed.
+      #   if: ${{ failure() }}
+      #   run: echo "TODO, send slack alert to notify failure"
+
+  create-destroy-tests-gcp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Pin terraform version
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.0.0
+          terraform_wrapper: false
+      - name: Create and destroy test-service and opta environment
+        run: ./scripts/dispatch_workflow.sh opta create-and-destroy-gcp.yml
+        env:
+          github_token: ${{ secrets.ALL_GITHUB_TOKEN }}
+      # - name: Slack alert if failed.
+      #   if: ${{ failure() }}
+      #   run: echo "TODO, send slack alert to notify failure"
+
+  create-destroy-tests-azure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Pin terraform version
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.0.0
+          terraform_wrapper: false
+      - name: Create and destroy test-service and opta environment
+        run: ./scripts/dispatch_workflow.sh opta create-and-destroy-azure.yml
         env:
           github_token: ${{ secrets.ALL_GITHUB_TOKEN }}
       # - name: Slack alert if failed.
