@@ -31,6 +31,7 @@ class AwsEksProcessor(ModuleProcessor):
         self.cleanup_dangling_enis(region)
 
     def cleanup_cloudwatch_log_group(self, region: str) -> None:
+        logger.info("Deleting dangling cloudwatch log groups")
         client: CloudWatchLogsClient = boto3.client(
             "logs", config=Config(region_name=region)
         )
@@ -38,6 +39,9 @@ class AwsEksProcessor(ModuleProcessor):
         log_groups = client.describe_log_groups(logGroupNamePrefix=log_group_name)
         if len(log_groups["logGroups"]) == 0:
             return
+        logger.info(
+            f"Found dangling cloudwatch log group {log_group_name}. Deleting it now"
+        )
         client.delete_log_group(logGroupName=log_group_name)
 
     def cleanup_dangling_enis(self, region: str) -> None:
