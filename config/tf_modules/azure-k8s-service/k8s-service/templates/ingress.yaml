@@ -7,6 +7,12 @@ metadata:
   labels:
     {{- include "k8s-service.labels" $ | nindent 4 }}
   annotations:
+    {{- if $.Values.stickySession }}
+    nginx.ingress.kubernetes.io/affinity: "cookie"
+    nginx.ingress.kubernetes.io/session-cookie-name: "opta-cookie"
+    nginx.ingress.kubernetes.io/session-cookie-expires: {{ $.Values.stickySessionMaxAge | quote }}
+    nginx.ingress.kubernetes.io/session-cookie-max-age: {{ $.Values.stickySessionMaxAge | quote }}
+    {{- end }}
     {{- if not (eq $val.pathPrefix "/") }}
     nginx.ingress.kubernetes.io/rewrite-target: /$2
     {{- end }}
