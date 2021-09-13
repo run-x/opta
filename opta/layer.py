@@ -423,7 +423,7 @@ class Layer:
         elif self.cloud == "azurerm":
             region = self.root().providers["azurerm"]["location"]
         elif self.cloud == "local":
-            return ret
+            pass
 
         hydration = self.metadata_hydration()
         providers = self.providers
