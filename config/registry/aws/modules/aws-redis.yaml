@@ -17,7 +17,7 @@ inputs:
     user_facing: true
     validator: str(required=False)
     description: This is the redis instance type used for the [instances](https://aws.amazon.com/elasticache/pricing/).
-    default: cache.m4.large
+    default: cache.t3.medium
   - name: redis_version
     user_facing: true
     validator: str(required=False)

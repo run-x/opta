@@ -1,6 +1,6 @@
 variable "node_type" {
   type    = string
-  default = "cache.m4.large"
+  default = "cache.t3.medium"
 }
 
 variable "env_name" {
