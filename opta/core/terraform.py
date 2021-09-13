@@ -46,7 +46,6 @@ EXTRA_ENV = (
 
 class Terraform:
     downloaded_state: Dict[str, Dict[Any, Any]] = {}
-
     @classmethod
     def init(cls, quiet: Optional[bool] = False, *tf_flags: str) -> None:
         kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
@@ -229,9 +228,10 @@ class Terraform:
             azure.delete_opta_config()
             azure.delete_remote_state()
         elif layer.cloud == "local":
+           
             local = Local(layer)
             local.delete_opta_config()
-            local.delete_remote_state()
+            local.delete_local_tf_state()
         else:
             raise Exception(
                 f"Can not handle opta config deletion for cloud {layer.cloud}"
@@ -448,16 +448,16 @@ class Terraform:
                     blob_data.readinto(file_obj)
             except ResourceNotFoundError:
                 return False
-        elif "local" in providers.get("terraform", {}).get("backend", {}):
-            state_path = providers["provider"]["local"]["state_path"]
-            prefix = providers["terraform"]["backend"]["local"]["prefix"]
+        elif layer.cloud == "local":  
             try:
-                copyfile(
-                    os.path.join(state_path, prefix, "default.tfstate"), state_file
-                )
+                tf_file = os.path.join(os.path.join(os.getcwd(),".opta"),layer.name)
+                if os.path.exists(tf_file):
+                    copyfile(tf_file, state_file)
+                else:
+                    return False
             except Exception as e:
                 UserErrors(f"Could copy local state file to {state_file}")
-                return False
+                
 
         else:
             raise UserErrors("Need to get state from S3 or GCS or Azure storage")
@@ -507,26 +507,20 @@ class Terraform:
         if "local" not in providers.get("terraform", {}).get("backend", {}):
             return
         try:
-            state_path = providers["provider"]["local"]["state_path"]
-            prefix = providers["terraform"]["backend"]["local"]["prefix"]
-            dir_path = os.path.join(state_path, prefix)
-            rmtree(dir_path)
+            rmtree(os.path.join(os.getcwd(),".opta"))
         except Exception:
             logger.warn(
-                f"Local state delete did not work, are the state files present at {dir_path}?"
+                f"Local state delete did not work?"
             )
 
     @classmethod
     def _create_local_state_storage(cls, providers: dict) -> None:
-        state_path = providers["provider"]["local"]["state_path"]
-        prefix = providers["terraform"]["backend"]["local"]["prefix"]
-        dir_path = os.path.join(state_path, prefix)
-        if not os.path.exists(dir_path):
+        if not os.path.exists(os.path.join(os.getcwd(),".opta")):
             try:
-                os.makedirs(dir_path)
+                os.makedirs(os.path.join(os.getcwd(),".opta"))
             except OSError as exc:  # Guard against race condition
                 if exc.errno != errno.EEXIST:
-                    raise UserErrors("Cannot write to local {state_path}")
+                    raise UserErrors(f"Cannot write to local.")
 
     @classmethod
     def _create_azure_state_storage(cls, providers: dict) -> None:

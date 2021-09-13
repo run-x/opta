@@ -12,9 +12,10 @@ if TYPE_CHECKING:
 
 class Local:
     def __init__(self, layer: "Layer"):
+        local_state_path = os.path.join(os.getcwd(),".opta")
         self.layer = layer
-        self.state_path = self.layer.providers["local"]["state_path"]
-        self.config_file_path = os.path.join(self.state_path, self.layer.name, "config")
+        self.local_state_path = local_state_path
+        self.config_file_path = os.path.join(local_state_path, "opta_config", self.layer.name)
         if not os.path.exists(os.path.dirname(self.config_file_path)):
             try:
                 os.makedirs(os.path.dirname(self.config_file_path))
@@ -22,15 +23,7 @@ class Local:
                 if exc.errno != errno.EEXIST:
                     raise
 
-        self.tfstate_path = os.path.join(
-            self.state_path, self.layer.name, "default.tfstate"
-        )
-        if not os.path.exists(os.path.dirname(self.tfstate_path)):
-            try:
-                os.makedirs(os.path.dirname(self.tfstate_path))
-            except OSError as exc:  # Guard against race condition
-                if exc.errno != errno.EEXIST:
-                    raise
+ 
 
     def get_remote_config(self) -> Optional["StructuredConfig"]:
         try:
@@ -56,9 +49,10 @@ class Local:
         else:
             logger.warn(f"Did not find opta config {self.config_file_path} to delete")
 
-    def delete_remote_state(self) -> None:
-        if os.path.exists(self.tfstate_path):
-            os.remove(self.tfstate_path)
-            logger.info("Deleted opta config from local")
+    def delete_local_tf_state(self) -> None:
+        tf_file = os.path.join(self.local_state_path, self.layer.name)
+        if os.path.exists(tf_file):
+            os.remove(tf_file)
+            logger.info("Deleted opta tf config from local")
         else:
-            logger.warn(f"Did not find opta tf state {self.tfstate_path} to delete")
+            logger.warn(f"Did not find opta tf state {tf_file} to delete")

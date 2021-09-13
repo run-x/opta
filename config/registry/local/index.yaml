@@ -1,15 +1,14 @@
 required_providers: {}
 backend:
   local:
-    state_path: "{state_storage}"
-    prefix: "{layer_name}"
+    {}
 validator:
   name: str()
   org_name: regex('^[a-z0-9-]{,15}$', name="Valid identifier, regex='[a-z0-9-]{,15}'")
   modules: list(module())
   providers: 
     local: 
-      state_path: str()
+      region: str()
 service_validator:
   - environments: list(include('env'), required=False)
     name: str()
