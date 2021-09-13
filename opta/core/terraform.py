@@ -7,7 +7,7 @@ from shutil import copyfile, rmtree
 from subprocess import DEVNULL, PIPE  # nosec
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
 from uuid import uuid4
-
+from pathlib import Path
 import boto3
 from azure.core.exceptions import (
     HttpResponseError,
@@ -450,7 +450,7 @@ class Terraform:
                 return False
         elif layer.cloud == "local":  
             try:
-                tf_file = os.path.join(os.path.join(os.getcwd(),".opta"),layer.name)
+                tf_file = os.path.join(cls.get_local_opta_dir(),layer.name)
                 if os.path.exists(tf_file):
                     copyfile(tf_file, state_file)
                 else:
@@ -507,7 +507,7 @@ class Terraform:
         if "local" not in providers.get("terraform", {}).get("backend", {}):
             return
         try:
-            rmtree(os.path.join(os.getcwd(),".opta"))
+            rmtree(os.path.join(cls.get_local_opta_dir()))
         except Exception:
             logger.warn(
                 f"Local state delete did not work?"
@@ -515,9 +515,9 @@ class Terraform:
 
     @classmethod
     def _create_local_state_storage(cls, providers: dict) -> None:
-        if not os.path.exists(os.path.join(os.getcwd(),".opta")):
+        if not os.path.exists(os.path.join(cls.get_local_opta_dir(), "local")):
             try:
-                os.makedirs(os.path.join(os.getcwd(),".opta"))
+                os.makedirs(os.path.join(cls.get_local_opta_dir(), "local"))
             except OSError as exc:  # Guard against race condition
                 if exc.errno != errno.EEXIST:
                     raise UserErrors(f"Cannot write to local.")
@@ -907,6 +907,9 @@ class Terraform:
         if "local" in providers.get("terraform", {}).get("backend", {}):
             cls._create_local_state_storage(providers)
 
+    @classmethod 
+    def get_local_opta_dir(cls) -> str:
+        return os.path.join(str(Path.home()), ".opta", "local")
 
 def get_terraform_outputs(layer: "Layer") -> dict:
     """Fetch terraform outputs from existing TF file"""

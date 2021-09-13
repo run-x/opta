@@ -1,5 +1,6 @@
 from typing import List, Optional
-
+import os
+from pathlib import Path
 import boto3
 import click
 from azure.storage.blob import ContainerClient
@@ -85,6 +86,8 @@ def _fetch_children_layers(layer: "Layer") -> List[str]:
         opta_configs = _gcp_get_configs(layer)
     elif layer.cloud == "azurerm":
         opta_configs = _azure_get_configs(layer)
+    elif layer.cloud == "local":
+        opta_configs = _local_get_configs(layer)
     else:
         raise Exception(f"Not handling deletion for cloud {layer.cloud}")
 
@@ -142,5 +145,11 @@ def _gcp_get_configs(layer: "Layer") -> List[str]:
         gcs_client.list_blobs(bucket_object, prefix=gcs_config_dir)
     )
     configs = [blob.name[len(gcs_config_dir) :] for blob in blobs]
+    configs.remove(layer.name)
+    return configs
+
+def _local_get_configs(layer: "Layer") -> List[str]:
+    local_config_dir =  local_dir = os.path.join(os.path.join(str(Path.home()), ".opta", "local","opta_config"))
+    configs =  os.listdir(local_config_dir)
     configs.remove(layer.name)
     return configs
