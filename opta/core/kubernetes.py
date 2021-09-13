@@ -42,7 +42,7 @@ GCP_CLI_INSTALL_URL = "https://cloud.google.com/sdk/docs/install"
 
 
 def configure_kubectl(layer: "Layer") -> None:
-    """ Configure the kubectl CLI tool for the given layer """
+    """Configure the kubectl CLI tool for the given layer"""
     # Make sure the user has the prerequisite CLI tools installed
     # kubectl may not *technically* be required for this opta command to run, but require
     # it anyways since user must install it to access the cluster.
@@ -56,6 +56,12 @@ def configure_kubectl(layer: "Layer") -> None:
         _gcp_configure_kubectl(layer)
     elif layer.cloud == "azurerm":
         _azure_configure_kubectl(layer)
+    elif layer.cloud == "local":
+        _local_configure_kubectl(layer)
+
+
+def _local_configure_kubectl(layer: "Layer") -> None:
+    pass
 
 
 def _gcp_configure_kubectl(layer: "Layer") -> None:
@@ -77,7 +83,9 @@ def _gcp_configure_kubectl(layer: "Layer") -> None:
             )
 
         out: str = nice_run(
-            ["gcloud", "config", "get-value", "project"], check=True, capture_output=True
+            ["gcloud", "config", "get-value", "project"],
+            check=True,
+            capture_output=True,
         ).stdout.decode("utf-8")
     except Exception as err:
         raise UserErrors(
@@ -424,7 +432,9 @@ def tail_pod_log(
 
 
 def tail_namespace_events(
-    layer: "Layer", seconds: Optional[int] = None, color_idx: int = 1,
+    layer: "Layer",
+    seconds: Optional[int] = None,
+    color_idx: int = 1,
 ) -> None:
     load_kube_config()
     v1 = CoreV1Api()
@@ -433,11 +443,16 @@ def tail_namespace_events(
     retry_count = 0
     start_time = pytz.utc.localize(datetime.datetime.min)
     if seconds is not None:
-        start_time = datetime.datetime.now(pytz.utc) - datetime.timedelta(seconds=seconds)
+        start_time = datetime.datetime.now(pytz.utc) - datetime.timedelta(
+            seconds=seconds
+        )
     old_events: List[V1Event] = v1.list_namespaced_event(namespace=layer.name).items
     # Filter by time
     old_events = list(
-        filter(lambda x: (x.last_timestamp or x.event_time) > start_time, old_events,)
+        filter(
+            lambda x: (x.last_timestamp or x.event_time) > start_time,
+            old_events,
+        )
     )
     # Sort by timestamp
     old_events = sorted(old_events, key=lambda x: (x.last_timestamp or x.event_time))
@@ -451,7 +466,8 @@ def tail_namespace_events(
     while True:
         try:
             for stream_obj in watch.stream(
-                v1.list_namespaced_event, namespace=layer.name,
+                v1.list_namespaced_event,
+                namespace=layer.name,
             ):
                 event = stream_obj["object"]
                 if (event.last_timestamp or event.event_time) > start_time:

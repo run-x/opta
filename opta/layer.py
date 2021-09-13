@@ -24,6 +24,7 @@ from google.oauth2 import service_account
 from opta.constants import REGISTRY, VERSION
 from opta.core.aws import AWS
 from opta.core.gcp import GCP
+from opta.core.local import Local
 from opta.core.validator import validate_yaml
 from opta.exceptions import UserErrors
 from opta.module import Module
@@ -106,7 +107,9 @@ class Layer:
         self.parent = parent
         self.path = path
         if parent is None and org_name is None:
-            raise UserErrors("Config must have org name or a parent who has an org name")
+            raise UserErrors(
+                "Config must have org name or a parent who has an org name"
+            )
         self.org_name = org_name
         if self.parent and self.org_name is None:
             self.org_name = self.parent.org_name
@@ -125,12 +128,20 @@ class Layer:
             self.cloud = "aws"
         elif "azurerm" in total_base_providers:
             self.cloud = "azurerm"
+        elif "local" in total_base_providers:
+            self.cloud = "local"
         else:
             raise UserErrors("No cloud provider (AWS, GCP, or Azure) found")
         self.variables = variables or {}
         self.modules = []
         for module_data in modules_data:
-            self.modules.append(Module(self, module_data, self.parent,))
+            self.modules.append(
+                Module(
+                    self,
+                    module_data,
+                    self.parent,
+                )
+            )
         module_names: set = set()
         for module in self.modules:
             if module.name in module_names:
@@ -150,7 +161,8 @@ class Layer:
                 file_path, file_vars = file_path.split("?")
                 res = dict(
                     map(
-                        lambda x: (x.split("=")[0], x.split("=")[1]), file_vars.split(",")
+                        lambda x: (x.split("=")[0], x.split("=")[1]),
+                        file_vars.split(","),
                     )
                 )
                 branch = res.get("ref", branch)
@@ -163,7 +175,9 @@ class Layer:
             conf = yaml.load(config_string)
         elif path.exists(config):
             config_path = config
-            logger.debug(f"Loaded the following configfile:\n{open(config_path).read()}")
+            logger.debug(
+                f"Loaded the following configfile:\n{open(config_path).read()}"
+            )
             with open(config_path) as f:
                 config_string = f.read()
             conf = yaml.load(config_string)
@@ -207,7 +221,9 @@ class Layer:
             for env_meta in environments:
                 env_name = env_meta["name"]
                 parent_path: str = env_meta["path"]
-                if not parent_path.startswith("git@") and not parent_path.startswith("/"):
+                if not parent_path.startswith("git@") and not parent_path.startswith(
+                    "/"
+                ):
                     parent_path = os.path.join(os.path.dirname(path), env_meta["path"])
                 current_parent = cls.load_from_yaml(parent_path, None)
                 if current_parent.parent is not None:
@@ -226,7 +242,7 @@ class Layer:
                     env = list(potential_envs.keys())[0]
                 else:
                     """This is a repeatable prompt, which will not disappear until a valid choice is provided or SIGABRT
-                    is given. """
+                    is given."""
                     env = click.prompt(
                         "Choose an Environment for the Given set of choices",
                         type=click.Choice(potential_envs.keys()),
@@ -331,7 +347,9 @@ class Layer:
             processor = self.PROCESSOR_DICT.get(module_type, ModuleProcessor)
             processor(module, self).post_hook(module_idx, exception)
         if self.parent is not None and self.parent.get_module("runx") is not None:
-            RunxProcessor(self.parent.get_module("runx"), self).post_hook(  # type:ignore
+            RunxProcessor(
+                self.parent.get_module("runx"), self
+            ).post_hook(  # type:ignore
                 module_idx, exception
             )
 
@@ -383,11 +401,13 @@ class Layer:
             region = gcp.region
             credentials = gcp.get_credentials()[0]
             if isinstance(credentials, service_account.Credentials):
-                service_account_credentials: service_account.Credentials = credentials.with_scopes(
-                    [
-                        "https://www.googleapis.com/auth/userinfo.email",
-                        "https://www.googleapis.com/auth/cloud-platform",
-                    ]
+                service_account_credentials: service_account.Credentials = (
+                    credentials.with_scopes(
+                        [
+                            "https://www.googleapis.com/auth/userinfo.email",
+                            "https://www.googleapis.com/auth/cloud-platform",
+                        ]
+                    )
                 )
                 service_account_credentials.refresh(
                     google.auth.transport.requests.Request()
@@ -402,6 +422,9 @@ class Layer:
             region = aws.region
         elif self.cloud == "azurerm":
             region = self.root().providers["azurerm"]["location"]
+        elif self.cloud == "local":
+            return ret
+
         hydration = self.metadata_hydration()
         providers = self.providers
         if self.parent is not None:

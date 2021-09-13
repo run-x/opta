@@ -38,16 +38,6 @@ inputs:
     validator: str(required=False)
     description: The Kubernetes version for the cluster. Must be [supported by AKS](https://docs.microsoft.com/en-us/azure/aks/supported-kubernetes-versions) to bind the cluster too. Gives you automatic K8s version management for the cluster and node pools.
     default: "1.19.11"
-  - name: admin_group_object_ids
-    user_facing: true
-    validator: list(str(), require=False)
-    description: ids of the Active Directory [groups](https://docs.microsoft.com/en-us/azure/active-directory/fundamentals/active-directory-groups-create-azure-portal) to make admins in the K8s cluster.
-    default: []
-  - name: service_cidr
-    user_facing: true
-    validator: str(required=False)
-    description: The cidr to be reserved for k8s service usage
-    default: "10.0.128.0/20"
   - name: dns_service_ip
     user_facing: true
     validator: str(required=False)

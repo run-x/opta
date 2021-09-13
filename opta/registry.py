@@ -37,7 +37,7 @@ def make_registry_dict() -> Dict[Any, Any]:
     common_modules_path = os.path.join(registry_path, "common", "modules")
     with open(os.path.join(registry_path, "index.md"), "r") as f:
         registry_dict["text"] = f.read()
-    for cloud in ["aws", "azurerm", "google"]:
+    for cloud in ["aws", "azurerm", "google", "local"]:
         cloud_path = os.path.join(registry_path, cloud)
         cloud_dict = yaml.load(open(os.path.join(cloud_path, "index.yaml")))
         cloud_dict["modules"] = {}
@@ -67,7 +67,9 @@ def _make_module_docs(vanilla_text: str, module_dict: Dict[Any, Any]) -> str:
         if required:
             input_lines.append(f"- `{name}` - Required. {description}")
         else:
-            input_lines.append(f"- `{name}` - Optional. {description} Default {default}")
+            input_lines.append(
+                f"- `{name}` - Optional. {description} Default {default}"
+            )
 
     output: Dict[str, Any]
     for output in module_dict["outputs"]:

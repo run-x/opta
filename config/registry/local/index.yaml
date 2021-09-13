@@ -1,0 +1,29 @@
+required_providers: {}
+backend:
+  local:
+    state_path: "{state_storage}"
+    prefix: "{layer_name}"
+validator:
+  name: str()
+  org_name: regex('^[a-z0-9-]{,15}$', name="Valid identifier, regex='[a-z0-9-]{,15}'")
+  modules: list(module())
+  providers: 
+    local: 
+      state_path: str()
+service_validator:
+  - environments: list(include('env'), required=False)
+    name: str()
+    modules: list(module())
+  - env:
+      name: str()
+      path: str()
+      variables: map(required=False)
+      vars: map(required=False)
+module_aliases:
+  postgres: local-postgres
+  redis: local-redis
+  k8s-service: local-k8s-service
+  base: local-base
+  k8s-base: local-k8s-base
+  k8s-cluster: local-kind
+  dns: local-dns
