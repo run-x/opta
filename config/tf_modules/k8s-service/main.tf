@@ -42,6 +42,8 @@ resource "helm_release" "k8s-service" {
       moduleName : var.module_name,
       environmentName : var.env_name,
       iamRoleArn : aws_iam_role.k8s_service.arn
+      stickySession : var.sticky_session
+      stickySessionMaxAge : var.sticky_session_max_age
     })
   ]
   atomic          = true

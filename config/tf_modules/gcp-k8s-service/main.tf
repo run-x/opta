@@ -41,6 +41,8 @@ resource "helm_release" "k8s-service" {
       moduleName : var.module_name,
       environmentName : var.env_name,
       googleServiceAccount : google_service_account.k8s_service.email
+      stickySession : var.sticky_session
+      stickySessionMaxAge : var.sticky_session_max_age
     })
   ]
   atomic          = true

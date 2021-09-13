@@ -5,6 +5,8 @@ iamRoleArn: ""
 layerName: ""
 moduleName: ""
 environmentName: ""
+stickySession: false
+stickySessionMaxAge: 86400
 envVars: []
 linkSecrets: []
 manualSecrets: []
