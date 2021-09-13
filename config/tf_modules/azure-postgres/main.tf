@@ -3,11 +3,11 @@ resource "random_id" "key_suffix" {
 }
 
 resource "random_password" "root_auth" {
-  length  = 20
-  min_lower = 5
-  min_upper = 5
+  length      = 20
+  min_lower   = 5
+  min_upper   = 5
   min_numeric = 5
-  special = false
+  special     = false
   lifecycle {
     ignore_changes = [min_lower, min_upper, min_numeric]
   }
