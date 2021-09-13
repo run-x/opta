@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # create a cluster with the local registry and nginx externalPorts enabled in containerd
-cat <<EOF | ~/.opta/kind/kind create cluster --name opta-local-cluster --wait 5m --kubeconfig ~/.opta/kind/config --config=-
+cat <<EOF | ~/.opta/local/kind create cluster --name opta-local-cluster --wait 5m --kubeconfig ~/.opta/local/kubeconfig --config=-
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 containerdConfigPatches:
