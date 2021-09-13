@@ -27,6 +27,7 @@ from opta.core.kubernetes import (
     tail_module_log,
     tail_namespace_events,
 )
+from opta.core.local import Local
 from opta.core.plan_displayer import PlanDisplayer
 from opta.core.terraform import Terraform, get_terraform_outputs
 from opta.exceptions import MissingState, UserErrors
@@ -154,6 +155,8 @@ def _apply(
         cloud_client = GCP(layer)
     elif layer.cloud == "azurerm":
         cloud_client = Azure(layer)
+    elif layer.cloud == "local":
+        cloud_client = Local(layer)
     else:
         raise Exception(f"Cannot handle upload config for cloud {layer.cloud}")
 
@@ -272,7 +275,9 @@ def _apply(
                 # Tailing events
                 new_thread.start()
                 new_thread = Thread(
-                    target=tail_namespace_events, args=(layer, 0, 1), daemon=True,
+                    target=tail_namespace_events,
+                    args=(layer, 0, 1),
+                    daemon=True,
                 )
                 new_thread.start()
 
@@ -280,7 +285,9 @@ def _apply(
             if auto_approve:
                 tf_flags.append("-auto-approve")
             try:
-                Terraform.apply(layer, *tf_flags, TF_PLAN_PATH, no_init=True, quiet=False)
+                Terraform.apply(
+                    layer, *tf_flags, TF_PLAN_PATH, no_init=True, quiet=False
+                )
             except Exception as e:
                 layer.post_hook(module_idx, e)
                 raise e

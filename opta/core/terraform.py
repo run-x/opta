@@ -1,7 +1,9 @@
+import errno
 import json
 import logging
 import os
 import time
+from shutil import copyfile, rmtree
 from subprocess import DEVNULL, PIPE  # nosec
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
 from uuid import uuid4
@@ -30,6 +32,7 @@ from opta.amplitude import amplitude_client
 from opta.core.aws import AWS, get_aws_resource_id
 from opta.core.azure import Azure
 from opta.core.gcp import GCP
+from opta.core.local import Local
 from opta.exceptions import MissingState, UserErrors
 from opta.nice_subprocess import nice_run
 from opta.utils import deep_merge, fmt_msg, logger
@@ -102,7 +105,9 @@ class Terraform:
             )
         except Exception as e:
             logging.error(e)
-            logging.info("Terraform apply failed, would rollback, but skipping for now..")
+            logging.info(
+                "Terraform apply failed, would rollback, but skipping for now.."
+            )
             raise e
             # cls.rollback(layer)
 
@@ -223,6 +228,10 @@ class Terraform:
             azure = Azure(layer)
             azure.delete_opta_config()
             azure.delete_remote_state()
+        elif layer.cloud == "local":
+            local = Local(layer)
+            local.delete_opta_config()
+            local.delete_remote_state()
         else:
             raise Exception(
                 f"Can not handle opta config deletion for cloud {layer.cloud}"
@@ -251,8 +260,14 @@ class Terraform:
             return cls._gcp_verify_storage(layer)
         elif layer.cloud == "azurerm":
             return cls._azure_verify_storage(layer)
+        elif layer.cloud == "local":
+            return cls._local_verify_storage(layer)
         else:
             raise Exception(f"Can not verify state storage for cloud {layer.cloud}")
+
+    @classmethod
+    def _local_verify_storage(cls, layer: "Layer") -> bool:
+        return True
 
     @classmethod
     def _azure_verify_storage(cls, layer: "Layer") -> bool:
@@ -293,7 +308,9 @@ class Terraform:
         bucket = layer.state_storage()
         s3 = boto3.client("s3")
         try:
-            s3.get_bucket_encryption(Bucket=bucket,)
+            s3.get_bucket_encryption(
+                Bucket=bucket,
+            )
         except ClientError as e:
             if e.response["Error"]["Code"] == "NoSuchBucket":
                 return False
@@ -431,6 +448,17 @@ class Terraform:
                     blob_data.readinto(file_obj)
             except ResourceNotFoundError:
                 return False
+        elif "local" in providers.get("terraform", {}).get("backend", {}):
+            state_path = providers["provider"]["local"]["state_path"]
+            prefix = providers["terraform"]["backend"]["local"]["prefix"]
+            try:
+                copyfile(
+                    os.path.join(state_path, prefix, "default.tfstate"), state_file
+                )
+            except Exception as e:
+                UserErrors(f"Could copy local state file to {state_file}")
+                return False
+
         else:
             raise UserErrors("Need to get state from S3 or GCS or Azure storage")
 
@@ -472,6 +500,33 @@ class Terraform:
             logger.info("Successfully deleted GCP state storage")
         except NotFound:
             logger.warn("State bucket was already deleted")
+
+    @classmethod
+    def _local_delete_state_storage(cls, layer: "Layer") -> None:
+        providers = layer.gen_providers(0)
+        if "local" not in providers.get("terraform", {}).get("backend", {}):
+            return
+        try:
+            state_path = providers["provider"]["local"]["state_path"]
+            prefix = providers["terraform"]["backend"]["local"]["prefix"]
+            dir_path = os.path.join(state_path, prefix)
+            rmtree(dir_path)
+        except Exception:
+            logger.warn(
+                f"Local state delete did not work, are the state files present at {dir_path}?"
+            )
+
+    @classmethod
+    def _create_local_state_storage(cls, providers: dict) -> None:
+        state_path = providers["provider"]["local"]["state_path"]
+        prefix = providers["terraform"]["backend"]["local"]["prefix"]
+        dir_path = os.path.join(state_path, prefix)
+        if not os.path.exists(dir_path):
+            try:
+                os.makedirs(dir_path)
+            except OSError as exc:  # Guard against race condition
+                if exc.errno != errno.EEXIST:
+                    raise UserErrors("Cannot write to local {state_path}")
 
     @classmethod
     def _create_azure_state_storage(cls, providers: dict) -> None:
@@ -534,8 +589,10 @@ class Terraform:
             )
         )[0]
 
-        role_assignments = authorization_client.role_assignments.list_for_resource_group(
-            rg_result.name
+        role_assignments = (
+            authorization_client.role_assignments.list_for_resource_group(
+                rg_result.name
+            )
         )
         for role_assignment in role_assignments:
             if role_assignment.role_definition_id == owner_role.id:
@@ -686,7 +743,10 @@ class Terraform:
         else:
             logger.info("No new API found that needs to be enabled")
         service = discovery.build(
-            "cloudresourcemanager", "v1", credentials=credentials, static_discovery=False,
+            "cloudresourcemanager",
+            "v1",
+            credentials=credentials,
+            static_discovery=False,
         )
         request = service.projects().get(projectId=project_id)
         response = request.execute()
@@ -710,7 +770,9 @@ class Terraform:
         dynamodb = boto3.client("dynamodb", config=Config(region_name=region))
         iam = boto3.client("iam", config=Config(region_name=region))
         try:
-            s3.get_bucket_encryption(Bucket=bucket_name,)
+            s3.get_bucket_encryption(
+                Bucket=bucket_name,
+            )
         except ClientError as e:
             if e.response["Error"]["Code"] == "AuthFailure":
                 raise UserErrors(
@@ -734,7 +796,9 @@ class Terraform:
                 )
             logger.info("S3 bucket for terraform state not found, creating a new one")
             if region == "us-east-1":
-                s3.create_bucket(Bucket=bucket_name,)
+                s3.create_bucket(
+                    Bucket=bucket_name,
+                )
             else:
                 s3.create_bucket(
                     Bucket=bucket_name,
@@ -762,7 +826,8 @@ class Terraform:
                 },
             )
             s3.put_bucket_versioning(
-                Bucket=bucket_name, VersioningConfiguration={"Status": "Enabled"},
+                Bucket=bucket_name,
+                VersioningConfiguration={"Status": "Enabled"},
             )
             s3.put_bucket_lifecycle(
                 Bucket=bucket_name,
@@ -777,7 +842,9 @@ class Terraform:
                                 "StorageClass": "GLACIER",
                             },
                             "NoncurrentVersionExpiration": {"NoncurrentDays": 60},
-                            "AbortIncompleteMultipartUpload": {"DaysAfterInitiation": 10},
+                            "AbortIncompleteMultipartUpload": {
+                                "DaysAfterInitiation": 10
+                            },
                         },
                     ]
                 },
@@ -796,7 +863,9 @@ class Terraform:
             dynamodb.create_table(
                 TableName=dynamodb_table,
                 KeySchema=[{"AttributeName": "LockID", "KeyType": "HASH"}],
-                AttributeDefinitions=[{"AttributeName": "LockID", "AttributeType": "S"}],
+                AttributeDefinitions=[
+                    {"AttributeName": "LockID", "AttributeType": "S"}
+                ],
                 BillingMode="PROVISIONED",
                 ProvisionedThroughput={
                     "ReadCapacityUnits": 20,
@@ -805,7 +874,9 @@ class Terraform:
             )
         # Create the service linked roles
         try:
-            iam.create_service_linked_role(AWSServiceName="autoscaling.amazonaws.com",)
+            iam.create_service_linked_role(
+                AWSServiceName="autoscaling.amazonaws.com",
+            )
         except ClientError as e:
             if e.response["Error"]["Code"] != "InvalidInput":
                 raise UserErrors(
@@ -839,10 +910,12 @@ class Terraform:
             cls._create_gcp_state_storage(providers)
         if "azurerm" in providers.get("terraform", {}).get("backend", {}):
             cls._create_azure_state_storage(providers)
+        if "local" in providers.get("terraform", {}).get("backend", {}):
+            cls._create_local_state_storage(providers)
 
 
 def get_terraform_outputs(layer: "Layer") -> dict:
-    """ Fetch terraform outputs from existing TF file """
+    """Fetch terraform outputs from existing TF file"""
     current_outputs = Terraform.get_outputs(layer)
     parent_outputs = _fetch_parent_outputs(layer)
     return deep_merge(current_outputs, parent_outputs)

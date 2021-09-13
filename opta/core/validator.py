@@ -30,9 +30,7 @@ class Module(Validator):
 
         type: str = value["type"]
         if type in REGISTRY[self.cloud]["module_aliases"]:
-            value["type"] = REGISTRY[self.cloud]["module_aliases"][  # type: ignore
-                type
-            ]
+            value["type"] = REGISTRY[self.cloud]["module_aliases"][type]  # type: ignore
             type = value["type"]
         elif type not in REGISTRY[self.cloud]["modules"]:
             raise UserErrors(f"Module {type} is not supported for cloud {self.cloud}")
@@ -53,6 +51,10 @@ class GcpModule(Module):
 
 class AzureModule(Module):
     cloud = "azurerm"
+
+
+class LocalModule(Module):
+    cloud = "local"
 
 
 class Opta(Validator):
@@ -115,8 +117,16 @@ class AureOpta(Opta):
     service_schema_dicts = REGISTRY["azurerm"]["service_validator"]
 
 
+class LocalOpta(Opta):
+    extra_validators = [LocalModule]
+    environment_schema_dict = REGISTRY["local"]["validator"]
+    service_schema_dicts = REGISTRY["local"]["service_validator"]
+
+
 def _get_yamale_errors(
-    data: Any, schema_path: str, extra_validators: Optional[List[Type[Validator]]] = None
+    data: Any,
+    schema_path: str,
+    extra_validators: Optional[List[Type[Validator]]] = None,
 ) -> List[str]:
     extra_validators = extra_validators or []
     validators = DefaultValidators.copy()
@@ -144,6 +154,8 @@ gcp_validators = DefaultValidators.copy()
 gcp_validators[GcpOpta.tag] = GcpOpta
 azure_validators = DefaultValidators.copy()
 azure_validators[AureOpta.tag] = AureOpta
+local_validators = DefaultValidators.copy()
+local_validators[LocalOpta.tag] = LocalOpta
 
 with NamedTemporaryFile(mode="w") as f:
     yaml.dump(REGISTRY["validator"], f)
@@ -159,6 +171,9 @@ with NamedTemporaryFile(mode="w") as f:
     )
     azure_main_schema = yamale.make_schema(
         f.name, validators=azure_validators, parser="ruamel"
+    )
+    local_main_schema = yamale.make_schema(
+        f.name, validators=local_validators, parser="ruamel"
     )
 
 
@@ -182,6 +197,8 @@ def validate_yaml(config_file_path: str, cloud: str) -> Literal[True]:
         yamale_result = yamale.validate(gcp_main_schema, data, _raise_error=False)
     elif cloud == "azurerm":
         yamale_result = yamale.validate(azure_main_schema, data, _raise_error=False)
+    elif cloud == "local":
+        yamale_result = yamale.validate(local_main_schema, data, _raise_error=False)
     else:
         yamale_result = yamale.validate(vanilla_main_schema, data, _raise_error=False)
     errors = []
