@@ -17,7 +17,10 @@ if TYPE_CHECKING:
 
 class Module:
     def __init__(
-        self, layer: "Layer", data: Dict[Any, Any], parent_layer: Optional["Layer"] = None
+        self,
+        layer: "Layer",
+        data: Dict[Any, Any],
+        parent_layer: Optional["Layer"] = None,
     ):
         if "type" not in data:
             raise UserErrors("Module data must always have a type")
@@ -35,10 +38,12 @@ class Module:
         self.parent_layer = parent_layer
         self.name: str = data.get("name", self.type.replace("-", ""))
         if not Module.valid_name(self.name):
-            raise UserErrors("Invalid module name, can only contain letters and numbers!")
-        self.halt = REGISTRY[layer.cloud]["modules"][self.aliased_type or self.type].get(
-            "halt", False
-        )
+            raise UserErrors(
+                "Invalid module name, can only contain letters and numbers!"
+            )
+        self.halt = REGISTRY[layer.cloud]["modules"][
+            self.aliased_type or self.type
+        ].get("halt", False)
         self.module_dir_path = self.translate_location(
             self.desc.get("terraform_module", self.aliased_type or self.type)
         )
@@ -57,7 +62,9 @@ class Module:
         return bool(re.match(pattern, name))
 
     def gen_tf(
-        self, depends_on: Optional[List[str]] = None, output_prefix: Optional[str] = None
+        self,
+        depends_on: Optional[List[str]] = None,
+        output_prefix: Optional[str] = None,
     ) -> Dict[Any, Any]:
         if self.module_dir_path == "":
             return {}
