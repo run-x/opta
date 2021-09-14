@@ -1,8 +1,9 @@
 import errno
 import json
 import os
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 from pathlib import Path
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
+
 from opta.exceptions import UserErrors
 from opta.utils import fmt_msg, logger
 
@@ -18,7 +19,6 @@ class Local:
         self.config_file_path = os.path.join(local_dir, "opta_config", self.layer.name)
         if not os.path.exists(os.path.dirname(self.config_file_path)):
             os.makedirs(os.path.dirname(self.config_file_path))
- 
 
     def get_remote_config(self) -> Optional["StructuredConfig"]:
         try:
@@ -45,7 +45,9 @@ class Local:
             logger.warn(f"Did not find opta config {self.config_file_path} to delete")
 
     def delete_local_tf_state(self) -> None:
-        tf_file = os.path.join(str(Path.home()), ".opta", "local", self.layer.name)
+        tf_file = os.path.join(
+            str(Path.home()), ".opta", "local", self.layer.name + ".tfstate"
+        )
         if os.path.exists(tf_file):
             os.remove(tf_file)
             logger.info("Deleted opta tf config from local")

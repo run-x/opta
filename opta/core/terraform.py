@@ -99,6 +99,10 @@ class Terraform:
             kwargs["stdout"] = DEVNULL
 
         try:
+            if layer.cloud == "local":
+                kwargs["env"]["KUBE_CONFIG_PATH"] = os.path.join(
+                    cls.get_local_opta_dir(), "kubeconfig"
+                )
             nice_run(
                 ["terraform", "apply", "-compact-warnings", *tf_flags],
                 check=True,
@@ -202,6 +206,11 @@ class Terraform:
         cls.refresh()
 
         kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
+        if layer.cloud == "local":
+            kwargs["env"]["KUBE_CONFIG_PATH"] = os.path.join(
+                cls.get_local_opta_dir(), "kubeconfig"
+            )
+
         idx = len(layer.modules) - 1
         for module in reversed(layer.modules):
             module_address_prefix = f"module.{module.name}"
@@ -322,9 +331,15 @@ class Terraform:
         return True
 
     @classmethod
-    def plan(cls, *tf_flags: str, quiet: Optional[bool] = False) -> None:
+    def plan(
+        cls, *tf_flags: str, quiet: Optional[bool] = False, cloud_name: str
+    ) -> None:
         cls.init(quiet)
         kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
+        if cloud_name == "local":
+            kwargs["env"]["KUBE_CONFIG_PATH"] = os.path.join(
+                cls.get_local_opta_dir(), "kubeconfig"
+            )
         if quiet:
             kwargs["stderr"] = PIPE
             kwargs["stdout"] = DEVNULL

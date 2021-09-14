@@ -1,6 +1,7 @@
+import os
 from threading import Thread
 from typing import List, Optional, Set
-import os
+
 import boto3
 import click
 import semver
@@ -241,6 +242,7 @@ def _apply(
                 "-lock=false",
                 "-input=false",
                 f"-out={TF_PLAN_PATH}",
+                cloud_name=layer.cloud,
                 *targets,
                 quiet=True,
             )
