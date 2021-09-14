@@ -400,6 +400,7 @@ class Terraform:
         try:
             tf_file = os.path.join(cls.get_local_opta_dir(), layer.name + ".tfstate")
             copyfile("terraform.tfstate", tf_file)
+            os.remove("terraform.tfstate")
             return True
         except Exception as e:
             UserErrors(f"Could copy TF state file to {tf_file}")

@@ -50,6 +50,7 @@ from opta.module_processors.gcp_gke import GcpGkeProcessor
 from opta.module_processors.gcp_k8s_base import GcpK8sBaseProcessor
 from opta.module_processors.gcp_k8s_service import GcpK8sServiceProcessor
 from opta.module_processors.helm_chart import HelmChartProcessor
+from opta.module_processors.local_k8s_service import LocalK8sServiceProcessor
 from opta.module_processors.runx import RunxProcessor
 from opta.plugins.derived_providers import DerivedProviders
 from opta.utils import deep_merge, hydrate, logger, yaml
@@ -81,6 +82,7 @@ class Layer:
         "azure-base": AzureBaseProcessor,
         "azure-k8s-base": AzureK8sBaseProcessor,
         "azure-k8s-service": AzureK8sServiceProcessor,
+        "local-k8s-service": LocalK8sServiceProcessor,
         "external-ssl-cert": ExternalSSLCert,
         "aws-s3": AwsS3Processor,
         "gcp-dns": GCPDnsProcessor,

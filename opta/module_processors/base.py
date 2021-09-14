@@ -91,7 +91,9 @@ class GcpK8sModuleProcessor(ModuleProcessor):
 class LocalK8sModuleProcessor(ModuleProcessor):
     def __init__(self, module: "Module", layer: "Layer"):
         if system() not in ["Linux", "MacOS"]:
-            raise UserErrors("Opta is not built to support this host operating system.")
+            raise UserErrors(
+                "Opta Local is not built to support this host operating system."
+            )
         super(LocalK8sModuleProcessor, self).__init__(module, layer)
 
     def process(self, module_idx: int) -> None:

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-
+reg_name='opta-local-registry'
+reg_port='5000'
 # create a cluster with the local registry and nginx externalPorts enabled in containerd
 cat <<EOF | ~/.opta/local/kind create cluster --name opta-local-cluster --wait 5m --kubeconfig ~/.opta/local/kubeconfig --config=-
 kind: Cluster
