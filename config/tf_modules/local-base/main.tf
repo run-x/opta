@@ -7,7 +7,7 @@ resource "null_resource" "local-base" {
     when    = destroy
     command = <<EOT
         echo "Uninstalling kind"
-        rm -rf .opta/local/kind
+        rm -rf ~/.opta/local/kind
         echo "Stopping and removing local docker registry"
         docker stop opta-local-registry
         docker rm opta-local-registry
