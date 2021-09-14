@@ -42,3 +42,5 @@ CI = "CI"
 
 # List of chars to escape in regexes
 ESCAPE_REQUIRED = ["\\", ".", "+", "*", "?", "[", "]", "$", "^", "(", ")", "{", "}", "|"]
+
+SHELLS_ALLOWED = ["bash", "sh"]
