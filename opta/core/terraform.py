@@ -3,11 +3,12 @@ import json
 import logging
 import os
 import time
+from pathlib import Path
 from shutil import copyfile, rmtree
 from subprocess import DEVNULL, PIPE  # nosec
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
 from uuid import uuid4
-from pathlib import Path
+
 import boto3
 from azure.core.exceptions import (
     HttpResponseError,
@@ -46,6 +47,7 @@ EXTRA_ENV = (
 
 class Terraform:
     downloaded_state: Dict[str, Dict[Any, Any]] = {}
+
     @classmethod
     def init(cls, quiet: Optional[bool] = False, *tf_flags: str) -> None:
         kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
@@ -102,6 +104,8 @@ class Terraform:
                 check=True,
                 **kwargs,
             )
+            if layer.cloud == "local":
+                cls.upload_local_state(layer)
         except Exception as e:
             logging.error(e)
             logging.info(
@@ -228,7 +232,7 @@ class Terraform:
             azure.delete_opta_config()
             azure.delete_remote_state()
         elif layer.cloud == "local":
-           
+
             local = Local(layer)
             local.delete_opta_config()
             local.delete_local_tf_state()
@@ -377,6 +381,16 @@ class Terraform:
         return module_resources
 
     @classmethod
+    def upload_local_state(cls, layer: "Layer") -> bool:
+        try:
+            tf_file = os.path.join(cls.get_local_opta_dir(), layer.name + ".tfstate")
+            copyfile("terraform.tfstate", tf_file)
+            return True
+        except Exception as e:
+            UserErrors(f"Could copy TF state file to {tf_file}")
+            return False
+
+    @classmethod
     def download_state(cls, layer: "Layer") -> bool:
         if not cls.verify_storage(layer):
             logger.info(
@@ -448,16 +462,18 @@ class Terraform:
                     blob_data.readinto(file_obj)
             except ResourceNotFoundError:
                 return False
-        elif layer.cloud == "local":  
+        elif layer.cloud == "local":
             try:
-                tf_file = os.path.join(cls.get_local_opta_dir(),layer.name)
+                tf_file = os.path.join(
+                    cls.get_local_opta_dir(), layer.name + ".tfstate"
+                )
                 if os.path.exists(tf_file):
                     copyfile(tf_file, state_file)
+                    copyfile(tf_file, "terraform.tfstate")
                 else:
                     return False
             except Exception as e:
                 UserErrors(f"Could copy local state file to {state_file}")
-                
 
         else:
             raise UserErrors("Need to get state from S3 or GCS or Azure storage")
@@ -509,9 +525,7 @@ class Terraform:
         try:
             rmtree(os.path.join(cls.get_local_opta_dir()))
         except Exception:
-            logger.warn(
-                f"Local state delete did not work?"
-            )
+            logger.warn(f"Local state delete did not work?")
 
     @classmethod
     def _create_local_state_storage(cls, providers: dict) -> None:
@@ -907,9 +921,10 @@ class Terraform:
         if "local" in providers.get("terraform", {}).get("backend", {}):
             cls._create_local_state_storage(providers)
 
-    @classmethod 
+    @classmethod
     def get_local_opta_dir(cls) -> str:
         return os.path.join(str(Path.home()), ".opta", "local")
+
 
 def get_terraform_outputs(layer: "Layer") -> dict:
     """Fetch terraform outputs from existing TF file"""
