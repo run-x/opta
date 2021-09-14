@@ -8,7 +8,7 @@ validator:
   modules: list(module())
   providers: 
     local: 
-      region: str()
+      region: str(required=False)
 service_validator:
   - environments: list(include('env'), required=False)
     name: str()
