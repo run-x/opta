@@ -90,6 +90,7 @@ class Terraform:
             kwargs["env"]["KUBE_CONFIG_PATH"] = os.path.join(
                 cls.get_local_opta_dir(), "kubeconfig"
             )
+            kwargs["env"]["KUBECONFIG"] = kwargs["env"]["KUBE_CONFIG_PATH"] #needed for helm templates with vlookup
         return kwargs
         
 
