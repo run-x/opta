@@ -124,4 +124,7 @@ variable "manual_secrets" {
   default = []
 }
 
-
+variable "local_registry_name" {
+  type = string
+  default = "localhost:5000"
+}

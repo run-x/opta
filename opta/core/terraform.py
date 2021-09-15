@@ -49,8 +49,8 @@ class Terraform:
     downloaded_state: Dict[str, Dict[Any, Any]] = {}
 
     @classmethod
-    def init(cls, quiet: Optional[bool] = False, *tf_flags: str) -> None:
-        kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
+    def init(cls, quiet: Optional[bool] = False, *tf_flags: str, layer: "Layer") -> None:
+        kwargs = cls.insert_extra_env(layer)
         if quiet:
             kwargs["stderr"] = PIPE
             kwargs["stdout"] = DEVNULL
@@ -84,6 +84,16 @@ class Terraform:
         raise MissingState(f"Unable to download state for layer {layer.name}")
 
     @classmethod
+    def insert_extra_env(cls, layer: "Layer") -> dict:
+        kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
+        if layer and layer.cloud == "local":
+            kwargs["env"]["KUBE_CONFIG_PATH"] = os.path.join(
+                cls.get_local_opta_dir(), "kubeconfig"
+            )
+        return kwargs
+        
+
+    @classmethod
     def apply(
         cls,
         layer: "Layer",
@@ -92,17 +102,12 @@ class Terraform:
         quiet: Optional[bool] = False,
     ) -> None:
         if not no_init:
-            cls.init(quiet)
-        kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
+            cls.init(quiet, layer=layer)
+        kwargs = cls.insert_extra_env(layer)
         if quiet:
             kwargs["stderr"] = PIPE
             kwargs["stdout"] = DEVNULL
-
         try:
-            if layer.cloud == "local":
-                kwargs["env"]["KUBE_CONFIG_PATH"] = os.path.join(
-                    cls.get_local_opta_dir(), "kubeconfig"
-                )
             nice_run(
                 ["terraform", "apply", "-compact-warnings", *tf_flags],
                 check=True,
@@ -133,7 +138,7 @@ class Terraform:
 
             try:
                 resource_id = get_aws_resource_id(aws_resources[resource])
-                cls.import_resource(resource, resource_id)
+                cls.import_resource(resource, resource_id, layer=layer)
                 stale_resources.append(resource)
             except Exception:
                 logging.debug(
@@ -149,8 +154,8 @@ class Terraform:
         cls.destroy_resources(layer, stale_resources)
 
     @classmethod
-    def import_resource(cls, tf_resource_address: str, aws_resource_id: str) -> None:
-        kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
+    def import_resource(cls, tf_resource_address: str, aws_resource_id: str, layer: "Layer") -> None:
+        kwargs = cls.insert_extra_env(layer)
         nice_run(
             ["terraform", "import", tf_resource_address, aws_resource_id],
             check=True,
@@ -158,8 +163,8 @@ class Terraform:
         )
 
     @classmethod
-    def refresh(cls, *tf_flags: str) -> None:
-        kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
+    def refresh(cls, layer: "Layer", *tf_flags: str) -> None:
+        kwargs = cls.insert_extra_env(layer)
         nice_run(["terraform", "refresh", *tf_flags], check=True, **kwargs)
 
     @classmethod
@@ -176,8 +181,8 @@ class Terraform:
         # Refreshing the state is necessary to update terraform outputs.
         # This includes fetching the latest EKS cluster auth token, which is
         # necessary for destroying many k8s resources.
-        cls.refresh()
-        kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
+        cls.refresh(layer)
+        kwargs = cls.insert_extra_env(layer)
 
         for module in reversed(layer.modules):
             module_address_prefix = f"module.{module.name}"
@@ -203,9 +208,8 @@ class Terraform:
         # Refreshing the state is necessary to update terraform outputs.
         # This includes fetching the latest EKS cluster auth token, which is
         # necessary for destroying many k8s resources.
-        cls.refresh()
-
-        kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
+        cls.refresh(layer)
+        kwargs = cls.insert_extra_env(layer)
         if layer.cloud == "local":
             kwargs["env"]["KUBE_CONFIG_PATH"] = os.path.join(
                 cls.get_local_opta_dir(), "kubeconfig"
@@ -218,7 +222,7 @@ class Terraform:
             if module.name not in existing_modules:
                 idx -= 1
                 continue
-            cls.refresh(f"-target={module_address_prefix}")
+            cls.refresh(layer,f"-target={module_address_prefix}")
             nice_run(
                 ["terraform", "destroy", f"-target={module_address_prefix}", *tf_flags],
                 check=True,
@@ -332,14 +336,10 @@ class Terraform:
 
     @classmethod
     def plan(
-        cls, *tf_flags: str, quiet: Optional[bool] = False, cloud_name: str
+        cls, *tf_flags: str, quiet: Optional[bool] = False, layer: "Layer",
     ) -> None:
-        cls.init(quiet)
-        kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
-        if cloud_name == "local":
-            kwargs["env"]["KUBE_CONFIG_PATH"] = os.path.join(
-                cls.get_local_opta_dir(), "kubeconfig"
-            )
+        cls.init(quiet,layer=layer)
+        kwargs = cls.insert_extra_env(layer)
         if quiet:
             kwargs["stderr"] = PIPE
             kwargs["stdout"] = DEVNULL
@@ -358,7 +358,7 @@ class Terraform:
 
     @classmethod
     def show(cls, *tf_flags: str) -> None:
-        kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
+        kwargs = cls.insert_extra_env(None)
         nice_run(["terraform", "show", *tf_flags], check=True, **kwargs)
 
     @classmethod
