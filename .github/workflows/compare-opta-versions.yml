@@ -55,11 +55,11 @@ jobs:
         run: VERSION=${{ github.event.inputs.version1 }} /bin/bash -c "$(curl -fsSL https://docs.opta.dev/install.sh)"
 
       - name: Check Opta Version Installed
-        run: opta version
+        run: /home/runner/.opta/opta version
 
       - name: Apply opta environment
         run: |
-          OPTA_DISABLE_REPORTING=true opta apply \
+          OPTA_DISABLE_REPORTING=true /home/runner/.opta/opta apply \
           --config runx-infra/opta-ci/opta.yml \
           --auto-approve \
           --refresh
@@ -73,14 +73,14 @@ jobs:
 
       - name: Set secret
         run: |
-          OPTA_DISABLE_REPORTING=true opta secret update \
+          OPTA_DISABLE_REPORTING=true /home/runner/.opta/opta secret update \
           --env ci \
           --config test-service/opta.yml \
           FAKE_SECRET foo
 
       - name: Deploy test-service
         run: |
-          OPTA_DISABLE_REPORTING=true opta deploy \
+          OPTA_DISABLE_REPORTING=true /home/runner/.opta/opta deploy \
           --image app:latest \
           --env ci \
           --config test-service/opta.yml \
@@ -89,7 +89,7 @@ jobs:
 
       - name: View secret and check value
         run: |
-          secret_value=$(OPTA_DISABLE_REPORTING=true opta secret view \
+          secret_value=$(OPTA_DISABLE_REPORTING=true /home/runner/.opta/opta secret view \
           --env ci \
           --config test-service/opta.yml \
           FAKE_SECRET | tail -1)
@@ -100,11 +100,11 @@ jobs:
         run: VERSION=${{ github.event.inputs.version2 }} /bin/bash -c "$(curl -fsSL https://docs.opta.dev/install.sh)"
 
       - name: Check Opta Version Installed
-        run: opta version
+        run: /home/runner/.opta/opta version
 
       - name: Deploy test-service
         run: |
-          OPTA_DISABLE_REPORTING=true opta deploy \
+          OPTA_DISABLE_REPORTING=true /home/runner/.opta/opta deploy \
           --image app:latest \
           --env ci \
           --config test-service/opta.yml \
@@ -113,7 +113,7 @@ jobs:
 
       - name: View secret and check value
         run: |
-          secret_value=$(OPTA_DISABLE_REPORTING=true opta secret view \
+          secret_value=$(OPTA_DISABLE_REPORTING=true /home/runner/.opta/opta secret view \
           --env ci \
           --config test-service/opta.yml \
           FAKE_SECRET | tail -1)
@@ -122,10 +122,10 @@ jobs:
 
       - name: Destroy environment (and test service)
         run: |
-          yes | OPTA_DISABLE_REPORTING=true opta destroy \
+          yes | OPTA_DISABLE_REPORTING=true /home/runner/.opta/opta destroy \
           --env ci \
           --config test-service/opta.yml \
           --auto-approve
-          yes | OPTA_DISABLE_REPORTING=true opta destroy \
+          yes | OPTA_DISABLE_REPORTING=true /home/runner/.opta/opta destroy \
           --config runx-infra/opta-ci/opta.yml \
           --auto-approve
