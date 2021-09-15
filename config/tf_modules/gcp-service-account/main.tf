@@ -4,10 +4,10 @@ resource "google_service_account" "k8s_service" {
 }
 
 resource "google_service_account_iam_binding" "trust_k8s_workload_idu" {
-  count = length(var.allowed_k8s_services) == 0 ? 0 : 1
+  count              = length(var.allowed_k8s_services) == 0 ? 0 : 1
   service_account_id = google_service_account.k8s_service.name
   role               = "roles/iam.workloadIdentityUser"
-  members = [for s in var.allowed_k8s_services : "serviceAccount:${data.google_client_config.current.project}.svc.id.goog[${s["namespace"]}/${s["service_account_name"]}]"]
+  members            = [for s in var.allowed_k8s_services : "serviceAccount:${data.google_client_config.current.project}.svc.id.goog[${s["namespace"]}/${s["service_account_name"]}]"]
 
 }
 
