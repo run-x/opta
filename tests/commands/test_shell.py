@@ -81,7 +81,7 @@ def test_shell_with_sh(mocker: MockFixture) -> None:
     mocked_nice_run = mocker.patch("opta.commands.shell.nice_run")
 
     runner = CliRunner()
-    result = runner.invoke(cli, ["shell", "-s", "sh"])
+    result = runner.invoke(cli, ["shell", "-t", "sh"])
 
     assert result.exit_code == 0
     layer_gen_all.assert_called_once_with(mocked_layer)
@@ -126,6 +126,6 @@ def test_shell_with_invalid_shell(mocker: MockFixture) -> None:
     mocked_core_v1_api.list_namespaced_pod.return_value = mocked_v1_pod_list
 
     runner = CliRunner()
-    result = runner.invoke(cli, ["shell", "-s", "shh"])
+    result = runner.invoke(cli, ["shell", "-t", "shh"])
 
     assert result.exit_code == 2
