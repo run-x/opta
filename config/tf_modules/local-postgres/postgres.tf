@@ -1,9 +1,11 @@
-provider "helm" {
-  kubernetes {
-    config_path="~/.opta/kind/config"
+terraform {
+  required_providers {
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = ">= 1.13.3"
+    }
   }
 }
-
 resource "helm_release" "opta-local-postgresql" {
   name       = "opta-local-postgres"
   repository = "https://charts.bitnami.com/bitnami"
@@ -13,15 +15,15 @@ resource "helm_release" "opta-local-postgresql" {
 
   set {
     name  = "postgresqlUsername"
-    value = "postgres"
+    value = var.db_user
   }
   set {
     name = "postgresqlPassword"
-    value = "postgres"
+    value = var.db_password
   }
   set {
     name = "postgresqlDatabase"
-    value = "appdb"
+    value = var.db_name
 }
 }
 

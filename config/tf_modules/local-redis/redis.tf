@@ -1,9 +1,11 @@
-provider "helm" {
-  kubernetes {
-    config_path="~/.opta/kind/config"
+terraform {
+  required_providers {
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = ">= 1.13.3"
+    }
   }
 }
-
 resource "helm_release" "opta-local-redis" {
   name       = "opta-local-redis"
   repository = "https://charts.bitnami.com/bitnami"

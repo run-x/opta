@@ -26,6 +26,11 @@ inputs:
     user_facing: false
     description: "Secrets from links"
     default: []
+  - name: links
+    user_facing: true
+    validator: list(any(str(), map()), required=False)
+    description: A list of extra IAM role policies not captured by Opta which you wish to give to your service.
+    default: []
   - name: manual_secrets
     user_facing: false
     description: "Manually set secrets"

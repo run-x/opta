@@ -7,32 +7,6 @@ terraform {
   }
 }
 
-# resource "helm_release" "k8s-service" {
-#   name       = "opta-local-redis"
-#   repository = "https://charts.bitnami.com/bitnami"
-#   chart      = "redis"
-#   version    = "15.3.2"
-
-#   set {
-#     name  = "cluster.enabled"
-#     value = "false"
-#   }
-#   set {
-#     name  = "auth.enabled"
-#     value = "false"
-#   }
-
-#   set {
-#     name  = "metrics.enabled"
-#     value = "false"
-#   }
-#   set {
-#     name = "architecture"
-#     value = "standalone"
-# }
-# }
-
-
 
 resource "helm_release" "k8s-service" {
   chart = "${path.module}/k8s-service"
