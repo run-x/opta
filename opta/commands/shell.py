@@ -22,14 +22,14 @@ from opta.utils import check_opta_file_exists
     "-c", "--config", default="opta.yml", help="Opta config file", show_default=True
 )
 @click.option(
-    "-s",
-    "--use-shell",
+    "-t",
+    "--type",
     default=SHELLS_ALLOWED[0],
     help="Shell to Use",
     show_default=True,
     type=click.Choice(SHELLS_ALLOWED),
 )
-def shell(env: Optional[str], config: str, use_shell: str) -> None:
+def shell(env: Optional[str], config: str, type: str) -> None:
     """Get a bash shell into one of the pods in your service"""
 
     check_opta_file_exists(config)
@@ -58,7 +58,7 @@ def shell(env: Optional[str], config: str, use_shell: str) -> None:
             pod_list[0].metadata.name,
             "-it",
             "--",
-            use_shell,
+            type,
             "-il",
         ]
     )
