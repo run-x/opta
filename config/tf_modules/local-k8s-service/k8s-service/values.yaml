@@ -2,8 +2,8 @@ nameOverride: ""
 fullnameOverride: ""
 uriComponents: []
 googleServiceAccount: ""
-layerName: "foo"
-moduleName: "bar"
+layerName: ""
+moduleName: ""
 environmentName: ""
 envVars: []
 linkSecrets: []

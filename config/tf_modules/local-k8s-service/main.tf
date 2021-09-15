@@ -7,6 +7,33 @@ terraform {
   }
 }
 
+# resource "helm_release" "k8s-service" {
+#   name       = "opta-local-redis"
+#   repository = "https://charts.bitnami.com/bitnami"
+#   chart      = "redis"
+#   version    = "15.3.2"
+
+#   set {
+#     name  = "cluster.enabled"
+#     value = "false"
+#   }
+#   set {
+#     name  = "auth.enabled"
+#     value = "false"
+#   }
+
+#   set {
+#     name  = "metrics.enabled"
+#     value = "false"
+#   }
+#   set {
+#     name = "architecture"
+#     value = "standalone"
+# }
+# }
+
+
+
 resource "helm_release" "k8s-service" {
   chart = "${path.module}/k8s-service"
   name  = "${var.layer_name}-${var.module_name}"
@@ -29,7 +56,7 @@ resource "helm_release" "k8s-service" {
         memory : "${var.resource_request["memory"]}Mi"
       },
       deployPods : (var.image != "AUTO") || (var.tag != null) || (var.digest != null),
-      image : "todo",
+      image : var.image == "AUTO" ? (var.digest != null ? "${var.local_registry_name}/${var.layer_name}/${var.module_name}@${var.digest}" : (var.tag == null ? "" : "${var.local_registry_name}/${var.layer_name}/${var.module_name}:${var.tag}")) : (var.tag == null ? var.image : "${var.image}:${var.tag}"),
       version : var.tag == null ? "latest" : var.tag
       livenessProbePath : var.healthcheck_path == null || var.liveness_probe_path != null ? var.liveness_probe_path : var.healthcheck_path,
       readinessProbePath : var.healthcheck_path == null || var.readiness_probe_path != null ? var.readiness_probe_path : var.healthcheck_path,

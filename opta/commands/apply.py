@@ -242,7 +242,7 @@ def _apply(
                 "-lock=false",
                 "-input=false",
                 f"-out={TF_PLAN_PATH}",
-                cloud_name=layer.cloud,
+                layer=layer,
                 *targets,
                 quiet=True,
             )

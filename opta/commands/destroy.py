@@ -67,7 +67,7 @@ def destroy(config: str, env: Optional[str], auto_approve: bool) -> None:
         tf_flags.append("-auto-approve")
 
     gen_all(layer)
-    Terraform.init("-reconfigure")
+    Terraform.init("-reconfigure", layer=layer)
     logger.info(f"Destroying {layer.name}")
     Terraform.destroy_all(layer, *tf_flags)
 
