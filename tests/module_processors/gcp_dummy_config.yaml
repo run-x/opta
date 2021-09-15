@@ -46,3 +46,11 @@ modules:
     type: postgres
   - name: redis2
     type: redis
+  - name: blah
+    type: gcp-service-account
+    links:
+      - bucket1:
+          - read
+      - bucket2:
+          - write
+      - bucket3
