@@ -11,6 +11,8 @@ resource "null_resource" "local-base" {
         echo "Stopping and removing local docker registry"
         docker stop opta-local-registry
         docker rm opta-local-registry
+        echo "Removing ./opta/local directory"
+        rm -rf ~/.opta/local
     EOT
 
     working_dir = path.module

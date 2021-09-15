@@ -4,7 +4,6 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = ">= 1.13.3"
     }
-    local = {}
   }
 }
 
