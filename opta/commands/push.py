@@ -122,6 +122,17 @@ def push_to_docker(
     nice_run(["docker", "push", remote_image_name], check=True)
     return get_image_digest(registry_url, image_tag), image_tag
 
+def push_to_docker_local(
+    local_image: str,
+    registry_url: str,
+    image_tag_override: Optional[str],
+) -> Tuple[str, str]:
+    image_tag = get_push_tag(local_image, image_tag_override)
+    remote_image_name = f"{registry_url}:{image_tag}"
+    nice_run(["docker", "tag", local_image, remote_image_name], check=True)
+    nice_run(["docker", "push", remote_image_name], check=True)
+    return get_image_digest(registry_url, image_tag), image_tag
+
 
 # Check if the config file is for a service or environment opta layer.
 # Some commands (like push/deploy) are meant only for service layers.
@@ -179,5 +190,7 @@ def _push(
     elif layer.cloud == "azurerm":
         username, password = get_acr_auth_info(layer)
     else:
+        if layer.cloud == "local":
+            return push_to_docker_local(image,registry_url,tag)
         raise Exception(f"No support for pushing image to provider {layer.cloud}")
     return push_to_docker(username, password, image, registry_url, tag)
