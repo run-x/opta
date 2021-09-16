@@ -11,7 +11,8 @@ resource "helm_release" "opta-local-postgresql" {
   repository = "https://charts.bitnami.com/bitnami"
   chart      = "postgresql"
   version    = "10.9.5"
-
+  create_namespace = true
+  namespace = "paas"
 
   set {
     name  = "postgresqlUsername"

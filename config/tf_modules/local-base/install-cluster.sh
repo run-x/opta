@@ -2,7 +2,7 @@
 reg_name='opta-local-registry'
 reg_port='5000'
 # create a cluster with the local registry and nginx externalPorts enabled in containerd
-cat <<EOF | ~/.opta/local/kind create cluster --name opta-local-cluster --wait 5m --kubeconfig ~/.opta/local/kubeconfig --config=-
+cat <<EOF | $HOME/.opta/local/kind create cluster --name opta-local-cluster --kubeconfig $HOME/.kube/config --wait 5m  --config=-
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 containerdConfigPatches:
@@ -26,9 +26,8 @@ nodes:
     protocol: TCP
 EOF
 
+kubectl config use-context kind-opta-local-cluster
+
 # connect the registry to the cluster network
 # (the network may already be connected)
 docker network connect "kind" "${reg_name}" || true
-
-# To enable ingress
-# kubectl  --kubeconfig /home/sachin/.opta/kind/config apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
