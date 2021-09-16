@@ -239,7 +239,6 @@ class Terraform:
             azure.delete_opta_config()
             azure.delete_remote_state()
         elif layer.cloud == "local":
-
             local = Local(layer)
             local.delete_opta_config()
             local.delete_local_tf_state()
@@ -256,6 +255,8 @@ class Terraform:
                 cls._aws_delete_state_storage(layer)
             elif layer.cloud == "google":
                 cls._gcp_delete_state_storage(layer)
+            elif layer.cloud == "local":
+                cls._local_delete_state_storage(layer)
 
     # Remove a resource from the terraform state, but does not destroy it.
     @classmethod
@@ -392,7 +393,11 @@ class Terraform:
     @classmethod
     def upload_local_state(cls, layer: "Layer") -> bool:
         try:
-            tf_file = os.path.join(cls.get_local_opta_dir(), layer.name + ".tfstate")
+            tfstate_dir = os.path.join(cls.get_local_opta_dir(), "tfstate")
+            if not os.path.exists(tfstate_dir):
+                os.makedirs(tfstate_dir)
+            tf_file = os.path.join(tfstate_dir, layer.name + ".tfstate")
+            
             copyfile("terraform.tfstate", tf_file)
             os.remove("terraform.tfstate")
             return True
@@ -475,7 +480,7 @@ class Terraform:
         elif layer.cloud == "local":
             try:
                 tf_file = os.path.join(
-                    cls.get_local_opta_dir(), layer.name + ".tfstate"
+                    cls.get_local_opta_dir(), "tfstate", layer.name + ".tfstate"
                 )
                 if os.path.exists(tf_file):
                     copyfile(tf_file, state_file)
