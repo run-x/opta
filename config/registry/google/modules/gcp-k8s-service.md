@@ -50,4 +50,4 @@ _NOTE_ We expose the resource requests and set the limits to twice the request v
 ### Ingress
 
 You can control if and how you want to expose your app to the world! Check out
-the [Ingress](/miscellaneous/ingress) docs for more details.
+the [Ingress](/tutorials/ingress) docs for more details.
