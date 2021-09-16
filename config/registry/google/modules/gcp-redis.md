@@ -20,7 +20,7 @@ When linked to a k8s-service, it adds connection credentials to your container's
 - `{module_name}_cache_auth_token` -- The auth token/password of the cluster.
 - `{module_name}_cache_host` -- The host to contact to access the cluster.
 
-In the [modules reference](/modules-reference), the _{module_name}_ would be replaced with `cache`
+In the [modules reference](/reference), the _{module_name}_ would be replaced with `cache`
 
 The permission list can optionally have one entry which should be a map for renaming the default environment variable
 names to a user-defined value:
