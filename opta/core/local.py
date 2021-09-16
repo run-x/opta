@@ -38,7 +38,7 @@ class Local:
 
     def delete_opta_config(self) -> None:
 
-        if os.path.exists(self.config_file_path):
+        if os.path.isfile(self.config_file_path):
             os.remove(self.config_file_path)
             logger.info("Deleted opta config from local")
         else:
@@ -46,9 +46,9 @@ class Local:
 
     def delete_local_tf_state(self) -> None:
         tf_file = os.path.join(
-            str(Path.home()), ".opta", "local", self.layer.name + ".tfstate"
+            str(Path.home()), ".opta", "local", "tfstate", self.layer.name + ".tfstate"
         )
-        if os.path.exists(tf_file):
+        if os.path.isfile(tf_file):
             os.remove(tf_file)
             logger.info("Deleted opta tf config from local")
         else:
