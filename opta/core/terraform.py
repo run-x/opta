@@ -87,13 +87,10 @@ class Terraform:
     def insert_extra_env(cls, layer: "Layer") -> dict:
         kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
         if layer and layer.cloud == "local":
-            kwargs["env"]["KUBE_CONFIG_PATH"] = os.path.join(
-                cls.get_local_opta_dir(), "kubeconfig"
-            )
+            kwargs["env"]["KUBE_CONFIG_PATH"] = os.path.join(os.path.join(str(Path.home()), ".kube", "config"))
             kwargs["env"]["KUBECONFIG"] = kwargs["env"]["KUBE_CONFIG_PATH"] #needed for helm templates with vlookup
         return kwargs
         
-
     @classmethod
     def apply(
         cls,
@@ -211,10 +208,6 @@ class Terraform:
         # necessary for destroying many k8s resources.
         cls.refresh(layer)
         kwargs = cls.insert_extra_env(layer)
-        if layer.cloud == "local":
-            kwargs["env"]["KUBE_CONFIG_PATH"] = os.path.join(
-                cls.get_local_opta_dir(), "kubeconfig"
-            )
 
         idx = len(layer.modules) - 1
         for module in reversed(layer.modules):
@@ -546,12 +539,13 @@ class Terraform:
 
     @classmethod
     def _create_local_state_storage(cls, providers: dict) -> None:
-        if not os.path.exists(os.path.join(cls.get_local_opta_dir(), "local")):
+        if not os.path.exists(cls.get_local_opta_dir()):
             try:
-                os.makedirs(os.path.join(cls.get_local_opta_dir(), "local"))
+                os.makedirs(cls.get_local_opta_dir())
+    
             except OSError as exc:  # Guard against race condition
                 if exc.errno != errno.EEXIST:
-                    raise UserErrors(f"Cannot write to local.")
+                    raise UserErrors(f"Cannot make local state dir at {cls.get_local_opta_dir()}.")
 
     @classmethod
     def _create_azure_state_storage(cls, providers: dict) -> None:

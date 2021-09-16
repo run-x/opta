@@ -8,7 +8,7 @@ output "db_password" {
 }
 
 output "db_host" {
-  value = "opta-local-postgres-postgresql.default.svc.cluster.local"
+  value = "opta-local-postgres-postgresql.paas.svc.cluster.local"
 }
 
 output "db_name" {

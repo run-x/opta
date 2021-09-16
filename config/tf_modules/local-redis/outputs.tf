@@ -1,3 +1,3 @@
 output "cache_host" {
-  value = "opta-local-redis-master.default.svc.cluster.local"
+  value = "opta-local-redis-master.paas.svc.cluster.local"
 }
