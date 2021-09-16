@@ -13,6 +13,7 @@ from opta.commands.apply import apply
 from opta.commands.deploy import deploy
 from opta.commands.destroy import destroy
 from opta.commands.events import events
+from opta.commands.force_unlock import force_unlock
 from opta.commands.init import init
 from opta.commands.inspect_cmd import inspect
 from opta.commands.kubectl import configure_kubectl
@@ -71,6 +72,7 @@ cli.add_command(shell)
 cli.add_command(validate)
 cli.add_command(version)
 cli.add_command(events)
+cli.add_command(force_unlock)
 
 
 if __name__ == "__main__":
