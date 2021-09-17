@@ -13,6 +13,10 @@ inputs:
     user_facing: false
     description: Opta Module name
     default: None
+  - name: paasns
+    user_facing: false
+    description: Namespace for paas helm installations
+    default: "paas-{layer_name}"
 outputs:
   - name: cache_host
     export: true

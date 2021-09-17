@@ -16,5 +16,5 @@ variable "module_name" {
 variable "paasns" {
   description = "A string like pass_myorg_my_layer, used to have multiple paas helm charts"
   type = string
-  default = "pass"
+  default = "paas"
 }

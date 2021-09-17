@@ -89,9 +89,6 @@ class Terraform:
     def insert_extra_env(cls, layer: "Layer") -> dict:
         kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
         if layer and layer.cloud == "local":
-            kwargs["env"]["TF_VAR_paasns"] = "_".join(
-                ["paas", layer.org_name, layer.name]
-            )
             kwargs["env"]["KUBE_CONFIG_PATH"] = os.path.join(
                 os.path.join(str(Path.home()), ".kube", "config")
             )
