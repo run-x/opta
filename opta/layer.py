@@ -327,7 +327,8 @@ class Layer:
             try:
                 ret = deep_merge(
                     module.gen_tf(
-                        depends_on=previous_module_reference, output_prefix=output_prefix
+                        depends_on=previous_module_reference,
+                        output_prefix=output_prefix,
                     ),
                     ret,
                 )

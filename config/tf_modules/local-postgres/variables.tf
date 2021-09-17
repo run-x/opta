@@ -29,3 +29,9 @@ variable "db_name" {
   type = string
   default = "appdb"
 }
+
+variable "paasns" {
+  description = "A string like pass_myorg_my_layer, used to have multiple paas helm charts"
+  type = string
+  default = "paas"
+}

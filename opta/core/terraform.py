@@ -49,7 +49,9 @@ class Terraform:
     downloaded_state: Dict[str, Dict[Any, Any]] = {}
 
     @classmethod
-    def init(cls, quiet: Optional[bool] = False, *tf_flags: str, layer: "Layer") -> None:
+    def init(
+        cls, quiet: Optional[bool] = False, *tf_flags: str, layer: "Layer"
+    ) -> None:
         kwargs = cls.insert_extra_env(layer)
         if quiet:
             kwargs["stderr"] = PIPE
@@ -87,10 +89,17 @@ class Terraform:
     def insert_extra_env(cls, layer: "Layer") -> dict:
         kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
         if layer and layer.cloud == "local":
-            kwargs["env"]["KUBE_CONFIG_PATH"] = os.path.join(os.path.join(str(Path.home()), ".kube", "config"))
-            kwargs["env"]["KUBECONFIG"] = kwargs["env"]["KUBE_CONFIG_PATH"] #needed for helm templates with vlookup
+            kwargs["env"]["TF_VAR_paasns"] = "_".join(
+                ["paas", layer.org_name, layer.name]
+            )
+            kwargs["env"]["KUBE_CONFIG_PATH"] = os.path.join(
+                os.path.join(str(Path.home()), ".kube", "config")
+            )
+            kwargs["env"]["KUBECONFIG"] = kwargs["env"][
+                "KUBE_CONFIG_PATH"
+            ]  # needed for helm templates with vlookup
         return kwargs
-        
+
     @classmethod
     def apply(
         cls,
@@ -152,7 +161,9 @@ class Terraform:
         cls.destroy_resources(layer, stale_resources)
 
     @classmethod
-    def import_resource(cls, tf_resource_address: str, aws_resource_id: str, layer: "Layer") -> None:
+    def import_resource(
+        cls, tf_resource_address: str, aws_resource_id: str, layer: "Layer"
+    ) -> None:
         kwargs = cls.insert_extra_env(layer)
         nice_run(
             ["terraform", "import", tf_resource_address, aws_resource_id],
@@ -201,6 +212,8 @@ class Terraform:
 
     @classmethod
     def destroy_all(cls, layer: "Layer", *tf_flags: str) -> None:
+        org_name = layer.org_name
+        layer_name = layer.name
         existing_modules = Terraform.get_existing_modules(layer)
 
         # Refreshing the state is necessary to update terraform outputs.
@@ -216,7 +229,7 @@ class Terraform:
             if module.name not in existing_modules:
                 idx -= 1
                 continue
-            cls.refresh(layer,f"-target={module_address_prefix}")
+            cls.refresh(layer, f"-target={module_address_prefix}")
             nice_run(
                 ["terraform", "destroy", f"-target={module_address_prefix}", *tf_flags],
                 check=True,
@@ -241,7 +254,7 @@ class Terraform:
         elif layer.cloud == "local":
             local = Local(layer)
             local.delete_opta_config()
-            local.delete_local_tf_state()
+            local.delete_local_tf_state(org_name, layer_name)
         else:
             raise Exception(
                 f"Can not handle opta config deletion for cloud {layer.cloud}"
@@ -331,9 +344,12 @@ class Terraform:
 
     @classmethod
     def plan(
-        cls, *tf_flags: str, quiet: Optional[bool] = False, layer: "Layer",
+        cls,
+        *tf_flags: str,
+        quiet: Optional[bool] = False,
+        layer: "Layer",
     ) -> None:
-        cls.init(quiet,layer=layer)
+        cls.init(quiet, layer=layer)
         kwargs = cls.insert_extra_env(layer)
         if quiet:
             kwargs["stderr"] = PIPE
@@ -396,8 +412,10 @@ class Terraform:
             tfstate_dir = os.path.join(cls.get_local_opta_dir(), "tfstate")
             if not os.path.exists(tfstate_dir):
                 os.makedirs(tfstate_dir)
-            tf_file = os.path.join(tfstate_dir, layer.name + ".tfstate")
-            
+            tf_file = os.path.join(
+                tfstate_dir, f"opta-tf-state-{layer.org_name}-{layer.name}"
+            )
+
             copyfile("terraform.tfstate", tf_file)
             os.remove("terraform.tfstate")
             return True
@@ -480,11 +498,14 @@ class Terraform:
         elif layer.cloud == "local":
             try:
                 tf_file = os.path.join(
-                    cls.get_local_opta_dir(), "tfstate", layer.name + ".tfstate"
+                    cls.get_local_opta_dir(),
+                    "tfstate",
+                    f"opta-tf-state-{layer.org_name}-{layer.name}",
                 )
                 if os.path.exists(tf_file):
                     copyfile(tf_file, state_file)
                     copyfile(tf_file, "terraform.tfstate")
+
                 else:
                     return False
             except Exception as e:
@@ -547,10 +568,12 @@ class Terraform:
         if not os.path.exists(cls.get_local_opta_dir()):
             try:
                 os.makedirs(cls.get_local_opta_dir())
-    
+
             except OSError as exc:  # Guard against race condition
                 if exc.errno != errno.EEXIST:
-                    raise UserErrors(f"Cannot make local state dir at {cls.get_local_opta_dir()}.")
+                    raise UserErrors(
+                        f"Cannot make local state dir at {cls.get_local_opta_dir()}."
+                    )
 
     @classmethod
     def _create_azure_state_storage(cls, providers: dict) -> None:

@@ -16,7 +16,9 @@ class Local:
         self.layer = layer
         local_dir = os.path.join(os.path.join(str(Path.home()), ".opta", "local"))
 
-        self.config_file_path = os.path.join(local_dir, "opta_config", self.layer.name)
+        self.config_file_path = os.path.join(
+            local_dir, "opta_config", f"opta-{layer.org_name}-{layer.name}"
+        )
         if not os.path.exists(os.path.dirname(self.config_file_path)):
             os.makedirs(os.path.dirname(self.config_file_path))
 
@@ -44,9 +46,13 @@ class Local:
         else:
             logger.warn(f"Did not find opta config {self.config_file_path} to delete")
 
-    def delete_local_tf_state(self) -> None:
+    def delete_local_tf_state(self, org_name, layer_name) -> None:
         tf_file = os.path.join(
-            str(Path.home()), ".opta", "local", "tfstate", self.layer.name + ".tfstate"
+            str(Path.home()),
+            ".opta",
+            "local",
+            "tfstate",
+            f"opta-tf-state-{org_name}-{layer_name}",
         )
         if os.path.isfile(tf_file):
             os.remove(tf_file)

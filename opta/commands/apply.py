@@ -224,7 +224,13 @@ def _apply(
             configured_modules = configured_modules.union(untouched_modules)
 
         layer.pre_hook(module_idx)
-        targets = list(map(lambda x: f"-target=module.{x}", sorted(configured_modules)))
+        if layer.cloud == "local":
+            if is_last_module:
+                targets = []
+        else:
+            targets = list(
+                map(lambda x: f"-target=module.{x}", sorted(configured_modules))
+            )
         if test:
             Terraform.plan("-lock=false", *targets)
             print("Plan ran successfully, not applying since this is a test.")

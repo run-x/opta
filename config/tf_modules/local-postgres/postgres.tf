@@ -12,7 +12,7 @@ resource "helm_release" "opta-local-postgresql" {
   chart      = "postgresql"
   version    = "10.9.5"
   create_namespace = true
-  namespace = "paas"
+  namespace = var.paasns
 
   set {
     name  = "postgresqlUsername"

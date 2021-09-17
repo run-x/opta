@@ -12,7 +12,7 @@ resource "helm_release" "opta-local-redis" {
   chart      = "redis"
   version    = "15.3.2"
   create_namespace = true
-  namespace = "paas"
+  namespace = var.paasns
   set {
     name  = "cluster.enabled"
     value = "false"

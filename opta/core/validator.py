@@ -77,7 +77,9 @@ class Opta(Validator):
 
         if "org_name" in value:
             if self.environment_schema_dict is None:
-                raise UserErrors("We currently only support AWS, GCP, and Azure")
+                raise UserErrors(
+                    "We currently only support AWS, GCP, and Azure and Local"
+                )
             schema_dicts = [self.environment_schema_dict]
         else:
             if self.service_schema_dicts is None:

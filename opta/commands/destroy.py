@@ -1,6 +1,7 @@
-from typing import List, Optional
 import os
 from pathlib import Path
+from typing import List, Optional
+
 import boto3
 import click
 from azure.storage.blob import ContainerClient
@@ -148,8 +149,11 @@ def _gcp_get_configs(layer: "Layer") -> List[str]:
     configs.remove(layer.name)
     return configs
 
+
 def _local_get_configs(layer: "Layer") -> List[str]:
-    local_config_dir =  local_dir = os.path.join(os.path.join(str(Path.home()), ".opta", "local","opta_config"))
-    configs =  os.listdir(local_config_dir)
-    configs.remove(layer.name)
+    local_config_dir = local_dir = os.path.join(
+        os.path.join(str(Path.home()), ".opta", "local", "opta_config")
+    )
+    configs = os.listdir(local_config_dir)
+    configs.remove(f"opta-{layer.org_name}-{layer.name}")
     return configs
