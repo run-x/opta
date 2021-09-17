@@ -1,3 +1,4 @@
+from time import sleep
 from typing import TYPE_CHECKING, Dict, List, Optional
 
 import boto3
@@ -45,6 +46,13 @@ class AwsEksProcessor(ModuleProcessor):
             f"Found dangling cloudwatch log group {log_group_name}. Deleting it now"
         )
         client.delete_log_group(logGroupName=log_group_name)
+        sleep(3)
+        log_groups = client.describe_log_groups(logGroupNamePrefix=log_group_name)
+        if len(log_groups["logGroups"]) != 0:
+            logger.warning(
+                f"Cloudwatch Log group {log_group_name} has recreated itself. Not stopping the destroy, but you will "
+                "wanna check this out."
+            )
 
     def cleanup_dangling_enis(self, region: str) -> None:
         client: EC2Client = boto3.client("ec2", config=Config(region_name=region))

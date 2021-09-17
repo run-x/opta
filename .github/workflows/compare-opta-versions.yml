@@ -1,0 +1,131 @@
+name: Create-n-Destoy AWS Resources using Different Opta Versions
+
+on:
+  workflow_dispatch:
+    inputs:
+      version1:
+        description: 'Opta Version 1'
+        required: true
+      version2:
+        description: 'Opta Version 2'
+        required: true
+
+jobs:
+  compare-opta-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pin terraform version
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.0.0
+          terraform_wrapper: false
+
+      - name: Limit concurrency to 1.
+        uses: softprops/turnstyle@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.ALL_GITHUB_TOKEN }}
+
+      - name: Checkout runx-infra repo
+        uses: actions/checkout@v2
+        with:
+          repository: "run-x/runx-infra"
+          path: "runx-infra"
+          ssh-key: ${{ secrets.SSH_KEY }}
+
+      - name: Checkout test-service repo
+        uses: actions/checkout@v2
+        with:
+          repository: "run-x/test-service"
+          path: "test-service"
+          ssh-key: ${{ secrets.SSH_KEY }}
+
+      - name: Setup ssh
+        uses: webfactory/ssh-agent@v0.4.1
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_OPTA_CI_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_OPTA_CI_SECRET_KEY }}
+          aws-region: us-east-1
+
+      - name: Install Version 1 binary from Opta GitHub releases
+        run: VERSION=${{ github.event.inputs.version1 }} /bin/bash -c "$(curl -fsSL https://docs.opta.dev/install.sh)"
+
+      - name: Check Opta Version Installed
+        run: /home/runner/.opta/opta version
+
+      - name: Apply opta environment
+        run: |
+          OPTA_DISABLE_REPORTING=true /home/runner/.opta/opta apply \
+          --config runx-infra/opta-ci/opta.yml \
+          --auto-approve \
+          --refresh
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build test-service image
+        run: docker build -t app:latest -f test-service/Dockerfile test-service/
+
+      - name: Set secret
+        run: |
+          OPTA_DISABLE_REPORTING=true /home/runner/.opta/opta secret update \
+          --env ci \
+          --config test-service/opta.yml \
+          FAKE_SECRET foo
+
+      - name: Deploy test-service
+        run: |
+          OPTA_DISABLE_REPORTING=true /home/runner/.opta/opta deploy \
+          --image app:latest \
+          --env ci \
+          --config test-service/opta.yml \
+          --tag ${{ github.sha }} \
+          --auto-approve
+
+      - name: View secret and check value
+        run: |
+          secret_value=$(OPTA_DISABLE_REPORTING=true /home/runner/.opta/opta secret view \
+          --env ci \
+          --config test-service/opta.yml \
+          FAKE_SECRET | tail -1)
+          echo "This was the found secret value: ${secret_value}"
+          [[ "$secret_value" =~ .*"foo".* ]] || exit 1
+
+      - name: Install Version 2 binary from Opta GitHub releases
+        run: VERSION=${{ github.event.inputs.version2 }} /bin/bash -c "$(curl -fsSL https://docs.opta.dev/install.sh)"
+
+      - name: Check Opta Version Installed
+        run: /home/runner/.opta/opta version
+
+      - name: Deploy test-service
+        run: |
+          OPTA_DISABLE_REPORTING=true /home/runner/.opta/opta deploy \
+          --image app:latest \
+          --env ci \
+          --config test-service/opta.yml \
+          --tag ${{ github.sha }} \
+          --auto-approve
+
+      - name: View secret and check value
+        run: |
+          secret_value=$(OPTA_DISABLE_REPORTING=true /home/runner/.opta/opta secret view \
+          --env ci \
+          --config test-service/opta.yml \
+          FAKE_SECRET | tail -1)
+          echo "This was the found secret value: ${secret_value}"
+          [[ "$secret_value" =~ .*"foo".* ]] || exit 1
+
+      - name: Destroy environment (and test service)
+        run: |
+          yes | OPTA_DISABLE_REPORTING=true /home/runner/.opta/opta destroy \
+          --env ci \
+          --config test-service/opta.yml \
+          --auto-approve
+          yes | OPTA_DISABLE_REPORTING=true /home/runner/.opta/opta destroy \
+          --config runx-infra/opta-ci/opta.yml \
+          --auto-approve

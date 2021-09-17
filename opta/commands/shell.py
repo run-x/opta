@@ -5,6 +5,7 @@ from kubernetes.client import CoreV1Api
 from kubernetes.config import load_kube_config
 
 from opta.amplitude import amplitude_client
+from opta.constants import SHELLS_ALLOWED
 from opta.core.generator import gen_all
 from opta.core.kubernetes import configure_kubectl
 from opta.exceptions import UserErrors
@@ -20,7 +21,15 @@ from opta.utils import check_opta_file_exists
 @click.option(
     "-c", "--config", default="opta.yml", help="Opta config file", show_default=True
 )
-def shell(env: Optional[str], config: str) -> None:
+@click.option(
+    "-t",
+    "--type",
+    default=SHELLS_ALLOWED[0],
+    help="Shell to Use",
+    show_default=True,
+    type=click.Choice(SHELLS_ALLOWED),
+)
+def shell(env: Optional[str], config: str, type: str) -> None:
     """Get a bash shell into one of the pods in your service"""
 
     check_opta_file_exists(config)
@@ -49,7 +58,7 @@ def shell(env: Optional[str], config: str) -> None:
             pod_list[0].metadata.name,
             "-it",
             "--",
-            "bash",
+            type,
             "-il",
         ]
     )

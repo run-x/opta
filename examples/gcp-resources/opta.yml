@@ -28,6 +28,10 @@ modules:
       - SECRET_1
   - name: db
     type: postgres
+  - name: blah
+    type: gcp-service-account
+    links:
+      - gcs: ["read"]
   - name: mysqldb
     type: mysql
   - name: gcs

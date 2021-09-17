@@ -78,7 +78,7 @@ inputs:
   - name: secrets
     user_facing: true
     validator: list(str(), required=False)
-    description: A list of secrets to add as environment variables for your container. All secrets must be set following the [secrets instructions](/miscellaneous/secrets) prior to deploying the app.
+    description: A list of secrets to add as environment variables for your container. All secrets must be set following the [secrets instructions](/tutorials/secrets) prior to deploying the app.
     default: []
   - name: env_vars
     user_facing: true
@@ -105,6 +105,16 @@ inputs:
     validator: str(required=False)
     description: Use if liveness probe != readiness probe
     default: null
+  - name: sticky_session
+    user_facing: true
+    validator: bool(required=False)
+    description: Use [sticky sessions](https://stackoverflow.com/questions/10494431/sticky-and-non-sticky-sessions) via cookies for your service (first request will send you a cookie called opta_cookie which you should add on future requests).
+    default: false
+  - name: sticky_session_max_age
+    user_facing: true
+    validator: int(required=False)
+    description: If the sticky session is enabled, how long should the cookie last?
+    default: 86400
   - name: resource_request
     user_facing: true
     validator: any(required=False)

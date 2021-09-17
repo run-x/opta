@@ -18,7 +18,7 @@ When linked to a k8s-service, it adds connection credentials to your container's
 - `{module_name}_db_name`
 - `{module_name}_db_host`
 
-In the [modules reference](/modules-reference) example, the _{module_name}_ would be replaced with `rds`
+In the [modules reference](/reference) example, the _{module_name}_ would be replaced with `rds`
 
 The permission list can optionally have one entry which should be a map for renaming the default environment variable
 names to a user-defined value:

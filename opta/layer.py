@@ -49,6 +49,7 @@ from opta.module_processors.gcp_dns import GCPDnsProcessor
 from opta.module_processors.gcp_gke import GcpGkeProcessor
 from opta.module_processors.gcp_k8s_base import GcpK8sBaseProcessor
 from opta.module_processors.gcp_k8s_service import GcpK8sServiceProcessor
+from opta.module_processors.gcp_service_account import GcpServiceAccountProcessor
 from opta.module_processors.helm_chart import HelmChartProcessor
 from opta.module_processors.local_k8s_service import LocalK8sServiceProcessor
 from opta.module_processors.runx import RunxProcessor
@@ -86,6 +87,7 @@ class Layer:
         "external-ssl-cert": ExternalSSLCert,
         "aws-s3": AwsS3Processor,
         "gcp-dns": GCPDnsProcessor,
+        "gcp-service-account": GcpServiceAccountProcessor,
         "custom-terraform": CustomTerraformProcessor,
     }
 
@@ -322,12 +324,18 @@ class Layer:
             output_prefix = (
                 None if len(self.get_module_by_type(module.type)) == 1 else module.name
             )
-            ret = deep_merge(
-                module.gen_tf(
-                    depends_on=previous_module_reference, output_prefix=output_prefix
-                ),
-                ret,
-            )
+            try:
+                ret = deep_merge(
+                    module.gen_tf(
+                        depends_on=previous_module_reference, output_prefix=output_prefix
+                    ),
+                    ret,
+                )
+            except Exception:
+
+                import pdb
+
+                pdb.set_trace()
             if module.desc.get("halt"):
                 previous_module_reference = [f"module.{module.name}"]
 

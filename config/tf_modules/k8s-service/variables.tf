@@ -30,6 +30,14 @@ variable "module_name" {
   type        = string
 }
 
+variable "sticky_session" {
+  default = false
+}
+
+variable "sticky_session_max_age" {
+  default = 86400
+}
+
 variable "port" {
   description = "Port to be exposed as :80"
   type        = map(number)

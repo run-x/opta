@@ -30,9 +30,12 @@ def gen(layer: "Layer") -> Generator[Tuple[int, List["Module"], int], None, None
         ret = deep_merge(layer.gen_tf(module_idx), ret)
 
         gen_tf.gen(ret, TF_FILE_PATH)
+<<<<<<< HEAD
         # if layer.cloud == "local":
         #     local_dir = os.path.join(os.path.join(str(Path.home()), ".opta", "local"))
         #     copyfile(TF_FILE_PATH, os.path.join(local_dir,layer.name) )
+=======
+>>>>>>> 83c99ada1a8ba2eef7feaf79a6eb796b5199ba9e
             
         yield module_idx, current_modules, total_module_count
 

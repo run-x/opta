@@ -20,9 +20,10 @@ modules:
     max_containers: "{vars.max_containers}"
     liveness_probe_path: "/get"
     readiness_probe_path: "/get"
+    sticky_session: true
     port:
       http: 80
     env_vars:
-      A: B
+      GUNICORN_CMD_ARGS: "--bind=0.0.0.0:8000 --workers=3 --capture-output --error-logfile - --access-logfile - --access-logformat '%(h)s %(t)s %(r)s %(s)s Content-Type: %({Content-Type}i)s'"
     public_uri: "http-example.{parent.domain}"
 
