@@ -1,6 +1,7 @@
 required_providers: {}
 backend:
-  local: {}
+  local: 
+    path: "{state_storage}/{layer_name}"
 validator:
   name: str()
   org_name: regex('^[a-z0-9-]{,15}$', name="Valid identifier, regex='[a-z0-9-]{,15}'")

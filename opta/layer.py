@@ -7,6 +7,7 @@ import shutil
 import tempfile
 from datetime import datetime
 from os import path
+from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, TypedDict
 
@@ -400,6 +401,8 @@ class Layer:
                 f"{self.org_name}{self.name}".encode("utf-8")
             ).hexdigest()[0:16]
             return f"opta{name_hash}"
+        elif self.cloud == "local":
+            return os.path.join(str(Path.home()), ".opta", "local", "tfstate")
         else:
             return f"opta-tf-state-{self.org_name}-{self.name}"
 

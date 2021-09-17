@@ -244,6 +244,7 @@ def _apply(
                 },
             )
             logger.info("Planning your changes (might take a minute)")
+
             Terraform.plan(
                 "-lock=false",
                 "-input=false",
@@ -296,6 +297,7 @@ def _apply(
                 Terraform.apply(
                     layer, *tf_flags, TF_PLAN_PATH, no_init=True, quiet=False
                 )
+
             except Exception as e:
                 layer.post_hook(module_idx, e)
                 raise e

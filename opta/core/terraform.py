@@ -120,8 +120,6 @@ class Terraform:
                 check=True,
                 **kwargs,
             )
-            if layer.cloud == "local":
-                cls.upload_local_state(layer)
         except Exception as e:
             logging.error(e)
             logging.info(
@@ -407,23 +405,6 @@ class Terraform:
         return module_resources
 
     @classmethod
-    def upload_local_state(cls, layer: "Layer") -> bool:
-        try:
-            tfstate_dir = os.path.join(cls.get_local_opta_dir(), "tfstate")
-            if not os.path.exists(tfstate_dir):
-                os.makedirs(tfstate_dir)
-            tf_file = os.path.join(
-                tfstate_dir, f"opta-tf-state-{layer.org_name}-{layer.name}"
-            )
-
-            copyfile("terraform.tfstate", tf_file)
-            os.remove("terraform.tfstate")
-            return True
-        except Exception as e:
-            UserErrors(f"Could copy TF state file to {tf_file}")
-            return False
-
-    @classmethod
     def download_state(cls, layer: "Layer") -> bool:
         if not cls.verify_storage(layer):
             logger.info(
@@ -500,11 +481,10 @@ class Terraform:
                 tf_file = os.path.join(
                     cls.get_local_opta_dir(),
                     "tfstate",
-                    f"opta-tf-state-{layer.org_name}-{layer.name}",
+                    f"{layer.name}",
                 )
                 if os.path.exists(tf_file):
                     copyfile(tf_file, state_file)
-                    copyfile(tf_file, "terraform.tfstate")
 
                 else:
                     return False
