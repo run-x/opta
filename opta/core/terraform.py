@@ -847,7 +847,7 @@ class Terraform:
         if "s3" in providers.get("terraform", {}).get("backend", {}):
             lock_id = cls._get_aws_lock_id(layer)
         if "gcs" in providers.get("terraform", {}).get("backend", {}):
-            lock_id = ""
+            lock_id = cls._get_gcp_lock_id(layer)
         if "azurerm" in providers.get("terraform", {}).get("backend", {}):
             lock_id = ""
 
@@ -861,6 +861,12 @@ class Terraform:
     def _get_aws_lock_id(cls, layer: "Layer") -> str:
         aws = AWS(layer)
         lock_id = aws.get_terraform_lock_id()
+        return lock_id
+
+    @classmethod
+    def _get_gcp_lock_id(cls, layer: "Layer") -> str:
+        gcp = GCP(layer)
+        lock_id = gcp.get_terraform_lock_id()
         return lock_id
 
 

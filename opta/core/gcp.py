@@ -139,3 +139,17 @@ class GCP:
         )
         response: Dict = request.execute()
         return sorted([x["name"] for x in response.get("items", [])])[:max_number]
+
+    def get_terraform_lock_id(self) -> str:
+        # return ""
+        bucket = self.layer.state_storage()
+        tf_lock_path = f"{self.layer.name}/default.tflock"
+        credentials, project_id = self.get_credentials()
+        gcs_client = storage.Client(project=project_id, credentials=credentials)
+        bucket_object = gcs_client.get_bucket(bucket)
+        try:
+            tf_lock_blob = bucket_object.get_blob(tf_lock_path)
+            return str(tf_lock_blob.generation)
+        except Exception:  # Backwards compatibility
+            logger.debug("No Terraform Lock state exists.")
+            return ""
