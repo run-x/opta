@@ -849,7 +849,7 @@ class Terraform:
         if "gcs" in providers.get("terraform", {}).get("backend", {}):
             lock_id = cls._get_gcp_lock_id(layer)
         if "azurerm" in providers.get("terraform", {}).get("backend", {}):
-            lock_id = ""
+            lock_id = cls._get_azure_lock_id(layer)
 
         if not lock_id:
             print("Lock Id could not be found.")
@@ -860,14 +860,17 @@ class Terraform:
     @classmethod
     def _get_aws_lock_id(cls, layer: "Layer") -> str:
         aws = AWS(layer)
-        lock_id = aws.get_terraform_lock_id()
-        return lock_id
+        return aws.get_terraform_lock_id()
 
     @classmethod
     def _get_gcp_lock_id(cls, layer: "Layer") -> str:
         gcp = GCP(layer)
-        lock_id = gcp.get_terraform_lock_id()
-        return lock_id
+        return gcp.get_terraform_lock_id()
+
+    @classmethod
+    def _get_azure_lock_id(cls, layer: "Layer") -> str:
+        azure = Azure(layer)
+        return azure.get_terraform_lock_id()
 
 
 def get_terraform_outputs(layer: "Layer") -> dict:
