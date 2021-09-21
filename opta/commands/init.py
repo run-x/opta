@@ -28,7 +28,7 @@ def _write_result(file_path: str, result: dict) -> None:
         return
     try: 
         with open(file_path, "x") as f:
-            file.write(yaml_str)
+            f.write(yaml_str)
     except FileExistsError as e:
         raise UserErrors(f"Output file {file_path} already exists, please select another output path")
 
