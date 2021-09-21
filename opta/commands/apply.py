@@ -315,7 +315,7 @@ def _verify_parent_layer(layer: Layer) -> None:
             )
     except MissingState as e:
         raise MissingState(
-            f"{e.args[0]}, (opta needs this to download Environment state). "
+            f"Failed to get the Environment state {e.args[0]}"
             "Usually, this means that the Environment mentioned in configuration file does not exist."
-            "Please create the mentioned Environment or use an existing one"
+            "You can read more about this in our getting started guide: https://docs.opta.dev/getting-started/"
         )
