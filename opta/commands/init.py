@@ -26,11 +26,13 @@ def _write_result(file_path: str, result: dict) -> None:
     if ok == "no":
         print("Aborted")
         return
-    try: 
+    try:
         with open(file_path, "x") as f:
             f.write(yaml_str)
-    except FileExistsError as e:
-        raise UserErrors(f"Output file {file_path} already exists, please select another output path")
+    except FileExistsError:
+        raise UserErrors(
+            f"Output file {file_path} already exists, please select another output path"
+        )
 
 
 @click.group(cls=DYMGroup)
