@@ -43,6 +43,7 @@ resource "helm_release" "k8s-service" {
       googleServiceAccount : google_service_account.k8s_service.email
       stickySession : var.sticky_session
       stickySessionMaxAge : var.sticky_session_max_age
+      consistentHash : var.consistent_hash
     })
   ]
   atomic          = true

@@ -96,6 +96,11 @@ inputs: # (what users see)
     validator: str(required=False)
     description: Use if liveness probe != readiness probe
     default: null
+  - name: consistent_hash
+    user_facing: true
+    validator: str(required=False)
+    description: Use [consistent hashing](https://www.nginx.com/resources/wiki/modules/consistent_hash/)
+    default: null
   - name: sticky_session
     user_facing: true
     validator: bool(required=False)

@@ -44,6 +44,7 @@ resource "helm_release" "k8s-service" {
       iamRoleArn : aws_iam_role.k8s_service.arn
       stickySession : var.sticky_session
       stickySessionMaxAge : var.sticky_session_max_age
+      consistentHash : var.consistent_hash
     })
   ]
   atomic          = true
