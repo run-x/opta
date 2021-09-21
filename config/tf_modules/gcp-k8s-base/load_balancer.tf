@@ -91,23 +91,18 @@ resource "google_compute_global_forwarding_rule" "https" {
 
 resource "google_dns_record_set" "default" {
   count        = var.hosted_zone_name == null ? 0 : 1
-  name         = data.google_dns_managed_zone.public[0].dns_name
+  name         = "${var.domain}."
   type         = "A"
   ttl          = 3600
-  managed_zone = data.google_dns_managed_zone.public[0].name
+  managed_zone = var.hosted_zone_name
   rrdatas      = [google_compute_global_address.load_balancer.address]
 }
 
 resource "google_dns_record_set" "wildcard" {
   count        = var.hosted_zone_name == null ? 0 : 1
-  name         = "*.${data.google_dns_managed_zone.public[0].dns_name}"
+  name         = "*.${var.domain}."
   type         = "A"
   ttl          = 3600
-  managed_zone = data.google_dns_managed_zone.public[0].name
+  managed_zone = var.hosted_zone_name
   rrdatas      = [google_compute_global_address.load_balancer.address]
-}
-
-data "google_dns_managed_zone" "public" {
-  count = var.hosted_zone_name == null ? 0 : 1
-  name  = var.hosted_zone_name
 }

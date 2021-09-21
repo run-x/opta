@@ -33,15 +33,15 @@ class GcpK8sBaseProcessor(GcpK8sModuleProcessor):
                 "certificate_chain"
             ] = f"${{{{module.{byo_cert_module.name}.certificate_chain}}}}"
 
+        gcp_dns_modules = self.layer.get_module_by_type("gcp-dns", module_idx)
         gcp_dns_module = None
-        for module in self.layer.modules:
-            if (module.aliased_type or module.type) == "gcp-dns":
-                gcp_dns_module = module
-                break
+        if len(gcp_dns_modules) > 0:
+            gcp_dns_module = gcp_dns_modules[0]
         if gcp_dns_module is not None:
             self.module.data[
                 "hosted_zone_name"
             ] = f"${{{{module.{gcp_dns_module.name}.zone_name}}}}"
+            self.module.data["domain"] = f"${{{{module.{gcp_dns_module.name}.domain}}}}"
             self.module.data[
                 "cert_self_link"
             ] = f"${{{{module.{gcp_dns_module.name}.cert_self_link}}}}"
