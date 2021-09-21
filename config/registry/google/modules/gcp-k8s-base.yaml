@@ -19,7 +19,7 @@ inputs:
     default: false
   - name: hosted_zone_name
     user_facing: false
-    description: Name of hostezed zone to setup the ingress with
+    description: Name of hosted zone to setup the ingress with
     default: ""
   - name: domain
     user_facing: false
