@@ -1,3 +1,5 @@
+from typing import List
+
 from botocore.exceptions import ClientError
 from google.api_core.exceptions import ClientError as GoogleClientError
 from pytest_mock import MockFixture
@@ -676,3 +678,125 @@ class TestTerraform:
         mocked_storage_client_instance.blob_containers.get.assert_called_once_with(
             "dummy_resource_group", "dummy_storage_account", "dummy_container_name"
         )
+
+    def test_force_unlock_aws(self, mocker: MockFixture) -> None:
+        tf_flags: List[str] = ["-force"]
+
+        mock_layer = mocker.Mock(spec=Layer)
+        mock_layer.gen_providers.return_value = {
+            "terraform": {
+                "backend": {
+                    "s3": {
+                        "bucket": "opta-tf-state-test-dev1",
+                        "key": "dev1",
+                        "dynamodb_table": "opta-tf-state-test-dev1",
+                        "region": "us-east-1",
+                    }
+                }
+            }
+        }
+
+        mocker.patch("opta.core.terraform.AWS")
+        mock_get_aws_lock_id = mocker.patch(
+            "opta.core.terraform.Terraform._get_aws_lock_id",
+            return_value="mock_aws_lock_id",
+        )
+        mock_force_unlock_nice_run = mocker.patch("opta.core.terraform.nice_run")
+
+        Terraform.force_unlock(mock_layer, *tf_flags)
+
+        mock_layer.gen_providers.assert_called_once_with(0, clean=False)
+        mock_get_aws_lock_id.assert_called_once_with(mock_layer)
+        mock_force_unlock_nice_run.assert_called_once_with(
+            ["terraform", "force-unlock", *tf_flags, mock_get_aws_lock_id.return_value],
+            check=True,
+        )
+
+    def test_force_unlock_gcp(self, mocker: MockFixture) -> None:
+        mock_layer = mocker.Mock(spec=Layer)
+        mock_layer.gen_providers.return_value = {
+            "terraform": {
+                "backend": {
+                    "gcs": {"bucket": "opta-tf-state-test-dev1", "prefix": "dev1"}
+                }
+            },
+            "provider": {"google": {"region": "us-central1", "project": "dummy-project"}},
+        }
+
+        mocker.patch("opta.core.terraform.GCP")
+        mock_get_gcp_lock_id = mocker.patch(
+            "opta.core.terraform.Terraform._get_gcp_lock_id",
+            return_value="mock_gcp_lock_id",
+        )
+        mock_force_unlock_nice_run = mocker.patch("opta.core.terraform.nice_run")
+
+        Terraform.force_unlock(mock_layer)
+
+        mock_layer.gen_providers.assert_called_once_with(0, clean=False)
+        mock_get_gcp_lock_id.assert_called_once_with(mock_layer)
+        mock_force_unlock_nice_run.assert_called_once_with(
+            ["terraform", "force-unlock", mock_get_gcp_lock_id.return_value], check=True
+        )
+
+    def test_force_unlock_azure(self, mocker: MockFixture) -> None:
+        mock_layer = mocker.Mock(spec=Layer)
+        mock_layer.gen_providers.return_value = {
+            "terraform": {
+                "backend": {
+                    "azurerm": {
+                        "resource_group_name": "dummy_resource_group",
+                        "storage_account_name": "dummy_storage_account",
+                        "container_name": "dummy_container_name",
+                    }
+                }
+            },
+            "provider": {
+                "azurerm": {
+                    "location": "centralus",
+                    "tenant_id": "blahbc17-blah-blah-blah-blah291d395b",
+                    "subscription_id": "blah99ae-blah-blah-blah-blahd2a04788",
+                }
+            },
+        }
+
+        mocker.patch("opta.core.terraform.GCP")
+        mock_get_azure_lock_id = mocker.patch(
+            "opta.core.terraform.Terraform._get_azure_lock_id",
+            return_value="mock_azure_lock_id",
+        )
+        mock_force_unlock_nice_run = mocker.patch("opta.core.terraform.nice_run")
+
+        Terraform.force_unlock(mock_layer)
+
+        mock_layer.gen_providers.assert_called_once_with(0, clean=False)
+        mock_get_azure_lock_id.assert_called_once_with(mock_layer)
+        mock_force_unlock_nice_run.assert_called_once_with(
+            ["terraform", "force-unlock", mock_get_azure_lock_id.return_value], check=True
+        )
+
+    def test_force_unlock_no_lock_id(self, mocker: MockFixture) -> None:
+        mock_layer = mocker.Mock(spec=Layer)
+        mock_layer.gen_providers.return_value = {
+            "terraform": {
+                "backend": {
+                    "s3": {
+                        "bucket": "opta-tf-state-test-dev1",
+                        "key": "dev1",
+                        "dynamodb_table": "opta-tf-state-test-dev1",
+                        "region": "us-east-1",
+                    }
+                }
+            }
+        }
+
+        mocker.patch("opta.core.terraform.AWS")
+        mock_get_aws_lock_id = mocker.patch(
+            "opta.core.terraform.Terraform._get_aws_lock_id", return_value="",
+        )
+        mock_force_unlock_nice_run = mocker.patch("opta.core.terraform.nice_run")
+
+        Terraform.force_unlock(mock_layer)
+
+        mock_layer.gen_providers.assert_called_once_with(0, clean=False)
+        mock_get_aws_lock_id.assert_called_once_with(mock_layer)
+        mock_force_unlock_nice_run.assert_not_called()
