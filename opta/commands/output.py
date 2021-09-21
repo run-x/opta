@@ -22,8 +22,11 @@ def output(config: str, env: Optional[str],) -> None:
     """ Print TF outputs """
 
     check_opta_file_exists(config)
-    amplitude_client.send_event(amplitude_client.VIEW_OUTPUT_EVENT)
     layer = Layer.load_from_yaml(config, env)
+    amplitude_client.send_event(
+        amplitude_client.VIEW_OUTPUT_EVENT,
+        event_properties={"org_name": layer.org_name, "layer_name": layer.name},
+    )
     layer.verify_cloud_credentials()
     gen_all(layer)
     outputs = get_terraform_outputs(layer)

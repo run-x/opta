@@ -23,8 +23,11 @@ def inspect(config: str, env: Optional[str]) -> None:
     """ Displays important resources and AWS/Datadog links to them """
 
     check_opta_file_exists(config)
-    amplitude_client.send_event(amplitude_client.INSPECT_EVENT)
     layer = Layer.load_from_yaml(config, env)
+    amplitude_client.send_event(
+        amplitude_client.INSPECT_EVENT,
+        event_properties={"org_name": layer.org_name, "layer_name": layer.name},
+    )
     layer.verify_cloud_credentials()
     gen_all(layer)
     InspectCommand(layer).run()
