@@ -61,6 +61,11 @@ variable "hosted_zone_name" {
   default = null
 }
 
+variable "domain" {
+  type    = string
+  default = null
+}
+
 variable "zone_names" {
   type    = list(string)
   default = []
