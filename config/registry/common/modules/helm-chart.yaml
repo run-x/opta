@@ -46,10 +46,10 @@ inputs:
     validator: bool(required=False)
     description: Allow deletion of new resources created in this upgrade when upgrade fails
     default: true
-  - name: version
+  - name: chart_version
     user_facing: true
     validator: str(required=False)
-    description: The version of the helm chart to install
+    description: User side of the version of the helm chart to install
     default: null
   - name: values_file
     user_facing: true

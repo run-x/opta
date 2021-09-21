@@ -20,9 +20,7 @@ class HelmChartProcessor(ModuleProcessor):
         super(HelmChartProcessor, self).__init__(module, layer)
 
     def process(self, module_idx: int) -> None:
-        if "version" in self.module.data:
-            self.module.data["chart_version"] = self.module.data["version"]
-        if "repository" in self.module.data and "version" not in self.module.data:
+        if "repository" in self.module.data and "chart_version" not in self.module.data:
             raise UserErrors(
                 "If you specify a remote repository you must give a version."
             )
