@@ -49,7 +49,7 @@ class TestSecretManager:
         mocked_layer.assert_called_once_with("dummyconfig", "dummyenv")
         mocked_amplitude_client.send_event.assert_called_once_with(
             amplitude_client.VIEW_SECRET_EVENT,
-            event_properties={"org_name": "dummy_org_name", "layer_name": "dummy_layer",},
+            event_properties={"org_name": "dummy_org_name", "layer_name": "dummy_layer"},
         )
 
     def test_list_secrets(self, mocker: MockFixture, mocked_layer: Any) -> None:
