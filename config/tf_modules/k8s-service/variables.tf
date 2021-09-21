@@ -31,7 +31,7 @@ variable "module_name" {
 }
 
 variable "consistent_hash" {
-  type = string
+  type    = string
   default = null
 }
 
