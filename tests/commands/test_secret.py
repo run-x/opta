@@ -16,6 +16,7 @@ class TestSecretManager:
         mocked_layer = mocker.Mock(spec=Layer)
         mocked_layer.name = "dummy_layer"
         mocked_layer.cloud = "aws"
+        mocked_layer.org_name = "dummy_org_name"
         mocked_load_layer.return_value = mocked_layer
         return mocked_load_layer
 
@@ -47,7 +48,8 @@ class TestSecretManager:
         mocked_get_secrets.assert_called_once_with("dummy_layer")
         mocked_layer.assert_called_once_with("dummyconfig", "dummyenv")
         mocked_amplitude_client.send_event.assert_called_once_with(
-            amplitude_client.VIEW_SECRET_EVENT
+            amplitude_client.VIEW_SECRET_EVENT,
+            event_properties={"org_name": "dummy_org_name", "layer_name": "dummy_layer",},
         )
 
     def test_list_secrets(self, mocker: MockFixture, mocked_layer: Any) -> None:

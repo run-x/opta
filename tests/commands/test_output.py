@@ -50,6 +50,8 @@ def test_output_aws(mocker: MockFixture) -> None:
     mocked_layer_class = mocker.patch("opta.commands.output.Layer")
     mocked_layer = mocker.Mock(spec=Layer)
     mocked_layer.cloud = "aws"
+    mocked_layer.org_name = "dummy_org_name"
+    mocked_layer.name = "dummy_name"
     mocked_layer_class.load_from_yaml.return_value = mocked_layer
     mocker.patch("opta.commands.output.gen_all")
     mocker.patch("opta.core.terraform.Terraform.get_state", return_value=TERRAFORM_STATE)
@@ -81,6 +83,8 @@ def test_output_gcp(mocker: MockFixture) -> None:
     mocked_layer_class = mocker.patch("opta.commands.output.Layer")
     mocked_layer = mocker.Mock(spec=Layer)
     mocked_layer.cloud = "google"
+    mocked_layer.org_name = "dummy_org_name"
+    mocked_layer.name = "dummy_name"
     mocked_layer_class.load_from_yaml.return_value = mocked_layer
     mocker.patch("opta.commands.output.gen_all")
     mocker.patch("opta.core.terraform.Terraform.get_state", return_value=TERRAFORM_STATE)

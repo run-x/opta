@@ -13,6 +13,7 @@ def test_shell(mocker: MockFixture) -> None:
     mocked_layer_class = mocker.patch("opta.commands.shell.Layer")
     mocked_layer = mocker.Mock(spec=Layer)
     mocked_layer.name = "layer_name"
+    mocked_layer.org_name = "dummy_org_name"
     mocked_layer_class.load_from_yaml.return_value = mocked_layer
     layer_gen_all = mocker.patch("opta.commands.shell.gen_all")
     configure_kubectl = mocker.patch("opta.commands.shell.configure_kubectl")
@@ -63,6 +64,7 @@ def test_shell_with_sh(mocker: MockFixture) -> None:
     mocked_layer_class = mocker.patch("opta.commands.shell.Layer")
     mocked_layer = mocker.Mock(spec=Layer)
     mocked_layer.name = "layer_name"
+    mocked_layer.org_name = "dummy_org_name"
     mocked_layer_class.load_from_yaml.return_value = mocked_layer
     layer_gen_all = mocker.patch("opta.commands.shell.gen_all")
     configure_kubectl = mocker.patch("opta.commands.shell.configure_kubectl")
