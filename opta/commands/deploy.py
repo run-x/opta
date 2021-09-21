@@ -53,9 +53,9 @@ def deploy(
             fmt_msg(
                 """
             Opta deploy can only run on service yaml files. This is an environment yaml file.
-            ~See https://docs.runx.dev/docs/reference/service_modules/ for more details.
+            ~See https://docs.opta.dev/getting-started/ for more details.
             ~
-            ~(We know that this is an environment yaml file, because service yaml must
+            ~(We think that this is an environment yaml file, because service yaml must
             ~specify the "environments" field).
             """
             )
