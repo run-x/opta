@@ -26,8 +26,8 @@ def _write_result(file_path: str, result: dict) -> None:
     if ok == "no":
         print("Aborted")
         return
-    file = open(file_path, "w")
-    file.write(yaml_str)
+    with open(file_path, "x") as f:
+        file.write(yaml_str)
 
 
 @click.group(cls=DYMGroup)
@@ -55,7 +55,7 @@ ENVIRONMENT_TEMPLATES: Dict[str, Template] = {
 @click.option(
     "-f",
     "--file-name",
-    default="opta.yml",
+    default="env.yml",
     help="The name of the file that this command will output (defaults to opta.yml)",
 )
 def env(cloud_provider: str, file_name: str) -> None:
@@ -89,7 +89,7 @@ SERVICE_TEMPLATES: Dict[str, Template] = {
 @click.option(
     "-f",
     "--file-name",
-    default="opta.yml",
+    default="service.yml",
     help="The name of the file that this command will output (defaults to opta.yml)",
 )
 def service(template_name: str, file_name: str, environment_file: str) -> None:
