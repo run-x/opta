@@ -29,6 +29,11 @@ variable "module_name" {
   type        = string
 }
 
+variable "consistent_hash" {
+  type    = string
+  default = null
+}
+
 variable "sticky_session" {
   default = false
 }

@@ -13,6 +13,9 @@ metadata:
     nginx.ingress.kubernetes.io/session-cookie-expires: {{ $.Values.stickySessionMaxAge | quote }}
     nginx.ingress.kubernetes.io/session-cookie-max-age: {{ $.Values.stickySessionMaxAge | quote }}
     {{- end }}
+    {{- if $.Values.consistentHash }}
+    nginx.ingress.kubernetes.io/upstream-hash-by: {{ $.Values.consistentHash }}
+    {{- end }}
     {{- if not (eq $val.pathPrefix "/") }}
     nginx.ingress.kubernetes.io/rewrite-target: /$2
     {{- end }}
