@@ -17,7 +17,7 @@ can even expose it to the world, complete with load balancing both internally an
 
 This module supports deploying from an "external" image repository (currently only public ones supported)
 by setting the `image` field to the repo (e.g. "kennethreitz/httpbin" in the examples). If you set the value to "AUTO" however,
-it will automatically create a secure container repository with ECR on your account. You can then use the `Opta push`
+it will automatically create a container repository with in your locally running docker registry (localhost:13450). You can then use the `Opta push`
 command to push to it!
 
 ### Healthcheck Probe
@@ -30,6 +30,8 @@ be sent to a replica or be temporarily rerouted to other replicas. Essentially s
 just checks the tcp connection on the given port.
 
 ### Autoscaling
+
+While Autoscaling is enabled for local, we do not recommend scaling up the local environment as it may cause host instability.
 
 As mentioned, autoscaling is available out of the box. We currently only support autoscaling
 based on the pod's cpu and memory usage, but we hope to soon offer the ability to use 3rd party metrics like datadog

@@ -7,9 +7,7 @@ weight: 1
 description: Creates a postgres Aurora RDS database instance
 ---
 
-This module creates a postgres Aurora RDS database instance. It is made in the
-private subnets automatically created during environment setup and so can only be accessed in the
-VPC or through some proxy (e.g. VPN).
+This module creates a postgres database instance within the local Kubernetes Kind cluster. 
 
 ### Linking
 
@@ -34,4 +32,4 @@ links:
         db_password: DBPASS
 ```
 
-If present, this map must have renames for all 4 fields.
+If present, this map must have names for all 4 fields.

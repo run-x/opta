@@ -22,6 +22,4 @@ module_aliases:
   redis: local-redis
   k8s-service: local-k8s-service
   base: local-base
-  k8s-base: local-k8s-base
-  k8s-cluster: local-kind
-  dns: local-dns
+  
