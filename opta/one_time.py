@@ -19,5 +19,5 @@ def one_time() -> None:
 
     print(
         "\nHi there, thanks for Using Opta.\nWe hope you have a great experience using Opta."
-        "\nPlease reach out to us on slack.runx.dev for any queries."
+        "\nPlease reach out to us on https://slack.runx.dev for any queries."
     )
