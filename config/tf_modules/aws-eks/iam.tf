@@ -36,7 +36,7 @@ data "aws_iam_policy_document" "minimal_ebs_kms_create_and_attach" {
 }
 
 resource "aws_iam_policy" "minimal_ebs_kms_create_and_attach" {
-  name  = "opta-${var.layer_name}-ebs-kms-create-attach"
+  name = "opta-${var.layer_name}-ebs-kms-create-attach"
 
   policy = data.aws_iam_policy_document.minimal_ebs_kms_create_and_attach.json
 }
