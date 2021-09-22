@@ -61,3 +61,8 @@ modules:
     type: aws-sns
     sqs_subscribers:
       - "${{module.queue.queue_arn}}"
+  - name: redishelm
+    type: helm-chart
+    chart: redis
+    chart_version: "15.3.2"
+    repository: "https://charts.bitnami.com/bitnami"

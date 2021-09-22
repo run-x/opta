@@ -22,3 +22,26 @@ resource "aws_iam_role_policy_attachment" "cluster_AmazonEKSClusterPolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
   role       = aws_iam_role.cluster_role.name
 }
+
+data "aws_iam_policy_document" "minimal_ebs_kms_create_and_attach" {
+  statement {
+    sid = "MinimalEBSKMSCreateAndAttach"
+    actions = [
+      "kms:Decrypt",
+      "kms:GenerateDataKeyWithoutPlaintext",
+      "kms:CreateGrant"
+    ]
+    resources = [data.aws_kms_key.env_key.arn]
+  }
+}
+
+resource "aws_iam_policy" "minimal_ebs_kms_create_and_attach" {
+  name  = "opta-${var.layer_name}-ebs-kms-create-attach"
+
+  policy = data.aws_iam_policy_document.minimal_ebs_kms_create_and_attach.json
+}
+
+resource "aws_iam_role_policy_attachment" "cluster_minimal_ebs_kms_create_and_attache" {
+  policy_arn = aws_iam_policy.minimal_ebs_kms_create_and_attach.arn
+  role       = aws_iam_role.cluster_role.name
+}
