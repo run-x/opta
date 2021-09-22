@@ -29,8 +29,11 @@ def events(env: Optional[str], config: str, seconds: Optional[int]) -> None:
 
     # Configure kubectl
     layer = Layer.load_from_yaml(config, env)
+    amplitude_client.send_event(
+        amplitude_client.SHELL_EVENT,
+        event_properties={"org_name": layer.org_name, "layer_name": layer.name},
+    )
     layer.verify_cloud_credentials()
-    amplitude_client.send_event(amplitude_client.SHELL_EVENT)
     gen_all(layer)
     configure_kubectl(layer)
     load_kube_config()

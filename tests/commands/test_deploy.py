@@ -22,6 +22,8 @@ def test_deploy_basic(mocker: MockFixture) -> None:
     mocked_layer_class = mocker.patch("opta.commands.deploy.Layer")
     mocked_layer = mocker.Mock(spec=Layer)
     mocked_layer_class.load_from_yaml.return_value = mocked_layer
+    mocked_layer.org_name = "dummy_org_name"
+    mocked_layer.name = "dummy_name"
     mock_terraform_outputs = mocker.patch(
         "opta.commands.deploy.Terraform.get_outputs",
         return_value={"docker_repo_url": "blah"},
@@ -58,6 +60,8 @@ def test_deploy_auto_approve(mocker: MockFixture) -> None:
     mocked_layer_class = mocker.patch("opta.commands.deploy.Layer")
     mocked_layer = mocker.Mock(spec=Layer)
     mocked_layer_class.load_from_yaml.return_value = mocked_layer
+    mocked_layer.org_name = "dummy_org_name"
+    mocked_layer.name = "dummy_name"
     mock_terraform_outputs = mocker.patch(
         "opta.commands.deploy.Terraform.get_outputs",
         return_value={"docker_repo_url": "blah"},
@@ -96,6 +100,8 @@ def test_deploy_all_flags(mocker: MockFixture) -> None:
     mocked_layer_class = mocker.patch("opta.commands.deploy.Layer")
     mocked_layer = mocker.Mock(spec=Layer)
     mocked_layer_class.load_from_yaml.return_value = mocked_layer
+    mocked_layer.org_name = "dummy_org_name"
+    mocked_layer.name = "dummy_name"
     mock_terraform_outputs = mocker.patch(
         "opta.commands.deploy.Terraform.get_outputs",
         return_value={"docker_repo_url": "blah"},
@@ -144,6 +150,8 @@ def test_deploy_ecr_apply(mocker: MockFixture) -> None:
     mocked_layer_class = mocker.patch("opta.commands.deploy.Layer")
     mocked_layer = mocker.Mock(spec=Layer)
     mocked_layer_class.load_from_yaml.return_value = mocked_layer
+    mocked_layer.org_name = "dummy_org_name"
+    mocked_layer.name = "dummy_name"
     mock_terraform_outputs = mocker.patch(
         "opta.commands.deploy.Terraform.get_outputs", return_value={},
     )

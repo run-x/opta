@@ -159,7 +159,6 @@ def push(image: str, config: str, env: Optional[str], tag: Optional[str]) -> Non
             )
         )
 
-    amplitude_client.send_event(amplitude_client.PUSH_EVENT)
     _push(image, config, env, tag)
 
 
@@ -169,6 +168,10 @@ def _push(
     if not is_tool("docker"):
         raise Exception("Please install docker on your machine")
     layer = Layer.load_from_yaml(config, env)
+    amplitude_client.send_event(
+        amplitude_client.PUSH_EVENT,
+        event_properties={"org_name": layer.org_name, "layer_name": layer.name},
+    )
     layer.verify_cloud_credentials()
     gen_all(layer)
     registry_url = get_registry_url(layer)

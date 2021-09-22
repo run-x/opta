@@ -44,6 +44,8 @@ def test_inspect(mocker: MockFixture) -> None:
     mocked_layer = mocker.Mock(spec=Layer)
     mocked_layer.cloud = "aws"
     mocked_layer_class.load_from_yaml.return_value = mocked_layer
+    mocked_layer.org_name = "dummy_org_name"
+    mocked_layer.name = "dummy_name"
     mocker.patch("opta.commands.inspect_cmd.gen_all")
     # Mock that the terraform CLI tool exists.
     mocker.patch("opta.commands.inspect_cmd.is_tool", return_value=True)

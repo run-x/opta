@@ -31,8 +31,11 @@ def destroy(config: str, env: Optional[str], auto_approve: bool) -> None:
     """Destroy all opta resources from the current config"""
 
     check_opta_file_exists(config)
-    amplitude_client.send_event(amplitude_client.DESTROY_EVENT)
     layer = Layer.load_from_yaml(config, env)
+    amplitude_client.send_event(
+        amplitude_client.DESTROY_EVENT,
+        event_properties={"org_name": layer.org_name, "layer_name": layer.name},
+    )
     layer.verify_cloud_credentials()
     if not Terraform.download_state(layer):
         logger.info(

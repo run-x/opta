@@ -61,8 +61,11 @@ def deploy(
             )
         )
 
-    amplitude_client.send_event(amplitude_client.DEPLOY_EVENT)
     layer = Layer.load_from_yaml(config, env)
+    amplitude_client.send_event(
+        amplitude_client.DEPLOY_EVENT,
+        event_properties={"org_name": layer.org_name, "layer_name": layer.name},
+    )
     layer.verify_cloud_credentials()
     try:
         outputs = Terraform.get_outputs(layer)

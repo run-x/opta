@@ -18,6 +18,7 @@ def test_configure_kubectl(mocker: MockFixture) -> None:
     mocked_layer = mocker.Mock(spec=Layer)
     mocked_layer.cloud = "aws"
     mocked_layer.name = "blah"
+    mocked_layer.org_name = "dummy_org_name"
     mocked_layer_class.load_from_yaml.return_value = mocked_layer
     mocked_layer.root.return_value = mocked_layer
     mocker.patch("opta.commands.kubectl.gen_all")

@@ -205,6 +205,8 @@ def test_no_tag_override(mocker: MockFixture) -> None:
     layer_object_mock = mocker.patch("opta.commands.push.Layer")
     layer_mock = mocker.Mock(spec=Layer)
     layer_mock.cloud = "aws"
+    layer_mock.org_name = "dummy_org_name"
+    layer_mock.name = "dummy_name"
     layer_object_mock.load_from_yaml.return_value = layer_mock
     mocker.patch(
         "opta.commands.push.get_registry_url"
@@ -259,6 +261,8 @@ def test_with_tag_override(mocker: MockFixture) -> None:
     layer_object_mock = mocker.patch("opta.commands.push.Layer")
     layer_mock = mocker.Mock(spec=Layer)
     layer_mock.cloud = "aws"
+    layer_mock.org_name = "dummy_org_name"
+    layer_mock.name = "dummy_name"
     layer_object_mock.load_from_yaml.return_value = layer_mock
     mocker.patch(
         "opta.commands.push.get_registry_url"
@@ -322,6 +326,8 @@ def test_bad_image_name(mocker: MockFixture) -> None:
     layer_object_mock = mocker.patch("opta.commands.push.Layer")
     layer_mock = mocker.Mock(spec=Layer)
     layer_mock.cloud = "aws"
+    layer_mock.org_name = "dummy_org_name"
+    layer_mock.name = "dummy_name"
     layer_object_mock.load_from_yaml.return_value = layer_mock
     mocker.patch(
         "opta.commands.push.get_registry_url"
