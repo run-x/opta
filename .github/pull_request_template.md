@@ -15,5 +15,11 @@ YOUR_ANSWER
 ### If this does cause dataloss, pls explain why.
 YOUR_ANSWER
 
+## Will this cause downtime for someone who already has an env/service setup (yes / no)?
+YOUR_ANSWER
+
+### If this does cause downtime, pls explain why.
+YOUR_ANSWER
+
 ## Besides the unit tests (which will now run), how else has this been tests?
 YOUR_ANSWER
