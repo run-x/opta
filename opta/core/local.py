@@ -2,8 +2,9 @@ import errno
 import json
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 from traceback import format_exc
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
+
 from opta.exceptions import UserErrors
 from opta.utils import fmt_msg, logger
 
@@ -23,9 +24,8 @@ class Local:
             os.makedirs(os.path.dirname(self.config_file_path))
 
     def get_remote_config(self) -> Optional["StructuredConfig"]:
-        print (self.config_file_path)
         try:
-            return json.load(open(self.config_file_path),'r')
+            return json.load(open(self.config_file_path), "r")
         except Exception:  # Backwards compatibility
             logger.debug(
                 "Could not successfully download and parse any pre-existing config"
@@ -58,8 +58,8 @@ class Local:
         if os.path.isfile(tf_file):
             os.remove(tf_file)
             logger.info("Deleted opta tf config from local")
-        if os.path.isfile(tf_file+".backup"):
-            os.remove(tf_file+".backup")
+        if os.path.isfile(tf_file + ".backup"):
+            os.remove(tf_file + ".backup")
             logger.info("Deleted opta tf backup config from local")
         else:
             logger.warn(f"Did not find opta tf state {tf_file} to delete")
