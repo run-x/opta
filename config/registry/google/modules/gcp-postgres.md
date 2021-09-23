@@ -10,6 +10,12 @@ description: Creates a postgres (GCP Cloud SQL) database instance
 This module creates a postgres [GCP Cloud SQL](https://cloud.google.com/sql/docs/introduction) database. It is made with
 the [private service access](https://cloud.google.com/vpc/docs/private-services-access), ensuring private communication.
 
+### Backups
+Opta will provision your database with 7 days of automatic daily backups in the form of
+[Cloud SQL Backups](https://cloud.google.com/sql/docs/postgres/backup-recovery/backups).
+You can find them either programmatically via the gcloud cli, or through the GCP web console inside your db description
+page.
+
 ### Linking
 
 When linked to a k8s-service, it adds connection credentials to your container's environment variables as:
