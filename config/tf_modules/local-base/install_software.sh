@@ -10,7 +10,7 @@ if [ "$(uname)" == "Darwin" ]; then
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
   echo "Detected LINUX"
   curl -Lo $HOME/.opta/local/kind https://kind.sigs.k8s.io/dl/v0.11.1/kind-linux-amd64
-    
+fi
 
 
 chmod +x $HOME/.opta/local/kind
