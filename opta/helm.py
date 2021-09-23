@@ -9,7 +9,7 @@ from opta.utils import is_tool
 HELM_INSTALL_URL = "https://helm.sh/docs/intro/install/"
 
 
-def is_helm_present() -> None:
+def helm_check() -> None:
     if not is_tool("helm"):
         raise UserErrors(
             f"Please visit this link to install helm first: {HELM_INSTALL_URL}"
@@ -19,12 +19,17 @@ def is_helm_present() -> None:
 class Helm:
     @classmethod
     def rollback_helm(cls, release: str, namespace: str, revision: str = "") -> None:
-        is_helm_present()
+        helm_check()
         try:
-            nice_run(
-                ["helm", "rollback", release, revision, "--namespace", namespace],
-                check=True,
-            )
+            if revision == "1":
+                nice_run(
+                    ["helm", "uninstall", release, "--namespace", namespace], check=True
+                )
+            else:
+                nice_run(
+                    ["helm", "rollback", release, revision, "--namespace", namespace],
+                    check=True,
+                )
         except CalledProcessError as e:
             raise UserErrors(
                 f"Helm was unable to rollback the release: {release}.\n"

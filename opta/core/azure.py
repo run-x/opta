@@ -134,3 +134,5 @@ class Azure:
             return tf_lock_data["ID"]
         except ResourceNotFoundError:
             return ""
+        except Exception:
+            return ""

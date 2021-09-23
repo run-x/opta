@@ -140,7 +140,10 @@ class AWS:
             Key={"LockID": {"S": f"{bucket}/{self.layer.name}"}},
         )
 
-        return json.loads(tf_lock_data["Item"]["Info"]["S"])["ID"]  # type: ignore
+        try:
+            return json.loads(tf_lock_data["Item"]["Info"]["S"])["ID"]  # type: ignore
+        except Exception:
+            return ""
 
     @staticmethod
     def get_all_versions(bucket: str, filename: str) -> List[str]:
