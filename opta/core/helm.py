@@ -1,5 +1,5 @@
 import json
-from subprocess import CalledProcessError
+from subprocess import CalledProcessError  # nosec
 from typing import List
 
 from opta.exceptions import UserErrors
