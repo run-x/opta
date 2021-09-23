@@ -9,6 +9,9 @@ description: Creates a postgres database
 This module creates a postgres [Azure Database for PostgreSQL](https://azure.microsoft.com/en-us/services/postgresql/) database. It is made with
 the [private link](https://docs.microsoft.com/en-us/azure/postgresql/concepts-data-access-and-security-private-link), ensuring private communication.
 
+### Backups
+Opta will provision your database with 7 days of [continuous backups](https://docs.microsoft.com/en-us/azure/postgresql/concepts-backup).
+
 ### Linking
 
 When linked to a k8s-service, it adds connection credentials to your container's environment variables as:
