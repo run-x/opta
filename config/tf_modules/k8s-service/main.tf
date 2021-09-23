@@ -45,6 +45,7 @@ resource "helm_release" "k8s-service" {
       stickySession : var.sticky_session
       stickySessionMaxAge : var.sticky_session_max_age
       consistentHash : var.consistent_hash
+      keepPathPrefix : var.keep_path_prefix
     })
   ]
   atomic          = true

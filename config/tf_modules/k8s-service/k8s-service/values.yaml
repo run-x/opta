@@ -11,6 +11,7 @@ envVars: []
 linkSecrets: []
 manualSecrets: []
 port: {}
+keepPathPrefix: false
 
 serviceAccount:
   # The name of the service account to use.

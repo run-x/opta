@@ -148,3 +148,8 @@ variable "manual_secrets" {
 variable "acr_registry_name" {
   type = string
 }
+
+variable "keep_path_prefix" {
+  type    = bool
+  default = false
+}
