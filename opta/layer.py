@@ -142,7 +142,9 @@ class Layer:
                 )
 
     @classmethod
-    def load_from_yaml(cls, config: str, env: Optional[str]) -> Layer:
+    def load_from_yaml(
+        cls, config: str, env: Optional[str], is_parent: bool = False
+    ) -> Layer:
         t = None
         if config.startswith("git@"):
             logger.debug("Loading layer from git...")
@@ -175,7 +177,7 @@ class Layer:
         conf["original_spec"] = config_string
         conf["path"] = config
 
-        layer = cls.load_from_dict(conf, env)
+        layer = cls.load_from_dict(conf, env, is_parent)
         validate_yaml(config_path, layer.cloud)
         if t is not None:
             shutil.rmtree(t)
@@ -189,7 +191,9 @@ class Layer:
         }
 
     @classmethod
-    def load_from_dict(cls, conf: Dict[Any, Any], env: Optional[str]) -> Layer:
+    def load_from_dict(
+        cls, conf: Dict[Any, Any], env: Optional[str], is_parent: bool = False
+    ) -> Layer:
         modules_data = conf.get("modules", [])
         environments = conf.pop("environments", None)
         original_spec = conf.pop("original_spec", "")
@@ -197,6 +201,10 @@ class Layer:
         name = conf.pop("name", None)
         if name is None:
             raise UserErrors("Config must have name")
+        if is_parent and environments is not None:
+            raise UserErrors(
+                f"Layer {name} can not be a parent as it has a parent of its own"
+            )
         org_name = conf.pop("org_name", None)
         providers = conf.pop("providers", {})
         if "aws" in providers:
@@ -211,7 +219,7 @@ class Layer:
                 parent_path: str = env_meta["path"]
                 if not parent_path.startswith("git@") and not parent_path.startswith("/"):
                     parent_path = os.path.join(os.path.dirname(path), env_meta["path"])
-                current_parent = cls.load_from_yaml(parent_path, None)
+                current_parent = cls.load_from_yaml(parent_path, None, is_parent=True)
                 if current_parent.parent is not None:
                     raise UserErrors(
                         "A parent can not have a parent, only one level of parent-child allowed."
