@@ -41,10 +41,7 @@ class Helm:
 
     @classmethod
     def get_helm_list(cls, **kwargs) -> List:  # type: ignore # nosec
-        if not is_tool("helm"):
-            raise UserErrors(
-                f"Please visit this link to install kubectl first: {HELM_INSTALL_URL}"
-            )
+        helm_check()
         namespaces: List[str] = []
         if kwargs.get("namespace") is not None:
             namespaces.append("--namespace")

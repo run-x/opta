@@ -4,9 +4,9 @@ import click
 
 from opta.amplitude import amplitude_client
 from opta.core.generator import gen_all
+from opta.core.helm import Helm
 from opta.core.kubernetes import configure_kubectl
 from opta.core.terraform import Terraform
-from opta.helm import Helm
 from opta.layer import Layer
 from opta.utils import check_opta_file_exists
 
