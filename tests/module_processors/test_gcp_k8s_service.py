@@ -29,7 +29,10 @@ class TestGCPK8sServiceProcessor:
         assert app_module.data["link_secrets"] == [
             {"name": "database_db_user", "value": "${{module.database.db_user}}"},
             {"name": "database_db_name", "value": "${{module.database.db_name}}"},
-            {"name": "database_db_password", "value": "${{module.database.db_password}}"},
+            {
+                "name": "database_db_password",
+                "value": "${{module.database.db_password}}",
+            },
             {"name": "database_db_host", "value": "${{module.database.db_host}}"},
             {"name": "redis_cache_host", "value": "${{module.redis.cache_host}}"},
             {

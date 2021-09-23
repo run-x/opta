@@ -108,7 +108,9 @@ class TestKubernetes:
         mocked_nice_run.assert_has_calls(
             [
                 mocker.call(
-                    ["aws", "sts", "get-caller-identity"], check=True, capture_output=True
+                    ["aws", "sts", "get-caller-identity"],
+                    check=True,
+                    capture_output=True,
                 ),
                 mocker.call(
                     [

@@ -38,7 +38,9 @@ class GcpK8sServiceProcessor(GcpK8sModuleProcessor):
         if isinstance(self.module.data.get("public_uri"), str):
             self.module.data["public_uri"] = [self.module.data["public_uri"]]
 
-        current_envars: Union[List, Dict[str, str]] = self.module.data.get("env_vars", [])
+        current_envars: Union[List, Dict[str, str]] = self.module.data.get(
+            "env_vars", []
+        )
         if isinstance(current_envars, dict):
             self.module.data["env_vars"] = [
                 {"name": x, "value": y} for x, y in current_envars.items()

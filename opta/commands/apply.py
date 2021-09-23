@@ -1,4 +1,3 @@
-import os
 from threading import Thread
 from typing import List, Optional, Set
 
@@ -284,9 +283,7 @@ def _apply(
                 # Tailing events
                 new_thread.start()
                 new_thread = Thread(
-                    target=tail_namespace_events,
-                    args=(layer, 0, 1),
-                    daemon=True,
+                    target=tail_namespace_events, args=(layer, 0, 1), daemon=True,
                 )
                 new_thread.start()
 

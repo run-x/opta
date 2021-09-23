@@ -34,10 +34,14 @@ class AwsEmailProcessor(ModuleProcessor):
         dns_modules = self.layer.get_module_by_type("aws-dns", module_idx)
 
         if len(dns_modules) == 0:
-            raise UserErrors("AWS email needs the dns to be setup and delegated to work")
+            raise UserErrors(
+                "AWS email needs the dns to be setup and delegated to work"
+            )
         dns_module = dns_modules[0]
         if not dns_module.data.get("delegated", False):
-            raise UserErrors("AWS email needs the dns to be setup and delegated to work")
+            raise UserErrors(
+                "AWS email needs the dns to be setup and delegated to work"
+            )
         self.module.data["domain"] = f"${{{{module.{dns_module.name}.domain}}}}"
         self.module.data["zone_id"] = f"${{{{module.{dns_module.name}.zone_id}}}}"
         super(AwsEmailProcessor, self).process(module_idx)

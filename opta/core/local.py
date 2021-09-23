@@ -1,12 +1,9 @@
-import errno
 import json
 import os
 from pathlib import Path
-from traceback import format_exc
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Optional
 
-from opta.exceptions import UserErrors
-from opta.utils import fmt_msg, logger
+from opta.utils import logger
 
 if TYPE_CHECKING:
     from opta.layer import Layer, StructuredConfig
@@ -49,11 +46,7 @@ class Local:
 
     def delete_local_tf_state(self, org_name, layer_name) -> None:
         tf_file = os.path.join(
-            str(Path.home()),
-            ".opta",
-            "local",
-            "tfstate",
-            f"{layer_name}",
+            str(Path.home()), ".opta", "local", "tfstate", f"{layer_name}",
         )
         if os.path.isfile(tf_file):
             os.remove(tf_file)

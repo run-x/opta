@@ -25,7 +25,6 @@ from google.oauth2 import service_account
 from opta.constants import REGISTRY, VERSION
 from opta.core.aws import AWS
 from opta.core.gcp import GCP
-from opta.core.local import Local
 from opta.core.validator import validate_yaml
 from opta.exceptions import UserErrors
 from opta.module import Module
@@ -140,13 +139,7 @@ class Layer:
         self.variables = variables or {}
         self.modules = []
         for module_data in modules_data:
-            self.modules.append(
-                Module(
-                    self,
-                    module_data,
-                    self.parent,
-                )
-            )
+            self.modules.append(Module(self, module_data, self.parent,))
         module_names: set = set()
         for module in self.modules:
             if module.name in module_names:

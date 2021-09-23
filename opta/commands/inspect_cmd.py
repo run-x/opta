@@ -64,7 +64,11 @@ class InspectCommand:
             )
 
             inspect_details.append(
-                (inspected_resource_name, inspected_resource_desc, inspected_resource_url)
+                (
+                    inspected_resource_name,
+                    inspected_resource_desc,
+                    inspected_resource_url,
+                )
             )
 
         # Sort the inspected resources alphabetically
@@ -108,7 +112,9 @@ class InspectCommand:
             k8s_metadata_values = self._get_k8s_metadata_values(resource_state)
             template_url_values = deep_merge(template_url_values, k8s_metadata_values)
         if resource_state.get("type") == "google_container_cluster":
-            template_url_values["cluster_name"] = template_url_values["id"].split("/")[-1]
+            template_url_values["cluster_name"] = template_url_values["id"].split("/")[
+                -1
+            ]
         return template_url_values
 
     def _get_k8s_metadata_values(self, resource_properties: dict) -> dict:

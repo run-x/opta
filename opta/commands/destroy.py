@@ -151,7 +151,7 @@ def _gcp_get_configs(layer: "Layer") -> List[str]:
 
 
 def _local_get_configs(layer: "Layer") -> List[str]:
-    local_config_dir = local_dir = os.path.join(
+    local_config_dir = os.path.join(
         os.path.join(str(Path.home()), ".opta", "local", "opta_config")
     )
     configs = os.listdir(local_config_dir)

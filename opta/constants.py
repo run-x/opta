@@ -22,7 +22,9 @@ tf_modules_path = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), "config", "tf_modules"
 )
 
-one_time_run = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".first_time_run")
+one_time_run = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)), ".first_time_run"
+)
 
 REGISTRY = make_registry_dict()
 DEBUG_TREE = yaml.load(open(debugger_path))
@@ -41,6 +43,21 @@ MIN_TERRAFORM_VERSION = "0.15.0"
 CI = "CI"
 
 # List of chars to escape in regexes
-ESCAPE_REQUIRED = ["\\", ".", "+", "*", "?", "[", "]", "$", "^", "(", ")", "{", "}", "|"]
+ESCAPE_REQUIRED = [
+    "\\",
+    ".",
+    "+",
+    "*",
+    "?",
+    "[",
+    "]",
+    "$",
+    "^",
+    "(",
+    ")",
+    "{",
+    "}",
+    "|",
+]
 
 SHELLS_ALLOWED = ["bash", "sh"]

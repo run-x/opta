@@ -90,7 +90,9 @@ class TestTerraform:
 
         # The stale resource should be imported and destroyed.
         mocked_import.assert_called_once_with("fake.tf.resource.address.2", "i-2")
-        mocked_destroy.assert_called_once_with(fake_layer, ["fake.tf.resource.address.2"])
+        mocked_destroy.assert_called_once_with(
+            fake_layer, ["fake.tf.resource.address.2"]
+        )
 
         # Test rollback again, but without the stale resource.
         del mocked_aws_instance.get_opta_resources.return_value[
@@ -155,7 +157,9 @@ class TestTerraform:
                     "gcs": {"bucket": "opta-tf-state-test-dev1", "prefix": "dev1"}
                 }
             },
-            "provider": {"google": {"region": "us-central1", "project": "dummy-project"}},
+            "provider": {
+                "google": {"region": "us-central1", "project": "dummy-project"}
+            },
         }
         layer.name = "blah"
         layer.cloud = "google"
@@ -350,7 +354,9 @@ class TestTerraform:
                     "gcs": {"bucket": "opta-tf-state-test-dev1", "prefix": "dev1"}
                 }
             },
-            "provider": {"google": {"region": "us-central1", "project": "dummy-project"}},
+            "provider": {
+                "google": {"region": "us-central1", "project": "dummy-project"}
+            },
         }
         mocked_gcp = mocker.patch("opta.core.terraform.GCP")
         mocked_credentials = mocker.Mock()
@@ -367,7 +373,9 @@ class TestTerraform:
         mocked_bucket.project_number = "123"
         mocked_storage_client.create_bucket.return_value = mocked_bucket
 
-        mocked_google_credentials = mocker.patch("opta.core.terraform.GoogleCredentials")
+        mocked_google_credentials = mocker.patch(
+            "opta.core.terraform.GoogleCredentials"
+        )
         mocked_api_credentials = mocker.Mock()
         mocked_google_credentials.get_application_default.return_value = (
             mocked_api_credentials
@@ -375,7 +383,10 @@ class TestTerraform:
         mocked_discovery = mocker.patch("opta.core.terraform.discovery")
         mocked_service = mocker.Mock()
         mocked_cloudresourcemanager = mocker.Mock()
-        mocked_discovery.build.side_effect = [mocked_service, mocked_cloudresourcemanager]
+        mocked_discovery.build.side_effect = [
+            mocked_service,
+            mocked_cloudresourcemanager,
+        ]
         mocked_service_services = mocker.Mock()
         mocked_service.services.return_value = mocked_service_services
         mocked_request = mocker.Mock()

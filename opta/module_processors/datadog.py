@@ -2,7 +2,13 @@ import base64
 from typing import TYPE_CHECKING
 
 import click
-from kubernetes.client import ApiException, CoreV1Api, V1Namespace, V1ObjectMeta, V1Secret
+from kubernetes.client import (
+    ApiException,
+    CoreV1Api,
+    V1Namespace,
+    V1ObjectMeta,
+    V1Secret,
+)
 from kubernetes.config import load_kube_config
 from requests import codes, get
 
@@ -54,7 +60,9 @@ class DatadogProcessor(ModuleProcessor):
             ):
                 api_key = self.create_secret()
             else:
-                api_key = base64.b64decode(secret.data["DATADOG_API_KEY"]).decode("utf-8")
+                api_key = base64.b64decode(secret.data["DATADOG_API_KEY"]).decode(
+                    "utf-8"
+                )
         except ApiException:
             self.v1.create_namespaced_secret(
                 namespace=self.layer.name,

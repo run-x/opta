@@ -82,7 +82,8 @@ class AwsEksProcessor(ModuleProcessor):
                 )
             else:
                 describe_enis = client.describe_network_interfaces(  # type: ignore
-                    Filters=[{"Name": "vpc-id", "Values": [vpc_id]}], NextToken=next_token
+                    Filters=[{"Name": "vpc-id", "Values": [vpc_id]}],
+                    NextToken=next_token,
                 )
             for eni in describe_enis["NetworkInterfaces"]:
                 if eni["Description"] == f"Amazon EKS opta-{self.layer.name}" or (
@@ -100,7 +101,9 @@ class AwsEksProcessor(ModuleProcessor):
             logger.info(
                 f"Now deleting dangling network interface {eni['NetworkInterfaceId']}"
             )
-            client.delete_network_interface(NetworkInterfaceId=eni["NetworkInterfaceId"])
+            client.delete_network_interface(
+                NetworkInterfaceId=eni["NetworkInterfaceId"]
+            )
 
     def post_hook(self, module_idx: int, exception: Optional[Exception]) -> None:
         if exception is not None or not self.module.data.get("enable_metrics", False):

@@ -59,7 +59,9 @@ class TestAzure:
         mocked_container_client_instance.download_blob = mocker.Mock()
         download_stream_mock = mocker.Mock()
         download_stream_mock.readall = mocker.Mock(return_value='{"a":1}')
-        mocked_container_client_instance.download_blob.return_value = download_stream_mock
+        mocked_container_client_instance.download_blob.return_value = (
+            download_stream_mock
+        )
         mocked_container_client = mocker.patch(
             "opta.core.azure.ContainerClient",
             return_value=mocked_container_client_instance,

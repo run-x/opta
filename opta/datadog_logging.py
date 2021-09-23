@@ -68,7 +68,9 @@ class DatadogLogHandler(Handler):
                 url=f"https://browser-http-intake.logs.datadoghq.com/v1/input/{CLIENT_TOKEN}",
                 params=parameters,
                 headers=headers,
-                data="\n".join(map(lambda x: json.dumps(x), self.cache)).encode("utf-8"),
+                data="\n".join(map(lambda x: json.dumps(x), self.cache)).encode(
+                    "utf-8"
+                ),
                 timeout=5,
             )
             if response.status_code != codes.ok:

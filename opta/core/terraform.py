@@ -328,9 +328,7 @@ class Terraform:
         bucket = layer.state_storage()
         s3 = boto3.client("s3")
         try:
-            s3.get_bucket_encryption(
-                Bucket=bucket,
-            )
+            s3.get_bucket_encryption(Bucket=bucket,)
         except ClientError as e:
             if e.response["Error"]["Code"] == "NoSuchBucket":
                 return False
@@ -339,10 +337,7 @@ class Terraform:
 
     @classmethod
     def plan(
-        cls,
-        *tf_flags: str,
-        quiet: Optional[bool] = False,
-        layer: "Layer",
+        cls, *tf_flags: str, quiet: Optional[bool] = False, layer: "Layer",
     ) -> None:
         cls.init(quiet, layer=layer)
         kwargs = cls.insert_extra_env(layer)
@@ -476,16 +471,14 @@ class Terraform:
         elif layer.cloud == "local":
             try:
                 tf_file = os.path.join(
-                    cls.get_local_opta_dir(),
-                    "tfstate",
-                    f"{layer.name}",
+                    cls.get_local_opta_dir(), "tfstate", f"{layer.name}",
                 )
                 if os.path.exists(tf_file):
                     copyfile(tf_file, state_file)
 
                 else:
                     return False
-            except Exception as e:
+            except Exception:
                 UserErrors(f"Could copy local state file to {state_file}")
 
         else:
@@ -538,7 +531,7 @@ class Terraform:
         try:
             rmtree(os.path.join(cls.get_local_opta_dir()))
         except Exception:
-            logger.warn(f"Local state delete did not work?")
+            logger.warn("Local state delete did not work?")
 
     @classmethod
     def _create_local_state_storage(cls, providers: dict) -> None:
@@ -613,10 +606,8 @@ class Terraform:
             )
         )[0]
 
-        role_assignments = (
-            authorization_client.role_assignments.list_for_resource_group(
-                rg_result.name
-            )
+        role_assignments = authorization_client.role_assignments.list_for_resource_group(
+            rg_result.name
         )
         for role_assignment in role_assignments:
             if role_assignment.role_definition_id == owner_role.id:
@@ -794,9 +785,7 @@ class Terraform:
         dynamodb = boto3.client("dynamodb", config=Config(region_name=region))
         iam = boto3.client("iam", config=Config(region_name=region))
         try:
-            s3.get_bucket_encryption(
-                Bucket=bucket_name,
-            )
+            s3.get_bucket_encryption(Bucket=bucket_name,)
         except ClientError as e:
             if e.response["Error"]["Code"] == "AuthFailure":
                 raise UserErrors(
@@ -820,9 +809,7 @@ class Terraform:
                 )
             logger.info("S3 bucket for terraform state not found, creating a new one")
             if region == "us-east-1":
-                s3.create_bucket(
-                    Bucket=bucket_name,
-                )
+                s3.create_bucket(Bucket=bucket_name,)
             else:
                 s3.create_bucket(
                     Bucket=bucket_name,
@@ -850,8 +837,7 @@ class Terraform:
                 },
             )
             s3.put_bucket_versioning(
-                Bucket=bucket_name,
-                VersioningConfiguration={"Status": "Enabled"},
+                Bucket=bucket_name, VersioningConfiguration={"Status": "Enabled"},
             )
             s3.put_bucket_lifecycle(
                 Bucket=bucket_name,
@@ -898,9 +884,7 @@ class Terraform:
             )
         # Create the service linked roles
         try:
-            iam.create_service_linked_role(
-                AWSServiceName="autoscaling.amazonaws.com",
-            )
+            iam.create_service_linked_role(AWSServiceName="autoscaling.amazonaws.com",)
         except ClientError as e:
             if e.response["Error"]["Code"] != "InvalidInput":
                 raise UserErrors(

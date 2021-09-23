@@ -118,7 +118,10 @@ def test_deploy_all_flags(mocker: MockFixture) -> None:
 
     assert result.exit_code == 0
     mock_push.assert_called_once_with(
-        image="local_image:local_tag", config="app/opta.yml", env="staging", tag="latest"
+        image="local_image:local_tag",
+        config="app/opta.yml",
+        env="staging",
+        tag="latest",
     )
     mock_terraform_outputs.assert_called_once_with(mocked_layer)
     mock_apply.assert_called_once_with(
@@ -165,7 +168,10 @@ def test_deploy_ecr_apply(mocker: MockFixture) -> None:
 
     assert result.exit_code == 0
     mock_push.assert_called_once_with(
-        image="local_image:local_tag", config="app/opta.yml", env="staging", tag="latest"
+        image="local_image:local_tag",
+        config="app/opta.yml",
+        env="staging",
+        tag="latest",
     )
     mock_terraform_outputs.assert_called_once_with(mocked_layer)
     mock_apply.assert_has_calls(

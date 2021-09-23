@@ -40,20 +40,26 @@ class AwsDnsProcessor(DNSModuleProcessor):
         region = providers["provider"]["aws"]["region"]
         self.validate_dns()
         if self.module.data.get("upload_cert"):
-            ssm_client: SSMClient = boto3.client("ssm", config=Config(region_name=region))
+            ssm_client: SSMClient = boto3.client(
+                "ssm", config=Config(region_name=region)
+            )
             parameters = ssm_client.get_parameters_by_path(
                 Path=f"/opta-{self.layer.get_env()}", Recursive=True
             ).get("Parameters", [])
             parameter_names = list(map(lambda x: x["Name"], parameters))
             files_found = False
-            private_key_ssm_path = f"/opta-{self.layer.get_env()}/{PRIVATE_KEY_FILE_NAME}"
+            private_key_ssm_path = (
+                f"/opta-{self.layer.get_env()}/{PRIVATE_KEY_FILE_NAME}"
+            )
             cert_body_ssm_path = (
                 f"/opta-{self.layer.get_env()}/{CERTIFICATE_BODY_FILE_NAME}"
             )
             cert_chain_ssm_path = (
                 f"/opta-{self.layer.get_env()}/{CERTIFICATE_CHAIN_FILE_NAME}"
             )
-            if {private_key_ssm_path, cert_body_ssm_path}.issubset(set(parameter_names)):
+            if {private_key_ssm_path, cert_body_ssm_path}.issubset(
+                set(parameter_names)
+            ):
                 logger.info("SSL files found in cloud")
                 files_found = True
             if cert_chain_ssm_path in parameter_names:
@@ -115,7 +121,9 @@ class AwsDnsProcessor(DNSModuleProcessor):
                 )
                 self.module.data["_updated_already"] = True
         elif self.module.data.get("external_cert_arn") is not None:
-            acm_client: ACMClient = boto3.client("acm", config=Config(region_name=region))
+            acm_client: ACMClient = boto3.client(
+                "acm", config=Config(region_name=region)
+            )
             try:
                 cert = acm_client.describe_certificate(
                     CertificateArn=str(self.module.data.get("external_cert_arn"))

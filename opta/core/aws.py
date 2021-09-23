@@ -123,7 +123,9 @@ class AWS:
             )
 
         for version in self.get_all_versions(bucket, self.layer.name):
-            s3_client.delete_object(Bucket=bucket, Key=self.layer.name, VersionId=version)
+            s3_client.delete_object(
+                Bucket=bucket, Key=self.layer.name, VersionId=version
+            )
         logger.info(f"Deleted opta tf state for {self.layer.name}")
 
     @staticmethod
@@ -181,7 +183,11 @@ class AWS:
     def prepare_subscribe_queues_iam_statements(queue_arns: List[str]) -> dict:
         return {
             "Sid": "SubscribeQueues",
-            "Action": ["sqs:ReceiveMessage", "sqs:GetQueueUrl", "sqs:GetQueueAttributes"],
+            "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:GetQueueUrl",
+                "sqs:GetQueueAttributes",
+            ],
             "Effect": "Allow",
             "Resource": [queue_arn for queue_arn in queue_arns],
         }
@@ -264,9 +270,13 @@ class AWS:
             "resource_type": None,
         }
         if "/" in result["resource"]:
-            result["resource_type"], result["resource"] = result["resource"].split("/", 1)
+            result["resource_type"], result["resource"] = result["resource"].split(
+                "/", 1
+            )
         elif ":" in result["resource"]:
-            result["resource_type"], result["resource"] = result["resource"].split(":", 1)
+            result["resource_type"], result["resource"] = result["resource"].split(
+                ":", 1
+            )
         return result
 
 

@@ -58,8 +58,12 @@ class TestCheckVersionUpgrade:
     def test_logs_update_instructions_if_newer_version_available(
         self, mocker: MockFixture
     ) -> None:
-        mocker.patch("opta.upgrade._should_check_for_version_upgrade", return_value=True)
-        mocker.patch("opta.upgrade._get_latest_version", return_value=TEST_LATEST_VERSION)
+        mocker.patch(
+            "opta.upgrade._should_check_for_version_upgrade", return_value=True
+        )
+        mocker.patch(
+            "opta.upgrade._get_latest_version", return_value=TEST_LATEST_VERSION
+        )
         mocker.patch("opta.upgrade.VERSION", TEST_OLD_VERSION)
         mocked_logger_warning = mocker.patch("opta.upgrade.logger.warning")
         check_version_upgrade()
@@ -70,7 +74,9 @@ class TestCheckVersionUpgrade:
         assert warning_message.find(UPGRADE_INSTRUCTIONS_URL) > -1
 
     def test_handles_get_latest_version_exceptions(self, mocker: MockFixture) -> None:
-        mocker.patch("opta.upgrade._should_check_for_version_upgrade", return_value=True)
+        mocker.patch(
+            "opta.upgrade._should_check_for_version_upgrade", return_value=True
+        )
         mocked_get_latest_version = mocker.patch(
             "opta.upgrade._get_latest_version",
             side_effect=requests.exceptions.ConnectTimeout,

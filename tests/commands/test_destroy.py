@@ -13,7 +13,9 @@ FAKE_ENV_CONFIG = os.path.join(
 )
 
 FAKE_SERVICE_CONFIG = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)), "module_processors", "dummy_config1.yaml",
+    os.path.dirname(os.path.dirname(__file__)),
+    "module_processors",
+    "dummy_config1.yaml",
 )
 
 FAKE_SERVICE_CONFIG_MULTIPLE_ENV = os.path.join(

@@ -61,7 +61,7 @@ def configure_kubectl(layer: "Layer") -> None:
 
 
 def _local_configure_kubectl(layer: "Layer") -> None:
-    out: str = nice_run(
+    nice_run(
         ["kubectl", "config", "use-context", "kind-opta-local-cluster"],
         check=True,
         capture_output=True,
@@ -436,9 +436,7 @@ def tail_pod_log(
 
 
 def tail_namespace_events(
-    layer: "Layer",
-    seconds: Optional[int] = None,
-    color_idx: int = 1,
+    layer: "Layer", seconds: Optional[int] = None, color_idx: int = 1,
 ) -> None:
     load_kube_config()
     v1 = CoreV1Api()
@@ -453,10 +451,7 @@ def tail_namespace_events(
     old_events: List[V1Event] = v1.list_namespaced_event(namespace=layer.name).items
     # Filter by time
     old_events = list(
-        filter(
-            lambda x: (x.last_timestamp or x.event_time) > start_time,
-            old_events,
-        )
+        filter(lambda x: (x.last_timestamp or x.event_time) > start_time, old_events,)
     )
     # Sort by timestamp
     old_events = sorted(old_events, key=lambda x: (x.last_timestamp or x.event_time))
@@ -470,8 +465,7 @@ def tail_namespace_events(
     while True:
         try:
             for stream_obj in watch.stream(
-                v1.list_namespaced_event,
-                namespace=layer.name,
+                v1.list_namespaced_event, namespace=layer.name,
             ):
                 event = stream_obj["object"]
                 if (event.last_timestamp or event.event_time) > start_time:

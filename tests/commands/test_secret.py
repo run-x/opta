@@ -99,7 +99,9 @@ class TestSecretManager:
         mocked_amplitude_client = mocker.patch(
             "opta.commands.secret.amplitude_client", spec=AmplitudeClient
         )
-        mocked_amplitude_client.UPDATE_SECRET_EVENT = amplitude_client.UPDATE_SECRET_EVENT
+        mocked_amplitude_client.UPDATE_SECRET_EVENT = (
+            amplitude_client.UPDATE_SECRET_EVENT
+        )
 
         runner = CliRunner()
         result = runner.invoke(

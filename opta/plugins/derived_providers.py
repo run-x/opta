@@ -42,5 +42,7 @@ class DerivedProviders:
                     },
                     base_hydration,
                 )
-                ret = deep_merge(hydrate({"data": m.desc["output_data"]}, hydration), ret)
+                ret = deep_merge(
+                    hydrate({"data": m.desc["output_data"]}, hydration), ret
+                )
         return ret

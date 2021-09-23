@@ -3,7 +3,11 @@ import json
 from click.testing import CliRunner
 from pytest_mock import MockFixture
 
-from opta.commands.output import _load_extra_aws_outputs, _load_extra_gcp_outputs, output
+from opta.commands.output import (
+    _load_extra_aws_outputs,
+    _load_extra_gcp_outputs,
+    output,
+)
 from opta.layer import Layer
 
 TERRAFORM_STATE = {
@@ -52,7 +56,9 @@ def test_output_aws(mocker: MockFixture) -> None:
     mocked_layer.cloud = "aws"
     mocked_layer_class.load_from_yaml.return_value = mocked_layer
     mocker.patch("opta.commands.output.gen_all")
-    mocker.patch("opta.core.terraform.Terraform.get_state", return_value=TERRAFORM_STATE)
+    mocker.patch(
+        "opta.core.terraform.Terraform.get_state", return_value=TERRAFORM_STATE
+    )
     mocker.patch(
         "opta.core.terraform.Terraform.get_outputs", return_value=TERRAFORM_OUTPUTS
     )
@@ -83,7 +89,9 @@ def test_output_gcp(mocker: MockFixture) -> None:
     mocked_layer.cloud = "google"
     mocked_layer_class.load_from_yaml.return_value = mocked_layer
     mocker.patch("opta.commands.output.gen_all")
-    mocker.patch("opta.core.terraform.Terraform.get_state", return_value=TERRAFORM_STATE)
+    mocker.patch(
+        "opta.core.terraform.Terraform.get_state", return_value=TERRAFORM_STATE
+    )
     mocker.patch(
         "opta.core.terraform.Terraform.get_outputs", return_value=TERRAFORM_OUTPUTS
     )

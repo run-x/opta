@@ -150,9 +150,13 @@ class AwsK8sBaseProcessor(AWSK8sModuleProcessor):
                 LoadBalancerArn=current_load_balancer["LoadBalancerArn"]
             )
             for listener in listeners["Listeners"]:
-                if listener["Port"] == 443 and len(listener.get("Certificates", [])) > 0:
+                if (
+                    listener["Port"] == 443
+                    and len(listener.get("Certificates", [])) > 0
+                ):
                     client.modify_listener(
-                        ListenerArn=listener["ListenerArn"], AlpnPolicy=["HTTP2Preferred"]
+                        ListenerArn=listener["ListenerArn"],
+                        AlpnPolicy=["HTTP2Preferred"],
                     )
                     return
 

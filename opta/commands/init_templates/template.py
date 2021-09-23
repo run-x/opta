@@ -39,7 +39,9 @@ class TemplateVariable:
 
 
 class Template:
-    def __init__(self, template_type: str, name: str, variables: List[TemplateVariable]):
+    def __init__(
+        self, template_type: str, name: str, variables: List[TemplateVariable]
+    ):
         self.initial_state = load_template(template_type, name)
         self.variables = variables
         self.name = name

@@ -31,7 +31,9 @@ def basic_mocks(mocker: MockFixture) -> None:
     mocked_layer = mocker.Mock()
     mocked_layer.name = "test"
     mocked_layer.cloud = "aws"
-    fake_module = Module(mocked_layer, data={"type": "k8s-service", "name": "fakemodule"})
+    fake_module = Module(
+        mocked_layer, data={"type": "k8s-service", "name": "fakemodule"}
+    )
     mocker.patch("opta.commands.apply.gen", return_value=iter([(0, [fake_module], 1)]))
     mocked_aws = mocker.patch("opta.commands.apply.AWS")
     mocked_aws.get_remote_config = None
@@ -45,7 +47,9 @@ def mocked_layer(mocker: MockFixture) -> Any:
     mocked_layer.name = "blah"
     mocked_layer.org_name = "blahorg"
     mocked_layer.cloud = "aws"
-    mocked_layer.gen_providers = lambda x: {"provider": {"aws": {"region": "us-east-1"}}}
+    mocked_layer.gen_providers = lambda x: {
+        "provider": {"aws": {"region": "us-east-1"}}
+    }
     mocked_layer_class.load_from_yaml.return_value = mocked_layer
     mocked_layer.parent = None
 
@@ -66,7 +70,9 @@ def test_apply(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None
     mocker.patch("opta.commands.apply.Terraform.download_state")
     tf_apply = mocker.patch("opta.commands.apply.Terraform.apply")
     tf_plan = mocker.patch("opta.commands.apply.Terraform.plan")
-    tf_create_storage = mocker.patch("opta.commands.apply.Terraform.create_state_storage")
+    tf_create_storage = mocker.patch(
+        "opta.commands.apply.Terraform.create_state_storage"
+    )
     mocked_thread = mocker.patch("opta.commands.apply.Thread")
     mocked_layer.get_module_by_type.return_value = [mocker.Mock()]
     mocker.patch(
@@ -128,7 +134,9 @@ def test_auto_approve(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) 
     mocker.patch("opta.commands.apply.get_cluster_name")
     tf_apply = mocker.patch("opta.commands.apply.Terraform.apply")
     tf_plan = mocker.patch("opta.commands.apply.Terraform.plan")
-    tf_create_storage = mocker.patch("opta.commands.apply.Terraform.create_state_storage")
+    tf_create_storage = mocker.patch(
+        "opta.commands.apply.Terraform.create_state_storage"
+    )
     mocked_thread = mocker.patch("opta.commands.apply.Thread")
     mocked_layer.get_module_by_type.return_value = [mocker.Mock()]
     mocker.patch(
@@ -198,7 +206,9 @@ def test_verify_parent_layer(mocker: MockFixture, mocked_layer: Any) -> None:
     mocked_get_terraform_outputs.assert_called_once_with(mocked_layer.parent)
 
 
-def test_verify_parent_layer_client_error(mocker: MockFixture, mocked_layer: Any) -> None:
+def test_verify_parent_layer_client_error(
+    mocker: MockFixture, mocked_layer: Any
+) -> None:
     mocked_get_terraform_outputs = mocker.patch(
         "opta.commands.apply.get_terraform_outputs"
     )
