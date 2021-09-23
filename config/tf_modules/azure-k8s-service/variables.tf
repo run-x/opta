@@ -150,6 +150,6 @@ variable "acr_registry_name" {
 }
 
 variable "keep_path_prefix" {
-  type = bool
+  type    = bool
   default = false
 }

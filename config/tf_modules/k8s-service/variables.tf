@@ -153,6 +153,6 @@ variable "additional_iam_policies" {
 }
 
 variable "keep_path_prefix" {
-  type = bool
+  type    = bool
   default = false
 }

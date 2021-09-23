@@ -154,6 +154,6 @@ variable "write_buckets" {
 }
 
 variable "keep_path_prefix" {
-  type = bool
+  type    = bool
   default = false
 }
