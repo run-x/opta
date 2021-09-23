@@ -3,7 +3,16 @@
 set -o errexit
 echo "Installing kind"
 mkdir -p $HOME/.opta/local
-curl -Lo $HOME/.opta/local/kind https://kind.sigs.k8s.io/dl/v0.11.1/kind-linux-amd64
+
+if [ "$(uname)" == "Darwin" ]; then
+	echo "Detected Mac OS"
+  curl -Lo $HOME/.opta/local/kind https://kind.sigs.k8s.io/dl/v0.11.1/kind-darwin-amd64
+elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+  echo "Detected LINUX"
+  curl -Lo $HOME/.opta/local/kind https://kind.sigs.k8s.io/dl/v0.11.1/kind-linux-amd64
+    
+
+
 chmod +x $HOME/.opta/local/kind
 
 # create registry container unless it already exists
