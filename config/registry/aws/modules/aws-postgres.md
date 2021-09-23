@@ -12,7 +12,7 @@ private subnets automatically created during environment setup and so can only b
 VPC or through some proxy (e.g. VPN).
 
 ### Backups
-Opta will provision your database with 5 days of automatic daily backups in the form of 
+Opta will provision your database with 7 days of automatic daily backups in the form of 
 [RDS snapshots](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_CreateSnapshot.html). 
 You can find them either programmatically via the aws cli, or through the AWS web console (they will be called
 system snapshots, and they have a different tab than the manual ones).
