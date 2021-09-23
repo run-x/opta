@@ -229,6 +229,10 @@ class Layer:
                     raise UserErrors(
                         f"Same environment: {current_env} is imported twice as parent"
                     )
+                if current_parent.name == name:
+                    raise UserErrors(
+                        "A service can not have the same name as its environment."
+                    )
                 potential_envs[env_name] = (current_parent, env_meta)
 
             if env is None:
