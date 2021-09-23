@@ -16,8 +16,11 @@ metadata:
     {{- if $.Values.consistentHash }}
     nginx.ingress.kubernetes.io/upstream-hash-by: {{ $.Values.consistentHash }}
     {{- end }}
-    {{- if not (eq $val.pathPrefix "/") }}
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    {{- if and ( ne $val.pathPrefix "/") (not $.Values.keepPathPrefix) }}
+    nginx.ingress.kubernetes.io/rewrite-target: "/$2"
+    {{- end }}
+    {{- if and ( ne $val.pathPrefix "/") $.Values.keepPathPrefix }}
+    nginx.ingress.kubernetes.io/rewrite-target: "{{ $val.pathPrefix }}$1$2"
     {{- end }}
     {{ if hasKey $.Values.port "grpc" }}
     nginx.ingress.kubernetes.io/backend-protocol: "GRPC"

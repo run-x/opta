@@ -151,3 +151,8 @@ variable "additional_iam_policies" {
   type    = list(string)
   default = []
 }
+
+variable "keep_path_prefix" {
+  type = bool
+  default = false
+}

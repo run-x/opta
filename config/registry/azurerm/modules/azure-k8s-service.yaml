@@ -130,6 +130,11 @@ inputs: # (what users see)
     description: |
       The full domain to expose your app under as well as path prefix. Must be the full parent domain or a subdomain referencing the parent as such: "dummy.{parent[domain]}/my/path/prefix"
     default: []
+  - name: keep_path_prefix
+    user_facing: true
+    validator: bool(required=False)
+    description: Should we keep the prefix path which you set in the public uri when forwarding requests to your service?
+    default: false
   - name: links
     user_facing: true
     validator: list(any(str(), map()), required=False)
