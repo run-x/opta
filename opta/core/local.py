@@ -46,11 +46,7 @@ class Local:
 
     def delete_local_tf_state(self, layer_name: str) -> None:
         tf_file = os.path.join(
-            str(Path.home()),
-            ".opta",
-            "local",
-            "tfstate",
-            f"{layer_name}",
+            str(Path.home()), ".opta", "local", "tfstate", f"{layer_name}",
         )
         if os.path.isfile(tf_file):
             os.remove(tf_file)
