@@ -93,7 +93,9 @@ class TestTerraform:
         Terraform.rollback(layer=fake_layer)
 
         # The stale resource should be imported and destroyed.
-        mocked_import.assert_called_once_with("fake.tf.resource.address.2", "i-2", layer=fake_layer)
+        mocked_import.assert_called_once_with(
+            "fake.tf.resource.address.2", "i-2", layer=fake_layer
+        )
         mocked_destroy.assert_called_once_with(fake_layer, ["fake.tf.resource.address.2"])
 
         # Test rollback again, but without the stale resource.

@@ -204,7 +204,6 @@ class Terraform:
 
     @classmethod
     def destroy_all(cls, layer: "Layer", *tf_flags: str) -> None:
-        layer_name = layer.name
         existing_modules = Terraform.get_existing_modules(layer)
 
         # Refreshing the state is necessary to update terraform outputs.
@@ -245,7 +244,7 @@ class Terraform:
         elif layer.cloud == "local":
             local = Local(layer)
             local.delete_opta_config()
-            local.delete_local_tf_state(layer_name)
+            local.delete_local_tf_state()
         else:
             raise Exception(
                 f"Can not handle opta config deletion for cloud {layer.cloud}"

@@ -13,7 +13,9 @@ class Local:
     def __init__(self, layer: "Layer"):
         self.layer = layer
         local_dir = os.path.join(os.path.join(str(Path.home()), ".opta", "local"))
-
+        self.tf_file = os.path.join(
+            str(Path.home()), ".opta", "local", "tfstate", layer.name
+        )
         self.config_file_path = os.path.join(
             local_dir, "opta_config", f"opta-{layer.org_name}-{layer.name}"
         )
@@ -44,15 +46,13 @@ class Local:
         else:
             logger.warn(f"Did not find opta config {self.config_file_path} to delete")
 
-    def delete_local_tf_state(self, layer_name: str) -> None:
-        tf_file = os.path.join(
-            str(Path.home()), ".opta", "local", "tfstate", f"{layer_name}",
-        )
-        if os.path.isfile(tf_file):
-            os.remove(tf_file)
+    def delete_local_tf_state(self) -> None:
+
+        if os.path.isfile(self.tf_file):
+            os.remove(self.tf_file)
             logger.info("Deleted opta tf config from local")
-        if os.path.isfile(tf_file + ".backup"):
-            os.remove(tf_file + ".backup")
+        if os.path.isfile(self.tf_file + ".backup"):
+            os.remove(self.tf_file + ".backup")
             logger.info("Deleted opta tf backup config from local")
         else:
-            logger.warn(f"Did not find opta tf state {tf_file} to delete")
+            logger.warn(f"Did not find opta tf state {self.tf_file} to delete")
