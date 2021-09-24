@@ -49,7 +49,9 @@ class Terraform:
     downloaded_state: Dict[str, Dict[Any, Any]] = {}
 
     @classmethod
-    def init(cls, quiet: Optional[bool] = False, *tf_flags: str, layer: "Layer") -> None:
+    def init(
+        cls, quiet: Optional[bool] = False, *tf_flags: str, layer: "Layer"
+    ) -> None:
         kwargs = cls.insert_extra_env(layer)
         if quiet:
             kwargs["stderr"] = PIPE
@@ -118,7 +120,9 @@ class Terraform:
             )
         except Exception as e:
             logging.error(e)
-            logging.info("Terraform apply failed, would rollback, but skipping for now..")
+            logging.info(
+                "Terraform apply failed, would rollback, but skipping for now.."
+            )
             raise e
             # cls.rollback(layer)
 
@@ -246,7 +250,7 @@ class Terraform:
         elif layer.cloud == "local":
             local = Local(layer)
             local.delete_opta_config()
-            local.delete_local_tf_state(org_name, layer_name)
+            local.delete_local_tf_state(layer_name)
         else:
             raise Exception(
                 f"Can not handle opta config deletion for cloud {layer.cloud}"
@@ -325,7 +329,9 @@ class Terraform:
         bucket = layer.state_storage()
         s3 = boto3.client("s3")
         try:
-            s3.get_bucket_encryption(Bucket=bucket,)
+            s3.get_bucket_encryption(
+                Bucket=bucket,
+            )
         except ClientError as e:
             if e.response["Error"]["Code"] == "NoSuchBucket":
                 return False
@@ -333,7 +339,12 @@ class Terraform:
         return True
 
     @classmethod
-    def plan(cls, *tf_flags: str, quiet: Optional[bool] = False, layer: "Layer",) -> None:
+    def plan(
+        cls,
+        *tf_flags: str,
+        quiet: Optional[bool] = False,
+        layer: "Layer",
+    ) -> None:
         cls.init(quiet, layer=layer)
         kwargs = cls.insert_extra_env(layer)
         if quiet:
@@ -354,7 +365,7 @@ class Terraform:
 
     @classmethod
     def show(cls, *tf_flags: str) -> None:
-        kwargs = cls.insert_extra_env(None)
+        kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
         nice_run(["terraform", "show", *tf_flags], check=True, **kwargs)
 
     @classmethod
@@ -466,7 +477,9 @@ class Terraform:
         elif layer.cloud == "local":
             try:
                 tf_file = os.path.join(
-                    cls.get_local_opta_dir(), "tfstate", f"{layer.name}",
+                    cls.get_local_opta_dir(),
+                    "tfstate",
+                    f"{layer.name}",
                 )
                 if os.path.exists(tf_file):
                     copyfile(tf_file, state_file)
@@ -601,8 +614,10 @@ class Terraform:
             )
         )[0]
 
-        role_assignments = authorization_client.role_assignments.list_for_resource_group(
-            rg_result.name
+        role_assignments = (
+            authorization_client.role_assignments.list_for_resource_group(
+                rg_result.name
+            )
         )
         for role_assignment in role_assignments:
             if role_assignment.role_definition_id == owner_role.id:
@@ -753,7 +768,10 @@ class Terraform:
         else:
             logger.info("No new API found that needs to be enabled")
         service = discovery.build(
-            "cloudresourcemanager", "v1", credentials=credentials, static_discovery=False,
+            "cloudresourcemanager",
+            "v1",
+            credentials=credentials,
+            static_discovery=False,
         )
         request = service.projects().get(projectId=project_id)
         response = request.execute()
@@ -777,7 +795,9 @@ class Terraform:
         dynamodb = boto3.client("dynamodb", config=Config(region_name=region))
         iam = boto3.client("iam", config=Config(region_name=region))
         try:
-            s3.get_bucket_encryption(Bucket=bucket_name,)
+            s3.get_bucket_encryption(
+                Bucket=bucket_name,
+            )
         except ClientError as e:
             if e.response["Error"]["Code"] == "AuthFailure":
                 raise UserErrors(
@@ -801,7 +821,9 @@ class Terraform:
                 )
             logger.info("S3 bucket for terraform state not found, creating a new one")
             if region == "us-east-1":
-                s3.create_bucket(Bucket=bucket_name,)
+                s3.create_bucket(
+                    Bucket=bucket_name,
+                )
             else:
                 s3.create_bucket(
                     Bucket=bucket_name,
@@ -829,7 +851,8 @@ class Terraform:
                 },
             )
             s3.put_bucket_versioning(
-                Bucket=bucket_name, VersioningConfiguration={"Status": "Enabled"},
+                Bucket=bucket_name,
+                VersioningConfiguration={"Status": "Enabled"},
             )
             s3.put_bucket_lifecycle(
                 Bucket=bucket_name,
@@ -844,7 +867,9 @@ class Terraform:
                                 "StorageClass": "GLACIER",
                             },
                             "NoncurrentVersionExpiration": {"NoncurrentDays": 60},
-                            "AbortIncompleteMultipartUpload": {"DaysAfterInitiation": 10},
+                            "AbortIncompleteMultipartUpload": {
+                                "DaysAfterInitiation": 10
+                            },
                         },
                     ]
                 },
@@ -863,7 +888,9 @@ class Terraform:
             dynamodb.create_table(
                 TableName=dynamodb_table,
                 KeySchema=[{"AttributeName": "LockID", "KeyType": "HASH"}],
-                AttributeDefinitions=[{"AttributeName": "LockID", "AttributeType": "S"}],
+                AttributeDefinitions=[
+                    {"AttributeName": "LockID", "AttributeType": "S"}
+                ],
                 BillingMode="PROVISIONED",
                 ProvisionedThroughput={
                     "ReadCapacityUnits": 20,
@@ -872,7 +899,9 @@ class Terraform:
             )
         # Create the service linked roles
         try:
-            iam.create_service_linked_role(AWSServiceName="autoscaling.amazonaws.com",)
+            iam.create_service_linked_role(
+                AWSServiceName="autoscaling.amazonaws.com",
+            )
         except ClientError as e:
             if e.response["Error"]["Code"] != "InvalidInput":
                 raise UserErrors(

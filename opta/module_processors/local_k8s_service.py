@@ -41,7 +41,9 @@ class LocalK8sServiceProcessor(LocalK8sModuleProcessor):
         if isinstance(self.module.data.get("public_uri"), str):
             self.module.data["public_uri"] = [self.module.data["public_uri"]]
 
-        current_envars: Union[List, Dict[str, str]] = self.module.data.get("env_vars", [])
+        current_envars: Union[List, Dict[str, str]] = self.module.data.get(
+            "env_vars", []
+        )
         if isinstance(current_envars, dict):
             self.module.data["env_vars"] = [
                 {"name": x, "value": y} for x, y in current_envars.items()
@@ -124,7 +126,7 @@ class LocalK8sServiceProcessor(LocalK8sModuleProcessor):
     def handle_redis_link(
         self, linked_module: "Module", link_permissions: List[Any]
     ) -> None:
-        required_redis_vars = []
+        required_redis_vars = ["cache_host"]
         renamed_vars = {}
 
         if len(link_permissions) > 0:

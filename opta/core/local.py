@@ -22,7 +22,7 @@ class Local:
 
     def get_remote_config(self) -> Optional["StructuredConfig"]:
         try:
-            return json.load(open(self.config_file_path), "r")
+            return json.load(open(self.config_file_path, "r"))
         except Exception:  # Backwards compatibility
             logger.debug(
                 "Could not successfully download and parse any pre-existing config"
@@ -44,9 +44,13 @@ class Local:
         else:
             logger.warn(f"Did not find opta config {self.config_file_path} to delete")
 
-    def delete_local_tf_state(self, org_name, layer_name) -> None:
+    def delete_local_tf_state(self, layer_name: str) -> None:
         tf_file = os.path.join(
-            str(Path.home()), ".opta", "local", "tfstate", f"{layer_name}",
+            str(Path.home()),
+            ".opta",
+            "local",
+            "tfstate",
+            f"{layer_name}",
         )
         if os.path.isfile(tf_file):
             os.remove(tf_file)
