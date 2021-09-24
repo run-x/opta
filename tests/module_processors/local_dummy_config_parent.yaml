@@ -1,0 +1,6 @@
+name: local-dummy-parent
+org_name: opta-tests
+providers:
+  local: {}
+modules:
+  - type: local-base
