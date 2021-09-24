@@ -42,7 +42,7 @@ GCP_CLI_INSTALL_URL = "https://cloud.google.com/sdk/docs/install"
 
 
 def configure_kubectl(layer: "Layer") -> None:
-    """ Configure the kubectl CLI tool for the given layer """
+    """Configure the kubectl CLI tool for the given layer"""
     # Make sure the user has the prerequisite CLI tools installed
     # kubectl may not *technically* be required for this opta command to run, but require
     # it anyways since user must install it to access the cluster.
@@ -61,7 +61,7 @@ def configure_kubectl(layer: "Layer") -> None:
 
 
 def _local_configure_kubectl(layer: "Layer") -> None:
-    out: str = nice_run(
+    nice_run(
         ["kubectl", "config", "use-context", "kind-opta-local-cluster"],
         check=True,
         capture_output=True,
@@ -87,7 +87,7 @@ def _gcp_configure_kubectl(layer: "Layer") -> None:
             )
 
         out: str = nice_run(
-            ["gcloud", "config", "get-value", "project"], check=True, capture_output=True
+            ["gcloud", "config", "get-value", "project"], check=True, capture_output=True,
         ).stdout.decode("utf-8")
     except Exception as err:
         raise UserErrors(

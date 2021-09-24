@@ -1,4 +1,3 @@
-import os
 from threading import Thread
 from typing import Any, List, Optional, Set
 

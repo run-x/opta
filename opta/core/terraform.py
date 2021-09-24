@@ -473,7 +473,7 @@ class Terraform:
 
                 else:
                     return False
-            except Exception as e:
+            except Exception:
                 UserErrors(f"Could copy local state file to {state_file}")
 
         else:
@@ -526,7 +526,7 @@ class Terraform:
         try:
             rmtree(os.path.join(cls.get_local_opta_dir()))
         except Exception:
-            logger.warn(f"Local state delete did not work?")
+            logger.warn("Local state delete did not work?")
 
     @classmethod
     def _create_local_state_storage(cls, providers: dict) -> None:
@@ -947,7 +947,7 @@ class Terraform:
 
 
 def get_terraform_outputs(layer: "Layer") -> dict:
-    """ Fetch terraform outputs from existing TF file """
+    """Fetch terraform outputs from existing TF file"""
     current_outputs = Terraform.get_outputs(layer)
     parent_outputs = _fetch_parent_outputs(layer)
     return deep_merge(current_outputs, parent_outputs)

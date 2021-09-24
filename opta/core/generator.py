@@ -1,6 +1,3 @@
-import os
-from pathlib import Path
-from shutil import copyfile
 from typing import TYPE_CHECKING, Generator, List, Tuple
 
 from opta import gen_tf
@@ -18,7 +15,7 @@ def gen_all(layer: "Layer") -> None:
 
 
 def gen(layer: "Layer") -> Generator[Tuple[int, List["Module"], int], None, None]:
-    """ Generate TF file based on opta config file """
+    """Generate TF file based on opta config file"""
     logger.debug("Loading infra blocks")
 
     total_module_count = len(layer.modules)

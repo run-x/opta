@@ -1,12 +1,9 @@
-import errno
 import json
 import os
 from pathlib import Path
-from traceback import format_exc
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Optional
 
-from opta.exceptions import UserErrors
-from opta.utils import fmt_msg, logger
+from opta.utils import logger
 
 if TYPE_CHECKING:
     from opta.layer import Layer, StructuredConfig

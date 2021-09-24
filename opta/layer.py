@@ -25,7 +25,6 @@ from google.oauth2 import service_account
 from opta.constants import REGISTRY, VERSION
 from opta.core.aws import AWS
 from opta.core.gcp import GCP
-from opta.core.local import Local
 from opta.core.validator import validate_yaml
 from opta.exceptions import UserErrors
 from opta.module import Module
@@ -160,7 +159,8 @@ class Layer:
                 file_path, file_vars = file_path.split("?")
                 res = dict(
                     map(
-                        lambda x: (x.split("=")[0], x.split("=")[1]), file_vars.split(",")
+                        lambda x: (x.split("=")[0], x.split("=")[1]),
+                        file_vars.split(","),
                     )
                 )
                 branch = res.get("ref", branch)
@@ -247,7 +247,7 @@ class Layer:
                     env = list(potential_envs.keys())[0]
                 else:
                     """This is a repeatable prompt, which will not disappear until a valid choice is provided or SIGABRT
-                    is given. """
+                    is given."""
                     env = click.prompt(
                         "Choose an Environment for the Given set of choices",
                         type=click.Choice(potential_envs.keys()),
@@ -328,7 +328,7 @@ class Layer:
             try:
                 ret = deep_merge(
                     module.gen_tf(
-                        depends_on=previous_module_reference, output_prefix=output_prefix
+                        depends_on=previous_module_reference, output_prefix=output_prefix,
                     ),
                     ret,
                 )
@@ -412,11 +412,13 @@ class Layer:
             region = gcp.region
             credentials = gcp.get_credentials()[0]
             if isinstance(credentials, service_account.Credentials):
-                service_account_credentials: service_account.Credentials = credentials.with_scopes(
-                    [
-                        "https://www.googleapis.com/auth/userinfo.email",
-                        "https://www.googleapis.com/auth/cloud-platform",
-                    ]
+                service_account_credentials: service_account.Credentials = (
+                    credentials.with_scopes(
+                        [
+                            "https://www.googleapis.com/auth/userinfo.email",
+                            "https://www.googleapis.com/auth/cloud-platform",
+                        ]
+                    )
                 )
                 service_account_credentials.refresh(
                     google.auth.transport.requests.Request()
