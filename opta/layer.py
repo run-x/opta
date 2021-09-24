@@ -203,7 +203,8 @@ class Layer:
             raise UserErrors("Config must have name")
         if is_parent and environments is not None:
             raise UserErrors(
-                f"Layer {name} can not be a parent as it has a parent of its own"
+                f"Environment {name} can not have an environment itself (usually this means your file is "
+                "self-referencing as it's own parent)."
             )
         org_name = conf.pop("org_name", None)
         providers = conf.pop("providers", {})
