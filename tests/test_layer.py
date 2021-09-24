@@ -2,12 +2,33 @@
 
 import os
 
+import pytest
 from pytest_mock import MockFixture
 
+from opta.exceptions import UserErrors
 from opta.layer import Layer
 
 
 class TestLayer:
+    def test_infinite_loop_prevention(self):
+        with pytest.raises(UserErrors):
+            Layer.load_from_yaml(
+                os.path.join(
+                    os.path.dirname(os.path.dirname(__file__)), "infinite_loop.yaml",
+                ),
+                None,
+            )
+
+    def test_same_name_as_parent(self):
+        with pytest.raises(UserErrors):
+            Layer.load_from_yaml(
+                os.path.join(
+                    os.path.dirname(os.path.dirname(__file__)),
+                    "same_name_as_parent.yaml",
+                ),
+                None,
+            )
+
     def test_parent(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(

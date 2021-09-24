@@ -1,0 +1,10 @@
+environments:
+  - path: "./module_processors/dummy_config_parent.yaml"
+    name: "dummy-env"
+    variables: {}
+name: dummy-parent
+modules:
+  - name: database
+    type: aws-postgres
+  - name: redis
+    type: aws-redis

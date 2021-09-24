@@ -1,0 +1,10 @@
+environments:
+  - path: "./infinite_loop.yaml"
+    name: "dummy-env"
+    variables: {}
+name: dummy-config-1
+modules:
+  - name: database
+    type: aws-postgres
+  - name: redis
+    type: aws-redis
