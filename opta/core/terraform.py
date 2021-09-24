@@ -49,9 +49,7 @@ class Terraform:
     downloaded_state: Dict[str, Dict[Any, Any]] = {}
 
     @classmethod
-    def init(
-        cls, quiet: Optional[bool] = False, *tf_flags: str, layer: "Layer"
-    ) -> None:
+    def init(cls, quiet: Optional[bool] = False, *tf_flags: str, layer: "Layer") -> None:
         kwargs = cls.insert_extra_env(layer)
         if quiet:
             kwargs["stderr"] = PIPE
@@ -120,9 +118,7 @@ class Terraform:
             )
         except Exception as e:
             logging.error(e)
-            logging.info(
-                "Terraform apply failed, would rollback, but skipping for now.."
-            )
+            logging.info("Terraform apply failed, would rollback, but skipping for now..")
             raise e
             # cls.rollback(layer)
 
@@ -217,7 +213,6 @@ class Terraform:
         # necessary for destroying many k8s resources.
         cls.refresh(layer)
         kwargs = cls.insert_extra_env(layer)
-
 
         idx = len(layer.modules) - 1
         for module in reversed(layer.modules):
@@ -338,12 +333,7 @@ class Terraform:
         return True
 
     @classmethod
-    def plan(
-        cls,
-        *tf_flags: str,
-        quiet: Optional[bool] = False,
-        layer: "Layer",
-    ) -> None:
+    def plan(cls, *tf_flags: str, quiet: Optional[bool] = False, layer: "Layer",) -> None:
         cls.init(quiet, layer=layer)
         kwargs = cls.insert_extra_env(layer)
         if quiet:
@@ -476,9 +466,7 @@ class Terraform:
         elif layer.cloud == "local":
             try:
                 tf_file = os.path.join(
-                    cls.get_local_opta_dir(),
-                    "tfstate",
-                    f"{layer.name}",
+                    cls.get_local_opta_dir(), "tfstate", f"{layer.name}",
                 )
                 if os.path.exists(tf_file):
                     copyfile(tf_file, state_file)
