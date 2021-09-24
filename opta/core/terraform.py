@@ -840,6 +840,38 @@ class Terraform:
         if "azurerm" in providers.get("terraform", {}).get("backend", {}):
             cls._create_azure_state_storage(providers)
 
+    @classmethod
+    def force_unlock(cls, layer: "Layer", *tf_flags: str) -> None:
+        providers = layer.gen_providers(0, clean=False)
+        lock_id: str = ""
+        if "s3" in providers.get("terraform", {}).get("backend", {}):
+            lock_id = cls._get_aws_lock_id(layer)
+        if "gcs" in providers.get("terraform", {}).get("backend", {}):
+            lock_id = cls._get_gcp_lock_id(layer)
+        if "azurerm" in providers.get("terraform", {}).get("backend", {}):
+            lock_id = cls._get_azure_lock_id(layer)
+
+        if not lock_id:
+            print("Lock Id could not be found.")
+            return
+
+        nice_run(["terraform", "force-unlock", *tf_flags, lock_id], check=True)
+
+    @classmethod
+    def _get_aws_lock_id(cls, layer: "Layer") -> str:
+        aws = AWS(layer)
+        return aws.get_terraform_lock_id()
+
+    @classmethod
+    def _get_gcp_lock_id(cls, layer: "Layer") -> str:
+        gcp = GCP(layer)
+        return gcp.get_terraform_lock_id()
+
+    @classmethod
+    def _get_azure_lock_id(cls, layer: "Layer") -> str:
+        azure = Azure(layer)
+        return azure.get_terraform_lock_id()
+
 
 def get_terraform_outputs(layer: "Layer") -> dict:
     """ Fetch terraform outputs from existing TF file """

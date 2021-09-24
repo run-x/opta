@@ -1,5 +1,5 @@
 from threading import Thread
-from typing import List, Optional, Set
+from typing import Any, List, Optional, Set
 
 import boto3
 import click
@@ -149,7 +149,7 @@ def _apply(
     Terraform.create_state_storage(layer)
     gen_opta_resource_tags(layer)
     if layer.cloud == "aws":
-        cloud_client = AWS(layer)
+        cloud_client: Any = AWS(layer)
     elif layer.cloud == "google":
         cloud_client = GCP(layer)
     elif layer.cloud == "azurerm":

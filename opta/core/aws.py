@@ -126,6 +126,25 @@ class AWS:
             s3_client.delete_object(Bucket=bucket, Key=self.layer.name, VersionId=version)
         logger.info(f"Deleted opta tf state for {self.layer.name}")
 
+    def get_terraform_lock_id(self) -> str:
+        bucket = self.layer.state_storage()
+        providers = self.layer.gen_providers(0)
+        dynamodb_table = providers["terraform"]["backend"]["s3"]["dynamodb_table"]
+
+        dynamodb_client: DynamoDBClient = boto3.client(
+            "dynamodb", config=Config(region_name=self.region)
+        )
+
+        tf_lock_data = dynamodb_client.get_item(
+            TableName=dynamodb_table,
+            Key={"LockID": {"S": f"{bucket}/{self.layer.name}"}},
+        )
+
+        try:
+            return json.loads(tf_lock_data["Item"]["Info"]["S"])["ID"]  # type: ignore
+        except Exception:
+            return ""
+
     @staticmethod
     def get_all_versions(bucket: str, filename: str) -> List[str]:
         s3 = boto3.client("s3")
