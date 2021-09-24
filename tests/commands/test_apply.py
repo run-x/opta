@@ -89,6 +89,7 @@ def test_apply(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None
         "-target=module.deletedmodule",
         "-target=module.fakemodule",
         quiet=True,
+        layer=mocked_layer
     )
     mocked_click.confirm.assert_called_once_with(
         "The above are the planned changes for your opta run. Do you approve?",
@@ -151,6 +152,7 @@ def test_auto_approve(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) 
         "-target=module.deletedmodule",
         "-target=module.fakemodule",
         quiet=True,
+        layer=mocked_layer
     )
     mocked_click.confirm.assert_not_called()
     mocked_layer.get_module_by_type.assert_has_calls(
