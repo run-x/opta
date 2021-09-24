@@ -32,7 +32,7 @@ def force_unlock(config: str, env: Optional[str], force_terraform: bool) -> None
     layer.verify_cloud_credentials()
     gen_all(layer)
 
-    Terraform.init()
+    Terraform.init(layer=layer)
 
     if not force_terraform:
         click.confirm(
