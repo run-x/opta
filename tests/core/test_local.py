@@ -1,13 +1,14 @@
-from unittest.mock import Mock, MagicMock
+import sys
+from unittest.mock import MagicMock, Mock
 
 from pytest import fixture
 from pytest_mock import MockFixture
 
-
 from opta.layer import Layer
-import sys
+
 sys.modules['json.load'] = MagicMock(return_value={"a":1})
 from opta.core.local import Local
+
 
 @fixture()
 def local_layer() -> Mock:
