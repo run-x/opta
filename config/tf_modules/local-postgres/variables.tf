@@ -15,23 +15,23 @@ variable "module_name" {
 
 variable "db_user" {
   description = "Database username"
-  type = string
-  default = "postgres"
+  type        = string
+  default     = "postgres"
 }
 
 variable "db_password" {
   description = "Database password"
-  type = string
-  default = "pgpassword"
+  type        = string
+  default     = "pgpassword"
 }
 variable "db_name" {
   description = "Database name"
-  type = string
-  default = "appdb"
+  type        = string
+  default     = "appdb"
 }
 
 variable "paasns" {
   description = "A string like pass_myorg_my_layer, used to have multiple paas helm charts"
-  type = string
-  default = "paas"
+  type        = string
+  default     = "paas"
 }

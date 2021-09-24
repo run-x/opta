@@ -24,7 +24,7 @@ variable "linkerd_high_availability" {
 }
 
 variable "local_k8s_cluster_name" {
-  type = string
-  default = "kind-opta-local-cluster"
+  type        = string
+  default     = "kind-opta-local-cluster"
   description = "The name of the local K8s cluster"
 }

@@ -7,12 +7,12 @@ terraform {
   }
 }
 resource "helm_release" "opta-local-redis" {
-  name       = "opta-local-redis"
-  repository = "https://charts.bitnami.com/bitnami"
-  chart      = "redis"
-  version    = "15.3.2"
+  name             = "opta-local-redis"
+  repository       = "https://charts.bitnami.com/bitnami"
+  chart            = "redis"
+  version          = "15.3.2"
   create_namespace = true
-  namespace = var.paasns
+  namespace        = var.paasns
   set {
     name  = "cluster.enabled"
     value = "false"
@@ -27,9 +27,9 @@ resource "helm_release" "opta-local-redis" {
     value = "false"
   }
   set {
-    name = "architecture"
+    name  = "architecture"
     value = "standalone"
-}
+  }
 }
 
 
