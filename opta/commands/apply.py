@@ -1,3 +1,4 @@
+import os
 from threading import Thread
 from typing import Any, List, Optional, Set
 
@@ -27,6 +28,7 @@ from opta.core.kubernetes import (
     tail_module_log,
     tail_namespace_events,
 )
+from opta.core.local import Local
 from opta.core.plan_displayer import PlanDisplayer
 from opta.core.terraform import Terraform, get_terraform_outputs
 from opta.exceptions import MissingState, UserErrors
@@ -154,6 +156,8 @@ def _apply(
         cloud_client = GCP(layer)
     elif layer.cloud == "azurerm":
         cloud_client = Azure(layer)
+    elif layer.cloud == "local":
+        cloud_client = Local(layer)
     else:
         raise Exception(f"Cannot handle upload config for cloud {layer.cloud}")
 
@@ -220,7 +224,13 @@ def _apply(
             configured_modules = configured_modules.union(untouched_modules)
 
         layer.pre_hook(module_idx)
-        targets = list(map(lambda x: f"-target=module.{x}", sorted(configured_modules)))
+        if layer.cloud == "local":
+            if is_last_module:
+                targets = []
+        else:
+            targets = list(
+                map(lambda x: f"-target=module.{x}", sorted(configured_modules))
+            )
         if test:
             Terraform.plan("-lock=false", *targets)
             print("Plan ran successfully, not applying since this is a test.")
@@ -234,10 +244,12 @@ def _apply(
                 },
             )
             logger.info("Planning your changes (might take a minute)")
+
             Terraform.plan(
                 "-lock=false",
                 "-input=false",
                 f"-out={TF_PLAN_PATH}",
+                layer=layer,
                 *targets,
                 quiet=True,
             )

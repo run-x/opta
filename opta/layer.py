@@ -7,6 +7,7 @@ import shutil
 import tempfile
 from datetime import datetime
 from os import path
+from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, TypedDict
 
@@ -24,6 +25,7 @@ from google.oauth2 import service_account
 from opta.constants import REGISTRY, VERSION
 from opta.core.aws import AWS
 from opta.core.gcp import GCP
+from opta.core.local import Local
 from opta.core.validator import validate_yaml
 from opta.exceptions import UserErrors
 from opta.module import Module
@@ -50,6 +52,7 @@ from opta.module_processors.gcp_k8s_base import GcpK8sBaseProcessor
 from opta.module_processors.gcp_k8s_service import GcpK8sServiceProcessor
 from opta.module_processors.gcp_service_account import GcpServiceAccountProcessor
 from opta.module_processors.helm_chart import HelmChartProcessor
+from opta.module_processors.local_k8s_service import LocalK8sServiceProcessor
 from opta.module_processors.runx import RunxProcessor
 from opta.plugins.derived_providers import DerivedProviders
 from opta.utils import deep_merge, hydrate, logger, yaml
@@ -81,6 +84,7 @@ class Layer:
         "azure-base": AzureBaseProcessor,
         "azure-k8s-base": AzureK8sBaseProcessor,
         "azure-k8s-service": AzureK8sServiceProcessor,
+        "local-k8s-service": LocalK8sServiceProcessor,
         "external-ssl-cert": ExternalSSLCert,
         "aws-s3": AwsS3Processor,
         "gcp-dns": GCPDnsProcessor,
@@ -127,6 +131,8 @@ class Layer:
             self.cloud = "aws"
         elif "azurerm" in total_base_providers:
             self.cloud = "azurerm"
+        elif "local" in total_base_providers:
+            self.cloud = "local"
         else:
             raise UserErrors("No cloud provider (AWS, GCP, or Azure) found")
         self.variables = variables or {}
@@ -392,6 +398,8 @@ class Layer:
                 f"{self.org_name}{self.name}".encode("utf-8")
             ).hexdigest()[0:16]
             return f"opta{name_hash}"
+        elif self.cloud == "local":
+            return os.path.join(str(Path.home()), ".opta", "local", "tfstate")
         else:
             return f"opta-tf-state-{self.org_name}-{self.name}"
 
@@ -423,6 +431,9 @@ class Layer:
             region = aws.region
         elif self.cloud == "azurerm":
             region = self.root().providers["azurerm"]["location"]
+        elif self.cloud == "local":
+            pass
+
         hydration = self.metadata_hydration()
         providers = self.providers
         if self.parent is not None:

@@ -1,3 +1,4 @@
+from platform import system
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 from dns.rdtypes.ANY.NS import NS
@@ -85,6 +86,18 @@ class GcpK8sModuleProcessor(ModuleProcessor):
 
     def process(self, module_idx: int) -> None:
         super(GcpK8sModuleProcessor, self).process(module_idx)
+
+
+class LocalK8sModuleProcessor(ModuleProcessor):
+    def __init__(self, module: "Module", layer: "Layer"):
+        if system() not in ["Linux", "Darwin"]:
+            raise UserErrors(
+                "Opta Local is not built to support this host operating system."
+            )
+        super(LocalK8sModuleProcessor, self).__init__(module, layer)
+
+    def process(self, module_idx: int) -> None:
+        super(LocalK8sModuleProcessor, self).process(module_idx)
 
 
 class AWSIamAssembler:

@@ -55,6 +55,10 @@ class AzureModule(Module):
     cloud = "azurerm"
 
 
+class LocalModule(Module):
+    cloud = "local"
+
+
 class Opta(Validator):
     """Opta Yaml Validator"""
 
@@ -75,7 +79,9 @@ class Opta(Validator):
 
         if "org_name" in value:
             if self.environment_schema_dict is None:
-                raise UserErrors("We currently only support AWS, GCP, and Azure")
+                raise UserErrors(
+                    "We currently only support AWS, GCP, and Azure and Local"
+                )
             schema_dicts = [self.environment_schema_dict]
         else:
             if self.service_schema_dicts is None:
@@ -115,6 +121,12 @@ class AureOpta(Opta):
     service_schema_dicts = REGISTRY["azurerm"]["service_validator"]
 
 
+class LocalOpta(Opta):
+    extra_validators = [LocalModule]
+    environment_schema_dict = REGISTRY["local"]["validator"]
+    service_schema_dicts = REGISTRY["local"]["service_validator"]
+
+
 def _get_yamale_errors(
     data: Any, schema_path: str, extra_validators: Optional[List[Type[Validator]]] = None
 ) -> List[str]:
@@ -144,6 +156,8 @@ gcp_validators = DefaultValidators.copy()
 gcp_validators[GcpOpta.tag] = GcpOpta
 azure_validators = DefaultValidators.copy()
 azure_validators[AureOpta.tag] = AureOpta
+local_validators = DefaultValidators.copy()
+local_validators[LocalOpta.tag] = LocalOpta
 
 with NamedTemporaryFile(mode="w") as f:
     yaml.dump(REGISTRY["validator"], f)
@@ -159,6 +173,9 @@ with NamedTemporaryFile(mode="w") as f:
     )
     azure_main_schema = yamale.make_schema(
         f.name, validators=azure_validators, parser="ruamel"
+    )
+    local_main_schema = yamale.make_schema(
+        f.name, validators=local_validators, parser="ruamel"
     )
 
 
@@ -182,6 +199,8 @@ def validate_yaml(config_file_path: str, cloud: str) -> Literal[True]:
         yamale_result = yamale.validate(gcp_main_schema, data, _raise_error=False)
     elif cloud == "azurerm":
         yamale_result = yamale.validate(azure_main_schema, data, _raise_error=False)
+    elif cloud == "local":
+        yamale_result = yamale.validate(local_main_schema, data, _raise_error=False)
     else:
         yamale_result = yamale.validate(vanilla_main_schema, data, _raise_error=False)
     errors = []

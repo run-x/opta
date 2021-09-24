@@ -16,4 +16,6 @@ build
 coverage.xml
 .venv
 .vscode
+setenv.sh
+.env
 Reference
