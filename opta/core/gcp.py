@@ -141,7 +141,6 @@ class GCP:
         return sorted([x["name"] for x in response.get("items", [])])[:max_number]
 
     def get_terraform_lock_id(self) -> str:
-        # return ""
         bucket = self.layer.state_storage()
         tf_lock_path = f"{self.layer.name}/default.tflock"
         credentials, project_id = self.get_credentials()
