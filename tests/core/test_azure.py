@@ -4,7 +4,7 @@ from pytest import fixture
 from pytest_mock import MockFixture
 
 from opta.core.azure import Azure
-from opta.layer import Layer
+from opta.layer import Layer, StructuredConfig
 
 
 @fixture()
@@ -58,14 +58,21 @@ class TestAzure:
         mocked_container_client_instance = mocker.Mock()
         mocked_container_client_instance.download_blob = mocker.Mock()
         download_stream_mock = mocker.Mock()
-        download_stream_mock.readall = mocker.Mock(return_value='{"a":1}')
+        download_stream_mock.readall = mocker.Mock(
+            return_value='{"opta_version":"1", "date": "mock_date", "original_spec": "mock_spec"}'
+        )
         mocked_container_client_instance.download_blob.return_value = download_stream_mock
         mocked_container_client = mocker.patch(
             "opta.core.azure.ContainerClient",
             return_value=mocked_container_client_instance,
         )
+        mocked_structured_config: StructuredConfig = {
+            "opta_version": "1",
+            "date": "mock_date",
+            "original_spec": "mock_spec",
+        }
 
-        assert Azure(azure_layer).get_remote_config() == {"a": 1}
+        assert Azure(azure_layer).get_remote_config() == mocked_structured_config
 
         azure_layer.gen_providers.assert_called_once_with(0)
         mocked_default_creds.assert_called_once_with()
