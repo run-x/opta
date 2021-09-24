@@ -1,6 +1,6 @@
-import unittest
-import os
 import json
+import os
+import unittest
 
 from opta.core.local import Local
 from opta.layer import Layer
