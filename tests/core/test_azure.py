@@ -1,5 +1,12 @@
 from unittest.mock import Mock
 
+from azure.identity import DefaultAzureCredential
+from azure.storage.blob import (
+    BlobClient,
+    BlobProperties,
+    BlobServiceClient,
+    ContainerClient,
+)
 from pytest import fixture
 from pytest_mock import MockFixture
 
@@ -160,3 +167,26 @@ class TestAzure:
         mocked_container_client_instance.delete_blob.assert_called_once_with(
             azure_layer.name, delete_snapshots="include"
         )
+
+    def test_get_terraform_lock_id(self, mocker: MockFixture, azure_layer: Mock) -> None:
+        mocker.patch(
+            "opta.core.azure.DefaultAzureCredential",
+            return_value=mocker.Mock(spec=DefaultAzureCredential),
+        )
+
+        mock_blob_service_client = mocker.Mock(spec=BlobServiceClient)
+        mock_container_client = mocker.Mock(spec=ContainerClient)
+        mock_blob_client = mocker.Mock(spec=BlobClient)
+        mock_blob_properties = mocker.Mock(spec=BlobProperties)
+        mock_blob_properties.metadata = {
+            "Terraformlockid": "J3siSUQiOiAibW9ja19sb2NrX2lkIn0n"
+        }
+
+        mocker.patch(
+            "opta.core.azure.BlobServiceClient", return_value=mock_blob_service_client
+        )
+        mock_blob_service_client.get_container_client.return_value = mock_container_client
+        mock_container_client.get_blob_client.return_value = mock_blob_client
+        mock_blob_client.get_blob_properties.return_value = mock_blob_properties
+
+        Azure(azure_layer).get_terraform_lock_id()
