@@ -32,7 +32,7 @@ inputs:
     user_facing: true
     validator: str(required=False)
     description: Window during which the snapshot would be taken.
-    default: ""
+    default: "04:00-05:00"
 outputs:
   - name: cache_host
     export: true
