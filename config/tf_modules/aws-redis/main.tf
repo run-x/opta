@@ -28,6 +28,8 @@ resource "aws_elasticache_replication_group" "redis_cluster" {
   transit_encryption_enabled    = true
   at_rest_encryption_enabled    = true
   kms_key_id                    = data.aws_kms_key.main.arn
+  snapshot_window               = var.snapshot_window
+  snapshot_retention_limit      = var.snapshot_retention_limit
   lifecycle {
     ignore_changes = [engine_version]
   }
