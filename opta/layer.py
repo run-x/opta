@@ -7,6 +7,7 @@ import shutil
 import tempfile
 from datetime import datetime
 from os import path
+from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, TypedDict
 
@@ -50,6 +51,7 @@ from opta.module_processors.gcp_k8s_base import GcpK8sBaseProcessor
 from opta.module_processors.gcp_k8s_service import GcpK8sServiceProcessor
 from opta.module_processors.gcp_service_account import GcpServiceAccountProcessor
 from opta.module_processors.helm_chart import HelmChartProcessor
+from opta.module_processors.local_k8s_service import LocalK8sServiceProcessor
 from opta.module_processors.runx import RunxProcessor
 from opta.plugins.derived_providers import DerivedProviders
 from opta.utils import deep_merge, hydrate, logger, yaml
@@ -81,6 +83,7 @@ class Layer:
         "azure-base": AzureBaseProcessor,
         "azure-k8s-base": AzureK8sBaseProcessor,
         "azure-k8s-service": AzureK8sServiceProcessor,
+        "local-k8s-service": LocalK8sServiceProcessor,
         "external-ssl-cert": ExternalSSLCert,
         "aws-s3": AwsS3Processor,
         "gcp-dns": GCPDnsProcessor,
@@ -127,6 +130,8 @@ class Layer:
             self.cloud = "aws"
         elif "azurerm" in total_base_providers:
             self.cloud = "azurerm"
+        elif "local" in total_base_providers:
+            self.cloud = "local"
         else:
             raise UserErrors("No cloud provider (AWS, GCP, or Azure) found")
         self.variables = variables or {}
@@ -154,7 +159,8 @@ class Layer:
                 file_path, file_vars = file_path.split("?")
                 res = dict(
                     map(
-                        lambda x: (x.split("=")[0], x.split("=")[1]), file_vars.split(",")
+                        lambda x: (x.split("=")[0], x.split("=")[1]),
+                        file_vars.split(","),
                     )
                 )
                 branch = res.get("ref", branch)
@@ -241,7 +247,7 @@ class Layer:
                     env = list(potential_envs.keys())[0]
                 else:
                     """This is a repeatable prompt, which will not disappear until a valid choice is provided or SIGABRT
-                    is given. """
+                    is given."""
                     env = click.prompt(
                         "Choose an Environment for the Given set of choices",
                         type=click.Choice(potential_envs.keys()),
@@ -322,7 +328,7 @@ class Layer:
             try:
                 ret = deep_merge(
                     module.gen_tf(
-                        depends_on=previous_module_reference, output_prefix=output_prefix
+                        depends_on=previous_module_reference, output_prefix=output_prefix,
                     ),
                     ret,
                 )
@@ -392,6 +398,8 @@ class Layer:
                 f"{self.org_name}{self.name}".encode("utf-8")
             ).hexdigest()[0:16]
             return f"opta{name_hash}"
+        elif self.cloud == "local":
+            return os.path.join(str(Path.home()), ".opta", "local", "tfstate")
         else:
             return f"opta-tf-state-{self.org_name}-{self.name}"
 
@@ -404,11 +412,13 @@ class Layer:
             region = gcp.region
             credentials = gcp.get_credentials()[0]
             if isinstance(credentials, service_account.Credentials):
-                service_account_credentials: service_account.Credentials = credentials.with_scopes(
-                    [
-                        "https://www.googleapis.com/auth/userinfo.email",
-                        "https://www.googleapis.com/auth/cloud-platform",
-                    ]
+                service_account_credentials: service_account.Credentials = (
+                    credentials.with_scopes(
+                        [
+                            "https://www.googleapis.com/auth/userinfo.email",
+                            "https://www.googleapis.com/auth/cloud-platform",
+                        ]
+                    )
                 )
                 service_account_credentials.refresh(
                     google.auth.transport.requests.Request()
@@ -423,6 +433,9 @@ class Layer:
             region = aws.region
         elif self.cloud == "azurerm":
             region = self.root().providers["azurerm"]["location"]
+        elif self.cloud == "local":
+            pass
+
         hydration = self.metadata_hydration()
         providers = self.providers
         if self.parent is not None:

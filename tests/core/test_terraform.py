@@ -17,11 +17,12 @@ class TestTerraform:
         # Calling terraform apply should also call terraform init
         tf_init = mocker.patch("opta.core.terraform.Terraform.init")
         fake_layer = mocker.Mock(spec=Layer)
-        Terraform.apply(fake_layer)
+        fake_layer.cloud = "blah"
+        Terraform.apply(layer=fake_layer)
         assert tf_init.call_count == 1
 
         # Calling terraform plan should also call terraform init
-        Terraform.plan()
+        Terraform.plan(layer=fake_layer)
         assert tf_init.call_count == 2
 
     def test_get_modules(self, mocker: MockFixture) -> None:
@@ -62,6 +63,7 @@ class TestTerraform:
         )
         mocked_layer = mocker.Mock(spec=Layer)
         mocked_layer.name = "blah"
+        mocked_layer.cloud = "blah"
         assert {"redis", "doc_db"} == Terraform.get_existing_modules(mocked_layer)
 
     def test_rollback(self, mocker: MockFixture) -> None:
@@ -88,10 +90,12 @@ class TestTerraform:
 
         # Run rollback
         fake_layer = mocker.Mock(spec=Layer)
-        Terraform.rollback(fake_layer)
+        Terraform.rollback(layer=fake_layer)
 
         # The stale resource should be imported and destroyed.
-        mocked_import.assert_called_once_with("fake.tf.resource.address.2", "i-2")
+        mocked_import.assert_called_once_with(
+            "fake.tf.resource.address.2", "i-2", layer=fake_layer
+        )
         mocked_destroy.assert_called_once_with(fake_layer, ["fake.tf.resource.address.2"])
 
         # Test rollback again, but without the stale resource.

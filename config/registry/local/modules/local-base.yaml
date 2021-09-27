@@ -1,0 +1,23 @@
+halt: true
+environment_module: true
+inputs:
+  - name: env_name
+    user_facing: false
+    description: Opta Environment name
+    default: None
+  - name: layer_name
+    user_facing: false
+    description: Opta Layer name
+    default: None
+  - name: module_name
+    user_facing: false
+    description: Opta Module name
+    default: None
+
+outputs:
+  - name: k8s_cluster_name
+    export: true
+    description: The name of the kubernetes cluster.
+
+output_providers: { }
+output_data: { }

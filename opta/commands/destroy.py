@@ -1,3 +1,5 @@
+import os
+from pathlib import Path
 from typing import List, Optional
 
 import boto3
@@ -69,7 +71,7 @@ def destroy(config: str, env: Optional[str], auto_approve: bool) -> None:
         tf_flags.append("-auto-approve")
 
     gen_all(layer)
-    Terraform.init(False, "-reconfigure")
+    Terraform.init(False, "-reconfigure", layer=layer)
     logger.info(f"Destroying {layer.name}")
     Terraform.destroy_all(layer, *tf_flags)
 
@@ -88,6 +90,8 @@ def _fetch_children_layers(layer: "Layer") -> List[str]:
         opta_configs = _gcp_get_configs(layer)
     elif layer.cloud == "azurerm":
         opta_configs = _azure_get_configs(layer)
+    elif layer.cloud == "local":
+        opta_configs = _local_get_configs(layer)
     else:
         raise Exception(f"Not handling deletion for cloud {layer.cloud}")
 
@@ -146,4 +150,13 @@ def _gcp_get_configs(layer: "Layer") -> List[str]:
     )
     configs = [blob.name[len(gcs_config_dir) :] for blob in blobs]
     configs.remove(layer.name)
+    return configs
+
+
+def _local_get_configs(layer: "Layer") -> List[str]:
+    local_config_dir = os.path.join(
+        os.path.join(str(Path.home()), ".opta", "local", "opta_config")
+    )
+    configs = os.listdir(local_config_dir)
+    configs.remove(f"opta-{layer.org_name}-{layer.name}")
     return configs

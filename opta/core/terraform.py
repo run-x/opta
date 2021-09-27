@@ -1,7 +1,10 @@
+import errno
 import json
 import logging
 import os
 import time
+from pathlib import Path
+from shutil import copyfile, rmtree
 from subprocess import DEVNULL, PIPE  # nosec
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
 from uuid import uuid4
@@ -30,6 +33,7 @@ from opta.amplitude import amplitude_client
 from opta.core.aws import AWS, get_aws_resource_id
 from opta.core.azure import Azure
 from opta.core.gcp import GCP
+from opta.core.local import Local
 from opta.exceptions import MissingState, UserErrors
 from opta.nice_subprocess import nice_run
 from opta.utils import deep_merge, fmt_msg, logger
@@ -45,8 +49,8 @@ class Terraform:
     downloaded_state: Dict[str, Dict[Any, Any]] = {}
 
     @classmethod
-    def init(cls, quiet: Optional[bool] = False, *tf_flags: str) -> None:
-        kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
+    def init(cls, quiet: Optional[bool] = False, *tf_flags: str, layer: "Layer") -> None:
+        kwargs = cls.insert_extra_env(layer)
         if quiet:
             kwargs["stderr"] = PIPE
             kwargs["stdout"] = DEVNULL
@@ -80,6 +84,18 @@ class Terraform:
         raise MissingState(f"Unable to download state for layer {layer.name}")
 
     @classmethod
+    def insert_extra_env(cls, layer: "Layer") -> dict:
+        kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
+        if layer and layer.cloud == "local":
+            kwargs["env"]["KUBE_CONFIG_PATH"] = os.path.join(
+                os.path.join(str(Path.home()), ".kube", "config")
+            )
+            kwargs["env"]["KUBECONFIG"] = kwargs["env"][
+                "KUBE_CONFIG_PATH"
+            ]  # needed for helm templates with vlookup
+        return kwargs
+
+    @classmethod
     def apply(
         cls,
         layer: "Layer",
@@ -88,8 +104,8 @@ class Terraform:
         quiet: Optional[bool] = False,
     ) -> None:
         if not no_init:
-            cls.init(quiet)
-        kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
+            cls.init(quiet, layer=layer)
+        kwargs = cls.insert_extra_env(layer)
         if quiet:
             kwargs["stderr"] = PIPE
             kwargs["stdout"] = DEVNULL
@@ -121,7 +137,7 @@ class Terraform:
 
             try:
                 resource_id = get_aws_resource_id(aws_resources[resource])
-                cls.import_resource(resource, resource_id)
+                cls.import_resource(resource, resource_id, layer=layer)
                 stale_resources.append(resource)
             except Exception:
                 logging.debug(
@@ -137,8 +153,10 @@ class Terraform:
         cls.destroy_resources(layer, stale_resources)
 
     @classmethod
-    def import_resource(cls, tf_resource_address: str, aws_resource_id: str) -> None:
-        kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
+    def import_resource(
+        cls, tf_resource_address: str, aws_resource_id: str, layer: "Layer"
+    ) -> None:
+        kwargs = cls.insert_extra_env(layer)
         nice_run(
             ["terraform", "import", tf_resource_address, aws_resource_id],
             check=True,
@@ -146,8 +164,8 @@ class Terraform:
         )
 
     @classmethod
-    def refresh(cls, *tf_flags: str) -> None:
-        kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
+    def refresh(cls, layer: "Layer", *tf_flags: str) -> None:
+        kwargs = cls.insert_extra_env(layer)
         nice_run(["terraform", "refresh", *tf_flags], check=True, **kwargs)
 
     @classmethod
@@ -164,8 +182,8 @@ class Terraform:
         # Refreshing the state is necessary to update terraform outputs.
         # This includes fetching the latest EKS cluster auth token, which is
         # necessary for destroying many k8s resources.
-        cls.refresh()
-        kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
+        cls.refresh(layer)
+        kwargs = cls.insert_extra_env(layer)
 
         for module in reversed(layer.modules):
             module_address_prefix = f"module.{module.name}"
@@ -191,9 +209,9 @@ class Terraform:
         # Refreshing the state is necessary to update terraform outputs.
         # This includes fetching the latest EKS cluster auth token, which is
         # necessary for destroying many k8s resources.
-        cls.refresh()
+        cls.refresh(layer)
+        kwargs = cls.insert_extra_env(layer)
 
-        kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
         idx = len(layer.modules) - 1
         for module in reversed(layer.modules):
             module_address_prefix = f"module.{module.name}"
@@ -201,7 +219,7 @@ class Terraform:
             if module.name not in existing_modules:
                 idx -= 1
                 continue
-            cls.refresh(f"-target={module_address_prefix}")
+            cls.refresh(layer, f"-target={module_address_prefix}")
             nice_run(
                 ["terraform", "destroy", f"-target={module_address_prefix}", *tf_flags],
                 check=True,
@@ -223,6 +241,10 @@ class Terraform:
             azure = Azure(layer)
             azure.delete_opta_config()
             azure.delete_remote_state()
+        elif layer.cloud == "local":
+            local = Local(layer)
+            local.delete_opta_config()
+            local.delete_local_tf_state()
         else:
             raise Exception(
                 f"Can not handle opta config deletion for cloud {layer.cloud}"
@@ -236,6 +258,8 @@ class Terraform:
                 cls._aws_delete_state_storage(layer)
             elif layer.cloud == "google":
                 cls._gcp_delete_state_storage(layer)
+            elif layer.cloud == "local":
+                cls._local_delete_state_storage(layer)
 
     # Remove a resource from the terraform state, but does not destroy it.
     @classmethod
@@ -251,8 +275,14 @@ class Terraform:
             return cls._gcp_verify_storage(layer)
         elif layer.cloud == "azurerm":
             return cls._azure_verify_storage(layer)
+        elif layer.cloud == "local":
+            return cls._local_verify_storage(layer)
         else:
             raise Exception(f"Can not verify state storage for cloud {layer.cloud}")
+
+    @classmethod
+    def _local_verify_storage(cls, layer: "Layer") -> bool:
+        return True
 
     @classmethod
     def _azure_verify_storage(cls, layer: "Layer") -> bool:
@@ -301,9 +331,9 @@ class Terraform:
         return True
 
     @classmethod
-    def plan(cls, *tf_flags: str, quiet: Optional[bool] = False) -> None:
-        cls.init(quiet)
-        kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
+    def plan(cls, *tf_flags: str, quiet: Optional[bool] = False, layer: "Layer",) -> None:
+        cls.init(quiet, layer=layer)
+        kwargs = cls.insert_extra_env(layer)
         if quiet:
             kwargs["stderr"] = PIPE
             kwargs["stdout"] = DEVNULL
@@ -431,6 +461,19 @@ class Terraform:
                     blob_data.readinto(file_obj)
             except ResourceNotFoundError:
                 return False
+        elif layer.cloud == "local":
+            try:
+                tf_file = os.path.join(
+                    cls.get_local_opta_dir(), "tfstate", f"{layer.name}",
+                )
+                if os.path.exists(tf_file):
+                    copyfile(tf_file, state_file)
+
+                else:
+                    return False
+            except Exception:
+                UserErrors(f"Could copy local state file to {state_file}")
+
         else:
             raise UserErrors("Need to get state from S3 or GCS or Azure storage")
 
@@ -472,6 +515,28 @@ class Terraform:
             logger.info("Successfully deleted GCP state storage")
         except NotFound:
             logger.warn("State bucket was already deleted")
+
+    @classmethod
+    def _local_delete_state_storage(cls, layer: "Layer") -> None:
+        providers = layer.gen_providers(0)
+        if "local" not in providers.get("terraform", {}).get("backend", {}):
+            return
+        try:
+            rmtree(os.path.join(cls.get_local_opta_dir()))
+        except Exception:
+            logger.warn("Local state delete did not work?")
+
+    @classmethod
+    def _create_local_state_storage(cls, providers: dict) -> None:
+        if not os.path.exists(cls.get_local_opta_dir()):
+            try:
+                os.makedirs(cls.get_local_opta_dir())
+
+            except OSError as exc:  # Guard against race condition
+                if exc.errno != errno.EEXIST:
+                    raise UserErrors(
+                        f"Cannot make local state dir at {cls.get_local_opta_dir()}."
+                    )
 
     @classmethod
     def _create_azure_state_storage(cls, providers: dict) -> None:
@@ -839,6 +904,12 @@ class Terraform:
             cls._create_gcp_state_storage(providers)
         if "azurerm" in providers.get("terraform", {}).get("backend", {}):
             cls._create_azure_state_storage(providers)
+        if "local" in providers.get("terraform", {}).get("backend", {}):
+            cls._create_local_state_storage(providers)
+
+    @classmethod
+    def get_local_opta_dir(cls) -> str:
+        return os.path.join(str(Path.home()), ".opta", "local")
 
     @classmethod
     def force_unlock(cls, layer: "Layer", *tf_flags: str) -> None:
@@ -874,7 +945,7 @@ class Terraform:
 
 
 def get_terraform_outputs(layer: "Layer") -> dict:
-    """ Fetch terraform outputs from existing TF file """
+    """Fetch terraform outputs from existing TF file"""
     current_outputs = Terraform.get_outputs(layer)
     parent_outputs = _fetch_parent_outputs(layer)
     return deep_merge(current_outputs, parent_outputs)
