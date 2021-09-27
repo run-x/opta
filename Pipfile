@@ -18,6 +18,7 @@ argparse = "*"
 pyinstaller = "*"
 macholib = "*"
 requests-mock = "*"
+PyGithub = "1.55"
 
 [packages]
 azure-storage-blob = ">=12.8.1,<12.9"
