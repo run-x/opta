@@ -71,6 +71,8 @@ class LocalK8sServiceProcessor(LocalK8sModuleProcessor):
                 self.handle_pg_link(module, link_permissions)
             elif module_type == "local-redis":
                 self.handle_redis_link(module, link_permissions)
+            elif module_type == "local-mongodb":
+                self.handle_mongo_link(module,link_permissions)
             else:
                 raise Exception(
                     f"Unsupported module type for k8s service link: {module_type}"
@@ -120,6 +122,39 @@ class LocalK8sServiceProcessor(LocalK8sModuleProcessor):
                 "permissions are for manipulating the db itself, which "
                 "I don't think is what you're looking for."
             )
+
+    def handle_mongo_link(
+        self, linked_module: "Module", link_permissions: List[Any]
+    ) -> None:
+        required_db_vars = ["db_user", "db_name", "db_password", "db_host"]
+        renamed_vars = {}
+        if len(link_permissions) > 0:
+            renamed_vars = link_permissions.pop()
+            if not isinstance(renamed_vars, dict) or set(renamed_vars.keys()) != set(
+                required_db_vars
+            ):
+                raise UserErrors(
+                    f"To rename db variables you must provide aliases for these fields: {required_db_vars}"
+                )
+            if not all(map(lambda x: isinstance(x, str), renamed_vars.values())):
+                raise UserErrors("DB variable rename must be only to another string")
+
+        for key in required_db_vars:
+            self.module.data["link_secrets"].append(
+                {
+                    "name": renamed_vars.get(key, f"{linked_module.name}_{key}"),
+                    "value": f"${{{{module.{linked_module.name}.{key}}}}}",
+                }
+            )
+        if link_permissions:
+            raise Exception(
+                "We're not supporting IAM permissions for rds right now. "
+                "Your k8s service will have the db user, name, password, "
+                "and host as envars (pls see docs) and these IAM "
+                "permissions are for manipulating the db itself, which "
+                "I don't think is what you're looking for."
+            )
+
 
     def handle_redis_link(
         self, linked_module: "Module", link_permissions: List[Any]
