@@ -4,6 +4,7 @@ import click
 
 from opta.core.generator import gen_all
 from opta.core.terraform import Terraform
+from opta.exceptions import UserErrors
 from opta.layer import Layer
 from opta.utils import check_opta_file_exists
 
@@ -20,6 +21,13 @@ def rollback(config: str, env: Optional[str]) -> None:
 
     check_opta_file_exists(config)
     layer = Layer.load_from_yaml(config, env)
+    tf_lock_exists, _ = Terraform.tf_lock_details(layer)
+    if tf_lock_exists:
+        raise UserErrors(
+            "Terraform Lock exists on the given configuration."
+            "\nEither wait for sometime for the Terraform to release lock."
+            "\nOr use force-unlock command to release the lock."
+        )
     layer.verify_cloud_credentials()
     gen_all(layer)
     Terraform.rollback(layer)

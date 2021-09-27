@@ -6,7 +6,7 @@ import time
 from pathlib import Path
 from shutil import copyfile, rmtree
 from subprocess import DEVNULL, PIPE  # nosec
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple
 from uuid import uuid4
 
 import boto3
@@ -913,6 +913,16 @@ class Terraform:
 
     @classmethod
     def force_unlock(cls, layer: "Layer", *tf_flags: str) -> None:
+        tf_lock_exists, lock_id = cls.tf_lock_details(layer)
+
+        if not tf_lock_exists:
+            print("Lock Id could not be found.")
+            return
+
+        nice_run(["terraform", "force-unlock", *tf_flags, lock_id], check=True)
+
+    @classmethod
+    def tf_lock_details(cls, layer: "Layer") -> Tuple[bool, str]:
         providers = layer.gen_providers(0, clean=False)
         lock_id: str = ""
         if "s3" in providers.get("terraform", {}).get("backend", {}):
@@ -922,11 +932,7 @@ class Terraform:
         if "azurerm" in providers.get("terraform", {}).get("backend", {}):
             lock_id = cls._get_azure_lock_id(layer)
 
-        if not lock_id:
-            print("Lock Id could not be found.")
-            return
-
-        nice_run(["terraform", "force-unlock", *tf_flags, lock_id], check=True)
+        return "" != lock_id, lock_id
 
     @classmethod
     def _get_aws_lock_id(cls, layer: "Layer") -> str:
