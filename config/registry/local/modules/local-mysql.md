@@ -1,13 +1,13 @@
 ---
-title: "postgres"
-linkTitle: "postgres"
-date: 2021-07-21
+title: "mysql"
+linkTitle: "mysql"
+date: 2021-09-27
 draft: false
 weight: 1
-description: Creates a postgres database on the local Kubernetes cluster
+description: Creates a mysql database as a paas in the local kubernetes cluster
 ---
 
-This module creates a postgres database instance within the local Kubernetes Kind cluster. 
+This module creates a mysql database instance within the local Kubernetes Kind cluster. 
 
 ### Linking
 

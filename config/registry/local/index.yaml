@@ -21,6 +21,7 @@ module_aliases:
   postgres: local-postgres
   redis: local-redis
   mongodb: local-mongodb
+  mysql: local-mysql
   k8s-service: local-k8s-service
   base: local-base
   
