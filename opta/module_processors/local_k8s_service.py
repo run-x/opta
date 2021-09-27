@@ -72,7 +72,7 @@ class LocalK8sServiceProcessor(LocalK8sModuleProcessor):
             elif module_type == "local-redis":
                 self.handle_redis_link(module, link_permissions)
             elif module_type == "local-mongodb":
-                self.handle_mongo_link(module,link_permissions)
+                self.handle_mongo_link(module, link_permissions)
             else:
                 raise Exception(
                     f"Unsupported module type for k8s service link: {module_type}"
@@ -154,7 +154,6 @@ class LocalK8sServiceProcessor(LocalK8sModuleProcessor):
                 "permissions are for manipulating the db itself, which "
                 "I don't think is what you're looking for."
             )
-
 
     def handle_redis_link(
         self, linked_module: "Module", link_permissions: List[Any]
