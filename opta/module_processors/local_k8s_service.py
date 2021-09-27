@@ -124,6 +124,7 @@ class LocalK8sServiceProcessor(LocalK8sModuleProcessor):
                 "permissions are for manipulating the db itself, which "
                 "I don't think is what you're looking for."
             )
+
     def handle_mysql_link(
         self, linked_module: "Module", link_permissions: List[Any]
     ) -> None:
@@ -155,6 +156,7 @@ class LocalK8sServiceProcessor(LocalK8sModuleProcessor):
                 "permissions are for manipulating the db itself, which "
                 "I don't think is what you're looking for."
             )
+
     def handle_mongo_link(
         self, linked_module: "Module", link_permissions: List[Any]
     ) -> None:
