@@ -12,8 +12,7 @@ from opta.constants import OPTA_DISABLE_REPORTING
 
 class TestAmplitudeClient:
     def test_send_event(self, mocker: MockFixture):  # noqa
-        mocked_version = mocker.patch("opta.amplitude.VERSION")
-        print("Mock Version used for Linting purpose" + mocked_version)
+        mocker.patch("opta.amplitude.VERSION")
         mocked_post = mocker.patch("opta.amplitude.post")
         mocked_response = mocker.Mock(spec=Response)
         mocked_response.status_code = codes.ok

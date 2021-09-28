@@ -42,7 +42,6 @@ def test_destroy_env_with_children(mocker: MockFixture) -> None:
     runner = CliRunner()
     result = runner.invoke(destroy, ["--config", FAKE_ENV_CONFIG])
 
-    print(result.exception)
     assert result.exit_code == 1
 
     assert not mocked_gen_all.called
@@ -68,7 +67,6 @@ def test_destroy_env_without_children(mocker: MockFixture) -> None:
     runner = CliRunner()
     result = runner.invoke(destroy, ["--config", FAKE_ENV_CONFIG])
 
-    print(result.exception)
     assert result.exit_code == 0
 
     args = get_call_args(mocked_gen_all)
@@ -97,7 +95,6 @@ def test_destroy_service(mocker: MockFixture) -> None:
     runner = CliRunner()
     result = runner.invoke(destroy, ["--config", FAKE_SERVICE_CONFIG])
 
-    print(result.exception)
     assert result.exit_code == 0
 
     args = get_call_args(mocked_gen_all)
@@ -121,7 +118,6 @@ def test_destroy_service_single_env_wrong_input(mocker: MockFixture) -> None:
     """Actual ENV present in the Service YML is dummy-env"""
     result = runner.invoke(destroy, ["--config", FAKE_SERVICE_CONFIG, "--env", "dummy"])
 
-    print(result.exception)
     assert result.exit_code == 1
 
 
@@ -142,5 +138,4 @@ def test_destroy_service_multiple_env_wrong_input(mocker: MockFixture) -> None:
         destroy, ["--config", FAKE_SERVICE_CONFIG_MULTIPLE_ENV, "--env", "dummy"]
     )
 
-    print(result.exception)
     assert result.exit_code == 1

@@ -72,7 +72,7 @@ class DatadogLogHandler(Handler):
                 timeout=5,
             )
             if response.status_code != codes.ok:
-                print("For some reason we could not send the logs to datadog")
+                return
             else:
                 self.cache = []
 

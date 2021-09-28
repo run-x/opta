@@ -13,52 +13,6 @@ FAKE_ENV_CONFIG = os.path.join(
 )
 
 
-def test_force_unlock_env_with_force_terraform(mocker: MockFixture) -> None:
-    mocked_click = mocker.patch("opta.commands.apply.click")
-    mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
-    mocked_os_path_exists.return_value = True
-    mocked_layer = mocker.Mock(spec=Layer)
-    mocker.patch(
-        "opta.commands.force_unlock.Layer.load_from_yaml", return_value=mocked_layer
-    )
-    mocker.patch("opta.commands.force_unlock.amplitude_client.send_event")
-    mocker.patch(
-        "opta.commands.force_unlock.Layer.verify_cloud_credentials", return_value=None
-    )
-    mocker.patch("opta.commands.force_unlock.gen_all")
-    mocker.patch("opta.commands.force_unlock.Terraform.init")
-    mocker.patch("opta.commands.force_unlock.Terraform.force_unlock")
-    mocker.patch("opta.commands.force_unlock.configure_kubectl")
-    mocked_helm_list = mocker.patch(
-        "opta.commands.force_unlock.Helm.get_helm_list",
-        return_value=[
-            {
-                "name": "mocked-app",
-                "namespace": "mocked-namespace",
-                "revision": "1",
-                "updated": "2021-09-23 19:55:15.503881027 +0000 UTC",
-                "status": "pending-upgrade",
-                "chart": "mocked-chart",
-                "app_version": "mocked-version",
-            }
-        ],
-    )
-    mocked_rollback_helm = mocker.patch("opta.commands.force_unlock.Helm.rollback_helm")
-
-    runner = CliRunner()
-    result = runner.invoke(
-        cli, ["force-unlock", "--config", FAKE_ENV_CONFIG, "--force-terraform"]
-    )
-
-    print(result.exception)
-    assert result.exit_code == 0
-    mocked_click.assert_not_called()
-    mocked_helm_list.assert_called_once_with(status="pending-upgrade")
-    mocked_rollback_helm.assert_called_once_with(
-        "mocked-app", namespace="mocked-namespace", revision="1"
-    )
-
-
 def test_force_unlock_env(mocker: MockFixture) -> None:
     mocked_click_confirm = mocker.patch(
         "opta.commands.apply.click.confirm", return_value="y"
@@ -96,12 +50,11 @@ def test_force_unlock_env(mocker: MockFixture) -> None:
     runner = CliRunner()
     result = runner.invoke(cli, ["force-unlock", "--config", FAKE_ENV_CONFIG])
 
-    print(result.exception)
     assert result.exit_code == 0
     mocked_click_confirm.assert_called_once_with(
-        "Do you really want to force-unlock?"
-        "\n\tTerraform will remove the lock on the remote state."
-        "\n\tThis will allow local Terraform commands to modify this state, even though it may be still be in use.",
+        "This will remove the lock on the remote state."
+        "\n\tPlease make sure that no other instance of opta command is running on this file."
+        "\n\tDo you still want to proceed?",
         abort=True,
     )
     mocked_helm_list.assert_called_once_with(status="pending-upgrade")
@@ -110,8 +63,10 @@ def test_force_unlock_env(mocker: MockFixture) -> None:
     )
 
 
-def test_force_unlock_env_with_force_terraform_no_rollback(mocker: MockFixture) -> None:
-    mocked_click = mocker.patch("opta.commands.apply.click")
+def test_force_unlock_env_no_rollback(mocker: MockFixture) -> None:
+    mocked_click_confirm = mocker.patch(
+        "opta.commands.apply.click.confirm", return_value="y"
+    )
     mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
     mocked_os_path_exists.return_value = True
     mocked_layer = mocker.Mock(spec=Layer)
@@ -132,12 +87,14 @@ def test_force_unlock_env_with_force_terraform_no_rollback(mocker: MockFixture) 
     mocked_rollback_helm = mocker.patch("opta.commands.force_unlock.Helm.rollback_helm")
 
     runner = CliRunner()
-    result = runner.invoke(
-        cli, ["force-unlock", "--config", FAKE_ENV_CONFIG, "--force-terraform"]
-    )
+    result = runner.invoke(cli, ["force-unlock", "--config", FAKE_ENV_CONFIG])
 
-    print(result.exception)
     assert result.exit_code == 0
-    mocked_click.assert_not_called()
+    mocked_click_confirm.assert_called_once_with(
+        "This will remove the lock on the remote state."
+        "\n\tPlease make sure that no other instance of opta command is running on this file."
+        "\n\tDo you still want to proceed?",
+        abort=True,
+    )
     mocked_helm_list.assert_called_once_with(status="pending-upgrade")
     mocked_rollback_helm.assert_not_called()
