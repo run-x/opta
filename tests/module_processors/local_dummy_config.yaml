@@ -12,6 +12,10 @@ modules:
     type: postgres
   - name: redis2
     type: redis
+  - name: mongodb
+    type: mongodb
+  - name: mysql
+    type: mysql
   - name: app
     type: k8s-service
     env_vars:
@@ -21,6 +25,8 @@ modules:
     links:
       - database
       - redis
+      - mongodb
+      - mysql
       - database2:
           - db_user: DBUSER2
             db_host: DBHOST2
