@@ -191,7 +191,6 @@ def test_no_docker(mocker: MockFixture) -> None:
 
     runner = CliRunner()
     result = runner.invoke(cli, ["push", "local_image:local_tag"])
-    print(result.exception)
     assert str(result.exception) == "Please install docker on your machine"
 
 

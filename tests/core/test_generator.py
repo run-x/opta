@@ -64,7 +64,6 @@ class TestGenerator:
         has_vpc = False
         for resource in tags_config["resource"]:
             resource_type = list(resource.keys())[0]
-            print(resource_type)
             if resource_type == "aws_vpc":
                 has_vpc = True
                 assert resource[resource_type]["vpc"]["tags"]["opta"] == "true"
