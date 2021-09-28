@@ -92,13 +92,13 @@ if __name__ == "__main__":
     except UserErrors as e:
         logger.error(e)
         logger.info(
-            "If you need more help please reach out to the contributors in our slack channel at: slack.opta.dev"
+            "If you need more help please reach out to the contributors in our slack channel at: https://slack.opta.dev"
         )
         sys.exit(1)
     except Exception as e:
         logger.exception(e)
         logger.info(
-            "If you need more help please reach out to the contributors in our slack channel at: slack.opta.dev"
+            "If you need more help please reach out to the contributors in our slack channel at: https://slack.opta.dev"
         )
         sys.exit(1)
     finally:
