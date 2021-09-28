@@ -1,8 +1,11 @@
 from threading import Thread
 from typing import Any, List, Optional, Set
-
+from shutil import copyfile
+from pathlib import Path
+import os
 import boto3
 import click
+from ruamel import yaml
 import semver
 from botocore.config import Config
 from botocore.exceptions import ClientError
@@ -83,6 +86,7 @@ def apply(
     config: str,
     env: Optional[str],
     refresh: bool,
+    local: bool,
     image_tag: Optional[str],
     test: bool,
     auto_approve: bool,
@@ -109,10 +113,20 @@ def _check_terraform_version() -> None:
         )
 
 
+def _setup_local_env()->None:
+    _apply(
+        config = 'config/localenv.yaml',
+        auto_approve=True,
+    )
+    copyfile('config/localenv.yml', os.path.join(Path.home(),".opta","local" ))
+    
+    
+
 def _apply(
     config: str,
     env: Optional[str],
     refresh: bool,
+    local: bool,
     image_tag: Optional[str],
     test: bool,
     auto_approve: bool,
@@ -121,6 +135,9 @@ def _apply(
     detailed_plan: bool = False,
 ) -> None:
     _check_terraform_version()
+    if local:
+        _setup_local_env()
+
     layer = Layer.load_from_yaml(config, env)
     layer.verify_cloud_credentials()
 
@@ -161,6 +178,8 @@ def _apply(
     elif layer.cloud == "azurerm":
         cloud_client = Azure(layer)
     elif layer.cloud == "local":
+        if local: #boolean passed via cli
+            pass
         cloud_client = Local(layer)
     else:
         raise Exception(f"Cannot handle upload config for cloud {layer.cloud}")
