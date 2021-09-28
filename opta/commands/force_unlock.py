@@ -16,7 +16,7 @@ from opta.utils import check_opta_file_exists
 @click.option(
     "-e", "--env", default=None, help="The env to use when loading the config file."
 )
-def force_unlock(config: str, env: Optional[str], force_terraform: bool) -> None:
+def force_unlock(config: str, env: Optional[str]) -> None:
     """Force Unlocks a stuck lock on the current workspace"""
     tf_flags: List[str] = []
     check_opta_file_exists(config)
