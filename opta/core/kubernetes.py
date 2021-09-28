@@ -1,11 +1,12 @@
 import base64
 import datetime
-import json
 import time
 from threading import Thread
 from typing import TYPE_CHECKING, List, Optional, Set, Tuple
 
+import boto3
 import pytz
+from botocore.exceptions import ClientError, NoCredentialsError
 from colored import attr, fg
 from kubernetes.client import (
     ApiException,
@@ -174,22 +175,21 @@ def _aws_configure_kubectl(layer: "Layer") -> None:
 
     # Get the current account details from the AWS CLI.
     try:
-        out = nice_run(
-            ["aws", "sts", "get-caller-identity"], check=True, capture_output=True
-        ).stdout.decode("utf-8")
-    except Exception as err:
+        aws_caller_identity = boto3.client("sts").get_caller_identity()
+    except NoCredentialsError:
         raise UserErrors(
-            fmt_msg(
-                f"""
-                Running the AWS CLI failed. Please make sure you've properly
-                configured your AWS credentials, and recently refreshed them if
-                they're expired:
-                ~{err}
-                """
-            )
+            "Unable to locate credentials.\n"
+            "Visit `https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html` "
+            "for more information."
+        )
+    except ClientError as e:
+        raise UserErrors(
+            "The AWS Credentials are not configured properly.\n"
+            f" - Code: {e.response['Error']['Code']} Error Message: {e.response['Error']['Message']}"
+            "Visit `https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html` "
+            "for more information."
         )
 
-    aws_caller_identity = json.loads(out)
     current_aws_account_id = aws_caller_identity["Account"]
 
     # Get the environment's account details from the opta config
@@ -217,6 +217,7 @@ def _aws_configure_kubectl(layer: "Layer") -> None:
         )
 
     # Update kubeconfig with the cluster details, and also switches context
+    # TODO: Change AWS to BOTO3
     nice_run(
         [
             "aws",

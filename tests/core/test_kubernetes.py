@@ -80,16 +80,22 @@ class TestKubernetes:
         mocked_nice_run = mocker.patch(
             "opta.core.kubernetes.nice_run",
             side_effect=[
-                CompletedProcess(
-                    None,  # type: ignore
-                    0,
-                    """{"UserId": "mocked_user_id:jd@runx.dev","Account": "111111111111", "Arn": "mocked_arn"}""".encode(
-                        "utf-8"
-                    ),
-                ),
                 CompletedProcess(None, 0, "blah".encode("utf-8")),  # type: ignore
             ],
         )
+        mock_aws_client_instance = mocker.Mock()
+        mock_aws_get_caller_identity = {
+            "UserId": "mocked_user_id:jd@runx.dev",
+            "Account": "111111111111",
+            "Arn": "mocked_arn",
+        }
+        mock_sts_client = mocker.patch(
+            "opta.core.kubernetes.boto3.client", return_value=mock_aws_client_instance
+        )
+        mock_aws_client_instance.get_caller_identity.return_value = (
+            mock_aws_get_caller_identity
+        )
+
         layer = mocker.Mock(spec=Layer)
         layer.parent = None
         layer.cloud = "aws"
@@ -103,13 +109,12 @@ class TestKubernetes:
 
         configure_kubectl(layer)
 
+        mock_sts_client.assert_called_once_with("sts")
         mocked_terraform_output.assert_called_once_with(layer)
         mocked_is_tool.assert_has_calls([mocker.call("kubectl"), mocker.call("aws")])
         mocked_nice_run.assert_has_calls(
             [
-                mocker.call(
-                    ["aws", "sts", "get-caller-identity"], check=True, capture_output=True
-                ),
+                # TODO: nsarupri -> change the AWS to Boto
                 mocker.call(
                     [
                         "aws",
