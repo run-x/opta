@@ -14,6 +14,10 @@ def mock_is_service_config(module_mocker: MockFixture) -> None:
 def test_deploy_basic(mocker: MockFixture) -> None:
     mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
     mocked_os_path_exists.return_value = True
+    mocker.patch(
+        "opta.commands.apply.Terraform.tf_lock_details",
+        return_value=(False, "mock_lock_id"),
+    )
 
     mock_push = mocker.patch(
         "opta.commands.deploy._push", return_value=("local_digest", "local_tag")
@@ -52,6 +56,10 @@ def test_deploy_basic(mocker: MockFixture) -> None:
 def test_deploy_auto_approve(mocker: MockFixture) -> None:
     mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
     mocked_os_path_exists.return_value = True
+    mocker.patch(
+        "opta.commands.apply.Terraform.tf_lock_details",
+        return_value=(False, "mock_lock_id"),
+    )
 
     mock_push = mocker.patch(
         "opta.commands.deploy._push", return_value=("local_digest", "local_tag")
@@ -92,6 +100,10 @@ def test_deploy_auto_approve(mocker: MockFixture) -> None:
 def test_deploy_all_flags(mocker: MockFixture) -> None:
     mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
     mocked_os_path_exists.return_value = True
+    mocker.patch(
+        "opta.commands.apply.Terraform.tf_lock_details",
+        return_value=(False, "mock_lock_id"),
+    )
 
     mock_push = mocker.patch(
         "opta.commands.deploy._push", return_value=("local_digest", "latest")
@@ -142,6 +154,10 @@ def test_deploy_all_flags(mocker: MockFixture) -> None:
 def test_deploy_ecr_apply(mocker: MockFixture) -> None:
     mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
     mocked_os_path_exists.return_value = True
+    mocker.patch(
+        "opta.commands.apply.Terraform.tf_lock_details",
+        return_value=(False, "mock_lock_id"),
+    )
 
     mock_push = mocker.patch(
         "opta.commands.deploy._push", return_value=("local_digest", "latest")

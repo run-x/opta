@@ -55,6 +55,10 @@ def mocked_layer(mocker: MockFixture) -> Any:
 def test_apply(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None:
     mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
     mocked_os_path_exists.return_value = True
+    mocker.patch(
+        "opta.commands.apply.Terraform.tf_lock_details",
+        return_value=(False, "mock_lock_id"),
+    )
 
     mocked_click = mocker.patch("opta.commands.apply.click")
     mocker.patch("opta.commands.apply.configure_kubectl")
@@ -118,6 +122,10 @@ def test_apply(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None
 def test_auto_approve(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None:
     mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
     mocked_os_path_exists.return_value = True
+    mocker.patch(
+        "opta.commands.apply.Terraform.tf_lock_details",
+        return_value=(False, "mock_lock_id"),
+    )
 
     mocked_click = mocker.patch("opta.commands.apply.click")
     mocker.patch("opta.commands.apply.configure_kubectl")
@@ -178,6 +186,10 @@ def test_auto_approve(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) 
 def test_fail_on_2_azs(mocker: MockFixture, mocked_layer: Any) -> None:
     mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
     mocked_os_path_exists.return_value = True
+    mocker.patch(
+        "opta.commands.apply.Terraform.tf_lock_details",
+        return_value=(False, "mock_lock_id"),
+    )
 
     # Opta needs a region with at least 3 AZs, fewer should fail.
     mocker.patch(

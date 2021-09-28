@@ -123,6 +123,13 @@ def _apply(
     layer = Layer.load_from_yaml(config, env)
     layer.verify_cloud_credentials()
 
+    tf_lock_exists, _ = Terraform.tf_lock_details(layer)
+    if tf_lock_exists:
+        raise UserErrors(
+            "Terraform Lock exists on the given configuration."
+            "\nEither wait for sometime for the Terraform to release lock."
+            "\nOr use force-unlock command to release the lock."
+        )
     _verify_parent_layer(layer)
 
     amplitude_client.send_event(

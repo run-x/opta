@@ -24,6 +24,10 @@ FAKE_SERVICE_CONFIG_MULTIPLE_ENV = os.path.join(
 
 
 def test_destroy_env_with_children(mocker: MockFixture) -> None:
+    mocker.patch(
+        "opta.commands.apply.Terraform.tf_lock_details",
+        return_value=(False, "mock_lock_id"),
+    )
     mocker.patch("opta.commands.destroy.amplitude_client.send_event")
     mocker.patch("opta.commands.destroy.Terraform.init")
     mocker.patch("opta.commands.destroy.Terraform.destroy_all")
@@ -45,6 +49,10 @@ def test_destroy_env_with_children(mocker: MockFixture) -> None:
 
 
 def test_destroy_env_without_children(mocker: MockFixture) -> None:
+    mocker.patch(
+        "opta.commands.apply.Terraform.tf_lock_details",
+        return_value=(False, "mock_lock_id"),
+    )
     mocker.patch("opta.commands.destroy.amplitude_client.send_event")
     mocker.patch("opta.commands.destroy.Terraform.init")
     mocker.patch("opta.commands.destroy.Terraform.destroy_all")
@@ -70,6 +78,10 @@ def test_destroy_env_without_children(mocker: MockFixture) -> None:
 
 
 def test_destroy_service(mocker: MockFixture) -> None:
+    mocker.patch(
+        "opta.commands.apply.Terraform.tf_lock_details",
+        return_value=(False, "mock_lock_id"),
+    )
     mocker.patch("opta.commands.destroy.amplitude_client.send_event")
     mocker.patch("opta.commands.destroy.Terraform.init")
     mocker.patch("opta.commands.destroy.Terraform.destroy_all")
