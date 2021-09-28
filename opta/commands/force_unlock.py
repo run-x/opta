@@ -16,13 +16,6 @@ from opta.utils import check_opta_file_exists
 @click.option(
     "-e", "--env", default=None, help="The env to use when loading the config file."
 )
-@click.option(
-    "-f",
-    "--force-terraform",
-    is_flag=True,
-    default=False,
-    help="Automatically approve terraform plan.",
-)
 def force_unlock(config: str, env: Optional[str], force_terraform: bool) -> None:
     """Force Unlocks a stuck lock on the current workspace"""
     tf_flags: List[str] = []
@@ -34,15 +27,12 @@ def force_unlock(config: str, env: Optional[str], force_terraform: bool) -> None
 
     Terraform.init(layer=layer)
 
-    if not force_terraform:
-        click.confirm(
-            "Do you really want to force-unlock?"
-            "\n\tTerraform will remove the lock on the remote state."
-            "\n\tThis will allow local Terraform commands to modify this state, even though it may be still be in use.",
-            abort=True,
-        )
-    else:
-        tf_flags.append("-force")
+    click.confirm(
+        "This will remove the lock on the remote state."
+        "\n\tPlease make sure that no other instance of opta command is running on this file."
+        "\n\tDo you still want to proceed?",
+        abort=True,
+    )
 
     Terraform.force_unlock(layer, *tf_flags)
     configure_kubectl(layer)
