@@ -8,4 +8,5 @@ providers:
 modules:
   - type: base
   - type: k8s-cluster
+    node_instance_type: Standard_D2_v2
   - type: k8s-base

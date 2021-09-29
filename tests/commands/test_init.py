@@ -35,10 +35,11 @@ class TestInitEnv:
         modules:
         - type: base
         - type: dns
-        domain: my.dns.domain
+          domain: my.dns.domain
         delegated: false
         - type: k8s-cluster
-        max_nodes: 6
+          max_nodes: 6
+          node_instance_type: n2-highcpu-4
         - type: k8s-base
         """
         assert _sanitize(expected_result) in _sanitize(result.output)
@@ -66,6 +67,7 @@ class TestInitEnv:
             modules:
             - type: base
             - type: k8s-cluster
+              node_instance_type: Standard_D2_v2
             - type: k8s-base
         """
         assert _sanitize(expected_result) in _sanitize(result.output)
@@ -93,10 +95,11 @@ class TestInitEnv:
             modules:
             - type: base
             - type: dns
-            domain: my.dns.domain
-            delegated: false
+              domain: my.dns.domain
+              delegated: false
             - type: k8s-cluster
-            max_nodes: 12
+              max_nodes: 12
+              node_instance_type: t3.medium
             - type: k8s-base
         """
         assert _sanitize(expected_result) in _sanitize(result.output)
@@ -124,10 +127,11 @@ class TestInitEnv:
             modules:
             - type: base
             - type: dns
-            domain: my.dns.domain
-            delegated: false
+              domain: my.dns.domain
+              delegated: false
             - type: k8s-cluster
-            max_nodes: 12
+              max_nodes: 12
+              node_instance_type: t3.medium
             - type: k8s-base
         """
         assert _sanitize(expected_result) in _sanitize(result.output)
@@ -155,10 +159,11 @@ class TestInitEnv:
         modules:
         - type: base
         - type: dns
-        domain: my.dns.domain
-        delegated: false
+          domain: my.dns.domain
+          delegated: false
         - type: k8s-cluster
-        max_nodes: 6
+          max_nodes: 6
+          node_instance_type: n2-highcpu-4
         - type: k8s-base
         """
         assert _sanitize(expected_result) in _sanitize(result.output)

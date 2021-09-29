@@ -11,4 +11,5 @@ modules:
     delegated: false
   - type: k8s-cluster
     max_nodes: 12
+    node_instance_type: t3.medium
   - type: k8s-base
