@@ -11,7 +11,7 @@ on:
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python 3.8
@@ -26,7 +26,7 @@ jobs:
       - name: Lint
         run: ./scripts/lint.py
   security:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python 3.8
@@ -41,7 +41,7 @@ jobs:
       - name: Security
         run: make security_tests
   terraform_format:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
       - name: Pin terraform version
@@ -55,7 +55,7 @@ jobs:
           terraform fmt -recursive -check ./config/tf_modules
 
   regula_lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
       - name: Install regula
@@ -69,7 +69,7 @@ jobs:
           ./regula run --include config.rego tf_modules
 
   python:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
       - name: Pin terraform version
@@ -107,7 +107,7 @@ jobs:
 
   test_cli_aws:
     if: ${{ github.event.pull_request.head.repo.full_name == 'run-x/opta' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
@@ -156,7 +156,7 @@ jobs:
           python ../opta/cli.py apply --env staging --test
   test_cli_gcp:
     if: ${{ github.event.pull_request.head.repo.full_name == 'run-x/opta' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
@@ -208,7 +208,7 @@ jobs:
     needs:
     - test_cli_aws
     - test_cli_gcp
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
       - name: Pin terraform version

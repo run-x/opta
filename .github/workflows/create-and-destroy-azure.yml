@@ -6,7 +6,7 @@ on: workflow_dispatch
 
 jobs:
   create-and-destroy-azure:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     env:
       ARM_CLIENT_ID: ${{ secrets.AZURE_CI_CD_CLIENT_ID }}
       ARM_CLIENT_SECRET: ${{ secrets.AZURE_CI_CD_CLIENT_SECRET }}
