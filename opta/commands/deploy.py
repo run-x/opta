@@ -6,6 +6,7 @@ from opta.amplitude import amplitude_client
 from opta.commands.apply import _apply
 from opta.commands.push import _push, is_service_config
 from opta.core.terraform import Terraform
+from opta.error_constants import USER_ERROR_TF_LOCK
 from opta.exceptions import MissingState, UserErrors
 from opta.layer import Layer
 from opta.utils import check_opta_file_exists, fmt_msg, logger
@@ -62,18 +63,16 @@ def deploy(
         )
 
     layer = Layer.load_from_yaml(config, env)
-    tf_lock_exists, _ = Terraform.tf_lock_details(layer)
-    if tf_lock_exists:
-        raise UserErrors(
-            "Terraform Lock exists on the given configuration."
-            "\nEither wait for sometime for the Terraform to release lock."
-            "\nOr use force-unlock command to release the lock."
-        )
     amplitude_client.send_event(
         amplitude_client.DEPLOY_EVENT,
         event_properties={"org_name": layer.org_name, "layer_name": layer.name},
     )
     layer.verify_cloud_credentials()
+    if Terraform.download_state(layer):
+        tf_lock_exists, _ = Terraform.tf_lock_details(layer)
+        if tf_lock_exists:
+            raise UserErrors(USER_ERROR_TF_LOCK)
+
     try:
         outputs = Terraform.get_outputs(layer)
     except MissingState:

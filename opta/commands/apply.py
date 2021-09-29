@@ -30,6 +30,7 @@ from opta.core.kubernetes import (
 from opta.core.local import Local
 from opta.core.plan_displayer import PlanDisplayer
 from opta.core.terraform import Terraform, get_terraform_outputs
+from opta.error_constants import USER_ERROR_TF_LOCK
 from opta.exceptions import MissingState, UserErrors
 from opta.layer import Layer, StructuredConfig
 from opta.utils import check_opta_file_exists, fmt_msg, is_tool, logger
@@ -123,13 +124,10 @@ def _apply(
     layer = Layer.load_from_yaml(config, env)
     layer.verify_cloud_credentials()
 
-    tf_lock_exists, _ = Terraform.tf_lock_details(layer)
-    if tf_lock_exists:
-        raise UserErrors(
-            "Terraform Lock exists on the given configuration."
-            "\nEither wait for sometime for the Terraform to release lock."
-            "\nOr use force-unlock command to release the lock."
-        )
+    if Terraform.download_state(layer):
+        tf_lock_exists, _ = Terraform.tf_lock_details(layer)
+        if tf_lock_exists:
+            raise UserErrors(USER_ERROR_TF_LOCK)
     _verify_parent_layer(layer)
 
     amplitude_client.send_event(
