@@ -24,6 +24,11 @@ chmod +x $HOME/.opta/local/kind
 # create registry container unless it already exists
 reg_name='opta-local-registry'
 reg_port='5000'
+stopped="$(docker inspect -f '{{.State.Status}}' "${reg_name}" 2>/dev/null || true)"
+if [ "${stopped}" == 'exited' ]; then
+  docker start "${reg_name}" 
+  exit 0
+fi
 running="$(docker inspect -f '{{.State.Running}}' "${reg_name}" 2>/dev/null || true)"
 if [ "${running}" != 'true' ]; then
   docker run \

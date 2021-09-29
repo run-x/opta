@@ -70,6 +70,15 @@ from opta.utils import check_opta_file_exists, fmt_msg, is_tool, logger
     help="Run tf plan, but don't lock state file",
     hidden=True,
 )
+
+@click.option(
+    "--local",
+    is_flag=True,
+    default=False,
+    help="""Run the service locally on a local Kubernetes cluster for development and testing,  irrespective of the environment specified inside the opta service yaml file""",
+    hidden=False,
+)
+
 @click.option(
     "--auto-approve",
     is_flag=True,
@@ -95,7 +104,7 @@ def apply(
     check_opta_file_exists(config)
     """Initialize your environment or service to match the config file"""
     _apply(
-        config, env, refresh, image_tag, test, auto_approve, detailed_plan=detailed_plan
+        config, env, refresh, local, image_tag, test, auto_approve, detailed_plan=detailed_plan
     )
 
 
@@ -113,13 +122,6 @@ def _check_terraform_version() -> None:
         )
 
 
-def _setup_local_env()->None:
-    _apply(
-        config = 'config/localenv.yaml',
-        auto_approve=True,
-    )
-    copyfile('config/localenv.yml', os.path.join(Path.home(),".opta","local" ))
-    
     
 
 def _apply(
@@ -136,7 +138,18 @@ def _apply(
 ) -> None:
     _check_terraform_version()
     if local:
-        _setup_local_env()
+        _apply(
+        config = 'config/localenv.yml',
+        auto_approve=True,
+        local=False,
+        env = "",
+        refresh=True,
+        image_tag=image_tag,
+        test=test
+        )
+        dir_path = os.path.join(Path.home(),".opta","local")
+        copyfile('config/localenv.yml',  dir_path)
+
 
     layer = Layer.load_from_yaml(config, env)
     layer.verify_cloud_credentials()
