@@ -62,7 +62,6 @@ ENVIRONMENT_TEMPLATES: Dict[str, Template] = {
 @click.option(
     "-f",
     "--file-name",
-    default="env.yml",
     help="The name of the file that this command will output (defaults to opta.yml)",
 )
 def env(cloud_provider: str, file_name: str) -> None:
@@ -80,7 +79,8 @@ Press ^C at any time to quit.
     template = ENVIRONMENT_TEMPLATES[cloud_provider]
     res = template.run()
 
-    _write_result(file_path=file_name, result=res)
+    name = res["name"]
+    _write_result(file_path=f"{name}.yaml", result=res)
 
 
 SERVICE_TEMPLATES: Dict[str, Template] = {
@@ -96,7 +96,6 @@ SERVICE_TEMPLATES: Dict[str, Template] = {
 @click.option(
     "-f",
     "--file-name",
-    default="service.yml",
     help="The name of the file that this command will output (defaults to opta.yml)",
 )
 def service(template_name: str, file_name: str, environment_file: str) -> None:
@@ -126,5 +125,6 @@ Press ^C at any time to quit.
                 }
             ]
 
-    _write_result(file_name, res)
+    name = res["name"]
+    _write_result(file_path=f"{name}.yaml", result=res)
     pass

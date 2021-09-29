@@ -11,4 +11,5 @@ modules:
     delegated: false
   - type: k8s-cluster
     max_nodes: 6
+    node_instance_type: n2-highcpu-4
   - type: k8s-base
