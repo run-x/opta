@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, List, Optional, Tuple
 
 import boto3
+import click
 from botocore.config import Config
 from click import prompt
 from colored import attr, fg
@@ -140,7 +141,7 @@ class AwsDnsProcessor(DNSModuleProcessor):
         while True:
             privkey_path = prompt(
                 "Please enter the full path to the private key pem file found locally. This is typically called privkey.pem or something like that.",
-                type=str,
+                type=click.STRING,
             )
             try:
                 with open(privkey_path, "r") as f:
@@ -162,7 +163,7 @@ class AwsDnsProcessor(DNSModuleProcessor):
             cert_body_path = prompt(
                 "Please enter the full path to the certificate body pem file found locally. This is typically called "
                 f"cert.pem, and is {fg(1)}NOT{attr(0)} fullchain.pem",
-                type=str,
+                type=click.STRING,
             )
             try:
                 with open(cert_body_path, "r") as f:
@@ -189,7 +190,7 @@ class AwsDnsProcessor(DNSModuleProcessor):
                 "Please enter the full path to the certificate chain/intermediate certificate pem file found locally or "
                 "the empty string if there is none. If you used fullchain.pem for the body, or something else saying full "
                 "chain then leave this empty.",
-                type=str,
+                type=click.STRING,
                 default="",
             )
             if cert_chain_path == "" or cert_chain_path is None:

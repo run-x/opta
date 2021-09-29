@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, List, Optional
 
 import boto3
+import click
 from botocore.config import Config
 from click import prompt
 from colored import attr, fg
@@ -87,7 +88,7 @@ class AwsEmailProcessor(ModuleProcessor):
         while website_url == "":
             website_url = prompt(
                 "Please enter your official website url-- the most official thing to show the AWS folks that this is for real.",
-                type=str,
+                type=click.STRING,
             ).strip()
         if not website_url.startswith("https://"):
             website_url = f"https://{website_url}"
@@ -95,7 +96,7 @@ class AwsEmailProcessor(ModuleProcessor):
         while description == "":
             description = prompt(
                 "Please enter some brief description about why you want this email capability",
-                type=str,
+                type=click.STRING,
             ).strip()
         email_list: List[str] = []
         valid_emails = False
@@ -103,7 +104,7 @@ class AwsEmailProcessor(ModuleProcessor):
             email_list = []
             contact_emails: str = prompt(
                 "Please enter a comma-delimited list of contact emails to keep in the loop about this request (need at least one).",
-                type=str,
+                type=click.STRING,
             )
             potential_emails = contact_emails.split(",")
             valid_emails = True

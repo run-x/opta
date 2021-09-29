@@ -56,7 +56,9 @@ ENVIRONMENT_TEMPLATES: Dict[str, Template] = {
 
 
 @init.command()
-@click.argument("cloud_provider", type=click.Choice(ENVIRONMENT_TEMPLATES.keys()))
+@click.argument(
+    "cloud_provider", type=click.Choice([x for x in ENVIRONMENT_TEMPLATES.keys()])
+)
 @click.option(
     "-f",
     "--file-name",
@@ -90,7 +92,7 @@ SERVICE_TEMPLATES: Dict[str, Template] = {
 @click.argument(
     "environment_file", type=click.Path(exists=True),
 )
-@click.argument("template_name", type=click.Choice(SERVICE_TEMPLATES.keys()))
+@click.argument("template_name", type=click.Choice([x for x in SERVICE_TEMPLATES.keys()]))
 @click.option(
     "-f",
     "--file-name",

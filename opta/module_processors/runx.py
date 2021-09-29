@@ -84,7 +84,7 @@ class RunxProcessor(ModuleProcessor):
 
     def set_secret(self) -> None:
         while True:
-            value = click.prompt("Please enter your runx api key", type=str,)
+            value = click.prompt("Please enter your runx api key", type=click.STRING,)
             try:
                 self.fetch_jwt(value)
             except UserErrors:
