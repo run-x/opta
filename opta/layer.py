@@ -13,7 +13,6 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, TypedDict
 
 import boto3
 import click
-import git
 import google.auth.transport.requests
 from azure.core.exceptions import ClientAuthenticationError
 from azure.identity import DefaultAzureCredential
@@ -166,6 +165,13 @@ class Layer:
                 branch = res.get("ref", branch)
             t = tempfile.mkdtemp()
             # Clone into temporary dir
+            try:
+                import git
+            except ImportError:
+                raise UserErrors(
+                    "Please install git locally to be able to load environments from git"
+                )
+
             git.Repo.clone_from(git_url, t, branch=branch, depth=1)
             config_path = os.path.join(t, file_path)
             with open(config_path) as f:
