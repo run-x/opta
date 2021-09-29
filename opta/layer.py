@@ -250,7 +250,7 @@ class Layer:
                     is given."""
                     env = click.prompt(
                         "Choose an Environment for the Given set of choices",
-                        type=click.Choice(potential_envs.keys()),
+                        type=click.Choice([x for x in potential_envs.keys()]),
                     )
             elif env not in potential_envs:
                 raise UserErrors(

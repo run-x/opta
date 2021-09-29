@@ -70,7 +70,7 @@ class DatadogProcessor(ModuleProcessor):
     def create_secret(self) -> str:
         value = self.module.data.get("api_key") or click.prompt(
             "Please enter your datadog api key (from https://app.datadoghq.com/account/settings#api)",
-            type=str,
+            type=click.STRING,
         )
 
         if not self.validate_api_key(value):
