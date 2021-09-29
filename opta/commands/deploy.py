@@ -62,18 +62,20 @@ def deploy(
         )
 
     layer = Layer.load_from_yaml(config, env)
-    tf_lock_exists, _ = Terraform.tf_lock_details(layer)
-    if tf_lock_exists:
-        raise UserErrors(
-            "Terraform Lock exists on the given configuration."
-            "\nEither wait for sometime for the Terraform to release lock."
-            "\nOr use force-unlock command to release the lock."
-        )
     amplitude_client.send_event(
         amplitude_client.DEPLOY_EVENT,
         event_properties={"org_name": layer.org_name, "layer_name": layer.name},
     )
     layer.verify_cloud_credentials()
+    if Terraform.download_state(layer):
+        tf_lock_exists, _ = Terraform.tf_lock_details(layer)
+        if tf_lock_exists:
+            raise UserErrors(
+                "Terraform Lock exists on the given configuration."
+                "\nEither wait for sometime for the Terraform to release lock."
+                "\nOr use force-unlock command to release the lock."
+            )
+
     try:
         outputs = Terraform.get_outputs(layer)
     except MissingState:

@@ -34,13 +34,6 @@ def destroy(config: str, env: Optional[str], auto_approve: bool) -> None:
 
     check_opta_file_exists(config)
     layer = Layer.load_from_yaml(config, env)
-    tf_lock_exists, _ = Terraform.tf_lock_details(layer)
-    if tf_lock_exists:
-        raise UserErrors(
-            "Terraform Lock exists on the given configuration."
-            "\nEither wait for sometime for the Terraform to release lock."
-            "\nOr use force-unlock command to release the lock."
-        )
     amplitude_client.send_event(
         amplitude_client.DESTROY_EVENT,
         event_properties={"org_name": layer.org_name, "layer_name": layer.name},
@@ -51,6 +44,14 @@ def destroy(config: str, env: Optional[str], auto_approve: bool) -> None:
             "The opta state could not be found. This may happen if destroy ran successfully before."
         )
         return
+
+    tf_lock_exists, _ = Terraform.tf_lock_details(layer)
+    if tf_lock_exists:
+        raise UserErrors(
+            "Terraform Lock exists on the given configuration."
+            "\nEither wait for sometime for the Terraform to release lock."
+            "\nOr use force-unlock command to release the lock."
+        )
 
     # Any child layers should be destroyed first before the current layer.
     children_layers = _fetch_children_layers(layer)
