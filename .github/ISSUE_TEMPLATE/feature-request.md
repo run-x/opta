@@ -1,5 +1,5 @@
 ---
-name: Enhancement Tracking Issue
+name: Feature Request Tracking Issue
 about: Provide supporting details for a feature in development
 labels: feature
 
