@@ -13,6 +13,7 @@ from opta.core.azure import Azure
 from opta.core.gcp import GCP
 from opta.core.generator import gen_all
 from opta.core.terraform import Terraform
+from opta.error_constants import USER_ERROR_TF_LOCK
 from opta.exceptions import UserErrors
 from opta.layer import Layer
 from opta.utils import check_opta_file_exists, fmt_msg, logger
@@ -47,11 +48,7 @@ def destroy(config: str, env: Optional[str], auto_approve: bool) -> None:
 
     tf_lock_exists, _ = Terraform.tf_lock_details(layer)
     if tf_lock_exists:
-        raise UserErrors(
-            "Terraform Lock exists on the given configuration."
-            "\nEither wait for sometime for the Terraform to release lock."
-            "\nOr use force-unlock command to release the lock."
-        )
+        raise UserErrors(USER_ERROR_TF_LOCK)
 
     # Any child layers should be destroyed first before the current layer.
     children_layers = _fetch_children_layers(layer)
