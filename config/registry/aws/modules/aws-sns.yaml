@@ -31,9 +31,9 @@ inputs:
 outputs:
   - name: topic_arn
     export: true
-    description: Arn of the topic jsut created
+    description: Arn of the topic just created
   - name: kms_arn
     export: false
     description: Arn of the kms key created to encrypt this topi
-output_providers: { }
-output_data: { }
+output_providers: {}
+output_data: {}

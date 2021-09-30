@@ -14,7 +14,6 @@ linkTitle: "Service"
 weight: 1
 description: This section provides the list of module types for the user to use in a service Opta yaml for this cloud, along with their inputs and outputs.
 ---
-This section provides the list of module types for the user to use in a service Opta yaml for this cloud, along with their inputs and outputs.
 """
 
 ENVIRONMENT_MODULE_INDEX = """---
@@ -23,7 +22,6 @@ linkTitle: "Environment"
 weight: 1
 description: This section provides the list of module types for the user to use in a environment Opta yaml for this cloud, along with their inputs and outputs.
 ---
-This section provides the list of module types for the user to use in a environment Opta yaml for this cloud, along with their inputs and outputs.
 """
 
 
@@ -53,32 +51,48 @@ def make_registry_dict() -> Dict[Any, Any]:
     return registry_dict
 
 
+INPUTS_TABLE_HEADING = """
+| Name      | Description | Default | Required |
+| ----------- | ----------- | ------- | -------- |
+"""
+
+OUTPUTS_TABLE_HEADING = """
+| Name      | Description |
+| ----------- | ----------- |
+"""
+
+
 def _make_module_docs(vanilla_text: str, module_dict: Dict[Any, Any]) -> str:
     input_lines: List[str] = []
     output_lines: List[str] = []
-    input: Dict[str, Any]
-    for input in module_dict["inputs"]:
-        if not input["user_facing"]:
+    inputs: Dict[str, Any]
+    for inputs in module_dict["inputs"]:
+        if not inputs["user_facing"]:
             continue
-        required = "required=True" in input["validator"]
-        name = input["name"]
-        default = input["default"]
-        description = input["description"]
-        if required:
-            input_lines.append(f"- `{name}` - Required. {description}")
-        else:
-            input_lines.append(f"- `{name}` - Optional. {description} Default {default}")
+        name = inputs["name"]
+        default = inputs["default"]
+        description = inputs["description"].replace("\n", " ")
+        required = "required=True" in inputs["validator"]
+        table_row = f"| `{name}` | {description} | `{default}` | {required} |"
+        input_lines.append(table_row)
 
     output: Dict[str, Any]
     for output in module_dict["outputs"]:
         if not output["export"]:
             continue
         name = output["name"]
-        description = output["description"]
-        output_lines.append(f"- {name} - {description}")
-    input_lines_block = "\n".join(input_lines)
-    output_lines_block = "\n".join(output_lines)
-    return f"{vanilla_text}\n\n## Fields\n\n{input_lines_block}\n\n## Outputs\n\n{output_lines_block}"
+        description = output["description"].replace("\n", " ")
+        table_row = f"| `{name}` | {description} |"
+        output_lines.append(table_row)
+
+    result = f"{vanilla_text}\n\n"
+    if len(input_lines) > 0:
+        result += "## Fields\n\n"
+        result += INPUTS_TABLE_HEADING + "\n".join(input_lines)
+    if len(output_lines) > 0:
+        result += "\n\n## Outputs\n\n"
+        result += OUTPUTS_TABLE_HEADING + "\n".join(output_lines)
+    return result
 
 
 def _make_module_registry_dict(directory: str) -> Dict[Any, Any]:
