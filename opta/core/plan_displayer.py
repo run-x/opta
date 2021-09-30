@@ -22,14 +22,8 @@ RISK_COLORS = {
     HIGH_RISK: fg("magenta"),
 }
 RISK_EXPLANATIONS = {
-    LOW_RISK: (
-        "This is the safe level of risk. For these changes there is no expected downtime or dataloss of any sort. "
-        "You should feel confident in the changes listed here."
-    ),
-    HIGH_RISK: (
-        "This is the high level of risk. For these changes there MAY (but not guaranteed) be some donwtime "
-        "and / or dataloss."
-    ),
+    LOW_RISK: "Low risk change.",
+    HIGH_RISK: "High risk change. May lead to significant downtime and/or data loss.",
 }
 
 LOW_RISK_FIELDS = {
@@ -153,8 +147,7 @@ class PlanDisplayer:
         logger.info(
             f"Identified total risk of {RISK_COLORS[plan_risk]}{plan_risk}{attr(0)}.\n"
             f"{RISK_EXPLANATIONS[plan_risk]}\n"
-            "If you want extra help, please feel free to reach out to the Runx team at https://slack.opta.dev.\n"
-            "Severity break down by module is as follows:"
+            "For additional help, please reach out to the RunX team at https://slack.opta.dev/"
         )
         module_changes_list = sorted(
             [(k, v) for k, v in module_changes.items()],
@@ -190,6 +183,5 @@ class PlanDisplayer:
                 )
             )
         logger.info(
-            "This concludes the plan summary. For more detail, please pass the --detailed-plan flag to your opta "
-            "command!"
+            "For more details, please rerun the command with the —detailed-plan flag."
         )
