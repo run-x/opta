@@ -69,3 +69,8 @@ variable "node_instance_type" {
   type    = string
   default = "n2-highcpu-4"
 }
+
+variable "preemptible" {
+  type    = bool
+  default = false
+}

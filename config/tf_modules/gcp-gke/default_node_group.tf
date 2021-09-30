@@ -15,7 +15,7 @@ resource "google_container_node_pool" "default" {
   }
 
   node_config {
-    preemptible  = false
+    preemptible  = var.preemptible
     machine_type = var.node_instance_type
     disk_size_gb = var.node_disk_size
     tags         = ["opta-${var.layer_name}-nodes"]
