@@ -58,6 +58,8 @@ pyOpenSSL = ">=20.0.1,<20.1"
 semver = "~=2.13.0"
 dnspython = "2.1.0"
 docker = "5.0.0"
+tabulate = "0.8.9"
+types-tabulate = "0.8.2"
 [requires]
 python_version = "3.8"
 
