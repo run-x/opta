@@ -172,7 +172,7 @@ class PlanDisplayer:
                 current_risk = resource_change["risk"]
                 table.append(
                     [
-                        module_name,
+                        f"{fg('blue')}{module_name}{attr(0)}",
                         resource_name,
                         resource_change["action"],
                         f"{RISK_COLORS[current_risk]}{current_risk}{attr(0)}",
