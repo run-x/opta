@@ -138,9 +138,7 @@ class PlanDisplayer:
             action = actions[0]
             if action in ["read", "create"]:
                 current_risk = LOW_RISK
-                action_reason = (
-                    "data_refresh" if action == "read" else "ground_up_creation"
-                )
+                action_reason = "data_refresh" if action == "read" else "creation"
             elif action in ["replace", "destroy"]:
                 current_risk = HIGH_RISK
                 action_reason = resource_change.get("action_reason", "N/A")
