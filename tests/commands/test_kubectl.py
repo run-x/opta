@@ -1,4 +1,3 @@
-import json
 from subprocess import CompletedProcess
 
 from click.testing import CliRunner
@@ -28,20 +27,22 @@ def test_configure_kubectl(mocker: MockFixture) -> None:
 
     # Mock aws commands, including fetching the current aws account id.
     fake_aws_account_id = 1234567890123
-    mocked_caller_identity = json.dumps(
-        {
-            "UserId": "bla",
-            "Account": f"{fake_aws_account_id}",
-            "Arn": "arn:aws:iam::979926061731:user/test",
-        }
+    mock_aws_client_instance = mocker.Mock()
+    mock_aws_get_caller_identity = {
+        "UserId": "mocked_user_id:jd@runx.dev",
+        "Account": "1234567890123",
+        "Arn": "mocked_arn",
+    }
+    mock_sts_client = mocker.patch(
+        "opta.core.kubernetes.boto3.client", return_value=mock_aws_client_instance
+    )
+    mock_aws_client_instance.get_caller_identity.return_value = (
+        mock_aws_get_caller_identity
     )
     mocked_update_kubeconfig = "Updated context arn... in ../.kube/config"
     mocker.patch(
         "opta.core.kubernetes.nice_run",
         side_effect=[
-            CompletedProcess(
-                None, 0, mocked_caller_identity.encode("utf-8")  # type: ignore
-            ),
             CompletedProcess(
                 None, 0, mocked_update_kubeconfig.encode("utf-8")  # type: ignore
             ),
@@ -62,28 +63,32 @@ def test_configure_kubectl(mocker: MockFixture) -> None:
     runner = CliRunner()
     result = runner.invoke(configure_kubectl, [])
     mocked_layer_class.load_from_yaml.assert_called_with("opta.yml", None)
+    mock_sts_client.assert_called()
     assert result.exit_code == 0
 
     # If the current aws account id does not match the specified opta env's, then
     # raise an exception.
-    mocked_caller_identity = json.dumps(
-        {
-            "UserId": "bla",
-            "Account": "999999999999",
-            "Arn": "arn:aws:iam::979926061731:user/test",
-        }
+    mock_aws_client_instance = mocker.Mock()
+    mock_aws_get_caller_identity = {
+        "UserId": "mocked_user_id:jd@runx.dev",
+        "Account": "999999999999",
+        "Arn": "mocked_arn",
+    }
+    mock_sts_client = mocker.patch(
+        "opta.core.kubernetes.boto3.client", return_value=mock_aws_client_instance
+    )
+    mock_aws_client_instance.get_caller_identity.return_value = (
+        mock_aws_get_caller_identity
     )
     mocker.patch(
         "opta.core.kubernetes.nice_run",
         side_effect=[
-            CompletedProcess(
-                None, 0, mocked_caller_identity.encode("utf-8")  # type: ignore
-            ),
             CompletedProcess(
                 None, 0, mocked_update_kubeconfig.encode("utf-8")  # type: ignore
             ),
         ],
     )
     result = runner.invoke(configure_kubectl, [])
+    mock_sts_client.assert_called()
     assert result.exit_code == 1
     assert "is not configured with the right credentials" in str(result.exception)
