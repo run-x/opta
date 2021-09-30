@@ -57,7 +57,10 @@ def dict_diffs(dict1: Dict, dict2: dict) -> Dict[Any, Tuple[Any, Any]]:
 class PlanDisplayer:
     @staticmethod
     def handle_update(resource_change: Dict) -> Tuple[str, str]:
-
+        # TODO: use OPA
+        diff_dict = dict_diffs(
+            resource_change["change"]["before"], resource_change["change"]["after"]
+        )
         if resource_change.get("change", {}).get("resource_change", {}) != {}:
             return LOW_RISK, "refreshing data"
         if (
@@ -65,10 +68,22 @@ class PlanDisplayer:
             and resource_change["name"] == "k8s-service"
         ):
             return LOW_RISK, "deploying new version of app"
+        if (
+            resource_change["type"] == "google_container_node_pool"
+            and list(diff_dict.keys()) == ["autoscaling"]
+            and diff_dict["autoscaling"][0][0]["max_node_count"]
+            <= diff_dict["autoscaling"][1][0]["max_node_count"]
+        ):
+            return LOW_RISK, "increasing node count"
 
-        diff_dict = dict_diffs(
-            resource_change["change"]["before"], resource_change["change"]["after"]
-        )
+        if (
+            resource_change["type"] == "aws_eks_node_group"
+            and list(diff_dict.keys()) == ["scaling_config"]
+            and diff_dict["scaling_config"][0][0]["max_size"]
+            <= diff_dict["scaling_config"][1][0]["max_size"]
+        ):
+            return LOW_RISK, "increasing node count"
+
         high_risk_change_keys = []
 
         for key in diff_dict.keys():
