@@ -51,7 +51,7 @@ def dict_diffs(dict1: Dict, dict2: dict) -> Dict[Any, Tuple[Any, Any]]:
     for key in dict1.keys():
         if key not in dict2:
             diff_dict[key] = (dict1[key], None)
-        if dict1[key] != dict2[key]:
+        elif dict1[key] != dict2[key]:
             diff_dict[key] = (dict1[key], dict2[key])
     for key in dict2.keys():
         if key not in dict1:
