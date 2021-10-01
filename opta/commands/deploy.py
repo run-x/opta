@@ -10,7 +10,7 @@ from opta.error_constants import USER_ERROR_TF_LOCK
 from opta.exceptions import MissingState, UserErrors
 from opta.layer import Layer
 from opta.utils import check_opta_file_exists, fmt_msg, logger
-
+from opta.commands.local_flag import _handle_local_flag, _clean_tf_folder
 
 @click.command()
 @click.option(
@@ -38,6 +38,16 @@ from opta.utils import check_opta_file_exists, fmt_msg, logger
     default=False,
     help="Show full terraform plan in detail, not the opta provided summary",
 )
+
+
+@click.option(
+    "--local",
+    is_flag=True,
+    default=False,
+    help="""Run the service locally on a local Kubernetes cluster for development and testing,  irrespective of the environment specified inside the opta service yaml file""",
+    hidden=False,
+)
+
 def deploy(
     image: str,
     config: str,
@@ -45,6 +55,7 @@ def deploy(
     tag: Optional[str],
     auto_approve: bool,
     detailed_plan: bool,
+    local: Optional[bool]
 ) -> None:
     """Push your new image to the cloud and deploy it in your environment"""
 
@@ -61,6 +72,20 @@ def deploy(
             """
             )
         )
+
+    if local:
+        _apply(
+            config = 'config/localopta.yml',
+            auto_approve=True,
+            local=False,
+            env = "",
+            refresh=True,
+            image_tag=tag,
+            test = False,
+            detailed_plan=True
+        )
+        config = _handle_local_flag(config)
+        _clean_tf_folder()
 
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(
@@ -87,6 +112,7 @@ def deploy(
             refresh=False,
             image_tag=None,
             test=False,
+            local=local,
             auto_approve=auto_approve,
             stdout_logs=False,
             detailed_plan=detailed_plan,
@@ -98,6 +124,7 @@ def deploy(
         refresh=False,
         image_tag=None,
         test=False,
+        local=local,
         auto_approve=auto_approve,
         image_digest=image_digest,
         detailed_plan=detailed_plan,

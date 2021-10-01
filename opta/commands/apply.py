@@ -1,11 +1,9 @@
 from threading import Thread
 from typing import Any, List, Optional, Set
-from shutil import copyfile
-from pathlib import Path
-import os
+
 import boto3
 import click
-from ruamel import yaml
+
 import semver
 from botocore.config import Config
 from botocore.exceptions import ClientError
@@ -37,7 +35,7 @@ from opta.error_constants import USER_ERROR_TF_LOCK
 from opta.exceptions import MissingState, UserErrors
 from opta.layer import Layer, StructuredConfig
 from opta.utils import check_opta_file_exists, fmt_msg, is_tool, logger
-
+from opta.commands.local_flag import _handle_local_flag, _clean_tf_folder
 
 @click.command()
 @click.option(
@@ -122,7 +120,7 @@ def _check_terraform_version() -> None:
         )
 
 
-    
+
 
 def _apply(
     config: str,
@@ -137,21 +135,24 @@ def _apply(
     detailed_plan: bool = False,
 ) -> None:
     _check_terraform_version()
+
     if local:
         _apply(
-        config = 'config/localenv.yml',
-        auto_approve=True,
-        local=False,
-        env = "",
-        refresh=True,
-        image_tag=image_tag,
-        test=test
+            config = 'config/localopta.yml',
+            auto_approve=True,
+            local=False,
+            env = "",
+            refresh=True,
+            image_tag=image_tag,
+            test=test,
+            detailed_plan=True
         )
-        dir_path = os.path.join(Path.home(),".opta","local")
-        copyfile('config/localenv.yml',  dir_path)
+        config = _handle_local_flag(config, test)
+        _clean_tf_folder()
+        
 
 
-    layer = Layer.load_from_yaml(config, env)
+    layer = Layer.load_from_yaml(config, env)        
     layer.verify_cloud_credentials()
 
     if Terraform.download_state(layer):
