@@ -16,8 +16,3 @@ def one_time() -> None:
         open(one_time_run, "w").close()
     except:  # noqa: E722
         sys.exit(1)
-
-    print(
-        "\nHi there, thanks for Using Opta.\nWe hope you have a great experience using Opta."
-        "\nPlease reach out to us on https://slack.runx.dev for any queries."
-    )
