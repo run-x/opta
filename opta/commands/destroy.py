@@ -17,8 +17,8 @@ from opta.error_constants import USER_ERROR_TF_LOCK
 from opta.exceptions import UserErrors
 from opta.layer import Layer
 from opta.utils import check_opta_file_exists, fmt_msg, logger
-
-
+from opta.commands.apply import _apply
+from opta.commands.local_flag import _clean_tf_folder, _handle_local_flag
 @click.command()
 @click.option("-c", "--config", default="opta.yml", help="Opta config file.")
 @click.option(
@@ -30,10 +30,21 @@ from opta.utils import check_opta_file_exists, fmt_msg, logger
     default=False,
     help="Automatically approve terraform plan.",
 )
-def destroy(config: str, env: Optional[str], auto_approve: bool) -> None:
+@click.option(
+    "--local",
+    is_flag=True,
+    default=False,
+    help="""Run the service locally on a local Kubernetes cluster for development and testing,  irrespective of the environment specified inside the opta service yaml file""",
+    hidden=False,
+)
+
+def destroy(config: str, env: Optional[str], auto_approve: bool, local: Optional[bool]) -> None:
     """Destroy all opta resources from the current config"""
 
     check_opta_file_exists(config)
+    if local:
+        config = _handle_local_flag(config, False)
+        _clean_tf_folder()
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(
         amplitude_client.DESTROY_EVENT,
