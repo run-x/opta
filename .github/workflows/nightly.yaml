@@ -8,6 +8,8 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
+        with:
+          ref: dev
       - name: Pin terraform version
         uses: hashicorp/setup-terraform@v1
         with:
