@@ -41,7 +41,6 @@ class TestAwsEmailProcessor:
 
         mocked_sesv2 = mocker.Mock()
         mocked_boto3 = mocker.patch("opta.module_processors.aws_email.boto3")
-        patched_logger = mocker.patch("opta.module_processors.aws_email.logger")
         mocked_boto3.client.return_value = mocked_sesv2
         mocked_sesv2.get_account.return_value = {"ProductionAccessEnabled": True}
         aws_dns_modules = layer.get_module("awsdns", 8)
