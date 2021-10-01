@@ -56,5 +56,3 @@ class Local:
             logger.info("Deleted opta tf backup config from local")
         else:
             logger.warn(f"Did not find opta tf state {self.tf_file} to delete")
-
-

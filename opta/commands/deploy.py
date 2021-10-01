@@ -4,13 +4,14 @@ import click
 
 from opta.amplitude import amplitude_client
 from opta.commands.apply import _apply
+from opta.commands.local_flag import _clean_tf_folder, _handle_local_flag
 from opta.commands.push import _push, is_service_config
 from opta.core.terraform import Terraform
 from opta.error_constants import USER_ERROR_TF_LOCK
 from opta.exceptions import MissingState, UserErrors
 from opta.layer import Layer
 from opta.utils import check_opta_file_exists, fmt_msg, logger
-from opta.commands.local_flag import _handle_local_flag, _clean_tf_folder
+
 
 @click.command()
 @click.option(
@@ -38,8 +39,6 @@ from opta.commands.local_flag import _handle_local_flag, _clean_tf_folder
     default=False,
     help="Show full terraform plan in detail, not the opta provided summary",
 )
-
-
 @click.option(
     "--local",
     is_flag=True,
@@ -47,7 +46,6 @@ from opta.commands.local_flag import _handle_local_flag, _clean_tf_folder
     help="""Run the service locally on a local Kubernetes cluster for development and testing,  irrespective of the environment specified inside the opta service yaml file""",
     hidden=False,
 )
-
 def deploy(
     image: str,
     config: str,
@@ -55,7 +53,7 @@ def deploy(
     tag: Optional[str],
     auto_approve: bool,
     detailed_plan: bool,
-    local: Optional[bool]
+    local: Optional[bool],
 ) -> None:
     """Push your new image to the cloud and deploy it in your environment"""
 
@@ -75,14 +73,14 @@ def deploy(
 
     if local:
         _apply(
-            config = 'config/localopta.yml',
+            config="config/localopta.yml",
             auto_approve=True,
             local=False,
-            env = "",
+            env="",
             refresh=True,
             image_tag=tag,
-            test = False,
-            detailed_plan=True
+            test=False,
+            detailed_plan=True,
         )
         config = _handle_local_flag(config)
         _clean_tf_folder()

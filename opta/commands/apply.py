@@ -3,13 +3,13 @@ from typing import Any, List, Optional, Set
 
 import boto3
 import click
-
 import semver
 from botocore.config import Config
 from botocore.exceptions import ClientError
 from packaging import version
 
 from opta.amplitude import amplitude_client
+from opta.commands.local_flag import _clean_tf_folder, _handle_local_flag
 from opta.constants import (
     DEV_VERSION,
     MAX_TERRAFORM_VERSION,
@@ -35,7 +35,7 @@ from opta.error_constants import USER_ERROR_TF_LOCK
 from opta.exceptions import MissingState, UserErrors
 from opta.layer import Layer, StructuredConfig
 from opta.utils import check_opta_file_exists, fmt_msg, is_tool, logger
-from opta.commands.local_flag import _handle_local_flag, _clean_tf_folder
+
 
 @click.command()
 @click.option(
@@ -68,7 +68,6 @@ from opta.commands.local_flag import _handle_local_flag, _clean_tf_folder
     help="Run tf plan, but don't lock state file",
     hidden=True,
 )
-
 @click.option(
     "--local",
     is_flag=True,
@@ -76,7 +75,6 @@ from opta.commands.local_flag import _handle_local_flag, _clean_tf_folder
     help="""Run the service locally on a local Kubernetes cluster for development and testing,  irrespective of the environment specified inside the opta service yaml file""",
     hidden=False,
 )
-
 @click.option(
     "--auto-approve",
     is_flag=True,
@@ -102,7 +100,14 @@ def apply(
     check_opta_file_exists(config)
     """Initialize your environment or service to match the config file"""
     _apply(
-        config, env, refresh, local, image_tag, test, auto_approve, detailed_plan=detailed_plan
+        config,
+        env,
+        refresh,
+        local,
+        image_tag,
+        test,
+        auto_approve,
+        detailed_plan=detailed_plan,
     )
 
 
@@ -118,8 +123,6 @@ def _check_terraform_version() -> None:
         raise UserErrors(
             f"Invalid terraform version {current_version}-- must be less than  {MAX_TERRAFORM_VERSION}"
         )
-
-
 
 
 def _apply(
@@ -138,21 +141,19 @@ def _apply(
 
     if local:
         _apply(
-            config = 'config/localopta.yml',
+            config="config/localopta.yml",
             auto_approve=True,
             local=False,
-            env = "",
+            env="",
             refresh=True,
             image_tag=image_tag,
             test=test,
-            detailed_plan=True
+            detailed_plan=True,
         )
         config = _handle_local_flag(config, test)
         _clean_tf_folder()
-        
 
-
-    layer = Layer.load_from_yaml(config, env)        
+    layer = Layer.load_from_yaml(config, env)
     layer.verify_cloud_credentials()
 
     if Terraform.download_state(layer):
@@ -192,7 +193,7 @@ def _apply(
     elif layer.cloud == "azurerm":
         cloud_client = Azure(layer)
     elif layer.cloud == "local":
-        if local: #boolean passed via cli
+        if local:  # boolean passed via cli
             pass
         cloud_client = Local(layer)
     else:

@@ -9,6 +9,7 @@ from google.cloud import storage  # type: ignore
 from google.cloud.exceptions import NotFound
 
 from opta.amplitude import amplitude_client
+from opta.commands.local_flag import _clean_tf_folder, _handle_local_flag
 from opta.core.azure import Azure
 from opta.core.gcp import GCP
 from opta.core.generator import gen_all
@@ -17,8 +18,8 @@ from opta.error_constants import USER_ERROR_TF_LOCK
 from opta.exceptions import UserErrors
 from opta.layer import Layer
 from opta.utils import check_opta_file_exists, fmt_msg, logger
-from opta.commands.apply import _apply
-from opta.commands.local_flag import _clean_tf_folder, _handle_local_flag
+
+
 @click.command()
 @click.option("-c", "--config", default="opta.yml", help="Opta config file.")
 @click.option(
@@ -37,8 +38,9 @@ from opta.commands.local_flag import _clean_tf_folder, _handle_local_flag
     help="""Run the service locally on a local Kubernetes cluster for development and testing,  irrespective of the environment specified inside the opta service yaml file""",
     hidden=False,
 )
-
-def destroy(config: str, env: Optional[str], auto_approve: bool, local: Optional[bool]) -> None:
+def destroy(
+    config: str, env: Optional[str], auto_approve: bool, local: Optional[bool]
+) -> None:
     """Destroy all opta resources from the current config"""
 
     check_opta_file_exists(config)
