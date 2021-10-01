@@ -365,7 +365,7 @@ class Terraform:
         try:
             state = cls.get_state(layer)
         except MissingState:
-            logger.info(
+            logger.debug(
                 "Could not fetch remote terraform state, assuming no resources exist yet."
             )
             return []
@@ -392,7 +392,7 @@ class Terraform:
     @classmethod
     def download_state(cls, layer: "Layer") -> bool:
         if not cls.verify_storage(layer):
-            logger.info(
+            logger.debug(
                 fmt_msg(
                     """
                     We store state in S3/GCP buckets/Azure Storage. Since the state bucket was not found,
@@ -571,7 +571,7 @@ class Terraform:
                     "This is used for accessing the resources in the Resource Group."
                 )
 
-        print(
+        logger.debug(
             f"Provisioned resource group {rg_result.name} in the {rg_result.location} region"
         )
         authorization_client = AuthorizationManagementClient(
@@ -633,9 +633,9 @@ class Terraform:
             storage_client.storage_accounts.get_properties(
                 resource_group_name, storage_account_name
             )
-            print(f"Storage account {storage_account_name} already exists!")
+            logger.debug(f"Storage account {storage_account_name} already exists!")
         except ResourceNotFoundError:
-            print("Need to create storage account")
+            logger.debug("Need to create storage account")
             # create sa
             try:
                 poller = storage_client.storage_accounts.begin_create(
@@ -654,7 +654,7 @@ class Terraform:
                 )
 
             account_result = poller.result()
-            print(f"Provisioned storage account {account_result.name}")
+            logger.debug(f"Provisioned storage account {account_result.name}")
             # TODO(ankur): assign Storage Blob Data Contributor to this SA,
             # otherwise it doesn't work
 
@@ -663,13 +663,13 @@ class Terraform:
             container = storage_client.blob_containers.get(
                 resource_group_name, storage_account_name, container_name
             )
-            print(f"container {container.name} exists")
+            logger.debug(f"container {container.name} exists")
         except ResourceNotFoundError:
-            print("Need to create container")
+            logger.debug("Need to create container")
             container = storage_client.blob_containers.create(
                 resource_group_name, storage_account_name, container_name, {}
             )
-            print(f"Provisioned container {container.name}")
+            logger.debug(f"Provisioned container {container.name}")
 
     @classmethod
     def _create_gcp_state_storage(cls, providers: dict) -> None:
@@ -700,7 +700,7 @@ class Terraform:
                     f"{e.code} error with the message "
                     f"{e.message}"
                 )
-            logger.info("GCS bucket for terraform state not found, creating a new one")
+            logger.debug("GCS bucket for terraform state not found, creating a new one")
             try:
                 bucket = gcs_client.create_bucket(bucket_name, location=region)
                 bucket_project_number = bucket.project_number
@@ -742,14 +742,12 @@ class Terraform:
                     raise UserErrors(
                         f"Got a 400 response when trying to enable the google {service_name} service with the following error reason: {e._get_reason()}"
                     )
-            print(f"Google service {service_name} activated")
+            logger.info(f"Google service {service_name} activated")
         if new_api_enabled:
             logger.info(
                 "New api has been enabled, waiting 120 seconds before progressing"
             )
             time.sleep(120)
-        else:
-            logger.info("No new API found that needs to be enabled")
         service = discovery.build(
             "cloudresourcemanager", "v1", credentials=credentials, static_discovery=False,
         )
@@ -797,7 +795,7 @@ class Terraform:
                     f"{e.response['Error']['Code']} error with the message "
                     f"{e.response['Error']['Message']}"
                 )
-            logger.info("S3 bucket for terraform state not found, creating a new one")
+            logger.debug("S3 bucket for terraform state not found, creating a new one")
             if region == "us-east-1":
                 s3.create_bucket(Bucket=bucket_name,)
             else:
@@ -857,7 +855,7 @@ class Terraform:
                     f"{e.response['Error']['Code']} error with the message "
                     f"{e.response['Error']['Message']}"
                 )
-            print("Dynamodb table for terraform state not found, creating a new one")
+            logger.debug("Dynamodb table for terraform state not found, creating a new one")
             dynamodb.create_table(
                 TableName=dynamodb_table,
                 KeySchema=[{"AttributeName": "LockID", "KeyType": "HASH"}],
@@ -916,7 +914,7 @@ class Terraform:
         tf_lock_exists, lock_id = cls.tf_lock_details(layer)
 
         if not tf_lock_exists:
-            print("Lock Id could not be found.")
+            print("Terraform Lock Id could not be found.")
             return
 
         nice_run(["terraform", "force-unlock", *tf_flags, lock_id], check=True)

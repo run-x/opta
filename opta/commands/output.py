@@ -72,7 +72,7 @@ def _load_extra_aws_outputs(layer: Layer, current_outputs: dict) -> dict:
         if marker == "":
             break
     logger.info(
-        "Could not find load balancer for current environment/service. Are you sure the environmend is fully set up?"
+        "Could not find load balancer for current environment/service. Please re-run opta apply on the environment file."
     )
     return current_outputs
 

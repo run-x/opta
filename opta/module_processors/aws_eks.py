@@ -32,7 +32,7 @@ class AwsEksProcessor(ModuleProcessor):
         self.cleanup_dangling_enis(region)
 
     def cleanup_cloudwatch_log_group(self, region: str) -> None:
-        logger.info(
+        logger.debug(
             "Seeking dangling cloudwatch log group for k8s cluster just destroyed."
         )
         client: CloudWatchLogsClient = boto3.client(
@@ -42,7 +42,7 @@ class AwsEksProcessor(ModuleProcessor):
         log_groups = client.describe_log_groups(logGroupNamePrefix=log_group_name)
         if len(log_groups["logGroups"]) == 0:
             return
-        logger.info(
+        logger.debug(
             f"Found dangling cloudwatch log group {log_group_name}. Deleting it now"
         )
         client.delete_log_group(logGroupName=log_group_name)
@@ -74,7 +74,7 @@ class AwsEksProcessor(ModuleProcessor):
         vpc_id = vpc["VpcId"]
         dangling_enis: List[NetworkInterfaceTypeDef] = []
         next_token = None
-        logger.info("Seeking dangling enis from k8s cluster just destroyed")
+        logger.debug("Seeking dangling enis from k8s cluster just destroyed")
         while True:
             if next_token is None:
                 describe_enis = client.describe_network_interfaces(
@@ -89,7 +89,7 @@ class AwsEksProcessor(ModuleProcessor):
                     eni["Description"].startswith("aws-K8S")
                     and eni["Status"] == "available"
                 ):
-                    logger.info(
+                    logger.debug(
                         f"Identified dangling EKS network interface {eni['NetworkInterfaceId']}"
                     )
                     dangling_enis.append(eni)
@@ -97,7 +97,7 @@ class AwsEksProcessor(ModuleProcessor):
             if next_token is None:
                 break
         for eni in dangling_enis:
-            logger.info(
+            logger.debug(
                 f"Now deleting dangling network interface {eni['NetworkInterfaceId']}"
             )
             client.delete_network_interface(NetworkInterfaceId=eni["NetworkInterfaceId"])
