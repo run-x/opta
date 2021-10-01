@@ -15,7 +15,7 @@ inputs:
     default: None
   - name: labels
     user_facing: true
-    validator:  map(str(), str(), required=False)
+    validator: map(str(), str(), required=False)
     description: labels for the kubernetes nodes
     default: {}
   - name: max_nodes
@@ -36,7 +36,7 @@ inputs:
   - name: node_instance_type
     user_facing: true
     validator: str(required=False)
-    description: he [ec2 instance type](https://aws.amazon.com/ec2/instance-types/) for the nodes.
+    description: The [ec2 instance type](https://aws.amazon.com/ec2/instance-types/) for the nodes.
     default: "t3.medium"
   - name: use_gpu
     user_facing: true
@@ -56,6 +56,6 @@ inputs:
       is a graver concern which can be addressed by having multiple node groups of different instance types (see aws
       nodegroup module) and ideally at least one non-spot.
     default: false
-outputs: { }
-output_providers: { }
-output_data: { }
+outputs: {}
+output_providers: {}
+output_data: {}
