@@ -41,15 +41,15 @@ inputs:
 outputs:
   - name: queue_arn
     export: true
-    description: Arn of the queue jsut created
+    description: Arn of the queue just created
   - name: queue_name
     export: true
-    description: Name of the queue jsut created
+    description: Name of the queue just created
   - name: queue_id
     export: true
-    description: ID of the queue jsut created
+    description: ID of the queue just created
   - name: kms_arn
     export: false
     description: Arn of the kms key created to encrypt this queue
-output_providers: { }
-output_data: { }
+output_providers: {}
+output_data: {}
