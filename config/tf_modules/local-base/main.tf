@@ -21,7 +21,7 @@ resource "null_resource" "local-base" {
 
 resource "null_resource" "k8s-installer" {
   depends_on = [
-    "null_resource.local-base"
+    null_resource.local-base
   ]
   provisioner "local-exec" {
     command = "bash -c config/tf_modules/local-base/install-cluster.sh"
@@ -40,7 +40,7 @@ resource "null_resource" "k8s-installer" {
 
 resource "null_resource" "kind-installer" {
   depends_on = [
-    "null_resource.k8s-installer"
+    null_resource.k8s-installer
   ]
   provisioner "local-exec" {
 

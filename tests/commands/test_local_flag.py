@@ -33,13 +33,15 @@ class Local_Flag_Tests(unittest.TestCase):
         return super().setUp()
 
     def tearDown(self) -> None:
-        os.remove(self.serviceconfig)
-        os.remove("/tmp/opta-local-test_local_flag.yaml")
+        if os.path.isfile(self.serviceconfig):
+            os.remove(self.serviceconfig)
+        if os.path.isfile("/tmp/opta-local-test_local_flag.yaml"):
+            os.remove("/tmp/opta-local-test_local_flag.yaml")
         return super().tearDown()
 
     def test_handle_local_flag(self):
         _handle_local_flag(self.serviceconfig)
         with open("/tmp/opta-local-test_local_flag.yaml", "r") as fr:
-            y = yaml.load(fr)
+            y = yaml.safe_load(fr)
             assert "environments" in y
-            assert y["environments"][0]["name"] == "localopta" 
+            assert y["environments"][0]["name"] == "localopta"
