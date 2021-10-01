@@ -49,7 +49,6 @@ class TestAwsEmailProcessor:
         AwsEmailProcessor(aws_email_module, layer).post_hook(8, None)
         mocked_boto3.client.assert_called_once()
         mocked_sesv2.get_account.assert_called_once()
-        patched_logger.info.assert_has_calls([mocker.call(mocker.ANY)])
 
     def test_post_hook_pending(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(

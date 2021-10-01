@@ -855,7 +855,9 @@ class Terraform:
                     f"{e.response['Error']['Code']} error with the message "
                     f"{e.response['Error']['Message']}"
                 )
-            logger.debug("Dynamodb table for terraform state not found, creating a new one")
+            logger.debug(
+                "Dynamodb table for terraform state not found, creating a new one"
+            )
             dynamodb.create_table(
                 TableName=dynamodb_table,
                 KeySchema=[{"AttributeName": "LockID", "KeyType": "HASH"}],
