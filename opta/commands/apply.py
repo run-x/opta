@@ -141,7 +141,7 @@ def _apply(
     _clean_tf_folder()
     if local:
         adjusted_config = _handle_local_flag(config, test)
-        if adjusted_config != config: # Only do this for service opta files
+        if adjusted_config != config:  # Only do this for service opta files
             config = adjusted_config
             _apply(
                 config="config/localopta.yml",
