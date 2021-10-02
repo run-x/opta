@@ -138,20 +138,22 @@ def _apply(
     detailed_plan: bool = False,
 ) -> None:
     _check_terraform_version()
-
+    _clean_tf_folder()
     if local:
-        _apply(
-            config="config/localopta.yml",
-            auto_approve=True,
-            local=False,
-            env="",
-            refresh=True,
-            image_tag=image_tag,
-            test=test,
-            detailed_plan=True,
-        )
-        config = _handle_local_flag(config, test)
-        _clean_tf_folder()
+        adjusted_config = _handle_local_flag(config, test)
+        if adjusted_config != config: # Only do this for service opta files
+            config = adjusted_config
+            _apply(
+                config="config/localopta.yml",
+                auto_approve=True,
+                local=False,
+                env="",
+                refresh=True,
+                image_tag=image_tag,
+                test=test,
+                detailed_plan=True,
+            )
+            _clean_tf_folder()
 
     layer = Layer.load_from_yaml(config, env)
     layer.verify_cloud_credentials()

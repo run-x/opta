@@ -16,6 +16,8 @@ def _handle_local_flag(config: str, test=False) -> str:
     copyfile("config/localopta.yml", dir_path + "/localopta.yml")
     with open(config, "r") as fr:
         y = yaml.safe_load(fr)
+    if "environments" not in y: # This is an environment opta file, so do nothing
+        return config
     y["environments"] = [{"name": "localopta", "path": dir_path + "/localopta.yml"}]
     p = Path(config)
     config = os.path.join(p.parent, "opta-local-" + p.name)
