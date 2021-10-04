@@ -39,7 +39,7 @@ class Local_Flag_Tests(unittest.TestCase):
             os.remove("/tmp/opta-local-test_local_flag.yaml")
         return super().tearDown()
 
-    def test_handle_local_flag(self):
+    def test_handle_local_flag(self) -> None:
         _handle_local_flag(self.serviceconfig)
         with open("/tmp/opta-local-test_local_flag.yaml", "r") as fr:
             y = yaml.safe_load(fr)
