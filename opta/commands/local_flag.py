@@ -36,7 +36,11 @@ def _handle_local_flag(config: str, test: bool = False) -> str:
     p = Path(config)
     config = os.path.join(p.parent, "opta-local-" + p.name)
     with open(config, "w") as fw:
+<<<<<<< HEAD
         yaml.round_trip_dump(y, fw, explicit_start=True)
+=======
+        yaml.dump(y, fw)
+>>>>>>> 4185b08 (Feature/dashlocal (#397))
 
     return config
 
