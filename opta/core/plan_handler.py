@@ -54,7 +54,7 @@ def dict_diffs(dict1: Dict, dict2: dict) -> Dict[Any, Tuple[Any, Any]]:
     return diff_dict
 
 
-class PlanDisplayer:
+class PlanHandler:
     @staticmethod
     def handle_update(resource_change: Dict) -> Tuple[str, str]:
         # TODO: use OPA
@@ -109,10 +109,7 @@ class PlanDisplayer:
         )
 
     @staticmethod
-    def display(detailed_plan: bool = False) -> None:
-        if detailed_plan:
-            Terraform.show(TF_PLAN_PATH)
-            return
+    def determine_risk() -> Tuple[str, dict]:
         plan_dict = Terraform.show_plan()
         plan_risk = LOW_RISK
         module_changes: dict = {}
@@ -143,7 +140,7 @@ class PlanDisplayer:
                 current_risk = HIGH_RISK
                 action_reason = resource_change.get("action_reason", "N/A")
             elif action in ["update"]:
-                current_risk, action_reason = PlanDisplayer.handle_update(resource_change)
+                current_risk, action_reason = PlanHandler.handle_update(resource_change)
             else:
                 raise Exception(f"Do not know how to handle planned action: {action}")
 
@@ -156,7 +153,13 @@ class PlanDisplayer:
                 module_changes[module_name]["risk"], current_risk
             )
             plan_risk = _max_risk(plan_risk, current_risk)
+        return plan_risk, module_changes
 
+    @staticmethod
+    def display(detailed_plan: bool, plan_risk: str, module_changes: dict) -> None:
+        if detailed_plan:
+            Terraform.show(TF_PLAN_PATH)
+            return
         logger.info(
             f"Identified total risk of {RISK_COLORS[plan_risk]}{plan_risk}{attr(0)}.\n"
             f"{RISK_EXPLANATIONS[plan_risk]}\n"

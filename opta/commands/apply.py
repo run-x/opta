@@ -28,7 +28,7 @@ from opta.core.kubernetes import (
     tail_namespace_events,
 )
 from opta.core.local import Local
-from opta.core.plan_displayer import PlanDisplayer
+from opta.core.plan_handler import HIGH_RISK, PlanHandler
 from opta.core.terraform import Terraform, get_terraform_outputs
 from opta.error_constants import USER_ERROR_TF_LOCK
 from opta.exceptions import MissingState, UserErrors
@@ -257,7 +257,14 @@ def _apply(
                 *targets,
                 quiet=True,
             )
-            PlanDisplayer.display(detailed_plan=detailed_plan)
+            plan_risk, module_changes = PlanHandler.determine_risk()
+            PlanHandler.display(
+                detailed_plan=detailed_plan,
+                plan_risk=plan_risk,
+                module_changes=module_changes,
+            )
+            if plan_risk == HIGH_RISK and auto_approve:
+                raise UserErrors("Can not auto approve high risk plan")
 
             if not auto_approve:
                 click.confirm(

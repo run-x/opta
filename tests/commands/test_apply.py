@@ -19,7 +19,8 @@ def basic_mocks(mocker: MockFixture) -> None:
     mocker.patch("opta.commands.apply.is_tool", return_value=True)
     mocker.patch("opta.commands.apply.amplitude_client.send_event")
     mocker.patch("opta.commands.apply.gen_opta_resource_tags")
-    mocker.patch("opta.commands.apply.PlanDisplayer")
+    mocked_planned_handler = mocker.patch("opta.commands.apply.PlanHandler")
+    mocked_planned_handler.determine_risk.return_value = "blah", {}
 
     # Mock remote state
     mocker.patch(
