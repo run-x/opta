@@ -15,7 +15,7 @@ jobs:
           terraform_version: 1.0.0
           terraform_wrapper: false
       - name: Create and destroy test-service and opta environment
-        run: ./scripts/dispatch_workflow.sh opta create-and-destroy-aws.yml
+        run: ./scripts/dispatch_workflow.sh opta create-and-destroy-aws.yml main
         env:
           github_token: ${{ secrets.ALL_GITHUB_TOKEN }}
       # - name: Slack alert if failed.
@@ -32,7 +32,7 @@ jobs:
           terraform_version: 1.0.0
           terraform_wrapper: false
       - name: Create and destroy test-service and opta environment
-        run: ./scripts/dispatch_workflow.sh opta create-and-destroy-gcp.yml
+        run: ./scripts/dispatch_workflow.sh opta create-and-destroy-gcp.yml main
         env:
           github_token: ${{ secrets.ALL_GITHUB_TOKEN }}
       # - name: Slack alert if failed.
@@ -49,7 +49,7 @@ jobs:
           terraform_version: 1.0.0
           terraform_wrapper: false
       - name: Create and destroy test-service and opta environment
-        run: ./scripts/dispatch_workflow.sh opta create-and-destroy-azure.yml
+        run: ./scripts/dispatch_workflow.sh opta create-and-destroy-azure.yml main
         env:
           github_token: ${{ secrets.ALL_GITHUB_TOKEN }}
       # - name: Slack alert if failed.

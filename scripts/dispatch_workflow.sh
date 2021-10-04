@@ -3,6 +3,7 @@ set -euo
 repo="$1"
 # Filename of the triggered workflow.
 workflow="$2"
+branch="$3"
 
 get_latest_build_data() {
   latest_build=$(curl -X GET "https://api.github.com/repos/run-x/${repo}/actions/workflows/${workflow}/runs" \
@@ -19,7 +20,8 @@ curl -X POST "https://api.github.com/repos/run-x/${repo}/actions/workflows/${wor
 -H "Accept: application/vnd.github.v3+json" \
 -H "Content-Type: application/json" \
 -H "Authorization: Bearer ${github_token}" \
---data '{"ref":"main"}'
+--data "{\"ref\":\"${branch}\"}" \
+--fail
 
 # Wait for the build to start.
 latest_build_id=""
