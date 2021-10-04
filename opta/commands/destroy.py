@@ -9,6 +9,7 @@ from google.cloud import storage  # type: ignore
 from google.cloud.exceptions import NotFound
 
 from opta.amplitude import amplitude_client
+from opta.commands.local_flag import _clean_tf_folder, _handle_local_flag
 from opta.core.azure import Azure
 from opta.core.gcp import GCP
 from opta.core.generator import gen_all
@@ -30,10 +31,22 @@ from opta.utils import check_opta_file_exists, fmt_msg, logger
     default=False,
     help="Automatically approve terraform plan.",
 )
-def destroy(config: str, env: Optional[str], auto_approve: bool) -> None:
+@click.option(
+    "--local",
+    is_flag=True,
+    default=False,
+    help="""Run the service locally on a local Kubernetes cluster for development and testing,  irrespective of the environment specified inside the opta service yaml file""",
+    hidden=False,
+)
+def destroy(
+    config: str, env: Optional[str], auto_approve: bool, local: Optional[bool]
+) -> None:
     """Destroy all opta resources from the current config"""
 
     check_opta_file_exists(config)
+    if local:
+        config = _handle_local_flag(config, False)
+        _clean_tf_folder()
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(
         amplitude_client.DESTROY_EVENT,

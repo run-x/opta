@@ -9,6 +9,7 @@ from botocore.exceptions import ClientError
 from packaging import version
 
 from opta.amplitude import amplitude_client
+from opta.commands.local_flag import _clean_tf_folder, _handle_local_flag
 from opta.constants import (
     DEV_VERSION,
     MAX_TERRAFORM_VERSION,
@@ -68,6 +69,13 @@ from opta.utils import check_opta_file_exists, fmt_msg, is_tool, logger
     hidden=True,
 )
 @click.option(
+    "--local",
+    is_flag=True,
+    default=False,
+    help="""Run the service locally on a local Kubernetes cluster for development and testing,  irrespective of the environment specified inside the opta service yaml file""",
+    hidden=False,
+)
+@click.option(
     "--auto-approve",
     is_flag=True,
     default=False,
@@ -83,6 +91,7 @@ def apply(
     config: str,
     env: Optional[str],
     refresh: bool,
+    local: bool,
     image_tag: Optional[str],
     test: bool,
     auto_approve: bool,
@@ -91,7 +100,14 @@ def apply(
     check_opta_file_exists(config)
     """Initialize your environment or service to match the config file"""
     _apply(
-        config, env, refresh, image_tag, test, auto_approve, detailed_plan=detailed_plan
+        config,
+        env,
+        refresh,
+        local,
+        image_tag,
+        test,
+        auto_approve,
+        detailed_plan=detailed_plan,
     )
 
 
@@ -113,6 +129,7 @@ def _apply(
     config: str,
     env: Optional[str],
     refresh: bool,
+    local: bool,
     image_tag: Optional[str],
     test: bool,
     auto_approve: bool,
@@ -121,6 +138,23 @@ def _apply(
     detailed_plan: bool = False,
 ) -> None:
     _check_terraform_version()
+    _clean_tf_folder()
+    if local:
+        adjusted_config = _handle_local_flag(config, test)
+        if adjusted_config != config:  # Only do this for service opta files
+            config = adjusted_config
+            _apply(
+                config="config/localopta.yml",
+                auto_approve=True,
+                local=False,
+                env="",
+                refresh=True,
+                image_tag=image_tag,
+                test=test,
+                detailed_plan=True,
+            )
+            _clean_tf_folder()
+
     layer = Layer.load_from_yaml(config, env)
     layer.verify_cloud_credentials()
 
@@ -161,6 +195,8 @@ def _apply(
     elif layer.cloud == "azurerm":
         cloud_client = Azure(layer)
     elif layer.cloud == "local":
+        if local:  # boolean passed via cli
+            pass
         cloud_client = Local(layer)
     else:
         raise Exception(f"Cannot handle upload config for cloud {layer.cloud}")

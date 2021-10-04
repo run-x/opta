@@ -147,7 +147,7 @@ class Layer:
 
     @classmethod
     def load_from_yaml(
-        cls, config: str, env: Optional[str], is_parent: bool = False
+        cls, config: str, env: Optional[str], is_parent: bool = False, local: bool = False
     ) -> Layer:
         t = None
         if config.startswith("git@"):
@@ -190,6 +190,8 @@ class Layer:
         conf["path"] = config
 
         layer = cls.load_from_dict(conf, env, is_parent)
+        if local:
+            pass
         validate_yaml(config_path, layer.cloud)
         if t is not None:
             shutil.rmtree(t)

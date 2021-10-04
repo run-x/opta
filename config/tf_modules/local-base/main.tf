@@ -21,7 +21,7 @@ resource "null_resource" "local-base" {
 
 resource "null_resource" "k8s-installer" {
   depends_on = [
-    "null_resource.local-base"
+    null_resource.local-base
   ]
   provisioner "local-exec" {
     command = "bash -c config/tf_modules/local-base/install-cluster.sh"
@@ -40,7 +40,7 @@ resource "null_resource" "k8s-installer" {
 
 resource "null_resource" "kind-installer" {
   depends_on = [
-    "null_resource.k8s-installer"
+    null_resource.k8s-installer
   ]
   provisioner "local-exec" {
 
@@ -48,6 +48,8 @@ resource "null_resource" "kind-installer" {
       echo "Installing Nginx ingress"
       kubectl config use-context kind-opta-local-cluster
       kubectl  apply -f config/tf_modules/local-base/deploy.yaml
+      echo "Waiting 20s for nginx ingress to stabilize"
+      sleep 20 # Wait for nginx to be ready
     EOT
   }
 }
