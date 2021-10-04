@@ -7,12 +7,16 @@ from ruamel import yaml
 from opta.utils import logger
 
 
-def _handle_local_flag(config: str, test=False) -> str:
+def _handle_local_flag(config: str, test: bool = False) -> str:
     if test:
+        return config
+    if "opta-local-" in config:
         return config
     logger.info("Checking local Opta Kubernetes environment, will install if needed.")
 
     dir_path = os.path.join(Path.home(), ".opta", "local")
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
     copyfile("config/localopta.yml", dir_path + "/localopta.yml")
     with open(config, "r") as fr:
         y = yaml.safe_load(fr)

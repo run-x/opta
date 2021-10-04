@@ -48,6 +48,8 @@ resource "null_resource" "kind-installer" {
       echo "Installing Nginx ingress"
       kubectl config use-context kind-opta-local-cluster
       kubectl  apply -f config/tf_modules/local-base/deploy.yaml
+      echo "Waiting 20s for nginx ingress to stabilize"
+      sleep 20 # Wait for nginx to be ready
     EOT
   }
 }
