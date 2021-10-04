@@ -10,6 +10,15 @@ on:
     branches: [main, dev]
 
 jobs:
+  no-pdb:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: No PDB
+        run: |
+          cd scripts
+          ./no_pdb.sh
+
   lint:
     runs-on: ubuntu-18.04
     steps:

@@ -340,11 +340,9 @@ class Layer:
                     ),
                     ret,
                 )
-            except Exception:
-
-                import pdb
-
-                pdb.set_trace()
+            except Exception as e:
+                # I dunno why we were swallowing this
+                raise e
             if module.desc.get("halt"):
                 previous_module_reference = [f"module.{module.name}"]
 
