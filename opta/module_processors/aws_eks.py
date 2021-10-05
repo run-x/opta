@@ -151,4 +151,5 @@ class AwsEksProcessor(ModuleProcessor):
         self.module.data[
             "kms_account_key_arn"
         ] = f"${{{{module.{aws_base_module.name}.kms_account_key_arn}}}}"
+        self.module.data["vpc_id"] = f"${{{{module.{aws_base_module.name}.vpc_id}}}}"
         super(AwsEksProcessor, self).process(module_idx)
