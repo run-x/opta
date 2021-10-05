@@ -1,3 +1,21 @@
+resource aws_security_group eks {
+  name_prefix = "opta-${var.layer_name}"
+  description = "EKS cluster security group."
+  vpc_id = var.vpc_id
+
+  tags = {
+    "Name" = "opta-${var.layer_name}-eks_cluster_sg"
+  }
+
+  egress {
+    description = "alloutbound"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 resource "aws_eks_cluster" "cluster" {
   name     = "opta-${var.layer_name}"
   role_arn = aws_iam_role.cluster_role.arn

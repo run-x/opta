@@ -12,6 +12,10 @@ variable "private_subnet_ids" {
   type = list(string)
 }
 
+variable "vpc_id" {
+  type = string
+}
+
 variable "env_name" {
   description = "Env name"
   type        = string
