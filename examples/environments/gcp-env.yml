@@ -15,3 +15,7 @@ modules:
   - type: k8s-cluster
     max_nodes: 6
   - type: k8s-base
+  - type: gcp-nodepool
+    name: additionalnodepool
+    min_nodes: 1
+    max_nodes: 5

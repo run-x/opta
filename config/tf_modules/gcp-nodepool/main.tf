@@ -6,11 +6,11 @@ resource "random_string" "node_pool_hash" {
 }
 
 resource "random_string" "node_pool_id" {
-  length = 8
+  length  = 8
   special = false
-  lower = true
-  upper = false
-  number = false
+  lower   = true
+  upper   = false
+  number  = false
 }
 
 resource "google_service_account" "gke_node" {
