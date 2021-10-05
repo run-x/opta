@@ -1,7 +1,7 @@
-resource aws_security_group eks {
+resource "aws_security_group" "eks" {
   name_prefix = "opta-${var.layer_name}"
   description = "EKS cluster security group."
-  vpc_id = var.vpc_id
+  vpc_id      = var.vpc_id
 
   tags = {
     "Name" = "opta-${var.layer_name}-eks_cluster_sg"
@@ -9,10 +9,10 @@ resource aws_security_group eks {
 
   ingress {
     description = "allowallfromself"
-    from_port = 0
-    protocol  = "-1"
-    to_port   = 0
-    self = true
+    from_port   = 0
+    protocol    = "-1"
+    to_port     = 0
+    self        = true
   }
 
   egress {
@@ -31,7 +31,7 @@ resource "aws_eks_cluster" "cluster" {
 
   vpc_config {
     subnet_ids              = var.private_subnet_ids
-    security_group_ids = [aws_security_group.eks.id]
+    security_group_ids      = [aws_security_group.eks.id]
     endpoint_private_access = false # TODO: make this true once we got VPN figured out
     endpoint_public_access  = true  # TODO: make this false once we got VPN figured out
   }
