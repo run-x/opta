@@ -1,4 +1,4 @@
-halt: true
+halt: false
 environment_module: true
 inputs:
   - name: env_name

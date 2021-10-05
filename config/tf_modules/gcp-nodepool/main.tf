@@ -5,13 +5,21 @@ resource "random_string" "node_pool_hash" {
   upper   = false
 }
 
+resource "random_string" "node_pool_id" {
+  length = 8
+  special = false
+  lower = true
+  upper = false
+  number = false
+}
+
 resource "google_service_account" "gke_node" {
   account_id   = "opta-${var.layer_name}-${random_string.node_pool_hash.result}"
   display_name = "opta-${var.layer_name}-default-node-pool"
 }
 
 resource "google_container_node_pool" "node_pool" {
-  name               = "opta-${var.layer_name}-secondary"
+  name               = "opta-${var.layer_name}-${random_string.node_pool_id.id}"
   cluster            = data.google_container_cluster.main.name
   location           = data.google_client_config.current.region
   initial_node_count = var.min_nodes
@@ -45,7 +53,7 @@ resource "google_container_node_pool" "node_pool" {
     }
 
     labels = {
-      node_pool_name = "opta-${var.layer_name}-default"
+      node_pool_name = "opta-${var.layer_name}-secondary"
     }
   }
   lifecycle {
