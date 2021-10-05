@@ -1,4 +1,60 @@
 resource_changes:
+  - address: module.app.aws_iam_role.k8s_service
+    module_address: module.app
+    mode: managed
+    type: aws_iam_role
+    name: k8s_service
+    provider_name: registry.terraform.io/hashicorp/aws
+    change:
+      actions:
+        - delete
+      before:
+        arn: arn:aws:iam::445935066876:role/live-example-dev-service-1-app
+        assume_role_policy: '{"Version":"2012-10-17","Statement":[{"Sid":"","Effect":"Allow","Principal":{"Federated":"arn:aws:iam::445935066876:oidc-provider/oidc.eks.us-east-1.amazonaws.com/id/CD680652372A21B639AF8970AA7A4816"},"Action":"sts:AssumeRoleWithWebIdentity","Condition":{"StringEquals":{"oidc.eks.us-east-1.amazonaws.com/id/CD680652372A21B639AF8970AA7A4816:sub":"system:serviceaccount:service-1:app"}}}]}'
+        create_date: "2021-08-02T20:18:05Z"
+        description: ""
+        force_detach_policies: false
+        id: live-example-dev-service-1-app
+        inline_policy:
+          - name: ""
+            policy: ""
+        managed_policy_arns:
+          - arn:aws:iam::445935066876:policy/live-example-dev-service-1-app
+        max_session_duration: 3600
+        name: live-example-dev-service-1-app
+        name_prefix: null
+        path: /
+        permissions_boundary: null
+        tags: {}
+        tags_all: {}
+        unique_id: AROAWPU6ND36CBJIDORDZ
+      after: null
+      after_unknown: {}
+      before_sensitive:
+        inline_policy:
+          - {}
+        managed_policy_arns:
+          - false
+        tags: {}
+        tags_all: {}
+      after_sensitive: false
+  - address: module.app.aws_iam_role_policy_attachment.vanilla_role_attachment
+    module_address: module.app
+    mode: managed
+    type: aws_iam_role_policy_attachment
+    name: vanilla_role_attachment
+    provider_name: registry.terraform.io/hashicorp/aws
+    change:
+      actions:
+        - delete
+      before:
+        id: live-example-dev-service-1-app-20210802201847670300000001
+        policy_arn: arn:aws:iam::445935066876:policy/live-example-dev-service-1-app
+        role: live-example-dev-service-1-app
+      after: null
+      after_unknown: {}
+      before_sensitive: {}
+      after_sensitive: false
   - action_reason: replace_because_cannot_update
     address: module.base.aws_ebs_default_kms_key.default
     change:
