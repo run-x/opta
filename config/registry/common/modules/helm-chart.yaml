@@ -51,6 +51,11 @@ inputs:
     validator: str(required=False)
     description: User side of the version of the helm chart to install
     default: null
+  - name: values_files
+    user_facing: true
+    validator: list(str, required=False)
+    description: A list of paths to a values files. Values will be merged, in order, as Helm does with multiple -f options.
+    default: []
   - name: values_file
     user_facing: true
     validator: str(required=False)

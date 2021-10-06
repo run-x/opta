@@ -66,3 +66,10 @@ modules:
     chart: redis
     chart_version: "15.3.2"
     repository: "https://charts.bitnami.com/bitnami"
+    values:
+      auth:
+        password: "faVBS7bEJW" # This is just an example, nothing is actually stored with this password.
+      commonAnnotations:
+        blah: "3"
+        opta_iteration: "2"
+    values_files: ["./blah.yaml"]
