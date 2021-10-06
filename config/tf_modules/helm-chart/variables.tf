@@ -1,3 +1,9 @@
+locals {
+  values_from_files = [for x in var.values_files :
+    file(x)
+  ]
+}
+
 variable "repository" {
   type    = string
   default = null
@@ -35,6 +41,11 @@ variable "cleanup_on_fail" {
 variable "chart_version" {
   type    = string
   default = null
+}
+
+variable "values_files" {
+  type    = list(string)
+  default = []
 }
 
 variable "values_file" {
