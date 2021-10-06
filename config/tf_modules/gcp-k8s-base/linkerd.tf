@@ -59,10 +59,10 @@ resource "helm_release" "linkerd" {
   chart      = "linkerd2"
   name       = "linkerd"
   repository = "https://helm.linkerd.io/stable"
-  version = "2.10.2"
+  version    = "2.10.2"
 
   set {
-    name  =  "identityTrustAnchorsPEM"
+    name  = "identityTrustAnchorsPEM"
     value = tls_self_signed_cert.trustanchor_cert.cert_pem
   }
 
