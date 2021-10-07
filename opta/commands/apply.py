@@ -1,3 +1,5 @@
+import os
+from pathlib import Path
 from threading import Thread
 from typing import Any, List, Optional, Set
 
@@ -142,9 +144,12 @@ def _apply(
     if local:
         adjusted_config = _handle_local_flag(config, test)
         if adjusted_config != config:  # Only do this for service opta files
-            config = adjusted_config
+            config = adjusted_config  # Config for service
+            localopta_envfile = os.path.join(
+                Path.home(), ".opta", "local", "localopta.yml"
+            )
             _apply(
-                config="config/localopta.yml",
+                config=localopta_envfile,
                 auto_approve=True,
                 local=False,
                 env="",
