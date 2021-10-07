@@ -555,7 +555,7 @@ class Layer:
                 required_project_id = self.root().providers["google"]["project"]
                 if required_project_id != configured_project_id:
                     raise UserErrors(
-                        "\nSystem configured AWS Credentials are different from the ones being used in the "
+                        "\nSystem configured GCP Credentials are different from the ones being used in the "
                         "Configuration. Please check with your Systems Administrator on which one to use and make "
                         "changes accordingly."
                         f"\nUsed Project ID: {required_project_id}"
