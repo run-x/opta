@@ -526,7 +526,16 @@ class Layer:
     def verify_cloud_credentials(self) -> None:
         if self.cloud == "aws":
             try:
-                boto3.client("sts").get_caller_identity()
+                aws_caller_identity = boto3.client("sts").get_caller_identity()
+                configured_aws_account_id = aws_caller_identity["Account"]
+                required_aws_account_id = self.root().providers["aws"]["account_id"]
+                if required_aws_account_id != configured_aws_account_id:
+                    raise UserErrors(
+                        "\nSystem configured AWS Credentials are different from the ones being used in the "
+                        "Configuration. Please check with your Systems Administrator on which one to use and make "
+                        "changes accordingly."
+                        f"\nUsed Account ID: {required_aws_account_id}"
+                    )
             except NoCredentialsError:
                 raise UserErrors(
                     "Unable to locate credentials.\n"
@@ -542,7 +551,15 @@ class Layer:
                 )
         if self.cloud == "google":
             try:
-                default()
+                _, configured_project_id = default()
+                required_project_id = self.root().providers["google"]["project"]
+                if required_project_id != configured_project_id:
+                    raise UserErrors(
+                        "\nSystem configured AWS Credentials are different from the ones being used in the "
+                        "Configuration. Please check with your Systems Administrator on which one to use and make "
+                        "changes accordingly."
+                        f"\nUsed Project ID: {required_project_id}"
+                    )
             except DefaultCredentialsError:
                 raise UserErrors(
                     "Google Cloud credentials are not configured properly.\n"
