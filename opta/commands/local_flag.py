@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from shutil import copyfile, rmtree
+from shutil import rmtree
 
 from ruamel import yaml
 
@@ -17,7 +17,17 @@ def _handle_local_flag(config: str, test: bool = False) -> str:
     dir_path = os.path.join(Path.home(), ".opta", "local")
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
-    copyfile("config/localopta.yml", dir_path + "/localopta.yml")
+    with open(os.path.join(dir_path, "localopta.yml"), "w") as fw:
+        yaml.safe_dump(
+            {
+                "name": "localopta",
+                "org_name": "opta",
+                "providers": {"local": {}},
+                "modules": [{"type": "local-base"}],
+            },
+            fw,
+        )
+
     with open(config, "r") as fr:
         y = yaml.round_trip_load(fr, preserve_quotes=True)
     if "environments" not in y:  # This is an environment opta file, so do nothing
