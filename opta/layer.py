@@ -507,7 +507,9 @@ class Layer:
             new_provider_data["allowed_account_ids"] = [aws_account_id]
 
         if provider_name == "azurerm":
-            new_provider_data["features"] = {}
+            new_provider_data["features"] = {
+                "key_vault": {"purge_soft_delete_on_destroy": False}
+            }
 
         # TODO(ankur): Very ugly
         if clean and provider_name == "azurerm":
