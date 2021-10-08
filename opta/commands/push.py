@@ -7,6 +7,7 @@ from botocore.config import Config
 from docker import from_env
 
 from opta.amplitude import amplitude_client
+from opta.core.docker import Docker
 from opta.core.gcp import GCP
 from opta.core.generator import gen_all
 from opta.core.terraform import get_terraform_outputs
@@ -113,12 +114,14 @@ def push_to_docker(
 ) -> Tuple[str, str]:
     image_tag = get_push_tag(local_image, image_tag_override)
     remote_image_name = f"{registry_url}:{image_tag}"
-    nice_run(
-        ["docker", "login", registry_url, "--username", username, "--password-stdin"],
-        input=password.encode(),
-        check=True,
-    )
-    nice_run(["docker", "tag", local_image, remote_image_name], check=True)
+    docker = Docker(username, password, registry_url)
+    docker.tag_image(local_image)
+    # nice_run(
+    #     ["docker", "login", registry_url, "--username", username, "--password-stdin"],
+    #     input=password.encode(),
+    #     check=True,
+    # )
+    # nice_run(["docker", "tag", local_image, remote_image_name], check=True)
     nice_run(["docker", "push", remote_image_name], check=True)
     return get_image_digest(registry_url, image_tag), image_tag
 
