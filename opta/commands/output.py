@@ -21,7 +21,7 @@ from opta.utils import check_opta_file_exists, logger
 def output(config: str, env: Optional[str],) -> None:
     """ Print TF outputs """
 
-    check_opta_file_exists(config)
+    config = check_opta_file_exists(config)
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(
         amplitude_client.VIEW_OUTPUT_EVENT,

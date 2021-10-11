@@ -97,7 +97,7 @@ def apply(
     auto_approve: bool,
     detailed_plan: bool,
 ) -> None:
-    check_opta_file_exists(config)
+    config = check_opta_file_exists(config)
     """Initialize your environment or service to match the config file"""
     _apply(
         config,

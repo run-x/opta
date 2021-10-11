@@ -155,7 +155,7 @@ def is_service_config(config: str) -> bool:
 )
 def push(image: str, config: str, env: Optional[str], tag: Optional[str]) -> None:
 
-    check_opta_file_exists(config)
+    config = check_opta_file_exists(config)
     if not is_service_config(config):
         raise UserErrors(
             fmt_msg(

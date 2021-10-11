@@ -43,7 +43,7 @@ def destroy(
 ) -> None:
     """Destroy all opta resources from the current config"""
 
-    check_opta_file_exists(config)
+    config = check_opta_file_exists(config)
     if local:
         config = _handle_local_flag(config, False)
         _clean_tf_folder()

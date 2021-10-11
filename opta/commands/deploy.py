@@ -57,7 +57,7 @@ def deploy(
 ) -> None:
     """Push your new image to the cloud and deploy it in your environment"""
 
-    check_opta_file_exists(config)
+    config = check_opta_file_exists(config)
     if not is_service_config(config):
         raise UserErrors(
             fmt_msg(

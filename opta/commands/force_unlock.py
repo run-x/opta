@@ -19,7 +19,7 @@ from opta.utils import check_opta_file_exists
 def force_unlock(config: str, env: Optional[str]) -> None:
     """Force Unlocks a stuck lock on the current workspace"""
     tf_flags: List[str] = []
-    check_opta_file_exists(config)
+    config = check_opta_file_exists(config)
     amplitude_client.send_event(amplitude_client.FORCE_UNLOCK_EVENT)
     layer = Layer.load_from_yaml(config, env)
     layer.verify_cloud_credentials()

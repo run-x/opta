@@ -29,7 +29,7 @@ from opta.utils import check_opta_file_exists
 def logs(env: Optional[str], config: str, seconds: Optional[int]) -> None:
     """Get stream of logs from your service"""
 
-    check_opta_file_exists(config)
+    config = check_opta_file_exists(config)
     # Configure kubectl
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(

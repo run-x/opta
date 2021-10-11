@@ -7,8 +7,9 @@ from queue import Queue
 from shutil import which
 from textwrap import dedent
 from time import sleep
-from typing import Any, Dict, Generator, List, Literal, Optional, Tuple
+from typing import Any, Dict, Generator, List, Optional, Tuple
 
+import click
 from ruamel.yaml import YAML
 
 from opta.constants import DEV_VERSION, VERSION
@@ -186,9 +187,9 @@ def exp_backoff(num_tries: int = 3) -> Generator:
         seconds *= seconds
 
 
-def check_opta_file_exists(config_path: str) -> Literal[True]:
+def check_opta_file_exists(config_path: str) -> str:
     if not os.path.exists(config_path):
-        raise UserErrors(
+        logger.info(
             fmt_msg(
                 f"""
             Could not find file: {config_path}. You can fix this in one of the following ways:
@@ -196,7 +197,23 @@ def check_opta_file_exists(config_path: str) -> Literal[True]:
             ~     the `-c` (or `--config`) flag to specify where your opta configuration is.
             ~  2. If you have not created an opta configuration file yet, you can use the `opta init` command
             ~     to create one.
+            ~  3. Enter a valid File Path in the Prompt below.
         """
             )
         )
-    return True
+        prompt_config_path = click.prompt(
+            "Enter a Configuration Path (Empty String will exit)",
+            default="",
+            type=click.STRING,
+        )
+
+        if not prompt_config_path:
+            logger.info("Exiting...")
+            raise sys.exit(0)
+
+        if not os.path.exists(prompt_config_path):
+            raise UserErrors("Invalid Configuration Path provided.")
+
+        config_path = prompt_config_path
+
+    return config_path
