@@ -1,9 +1,12 @@
+import os
+from pathlib import Path
 from typing import Optional
 
 import click
 
 from opta.amplitude import amplitude_client
 from opta.commands.apply import _apply
+from opta.commands.local_flag import _clean_tf_folder, _handle_local_flag
 from opta.commands.push import _push, is_service_config
 from opta.core.terraform import Terraform
 from opta.error_constants import USER_ERROR_TF_LOCK
@@ -38,6 +41,13 @@ from opta.utils import check_opta_file_exists, fmt_msg, logger
     default=False,
     help="Show full terraform plan in detail, not the opta provided summary",
 )
+@click.option(
+    "--local",
+    is_flag=True,
+    default=False,
+    help="""Run the service locally on a local Kubernetes cluster for development and testing,  irrespective of the environment specified inside the opta service yaml file""",
+    hidden=False,
+)
 def deploy(
     image: str,
     config: str,
@@ -45,6 +55,7 @@ def deploy(
     tag: Optional[str],
     auto_approve: bool,
     detailed_plan: bool,
+    local: Optional[bool],
 ) -> None:
     """Push your new image to the cloud and deploy it in your environment"""
 
@@ -61,6 +72,25 @@ def deploy(
             """
             )
         )
+
+    if local:
+        adjusted_config = _handle_local_flag(config, False)
+        if adjusted_config != config:  # Only do this for service opta files
+            config = adjusted_config
+            localopta_envfile = os.path.join(
+                Path.home(), ".opta", "local", "localopta.yml"
+            )
+            _apply(
+                config=localopta_envfile,
+                auto_approve=True,
+                local=False,
+                env="",
+                refresh=True,
+                image_tag="",
+                test=False,
+                detailed_plan=True,
+            )
+            _clean_tf_folder()
 
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(
@@ -87,6 +117,7 @@ def deploy(
             refresh=False,
             image_tag=None,
             test=False,
+            local=local,
             auto_approve=auto_approve,
             stdout_logs=False,
             detailed_plan=detailed_plan,
@@ -98,6 +129,7 @@ def deploy(
         refresh=False,
         image_tag=None,
         test=False,
+        local=local,
         auto_approve=auto_approve,
         image_digest=image_digest,
         detailed_plan=detailed_plan,

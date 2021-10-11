@@ -1,4 +1,4 @@
-halt: true
+halt: false
 environment_module: true
 inputs:
   - name: env_name
@@ -52,7 +52,7 @@ inputs:
   - name: gke_channel
     user_facing: true
     validator: str(required=False)
-    description: The GKE K8s [release channel](https://cloud.google.com/kubernetes-engine/docs/concepts/release-channels) to bind the cluster too. Gives you automatic K8s version management for the lcuster and node pools.
+    description: The GKE K8s [release channel](https://cloud.google.com/kubernetes-engine/docs/concepts/release-channels) to bind the cluster too. Gives you automatic K8s version management for the cluster and node pools.
     default: REGULAR
   - name: preemptible
     user_facing: true
@@ -65,24 +65,6 @@ inputs:
       risk as containers of Opta services will be automatically restarted on surviving nodes. So just make sure to specify
       a minimum of more than 1 containers -- Opta by default attempts to spread them out amongst many nodes.
     default: false
-outputs:
-  - name: k8s_endpoint
-    export: true
-    description: The endpoint to communicate to the kubernetes cluster through.
-  - name: k8s_ca_data
-    export: true
-    description: The certificate authority used by the kubernetes cluster for ssl.
-  - name: k8s_cluster_name
-    export: true
-    description: The name of the kubernetes cluster.
-output_providers:
-  helm:
-    kubernetes:
-      host: "https://${{data.google_container_cluster.k8s.endpoint}}"
-      token: "{k8s_access_token}"
-      cluster_ca_certificate: "${{base64decode({module_source}.k8s_ca_data)}}"
-output_data:
-  google_container_cluster:
-    k8s:
-      name: "${{{module_source}.k8s_cluster_name}}"
-      location: "{region}"
+outputs: []
+output_providers: {}
+output_data: {}

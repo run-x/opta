@@ -1,5 +1,10 @@
 data "google_client_config" "current" {}
 
+data "google_container_cluster" "main" {
+  name     = "opta-${var.layer_name}"
+  location = data.google_client_config.current.region
+}
+
 variable "env_name" {
   description = "Env name"
   type        = string
@@ -22,20 +27,6 @@ variable "gke_channel" {
 
 variable "node_zone_names" {
   type = list(string)
-}
-
-data "google_secret_manager_secret_version" "kms_suffix" {
-  secret = "opta-${var.layer_name}-kms-suffix"
-}
-
-data "google_kms_key_ring" "key_ring" {
-  name     = "opta-${var.env_name}-${data.google_secret_manager_secret_version.kms_suffix.secret_data}"
-  location = data.google_client_config.current.region
-}
-
-data "google_kms_crypto_key" "kms" {
-  key_ring = data.google_kms_key_ring.key_ring.self_link
-  name     = "opta-${var.env_name}-${data.google_secret_manager_secret_version.kms_suffix.secret_data}"
 }
 
 variable "vpc_self_link" {

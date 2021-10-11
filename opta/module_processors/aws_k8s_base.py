@@ -56,15 +56,14 @@ class AwsK8sBaseProcessor(AWSK8sModuleProcessor):
                 "cert_arn"
             ] = f"${{{{module.{aws_dns_module.name}.cert_arn}}}}"
 
-        aws_base_module = None
-        for module in self.layer.modules:
-            if (module.aliased_type or module.type) == "aws-base":
-                aws_base_module = module
-                break
-        if aws_base_module is not None:
-            self.module.data[
-                "s3_log_bucket_name"
-            ] = f"${{{{module.{aws_base_module.name}.s3_log_bucket_name}}}}"
+        aws_base_modules = self.layer.get_module_by_type("aws-base", module_idx)
+        if len(aws_base_modules) == 0:
+            raise UserErrors("Must have the base module in before the k8s-base")
+        aws_base_module = aws_base_modules[0]
+        self.module.data[
+            "s3_log_bucket_name"
+        ] = f"${{{{module.{aws_base_module.name}.s3_log_bucket_name}}}}"
+
         super(AwsK8sBaseProcessor, self).process(module_idx)
 
     def pre_hook(self, module_idx: int) -> None:

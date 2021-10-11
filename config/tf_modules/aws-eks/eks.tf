@@ -1,3 +1,29 @@
+resource "aws_security_group" "eks" {
+  name_prefix = "opta-${var.layer_name}"
+  description = "EKS cluster security group."
+  vpc_id      = var.vpc_id
+
+  tags = {
+    "Name" = "opta-${var.layer_name}-eks_cluster_sg"
+  }
+
+  ingress {
+    description = "allowallfromself"
+    from_port   = 0
+    protocol    = "-1"
+    to_port     = 0
+    self        = true
+  }
+
+  egress {
+    description = "alloutbound"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 resource "aws_eks_cluster" "cluster" {
   name     = "opta-${var.layer_name}"
   role_arn = aws_iam_role.cluster_role.arn
@@ -5,6 +31,7 @@ resource "aws_eks_cluster" "cluster" {
 
   vpc_config {
     subnet_ids              = var.private_subnet_ids
+    security_group_ids      = [aws_security_group.eks.id]
     endpoint_private_access = false # TODO: make this true once we got VPN figured out
     endpoint_public_access  = true  # TODO: make this false once we got VPN figured out
   }
@@ -28,6 +55,9 @@ resource "aws_eks_cluster" "cluster" {
 
   tags = {
     terraform = "true"
+  }
+  lifecycle {
+    ignore_changes = [vpc_config[0].security_group_ids]
   }
 }
 

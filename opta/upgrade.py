@@ -48,7 +48,5 @@ def check_version_upgrade() -> None:
                 f"You have {VERSION} installed. Latest version is {latest_version}.\n"
                 f"Upgrade instructions are available at {UPGRADE_INSTRUCTIONS_URL}."
             )
-        else:
-            logger.info("Version check: You are running the latest version of opta.")
     except Exception as e:
         logger.debug(f"Semver check failed with error {e}")

@@ -1,7 +1,8 @@
 resource "null_resource" "local-base" {
 
   provisioner "local-exec" {
-    command = "bash -c config/tf_modules/local-base/install_software.sh"
+    working_dir = path.module
+    command     = "bash ./install_software.sh"
   }
   provisioner "local-exec" {
     when    = destroy
@@ -21,10 +22,11 @@ resource "null_resource" "local-base" {
 
 resource "null_resource" "k8s-installer" {
   depends_on = [
-    "null_resource.local-base"
+    null_resource.local-base
   ]
   provisioner "local-exec" {
-    command = "bash -c config/tf_modules/local-base/install-cluster.sh"
+    working_dir = path.module
+    command     = "bash -c ./install-cluster.sh"
   }
   provisioner "local-exec" {
     when    = destroy
@@ -40,14 +42,16 @@ resource "null_resource" "k8s-installer" {
 
 resource "null_resource" "kind-installer" {
   depends_on = [
-    "null_resource.k8s-installer"
+    null_resource.k8s-installer
   ]
   provisioner "local-exec" {
-
-    command = <<EOT
+    working_dir = path.module
+    command     = <<EOT
       echo "Installing Nginx ingress"
       kubectl config use-context kind-opta-local-cluster
-      kubectl  apply -f config/tf_modules/local-base/deploy.yaml
+      kubectl  apply -f deploy.yaml
+      echo "Waiting 20s for nginx ingress to stabilize"
+      sleep 20 # Wait for nginx to be ready
     EOT
   }
 }

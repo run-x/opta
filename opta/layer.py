@@ -13,7 +13,6 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, TypedDict
 
 import boto3
 import click
-import git
 import google.auth.transport.requests
 from azure.core.exceptions import ClientAuthenticationError
 from azure.identity import DefaultAzureCredential
@@ -148,7 +147,7 @@ class Layer:
 
     @classmethod
     def load_from_yaml(
-        cls, config: str, env: Optional[str], is_parent: bool = False
+        cls, config: str, env: Optional[str], is_parent: bool = False, local: bool = False
     ) -> Layer:
         t = None
         if config.startswith("git@"):
@@ -166,6 +165,13 @@ class Layer:
                 branch = res.get("ref", branch)
             t = tempfile.mkdtemp()
             # Clone into temporary dir
+            try:
+                import git
+            except ImportError:
+                raise UserErrors(
+                    "Please install git locally to be able to load environments from git"
+                )
+
             git.Repo.clone_from(git_url, t, branch=branch, depth=1)
             config_path = os.path.join(t, file_path)
             with open(config_path) as f:
@@ -184,6 +190,8 @@ class Layer:
         conf["path"] = config
 
         layer = cls.load_from_dict(conf, env, is_parent)
+        if local:
+            pass
         validate_yaml(config_path, layer.cloud)
         if t is not None:
             shutil.rmtree(t)
@@ -332,11 +340,9 @@ class Layer:
                     ),
                     ret,
                 )
-            except Exception:
-
-                import pdb
-
-                pdb.set_trace()
+            except Exception as e:
+                # I dunno why we were swallowing this
+                raise e
             if module.desc.get("halt"):
                 previous_module_reference = [f"module.{module.name}"]
 
@@ -501,7 +507,9 @@ class Layer:
             new_provider_data["allowed_account_ids"] = [aws_account_id]
 
         if provider_name == "azurerm":
-            new_provider_data["features"] = {}
+            new_provider_data["features"] = {
+                "key_vault": {"purge_soft_delete_on_destroy": False}
+            }
 
         # TODO(ankur): Very ugly
         if clean and provider_name == "azurerm":

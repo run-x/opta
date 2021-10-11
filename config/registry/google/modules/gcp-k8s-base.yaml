@@ -25,6 +25,10 @@ inputs:
     user_facing: false
     description: Domain to setup the ingress with
     default: ""
+  - name: delegated
+    user_facing: false
+    description: Dns delegation completed
+    default: false
   - name: cert_self_link
     user_facing: false
     description: Cert self link

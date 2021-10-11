@@ -42,7 +42,7 @@ class RunxProcessor(ModuleProcessor):
         super(RunxProcessor, self).__init__(module, layer)
 
     def process(self, module_idx: int) -> None:
-        logger.info("Checking for runx api key secret")
+        logger.debug("Checking for runx api key secret")
         current_api_key = self.fetch_secret()
         if current_api_key is None:
             self.set_secret()
@@ -157,7 +157,7 @@ class RunxProcessor(ModuleProcessor):
         }
         if not is_environment:
             body["environment_name"] = self.layer.parent.name  # type: ignore
-        logger.info("Sending layer deployment data over to opta backend")
+        logger.debug("Sending layer deployment data over to opta backend")
         resp = requests.post(
             f"https://{OPTA_DOMAIN}{url_path}", json=body, headers={"opta": jwt}
         )

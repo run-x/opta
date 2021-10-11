@@ -96,6 +96,14 @@ jobs:
           echo "This was the found secret value: ${secret_value}"
           [[ "$secret_value" =~ .*"foo".* ]] || exit 1
 
+      - name: Set stateful data
+        env:
+          OPTA_DISABLE_REPORTING: true
+        run: |
+          export PARENT_DOMAIN=`/home/runner/.opta/opta output --env ci --config test-service/opta.yml | jq -r '."parent.domain"'`
+          export HOST=`/home/runner/.opta/opta output --env ci --config test-service/opta.yml | jq -r '.load_balancer_raw_dns'`
+          curl -X POST -L --header "Host: test-service.${PARENT_DOMAIN}" --fail ${HOST}/stateful
+
       - name: Install Version 2 binary from Opta GitHub releases
         run: VERSION=${{ github.event.inputs.version2 }} /bin/bash -c "$(curl -fsSL https://docs.opta.dev/install.sh)"
 
@@ -119,6 +127,14 @@ jobs:
           FAKE_SECRET | tail -1)
           echo "This was the found secret value: ${secret_value}"
           [[ "$secret_value" =~ .*"foo".* ]] || exit 1
+
+      - name: Check stateful data
+        env:
+          OPTA_DISABLE_REPORTING: true
+        run: |
+          export PARENT_DOMAIN=`/home/runner/.opta/opta output --env ci --config test-service/opta.yml | jq -r '."parent.domain"'`
+          export HOST=`/home/runner/.opta/opta output --env ci --config test-service/opta.yml | jq -r '.load_balancer_raw_dns'`
+          curl -L --header "Host: test-service.${PARENT_DOMAIN}" --fail ${HOST}/stateful
 
       - name: Destroy environment (and test service)
         run: |

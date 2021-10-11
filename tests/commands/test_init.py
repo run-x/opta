@@ -195,8 +195,7 @@ class TestInitService:
             http: 9000
         image: AUTO
         env_vars:
-        - name: APPENV
-            value: '{env}'
+          APPENV: '{env}'
         public_uri: '{parent.domain}'
         resource_request:
             cpu: 100

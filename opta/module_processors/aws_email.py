@@ -54,7 +54,7 @@ class AwsEmailProcessor(ModuleProcessor):
         ses_account = sesv2_client.get_account()
 
         if ses_account["ProductionAccessEnabled"]:
-            logger.info("Alrighty, looks like your account is out of SES sandbox")
+            logger.debug("Alrighty, looks like your account is out of SES sandbox")
             return
         elif "Details" in ses_account:
             if ses_account["Details"]["ReviewDetails"]["Status"] == "PENDING":

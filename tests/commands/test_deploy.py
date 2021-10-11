@@ -52,6 +52,7 @@ def test_deploy_basic(mocker: MockFixture) -> None:
         auto_approve=False,
         image_digest="local_digest",
         detailed_plan=False,
+        local=False,
     )
     mock_terraform_outputs.assert_called_once_with(mocker.ANY)
 
@@ -99,6 +100,7 @@ def test_deploy_auto_approve(mocker: MockFixture) -> None:
         auto_approve=True,
         image_digest="local_digest",
         detailed_plan=False,
+        local=False,
     )
     mock_terraform_outputs.assert_called_once_with(mocker.ANY)
 
@@ -157,6 +159,7 @@ def test_deploy_all_flags(mocker: MockFixture) -> None:
         auto_approve=False,
         image_digest="local_digest",
         detailed_plan=False,
+        local=False,
     )
 
 
@@ -215,6 +218,7 @@ def test_deploy_ecr_apply(mocker: MockFixture) -> None:
                 auto_approve=False,
                 stdout_logs=False,
                 detailed_plan=False,
+                local=False,
             ),
             mocker.call(
                 config="app/opta.yml",
@@ -225,6 +229,7 @@ def test_deploy_ecr_apply(mocker: MockFixture) -> None:
                 auto_approve=False,
                 image_digest="local_digest",
                 detailed_plan=False,
+                local=False,
             ),
         ]
     )
