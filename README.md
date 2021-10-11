@@ -78,7 +78,7 @@ This will set up the base infrastructure (like network and cluster) that will be
 > (opta has a destroy command so it should be easy :))!
 
 Create this file and name it staging.yml
-```
+```yaml
 name: staging
 org_name: <something unique>
 providers:
@@ -96,7 +96,7 @@ modules:
 In this example we are using the popular [httbin](https://httpbin.org/) container as our application
 
 Create this file and name it opta.yml:
-```
+```yaml
 name: hello-world
 environments:
   - name: staging

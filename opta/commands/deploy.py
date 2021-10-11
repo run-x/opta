@@ -1,3 +1,5 @@
+import os
+from pathlib import Path
 from typing import Optional
 
 import click
@@ -75,8 +77,11 @@ def deploy(
         adjusted_config = _handle_local_flag(config, False)
         if adjusted_config != config:  # Only do this for service opta files
             config = adjusted_config
+            localopta_envfile = os.path.join(
+                Path.home(), ".opta", "local", "localopta.yml"
+            )
             _apply(
-                config="config/localopta.yml",
+                config=localopta_envfile,
                 auto_approve=True,
                 local=False,
                 env="",
