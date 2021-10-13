@@ -197,7 +197,7 @@ def check_opta_file_exists(config_path: str) -> str:
             ~     the `-c` (or `--config`) flag to specify where your opta configuration is.
             ~  2. If you have not created an opta configuration file yet, you can use the `opta init` command
             ~     to create one.
-            ~  3. Enter a valid File Path in the Prompt below.
+            ~  3. Enter a valid File Path in the Prompt below. When using absolute paths, please do not use `~`.
         """
             )
         )
@@ -205,6 +205,7 @@ def check_opta_file_exists(config_path: str) -> str:
             "Enter a Configuration Path (Empty String will exit)",
             default="",
             type=click.STRING,
+            show_default=False,
         )
 
         if not prompt_config_path:

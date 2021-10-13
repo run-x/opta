@@ -60,6 +60,7 @@ def test_check_opta_file_exists_file_does_not_exists_user_input(
         "Enter a Configuration Path (Empty String will exit)",
         default="",
         type=click.STRING,
+        show_default=False,
     )
     mock_system_exit.assert_not_called()
 
@@ -85,6 +86,7 @@ def test_check_opta_file_exists_file_does_not_exists_no_user_input(
         "Enter a Configuration Path (Empty String will exit)",
         default="",
         type=click.STRING,
+        show_default=False,
     )
     mock_system_exit.assert_called_once_with(0)
 
@@ -112,5 +114,6 @@ def test_check_opta_file_exists_file_does_not_exists_invalid_user_input(
         "Enter a Configuration Path (Empty String will exit)",
         default="",
         type=click.STRING,
+        show_default=False,
     )
     mock_system_exit.assert_not_called()
