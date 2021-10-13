@@ -209,9 +209,8 @@ def check_opta_file_exists(config_path: str) -> str:
 
         if not prompt_config_path:
             logger.info("Exiting...")
-            raise sys.exit(0)
-
-        if not os.path.exists(prompt_config_path):
+            sys.exit(0)
+        elif not os.path.exists(prompt_config_path):
             raise UserErrors("Invalid Configuration Path provided.")
 
         config_path = prompt_config_path

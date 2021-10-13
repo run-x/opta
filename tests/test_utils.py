@@ -1,6 +1,9 @@
+import click
+import pytest
 from pytest_mock import MockFixture
 
-from opta.utils import exp_backoff
+from opta.exceptions import UserErrors
+from opta.utils import check_opta_file_exists, exp_backoff
 
 
 def test_exp_backoff(mocker: MockFixture) -> None:
@@ -18,3 +21,96 @@ def test_exp_backoff(mocker: MockFixture) -> None:
     for _ in exp_backoff(num_tries=retries):
         break
     assert mocked_sleep.call_count == 0
+
+
+def test_check_opta_file_exists_file_exists(mocker: MockFixture) -> None:
+    mock_config_path = "mock_config_path"
+    mock_os_path_exists = mocker.patch("opta.utils.os.path.exists", return_value=True)
+    mock_click_prompt = mocker.patch("opta.utils.click.prompt")
+    mock_system_exit = mocker.patch("opta.utils.sys.exit")
+
+    config_path = check_opta_file_exists(mock_config_path)
+
+    assert config_path == mock_config_path
+    mock_os_path_exists.assert_called_once_with(mock_config_path)
+    mock_click_prompt.assert_not_called()
+    mock_system_exit.assert_not_called()
+
+
+def test_check_opta_file_exists_file_does_not_exists_user_input(
+    mocker: MockFixture,
+) -> None:
+    mock_config_path = "mock_config_path"
+    mock_user_config_path = "mock_user_config_path"
+    mock_os_path_exists = mocker.patch(
+        "opta.utils.os.path.exists", side_effect=[False, True]
+    )
+    mock_click_prompt = mocker.patch(
+        "opta.utils.click.prompt", return_value=mock_user_config_path
+    )
+    mock_system_exit = mocker.patch("opta.utils.sys.exit")
+
+    config_path = check_opta_file_exists(mock_config_path)
+
+    assert config_path == mock_user_config_path
+    mock_os_path_exists.assert_has_calls(
+        [mocker.call(mock_config_path), mocker.call(mock_user_config_path)]
+    )
+    mock_click_prompt.assert_called_once_with(
+        "Enter a Configuration Path (Empty String will exit)",
+        default="",
+        type=click.STRING,
+    )
+    mock_system_exit.assert_not_called()
+
+
+def test_check_opta_file_exists_file_does_not_exists_no_user_input(
+    mocker: MockFixture,
+) -> None:
+    mock_config_path = "mock_config_path"
+    mock_no_user_config_path = ""
+    mock_os_path_exists = mocker.patch(
+        "opta.utils.os.path.exists", side_effect=[False, False]
+    )
+    mock_click_prompt = mocker.patch(
+        "opta.utils.click.prompt", return_value=mock_no_user_config_path
+    )
+    mock_system_exit = mocker.patch("opta.utils.sys.exit")
+
+    config_path = check_opta_file_exists(mock_config_path)
+
+    assert config_path == mock_no_user_config_path
+    mock_os_path_exists.assert_called_once_with(mock_config_path)
+    mock_click_prompt.assert_called_once_with(
+        "Enter a Configuration Path (Empty String will exit)",
+        default="",
+        type=click.STRING,
+    )
+    mock_system_exit.assert_called_once_with(0)
+
+
+def test_check_opta_file_exists_file_does_not_exists_invalid_user_input(
+    mocker: MockFixture,
+) -> None:
+    mock_config_path = "mock_config_path"
+    mock_invalid_user_config_path = "mock_invalid_user_config_path"
+    mock_os_path_exists = mocker.patch(
+        "opta.utils.os.path.exists", side_effect=[False, False]
+    )
+    mock_click_prompt = mocker.patch(
+        "opta.utils.click.prompt", return_value=mock_invalid_user_config_path
+    )
+    mock_system_exit = mocker.patch("opta.utils.sys.exit")
+
+    with pytest.raises(UserErrors):
+        _ = check_opta_file_exists(mock_config_path)
+
+    mock_os_path_exists.assert_has_calls(
+        [mocker.call(mock_config_path), mocker.call(mock_invalid_user_config_path)]
+    )
+    mock_click_prompt.assert_called_once_with(
+        "Enter a Configuration Path (Empty String will exit)",
+        default="",
+        type=click.STRING,
+    )
+    mock_system_exit.assert_not_called()
