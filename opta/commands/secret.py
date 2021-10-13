@@ -33,7 +33,7 @@ def secret() -> None:
 def view(secret: str, env: Optional[str], config: str) -> None:
     """View a given secret of a k8s service"""
 
-    check_opta_file_exists(config)
+    config = check_opta_file_exists(config)
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(
         amplitude_client.VIEW_SECRET_EVENT,

@@ -22,7 +22,7 @@ from opta.utils import check_opta_file_exists, column_print, deep_merge, is_tool
 def inspect(config: str, env: Optional[str]) -> None:
     """ Displays important resources and AWS/Datadog links to them """
 
-    check_opta_file_exists(config)
+    config = check_opta_file_exists(config)
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(
         amplitude_client.INSPECT_EVENT,

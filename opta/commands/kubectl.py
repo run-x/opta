@@ -19,7 +19,7 @@ from opta.utils import check_opta_file_exists
 def configure_kubectl(config: str, env: Optional[str]) -> None:
     """ Configure the kubectl CLI tool for the given cluster """
 
-    check_opta_file_exists(config)
+    config = check_opta_file_exists(config)
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(
         amplitude_client.CONFIGURE_KUBECTL_EVENT,

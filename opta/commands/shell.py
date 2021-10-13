@@ -32,7 +32,7 @@ from opta.utils import check_opta_file_exists
 def shell(env: Optional[str], config: str, type: str) -> None:
     """Get a bash shell into one of the pods in your service"""
 
-    check_opta_file_exists(config)
+    config = check_opta_file_exists(config)
     # Configure kubectl
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(
