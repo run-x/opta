@@ -1,8 +1,7 @@
 name: Release tests
 
-on:
-  pull_request:
-    branches: [main]
+on: workflow_dispatch
+
 
 jobs:
   compare-release-w-latest:
