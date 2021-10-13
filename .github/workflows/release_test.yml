@@ -7,6 +7,8 @@ jobs:
   compare-release-w-latest:
     runs-on: ubuntu-20.04
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
       - name: Pin terraform version
         uses: hashicorp/setup-terraform@v1
         with:
