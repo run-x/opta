@@ -192,12 +192,8 @@ def check_opta_file_exists(config_path: str) -> str:
         logger.info(
             fmt_msg(
                 f"""
-            Could not find file: {config_path}. You can fix this in one of the following ways:
-            ~  1. If your file is named something other than `opta.yml`, make sure you are using
-            ~     the `-c` (or `--config`) flag to specify where your opta configuration is.
-            ~  2. If you have not created an opta configuration file yet, you can use the `opta init` command
-            ~     to create one.
-            ~  3. Enter a valid File Path in the Prompt below. When using absolute paths, please do not use `~`.
+            Could not find file: {config_path}. Please provide the path to a valid opta config file.
+            When using absolute paths, please do not use `~`.
         """
             )
         )
