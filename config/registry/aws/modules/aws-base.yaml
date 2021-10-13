@@ -56,6 +56,9 @@ outputs:
   - name: s3_log_bucket_name
     export: true
     description: The name of the default logging bucket provisioned by opta
+  - name: "public_nat_ips"
+    export: true
+    description: Public static IP of nat gateway(s)
 output_providers: { }
 output_data:
   aws_caller_identity:

@@ -21,3 +21,7 @@ output "private_subnet_ids" {
 output "public_subnets_ids" {
   value = aws_subnet.public_subnets.*.id
 }
+
+output "public_nat_ips" {
+  value = aws_eip.nat_eips.*.public_ip
+}

@@ -8,6 +8,7 @@ from opta.core.kubernetes import (
 from opta.exceptions import UserErrors
 from opta.module_processors.base import K8sServiceModuleProcessor, LocalK8sModuleProcessor
 
+from opta.module_processors.linker_helper import LinkerHelper
 if TYPE_CHECKING:
     from opta.layer import Layer
     from opta.module import Module
@@ -75,6 +76,16 @@ class LocalK8sServiceProcessor(LocalK8sModuleProcessor, K8sServiceModuleProcesso
                 self.handle_mongo_link(module, link_permissions)
             elif module_type == "local-mysql":
                 self.handle_mysql_link(module, link_permissions)
+            elif module_type == "atlas-mongo":
+                LinkerHelper.handle_link(
+                    module=self.module, 
+                    linked_module=module, 
+                    link_permissions=link_permissions, 
+                    required_vars=[
+                        "db_password",
+                        "db_user",
+                        "mongo_atlas_connection_string"]
+                    )
             else:
                 raise Exception(
                     f"Unsupported module type for k8s service link: {module_type}"

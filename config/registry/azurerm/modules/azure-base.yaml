@@ -44,5 +44,8 @@ outputs:
   - name: acr_login_url
     export: true
     description: The login url of the Azure container registry.
+  - name: "public_nat_ips"
+    export: true
+    description: Public static IP of nat gateway(s)
 output_providers: { }
 output_data: { }

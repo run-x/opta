@@ -18,6 +18,11 @@ outputs:
   - name: k8s_cluster_name
     export: true
     description: The name of the kubernetes cluster.
+  - name: "public_nat_ips"
+    export: true
+    description: Public static IP of nat gateway(s)
+
+
 
 output_providers: { }
 output_data: { }
