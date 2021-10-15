@@ -30,7 +30,7 @@ from opta.upgrade import check_version_upgrade
 from opta.utils import dd_handler, dd_listener, logger
 
 
-@click.group(cls=DYMGroup)
+@click.group(cls=DYMGroup, context_settings = dict(help_option_names=['-h', '--help']))
 def cli() -> None:
     """Welcome to opta, runx's cli!"""
     pass

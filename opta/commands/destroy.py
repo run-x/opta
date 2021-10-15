@@ -41,7 +41,14 @@ from opta.utils import check_opta_file_exists, fmt_msg, logger
 def destroy(
     config: str, env: Optional[str], auto_approve: bool, local: Optional[bool]
 ) -> None:
-    """Destroy all opta resources from the current config"""
+    """Destroy all opta resources from the current config
+
+    To destroy an environment, you have to first destroy all the services first.
+    
+    Examples:
+
+    opta destroy -c my_config.yaml --auto-approve
+    """
 
     config = check_opta_file_exists(config)
     if local:

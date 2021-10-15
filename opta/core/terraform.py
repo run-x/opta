@@ -742,7 +742,7 @@ class Terraform:
                     raise UserErrors(
                         f"Got a 400 response when trying to enable the google {service_name} service with the following error reason: {e._get_reason()}"
                     )
-            logger.info(f"Google service {service_name} activated")
+            logger.debug(f"Google service {service_name} activated")
         if new_api_enabled:
             logger.info(
                 "New api has been enabled, waiting 120 seconds before progressing"
