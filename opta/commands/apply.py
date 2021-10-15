@@ -100,7 +100,7 @@ def apply(
     detailed_plan: bool,
 ) -> None:
     """Initialize your environment or service to match the config file
-    
+
     Examples:
 
     opta apply -c my_config.yaml --auto-approve

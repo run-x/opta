@@ -192,7 +192,7 @@ class TestInitService:
         - type: k8s-service
         name: app
         port:
-            http: 9000
+            http: 80
         image: AUTO
         env_vars:
           APPENV: '{env}'

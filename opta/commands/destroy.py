@@ -44,7 +44,7 @@ def destroy(
     """Destroy all opta resources from the current config
 
     To destroy an environment, you have to first destroy all the services first.
-    
+
     Examples:
 
     opta destroy -c my_config.yaml --auto-approve

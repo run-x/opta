@@ -18,9 +18,9 @@ from opta.utils import check_opta_file_exists
 )
 def force_unlock(config: str, env: Optional[str]) -> None:
     """Force Unlocks a stuck lock on the current workspace
-    
+
     Examples:
-    
+
     opta force-unlock -c my_config.yaml -e prod.yaml
     """
     tf_flags: List[str] = []

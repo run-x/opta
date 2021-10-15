@@ -58,9 +58,9 @@ def deploy(
     local: Optional[bool],
 ) -> None:
     """Push your new image to the cloud and deploy it in your environment
-    
+
     You can build your container image locally and then pass it with the -i flag
-    
+
     Examples:
 
     opta deploy -c my_config.yaml -i my_container:latest --auto-approve
@@ -68,7 +68,7 @@ def deploy(
     opta deploy -c my_config.yaml -i my_container:latest -e prod
 
     opta deploy -c my_config.yaml -i my_container:latest --local
-    
+
     """
 
     config = check_opta_file_exists(config)
