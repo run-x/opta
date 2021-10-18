@@ -12,9 +12,6 @@ yaml = YAML(
 init_template_path = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), "config", "init_templates"
 )
-debugger_path = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)), "config", "debugger.yaml"
-)
 version_path = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), "config", "version.txt"
 )
@@ -25,7 +22,6 @@ tf_modules_path = os.path.join(
 one_time_run = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".first_time_run")
 
 REGISTRY = make_registry_dict()
-DEBUG_TREE = yaml.load(open(debugger_path))
 VERSION = open(version_path).read().strip()
 DEV_VERSION = "dev"
 
