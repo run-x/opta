@@ -532,9 +532,9 @@ class Layer:
                 if required_aws_account_id != configured_aws_account_id:
                     raise UserErrors(
                         "\nSystem configured AWS Credentials are different from the ones being used in the "
-                        "Configuration. Please check with your Systems Administrator on which one to use and make "
-                        "changes accordingly."
-                        f"\nUsed Account ID: {required_aws_account_id}"
+                        f"Configuration. \nSystem is configured with credentials for account "
+                        f"{configured_aws_account_id} but the config requires the credentials for "
+                        f"{required_aws_account_id}."
                     )
             except NoCredentialsError:
                 raise UserErrors(
@@ -556,9 +556,9 @@ class Layer:
                 if required_project_id != configured_project_id:
                     raise UserErrors(
                         "\nSystem configured GCP Credentials are different from the ones being used in the "
-                        "Configuration. Please check with your Systems Administrator on which one to use and make "
-                        "changes accordingly."
-                        f"\nUsed Project ID: {required_project_id}"
+                        "Configuration. \nSystem is configured with credentials for account "
+                        f"{configured_project_id} but the config requires the credentials for "
+                        f"{required_project_id}."
                     )
             except DefaultCredentialsError:
                 raise UserErrors(
