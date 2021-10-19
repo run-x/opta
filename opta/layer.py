@@ -9,7 +9,7 @@ from datetime import datetime
 from os import path
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, TypedDict
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Type, TypedDict
 
 import boto3
 import click
@@ -195,6 +195,8 @@ class Layer:
         validate_yaml(config_path, layer.cloud)
         if t is not None:
             shutil.rmtree(t)
+
+        cls.validate_layer(layer)
         return layer
 
     def structured_config(self) -> StructuredConfig:
@@ -281,6 +283,19 @@ class Layer:
         return cls(
             name, org_name, providers, modules_data, path, original_spec=original_spec
         )
+
+    @classmethod
+    def validate_layer(cls, layer: "Layer") -> None:
+        # Check for Uniqueness of Modules
+        unique_modules: Set[str] = set()
+        for module in layer.modules:
+            if module.desc.get("is_unique", False) and unique_modules.__contains__(
+                module.type
+            ):
+                raise UserErrors(
+                    f"Module Type: '{module.type}' used twice in the configuration. Please check and update as required."
+                )
+            unique_modules.add(module.type)
 
     @staticmethod
     def valid_name(name: str) -> bool:
