@@ -12,7 +12,7 @@ data "aws_kms_key" "main" {
 }
 
 resource "aws_docdb_cluster_instance" "cluster_instances" {
-  count                      = 1
+  count                      = var.instance_count
   identifier                 = "opta-${var.layer_name}-${var.module_name}-${count.index}"
   cluster_identifier         = aws_docdb_cluster.cluster.id
   instance_class             = var.instance_class
