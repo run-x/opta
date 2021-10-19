@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 
+from opta.exceptions import UserErrors
 from opta.module_processors.base import ModuleProcessor
 
 if TYPE_CHECKING:
@@ -8,6 +9,9 @@ if TYPE_CHECKING:
 
 
 class AwsDocumentDbProcessor(ModuleProcessor):
+    MIN_ALLOWED = 1
+    MAX_ALLOWED = 16
+
     def __init__(self, module: "Module", layer: "Layer"):
         if (module.aliased_type or module.type) != "aws-documentdb":
             raise Exception(
@@ -17,5 +21,10 @@ class AwsDocumentDbProcessor(ModuleProcessor):
 
     def process(self, module_idx: int) -> None:
         if self.module.data.__contains__("instance_count"):
+            instance_count = self.module.data.get("instance_count")
+            if self.MIN_ALLOWED > instance_count or self.MAX_ALLOWED < instance_count:
+                raise UserErrors(
+                    f"AWS allows Document DB Instaces only between {self.MIN_ALLOWED} and {self.MAX_ALLOWED}"
+                )
             self.module.data["instance_count"] = self.module.data.get("instance_count")
         super(AwsDocumentDbProcessor, self).process(module_idx)
