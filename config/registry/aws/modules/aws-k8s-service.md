@@ -82,6 +82,9 @@ modules:
 ```
 Under the hood, an AWS EBS volume is being created to house your data for each coexisting server container of your app.
 
-_NOTE_ because of the nature of these volumes, they will not be cleaned up automatically unless during an environment 
+_WARNING_ Switching between having the persistent_storage field set or not will lead to some minor downtime as the
+underlying resource kind is being switched.
+
+_NOTE_ because of the nature of these volumes, they will not be cleaned up automatically unless during a service 
 destruction. If you wish to release the EBS volumes for whatever reason you will need to manually do so by deleting
 the kubernetes persistent volume claims.
