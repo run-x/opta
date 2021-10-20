@@ -11,5 +11,8 @@ spec:
       targetPort: main
       protocol: TCP
       name: main
+  {{- if ne (len .Values.persistentStorage) 0 }}
+  clusterIP: None
+  {{- end }}
   selector:
     {{- include "k8s-service.selectorLabels" . | nindent 4 }}
