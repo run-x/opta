@@ -12,6 +12,7 @@ linkSecrets: []
 manualSecrets: []
 port: {}
 keepPathPrefix: false
+persistentStorage: []
 
 serviceAccount:
   # The name of the service account to use.

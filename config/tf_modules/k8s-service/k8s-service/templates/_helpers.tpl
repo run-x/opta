@@ -63,6 +63,14 @@ opta.dev/environment-name: {{ .Values.environmentName }}
 {{- end }}
 {{/*Service name*/}}
 {{- define "k8s-service.serviceName" -}}
+{{- if eq (len .Values.persistentStorage) 0 }}
+{{- .Values.moduleName }}
+{{- else }}
+{{- .Values.moduleName }}-headless
+{{- end }}
+{{- end }}
+{{/*Service Account name*/}}
+{{- define "k8s-service.serviceAccountName" -}}
 {{- .Values.moduleName }}
 {{- end }}
 

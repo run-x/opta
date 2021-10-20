@@ -156,3 +156,8 @@ variable "keep_path_prefix" {
   type    = bool
   default = false
 }
+
+variable "persistent_storage" {
+  type    = list(map(string))
+  default = []
+}
