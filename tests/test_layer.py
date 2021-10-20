@@ -138,6 +138,10 @@ class TestLayer:
         layer.PROCESSOR_DICT["aws-sqs"] = mocked_aws_sqs_processor
         mocked_runx_processor = mocker.patch("opta.layer.RunxProcessor")
         layer.PROCESSOR_DICT["runx"] = mocked_runx_processor
+        mocked_aws_documentdb_processor = mocker.patch(
+            "opta.layer.AwsDocumentDbProcessor"
+        )
+        layer.PROCESSOR_DICT["aws-documentdb"] = mocked_aws_documentdb_processor
         mocked_base_processor = mocker.patch("opta.layer.ModuleProcessor")
 
         assert layer.name == "dummy-config-1"
@@ -155,6 +159,20 @@ class TestLayer:
                 mocker.call().post_hook(13, None),
             ]
         )
+
+        mocked_aws_documentdb_processor.assert_has_calls(
+            [
+                mocker.call(mocker.ANY, layer),
+                mocker.call().pre_hook(13),
+                mocker.call(mocker.ANY, layer),
+                mocker.call().pre_hook(13),
+                mocker.call(mocker.ANY, layer),
+                mocker.call().post_hook(13, None),
+                mocker.call(mocker.ANY, layer),
+                mocker.call().post_hook(13, None),
+            ]
+        )
+
         mocked_base_processor.assert_has_calls(
             [
                 mocker.call(mocker.ANY, layer),
@@ -165,14 +183,6 @@ class TestLayer:
                 mocker.call().pre_hook(13),
                 mocker.call(mocker.ANY, layer),
                 mocker.call().pre_hook(13),
-                mocker.call(mocker.ANY, layer),
-                mocker.call().pre_hook(13),
-                mocker.call(mocker.ANY, layer),
-                mocker.call().pre_hook(13),
-                mocker.call(mocker.ANY, layer),
-                mocker.call().post_hook(13, None),
-                mocker.call(mocker.ANY, layer),
-                mocker.call().post_hook(13, None),
                 mocker.call(mocker.ANY, layer),
                 mocker.call().post_hook(13, None),
                 mocker.call(mocker.ANY, layer),

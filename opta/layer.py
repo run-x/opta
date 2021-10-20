@@ -28,6 +28,7 @@ from opta.core.validator import validate_yaml
 from opta.exceptions import UserErrors
 from opta.module import Module
 from opta.module_processors.aws_dns import AwsDnsProcessor
+from opta.module_processors.aws_document_db import AwsDocumentDbProcessor
 from opta.module_processors.aws_eks import AwsEksProcessor
 from opta.module_processors.aws_email import AwsEmailProcessor
 from opta.module_processors.aws_iam_role import AwsIamRoleProcessor
@@ -71,6 +72,7 @@ class Layer:
         "gcp-k8s-service": GcpK8sServiceProcessor,
         "gcp-gke": GcpGkeProcessor,
         "aws-dns": AwsDnsProcessor,
+        "aws-documentdb": AwsDocumentDbProcessor,
         "runx": RunxProcessor,
         "helm-chart": HelmChartProcessor,
         "aws-iam-role": AwsIamRoleProcessor,
