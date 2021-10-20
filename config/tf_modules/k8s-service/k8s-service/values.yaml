@@ -1,8 +1,7 @@
 nameOverride: ""
 fullnameOverride: ""
 uriComponents: []
-iamRoleArn: "placeholder"
-googleServiceAccount: "placeholder"
+iamRoleArn: ""
 layerName: ""
 moduleName: ""
 environmentName: ""
@@ -14,6 +13,7 @@ manualSecrets: []
 port: {}
 keepPathPrefix: false
 persistentStorage: []
+
 serviceAccount:
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template

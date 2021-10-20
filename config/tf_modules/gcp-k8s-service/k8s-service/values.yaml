@@ -1,8 +1,7 @@
 nameOverride: ""
 fullnameOverride: ""
 uriComponents: []
-iamRoleArn: "placeholder"
-googleServiceAccount: "placeholder"
+googleServiceAccount: ""
 layerName: ""
 moduleName: ""
 environmentName: ""

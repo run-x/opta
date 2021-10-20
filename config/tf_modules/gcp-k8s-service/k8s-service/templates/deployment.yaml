@@ -1,4 +1,4 @@
-{{- if ne (len .Values.persistentStorage) 0 }}
+{{- if eq (len .Values.persistentStorage) 0 }}
 {{- if ne ((keys .Values.port) | len) 1 }}
   {{- fail "Port must specify either a single tcp port (for websockets) or a single http port" }}
 {{- end }}
@@ -7,30 +7,18 @@
 {{- end }}
 {{- if .Values.deployPods }}
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
   name: {{ include "k8s-service.fullname" . }}
   labels:
     tags.datadoghq.com/service: {{ include "k8s-service.serviceName" . }}-{{ include "k8s-service.namespaceName" . }}
     tags.datadoghq.com/version: {{ .Values.version | quote }}
-  {{- include "k8s-service.labels" . | nindent 4 }}
+    {{- include "k8s-service.labels" . | nindent 4 }}
   namespace: {{ include "k8s-service.namespaceName" . }}
 spec:
   selector:
     matchLabels:
-  {{- include "k8s-service.selectorLabels" . | nindent 6 }}
-  podManagementPolicy: "Parallel"
-  volumeClaimTemplates:
-    {{ range $index, $value := .Values.persistentStorage }}
-    - metadata:
-        name: opta-persistent-{{ $index }}
-      spec:
-        accessModes: [ "ReadWriteOnce" ]
-        resources:
-          requests:
-            storage: {{ $value.size }}Gi
-    {{ end }}
-  serviceName: {{ include "k8s-service.serviceName" . }}
+      {{- include "k8s-service.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
@@ -54,10 +42,6 @@ spec:
             - name: config
               mountPath: "/config"
               readOnly: true
-          {{ range $index, $value := .Values.persistentStorage }}
-            - name: opta-persistent-{{ $index }}
-              mountPath: {{ $value.path | quote }}
-          {{ end }}
           ports:
             - name: main
               protocol: TCP
