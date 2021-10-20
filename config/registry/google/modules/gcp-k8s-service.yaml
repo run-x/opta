@@ -1,5 +1,6 @@
 halt: false
 environment_module: false
+is_unique: true
 inputs:
   - name: env_name
     user_facing: false
