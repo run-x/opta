@@ -158,6 +158,6 @@ variable "keep_path_prefix" {
 }
 
 variable "persistent_storage" {
-  type = list(map(string))
+  type    = list(map(string))
   default = []
 }
