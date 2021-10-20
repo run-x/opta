@@ -21,6 +21,8 @@ modules:
     liveness_probe_path: "/get"
     readiness_probe_path: "/get"
     sticky_session: true
+    sticky_session_max_age: 20
+    keep_path_prefix: true
     port:
       http: 80
     env_vars:

@@ -24,6 +24,11 @@ modules:
     secrets:
       - API_KEY
       - SECRET_1
+    persistent_storage:
+      - path: "/DESIRED/PATH1"
+        size: 5 # 5 GB
+      - path: "/DESIRED/PATH2"
+        size: 10 # 10 GB
   - name: db
     type: postgres
   - name: redis

@@ -51,3 +51,37 @@ _NOTE_ We expose the resource requests and set the limits to twice the request v
 
 You can control if and how you want to expose your app to the world! Check out
 the [Ingress](/tutorials/ingress) docs for more details.
+
+### Persistent Storage
+A user can now specify persistent storage to be provisioned for your servers and kept intact over your different
+deployments + scaling. This will take form of a list of entries holding a `size` (size of the storage to create in
+gigabytes) and `path` (path to put it on your server's container) field, like so:
+```yaml
+.
+.
+.
+modules:
+  - name: app
+    type: k8s-service
+    image: kennethreitz/httpbin
+    min_containers: 2
+    max_containers: "{vars.max_containers}"
+    liveness_probe_path: "/get"
+    readiness_probe_path: "/get"
+    port:
+      http: 80
+    public_uri: "subdomain1.{parent.domain}"
+    persistent_storage:
+      - path: "/DESIRED/PATH1"
+        size: 20 # 20 GB
+      - path: "/DESIRED/PATH2"
+        size: 30 # 30 GB
+.
+.
+.
+```
+Under the hood, an GCP persistent disk is being created to house your data for each coexisting server container of your app.
+
+_NOTE_ because of the nature of these disks, they will not be cleaned up automatically unless during an environment
+destruction. If you wish to release the persistent disks for whatever reason you will need to manually do so by deleting
+the kubernetes persistent volume claims.

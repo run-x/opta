@@ -1,3 +1,4 @@
+{{- if eq (len .Values.persistentStorage) 0 }}
 {{- if ne ((keys .Values.port) | len) 1 }}
   {{- fail "Port must specify either a single tcp port (for websockets) or a single http port" }}
 {{- end }}
@@ -116,4 +117,5 @@ spec:
             items:
               - key: "rds_ca.pem"
                 path: "rds_ca.pem"
+{{- end }}
 {{- end }}

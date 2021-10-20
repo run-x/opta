@@ -141,7 +141,17 @@ inputs: # (what users see)
     validator: list(any(str(), map()), required=False)
     description: A list of extra IAM role policies not captured by Opta which you wish to give to your service.
     default: []
+  - name: persistent_storage
+    user_facing: true
+    validator: list(include('persistent_storage'), required=False)
+    description: |
+      A list persistent storages to add to each instance of your service (need to give a `size` which is the size in GB
+      for the storage volume to be, and `path` which is the path in the filesystem of each instance to place it under)
+    default: []
 extra_validators:
+  persistent_storage:
+    size: int(required=True)
+    path: str(required=True)
   env-var:
     name: str(required=False)
     value: str()
