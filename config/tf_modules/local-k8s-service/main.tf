@@ -9,7 +9,7 @@ terraform {
 
 
 resource "helm_release" "k8s-service" {
-  chart = "${path.module}/k8s-service"
+  chart = "${path.module}/../../opta-k8s-service-helm"
   name  = "${var.layer_name}-${var.module_name}"
   values = [
     yamlencode({
@@ -42,6 +42,11 @@ resource "helm_release" "k8s-service" {
       layerName : var.layer_name,
       moduleName : var.module_name,
       environmentName : var.env_name,
+      stickySession : var.sticky_session
+      stickySessionMaxAge : var.sticky_session_max_age
+      consistentHash : var.consistent_hash
+      keepPathPrefix : var.keep_path_prefix
+      persistentStorage : var.persistent_storage
     })
   ]
   atomic          = true
