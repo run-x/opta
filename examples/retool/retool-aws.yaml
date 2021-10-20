@@ -1,9 +1,9 @@
-name: <<environment_name>>
-org_name: <<organization_name>>
+name: <<environment_name>>  # update
+org_name: <<organization_name>>  # update
 providers:
   aws:
-    region: <<aws_region>>
-    account_id: <<aws_account_id>>
+    region: <<aws_region>>  # update
+    account_id: <<aws_account_id>>  # update
 modules:
   - type: base
   - type: k8s-cluster
@@ -12,7 +12,7 @@ modules:
     spot_instances: true
   - type: k8s-base
   - type: dns
-    domain: <<your_domain>>
+    domain: <<your_domain>>  # update
     delegated: false
   - name: postgres
     type: postgres
@@ -25,8 +25,8 @@ modules:
       postgresql:
         enabled: false
       config:
-        encryptionKey: changeme123
-        jwtSecret: changeme123
+        encryptionKey: changeme123  # update
+        jwtSecret: changeme123  # update
         postgresql:
           port: 5432
           user: "${{module.postgres.db_user}}"
