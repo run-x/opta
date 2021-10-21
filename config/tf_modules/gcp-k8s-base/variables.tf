@@ -58,7 +58,7 @@ variable "cert_self_link" {
 
 variable "hosted_zone_name" {
   type    = string
-  default = null
+  default = ""
 }
 
 variable "domain" {
