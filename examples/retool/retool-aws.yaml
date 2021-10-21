@@ -1,0 +1,41 @@
+name: <<environment_name>>  # update
+org_name: <<organization_name>>  # update
+providers:
+  aws:
+    region: <<aws_region>>  # update
+    account_id: <<aws_account_id>>  # update
+modules:
+  - type: base
+  - type: k8s-cluster
+    node_instance_type: t3.medium
+    max_nodes: 5
+    spot_instances: true
+  - type: k8s-base
+  - type: dns
+    domain: <<your_domain>>  # update
+    delegated: false
+  - name: postgres
+    type: postgres
+  - type: helm-chart
+    name: console
+    chart: retool
+    repository: https://charts.retool.com
+    chart_version: "4.5.0"
+    values:
+      postgresql:
+        enabled: false
+      config:
+        encryptionKey: changeme123  # update
+        jwtSecret: changeme123  # update
+        postgresql:
+          port: 5432
+          user: "${{module.postgres.db_user}}"
+          host: "${{module.postgres.db_host}}"
+          db: "${{module.postgres.db_name}}"
+          password: "${{module.postgres.db_password}}"
+      image:
+        tag: 2.75.20
+      ingress:
+       enabled: true
+       apiVersion: "networking.k8s.io/v1beta1"
+       hostName: "{module.dns.domain}"
