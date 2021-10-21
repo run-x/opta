@@ -1,4 +1,6 @@
+import math
 from platform import system
+from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 from dns.rdtypes.ANY.NS import NS
@@ -7,6 +9,7 @@ from dns.resolver import Answer, NoNameservers, query
 from opta.core.aws import AWS
 from opta.core.terraform import get_terraform_outputs
 from opta.exceptions import UserErrors
+from opta.utils import hydrate
 
 if TYPE_CHECKING:
     from opta.layer import Layer
@@ -27,6 +30,9 @@ class ModuleProcessor:
         self.module.data["env_name"] = self.layer.get_env()
         self.module.data["layer_name"] = self.layer.name
         self.module.data["module_name"] = self.module.name
+
+    def get_instance_count_keys(self) -> Dict[str, int]:
+        return {}
 
     def pre_hook(self, module_idx: int) -> None:
         pass
@@ -66,6 +72,43 @@ class DNSModuleProcessor(ModuleProcessor):
             raise UserErrors(
                 f"Incorrect NS servers. Expected {expected_name_servers}, actual {actual_name_servers}. (might take some time to propagate)"
             )
+
+
+class K8sServiceModuleProcessor(ModuleProcessor):
+    def __init__(self, module: "Module", layer: "Layer"):
+        super(K8sServiceModuleProcessor, self).__init__(module, layer)
+
+    def get_instance_count_keys(self) -> Dict[str, int]:
+        min_max_container_data = {
+            "min_containers": self.module.data.get("min_containers", 1),
+            "max_containers": self.module.data.get("max_containers", 3),
+        }
+        min_max_container_data = hydrate(
+            min_max_container_data,
+            {
+                "vars": SimpleNamespace(**self.layer.variables),
+                "variables": SimpleNamespace(**self.layer.variables),
+            },
+        )
+
+        try:
+            min_containers = int(min_max_container_data["min_containers"])
+        except Exception:
+            min_containers = 1
+        try:
+            max_containers = int(min_max_container_data["max_containers"])
+        except Exception:
+            max_containers = 3
+
+        if self.layer.cloud == "aws":
+            key = "module_aws_k8s_service"
+        elif self.layer.cloud == "google":
+            key = "module_gcp_k8s_service"
+        elif self.layer.cloud == "azurerm":
+            key = "module_azure_k8s_service"
+        else:
+            key = "module_local_k8s_service"
+        return {key: math.floor((min_containers + max_containers) / 2)}
 
 
 class AWSK8sModuleProcessor(ModuleProcessor):

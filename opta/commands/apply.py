@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 from threading import Thread
-from typing import Any, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set
 
 import boto3
 import click
@@ -176,9 +176,9 @@ def _apply(
             raise UserErrors(USER_ERROR_TF_LOCK)
     _verify_parent_layer(layer)
 
+    event_properties: Dict = layer.get_instance_count_keys()
     amplitude_client.send_event(
-        amplitude_client.START_GEN_EVENT,
-        event_properties={"org_name": layer.org_name, "layer_name": layer.name},
+        amplitude_client.START_GEN_EVENT, event_properties=event_properties,
     )
 
     # We need a region with at least 3 AZs for leader election during failover.
@@ -230,127 +230,135 @@ def _apply(
     cloud_client.upload_opta_config()
 
     service_modules = layer.get_module_by_type("k8s-service")
+    try:
+        if len(service_modules) > 0 and (get_cluster_name(layer.root()) is not None):
+            configure_kubectl(layer)
 
-    if len(service_modules) > 0 and (get_cluster_name(layer.root()) is not None):
-        configure_kubectl(layer)
-
-        for service_module in service_modules:
-            current_image_info = current_image_digest_tag(layer)
-            if (
-                image_digest is None
-                and (
-                    current_image_info["tag"] is not None
-                    or current_image_info["digest"] is not None
-                )
-                and image_tag is None
-                and service_module.data.get("image", "") == "AUTO"
-                and not test
-            ):
-                if click.confirm(
-                    f"WARNING There is an existing deployment (tag={current_image_info['tag']}, "
-                    f"digest={current_image_info['digest']}) and the pods will be killed as you "
-                    f"did not specify an image tag. Would you like to keep the existing deployment alive? (y/n)",
+            for service_module in service_modules:
+                current_image_info = current_image_digest_tag(layer)
+                if (
+                    image_digest is None
+                    and (
+                        current_image_info["tag"] is not None
+                        or current_image_info["digest"] is not None
+                    )
+                    and image_tag is None
+                    and service_module.data.get("image", "") == "AUTO"
+                    and not test
                 ):
-                    image_tag = current_image_info["tag"]
-                    image_digest = current_image_info["digest"]
+                    if click.confirm(
+                        f"WARNING There is an existing deployment (tag={current_image_info['tag']}, "
+                        f"digest={current_image_info['digest']}) and the pods will be killed as you "
+                        f"did not specify an image tag. Would you like to keep the existing deployment alive? (y/n)",
+                    ):
+                        image_tag = current_image_info["tag"]
+                        image_digest = current_image_info["digest"]
 
-    layer.variables["image_tag"] = image_tag
-    layer.variables["image_digest"] = image_digest
+        layer.variables["image_tag"] = image_tag
+        layer.variables["image_digest"] = image_digest
 
-    existing_modules: Set[str] = set()
-    first_loop = True
-    for module_idx, current_modules, total_block_count in gen(layer):
-        if first_loop:
-            # This is set during the first iteration, since the tf file must exist.
-            existing_modules = Terraform.get_existing_modules(layer)
-            first_loop = False
-        configured_modules = set([x.name for x in current_modules]) - {
-            "runx"
-        }  # Ignore runx module
-        is_last_module = module_idx == total_block_count - 1
-        has_new_modules = not configured_modules.issubset(existing_modules)
-        if not is_last_module and not has_new_modules and not refresh:
-            continue
-        if is_last_module:
-            untouched_modules = existing_modules - configured_modules
-            configured_modules = configured_modules.union(untouched_modules)
-
-        layer.pre_hook(module_idx)
-        if layer.cloud == "local":
+        existing_modules: Set[str] = set()
+        first_loop = True
+        for module_idx, current_modules, total_block_count in gen(layer):
+            if first_loop:
+                # This is set during the first iteration, since the tf file must exist.
+                existing_modules = Terraform.get_existing_modules(layer)
+                first_loop = False
+            configured_modules = set([x.name for x in current_modules]) - {
+                "runx"
+            }  # Ignore runx module
+            is_last_module = module_idx == total_block_count - 1
+            has_new_modules = not configured_modules.issubset(existing_modules)
+            if not is_last_module and not has_new_modules and not refresh:
+                continue
             if is_last_module:
-                targets = []
-        else:
-            targets = list(
-                map(lambda x: f"-target=module.{x}", sorted(configured_modules))
-            )
-        if test:
-            Terraform.plan("-lock=false", *targets, layer=layer)
-            print("Plan ran successfully, not applying since this is a test.")
-        else:
-            amplitude_client.send_event(
-                amplitude_client.APPLY_EVENT,
-                event_properties={
-                    "module_idx": module_idx,
-                    "org_name": layer.org_name,
-                    "layer_name": layer.name,
-                },
-            )
-            logger.info("Planning your changes (might take a minute)")
+                untouched_modules = existing_modules - configured_modules
+                configured_modules = configured_modules.union(untouched_modules)
 
-            Terraform.plan(
-                "-lock=false",
-                "-input=false",
-                f"-out={TF_PLAN_PATH}",
-                layer=layer,
-                *targets,
-                quiet=True,
-            )
-            PlanDisplayer.display(detailed_plan=detailed_plan)
-
-            if not auto_approve:
-                click.confirm(
-                    "The above are the planned changes for your opta run. Do you approve?",
-                    abort=True,
-                )
-            logger.info("Applying your changes (might take a minute)")
-            service_modules = (
-                layer.get_module_by_type("k8s-service", module_idx)
-                if layer.cloud == "aws"
-                else layer.get_module_by_type("gcp-k8s-service", module_idx)
-            )
-            if (
-                len(service_modules) != 0
-                and get_cluster_name(layer.root()) is not None
-                and stdout_logs
-            ):
-                service_module = service_modules[0]
-                # Tailing logs
-                logger.info(
-                    f"Identified deployment for kubernetes service module {service_module.name}, tailing logs now."
-                )
-                new_thread = Thread(
-                    target=tail_module_log,
-                    args=(layer, service_module.name, 10, 2),
-                    daemon=True,
-                )
-                # Tailing events
-                new_thread.start()
-                new_thread = Thread(
-                    target=tail_namespace_events, args=(layer, 0, 1), daemon=True,
-                )
-                new_thread.start()
-
-            tf_flags: List[str] = []
-            if auto_approve:
-                tf_flags.append("-auto-approve")
-            try:
-                Terraform.apply(layer, *tf_flags, TF_PLAN_PATH, no_init=True, quiet=False)
-            except Exception as e:
-                layer.post_hook(module_idx, e)
-                raise e
+            layer.pre_hook(module_idx)
+            if layer.cloud == "local":
+                if is_last_module:
+                    targets = []
             else:
-                layer.post_hook(module_idx, None)
-            logger.info("Opta updates complete!")
+                targets = list(
+                    map(lambda x: f"-target=module.{x}", sorted(configured_modules))
+                )
+            if test:
+                Terraform.plan("-lock=false", *targets, layer=layer)
+                print("Plan ran successfully, not applying since this is a test.")
+            else:
+                current_properties = event_properties.copy()
+                current_properties["module_idx"] = module_idx
+                amplitude_client.send_event(
+                    amplitude_client.APPLY_EVENT, event_properties=current_properties,
+                )
+                logger.info("Planning your changes (might take a minute)")
+
+                Terraform.plan(
+                    "-lock=false",
+                    "-input=false",
+                    f"-out={TF_PLAN_PATH}",
+                    layer=layer,
+                    *targets,
+                    quiet=True,
+                )
+                PlanDisplayer.display(detailed_plan=detailed_plan)
+
+                if not auto_approve:
+                    click.confirm(
+                        "The above are the planned changes for your opta run. Do you approve?",
+                        abort=True,
+                    )
+                logger.info("Applying your changes (might take a minute)")
+                service_modules = (
+                    layer.get_module_by_type("k8s-service", module_idx)
+                    if layer.cloud == "aws"
+                    else layer.get_module_by_type("gcp-k8s-service", module_idx)
+                )
+                if (
+                    len(service_modules) != 0
+                    and get_cluster_name(layer.root()) is not None
+                    and stdout_logs
+                ):
+                    service_module = service_modules[0]
+                    # Tailing logs
+                    logger.info(
+                        f"Identified deployment for kubernetes service module {service_module.name}, tailing logs now."
+                    )
+                    new_thread = Thread(
+                        target=tail_module_log,
+                        args=(layer, service_module.name, 10, 2),
+                        daemon=True,
+                    )
+                    # Tailing events
+                    new_thread.start()
+                    new_thread = Thread(
+                        target=tail_namespace_events, args=(layer, 0, 1), daemon=True,
+                    )
+                    new_thread.start()
+
+                tf_flags: List[str] = []
+                if auto_approve:
+                    tf_flags.append("-auto-approve")
+                try:
+                    Terraform.apply(
+                        layer, *tf_flags, TF_PLAN_PATH, no_init=True, quiet=False
+                    )
+                except Exception as e:
+                    layer.post_hook(module_idx, e)
+                    raise e
+                else:
+                    layer.post_hook(module_idx, None)
+                logger.info("Opta updates complete!")
+    except Exception as e:
+        event_properties["success"] = False
+        raise e
+    else:
+        event_properties["success"] = True
+    finally:
+        amplitude_client.send_event(
+            amplitude_client.STOP_GEN_EVENT, event_properties=event_properties,
+        )
 
 
 # Fetch the AZs of a region with boto3
