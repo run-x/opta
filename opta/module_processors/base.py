@@ -31,7 +31,7 @@ class ModuleProcessor:
         self.module.data["layer_name"] = self.layer.name
         self.module.data["module_name"] = self.module.name
 
-    def get_instance_count_keys(self) -> Dict[str, int]:
+    def get_event_properties(self) -> Dict[str, int]:
         return {}
 
     def pre_hook(self, module_idx: int) -> None:
@@ -78,7 +78,7 @@ class K8sServiceModuleProcessor(ModuleProcessor):
     def __init__(self, module: "Module", layer: "Layer"):
         super(K8sServiceModuleProcessor, self).__init__(module, layer)
 
-    def get_instance_count_keys(self) -> Dict[str, int]:
+    def get_event_properties(self) -> Dict[str, int]:
         min_max_container_data = {
             "min_containers": self.module.data.get("min_containers", 1),
             "max_containers": self.module.data.get("max_containers", 3),
@@ -108,7 +108,7 @@ class K8sServiceModuleProcessor(ModuleProcessor):
             key = "module_azure_k8s_service"
         else:
             key = "module_local_k8s_service"
-        return {key: math.floor((min_containers + max_containers) / 2)}
+        return {key: math.ceil((min_containers + max_containers) / 2)}
 
 
 class AWSK8sModuleProcessor(ModuleProcessor):

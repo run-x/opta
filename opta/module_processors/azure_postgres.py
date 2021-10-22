@@ -11,5 +11,5 @@ class AzurePostgresProcessor(ModuleProcessor):
     def __init__(self, module: "Module", layer: "Layer"):
         super(AzurePostgresProcessor, self).__init__(module, layer)
 
-    def get_instance_count_keys(self) -> Dict[str, int]:
+    def get_event_properties(self) -> Dict[str, int]:
         return {"module_azure_postgres": 1}

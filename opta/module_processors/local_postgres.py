@@ -11,5 +11,5 @@ class LocalPostgresProcessor(ModuleProcessor):
     def __init__(self, module: "Module", layer: "Layer"):
         super(LocalPostgresProcessor, self).__init__(module, layer)
 
-    def get_instance_count_keys(self) -> Dict[str, int]:
+    def get_event_properties(self) -> Dict[str, int]:
         return {"module_local_postgres": 1}

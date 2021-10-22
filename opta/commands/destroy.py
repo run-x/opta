@@ -55,7 +55,7 @@ def destroy(
         config = _handle_local_flag(config, False)
         _clean_tf_folder()
     layer = Layer.load_from_yaml(config, env)
-    event_properties: Dict = layer.get_instance_count_keys()
+    event_properties: Dict = layer.get_event_properties()
     amplitude_client.send_event(
         amplitude_client.DESTROY_EVENT, event_properties=event_properties,
     )

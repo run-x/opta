@@ -20,7 +20,7 @@ class HelmChartProcessor(ModuleProcessor):
             )
         super(HelmChartProcessor, self).__init__(module, layer)
 
-    def get_instance_count_keys(self) -> Dict[str, int]:
+    def get_event_properties(self) -> Dict[str, int]:
         return {"module_helm_chart": 1}
 
     def process(self, module_idx: int) -> None:

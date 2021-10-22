@@ -176,7 +176,7 @@ def _apply(
             raise UserErrors(USER_ERROR_TF_LOCK)
     _verify_parent_layer(layer)
 
-    event_properties: Dict = layer.get_instance_count_keys()
+    event_properties: Dict = layer.get_event_properties()
     amplitude_client.send_event(
         amplitude_client.START_GEN_EVENT, event_properties=event_properties,
     )
@@ -352,6 +352,7 @@ def _apply(
                 logger.info("Opta updates complete!")
     except Exception as e:
         event_properties["success"] = False
+        event_properties["error_name"] = e.__class__.__name__
         raise e
     else:
         event_properties["success"] = True

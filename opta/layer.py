@@ -435,12 +435,12 @@ class Layer:
             "env": self.get_env(),
         }
 
-    def get_instance_count_keys(self) -> Dict[str, Any]:
+    def get_event_properties(self) -> Dict[str, Any]:
         current_keys: Dict[str, Any] = {}
         for module in self.modules:
             module_type = module.aliased_type or module.type
             processor = self.PROCESSOR_DICT.get(module_type, ModuleProcessor)
-            new_keys = processor(module, self).get_instance_count_keys()
+            new_keys = processor(module, self).get_event_properties()
             for key, val in new_keys.items():
                 current_keys[key] = current_keys.get(key, 0) + val
         current_keys["total_resources"] = sum([x for x in current_keys.values()])
