@@ -30,7 +30,7 @@ class AmplitudeClient:
     CONFIGURE_KUBECTL_EVENT = "CONFIGURE_KUBECTL"
     VIEW_OUTPUT_EVENT = "VIEW_OUTPUT"
     FORCE_UNLOCK_EVENT = "FORCE_UNLOCK"
-    STOP_GEN_EVENT = "STOP_GEN_EVENT"
+    FINISH_GEN_EVENT = "FINISH_GEN_EVENT"
     VALID_EVENTS = [
         UPDATE_SECRET_EVENT,
         VIEW_SECRET_EVENT,
@@ -48,7 +48,7 @@ class AmplitudeClient:
         CONFIGURE_KUBECTL_EVENT,
         VIEW_OUTPUT_EVENT,
         FORCE_UNLOCK_EVENT,
-        STOP_GEN_EVENT,
+        FINISH_GEN_EVENT,
     ]
 
     def __init__(self) -> None:

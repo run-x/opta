@@ -358,7 +358,7 @@ def _apply(
         event_properties["success"] = True
     finally:
         amplitude_client.send_event(
-            amplitude_client.STOP_GEN_EVENT, event_properties=event_properties,
+            amplitude_client.FINISH_GEN_EVENT, event_properties=event_properties,
         )
 
 
