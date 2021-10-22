@@ -6,14 +6,20 @@ from opta.core.kubernetes import (
     list_namespaces,
 )
 from opta.exceptions import UserErrors
-from opta.module_processors.base import AWSIamAssembler, AWSK8sModuleProcessor
+from opta.module_processors.base import (
+    AWSIamAssembler,
+    AWSK8sModuleProcessor,
+    K8sServiceModuleProcessor,
+)
 
 if TYPE_CHECKING:
     from opta.layer import Layer
     from opta.module import Module
 
 
-class AwsK8sServiceProcessor(AWSK8sModuleProcessor, AWSIamAssembler):
+class AwsK8sServiceProcessor(
+    AWSK8sModuleProcessor, K8sServiceModuleProcessor, AWSIamAssembler
+):
     def __init__(self, module: "Module", layer: "Layer"):
         if (module.aliased_type or module.type) != "aws-k8s-service":
             raise Exception(

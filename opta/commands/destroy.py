@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import boto3
 import click
@@ -55,9 +55,9 @@ def destroy(
         config = _handle_local_flag(config, False)
         _clean_tf_folder()
     layer = Layer.load_from_yaml(config, env)
+    event_properties: Dict = layer.get_event_properties()
     amplitude_client.send_event(
-        amplitude_client.DESTROY_EVENT,
-        event_properties={"org_name": layer.org_name, "layer_name": layer.name},
+        amplitude_client.DESTROY_EVENT, event_properties=event_properties,
     )
     layer.verify_cloud_credentials()
     if not Terraform.download_state(layer):

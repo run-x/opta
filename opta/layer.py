@@ -413,6 +413,20 @@ class Layer:
             "env": self.get_env(),
         }
 
+    def get_event_properties(self) -> Dict[str, Any]:
+        current_keys: Dict[str, Any] = {}
+        for module in self.modules:
+            module_type = module.aliased_type or module.type
+            processor = self.PROCESSOR_DICT.get(module_type, ModuleProcessor)
+            new_keys = processor(module, self).get_event_properties()
+            for key, val in new_keys.items():
+                current_keys[key] = current_keys.get(key, 0) + val
+        current_keys["total_resources"] = sum([x for x in current_keys.values()])
+        current_keys["org_name"] = self.org_name
+        current_keys["layer_name"] = self.name
+        current_keys["parent_name"] = self.parent.name if self.parent is not None else ""
+        return current_keys
+
     def state_storage(self) -> str:
         if self.parent is not None:
             return self.parent.state_storage()

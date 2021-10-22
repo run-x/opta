@@ -6,14 +6,14 @@ from opta.core.kubernetes import (
     list_namespaces,
 )
 from opta.exceptions import UserErrors
-from opta.module_processors.base import LocalK8sModuleProcessor
+from opta.module_processors.base import K8sServiceModuleProcessor, LocalK8sModuleProcessor
 
 if TYPE_CHECKING:
     from opta.layer import Layer
     from opta.module import Module
 
 
-class LocalK8sServiceProcessor(LocalK8sModuleProcessor):
+class LocalK8sServiceProcessor(LocalK8sModuleProcessor, K8sServiceModuleProcessor):
     def __init__(self, module: "Module", layer: "Layer"):
         if (module.aliased_type or module.type) != "local-k8s-service":
             raise Exception(

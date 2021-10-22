@@ -45,6 +45,7 @@ def mocked_layer(mocker: MockFixture) -> Any:
     mocked_layer.name = "blah"
     mocked_layer.org_name = "blahorg"
     mocked_layer.cloud = "aws"
+    mocked_layer.get_event_properties = mocker.Mock(return_value={})
     mocked_layer.gen_providers = lambda x: {"provider": {"aws": {"region": "us-east-1"}}}
     mocked_layer_class.load_from_yaml.return_value = mocked_layer
     mocked_layer.parent = None

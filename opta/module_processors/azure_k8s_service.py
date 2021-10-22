@@ -2,14 +2,14 @@ from typing import TYPE_CHECKING, Any, Dict, List, Union
 
 from opta.core.kubernetes import create_namespace_if_not_exists, get_manual_secrets
 from opta.exceptions import UserErrors
-from opta.module_processors.base import ModuleProcessor
+from opta.module_processors.base import K8sServiceModuleProcessor
 
 if TYPE_CHECKING:
     from opta.layer import Layer
     from opta.module import Module
 
 
-class AzureK8sServiceProcessor(ModuleProcessor):
+class AzureK8sServiceProcessor(K8sServiceModuleProcessor):
     def __init__(self, module: "Module", layer: "Layer"):
         if (module.aliased_type or module.type) != "azure-k8s-service":
             raise Exception(

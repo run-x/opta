@@ -21,7 +21,7 @@ class Module:
     ):
         if "type" not in data:
             raise UserErrors("Module data must always have a type")
-        self.type = data["type"]
+        self.type: str = data["type"]
         self.aliased_type: Optional[str] = None
         if self.type in REGISTRY[layer.cloud]["module_aliases"]:
             self.aliased_type = REGISTRY[layer.cloud]["module_aliases"][self.type]
