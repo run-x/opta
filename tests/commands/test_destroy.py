@@ -4,7 +4,7 @@ from click.testing import CliRunner
 from pytest_mock import MockFixture
 
 from opta.commands.destroy import destroy
-from tests.utils import get_call_args
+from tests.util import get_call_args
 
 FAKE_ENV_CONFIG = os.path.join(
     os.path.dirname(os.path.dirname(__file__)),

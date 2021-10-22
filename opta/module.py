@@ -1,4 +1,3 @@
-import json
 import os
 import re
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional
@@ -8,7 +7,7 @@ import hcl2
 from opta.constants import REGISTRY
 from opta.exceptions import UserErrors
 from opta.resource import Resource
-from opta.utils import deep_merge
+from opta.utils import deep_merge, json
 
 TAGS_OVERRIDE_FILE = "tags_override.tf.json"
 if TYPE_CHECKING:

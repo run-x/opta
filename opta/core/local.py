@@ -1,9 +1,8 @@
-import json
 import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
-from opta.utils import logger
+from opta.utils import json, logger
 
 if TYPE_CHECKING:
     from opta.layer import Layer, StructuredConfig

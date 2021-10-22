@@ -1,4 +1,3 @@
-import json
 from time import sleep
 from typing import TYPE_CHECKING, List, Optional, TypedDict
 
@@ -6,7 +5,7 @@ import boto3
 from botocore.config import Config
 from mypy_boto3_dynamodb import DynamoDBClient
 
-from opta.utils import fmt_msg, logger
+from opta.utils import fmt_msg, json, logger
 
 if TYPE_CHECKING:
     from opta.layer import Layer, StructuredConfig

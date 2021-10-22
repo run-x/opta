@@ -1,10 +1,9 @@
-import json
 from subprocess import CalledProcessError  # nosec
 from typing import List
 
 from opta.exceptions import UserErrors
 from opta.nice_subprocess import nice_run
-from opta.utils import is_tool
+from opta.utils import is_tool, json
 
 HELM_INSTALL_URL = "https://helm.sh/docs/intro/install/"
 
