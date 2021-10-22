@@ -76,7 +76,8 @@ resource "helm_release" "ingress-nginx" {
             "external-dns.alpha.kubernetes.io/hostname" : var.domain == "" ? "" : join(",", [var.domain, "*.${var.domain}"])
           }
         }
-      }
+      },
+      tcp : var.nginx_extra_tcp_ports,
     })
   ]
   depends_on = [

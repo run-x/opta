@@ -88,3 +88,8 @@ variable "certificate_chain" {
 variable "nginx_config" {
   default = {}
 }
+
+variable "nginx_extra_tcp_ports" {
+  type    = map(string)
+  default = {}
+}

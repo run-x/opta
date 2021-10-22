@@ -19,7 +19,10 @@ resource "helm_release" "k8s-service" {
         targetCPUUtilizationPercentage : var.autoscaling_target_cpu_percentage
         targetMemoryUtilizationPercentage : var.autoscaling_target_mem_percentage
       },
-      port : var.port,
+      httpPort : var.http_port,
+      probePort : var.probe_port,
+      ports : var.ports,
+      serviceAnnotations : var.service_annotations,
       containerResourceLimits : {
         cpu : "${var.resource_request["cpu"] * 2}m"
         memory : "${var.resource_request["memory"] * 2}Mi"

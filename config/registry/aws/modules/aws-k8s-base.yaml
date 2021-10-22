@@ -76,6 +76,11 @@ inputs:
     validator: any(required=False)
     description: Additional configuration for nginx ingress. [Available options](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/#configuration-options)
     default: {}
+  - name: nginx_extra_tcp_ports
+    user_facing: true
+    validator: list(int(min=1, max=65535), required=False)
+    description: Additional TCP ports to expose from nginx
+    default: []
 outputs: []
 output_providers: {}
 output_data: {}

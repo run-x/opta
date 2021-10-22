@@ -64,6 +64,7 @@ class Module:
             "module": {self.name: {"source": self.module_dir_path}},
             "output": {},
         }
+        # TODO: Should error if module writes to "data" when keys aren't defined (or validation doesn't pass ???)
         for input in self.desc["inputs"]:
             input_name = input["name"]
             if input_name in self.data:
@@ -73,7 +74,9 @@ class Module:
             elif input_name == "layer_name":
                 module_blk["module"][self.name][input_name] = self.layer_name
             elif not input["required"]:
-                module_blk["module"][self.name][input_name] = input["default"]
+                # TODO: This cannot handle inputs that have defaults but are removed by a module's `process` method
+                if "default" in input:
+                    module_blk["module"][self.name][input_name] = input["default"]
             else:
                 raise Exception(f"Unable to hydrate {input_name}")
         for output in self.desc["outputs"]:

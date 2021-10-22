@@ -1,20 +1,29 @@
+import dataclasses
 import math
 from platform import system
-from types import SimpleNamespace
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Set, Tuple, Union
 
 from dns.rdtypes.ANY.NS import NS
 from dns.resolver import Answer, NoNameservers, query
+from types import SimpleNamespace
 
 from opta.constants import REGISTRY
+from opta.core import kubernetes
 from opta.core.aws import AWS
 from opta.core.terraform import get_terraform_outputs
 from opta.exceptions import UserErrors
-from opta.utils import hydrate
+from opta.utils import RawString, hydrate, json
 
 if TYPE_CHECKING:
     from opta.layer import Layer
     from opta.module import Module
+
+
+NGINX_EXTRA_TCP_PORTS_ANNOTATION = "nginx.opta.dev/extra-tcp-ports"
+NGINX_PLACEHOLDER_SERVICE = (
+    "noservice/configured:9"  # Port 9 on TCP/UDP is the "Discard" protocol
+)
+NGINX_TCP_CONFIGMAP = ("ingress-nginx", "ingress-nginx-tcp")  # Namespace, name
 
 
 class ModuleProcessor:
@@ -81,11 +90,67 @@ class DNSModuleProcessor(ModuleProcessor):
             )
 
 
-class K8sServiceModuleProcessor(ModuleProcessor):
-    def __init__(self, module: "Module", layer: "Layer"):
-        super(K8sServiceModuleProcessor, self).__init__(module, layer)
+@dataclasses.dataclass
+class PortSpec:
+    name: str
+    type: Union[Literal["http"], Literal["tcp"]]
+    port: int
+    protocol: Optional[str] = None
+    tls: bool = True
 
+    @classmethod
+    def from_raw(cls, raw: Dict[str, Any]) -> "PortSpec":
+        spec = cls(
+            name=raw["name"],
+            type=raw["type"],
+            port=raw["port"],
+            protocol=raw.get("protocol"),
+            tls=raw.get("tls", True),
+        )
+
+        if (spec.type, spec.protocol) not in cls.valid_type_protocols():
+            raise ValueError(f"Invalid type/protocol combo: {spec.type}/{spec.protocol}")
+
+        return spec
+
+    @staticmethod
+    def valid_type_protocols() -> Set[Tuple[str, Optional[str]]]:
+        return {
+            ("http", None),
+            ("http", "grpc"),
+            ("http", "websocket"),
+            ("tcp", None),
+        }
+
+    @property
+    def is_http(self) -> bool:
+        return self.type == "http"
+
+    @property
+    def is_tcp(self) -> bool:
+        return self.type == "tcp"
+
+    @property
+    def probe_type(self) -> Union[Literal["http"], Literal["tcp"]]:
+        """The type of health probe to use with this port, either "tcp" or "http"."""
+
+        if self.type == "http" and self.protocol is None:
+            # Only plain HTTP can handle an HTTP probe
+            return "http"
+
+        return "tcp"
+
+    def __to_json__(self) -> Dict[str, Any]:
+        values = dataclasses.asdict(self)
+        values["probeType"] = self.probe_type
+
+        return values
+
+
+class K8sServiceModuleProcessor(ModuleProcessor):
     def process(self, module_idx: int) -> None:
+        self._process_ports(self.module.data)
+
         if isinstance(self.module.data.get("public_uri"), str):
             self.module.data["public_uri"] = [self.module.data["public_uri"]]
 
@@ -135,6 +200,130 @@ class K8sServiceModuleProcessor(ModuleProcessor):
             key = "module_local_k8s_service"
         return {key: math.ceil((min_containers + max_containers) / 2)}
 
+    def _extra_ports_controller(self) -> None:
+        reconcile_nginx_extra_ports()
+
+    def _process_ports(self, data: Dict[Any, Any]) -> None:
+        self.__transform_port(data)
+
+        if "ports" not in data:
+            return
+
+        ports = self.__read_ports(data["ports"])
+        self.__validate_ports(ports)
+        data["ports"] = ports
+
+        http_port = next((port for port in ports if port.is_http), None)
+        data["http_port"] = http_port
+
+        if "probe_port" in data:
+            try:
+                probe_port = next(
+                    port for port in ports if port.name == data["probe_port"]
+                )
+
+            except StopIteration:
+                raise UserErrors(
+                    f"invalid probe_port: {data['probe_port']} is not a valid port name"
+                )
+        else:
+            probe_port = ports[0]
+
+        data["probe_port"] = probe_port
+
+        data["service_annotations"] = self.__service_annotations(ports)
+
+    def __read_ports(self, raw: List[Dict[str, Any]]) -> List[PortSpec]:
+        # TODO: Convert KeyError into UserErrors? We should be validated at this point though
+        # TODO: ValueError too
+        return [PortSpec.from_raw(raw_spec) for raw_spec in raw]
+
+    def __service_annotations(self, ports: List[PortSpec]) -> Dict[str, str]:
+        """Returns list of annotations to put on the service resources"""
+        port_mapping = {port.port: port.name for port in ports if port.is_tcp}
+
+        if not port_mapping:
+            print("no tcp ports")
+            return {}
+
+        return {
+            # Use RawString here to prevent the json-encoded value being "hydrated"
+            # TODO FIXME(patrick): RawString is a workaround and I hate it. https://www.youtube.com/watch?v=31g0YE61PLQ
+            NGINX_EXTRA_TCP_PORTS_ANNOTATION: RawString(json.dumps(port_mapping)),
+        }
+
+    def __transform_port(self, data: Dict[Any, Any]) -> None:
+        if "port" not in data:
+            return
+
+        if "ports" in data:
+            raise UserErrors("Cannot specify both port and ports")
+
+        # TODO: Use mapping from portspec class
+        port_type_mapping = {
+            "http": ("http", None),
+            "tcp": ("tcp", None),
+            "grpc": ("http", "grpc"),
+            "websocket": ("http", "websocket"),  # TODO: HTTP type?
+        }
+
+        port_config = data["port"]
+        if len(port_config) > 1:
+            raise UserErrors("Cannot specify multiple keys in port")
+
+        # This will only run once, but is a clean way to get the only key,value pair
+        for type, port in port_config.items():
+            type_config = port_type_mapping[type]
+            port_spec = {
+                "name": "main",
+                "type": type_config[0],
+                "port": port,
+            }
+
+            if type_config[1]:
+                port_spec["protocol"] = type_config[1]
+
+            data["ports"] = [port_spec]
+
+        del data["port"]
+
+    def __validate_ports(self, ports: List[PortSpec]) -> None:
+        # Make sure we only have at most one http port
+        http_ports = [port for port in ports if port.is_http]
+        if len(http_ports) > 1:
+            raise UserErrors("Multiple `type: http` ports not supported")
+
+        # Check for duplicate port numbers or names
+        port_nums = set()
+        port_names = set()
+        for port in ports:
+            if port.name in port_names:
+                raise UserErrors(f"Duplicate port name `{port.name}`")
+
+            if port.port in port_nums:
+                raise UserErrors(f"Duplicate port number `{port.port}`")
+
+            port_names.add(port.name)
+            port_nums.add(port.port)
+
+
+class K8sBaseModuleProcessor:
+    def _process_nginx_extra_ports(self, data: Dict[Any, Any]) -> None:
+        extra_ports: List[int] = data["nginx_extra_tcp_ports"]
+
+        placeholder_port_mapping = {
+            port: f"{NGINX_PLACEHOLDER_SERVICE}" for port in extra_ports
+        }
+        service_port_mapping = reconcile_nginx_extra_ports(update_config_map=False)
+
+        # Only expose ports defined in nginx_extra_tcp_ports
+        port_mapping = {
+            port: service_port_mapping.get(port, placeholder_service)
+            for port, placeholder_service in placeholder_port_mapping.items()
+        }
+
+        data["nginx_extra_tcp_ports"] = port_mapping
+
 
 class AWSK8sModuleProcessor(ModuleProcessor):
     def __init__(self, module: "Module", layer: "Layer"):
@@ -177,8 +366,11 @@ class AWSIamAssembler:
         self.publish_topics: list[str] = []
         self.kms_write_keys: list[str] = []
         self.kms_read_keys: list[str] = []
+<<<<<<< HEAD
         self.dynamodb_write_tables: list[str] = []
         self.dynamodb_read_tables: list[str] = []
+=======
+>>>>>>> f36a2a3 (linting)
         super(AWSIamAssembler, self).__init__()
 
     def prepare_iam_statements(self) -> List[dict]:
@@ -345,3 +537,90 @@ def get_aws_base_module_refs(layer: "Layer") -> Dict[str, str]:
         "private_subnet_ids": f"${{{{{module_source}.private_subnet_ids}}}}",
         "public_subnets_ids": f"${{{{{module_source}.public_subnets_ids}}}}",
     }
+
+
+def reconcile_nginx_extra_ports(*, update_config_map: bool = True) -> Dict[int, str]:
+    """
+    Runs the pseudo-controller that scans the cluster for Kubernetes services that expose raw TCP ports.
+    If :update_config_map is True (default), it will also update the nginx port config map.
+    The ConfigMap won't be updated with any ports not already defined in it.
+
+    Returns the port mapping defined by services, in the form of a dict of "external port -> 'namespace/service_name:service_port'"
+    """
+
+    services = kubernetes.list_services()
+
+    # Filter out any deleted services or services that don't have the annotation we want
+    services = [
+        service for service in services if service.metadata.deletion_timestamp is None
+    ]
+
+    # Skip services that don't have the annotation
+    services = [
+        service
+        for service in services
+        if NGINX_EXTRA_TCP_PORTS_ANNOTATION in (service.metadata.annotations or {})
+    ]
+
+    # Give precedence to older services in case of port conflicts
+    services.sort(key=lambda svc: svc.metadata.creation_timestamp)
+
+    port_mapping: Dict[int, str] = {}
+    for service in services:
+        extra_ports_annotation: str = service.metadata.annotations[
+            NGINX_EXTRA_TCP_PORTS_ANNOTATION
+        ]
+
+        try:
+            extra_ports: Dict[str, str] = json.loads(extra_ports_annotation)
+        except json.JSONDecodeError:
+            # TODO: Log decode error
+            continue
+
+        if not isinstance(extra_ports, dict):
+            # TODO: Log type error
+            continue
+
+        for nginx_port_str, target_port in extra_ports.items():
+            try:
+                nginx_port = int(nginx_port_str)
+            except ValueError:
+                # TODO: Log type error?
+                # Skip bad value
+                continue
+
+            if nginx_port in port_mapping:
+                # TODO: Log conflict?
+                # Skip conflicting ports
+                continue
+
+            port_mapping[
+                nginx_port
+            ] = f"{service.metadata.namespace}/{service.metadata.name}:{target_port}"
+
+    if not update_config_map:
+        return port_mapping
+
+    cm = kubernetes.get_config_map(*NGINX_TCP_CONFIGMAP)
+    if cm is None:
+        # We can't update anything if we don't have the config map
+        return port_mapping
+
+    desired_mapping = {str(port): service for port, service in port_mapping.items()}
+
+    # Don't add any keys, and keys that we don't have a service for should be set to the placeholder service
+    current_data: Dict[str, str] = cm.data or {}
+    desired_data = {
+        port: desired_mapping.get(port, NGINX_PLACEHOLDER_SERVICE)
+        for port in current_data
+    }
+
+    if desired_data != current_data:
+        # We don't handle any conficts here (by passing resource version), but we probably don't need to until this is implemented as an actual controller
+        kubernetes.update_config_map_data(
+            cm.metadata.namespace, cm.metadata.name, desired_data
+        )
+
+    # We return port_mapping instead of desired_data because we always want to return services that have "requested" to be mapped,
+    # even if nginx hasn't been configured to expose them.
+    return port_mapping
