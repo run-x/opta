@@ -1,4 +1,5 @@
 import io
+import json as stdjson
 from typing import Any
 
 import pytest
@@ -45,3 +46,12 @@ def test_dump() -> None:
 def test_dumps() -> None:
     val = SerializableType(1)
     assert json.dumps(val) == "1"
+
+
+def test_plain_encoding() -> None:
+    val = {
+        "abc": 123,
+        "foo": "bar",
+    }
+
+    assert stdjson.dumps(val) == json.dumps(val)
