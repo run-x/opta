@@ -1,5 +1,5 @@
 import os
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING
 
 from ruamel.yaml.compat import StringIO
 
@@ -19,9 +19,6 @@ class HelmChartProcessor(ModuleProcessor):
                 f"The module {module.name} was expected to be of type k8s service"
             )
         super(HelmChartProcessor, self).__init__(module, layer)
-
-    def get_event_properties(self) -> Dict[str, int]:
-        return {"module_helm_chart": 1}
 
     def process(self, module_idx: int) -> None:
         if "repository" in self.module.data and "chart_version" not in self.module.data:

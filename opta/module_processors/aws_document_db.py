@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING
 
 from opta.exceptions import UserErrors
 from opta.module_processors.base import ModuleProcessor
@@ -18,9 +18,6 @@ class AwsDocumentDbProcessor(ModuleProcessor):
                 f"The module {module.name} was expected to be of type aws sns"
             )
         super(AwsDocumentDbProcessor, self).__init__(module, layer)
-
-    def get_event_properties(self) -> Dict[str, int]:
-        return {"module_aws_documentdb": 1}
 
     def process(self, module_idx: int) -> None:
         if self.module.data.__contains__("instance_count"):

@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 from dns.rdtypes.ANY.NS import NS
 from dns.resolver import Answer, NoNameservers, query
 
+from opta.constants import REGISTRY
 from opta.core.aws import AWS
 from opta.core.terraform import get_terraform_outputs
 from opta.exceptions import UserErrors
@@ -32,6 +33,12 @@ class ModuleProcessor:
         self.module.data["module_name"] = self.module.name
 
     def get_event_properties(self) -> Dict[str, int]:
+        module_type = self.module.aliased_type or self.module.type
+        module_instance_count = REGISTRY[self.layer.cloud]["modules"][module_type].get(
+            "metric_count", 0
+        )
+        if module_instance_count != 0:
+            return {f"module_{module_type.replace('-', '_')}": module_instance_count}
         return {}
 
     def pre_hook(self, module_idx: int) -> None:

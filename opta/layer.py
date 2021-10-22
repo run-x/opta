@@ -35,16 +35,12 @@ from opta.module_processors.aws_iam_role import AwsIamRoleProcessor
 from opta.module_processors.aws_iam_user import AwsIamUserProcessor
 from opta.module_processors.aws_k8s_base import AwsK8sBaseProcessor
 from opta.module_processors.aws_k8s_service import AwsK8sServiceProcessor
-from opta.module_processors.aws_postgres import AwsPostgresProcessor
-from opta.module_processors.aws_redis import AwsRedisProcessor
 from opta.module_processors.aws_s3 import AwsS3Processor
 from opta.module_processors.aws_sns import AwsSnsProcessor
 from opta.module_processors.aws_sqs import AwsSqsProcessor
 from opta.module_processors.azure_base import AzureBaseProcessor
 from opta.module_processors.azure_k8s_base import AzureK8sBaseProcessor
 from opta.module_processors.azure_k8s_service import AzureK8sServiceProcessor
-from opta.module_processors.azure_postgres import AzurePostgresProcessor
-from opta.module_processors.azure_redis import AzureRedisProcessor
 from opta.module_processors.base import ModuleProcessor
 from opta.module_processors.custom_terraform import CustomTerraformProcessor
 from opta.module_processors.datadog import DatadogProcessor
@@ -53,16 +49,9 @@ from opta.module_processors.gcp_dns import GCPDnsProcessor
 from opta.module_processors.gcp_gke import GcpGkeProcessor
 from opta.module_processors.gcp_k8s_base import GcpK8sBaseProcessor
 from opta.module_processors.gcp_k8s_service import GcpK8sServiceProcessor
-from opta.module_processors.gcp_mysql import GCPMYSQLProcessor
-from opta.module_processors.gcp_postgres import GCPPostgresProcessor
-from opta.module_processors.gcp_redis import GCPRedisProcessor
 from opta.module_processors.gcp_service_account import GcpServiceAccountProcessor
 from opta.module_processors.helm_chart import HelmChartProcessor
 from opta.module_processors.local_k8s_service import LocalK8sServiceProcessor
-from opta.module_processors.local_mongodb import LocalMongoDBProcessor
-from opta.module_processors.local_mysql import LocalMYSQLProcessor
-from opta.module_processors.local_postgres import LocalPostgresProcessor
-from opta.module_processors.local_redis import LocalRedisProcessor
 from opta.module_processors.runx import RunxProcessor
 from opta.plugins.derived_providers import DerivedProviders
 from opta.utils import deep_merge, hydrate, logger, yaml
@@ -101,17 +90,6 @@ class Layer:
         "gcp-dns": GCPDnsProcessor,
         "gcp-service-account": GcpServiceAccountProcessor,
         "custom-terraform": CustomTerraformProcessor,
-        "aws-postgres": AwsPostgresProcessor,
-        "aws-redis": AwsRedisProcessor,
-        "azure-postgres": AzurePostgresProcessor,
-        "azure-redis": AzureRedisProcessor,
-        "gcp-mysql": GCPMYSQLProcessor,
-        "gcp-postgres": GCPPostgresProcessor,
-        "gcp-redis": GCPRedisProcessor,
-        "local-mongodb": LocalMongoDBProcessor,
-        "local-mysql": LocalMYSQLProcessor,
-        "local-postgres": LocalPostgresProcessor,
-        "local-redis": LocalRedisProcessor,
     }
 
     def __init__(

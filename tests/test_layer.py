@@ -142,10 +142,6 @@ class TestLayer:
             "opta.layer.AwsDocumentDbProcessor"
         )
         layer.PROCESSOR_DICT["aws-documentdb"] = mocked_aws_documentdb_processor
-        mocked_aws_postgres_processor = mocker.patch("opta.layer.AwsPostgresProcessor")
-        layer.PROCESSOR_DICT["aws-postgres"] = mocked_aws_postgres_processor
-        mocked_aws_redis_processor = mocker.patch("opta.layer.AwsRedisProcessor")
-        layer.PROCESSOR_DICT["aws-redis"] = mocked_aws_redis_processor
         mocked_base_processor = mocker.patch("opta.layer.ModuleProcessor")
 
         assert layer.name == "dummy-config-1"
@@ -177,22 +173,13 @@ class TestLayer:
             ]
         )
 
-        mocked_aws_postgres_processor.assert_has_calls(
+        mocked_base_processor.assert_has_calls(
             [
                 mocker.call(mocker.ANY, layer),
                 mocker.call().pre_hook(13),
                 mocker.call(mocker.ANY, layer),
                 mocker.call().pre_hook(13),
                 mocker.call(mocker.ANY, layer),
-                mocker.call().post_hook(13, None),
-                mocker.call(mocker.ANY, layer),
-                mocker.call().post_hook(13, None),
-            ]
-        )
-
-        mocked_aws_redis_processor.assert_has_calls(
-            [
-                mocker.call(mocker.ANY, layer),
                 mocker.call().pre_hook(13),
                 mocker.call(mocker.ANY, layer),
                 mocker.call().pre_hook(13),
@@ -200,10 +187,12 @@ class TestLayer:
                 mocker.call().post_hook(13, None),
                 mocker.call(mocker.ANY, layer),
                 mocker.call().post_hook(13, None),
+                mocker.call(mocker.ANY, layer),
+                mocker.call().post_hook(13, None),
+                mocker.call(mocker.ANY, layer),
+                mocker.call().post_hook(13, None),
             ]
         )
-
-        mocked_base_processor.assert_has_calls([])
         mocked_aws_iam_role_processor.assert_has_calls(
             [
                 mocker.call(mocker.ANY, layer),
