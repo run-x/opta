@@ -1,12 +1,11 @@
 import base64
-import json
 from typing import TYPE_CHECKING, Any, Optional
 
 from azure.core.exceptions import ResourceNotFoundError
 from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient, ContainerClient, StorageStreamDownloader
 
-from opta.utils import logger
+from opta.utils import json, logger
 
 if TYPE_CHECKING:
     from opta.layer import Layer, StructuredConfig

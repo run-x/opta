@@ -1,5 +1,4 @@
 import errno
-import json
 import logging
 import os
 import time
@@ -36,7 +35,7 @@ from opta.core.gcp import GCP
 from opta.core.local import Local
 from opta.exceptions import MissingState, UserErrors
 from opta.nice_subprocess import nice_run
-from opta.utils import deep_merge, fmt_msg, logger
+from opta.utils import deep_merge, fmt_msg, json, logger
 
 if TYPE_CHECKING:
     from opta.layer import Layer
