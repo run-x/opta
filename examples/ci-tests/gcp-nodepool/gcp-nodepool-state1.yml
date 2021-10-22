@@ -1,0 +1,14 @@
+name: gcp-multi-nodepool
+org_name: runx-ci
+providers:
+  google:
+    region: us-central1
+    project: opta-ci-1
+modules:
+  - type: base
+  - type: dns
+    domain: gcp-release.runx.dev
+    delegated: false
+  - type: k8s-cluster
+    max_nodes: 4
+  - type: k8s-base
