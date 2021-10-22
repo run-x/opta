@@ -20,7 +20,7 @@ class TestAzureK8sServiceProcessor:
         idx = len(layer.modules)
         app_module = layer.get_module("app", idx)
         mocked_process = mocker.patch(
-            "opta.module_processors.azure_k8s_service.ModuleProcessor.process"
+            "opta.module_processors.azure_k8s_service.K8sServiceModuleProcessor.process"
         )
         AzureK8sServiceProcessor(app_module, layer).process(idx)
         mocked_process.assert_called_once_with(idx)
