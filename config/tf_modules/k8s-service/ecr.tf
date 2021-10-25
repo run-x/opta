@@ -1,8 +1,16 @@
+resource "random_string" "repo_name_hash" {
+  length  = 4
+  special = false
+}
+
 resource "aws_ecr_repository" "repo" {
   count = var.image == "AUTO" ? 1 : 0
-  name  = "opta-${var.layer_name}-${var.module_name}"
+  name  = "opta-${var.layer_name}-${var.module_name}-${random_string.repo_name_hash.result}"
   tags = {
     terraform = "true"
+  }
+  lifecycle {
+    ignore_changes = [name]
   }
 }
 
