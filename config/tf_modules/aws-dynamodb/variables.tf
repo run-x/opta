@@ -17,27 +17,27 @@ variable "module_name" {
 }
 
 variable "read_capacity" {
-  type = number
+  type    = number
   default = 20
 }
 
 variable "write_capacity" {
-  type = number
+  type    = number
   default = 20
 }
 
 variable "billing_mode" {
-  type = string
+  type    = string
   default = "PROVISIONED"
 }
 
 variable "hash_key" {
-  type = string
+  type    = string
   default = ""
 }
 
 variable "range_key" {
-  type = string
+  type    = string
   default = null
 }
 
