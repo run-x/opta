@@ -159,6 +159,8 @@ class AWSIamAssembler:
         self.publish_topics: list[str] = []
         self.kms_write_keys: list[str] = []
         self.kms_read_keys: list[str] = []
+        self.dynamodb_write_tables: list[str] = []
+        self.dynamodb_read_tables: list[str] = []
         super(AWSIamAssembler, self).__init__()
 
     def prepare_iam_statements(self) -> List[dict]:
@@ -190,6 +192,14 @@ class AWSIamAssembler:
         if self.kms_read_keys:
             iam_statements.append(
                 AWS.prepare_kms_read_keys_statements(self.kms_read_keys)
+            )
+        if self.dynamodb_write_tables:
+            iam_statements.append(
+                AWS.prepare_dynamodb_write_tables_statements(self.dynamodb_write_tables)
+            )
+        if self.dynamodb_read_tables:
+            iam_statements.append(
+                AWS.prepare_dynamodb_read_tables_statements(self.dynamodb_read_tables)
             )
         return iam_statements
 
@@ -225,6 +235,27 @@ class AWSIamAssembler:
             if permission == "publish":
                 self.publish_topics.append(
                     f"${{{{module.{linked_module.name}.topic_arn}}}}"
+                )
+                self.kms_write_keys.append(
+                    f"${{{{module.{linked_module.name}.kms_arn}}}}"
+                )
+            else:
+                raise Exception(f"Invalid permission {permission}")
+
+    def handle_dynamodb_link(
+        self, linked_module: "Module", link_permissions: List[str]
+    ) -> None:
+        if link_permissions is None or len(link_permissions) == 0:
+            link_permissions = ["write"]
+        for permission in link_permissions:
+            if permission == "read":
+                self.dynamodb_read_tables.append(
+                    f"${{{{module.{linked_module.name}.table_arn}}}}"
+                )
+                self.kms_read_keys.append(f"${{{{module.{linked_module.name}.kms_arn}}}}")
+            elif permission == "write":
+                self.dynamodb_write_tables.append(
+                    f"${{{{module.{linked_module.name}.table_arn}}}}"
                 )
                 self.kms_write_keys.append(
                     f"${{{{module.{linked_module.name}.kms_arn}}}}"
