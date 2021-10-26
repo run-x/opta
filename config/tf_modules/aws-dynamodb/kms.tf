@@ -34,7 +34,7 @@ data "aws_iam_policy_document" "kms_policy" {
 }
 
 resource "aws_kms_key" "key" {
-  description         = "SQS Key"
+  description         = "DynamoDB Key"
   policy              = data.aws_iam_policy_document.kms_policy.json
   enable_key_rotation = true
   tags = {
