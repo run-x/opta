@@ -1,4 +1,4 @@
-name: ToDo List
+name: DB Editions
 
 on: workflow_dispatch
 
