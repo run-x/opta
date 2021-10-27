@@ -1,0 +1,36 @@
+environments:
+    - name: gcp-release
+      path: "environment.yml"
+      variables: {}
+name: testservice
+modules:
+  - type: k8s-service
+    port:
+      http: 5000
+    image: AUTO
+    healthcheck_path: "/healthcheck"
+    public_uri: "test-service.{parent.domain}"
+    env_vars:
+      - name: APPENV
+        value: "{env}"
+      - name: CLOUD_PROVIDER
+        value: gcp
+    secrets:
+      - FAKE_SECRET
+    links:
+      - pg
+      - redis
+      - bucket
+  - name: pg
+    type: postgres
+    safety: false
+  - name: redis
+    type: redis
+  - name: bucket
+    type: gcp-gcs
+    bucket_name: "runx-test-service-bucket-{env}"
+  - name: redishelm
+    type: helm-chart
+    chart: redis
+    chart_version: "15.3.2"
+    repository: "https://charts.bitnami.com/bitnami"

@@ -16,8 +16,3 @@ modules:
   - type: k8s-base
     admin_arns:
       - "arn:aws:iam::693658092572:user/github-actions"
-  - type: aws-nodegroup
-    name: nodegroup1
-    spot_instances: true
-    min_nodes: 1
-    max_nodes: 3
