@@ -1,4 +1,4 @@
-name: Create, Destroy and Test Services Local
+name: Local Test Mode
 
 on: workflow_dispatch
 

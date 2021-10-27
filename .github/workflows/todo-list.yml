@@ -1,4 +1,4 @@
-name: ToDo List
+name: K8s Service mesh
 
 on: workflow_dispatch
 
