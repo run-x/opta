@@ -253,7 +253,11 @@ class AWS:
             ],
             "Effect": "Allow",
             "Resource": [
-                dynamodb_table_arn for dynamodb_table_arn in dynamodb_table_arns
+                *[dynamodb_table_arn for dynamodb_table_arn in dynamodb_table_arns],
+                *[
+                    f"{dynamodb_table_arn}/index/*"
+                    for dynamodb_table_arn in dynamodb_table_arns
+                ],
             ],
         }
 
@@ -272,7 +276,11 @@ class AWS:
             ],
             "Effect": "Allow",
             "Resource": [
-                dynamodb_table_arn for dynamodb_table_arn in dynamodb_table_arns
+                *[dynamodb_table_arn for dynamodb_table_arn in dynamodb_table_arns],
+                *[
+                    f"{dynamodb_table_arn}/index/*"
+                    for dynamodb_table_arn in dynamodb_table_arns
+                ],
             ],
         }
 

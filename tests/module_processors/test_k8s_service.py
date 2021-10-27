@@ -146,7 +146,10 @@ class TestK8sServiceProcessor:
                         "dynamodb:PartiQLSelect",
                     ],
                     "Effect": "Allow",
-                    "Resource": ["${{module.dynamo.table_arn}}"],
+                    "Resource": [
+                        "${{module.dynamo.table_arn}}",
+                        "${{module.dynamo.table_arn}}/index/*",
+                    ],
                     "Sid": "DynamodbWrite",
                 },
             ],

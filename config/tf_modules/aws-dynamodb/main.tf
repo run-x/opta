@@ -1,6 +1,7 @@
 resource "random_string" "db_name_hash" {
   length  = 4
   special = false
+  upper   = false
 }
 
 resource "aws_dynamodb_table" "table_no_range" {

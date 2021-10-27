@@ -38,7 +38,7 @@ inputs:
     user_facing: true
     validator: str(required=False)
     description: The range key for your table
-    default: None
+    default: null
   - name: attributes
     user_facing: true
     validator: list(include('attributes'), required=True)
