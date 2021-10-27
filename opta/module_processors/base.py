@@ -85,6 +85,23 @@ class K8sServiceModuleProcessor(ModuleProcessor):
     def __init__(self, module: "Module", layer: "Layer"):
         super(K8sServiceModuleProcessor, self).__init__(module, layer)
 
+    def process(self, module_idx: int) -> None:
+        if isinstance(self.module.data.get("public_uri"), str):
+            self.module.data["public_uri"] = [self.module.data["public_uri"]]
+
+        new_uris: list[str] = []
+        public_uri: str
+        for public_uri in self.module.data["public_uri"]:
+            if public_uri.startswith("/"):
+                new_uris.append(f"all{public_uri}")
+            elif public_uri.startswith("*"):
+                new_uris.append(f"all{public_uri[1:]}")
+            else:
+                new_uris.append(public_uri)
+        self.module.data["public_uri"] = new_uris
+
+        super(K8sServiceModuleProcessor, self).process(module_idx)
+
     def get_event_properties(self) -> Dict[str, int]:
         min_max_container_data = {
             "min_containers": self.module.data.get("min_containers", 1),

@@ -35,9 +35,6 @@ class GcpK8sServiceProcessor(GcpK8sModuleProcessor, K8sServiceModuleProcessor):
         self.module.data["manual_secrets"] = self.module.data.get("secrets", [])
         self.module.data["link_secrets"] = self.module.data.get("link_secrets", [])
 
-        if isinstance(self.module.data.get("public_uri"), str):
-            self.module.data["public_uri"] = [self.module.data["public_uri"]]
-
         current_envars: Union[List, Dict[str, str]] = self.module.data.get("env_vars", [])
         if isinstance(current_envars, dict):
             self.module.data["env_vars"] = [
