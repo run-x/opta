@@ -1,6 +1,7 @@
 resource "random_string" "repo_name_hash" {
   length  = 4
   special = false
+  upper = false
 }
 
 resource "aws_ecr_repository" "repo" {

@@ -6,6 +6,7 @@ resource "random_password" "redis_auth" {
 resource "random_string" "redis_name_hash" {
   length  = 4
   special = false
+  upper = false
 }
 
 data "aws_security_group" "security_group" {
