@@ -22,12 +22,7 @@ jobs:
         uses: softprops/turnstyle@v1
         env:
           GITHUB_TOKEN: ${{ secrets.ALL_GITHUB_TOKEN }}
-      - name: Checkout runx-infra repo
-        uses: actions/checkout@v2
-        with:
-          repository: "run-x/runx-infra"
-          path: "runx-infra"
-          ssh-key: ${{ secrets.SSH_KEY }}
+
       - name: Checkout test-service repo
         uses: actions/checkout@v2
         with:
