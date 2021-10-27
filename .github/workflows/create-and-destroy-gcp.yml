@@ -90,6 +90,22 @@ jobs:
           --config ./examples/ci-tests/create-and-destroy-gcp/service.yml \
           --tag ${{ github.sha }} \
           --auto-approve
+      - name: Deploy test-service with Additional PG
+        run: |
+          OPTA_DISABLE_REPORTING=true ./dist/opta/opta deploy \
+          --image app:latest \
+          --env gcp-release \
+          --config ./examples/ci-tests/create-and-destroy-gcp/service-additional-pg.yml \
+          --tag ${{ github.sha }} \
+          --auto-approve
+      - name: Deploy test-service remove Additional PG
+        run: |
+          OPTA_DISABLE_REPORTING=true ./dist/opta/opta deploy \
+          --image app:latest \
+          --env gcp-release \
+          --config ./examples/ci-tests/create-and-destroy-gcp/service.yml \
+          --tag ${{ github.sha }} \
+          --auto-approve
       - name: View secret and check value
         run: |
           secret_value=$(OPTA_DISABLE_REPORTING=true ./dist/opta/opta secret view \
