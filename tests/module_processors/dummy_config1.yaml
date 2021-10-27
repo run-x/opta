@@ -51,6 +51,7 @@ modules:
       - bucket3
       - queue
       - topic
+      - dynamo
   - name: deployeruser
     type: aws-iam-user
     extra_iam_policies:
@@ -84,3 +85,12 @@ modules:
     type: redis
   - name: docdb2
     type: aws-documentdb
+  - name: dynamo
+    type: aws-dynamodb
+    hash_key: blah
+    range_key: baloney
+    attributes:
+      - name: blah
+        type: S
+      - name: baloney
+        type: N
