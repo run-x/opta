@@ -35,8 +35,10 @@ class AWS:
         try:
             dynamodb_client.describe_table(TableName=dynamodb_table)
         except Exception:
-            raise UserErrors("Unable to reach Dynamo DB. Please check the configuration for the provided.\n"
-                             "Check if the Account ID or region are configured properly.")
+            raise UserErrors(
+                "Unable to reach Dynamo DB. Please check the configuration for the provided.\n"
+                "Check if the Account ID or region are configured properly."
+            )
         return dynamodb_client
 
     # Fetches AWS resources tagged with "opta: true"
