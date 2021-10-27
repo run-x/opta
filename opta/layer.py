@@ -29,6 +29,7 @@ from opta.exceptions import UserErrors
 from opta.module import Module
 from opta.module_processors.aws_dns import AwsDnsProcessor
 from opta.module_processors.aws_document_db import AwsDocumentDbProcessor
+from opta.module_processors.aws_dynamodb import AwsDynamodbProcessor
 from opta.module_processors.aws_eks import AwsEksProcessor
 from opta.module_processors.aws_email import AwsEmailProcessor
 from opta.module_processors.aws_iam_role import AwsIamRoleProcessor
@@ -90,6 +91,7 @@ class Layer:
         "gcp-dns": GCPDnsProcessor,
         "gcp-service-account": GcpServiceAccountProcessor,
         "custom-terraform": CustomTerraformProcessor,
+        "aws-dynamodb": AwsDynamodbProcessor,
     }
 
     def __init__(

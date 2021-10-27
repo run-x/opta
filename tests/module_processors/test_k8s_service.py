@@ -118,6 +118,7 @@ class TestK8sServiceProcessor:
                     "Resource": [
                         "${{module.queue.kms_arn}}",
                         "${{module.topic.kms_arn}}",
+                        "${{module.dynamo.kms_arn}}",
                     ],
                     "Sid": "KMSWrite",
                 },
@@ -126,6 +127,30 @@ class TestK8sServiceProcessor:
                     "Effect": "Allow",
                     "Resource": ["${{module.queue.kms_arn}}"],
                     "Sid": "KMSRead",
+                },
+                {
+                    "Action": [
+                        "dynamodb:BatchWriteItem",
+                        "dynamodb:DeleteItem",
+                        "dynamodb:PartiQLDelete",
+                        "dynamodb:PartiQLInsert",
+                        "dynamodb:PartiQLUpdate",
+                        "dynamodb:PutItem",
+                        "dynamodb:UpdateItem",
+                        "dynamodb:ListTables",
+                        "dynamodb:BatchGetItem",
+                        "dynamodb:Describe*",
+                        "dynamodb:GetItem",
+                        "dynamodb:Query",
+                        "dynamodb:Scan",
+                        "dynamodb:PartiQLSelect",
+                    ],
+                    "Effect": "Allow",
+                    "Resource": [
+                        "${{module.dynamo.table_arn}}",
+                        "${{module.dynamo.table_arn}}/index/*",
+                    ],
+                    "Sid": "DynamodbWrite",
                 },
             ],
         }

@@ -240,6 +240,59 @@ class AWS:
         }
 
     @staticmethod
+    def prepare_dynamodb_write_tables_statements(dynamodb_table_arns: List[str]) -> dict:
+        return {
+            "Sid": "DynamodbWrite",
+            "Action": [
+                "dynamodb:BatchWriteItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:PartiQLDelete",
+                "dynamodb:PartiQLInsert",
+                "dynamodb:PartiQLUpdate",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:ListTables",
+                "dynamodb:BatchGetItem",
+                "dynamodb:Describe*",
+                "dynamodb:GetItem",
+                "dynamodb:Query",
+                "dynamodb:Scan",
+                "dynamodb:PartiQLSelect",
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                *[dynamodb_table_arn for dynamodb_table_arn in dynamodb_table_arns],
+                *[
+                    f"{dynamodb_table_arn}/index/*"
+                    for dynamodb_table_arn in dynamodb_table_arns
+                ],
+            ],
+        }
+
+    @staticmethod
+    def prepare_dynamodb_read_tables_statements(dynamodb_table_arns: List[str]) -> dict:
+        return {
+            "Sid": "DynamodbRead",
+            "Action": [
+                "dynamodb:ListTables",
+                "dynamodb:BatchGetItem",
+                "dynamodb:Describe*",
+                "dynamodb:GetItem",
+                "dynamodb:Query",
+                "dynamodb:Scan",
+                "dynamodb:PartiQLSelect",
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                *[dynamodb_table_arn for dynamodb_table_arn in dynamodb_table_arns],
+                *[
+                    f"{dynamodb_table_arn}/index/*"
+                    for dynamodb_table_arn in dynamodb_table_arns
+                ],
+            ],
+        }
+
+    @staticmethod
     def delete_bucket(bucket_name: str) -> None:
         # Before a bucket can be deleted, all of the objects inside must be removed.
         bucket = boto3.resource("s3").Bucket(bucket_name)

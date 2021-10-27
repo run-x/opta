@@ -23,6 +23,7 @@ modules:
       - db
       - topic
       - queue
+      - dynamo
     secrets:
       - API_KEY
       - SECRET_1
@@ -78,3 +79,12 @@ modules:
         blah: "3"
         opta_iteration: "2"
     values_files: ["./blah.yaml"]
+  - name: dynamo
+    type: aws-dynamodb
+    hash_key: blah
+    range_key: baloney
+    attributes:
+      - name: blah
+        type: S
+      - name: baloney
+        type: N
