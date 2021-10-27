@@ -92,6 +92,13 @@ jobs:
           --config ./examples/ci-tests/todo-list/monitoring-service.yml \
           --auto-approve
 
+      - name: Ping tests for API, Frotend and Grafana
+        run: |
+          export HOST_NAME=`./dist/opta/opta output -c ./examples/ci-tests/todo-list/provider.yml | jq -r '.load_balancer_raw_dns'`
+          curl $HOST_NAME/frontend --fail
+          curl $HOST_NAME/djangoapi/ht/ --fail
+          curl $HOST_NAME/grafana --fail
+
       - name: Destroy Test Prometheus Service using Release build
         run: |
           yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
