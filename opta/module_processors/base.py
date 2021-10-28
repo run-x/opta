@@ -1,11 +1,11 @@
 import dataclasses
 import math
 from platform import system
+from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Set, Tuple, Union
 
 from dns.rdtypes.ANY.NS import NS
 from dns.resolver import Answer, NoNameservers, query
-from types import SimpleNamespace
 
 from opta.constants import REGISTRY
 from opta.core import kubernetes
