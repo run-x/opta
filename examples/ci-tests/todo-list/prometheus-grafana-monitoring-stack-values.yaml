@@ -1,0 +1,18 @@
+alertmanager:
+  enabled: false
+grafana:
+  enabled: true
+  grafana.ini:
+    server:
+      domain: localhost
+      root_url: "%(protocol)s://%(domain)s:%(http_port)s/grafana"
+      serve_from_sub_path: true
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/rewrite-target: /$1
+      nginx.ingress.kubernetes.io/use-regex: "true"
+    path: /grafana/?(.*)
+prometheusOperator:
+  enabled: false

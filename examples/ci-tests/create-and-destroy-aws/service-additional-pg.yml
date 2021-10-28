@@ -1,0 +1,43 @@
+environments:
+    - name: ci
+      path: "environment.yml"
+      variables: {}
+name: test-service-runx
+modules:
+  - type: k8s-service
+    name: app
+    public_uri: "test-service.{parent.domain}"
+    port:
+      http: 5000
+    image: AUTO
+    healthcheck_path: "/healthcheck"
+    env_vars:
+      - name: APPENV
+        value: "{env}"
+    secrets:
+      - FAKE_SECRET
+    links:
+      - pg
+      - docdb
+      - redis
+      - addpg
+      - bucket: ["write"]
+  - name: pg
+    type: postgres
+    safety: false
+  - name: addpg
+    type: postgres
+    safety: false
+  - name: docdb
+    type: aws-documentdb
+  - name: redis
+    type: redis
+    node_type: "cache.t3.micro"
+  - name: bucket
+    type: aws-s3
+    bucket_name: "runx-test-service-bucket-{env}"
+  - name: redishelm
+    type: helm-chart
+    chart: redis
+    chart_version: "15.3.2"
+    repository: "https://charts.bitnami.com/bitnami"
