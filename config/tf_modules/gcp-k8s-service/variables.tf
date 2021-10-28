@@ -12,6 +12,7 @@ locals {
   env_short    = substr(var.env_name, 0, 9)
   layer_short  = substr(var.layer_name, 0, 9)
   module_short = substr(var.module_name, 0, 9)
+  uppercase_image = upper(var.image)
 }
 
 variable "env_name" {

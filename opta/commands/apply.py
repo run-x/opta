@@ -243,7 +243,7 @@ def _apply(
                         or current_image_info["digest"] is not None
                     )
                     and image_tag is None
-                    and service_module.data.get("image", "") == "AUTO"
+                    and service_module.data.get("image", "").upper() == "AUTO"
                     and not test
                 ):
                     if click.confirm(
