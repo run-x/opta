@@ -366,11 +366,8 @@ class AWSIamAssembler:
         self.publish_topics: list[str] = []
         self.kms_write_keys: list[str] = []
         self.kms_read_keys: list[str] = []
-<<<<<<< HEAD
         self.dynamodb_write_tables: list[str] = []
         self.dynamodb_read_tables: list[str] = []
-=======
->>>>>>> f36a2a3 (linting)
         super(AWSIamAssembler, self).__init__()
 
     def prepare_iam_statements(self) -> List[dict]:
