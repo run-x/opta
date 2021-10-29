@@ -24,6 +24,19 @@ variable "module_name" {
   type        = string
 }
 
+variable "consistent_hash" {
+  type    = string
+  default = null
+}
+
+variable "sticky_session" {
+  default = false
+}
+
+variable "sticky_session_max_age" {
+  default = 86400
+}
+
 variable "port" {
   description = "Port to be exposed as :80"
   type        = map(number)
@@ -128,4 +141,14 @@ variable "manual_secrets" {
 variable "local_registry_name" {
   type    = string
   default = "localhost:5000"
+}
+
+variable "keep_path_prefix" {
+  type    = bool
+  default = false
+}
+
+variable "persistent_storage" {
+  type    = list(map(string))
+  default = []
 }

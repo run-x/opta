@@ -98,6 +98,21 @@ inputs:
     validator: str(required=False)
     description: Use if liveness probe != readiness probe
     default: null
+  - name: consistent_hash
+    user_facing: true
+    validator: str(required=False)
+    description: Use [consistent hashing](https://www.nginx.com/resources/wiki/modules/consistent_hash/)
+    default: null
+  - name: sticky_session
+    user_facing: true
+    validator: bool(required=False)
+    description: Use [sticky sessions](https://stackoverflow.com/questions/10494431/sticky-and-non-sticky-sessions) via cookies for your service (first request will send you a cookie called opta_cookie which you should add on future requests).
+    default: false
+  - name: sticky_session_max_age
+    user_facing: true
+    validator: int(required=False)
+    description: If the sticky session is enabled, how long should the cookie last?
+    default: 86400
   - name: resource_request
     user_facing: true
     validator: any(required=False)
@@ -117,7 +132,17 @@ inputs:
     description: |
       The full domain to expose your app under as well as path prefix. Must be the full parent domain or a subdomain referencing the parent as such: "dummy.{parent[domain]}/my/path/prefix"
     default: []
+  - name: persistent_storage
+    user_facing: true
+    validator: list(include('persistent_storage'), required=False)
+    description: |
+      A list persistent storages to add to each instance of your service (need to give a `size` which is the size in GB
+      for the storage volume to be, and `path` which is the path in the filesystem of each instance to place it under)
+    default: []
 extra_validators:
+  persistent_storage:
+    size: int(required=True)
+    path: str(required=True)
   env-var:
     name: str(required=False)
     value: str()
