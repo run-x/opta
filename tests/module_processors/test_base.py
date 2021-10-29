@@ -157,20 +157,24 @@ class TestK8sBaseModuleProcessor:
     def process_nginx_extra_ports(
         processor: K8sBaseModuleProcessor,
         extra_ports: List[int],
+        extra_tls_ports: List[int],
         service_ports: Dict[int, str],
     ) -> Dict[int, str]:
 
         # mypy cannot see the mangled method, so we need to ignore type errors here
-        return processor._K8sBaseModuleProcessor__process_nginx_extra_ports(extra_ports, service_ports)  # type: ignore
+        return processor._K8sBaseModuleProcessor__process_nginx_extra_ports(extra_ports, extra_tls_ports, service_ports)  # type: ignore
 
     def test_process_nginx_extra_ports_empty(self) -> None:
         processor = K8sBaseModuleProcessor()
 
         extra_ports: List[int] = []
+        extra_tls_ports: List[int] = []
         service_ports: Dict[int, str] = {}
         expected: Dict[int, str] = {}
 
-        actual = self.process_nginx_extra_ports(processor, extra_ports, service_ports)
+        actual = self.process_nginx_extra_ports(
+            processor, extra_ports, extra_tls_ports, service_ports
+        )
 
         assert actual == expected
 
@@ -181,13 +185,16 @@ class TestK8sBaseModuleProcessor:
             1,
             2,
         ]
+        extra_tls_ports: List[int] = []
         service_ports: Dict[int, str] = {}
         expected: Dict[int, str] = {
             1: "noservice/configured:9",
             2: "noservice/configured:9",
         }
 
-        actual = self.process_nginx_extra_ports(processor, extra_ports, service_ports)
+        actual = self.process_nginx_extra_ports(
+            processor, extra_ports, extra_tls_ports, service_ports
+        )
 
         assert actual == expected
 
@@ -198,6 +205,7 @@ class TestK8sBaseModuleProcessor:
             1,
             2,
         ]
+        extra_tls_ports: List[int] = []
         service_ports: Dict[int, str] = {
             1: "foo/bar:spam",
             3: "notin/extra:ports",
@@ -208,7 +216,9 @@ class TestK8sBaseModuleProcessor:
             2: "noservice/configured:9",
         }
 
-        actual = self.process_nginx_extra_ports(processor, extra_ports, service_ports)
+        actual = self.process_nginx_extra_ports(
+            processor, extra_ports, extra_tls_ports, service_ports
+        )
 
         assert actual == expected
 

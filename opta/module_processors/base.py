@@ -105,7 +105,7 @@ class PortSpec:
             type=raw["type"],
             port=raw["port"],
             protocol=raw.get("protocol"),
-            tls=raw.get("tls", True),
+            tls=raw.get("tls", False),
         )
 
         if (spec.type, spec.protocol) not in cls.valid_type_protocols():
@@ -326,15 +326,20 @@ class K8sServiceModuleProcessor(ModuleProcessor):
 class K8sBaseModuleProcessor:
     def _process_nginx_extra_ports(self, data: Dict[Any, Any]) -> None:
         extra_ports: List[int] = data["nginx_extra_tcp_ports"]
+        extra_tls_ports: List[int] = data["nginx_extra_tcp_ports_tls"]
+
         service_port_mapping = reconcile_nginx_extra_ports(update_config_map=False)
 
         # In a separate function to make logic more testable
         data["nginx_extra_tcp_ports"] = self.__process_nginx_extra_ports(
-            extra_ports, service_port_mapping
+            extra_ports, extra_tls_ports, service_port_mapping
         )
 
     def __process_nginx_extra_ports(
-        self, extra_ports: List[int], service_ports: Dict[int, str]
+        self,
+        extra_ports: List[int],
+        extra_tls_ports: List[int],
+        service_ports: Dict[int, str],
     ) -> Dict[int, str]:
         placeholder_port_mapping = {
             port: f"{NGINX_PLACEHOLDER_SERVICE}" for port in extra_ports
@@ -345,6 +350,15 @@ class K8sBaseModuleProcessor:
             port: service_ports.get(port, placeholder_service)
             for port, placeholder_service in placeholder_port_mapping.items()
         }
+
+        missing_ports = [
+            str(port) for port in extra_tls_ports if port not in port_mapping
+        ]
+
+        if missing_ports:
+            raise UserErrors(
+                f"Cannot enable TLS on ports {', '.join(missing_ports)} unless they are also set in nginx_extra_tcp_ports"
+            )
 
         return port_mapping
 
