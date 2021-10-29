@@ -29,6 +29,29 @@ class TestLayer:
                 None,
             )
 
+    def test_get_event_properties(self, mocker: MockFixture):
+        layer = Layer.load_from_yaml(
+            os.path.join(
+                os.path.dirname(os.path.dirname(__file__)),
+                "tests",
+                "module_processors",
+                "dummy_config1.yaml",
+            ),
+            None,
+        )
+
+        assert layer.get_event_properties() == {
+            "layer_name": "dummy-config-1",
+            "module_aws_documentdb": 2,
+            "module_aws_dynamodb": 1,
+            "module_aws_k8s_service": 2,
+            "module_aws_postgres": 2,
+            "module_aws_redis": 2,
+            "org_name": "opta-tests",
+            "parent_name": "dummy-parent",
+            "total_resources": 9,
+        }
+
     def test_parent(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(

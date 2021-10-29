@@ -5,5 +5,5 @@ locals {
 }
 
 output "docker_repo_url" {
-  value = var.image == "AUTO" ? local.get_ecr_repo_url : ""
+  value = local.uppercase_image == "AUTO" ? local.get_ecr_repo_url : ""
 }

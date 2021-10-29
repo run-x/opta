@@ -155,6 +155,21 @@ class TestK8sServiceProcessor:
             ],
         }
 
+    def test_get_event_properties(self):
+        layer = Layer.load_from_yaml(
+            os.path.join(
+                os.path.dirname(os.path.dirname(__file__)),
+                "module_processors",
+                "dummy_config1.yaml",
+            ),
+            None,
+        )
+        idx = len(layer.modules)
+        app_module = layer.get_module("app", idx)
+        assert AwsK8sServiceProcessor(app_module, layer).get_event_properties() == {
+            "module_aws_k8s_service": 2
+        }
+
     def test_bad_rds_permission(self):
         layer = Layer.load_from_yaml(
             os.path.join(

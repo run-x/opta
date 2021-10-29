@@ -14,6 +14,7 @@ locals {
     domain : split("/", s)[0],
     pathPrefix : (length(split("/", s)) > 1 ? "/${join("/", slice(split("/", s), 1, length(split("/", s))))}" : "/")
   }]
+  uppercase_image = upper(var.image)
 }
 
 variable "env_name" {
