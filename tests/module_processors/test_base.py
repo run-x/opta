@@ -217,7 +217,10 @@ class TestK8sServiceModuleProcessor:
     @pytest.fixture
     def processor(self) -> K8sServiceModuleProcessor:
         # TODO: Actually create module and layer; these tests don't depend on those
-        return K8sServiceModuleProcessor(None, None)  # type: ignore
+        processor = K8sServiceModuleProcessor(None, None)  # type: ignore
+        processor.FLAG_MULTIPLE_PORTS_SUPPORTED = True
+
+        return processor
 
     @staticmethod
     def transform_port(
