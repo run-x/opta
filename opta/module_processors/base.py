@@ -310,19 +310,27 @@ class K8sServiceModuleProcessor(ModuleProcessor):
 class K8sBaseModuleProcessor:
     def _process_nginx_extra_ports(self, data: Dict[Any, Any]) -> None:
         extra_ports: List[int] = data["nginx_extra_tcp_ports"]
+        service_port_mapping = reconcile_nginx_extra_ports(update_config_map=False)
 
+        # In a separate function to make logic more testable
+        data["nginx_extra_tcp_ports"] = self.__process_nginx_extra_ports(
+            extra_ports, service_port_mapping
+        )
+
+    def __process_nginx_extra_ports(
+        self, extra_ports: List[int], service_ports: Dict[int, str]
+    ) -> Dict[int, str]:
         placeholder_port_mapping = {
             port: f"{NGINX_PLACEHOLDER_SERVICE}" for port in extra_ports
         }
-        service_port_mapping = reconcile_nginx_extra_ports(update_config_map=False)
 
         # Only expose ports defined in nginx_extra_tcp_ports
         port_mapping = {
-            port: service_port_mapping.get(port, placeholder_service)
+            port: service_ports.get(port, placeholder_service)
             for port, placeholder_service in placeholder_port_mapping.items()
         }
 
-        data["nginx_extra_tcp_ports"] = port_mapping
+        return port_mapping
 
 
 class AWSK8sModuleProcessor(ModuleProcessor):

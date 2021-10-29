@@ -1,6 +1,6 @@
 import copy
 import os
-from typing import Any, Dict, Optional, Type
+from typing import Any, Dict, List, Optional, Type
 
 import pytest
 from dns.resolver import NoNameservers
@@ -153,34 +153,64 @@ class TestBaseModuleProcessors:
 
 
 class TestK8sBaseModuleProcessor:
-    @pytest.mark.skip(reason="We don't have a way of mocking kubernetes interactions")
+    @staticmethod
+    def process_nginx_extra_ports(
+        processor: K8sBaseModuleProcessor,
+        extra_ports: List[int],
+        service_ports: Dict[int, str],
+    ) -> Dict[int, str]:
+
+        # mypy cannot see the mangled method, so we need to ignore type errors here
+        return processor._K8sBaseModuleProcessor__process_nginx_extra_ports(extra_ports, service_ports)  # type: ignore
+
     def test_process_nginx_extra_ports_empty(self) -> None:
         processor = K8sBaseModuleProcessor()
-        data: Dict[str, Any] = {"nginx_extra_tcp_ports": []}
 
-        expected: Dict[str, Any] = {
-            "nginx_extra_tcp_ports": {},
-        }
+        extra_ports: List[int] = []
+        service_ports: Dict[int, str] = {}
+        expected: Dict[int, str] = {}
 
-        processor._process_nginx_extra_ports(data)
+        actual = self.process_nginx_extra_ports(processor, extra_ports, service_ports)
 
-        assert data == expected
+        assert actual == expected
 
-    @pytest.mark.skip(reason="We don't have a way of mocking kubernetes interactions")
-    def test_process_nginx_extra_ports(self) -> None:
+    def test_process_nginx_extra_ports_no_service(self) -> None:
         processor = K8sBaseModuleProcessor()
-        data: Dict[str, Any] = {"nginx_extra_tcp_ports": [1, 2]}
 
-        expected = {
-            "nginx_extra_tcp_ports": {
-                1: "noservice/configured:9",
-                2: "noservice/configured:9",
-            },
+        extra_ports: List[int] = [
+            1,
+            2,
+        ]
+        service_ports: Dict[int, str] = {}
+        expected: Dict[int, str] = {
+            1: "noservice/configured:9",
+            2: "noservice/configured:9",
         }
 
-        processor._process_nginx_extra_ports(data)
+        actual = self.process_nginx_extra_ports(processor, extra_ports, service_ports)
 
-        assert data == expected
+        assert actual == expected
+
+    def test_process_nginx_extra_ports_with_service(self) -> None:
+        processor = K8sBaseModuleProcessor()
+
+        extra_ports: List[int] = [
+            1,
+            2,
+        ]
+        service_ports: Dict[int, str] = {
+            1: "foo/bar:spam",
+            3: "notin/extra:ports",
+        }
+
+        expected: Dict[int, str] = {
+            1: "foo/bar:spam",
+            2: "noservice/configured:9",
+        }
+
+        actual = self.process_nginx_extra_ports(processor, extra_ports, service_ports)
+
+        assert actual == expected
 
 
 class TestK8sServiceModuleProcessor:
