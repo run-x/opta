@@ -148,6 +148,9 @@ class PortSpec:
 
 
 class K8sServiceModuleProcessor(ModuleProcessor):
+    # TODO: Remove this flag and references to it once all clouds support multiple ports
+    FLAG_MULTIPLE_PORTS_SUPPORTED = False
+
     def process(self, module_idx: int) -> None:
         self._process_ports(self.module.data)
 
@@ -240,6 +243,9 @@ class K8sServiceModuleProcessor(ModuleProcessor):
 
     def __service_annotations(self, ports: List[PortSpec]) -> Dict[str, str]:
         """Returns list of annotations to put on the service resources"""
+        if not self.FLAG_MULTIPLE_PORTS_SUPPORTED:
+            return {}
+
         port_mapping = {port.port: port.name for port in ports if port.is_tcp}
 
         if not port_mapping:
@@ -254,6 +260,9 @@ class K8sServiceModuleProcessor(ModuleProcessor):
 
     def __transform_port(self, data: Dict[Any, Any]) -> None:
         if "port" not in data:
+            if not self.FLAG_MULTIPLE_PORTS_SUPPORTED:
+                raise UserErrors("`port` is required in the service definition")
+
             return
 
         if "ports" in data:
@@ -288,6 +297,13 @@ class K8sServiceModuleProcessor(ModuleProcessor):
         del data["port"]
 
     def __validate_ports(self, ports: List[PortSpec]) -> None:
+        if not self.FLAG_MULTIPLE_PORTS_SUPPORTED:
+            if len(ports) > 1:
+                raise UserErrors("Cannot specify multiple ports in this cloud")
+
+            if len([port for port in ports if port.is_tcp]):
+                raise UserErrors("Cannot specify TCP ports in this cloud")
+
         # Make sure we only have at most one http port
         http_ports = [port for port in ports if port.is_http]
         if len(http_ports) > 1:

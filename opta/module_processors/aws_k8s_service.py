@@ -20,6 +20,8 @@ if TYPE_CHECKING:
 class AwsK8sServiceProcessor(
     AWSK8sModuleProcessor, K8sServiceModuleProcessor, AWSIamAssembler
 ):
+    FLAG_MULTIPLE_PORTS_SUPPORTED = True
+
     def __init__(self, module: "Module", layer: "Layer"):
         if (module.aliased_type or module.type) != "aws-k8s-service":
             raise Exception(
