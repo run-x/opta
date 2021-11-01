@@ -23,7 +23,7 @@ metadata:
     {{- if and ( ne $val.pathPrefix "/") $.Values.keepPathPrefix }}
     nginx.ingress.kubernetes.io/rewrite-target: "{{ $val.pathPrefix }}$1$2"
     {{- end }}
-    {{ if eq $.Values.httpPort.protocol "grpc" }}
+    {{ if eq (default "http" $.Values.httpPort.protocol) "grpc" }}
     nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
     {{- end }}
     cert-manager.io/cluster-issuer: opta-selfsigned
@@ -32,7 +32,7 @@ metadata:
       proxy_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;
       grpc_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;
     {{/* For websockets */}}
-    {{ if eq $.Values.httpPort.protocol "websocket" }}
+    {{ if eq (default "http" $.Values.httpPort.protocol) "websocket" }}
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
     {{- end }}
