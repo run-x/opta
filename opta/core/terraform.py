@@ -802,6 +802,7 @@ class Terraform:
                     Bucket=bucket_name,
                     CreateBucketConfiguration={"LocationConstraint": region},
                 )
+            time.sleep(10)
             s3.put_bucket_encryption(
                 Bucket=bucket_name,
                 ServerSideEncryptionConfiguration={
