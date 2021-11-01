@@ -89,16 +89,17 @@ class K8sServiceModuleProcessor(ModuleProcessor):
         if isinstance(self.module.data.get("public_uri"), str):
             self.module.data["public_uri"] = [self.module.data["public_uri"]]
 
-        new_uris: list[str] = []
-        public_uri: str
-        for public_uri in self.module.data["public_uri"]:
-            if public_uri.startswith("/"):
-                new_uris.append(f"all{public_uri}")
-            elif public_uri.startswith("*"):
-                new_uris.append(f"all{public_uri[1:]}")
-            else:
-                new_uris.append(public_uri)
-        self.module.data["public_uri"] = new_uris
+        if "public_uri" in self.module.data:
+            new_uris: list[str] = []
+            public_uri: str
+            for public_uri in self.module.data["public_uri"]:
+                if public_uri.startswith("/"):
+                    new_uris.append(f"all{public_uri}")
+                elif public_uri.startswith("*"):
+                    new_uris.append(f"all{public_uri[1:]}")
+                else:
+                    new_uris.append(public_uri)
+            self.module.data["public_uri"] = new_uris
 
         super(K8sServiceModuleProcessor, self).process(module_idx)
 
