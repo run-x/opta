@@ -77,6 +77,11 @@ inputs:
     validator: bool(required=False)
     description: Runs helm dependency update before installing the chart.
     default: true
+  - name: wait
+    user_facing: true
+    validator: bool(required=False)
+    description: Will wait (for as long as timeout) until all resources are in a ready state before marking the release as successful.
+    default: true
 outputs: { }
 output_providers: { }
 output_data: { }
