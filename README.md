@@ -108,6 +108,7 @@ modules:
       http: 80
     image: docker.io/kennethreitz/httpbin:latest
     healthcheck_path: "/get"
+    public_uri: "all"
 ```
 
 4. Deploy
