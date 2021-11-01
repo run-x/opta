@@ -44,6 +44,12 @@ class TestLocalK8sServiceProcessor:
             {"name": "BLAH", "value": "${{module.database2.db_password}}"},
             {"name": "DBHOST2", "value": "${{module.database2.db_host}}"},
             {"name": "CACHEHOST2", "value": "${{module.redis2.cache_host}}"},
+            {"name": "DB_PASSWORD", "value": "${{module.atlasmongo.db_password}}"},
+            {"name": "DB_USER", "value": "${{module.atlasmongo.db_user}}"},
+            {
+                "name": "MONGO_URI",
+                "value": "${{module.atlasmongo.mongo_atlas_connection_string}}",
+            },
         ]
         assert app_module.data["manual_secrets"] == [
             "BALONEY",

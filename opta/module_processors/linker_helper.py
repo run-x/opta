@@ -1,13 +1,18 @@
+from typing import Any, List
+
 from opta.exceptions import UserErrors
-from opta.module_processors.base import LocalK8sModuleProcessor
 from opta.module import Module
-from typing import List, Any
+from opta.module_processors.base import LocalK8sModuleProcessor
+
 
 class LinkerHelper:
     def handle_link(
-        module: "Module", linked_module: "Module", link_permissions: List[Any], required_vars: List[Any]
+        module: "Module",
+        linked_module: "Module",
+        link_permissions: List[Any],
+        required_vars: List[Any],
     ) -> None:
-        
+
         renamed_vars = {}
         if len(link_permissions) > 0:
             renamed_vars = link_permissions.pop()

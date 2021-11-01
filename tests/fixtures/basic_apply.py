@@ -44,6 +44,7 @@ BASIC_APPLY = (
             "private_subnet_ids": {"value": "${module.core.private_subnet_ids }"},
             "public_subnets_ids": {"value": "${module.core.public_subnets_ids }"},
             "s3_log_bucket_name": {"value": "${module.core.s3_log_bucket_name }"},
+            "public_nat_ips": {"value": "${module.core.public_nat_ips }"},
         },
     },
 )

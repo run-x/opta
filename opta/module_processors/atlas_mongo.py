@@ -46,6 +46,6 @@ class AtlasMongoProcessor(ModuleProcessor):
             self.module.data["region"] = "US_EAST_1"
         base_layer = self.layer.root()
         root_outputs = get_terraform_outputs(base_layer)
-        self.module.data["public_nat_ips"] =root_outputs["public_nat_ips"]
+        self.module.data["public_nat_ips"] = root_outputs["public_nat_ips"]
 
         super(AtlasMongoProcessor, self).process(module_idx)

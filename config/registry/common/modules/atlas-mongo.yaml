@@ -6,12 +6,6 @@ inputs:
     description: Project ID from Mongo Atlas; see https://docs.atlas.mongodb.com/tutorial/manage-project-settings/
     default: None
 
-  # - name: cloud_provider
-  #   user_facing: true
-  #   description: The cloud provider to use, must be AWS, GCP or AZURE
-  #   default: AWS
-  #   validator: str(required=False)
-
   - name: region
     user_facing: true
     description: MongoDB Atlas Cluster Region, must be a mongo region for the provider.
