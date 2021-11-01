@@ -46,7 +46,7 @@ spec:
           - path: {{ $val.pathPrefix }}{{ if not (eq $val.pathPrefix "/") }}(/|$)(.*){{ end }}
             backend:
               serviceName: {{ include "k8s-service.serviceName" $ }}
-              servicePort: {{ .Values.httpPort.port | quote }}
+              servicePort: {{ $.Values.httpPort.port | quote }}
 ---
 {{- end }}
 {{- end }}
