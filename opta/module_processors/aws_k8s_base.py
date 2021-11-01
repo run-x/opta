@@ -45,6 +45,8 @@ class AwsK8sBaseProcessor(AWSK8sModuleProcessor, K8sBaseModuleProcessor):
                 "certificate_chain"
             ] = f"${{{{module.{byo_cert_module.name}.certificate_chain}}}}"
 
+        Terraform.download_state(self.layer)
+        configure_kubectl(self.layer)
         self._process_nginx_extra_ports(self.module.data)
 
         aws_dns_module = None
