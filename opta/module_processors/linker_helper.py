@@ -2,10 +2,10 @@ from typing import Any, List
 
 from opta.exceptions import UserErrors
 from opta.module import Module
-from opta.module_processors.base import LocalK8sModuleProcessor
 
 
 class LinkerHelper:
+    @staticmethod
     def handle_link(
         module: "Module",
         linked_module: "Module",

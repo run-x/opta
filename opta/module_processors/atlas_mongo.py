@@ -1,16 +1,9 @@
 import os
 from typing import TYPE_CHECKING
 
-import click
-from kubernetes.client import ApiException, CoreV1Api, V1Namespace, V1ObjectMeta, V1Secret
-from kubernetes.config import load_kube_config
-from requests import codes, get
-
-from opta.core.kubernetes import configure_kubectl
 from opta.core.terraform import get_terraform_outputs
 from opta.exceptions import UserErrors
 from opta.module_processors.base import ModuleProcessor
-from opta.utils import exp_backoff, logger
 
 if TYPE_CHECKING:
     from opta.layer import Layer
@@ -27,7 +20,7 @@ class AtlasMongoProcessor(ModuleProcessor):
         super(AtlasMongoProcessor, self).__init__(module, layer)
 
     def pre_hook(self, module_idx: int) -> None:
-        required_env_set = set(["MONGODB_ATLAS_PUBLIC_KEY", "MONGODB_ATLAS_PRIVATE_KEY",])
+        required_env_set = set(["MONGODB_ATLAS_PUBLIC_KEY", "MONGODB_ATLAS_PRIVATE_KEY"])
 
         if not required_env_set.issubset(set(os.environ.keys())):
             raise UserErrors(

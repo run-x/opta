@@ -36,7 +36,7 @@ class TestLinkerHelper:
             app_module,
             atlas_module,
             link_permissions,
-            required_vars=["db_password", "db_user", "mongo_atlas_connection_string",],
+            required_vars=["db_password", "db_user", "mongo_atlas_connection_string"],
         )
         link_secret_keys = [x["name"] for x in app_module.data["link_secrets"]]
         assert "DB_USER" in link_secret_keys
