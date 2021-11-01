@@ -68,7 +68,7 @@ spec:
           {{- if .Values.livenessProbePath }}
           livenessProbe:
             initialDelaySeconds: 30
-            {{- if eq .Values.probePort "tcp" }}
+            {{- if eq .Values.probePort.type "tcp" }}
             tcpSocket:
               port: {{ .Values.probePort.name | quote }}
             {{- else if eq .Values.probePort.probe_type "http" }}
