@@ -38,13 +38,13 @@ rules[rule] {
     "status": "DISABLED"
   }
 } {
-    rule := {
-      "rule_id": "FG_R00433",
-      "status": "DISABLED"
-    }
-} {
   rule := {
     "rule_id": "FG_R00227",
+    "status": "DISABLED"
+  }
+} {
+  rule := {
+    "rule_id": "FG_R00433",
     "status": "DISABLED"
   }
 }

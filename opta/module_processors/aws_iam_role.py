@@ -112,6 +112,8 @@ class AwsIamRoleProcessor(ModuleProcessor, AWSIamAssembler):
                 self.handle_sqs_link(module, link_permissions)
             elif module_type == "aws-sns":
                 self.handle_sns_link(module, link_permissions)
+            elif module_type == "aws-dynamodb":
+                self.handle_dynamodb_link(module, link_permissions)
             else:
                 raise Exception(
                     f"Unsupported module type for k8s service link: {module_type}"

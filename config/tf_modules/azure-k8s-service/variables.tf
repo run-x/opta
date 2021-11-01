@@ -14,6 +14,7 @@ locals {
     domain : split("/", s)[0],
     pathPrefix : (length(split("/", s)) > 1 ? "/${join("/", slice(split("/", s), 1, length(split("/", s))))}" : "/")
   }]
+  uppercase_image = upper(var.image)
 }
 
 variable "env_name" {
@@ -152,4 +153,10 @@ variable "acr_registry_name" {
 variable "keep_path_prefix" {
   type    = bool
   default = false
+}
+
+
+variable "persistent_storage" {
+  type    = list(map(string))
+  default = []
 }

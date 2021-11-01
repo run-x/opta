@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import boto3
 import click
@@ -41,16 +41,23 @@ from opta.utils import check_opta_file_exists, fmt_msg, logger
 def destroy(
     config: str, env: Optional[str], auto_approve: bool, local: Optional[bool]
 ) -> None:
-    """Destroy all opta resources from the current config"""
+    """Destroy all opta resources from the current config
 
-    check_opta_file_exists(config)
+    To destroy an environment, you have to first destroy all the services first.
+
+    Examples:
+
+    opta destroy -c my_config.yaml --auto-approve
+    """
+
+    config = check_opta_file_exists(config)
     if local:
         config = _handle_local_flag(config, False)
         _clean_tf_folder()
     layer = Layer.load_from_yaml(config, env)
+    event_properties: Dict = layer.get_event_properties()
     amplitude_client.send_event(
-        amplitude_client.DESTROY_EVENT,
-        event_properties={"org_name": layer.org_name, "layer_name": layer.name},
+        amplitude_client.DESTROY_EVENT, event_properties=event_properties,
     )
     layer.verify_cloud_credentials()
     if not Terraform.download_state(layer):

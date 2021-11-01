@@ -11,8 +11,14 @@ data "aws_kms_key" "main" {
   key_id = "alias/opta-${var.env_name}"
 }
 
+resource "random_string" "db_name_hash" {
+  length  = 4
+  special = false
+  upper   = false
+}
+
 resource "aws_rds_cluster" "db_cluster" {
-  cluster_identifier      = "opta-${var.layer_name}-${var.module_name}"
+  cluster_identifier      = "opta-${var.layer_name}-${var.module_name}-${random_string.db_name_hash.result}"
   db_subnet_group_name    = "opta-${var.env_name}"
   database_name           = "app"
   engine                  = "aurora-postgresql"
@@ -27,13 +33,13 @@ resource "aws_rds_cluster" "db_cluster" {
   kms_key_id              = data.aws_kms_key.main.arn
   deletion_protection     = var.safety
   lifecycle {
-    ignore_changes = [storage_encrypted, kms_key_id]
+    ignore_changes = [storage_encrypted, kms_key_id, cluster_identifier]
   }
 }
 
 resource "aws_rds_cluster_instance" "db_instance" {
   count                           = var.multi_az ? 2 : 1
-  identifier                      = "opta-${var.layer_name}-${var.module_name}-${count.index}"
+  identifier                      = "opta-${var.layer_name}-${var.module_name}-${random_string.db_name_hash.result}-${count.index}"
   cluster_identifier              = aws_rds_cluster.db_cluster.id
   instance_class                  = var.instance_class
   engine                          = aws_rds_cluster.db_cluster.engine
@@ -42,4 +48,7 @@ resource "aws_rds_cluster_instance" "db_instance" {
   auto_minor_version_upgrade      = false
   performance_insights_enabled    = true
   performance_insights_kms_key_id = data.aws_kms_key.main.arn
+  lifecycle {
+    ignore_changes = [identifier]
+  }
 }

@@ -16,5 +16,5 @@ from opta.utils import check_opta_file_exists
     show_default=True,
 )
 def validate(config: str, env: Optional[str]) -> None:
-    check_opta_file_exists(config)
+    config = check_opta_file_exists(config)
     Layer.load_from_yaml(config, env)

@@ -118,6 +118,7 @@ class TestK8sServiceProcessor:
                     "Resource": [
                         "${{module.queue.kms_arn}}",
                         "${{module.topic.kms_arn}}",
+                        "${{module.dynamo.kms_arn}}",
                     ],
                     "Sid": "KMSWrite",
                 },
@@ -127,7 +128,46 @@ class TestK8sServiceProcessor:
                     "Resource": ["${{module.queue.kms_arn}}"],
                     "Sid": "KMSRead",
                 },
+                {
+                    "Action": [
+                        "dynamodb:BatchWriteItem",
+                        "dynamodb:DeleteItem",
+                        "dynamodb:PartiQLDelete",
+                        "dynamodb:PartiQLInsert",
+                        "dynamodb:PartiQLUpdate",
+                        "dynamodb:PutItem",
+                        "dynamodb:UpdateItem",
+                        "dynamodb:ListTables",
+                        "dynamodb:BatchGetItem",
+                        "dynamodb:Describe*",
+                        "dynamodb:GetItem",
+                        "dynamodb:Query",
+                        "dynamodb:Scan",
+                        "dynamodb:PartiQLSelect",
+                    ],
+                    "Effect": "Allow",
+                    "Resource": [
+                        "${{module.dynamo.table_arn}}",
+                        "${{module.dynamo.table_arn}}/index/*",
+                    ],
+                    "Sid": "DynamodbWrite",
+                },
             ],
+        }
+
+    def test_get_event_properties(self):
+        layer = Layer.load_from_yaml(
+            os.path.join(
+                os.path.dirname(os.path.dirname(__file__)),
+                "module_processors",
+                "dummy_config1.yaml",
+            ),
+            None,
+        )
+        idx = len(layer.modules)
+        app_module = layer.get_module("app", idx)
+        assert AwsK8sServiceProcessor(app_module, layer).get_event_properties() == {
+            "module_aws_k8s_service": 2
         }
 
     def test_bad_rds_permission(self):

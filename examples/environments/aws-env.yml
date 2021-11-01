@@ -26,7 +26,7 @@ modules:
       - "${{module.deployeruser.user_arn}}"
   - type: k8s-cluster
     spot_instances: true
-    max_nodes: 12
+    max_nodes: 13
     enable_metrics: true
     node_launch_template:
       user_data: |

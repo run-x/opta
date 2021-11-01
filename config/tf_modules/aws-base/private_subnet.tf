@@ -9,6 +9,7 @@ resource "aws_subnet" "private_subnets" {
     "kubernetes.io/cluster/opta-${var.layer_name}" = "shared"
     type                                           = "private"
     terraform                                      = "true"
+    "kubernetes.io/role/internal-elb"              = "1"
   }
 }
 

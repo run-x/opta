@@ -17,9 +17,14 @@ from opta.utils import check_opta_file_exists
     "-e", "--env", default=None, help="The env to use when loading the config file."
 )
 def force_unlock(config: str, env: Optional[str]) -> None:
-    """Force Unlocks a stuck lock on the current workspace"""
+    """Force Unlocks a stuck lock on the current workspace
+
+    Examples:
+
+    opta force-unlock -c my_config.yaml -e prod.yaml
+    """
     tf_flags: List[str] = []
-    check_opta_file_exists(config)
+    config = check_opta_file_exists(config)
     amplitude_client.send_event(amplitude_client.FORCE_UNLOCK_EVENT)
     layer = Layer.load_from_yaml(config, env)
     layer.verify_cloud_credentials()

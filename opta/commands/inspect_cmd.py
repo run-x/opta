@@ -1,4 +1,3 @@
-import json
 from typing import Any, List, Optional
 
 import click
@@ -9,7 +8,7 @@ from opta.core.generator import gen_all
 from opta.core.terraform import fetch_terraform_state_resources
 from opta.layer import Layer
 from opta.resource import Resource
-from opta.utils import check_opta_file_exists, column_print, deep_merge, is_tool
+from opta.utils import check_opta_file_exists, column_print, deep_merge, is_tool, json
 
 
 @click.command(hidden=True)
@@ -22,7 +21,7 @@ from opta.utils import check_opta_file_exists, column_print, deep_merge, is_tool
 def inspect(config: str, env: Optional[str]) -> None:
     """ Displays important resources and AWS/Datadog links to them """
 
-    check_opta_file_exists(config)
+    config = check_opta_file_exists(config)
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(
         amplitude_client.INSPECT_EVENT,

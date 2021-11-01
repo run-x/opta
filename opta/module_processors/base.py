@@ -1,12 +1,16 @@
+import math
 from platform import system
+from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 from dns.rdtypes.ANY.NS import NS
 from dns.resolver import Answer, NoNameservers, query
 
+from opta.constants import REGISTRY
 from opta.core.aws import AWS
 from opta.core.terraform import get_terraform_outputs
 from opta.exceptions import UserErrors
+from opta.utils import hydrate
 
 if TYPE_CHECKING:
     from opta.layer import Layer
@@ -27,6 +31,15 @@ class ModuleProcessor:
         self.module.data["env_name"] = self.layer.get_env()
         self.module.data["layer_name"] = self.layer.name
         self.module.data["module_name"] = self.module.name
+
+    def get_event_properties(self) -> Dict[str, int]:
+        module_type = self.module.aliased_type or self.module.type
+        module_instance_count = REGISTRY[self.layer.cloud]["modules"][module_type].get(
+            "metric_count", 0
+        )
+        if module_instance_count != 0:
+            return {f"module_{module_type.replace('-', '_')}": module_instance_count}
+        return {}
 
     def pre_hook(self, module_idx: int) -> None:
         pass
@@ -66,6 +79,61 @@ class DNSModuleProcessor(ModuleProcessor):
             raise UserErrors(
                 f"Incorrect NS servers. Expected {expected_name_servers}, actual {actual_name_servers}. (might take some time to propagate)"
             )
+
+
+class K8sServiceModuleProcessor(ModuleProcessor):
+    def __init__(self, module: "Module", layer: "Layer"):
+        super(K8sServiceModuleProcessor, self).__init__(module, layer)
+
+    def process(self, module_idx: int) -> None:
+        if isinstance(self.module.data.get("public_uri"), str):
+            self.module.data["public_uri"] = [self.module.data["public_uri"]]
+
+        if "public_uri" in self.module.data:
+            new_uris: list[str] = []
+            public_uri: str
+            for public_uri in self.module.data["public_uri"]:
+                if public_uri.startswith("/"):
+                    new_uris.append(f"all{public_uri}")
+                elif public_uri.startswith("*"):
+                    new_uris.append(f"all{public_uri[1:]}")
+                else:
+                    new_uris.append(public_uri)
+            self.module.data["public_uri"] = new_uris
+
+        super(K8sServiceModuleProcessor, self).process(module_idx)
+
+    def get_event_properties(self) -> Dict[str, int]:
+        min_max_container_data = {
+            "min_containers": self.module.data.get("min_containers", 1),
+            "max_containers": self.module.data.get("max_containers", 3),
+        }
+        min_max_container_data = hydrate(
+            min_max_container_data,
+            {
+                "vars": SimpleNamespace(**self.layer.variables),
+                "variables": SimpleNamespace(**self.layer.variables),
+            },
+        )
+
+        try:
+            min_containers = int(min_max_container_data["min_containers"])
+        except Exception:
+            min_containers = 1
+        try:
+            max_containers = int(min_max_container_data["max_containers"])
+        except Exception:
+            max_containers = 3
+
+        if self.layer.cloud == "aws":
+            key = "module_aws_k8s_service"
+        elif self.layer.cloud == "google":
+            key = "module_gcp_k8s_service"
+        elif self.layer.cloud == "azurerm":
+            key = "module_azure_k8s_service"
+        else:
+            key = "module_local_k8s_service"
+        return {key: math.ceil((min_containers + max_containers) / 2)}
 
 
 class AWSK8sModuleProcessor(ModuleProcessor):
@@ -109,6 +177,8 @@ class AWSIamAssembler:
         self.publish_topics: list[str] = []
         self.kms_write_keys: list[str] = []
         self.kms_read_keys: list[str] = []
+        self.dynamodb_write_tables: list[str] = []
+        self.dynamodb_read_tables: list[str] = []
         super(AWSIamAssembler, self).__init__()
 
     def prepare_iam_statements(self) -> List[dict]:
@@ -140,6 +210,14 @@ class AWSIamAssembler:
         if self.kms_read_keys:
             iam_statements.append(
                 AWS.prepare_kms_read_keys_statements(self.kms_read_keys)
+            )
+        if self.dynamodb_write_tables:
+            iam_statements.append(
+                AWS.prepare_dynamodb_write_tables_statements(self.dynamodb_write_tables)
+            )
+        if self.dynamodb_read_tables:
+            iam_statements.append(
+                AWS.prepare_dynamodb_read_tables_statements(self.dynamodb_read_tables)
             )
         return iam_statements
 
@@ -175,6 +253,27 @@ class AWSIamAssembler:
             if permission == "publish":
                 self.publish_topics.append(
                     f"${{{{module.{linked_module.name}.topic_arn}}}}"
+                )
+                self.kms_write_keys.append(
+                    f"${{{{module.{linked_module.name}.kms_arn}}}}"
+                )
+            else:
+                raise Exception(f"Invalid permission {permission}")
+
+    def handle_dynamodb_link(
+        self, linked_module: "Module", link_permissions: List[str]
+    ) -> None:
+        if link_permissions is None or len(link_permissions) == 0:
+            link_permissions = ["write"]
+        for permission in link_permissions:
+            if permission == "read":
+                self.dynamodb_read_tables.append(
+                    f"${{{{module.{linked_module.name}.table_arn}}}}"
+                )
+                self.kms_read_keys.append(f"${{{{module.{linked_module.name}.kms_arn}}}}")
+            elif permission == "write":
+                self.dynamodb_write_tables.append(
+                    f"${{{{module.{linked_module.name}.table_arn}}}}"
                 )
                 self.kms_write_keys.append(
                     f"${{{{module.{linked_module.name}.kms_arn}}}}"

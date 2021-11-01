@@ -1,4 +1,3 @@
-import json
 import os
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
@@ -12,7 +11,7 @@ from google.oauth2 import service_account
 from googleapiclient import discovery
 
 from opta.exceptions import UserErrors
-from opta.utils import fmt_msg, logger
+from opta.utils import fmt_msg, json, logger
 
 if TYPE_CHECKING:
     from opta.layer import Layer, StructuredConfig

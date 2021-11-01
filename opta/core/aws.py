@@ -1,4 +1,3 @@
-import json
 from time import sleep
 from typing import TYPE_CHECKING, List, Optional, TypedDict
 
@@ -6,7 +5,8 @@ import boto3
 from botocore.config import Config
 from mypy_boto3_dynamodb import DynamoDBClient
 
-from opta.utils import fmt_msg, logger
+from opta.exceptions import UserErrors
+from opta.utils import fmt_msg, json, logger
 
 if TYPE_CHECKING:
     from opta.layer import Layer, StructuredConfig
@@ -26,6 +26,20 @@ class AWS:
     def __init__(self, layer: "Layer"):
         self.layer = layer
         self.region = layer.root().providers["aws"]["region"]
+
+    def __get_dynamodb(self, dynamodb_table: str) -> DynamoDBClient:
+        dynamodb_client: DynamoDBClient = boto3.client(
+            "dynamodb", config=Config(region_name=self.region)
+        )
+
+        try:
+            dynamodb_client.describe_table(TableName=dynamodb_table)
+        except Exception:
+            raise UserErrors(
+                "Unable to reach Dynamo DB. Please check the configuration for the provided.\n"
+                "Check if the Account ID or region are configured properly."
+            )
+        return dynamodb_client
 
     # Fetches AWS resources tagged with "opta: true"
     # Works on most resources, but not all (ex. IAM, elasticache subnet groups)
@@ -106,10 +120,7 @@ class AWS:
         providers = self.layer.gen_providers(0)
         dynamodb_table = providers["terraform"]["backend"]["s3"]["dynamodb_table"]
 
-        dynamodb_client: DynamoDBClient = boto3.client(
-            "dynamodb", config=Config(region_name=self.region)
-        )
-        dynamodb_client.delete_item(
+        self.__get_dynamodb(dynamodb_table).delete_item(
             TableName=dynamodb_table,
             Key={"LockID": {"S": f"{bucket}/{self.layer.name}-md5"}},
         )
@@ -131,11 +142,7 @@ class AWS:
         providers = self.layer.gen_providers(0)
         dynamodb_table = providers["terraform"]["backend"]["s3"]["dynamodb_table"]
 
-        dynamodb_client: DynamoDBClient = boto3.client(
-            "dynamodb", config=Config(region_name=self.region)
-        )
-
-        tf_lock_data = dynamodb_client.get_item(
+        tf_lock_data = self.__get_dynamodb(dynamodb_table).get_item(
             TableName=dynamodb_table,
             Key={"LockID": {"S": f"{bucket}/{self.layer.name}"}},
         )
@@ -230,6 +237,59 @@ class AWS:
             "Action": ["kms:Decrypt"],
             "Effect": "Allow",
             "Resource": [kms_arn for kms_arn in kms_arns],
+        }
+
+    @staticmethod
+    def prepare_dynamodb_write_tables_statements(dynamodb_table_arns: List[str]) -> dict:
+        return {
+            "Sid": "DynamodbWrite",
+            "Action": [
+                "dynamodb:BatchWriteItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:PartiQLDelete",
+                "dynamodb:PartiQLInsert",
+                "dynamodb:PartiQLUpdate",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:ListTables",
+                "dynamodb:BatchGetItem",
+                "dynamodb:Describe*",
+                "dynamodb:GetItem",
+                "dynamodb:Query",
+                "dynamodb:Scan",
+                "dynamodb:PartiQLSelect",
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                *[dynamodb_table_arn for dynamodb_table_arn in dynamodb_table_arns],
+                *[
+                    f"{dynamodb_table_arn}/index/*"
+                    for dynamodb_table_arn in dynamodb_table_arns
+                ],
+            ],
+        }
+
+    @staticmethod
+    def prepare_dynamodb_read_tables_statements(dynamodb_table_arns: List[str]) -> dict:
+        return {
+            "Sid": "DynamodbRead",
+            "Action": [
+                "dynamodb:ListTables",
+                "dynamodb:BatchGetItem",
+                "dynamodb:Describe*",
+                "dynamodb:GetItem",
+                "dynamodb:Query",
+                "dynamodb:Scan",
+                "dynamodb:PartiQLSelect",
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                *[dynamodb_table_arn for dynamodb_table_arn in dynamodb_table_arns],
+                *[
+                    f"{dynamodb_table_arn}/index/*"
+                    for dynamodb_table_arn in dynamodb_table_arns
+                ],
+            ],
         }
 
     @staticmethod

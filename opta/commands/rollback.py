@@ -20,7 +20,7 @@ from opta.utils import check_opta_file_exists, logger
 def rollback(config: str, env: Optional[str]) -> None:
     """Destroy any stale opta resources in the current layer"""
 
-    check_opta_file_exists(config)
+    config = check_opta_file_exists(config)
     layer = Layer.load_from_yaml(config, env)
     layer.verify_cloud_credentials()
     if not Terraform.download_state(layer):

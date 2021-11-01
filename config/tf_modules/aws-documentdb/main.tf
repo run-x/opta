@@ -11,17 +11,26 @@ data "aws_kms_key" "main" {
   key_id = "alias/opta-${var.env_name}"
 }
 
+resource "random_string" "db_name_hash" {
+  length  = 4
+  special = false
+  upper   = false
+}
+
 resource "aws_docdb_cluster_instance" "cluster_instances" {
-  count                      = 1
-  identifier                 = "opta-${var.layer_name}-${var.module_name}-${count.index}"
+  count                      = var.instance_count
+  identifier                 = "opta-${var.layer_name}-${var.module_name}-${random_string.db_name_hash.result}-${count.index}"
   cluster_identifier         = aws_docdb_cluster.cluster.id
   instance_class             = var.instance_class
   apply_immediately          = true
   auto_minor_version_upgrade = true
+  lifecycle {
+    ignore_changes = [identifier]
+  }
 }
 
 resource "aws_docdb_cluster" "cluster" {
-  cluster_identifier      = "opta-${var.layer_name}-${var.module_name}"
+  cluster_identifier      = "opta-${var.layer_name}-${var.module_name}-${random_string.db_name_hash.result}"
   master_username         = "master_user"
   master_password         = random_password.documentdb_auth.result
   db_subnet_group_name    = "opta-${var.env_name}-docdb"
@@ -32,4 +41,7 @@ resource "aws_docdb_cluster" "cluster" {
   backup_retention_period = 5
   apply_immediately       = true
   skip_final_snapshot     = true
+  lifecycle {
+    ignore_changes = [cluster_identifier]
+  }
 }

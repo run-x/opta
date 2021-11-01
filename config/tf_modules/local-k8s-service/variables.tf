@@ -5,6 +5,7 @@ locals {
     domain : split("/", s)[0],
     pathPrefix : (length(split("/", s)) > 1 ? "/${join("/", slice(split("/", s), 1, length(split("/", s))))}" : "/")
   }]
+  uppercase_image = upper(var.image)
 }
 
 
@@ -21,6 +22,19 @@ variable "layer_name" {
 variable "module_name" {
   description = "Module name"
   type        = string
+}
+
+variable "consistent_hash" {
+  type    = string
+  default = null
+}
+
+variable "sticky_session" {
+  default = false
+}
+
+variable "sticky_session_max_age" {
+  default = 86400
 }
 
 variable "port" {
@@ -127,4 +141,14 @@ variable "manual_secrets" {
 variable "local_registry_name" {
   type    = string
   default = "localhost:5000"
+}
+
+variable "keep_path_prefix" {
+  type    = bool
+  default = false
+}
+
+variable "persistent_storage" {
+  type    = list(map(string))
+  default = []
 }

@@ -6,14 +6,20 @@ from opta.core.kubernetes import (
     list_namespaces,
 )
 from opta.exceptions import UserErrors
-from opta.module_processors.base import AWSIamAssembler, AWSK8sModuleProcessor
+from opta.module_processors.base import (
+    AWSIamAssembler,
+    AWSK8sModuleProcessor,
+    K8sServiceModuleProcessor,
+)
 
 if TYPE_CHECKING:
     from opta.layer import Layer
     from opta.module import Module
 
 
-class AwsK8sServiceProcessor(AWSK8sModuleProcessor, AWSIamAssembler):
+class AwsK8sServiceProcessor(
+    AWSK8sModuleProcessor, K8sServiceModuleProcessor, AWSIamAssembler
+):
     def __init__(self, module: "Module", layer: "Layer"):
         if (module.aliased_type or module.type) != "aws-k8s-service":
             raise Exception(
@@ -37,9 +43,6 @@ class AwsK8sServiceProcessor(AWSK8sModuleProcessor, AWSIamAssembler):
         # Update the secrets
         self.module.data["manual_secrets"] = self.module.data.get("secrets", [])
         self.module.data["link_secrets"] = self.module.data.get("link_secrets", [])
-
-        if isinstance(self.module.data.get("public_uri"), str):
-            self.module.data["public_uri"] = [self.module.data["public_uri"]]
 
         current_envars: Union[List, Dict[str, str]] = self.module.data.get("env_vars", [])
         if isinstance(current_envars, dict):
@@ -79,6 +82,8 @@ class AwsK8sServiceProcessor(AWSK8sModuleProcessor, AWSIamAssembler):
                 self.handle_sqs_link(module, link_permissions)
             elif module_type == "aws-sns":
                 self.handle_sns_link(module, link_permissions)
+            elif module_type == "aws-dynamodb":
+                self.handle_dynamodb_link(module, link_permissions)
             else:
                 raise Exception(
                     f"Unsupported module type for k8s service link: {module_type}"

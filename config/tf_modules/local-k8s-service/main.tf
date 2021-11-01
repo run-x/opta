@@ -9,7 +9,7 @@ terraform {
 
 
 resource "helm_release" "k8s-service" {
-  chart = "${path.module}/k8s-service"
+  chart = "${path.module}/../../opta-k8s-service-helm"
   name  = "${var.layer_name}-${var.module_name}"
   values = [
     yamlencode({
@@ -29,8 +29,8 @@ resource "helm_release" "k8s-service" {
         cpu : "${var.resource_request["cpu"]}m"
         memory : "${var.resource_request["memory"]}Mi"
       },
-      deployPods : (var.image != "AUTO") || (var.tag != null) || (var.digest != null),
-      image : var.image == "AUTO" ? (var.digest != null ? "${var.local_registry_name}/${var.layer_name}/${var.module_name}@${var.digest}" : (var.tag == null ? "" : "${var.local_registry_name}/${var.layer_name}/${var.module_name}:${var.tag}")) : (var.tag == null ? var.image : "${var.image}:${var.tag}"),
+      deployPods : (local.uppercase_image != "AUTO") || (var.tag != null) || (var.digest != null),
+      image : local.uppercase_image == "AUTO" ? (var.digest != null ? "${var.local_registry_name}/${var.layer_name}/${var.module_name}@${var.digest}" : (var.tag == null ? "" : "${var.local_registry_name}/${var.layer_name}/${var.module_name}:${var.tag}")) : (var.tag == null ? var.image : "${var.image}:${var.tag}"),
       version : var.tag == null ? "latest" : var.tag
       livenessProbePath : var.healthcheck_path == null || var.liveness_probe_path != null ? var.liveness_probe_path : var.healthcheck_path,
       readinessProbePath : var.healthcheck_path == null || var.readiness_probe_path != null ? var.readiness_probe_path : var.healthcheck_path,
@@ -42,6 +42,11 @@ resource "helm_release" "k8s-service" {
       layerName : var.layer_name,
       moduleName : var.module_name,
       environmentName : var.env_name,
+      stickySession : var.sticky_session
+      stickySessionMaxAge : var.sticky_session_max_age
+      consistentHash : var.consistent_hash
+      keepPathPrefix : var.keep_path_prefix
+      persistentStorage : var.persistent_storage
     })
   ]
   atomic          = true

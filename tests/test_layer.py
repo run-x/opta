@@ -29,6 +29,29 @@ class TestLayer:
                 None,
             )
 
+    def test_get_event_properties(self, mocker: MockFixture):
+        layer = Layer.load_from_yaml(
+            os.path.join(
+                os.path.dirname(os.path.dirname(__file__)),
+                "tests",
+                "module_processors",
+                "dummy_config1.yaml",
+            ),
+            None,
+        )
+
+        assert layer.get_event_properties() == {
+            "layer_name": "dummy-config-1",
+            "module_aws_documentdb": 2,
+            "module_aws_dynamodb": 1,
+            "module_aws_k8s_service": 2,
+            "module_aws_postgres": 2,
+            "module_aws_redis": 2,
+            "org_name": "opta-tests",
+            "parent_name": "dummy-parent",
+            "total_resources": 9,
+        }
+
     def test_parent(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
@@ -138,12 +161,16 @@ class TestLayer:
         layer.PROCESSOR_DICT["aws-sqs"] = mocked_aws_sqs_processor
         mocked_runx_processor = mocker.patch("opta.layer.RunxProcessor")
         layer.PROCESSOR_DICT["runx"] = mocked_runx_processor
+        mocked_aws_documentdb_processor = mocker.patch(
+            "opta.layer.AwsDocumentDbProcessor"
+        )
+        layer.PROCESSOR_DICT["aws-documentdb"] = mocked_aws_documentdb_processor
         mocked_base_processor = mocker.patch("opta.layer.ModuleProcessor")
 
         assert layer.name == "dummy-config-1"
         assert layer.parent is not None
         assert layer.parent == layer.root()
-        assert len(layer.modules) == 14
+        assert len(layer.modules) == 15
         assert layer.pre_hook(13) is None
         assert layer.post_hook(13, None) is None
 
@@ -155,6 +182,20 @@ class TestLayer:
                 mocker.call().post_hook(13, None),
             ]
         )
+
+        mocked_aws_documentdb_processor.assert_has_calls(
+            [
+                mocker.call(mocker.ANY, layer),
+                mocker.call().pre_hook(13),
+                mocker.call(mocker.ANY, layer),
+                mocker.call().pre_hook(13),
+                mocker.call(mocker.ANY, layer),
+                mocker.call().post_hook(13, None),
+                mocker.call(mocker.ANY, layer),
+                mocker.call().post_hook(13, None),
+            ]
+        )
+
         mocked_base_processor.assert_has_calls(
             [
                 mocker.call(mocker.ANY, layer),
@@ -165,14 +206,6 @@ class TestLayer:
                 mocker.call().pre_hook(13),
                 mocker.call(mocker.ANY, layer),
                 mocker.call().pre_hook(13),
-                mocker.call(mocker.ANY, layer),
-                mocker.call().pre_hook(13),
-                mocker.call(mocker.ANY, layer),
-                mocker.call().pre_hook(13),
-                mocker.call(mocker.ANY, layer),
-                mocker.call().post_hook(13, None),
-                mocker.call(mocker.ANY, layer),
-                mocker.call().post_hook(13, None),
                 mocker.call(mocker.ANY, layer),
                 mocker.call().post_hook(13, None),
                 mocker.call(mocker.ANY, layer),

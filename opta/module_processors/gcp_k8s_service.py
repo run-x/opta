@@ -2,14 +2,14 @@ from typing import TYPE_CHECKING, Any, Dict, List, Union
 
 from opta.core.kubernetes import create_namespace_if_not_exists, get_manual_secrets
 from opta.exceptions import UserErrors
-from opta.module_processors.base import GcpK8sModuleProcessor
+from opta.module_processors.base import GcpK8sModuleProcessor, K8sServiceModuleProcessor
 
 if TYPE_CHECKING:
     from opta.layer import Layer
     from opta.module import Module
 
 
-class GcpK8sServiceProcessor(GcpK8sModuleProcessor):
+class GcpK8sServiceProcessor(GcpK8sModuleProcessor, K8sServiceModuleProcessor):
     def __init__(self, module: "Module", layer: "Layer"):
         if (module.aliased_type or module.type) != "gcp-k8s-service":
             raise Exception(
@@ -34,9 +34,6 @@ class GcpK8sServiceProcessor(GcpK8sModuleProcessor):
         # Update the secrets
         self.module.data["manual_secrets"] = self.module.data.get("secrets", [])
         self.module.data["link_secrets"] = self.module.data.get("link_secrets", [])
-
-        if isinstance(self.module.data.get("public_uri"), str):
-            self.module.data["public_uri"] = [self.module.data["public_uri"]]
 
         current_envars: Union[List, Dict[str, str]] = self.module.data.get("env_vars", [])
         if isinstance(current_envars, dict):

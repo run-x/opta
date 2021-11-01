@@ -9,7 +9,7 @@ from datetime import datetime
 from os import path
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, TypedDict
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Type, TypedDict
 
 import boto3
 import click
@@ -28,6 +28,8 @@ from opta.core.validator import validate_yaml
 from opta.exceptions import UserErrors
 from opta.module import Module
 from opta.module_processors.aws_dns import AwsDnsProcessor
+from opta.module_processors.aws_document_db import AwsDocumentDbProcessor
+from opta.module_processors.aws_dynamodb import AwsDynamodbProcessor
 from opta.module_processors.aws_eks import AwsEksProcessor
 from opta.module_processors.aws_email import AwsEmailProcessor
 from opta.module_processors.aws_iam_role import AwsIamRoleProcessor
@@ -71,6 +73,7 @@ class Layer:
         "gcp-k8s-service": GcpK8sServiceProcessor,
         "gcp-gke": GcpGkeProcessor,
         "aws-dns": AwsDnsProcessor,
+        "aws-documentdb": AwsDocumentDbProcessor,
         "runx": RunxProcessor,
         "helm-chart": HelmChartProcessor,
         "aws-iam-role": AwsIamRoleProcessor,
@@ -88,6 +91,7 @@ class Layer:
         "gcp-dns": GCPDnsProcessor,
         "gcp-service-account": GcpServiceAccountProcessor,
         "custom-terraform": CustomTerraformProcessor,
+        "aws-dynamodb": AwsDynamodbProcessor,
     }
 
     def __init__(
@@ -195,6 +199,8 @@ class Layer:
         validate_yaml(config_path, layer.cloud)
         if t is not None:
             shutil.rmtree(t)
+
+        cls.validate_layer(layer)
         return layer
 
     def structured_config(self) -> StructuredConfig:
@@ -281,6 +287,19 @@ class Layer:
         return cls(
             name, org_name, providers, modules_data, path, original_spec=original_spec
         )
+
+    @classmethod
+    def validate_layer(cls, layer: "Layer") -> None:
+        # Check for Uniqueness of Modules
+        unique_modules: Set[str] = set()
+        for module in layer.modules:
+            if module.desc.get("is_unique", False) and unique_modules.__contains__(
+                module.type
+            ):
+                raise UserErrors(
+                    f"Module Type: '{module.type}' used twice in the configuration. Please check and update as required."
+                )
+            unique_modules.add(module.type)
 
     @staticmethod
     def valid_name(name: str) -> bool:
@@ -395,6 +414,20 @@ class Layer:
             "state_storage": self.state_storage(),
             "env": self.get_env(),
         }
+
+    def get_event_properties(self) -> Dict[str, Any]:
+        current_keys: Dict[str, Any] = {}
+        for module in self.modules:
+            module_type = module.aliased_type or module.type
+            processor = self.PROCESSOR_DICT.get(module_type, ModuleProcessor)
+            new_keys = processor(module, self).get_event_properties()
+            for key, val in new_keys.items():
+                current_keys[key] = current_keys.get(key, 0) + val
+        current_keys["total_resources"] = sum([x for x in current_keys.values()])
+        current_keys["org_name"] = self.org_name
+        current_keys["layer_name"] = self.name
+        current_keys["parent_name"] = self.parent.name if self.parent is not None else ""
+        return current_keys
 
     def state_storage(self) -> str:
         if self.parent is not None:
@@ -528,7 +561,16 @@ class Layer:
     def verify_cloud_credentials(self) -> None:
         if self.cloud == "aws":
             try:
-                boto3.client("sts").get_caller_identity()
+                aws_caller_identity = boto3.client("sts").get_caller_identity()
+                configured_aws_account_id = aws_caller_identity["Account"]
+                required_aws_account_id = self.root().providers["aws"]["account_id"]
+                if required_aws_account_id != configured_aws_account_id:
+                    raise UserErrors(
+                        "\nSystem configured AWS Credentials are different from the ones being used in the "
+                        f"Configuration. \nSystem is configured with credentials for account "
+                        f"{configured_aws_account_id} but the config requires the credentials for "
+                        f"{required_aws_account_id}."
+                    )
             except NoCredentialsError:
                 raise UserErrors(
                     "Unable to locate credentials.\n"
@@ -544,7 +586,15 @@ class Layer:
                 )
         if self.cloud == "google":
             try:
-                default()
+                _, configured_project_id = default()
+                required_project_id = self.root().providers["google"]["project"]
+                if required_project_id != configured_project_id:
+                    raise UserErrors(
+                        "\nSystem configured GCP Credentials are different from the ones being used in the "
+                        "Configuration. \nSystem is configured with credentials for account "
+                        f"{configured_project_id} but the config requires the credentials for "
+                        f"{required_project_id}."
+                    )
             except DefaultCredentialsError:
                 raise UserErrors(
                     "Google Cloud credentials are not configured properly.\n"

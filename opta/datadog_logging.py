@@ -1,4 +1,3 @@
-import json
 import os
 import platform
 import time
@@ -10,6 +9,7 @@ from git.config import GitConfigParser
 from requests import codes, post
 
 from opta.constants import DEV_VERSION, OPTA_DISABLE_REPORTING, SESSION_ID, VERSION
+from opta.utils import json
 
 CLIENT_TOKEN = "pub40d867605951d2a30fb8020e193ee7e5"  # nosec
 DEFAULT_CACHE_SIZE = 10

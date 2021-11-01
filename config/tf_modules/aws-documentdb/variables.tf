@@ -22,3 +22,9 @@ variable "instance_class" {
   type    = string
   default = "db.r5.large"
 }
+
+variable "instance_count" {
+  type        = number
+  default     = 1
+  description = "Number of Instances for aws_docdb_cluster_instance"
+}

@@ -1,7 +1,6 @@
-import json
 from typing import Any, Mapping
 
-from opta.utils import logger
+from opta.utils import json, logger
 
 
 def gen(tf_blocks: Mapping[Any, Any], out_file: str) -> None:

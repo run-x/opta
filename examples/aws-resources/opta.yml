@@ -23,9 +23,15 @@ modules:
       - db
       - topic
       - queue
+      - dynamo
     secrets:
       - API_KEY
       - SECRET_1
+    persistent_storage:
+      - path: "/DESIRED/PATH1"
+        size: 5 # 5 GB
+      - path: "/DESIRED/PATH2"
+        size: 10 # 10 GB
   - name: db
     type: aws-postgres
     multi_az: true
@@ -73,3 +79,12 @@ modules:
         blah: "3"
         opta_iteration: "2"
     values_files: ["./blah.yaml"]
+  - name: dynamo
+    type: aws-dynamodb
+    hash_key: blah
+    range_key: baloney
+    attributes:
+      - name: blah
+        type: S
+      - name: baloney
+        type: N

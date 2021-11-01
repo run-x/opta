@@ -1,13 +1,11 @@
 import os.path
 import sys
-from importlib.util import find_spec
 from subprocess import CalledProcessError  # nosec
 
 import click
 from click_didyoumean import DYMGroup
 
 import opta.sentry  # noqa: F401 This leads to initialization of sentry sdk
-from opta.amplitude import amplitude_client
 from opta.cleanup_files import cleanup_files
 from opta.commands.apply import apply
 from opta.commands.deploy import deploy
@@ -30,31 +28,10 @@ from opta.upgrade import check_version_upgrade
 from opta.utils import dd_handler, dd_listener, logger
 
 
-@click.group(cls=DYMGroup)
+@click.group(cls=DYMGroup, context_settings=dict(help_option_names=["-h", "--help"]))
 def cli() -> None:
     """Welcome to opta, runx's cli!"""
     pass
-
-
-@cli.command(hidden=True)
-def debugger() -> None:
-    """The opta debugger -- to help you debug"""
-    curses_spec = find_spec("_curses")
-    curses_found = curses_spec is not None
-    amplitude_client.send_event(amplitude_client.DEBUGGER_EVENT)
-
-    if curses_found:
-        from opta.debugger import Debugger
-
-        dbg = Debugger()
-        dbg.run()
-    else:
-        logger.warning(
-            "We're very sorry but it seems like your python installation does not "
-            "support curses for advanced cli ui experience. This is a known issue if you "
-            "have pyenv + Big Sur-- pls look at this issue documentations: "
-            "https://github.com/pyenv/pyenv/issues/1755"
-        )
 
 
 # Add commands

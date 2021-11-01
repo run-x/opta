@@ -1,5 +1,6 @@
 halt: false
 environment_module: false
+metric_count: 1
 inputs:
   - name: env_name
     user_facing: false
@@ -49,7 +50,7 @@ inputs:
   - name: chart_version
     user_facing: true
     validator: str(required=False)
-    description: User side of the version of the helm chart to install
+    description: User side of the version of the helm chart to install. Note-- this IS required for remote charts (in a repository and not from local filesystem).
     default: null
   - name: values_files
     user_facing: true

@@ -90,7 +90,7 @@ resource "google_compute_global_forwarding_rule" "https" {
 }
 
 resource "google_dns_record_set" "default" {
-  count        = var.hosted_zone_name == null ? 0 : 1
+  count        = var.hosted_zone_name == "" ? 0 : 1
   name         = "${var.domain}."
   type         = "A"
   ttl          = 3600
@@ -99,7 +99,7 @@ resource "google_dns_record_set" "default" {
 }
 
 resource "google_dns_record_set" "wildcard" {
-  count        = var.hosted_zone_name == null ? 0 : 1
+  count        = var.hosted_zone_name == "" ? 0 : 1
   name         = "*.${var.domain}."
   type         = "A"
   ttl          = 3600

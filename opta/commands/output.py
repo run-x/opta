@@ -1,4 +1,3 @@
-import json
 from typing import Optional
 
 import boto3
@@ -10,7 +9,7 @@ from opta.amplitude import amplitude_client
 from opta.core.generator import gen_all
 from opta.core.terraform import get_terraform_outputs
 from opta.layer import Layer
-from opta.utils import check_opta_file_exists, logger
+from opta.utils import check_opta_file_exists, json, logger
 
 
 @click.command(hidden=True)
@@ -21,7 +20,7 @@ from opta.utils import check_opta_file_exists, logger
 def output(config: str, env: Optional[str],) -> None:
     """ Print TF outputs """
 
-    check_opta_file_exists(config)
+    config = check_opta_file_exists(config)
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(
         amplitude_client.VIEW_OUTPUT_EVENT,
