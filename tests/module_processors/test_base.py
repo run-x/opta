@@ -1,6 +1,6 @@
 import copy
 import os
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional, Tuple, Type
 
 import pytest
 from dns.resolver import NoNameservers
@@ -12,6 +12,7 @@ from opta.module_processors.base import (
     DNSModuleProcessor,
     K8sBaseModuleProcessor,
     K8sServiceModuleProcessor,
+    PortSpec,
 )
 
 
@@ -330,4 +331,235 @@ class TestK8sServiceModuleProcessor:
             processor, data, expected=expected,
         )
 
-    # TODO: Test __validate_ports, __read_ports, and _process_ports (split up latter)
+    @staticmethod
+    def validate_ports(
+        processor: K8sServiceModuleProcessor, ports: List[PortSpec]
+    ) -> None:
+        processor._K8sServiceModuleProcessor__validate_ports(ports)  # type: ignore
+
+    def validate_ports_assert(
+        self,
+        processor: K8sServiceModuleProcessor,
+        ports: List[PortSpec],
+        *,
+        exception_type: Optional[Type[Exception]] = None,
+        exception_message: Optional[str] = None,
+    ) -> None:
+
+        if exception_type:
+            with pytest.raises(exception_type) as e:
+                self.validate_ports(processor, ports)
+
+            if exception_message is not None:
+                assert str(e.value) == exception_message
+        else:
+            self.validate_ports(processor, ports)
+
+    def test_validate_ports_flag_disabled_multiple(
+        self, processor: K8sServiceModuleProcessor
+    ) -> None:
+        processor.FLAG_MULTIPLE_PORTS_SUPPORTED = False
+
+        ports = [
+            PortSpec("a", "http", 1),
+            PortSpec("b", "http", 2),
+        ]
+
+        self.validate_ports_assert(
+            processor,
+            ports,
+            exception_type=UserErrors,
+            exception_message="Cannot specify multiple ports in this cloud",
+        )
+
+    def test_validate_ports_flag_disabled_tcp(
+        self, processor: K8sServiceModuleProcessor
+    ) -> None:
+        processor.FLAG_MULTIPLE_PORTS_SUPPORTED = False
+
+        ports = [
+            PortSpec("a", "tcp", 1),
+        ]
+
+        self.validate_ports_assert(
+            processor,
+            ports,
+            exception_type=UserErrors,
+            exception_message="Cannot specify TCP ports in this cloud",
+        )
+
+    def test_validate_ports_multiple_http(
+        self, processor: K8sServiceModuleProcessor
+    ) -> None:
+        ports = [
+            PortSpec("a", "http", 1),
+            PortSpec("b", "http", 2),
+        ]
+
+        self.validate_ports_assert(
+            processor,
+            ports,
+            exception_type=UserErrors,
+            exception_message="Multiple `type: http` ports not supported",
+        )
+
+    def test_validate_ports_duplicate_name(
+        self, processor: K8sServiceModuleProcessor
+    ) -> None:
+        ports = [
+            PortSpec("a", "http", 1),
+            PortSpec("a", "tcp", 2),
+        ]
+
+        self.validate_ports_assert(
+            processor,
+            ports,
+            exception_type=UserErrors,
+            exception_message="Duplicate port name `a`",
+        )
+
+    def test_validate_ports_duplicate_num(
+        self, processor: K8sServiceModuleProcessor
+    ) -> None:
+        ports = [
+            PortSpec("a", "http", 1),
+            PortSpec("b", "tcp", 1),
+        ]
+
+        self.validate_ports_assert(
+            processor,
+            ports,
+            exception_type=UserErrors,
+            exception_message="Duplicate port number `1`",
+        )
+
+    @staticmethod
+    def read_ports(
+        processor: K8sServiceModuleProcessor, raw: List[Dict[str, Any]]
+    ) -> List[PortSpec]:
+        return processor._K8sServiceModuleProcessor__read_ports(raw)  # type: ignore
+
+    def read_ports_assert(
+        self,
+        processor: K8sServiceModuleProcessor,
+        raw: List[Dict[str, Any]],
+        *,
+        expected: Optional[List[PortSpec]] = None,
+        exception_type: Optional[Type[Exception]] = None,
+        exception_message: Optional[str] = None,
+    ) -> None:
+
+        if exception_type:
+            with pytest.raises(exception_type) as e:
+                self.read_ports(processor, raw)
+
+            if exception_message is not None:
+                assert str(e.value) == exception_message
+        else:
+            ports = self.read_ports(processor, raw)
+
+            assert ports == expected
+
+    # TODO: Test _process_ports (split it up first)
+
+    def test_read_ports_empty(self, processor: K8sServiceModuleProcessor) -> None:
+        self.read_ports_assert(processor, [], expected=[])
+
+    def test_read_ports(self, processor: K8sServiceModuleProcessor) -> None:
+        raw = [{"name": "a", "port": 1, "type": "http"}]
+
+        expected = [
+            PortSpec("a", "http", 1),
+        ]
+
+        self.read_ports_assert(processor, raw, expected=expected)
+
+
+class TestPortSpec:
+    def from_raw_assert(
+        self,
+        raw: Dict[str, Any],
+        *,
+        expected: Optional[PortSpec] = None,
+        exception_type: Optional[Type[Exception]] = None,
+        exception_message: Optional[str] = None,
+    ) -> None:
+
+        if exception_type:
+            with pytest.raises(exception_type) as e:
+                PortSpec.from_raw(raw)
+
+            if exception_message is not None:
+                assert str(e.value) == exception_message
+        else:
+            actual = PortSpec.from_raw(raw)
+
+            assert actual == expected
+
+    def test_from_raw_simple(self) -> None:
+        self.from_raw_assert(
+            {"name": "a", "type": "http", "port": 1},
+            expected=PortSpec("a", "http", 1, None, False),
+        )
+
+    def test_from_raw_advanced(self) -> None:
+        self.from_raw_assert(
+            {"name": "a", "type": "http", "port": 1, "protocol": "grpc", "tls": True},
+            expected=PortSpec("a", "http", 1, "grpc", True),
+        )
+
+    def test_from_raw_invalid_type(self) -> None:
+        self.from_raw_assert(
+            {"name": "a", "type": "foo", "port": 1},
+            exception_type=ValueError,
+            exception_message="Invalid type/protocol combo: foo/None",
+        )
+
+    def test_from_raw_invalid_protocol(self) -> None:
+        self.from_raw_assert(
+            {"name": "a", "type": "http", "port": 1, "protocol": "bar"},
+            exception_type=ValueError,
+            exception_message="Invalid type/protocol combo: http/bar",
+        )
+
+    def test_valid_type_protocols(self) -> None:
+        protos = PortSpec.valid_type_protocols()
+
+        assert len(protos) > 0
+
+        for type, protocol in protos:
+            assert len(type) > 0
+            if protocol:
+                assert len(protocol) > 0
+
+    def test_is_http(self) -> None:
+        assert PortSpec("a", "http", 1).is_http is True
+        assert PortSpec("a", "tcp", 1).is_http is False
+
+    def test_is_tcp(self) -> None:
+        assert PortSpec("a", "http", 1).is_tcp is False
+        assert PortSpec("a", "tcp", 1).is_tcp is True
+
+    def test_probe_type(self) -> None:
+        tests: Dict[Tuple[str, Optional[str]], str] = {
+            ("http", None): "http",
+            ("http", "grpc"): "tcp",
+            ("tcp", None): "tcp",
+        }
+
+        for input, expected in tests.items():
+            spec = PortSpec("a", input[0], 1, input[1])
+            assert spec.probe_type == expected
+
+    def test_to_json(self) -> None:
+        spec = PortSpec("a", "http", 1, "grpc", True)
+        expected = {
+            "name": "a",
+            "type": "http",
+            "port": 1,
+            "protocol": "grpc",
+            "tls": True,
+            "probeType": "tcp",
+        }
+
+        assert spec.__to_json__() == expected

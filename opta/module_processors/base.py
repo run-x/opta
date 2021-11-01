@@ -93,10 +93,10 @@ class DNSModuleProcessor(ModuleProcessor):
 @dataclasses.dataclass
 class PortSpec:
     name: str
-    type: Union[Literal["http"], Literal["tcp"]]
+    type: str
     port: int
     protocol: Optional[str] = None
-    tls: bool = True
+    tls: bool = False
 
     @classmethod
     def from_raw(cls, raw: Dict[str, Any]) -> "PortSpec":
