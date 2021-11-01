@@ -71,7 +71,7 @@ spec:
             {{- if eq .Values.probePort.type "tcp" }}
             tcpSocket:
               port: {{ .Values.probePort.name | quote }}
-            {{- else if eq .Values.probePort.probe_type "http" }}
+            {{- else if eq .Values.probePort.type "http" }}
             httpGet:
               port: {{ .Values.probePort.name | quote }}
               path: {{ .Values.livenessProbePath }}
@@ -81,10 +81,10 @@ spec:
           readinessProbe:
             initialDelaySeconds: 30
             periodSeconds: 10
-            {{- if eq .Values.probePort "tcp" }}
+            {{- if eq .Values.probePort.type "tcp" }}
             tcpSocket:
               port: {{ .Values.probePort.name | quote }}
-            {{- else if eq .Values.probePort.probe_type "http" }}
+            {{- else if eq .Values.probePort.type "http" }}
             httpGet:
               port: {{ .Values.probePort.name | quote }}
               path: {{ .Values.livenessProbePath }}
