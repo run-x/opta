@@ -27,24 +27,24 @@ variable "region" {
 variable "mongodbversion" {
   type        = string
   description = "The Major MongoDB Version"
-  default = "4.4"
+  default     = "4.4"
 }
 
 variable "database_name" {
   type        = string
   description = "The database in the cluster to limit the database user to, the database does not have to exist yet"
-  default = "app"
+  default     = "app"
 }
 
 variable "public_nat_ips" {
-  type = list(string)
+  type        = list(string)
   description = "The IP address(es) from where clients can connect"
 }
 
 variable "mongo_instance_size" {
-  type = string
+  type        = string
   description = "Atlas Mongo Cluster size, see this: https://docs.atlas.mongodb.com/cluster-tier/"
-  default = "M0"
+  default     = "M0"
 
 }
 

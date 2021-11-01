@@ -1,7 +1,7 @@
 resource "mongodbatlas_cluster" "cluster" {
-  project_id             = var.mongo_atlas_project_id
-  name                   = "opta-${var.layer_name}-${var.module_name}"
-  cluster_type           = "REPLICASET"
+  project_id   = var.mongo_atlas_project_id
+  name         = "opta-${var.layer_name}-${var.module_name}"
+  cluster_type = "REPLICASET"
   replication_specs {
     num_shards = 1
     regions_config {
@@ -11,7 +11,7 @@ resource "mongodbatlas_cluster" "cluster" {
       read_only_nodes = 0
     }
   }
-  cloud_backup       = true
+  cloud_backup                 = true
   auto_scaling_disk_gb_enabled = true
   provider_name                = var.cloud_provider
   provider_instance_size_name  = var.mongo_instance_size
