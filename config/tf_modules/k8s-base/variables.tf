@@ -101,5 +101,5 @@ variable "nginx_extra_tcp_ports" {
 
 variable "nginx_extra_tcp_ports_tls" {
   type    = list(number)
-  default = {}
+  default = []
 }

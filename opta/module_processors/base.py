@@ -325,8 +325,8 @@ class K8sServiceModuleProcessor(ModuleProcessor):
 
 class K8sBaseModuleProcessor:
     def _process_nginx_extra_ports(self, data: Dict[Any, Any]) -> None:
-        extra_ports: List[int] = data["nginx_extra_tcp_ports"]
-        extra_tls_ports: List[int] = data["nginx_extra_tcp_ports_tls"]
+        extra_ports: List[int] = data.get("nginx_extra_tcp_ports", [])
+        extra_tls_ports: List[int] = data.get("nginx_extra_tcp_ports_tls", [])
 
         service_port_mapping = reconcile_nginx_extra_ports(update_config_map=False)
 
