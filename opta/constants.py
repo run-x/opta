@@ -40,3 +40,12 @@ CI = "CI"
 ESCAPE_REQUIRED = ["\\", ".", "+", "*", "?", "[", "]", "$", "^", "(", ")", "{", "}", "|"]
 
 SHELLS_ALLOWED = ["bash", "sh"]
+
+"""
+Note: Key in Module Dependency should have all the dependencies present in the set.
+"""
+MODULE_DEPENDENCY = {
+    "aws-k8s-base": {"aws-eks"},
+    "azure-kys-base": {"azure-aks"},
+    "gcp-k8s-base": {"gcp-gke"},
+}
