@@ -35,6 +35,13 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
     {{- end }}
+    {{ if hasKey $.Values.annotations.ingress }}
+    {{- range $k, $v := .Values.annotations.ingress }}
+    {{- range $kk, $vv := $v }}
+    {{ $kk }}: {{ $vv }}
+    {{- end }}
+    {{- end }}
+    {{- end }}
 spec:
   rules:
     - {{ if not (eq $val.domain "all" ) }}
