@@ -14,7 +14,7 @@ manualSecrets: []
 port: {}
 keepPathPrefix: false
 persistentStorage: []
-annotations: []
+annotations: {}
 
 serviceAccount:
   # The name of the service account to use.

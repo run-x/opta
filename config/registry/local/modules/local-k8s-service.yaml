@@ -141,8 +141,10 @@ inputs:
     default: []
   - name: annotations
     user_facing: true
-    validator: map(map(string), required=false)
-    default: {{}}
+    validator: map(map(),required=False)
+    default: {}
+    description: |
+      These are annotations to add to Kubernetes objects, for example ingress objects.
 extra_validators:
   persistent_storage:
     size: int(required=True)
