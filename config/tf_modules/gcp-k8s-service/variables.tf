@@ -164,6 +164,6 @@ variable "persistent_storage" {
   default = []
 }
 
-variable "extra_project_iam_roles" {
+variable "additional_iam_roles" {
   default = []
 }
