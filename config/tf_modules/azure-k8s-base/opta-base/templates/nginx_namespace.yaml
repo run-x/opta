@@ -3,7 +3,7 @@
 {{- if  $existingNamespace }}
   {{- if ( hasKey $existingNamespace.metadata "annotations"  ) }}
     {{- if ( hasKey $existingNamespace.metadata.annotations "meta.helm.sh/release-name"  ) }}
-      {{ $result := true }}
+      {{ $result = true }}
     {{- end }}
   {{- end }}
 {{- end }}
