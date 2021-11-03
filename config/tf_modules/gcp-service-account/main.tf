@@ -26,7 +26,7 @@ resource "google_storage_bucket_iam_member" "viewer" {
 }
 
 resource "google_project_iam_member" "project" {
-  count = length(var.additional_iam_roles)
+  count   = length(var.additional_iam_roles)
   project = data.google_client_config.current.project
   role    = var.additional_iam_roles[count.index]
   member  = "serviceAccount:${google_service_account.k8s_service.email}"
