@@ -11,6 +11,7 @@ from opta.module_processors.base import (
     AWSK8sModuleProcessor,
     K8sServiceModuleProcessor,
 )
+from opta.module_processors.linker_helper import LinkerHelper
 
 if TYPE_CHECKING:
     from opta.layer import Layer
@@ -84,6 +85,17 @@ class AwsK8sServiceProcessor(
                 self.handle_sns_link(module, link_permissions)
             elif module_type == "aws-dynamodb":
                 self.handle_dynamodb_link(module, link_permissions)
+            elif module_type == "atlas-mongo":
+                LinkerHelper.handle_link(
+                    module=self.module,
+                    linked_module=module,
+                    link_permissions=link_permissions,
+                    required_vars=[
+                        "db_password",
+                        "db_user",
+                        "mongo_atlas_connection_string",
+                    ],
+                )
             else:
                 raise Exception(
                     f"Unsupported module type for k8s service link: {module_type}"

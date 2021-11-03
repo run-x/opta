@@ -25,3 +25,7 @@ output "private_subnet_self_link" {
 output "k8s_master_ipv4_cidr_block" {
   value = var.k8s_master_ipv4_cidr_block
 }
+
+output "public_nat_ips" {
+  value = google_compute_address.address
+}

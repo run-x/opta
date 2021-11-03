@@ -17,3 +17,7 @@ output "acr_name" {
 output "acr_login_url" {
   value = azurerm_container_registry.acr.login_server
 }
+
+output "public_nat_ips" {
+  value = azurerm_public_ip.opta.ip_address
+}

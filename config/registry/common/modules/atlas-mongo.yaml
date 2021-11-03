@@ -1,0 +1,66 @@
+halt: false
+environment_module: false
+inputs:
+  - name: mongo_atlas_project_id
+    user_facing: false
+    description: Project ID from Mongo Atlas; see https://docs.atlas.mongodb.com/tutorial/manage-project-settings/
+    default: None
+
+  - name: region
+    user_facing: true
+    description: MongoDB Atlas Cluster Region, must be a mongo region for the provider.
+    validator: str(required=True)
+    default: None
+  - name: layer_name
+    user_facing: false
+    description: Opta Layer name
+    default: None
+  - name: module_name
+    user_facing: false
+    description: Opta Module name
+    default: None
+  - name: mongo_instance_size
+    user_facing: true
+    description : "Atlas Mongo Cluster size, see this: https://docs.atlas.mongodb.com/cluster-tier/"
+    default: M0
+    validator: str(required=True)
+  - name: mongodbversion
+    user_facing: true
+    description: The version of the database to use.
+    default: "4.4"
+    validator: str(required=False)
+  - name: database_name
+    user_facing: true
+    description: The name of the mongo database
+    validator: str(required=False)
+    required: false
+    default: mongo_database
+  - name: public_nat_ips
+    user_facing: false
+    description: The IP address(es) from where clients can connect
+    validator: list(str(), required=False)
+  - name: cloud_provider
+    user_facing: false
+    description: The cloud provider name - AWS/GCP/AZURE
+    validator: str(required=True)
+    default: AWS
+  - name: mongo_atlas_project_id 
+    description: The Atlas project ID
+    validator: str(required=True)
+    user_facing: true
+    default: Notknown
+outputs:
+  - name: db_user
+    export: false
+    description: The database user
+  - name: db_password
+    export: false
+    description: The database password
+  - name: mongo_atlas_connection_string
+    export: false
+    description: The Mongo database connection string
+  - name: mongo_atlas_ipaccesslist
+    export: false
+    description: Mongo atlas IP access list
+output_providers: { }
+output_data: { }

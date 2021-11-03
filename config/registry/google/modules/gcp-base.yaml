@@ -56,5 +56,8 @@ outputs:
   - name: k8s_master_ipv4_cidr_block
     export: true
     description: This is the cidr block reserved for the master/control plane in the GKE cluster.
+  - name: "public_nat_ips"
+    export: true
+    description: Public static IP of nat gateway(s)
 output_providers: { }
 output_data: { }
