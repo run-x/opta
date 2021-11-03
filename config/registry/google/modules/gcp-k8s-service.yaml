@@ -31,12 +31,14 @@ inputs:
     description: "Manually set secrets"
     default: [ ]
   - name: read_buckets
-    user_facing: false
-    description: Buckets linked for reading
+    user_facing: true
+    description: Buckets to grant read permissions for
+    validator: list(str(), required=False)
     default: []
   - name: write_buckets
-    user_facing: false
-    description: Buckets linked for writing
+    user_facing: true
+    description: Buckets to grant write permissions for
+    validator: list(str(), required=False)
     default: []
   - name: image
     user_facing: true
@@ -152,6 +154,11 @@ inputs:
       A list persistent storages to add to each instance of your service (need to give a `size` which is the size in GB
       for the storage volume to be, and `path` which is the path in the filesystem of each instance to place it under)
     default: []
+  - name: extra_project_iam_roles
+    user_facing: true
+    description: A list of extra project-level iam roles to grant to the service account created for this k8s service
+    validator: list(str(), required=False)
+    default: [ ]
 extra_validators:
   persistent_storage:
     size: int(required=True)

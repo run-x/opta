@@ -163,3 +163,7 @@ variable "persistent_storage" {
   type    = list(map(string))
   default = []
 }
+
+variable "extra_project_iam_roles" {
+  default = []
+}

@@ -5,6 +5,10 @@ environments:
       max_containers: 2
 name: blah42
 modules:
+  - type: gcp-service-account
+    explicit_name: "hello-world-blah"
+    extra_project_iam_roles:
+      - "roles/firebase.admin"
   - type: k8s-service
     image: kennethreitz/httpbin
     min_containers: 2

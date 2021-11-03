@@ -40,3 +40,12 @@ variable "allowed_k8s_services" {
 variable "links" {
   default = []
 }
+
+variable "extra_project_iam_roles" {
+  default = []
+}
+
+variable "explicit_name" {
+  type    = string
+  default = null
+}
