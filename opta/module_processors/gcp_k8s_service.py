@@ -72,8 +72,12 @@ class GcpK8sServiceProcessor(GcpK8sModuleProcessor, K8sServiceModuleProcessor):
                     f"Unsupported module type for k8s service link: {module_type}"
                 )
 
-        self.module.data["read_buckets"] = self.read_buckets
-        self.module.data["write_buckets"] = self.write_buckets
+        self.module.data["read_buckets"] = (
+            self.module.data.get("read_buckets", []) + self.read_buckets
+        )
+        self.module.data["write_buckets"] = (
+            self.module.data.get("write_buckets", []) + self.write_buckets
+        )
         if "image_tag" in self.layer.variables:
             self.module.data["tag"] = self.layer.variables["image_tag"]
 
