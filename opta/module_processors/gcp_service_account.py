@@ -60,10 +60,6 @@ class GcpServiceAccountProcessor(ModuleProcessor):
                     f"Unsupported module type for gcp service account link: {module_type}"
                 )
 
-        self.module.data["read_buckets"] = (
-            self.module.data.get("read_buckets", []) + self.read_buckets
-        )
-        self.module.data["write_buckets"] = (
-            self.module.data.get("write_buckets", []) + self.write_buckets
-        )
+        self.module.data["read_buckets"] = self.read_buckets
+        self.module.data["write_buckets"] = self.write_buckets
         super(GcpServiceAccountProcessor, self).process(module_idx)
