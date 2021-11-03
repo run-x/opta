@@ -164,10 +164,10 @@ variable "persistent_storage" {
 }
 
 variable "annotations" {
-  type = map(map(string))
+  type    = map(map(string))
   default = {}
 }
 variable "annotations" {
-  type = map(map(string))
+  type    = map(map(string))
   default = {}
 }
