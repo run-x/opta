@@ -227,11 +227,73 @@ class TestK8sBaseModuleProcessor:
 class TestK8sServiceModuleProcessor:
     @pytest.fixture
     def processor(self) -> K8sServiceModuleProcessor:
-        # TODO: Actually create module and layer; these tests don't depend on those
+        # These tests don't depend on the layer and module, so we don't need to provide them
+        # May need to fix this if future changes cause these tests to break
         processor = K8sServiceModuleProcessor(None, None)  # type: ignore
         processor.FLAG_MULTIPLE_PORTS_SUPPORTED = True
 
         return processor
+
+    def process_ports_assert(
+        self,
+        processor: K8sServiceModuleProcessor,
+        data: Dict[Any, Any],
+        *,
+        expected: Optional[Dict[Any, Any]] = None,
+        exception_type: Optional[Type[Exception]] = None,
+        exception_message: Optional[str] = None,
+    ) -> None:
+
+        if expected is None:
+            expected = copy.copy(data)
+
+        if exception_type:
+            with pytest.raises(exception_type) as e:
+                processor._process_ports(data)
+
+            if exception_message is not None:
+                assert str(e.value) == exception_message
+        else:
+            processor._process_ports(data)
+
+        assert data == expected
+
+    def test_process_ports_empty(self, processor: K8sServiceModuleProcessor) -> None:
+        # Should be okay with missing "port" and "ports"
+        self.process_ports_assert(processor, {})
+
+    def test_process_ports_multi_port(self, processor: K8sServiceModuleProcessor) -> None:
+        input = {
+            "ports": [
+                {
+                    "name": "a",
+                    "type": "http",
+                    "port": 1,
+                },
+                {
+                    "name": "b",
+                    "type": "tcp",
+                    "port": 2,
+                },
+            ],
+            "probe_port": "b",
+        }
+
+
+        port_a = PortSpec("a", "http", 1)
+        port_b = PortSpec("b", "tcp", 2)
+
+        expected = {
+            "ports": [port_a, port_b],
+            "http_port": port_a,
+            "probe_port": port_b,
+            "service_annotations": {
+                "nginx.opta.dev/extra-tcp-ports": '{"2": "b"}',
+            },
+        }
+
+        self.process_ports_assert(processor, input, expected=expected)
+
 
     @staticmethod
     def transform_port(
@@ -459,8 +521,6 @@ class TestK8sServiceModuleProcessor:
             ports = self.read_ports(processor, raw)
 
             assert ports == expected
-
-    # TODO: Test _process_ports (split it up first)
 
     def test_read_ports_empty(self, processor: K8sServiceModuleProcessor) -> None:
         self.read_ports_assert(processor, [], expected=[])
