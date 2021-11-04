@@ -1,10 +1,4 @@
 {{- if eq (len .Values.persistentStorage) 0 }}
-{{- if ne ((keys .Values.port) | len) 1 }}
-  {{- fail "Port must specify either a single tcp port (for websockets) or a single http port" }}
-{{- end }}
-{{- if not ( or (hasKey .Values.port "tcp") ( or (hasKey .Values.port "http") (hasKey .Values.port "grpc"))) }}
-  {{- fail "Port must specify either a single tcp port (for websockets) or a single http port" }}
-{{- end }}
 {{- if .Values.deployPods }}
 apiVersion: apps/v1
 kind: Deployment
@@ -42,18 +36,14 @@ spec:
             - name: config
               mountPath: "/config"
               readOnly: true
+          {{- with .Values.ports }}
           ports:
-            - name: main
+            {{- range $portSpec := . }}
+            - name: {{ $portSpec.name | quote }}
               protocol: TCP
-            {{- if hasKey .Values.port "http" }}
-              containerPort: {{ .Values.port.http }}
+              containerPort: {{ $portSpec.port }}
             {{- end }}
-            {{- if hasKey .Values.port "tcp" }}
-              containerPort: {{ .Values.port.tcp }}
-            {{- end }}
-            {{- if hasKey .Values.port "grpc" }}
-              containerPort: {{ .Values.port.grpc }}
-            {{- end }}
+          {{- end }}
           env:
             - name: RDS_CA_PATH # This is the path to the public key for the docdb tls
               value: "/config/rds_ca.pem"
@@ -75,36 +65,31 @@ spec:
                   name: manual-secrets
                   key: {{ $val | quote }}
             {{ end }}
-          {{/* No probes for grpc at the moment */}}
-          {{ if not (hasKey .Values.port "grpc") }}
-          {{ if .Values.livenessProbePath }} 
+          {{- if .Values.livenessProbePath }}
           livenessProbe:
             initialDelaySeconds: 30
-            {{ if hasKey .Values.port "tcp" }}
+            {{- if eq .Values.probePort.type "tcp" }}
             tcpSocket:
-              port: main
-            {{ end }}
-            {{- if hasKey .Values.port "http" }}
+              port: {{ .Values.probePort.name | quote }}
+            {{- else if eq .Values.probePort.type "http" }}
             httpGet:
-              port: main
+              port: {{ .Values.probePort.name | quote }}
               path: {{ .Values.livenessProbePath }}
-            {{ end }}
-          {{ end }}
-          {{ if .Values.readinessProbePath }} 
+            {{- end }}
+          {{- end }}
+          {{- if .Values.readinessProbePath }}
           readinessProbe:
             initialDelaySeconds: 30
             periodSeconds: 10
-            {{ if hasKey .Values.port "tcp" }}
+            {{- if eq .Values.probePort.type "tcp" }}
             tcpSocket:
-              port: main
-            {{ end }}
-            {{- if hasKey .Values.port "http" }}
+              port: {{ .Values.probePort.name | quote }}
+            {{- else if eq .Values.probePort.type "http" }}
             httpGet:
-              port: main
-              path: {{ .Values.readinessProbePath }}
-            {{ end }}
-          {{ end }}
-          {{ end }}
+              port: {{ .Values.probePort.name | quote }}
+              path: {{ .Values.livenessProbePath }}
+            {{- end }}
+          {{- end }}
           resources:
             limits:
               {{- toYaml .Values.containerResourceLimits | nindent 14 }}

@@ -50,12 +50,24 @@ inputs:
     default: null
   - name: port
     user_facing: true
-    validator: any(include('service_port'), required=True)
+    validator: any(include('service_port'), required=False)
+    # TODO(patrick): In description, mention deprecation
     description: |
       Specifies what port your app was made to be listened to. Currently it must be a map of the form
       `http: [PORT_NUMBER_HERE]` or `tcp: [PORT_NUMBER_HERE]`. Use http if you just have a vanilla http server and tcp for
       websockets.
-    default: null
+  - name: ports
+    user_facing: true
+    validator: list(include('port_definition'), required=False)
+    description: Specifies which port(s) your app exposes.
+  - name: probe_port
+    user_facing: true
+    validator: str(required=False)
+    description: The name of the port to use for readiness and liveness probes. Defaults to the first port listed.
+  - name: http_port
+    user_facing: false
+  - name: service_annotations
+    user_facing: false
   - name: min_containers
     user_facing: true
     validator: any(required=False)
@@ -169,6 +181,11 @@ extra_validators:
   env-var:
     name: str(required=False)
     value: str()
+  port_definition:
+    name: regex('^[a-z0-9-]+$', name='valid service name')
+    type: regex('^(http|tcp)$', name='http or tcp')
+    port: int(min=1, max=65535)
+    protocol: regex('^(grpc|websocket)$', name='grpc or websocket', required=False)
   service_port:
     http: int(required=False)
     tcp: int(required=False)

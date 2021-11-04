@@ -19,3 +19,5 @@ coverage.xml
 setenv.sh
 .env
 Reference
+.mypy_cache
+.pytest_cache

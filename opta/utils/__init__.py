@@ -79,6 +79,13 @@ if hasattr(sys, "_called_from_test") or VERSION == DEV_VERSION:
 fmt = PartialFormatter("")
 
 
+class RawString(str):
+    """This class can be used to avoid formatting the string in the hydrate method"""
+
+    # TODO: This should not actually exist. It is purely a workaround
+    pass
+
+
 def deep_merge(dict1: Dict[Any, Any], dict2: Dict[Any, Any]) -> Dict[Any, Any]:
     dict2 = dict2.copy()
     for key, value in dict1.items():
@@ -100,6 +107,8 @@ def hydrate(target: Any, hydration: Dict[Any, Any]) -> Dict[Any, Any]:
             target[k] = hydrate(v, hydration)
     elif isinstance(target, list):
         target = [hydrate(x, hydration) for x in target]
+    elif isinstance(target, RawString):  # TODO: No, just no
+        target = str(target)  # https://www.youtube.com/watch?v=31g0YE61PLQ
     elif isinstance(target, str):
         target = fmt.format(target, **hydration)
 

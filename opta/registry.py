@@ -70,10 +70,14 @@ def _make_module_docs(vanilla_text: str, module_dict: Dict[Any, Any]) -> str:
         if not inputs["user_facing"]:
             continue
         name = inputs["name"]
-        default = inputs["default"]
+        if "default" in inputs:
+            default = f"`{inputs['default']}`"
+        else:
+            default = "*none*"
+
         description = inputs["description"].replace("\n", " ")
         required = "required=True" in inputs["validator"]
-        table_row = f"| `{name}` | {description} | `{default}` | {required} |"
+        table_row = f"| `{name}` | {description} | {default} | {required} |"
         input_lines.append(table_row)
 
     output: Dict[str, Any]

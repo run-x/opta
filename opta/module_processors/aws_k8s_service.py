@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict, List, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from opta.core.kubernetes import (
     create_namespace_if_not_exists,
@@ -21,6 +21,8 @@ if TYPE_CHECKING:
 class AwsK8sServiceProcessor(
     AWSK8sModuleProcessor, K8sServiceModuleProcessor, AWSIamAssembler
 ):
+    FLAG_MULTIPLE_PORTS_SUPPORTED = True
+
     def __init__(self, module: "Module", layer: "Layer"):
         if (module.aliased_type or module.type) != "aws-k8s-service":
             raise Exception(
@@ -39,6 +41,11 @@ class AwsK8sServiceProcessor(
                     f"K8s service w/ a new secret."
                 )
         super(AwsK8sServiceProcessor, self).pre_hook(module_idx)
+
+    def post_hook(self, module_idx: int, exception: Optional[Exception]) -> None:
+        self._extra_ports_controller()
+
+        super().post_hook(module_idx, exception)
 
     def process(self, module_idx: int) -> None:
         # Update the secrets
