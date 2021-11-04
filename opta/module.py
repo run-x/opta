@@ -64,7 +64,7 @@ class Module:
             "module": {self.name: {"source": self.module_dir_path}},
             "output": {},
         }
-        # TODO: Should error if module writes to "data" when keys aren't defined (or validation doesn't pass ???)
+        # TODO(patrick): Should error if module writes to "data" when keys aren't defined (or validation doesn't pass ???)
         for input in self.desc["inputs"]:
             input_name = input["name"]
             if input_name in self.data:
@@ -74,7 +74,7 @@ class Module:
             elif input_name == "layer_name":
                 module_blk["module"][self.name][input_name] = self.layer_name
             elif not input["required"]:
-                # TODO: This cannot handle inputs that have defaults but are removed by a module's `process` method
+                # TODO(patrick): This cannot handle inputs that have defaults but are removed by a module's `process` method
                 if "default" in input:
                     module_blk["module"][self.name][input_name] = input["default"]
             else:

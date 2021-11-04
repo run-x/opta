@@ -265,20 +265,11 @@ class TestK8sServiceModuleProcessor:
     def test_process_ports_multi_port(self, processor: K8sServiceModuleProcessor) -> None:
         input = {
             "ports": [
-                {
-                    "name": "a",
-                    "type": "http",
-                    "port": 1,
-                },
-                {
-                    "name": "b",
-                    "type": "tcp",
-                    "port": 2,
-                },
+                {"name": "a", "type": "http", "port": 1},
+                {"name": "b", "type": "tcp", "port": 2},
             ],
             "probe_port": "b",
         }
-
 
         port_a = PortSpec("a", "http", 1)
         port_b = PortSpec("b", "tcp", 2)
@@ -287,13 +278,10 @@ class TestK8sServiceModuleProcessor:
             "ports": [port_a, port_b],
             "http_port": port_a,
             "probe_port": port_b,
-            "service_annotations": {
-                "nginx.opta.dev/extra-tcp-ports": '{"2": "b"}',
-            },
+            "service_annotations": {"nginx.opta.dev/extra-tcp-ports": '{"2": "b"}'},
         }
 
         self.process_ports_assert(processor, input, expected=expected)
-
 
     @staticmethod
     def transform_port(
@@ -363,9 +351,12 @@ class TestK8sServiceModuleProcessor:
         data = {
             "port": {"foo": 1},
         }
-        # TODO: Should this raise a different exception? Probably
+
         self.transform_port_assert(
-            processor, data, exception_type=KeyError,
+            processor,
+            data,
+            exception_type=UserErrors,
+            exception_message="Unknown port type foo",
         )
 
     def test_transform_port_tcp(self, processor: K8sServiceModuleProcessor) -> None:
@@ -534,6 +525,19 @@ class TestK8sServiceModuleProcessor:
 
         self.read_ports_assert(processor, raw, expected=expected)
 
+    def test_read_ports_invalid_combo(self, processor: K8sServiceModuleProcessor) -> None:
+        raw = [
+            {"name": "a", "port": 1, "type": "http"},
+            {"name": "b", "port": 2, "type": "tcp", "protocol": "grpc"},
+        ]
+
+        self.read_ports_assert(
+            processor,
+            raw,
+            exception_type=UserErrors,
+            exception_message="Issue with port b: Invalid type/protocol combo: tcp/grpc",
+        )
+
 
 class TestPortSpec:
     def from_raw_assert(
@@ -591,6 +595,13 @@ class TestPortSpec:
             assert len(type) > 0
             if protocol:
                 assert len(protocol) > 0
+
+    def test_legacy_port_type_mapping(self) -> None:
+        mapping = PortSpec.legacy_port_type_mapping()
+        valid_types = PortSpec.valid_type_protocols()
+
+        for type_protocol in mapping.values():
+            assert type_protocol in valid_types
 
     def test_is_http(self) -> None:
         assert PortSpec("a", "http", 1).is_http is True

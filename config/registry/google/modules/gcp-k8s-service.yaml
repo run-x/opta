@@ -46,15 +46,15 @@ inputs:
   - name: port
     user_facing: true
     validator: any(include('service_port'), required=False)
-    # TODO: In description, mention deprecation
+    # TODO(patrick): In description, mention deprecation
     description: |
       Specifies what port your app was made to be listened to. Currently it must be a map of the form
       `http: [PORT_NUMBER_HERE]` or `tcp: [PORT_NUMBER_HERE]`. Use http if you just have a vanilla http server and tcp for
       websockets.
   - name: ports
-    user_facing: false # TODO: Will need to flip to true when we add support in this cloud
+    user_facing: false # TODO(patrick): Will need to flip to true when we add support in this cloud
   - name: probe_port
-    user_facing: false # TODO: Will need to flip to true when we add support in this cloud
+    user_facing: false # TODO(patrick): Will need to flip to true when we add support in this cloud
   - name: http_port
     user_facing: false
   - name: min_containers

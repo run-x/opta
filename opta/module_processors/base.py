@@ -12,7 +12,7 @@ from opta.core import kubernetes
 from opta.core.aws import AWS
 from opta.core.terraform import get_terraform_outputs
 from opta.exceptions import UserErrors
-from opta.utils import RawString, hydrate, json
+from opta.utils import RawString, hydrate, json, logger
 
 if TYPE_CHECKING:
     from opta.layer import Layer
@@ -122,6 +122,15 @@ class PortSpec:
             ("tcp", None),
         }
 
+    @staticmethod
+    def legacy_port_type_mapping() -> Dict[str, Tuple[str, Optional[str]]]:
+        return {
+            "http": ("http", None),
+            "tcp": ("tcp", None),
+            "grpc": ("http", "grpc"),
+            "websocket": ("http", "websocket"),
+        }
+
     @property
     def is_http(self) -> bool:
         return self.type == "http"
@@ -148,7 +157,7 @@ class PortSpec:
 
 
 class K8sServiceModuleProcessor(ModuleProcessor):
-    # TODO: Remove this flag and references to it once all clouds support multiple ports
+    # TODO(patrick): Remove this flag and references to it once all clouds support multiple ports
     FLAG_MULTIPLE_PORTS_SUPPORTED = False
 
     def process(self, module_idx: int) -> None:
@@ -237,9 +246,15 @@ class K8sServiceModuleProcessor(ModuleProcessor):
         data["service_annotations"] = self.__service_annotations(ports)
 
     def __read_ports(self, raw: List[Dict[str, Any]]) -> List[PortSpec]:
-        # TODO: Convert KeyError into UserErrors? We should be validated at this point though
-        # TODO: ValueError too
-        return [PortSpec.from_raw(raw_spec) for raw_spec in raw]
+        def convert(raw_spec: Dict[str, Any]) -> PortSpec:
+            try:
+                return PortSpec.from_raw(raw_spec)
+            except ValueError as e:
+                name = raw_spec.get("name", "unnamed")
+
+                raise UserErrors(f"Issue with port {name}: {str(e)}") from e
+
+        return [convert(raw_spec) for raw_spec in raw]
 
     def __service_annotations(self, ports: List[PortSpec]) -> Dict[str, str]:
         """Returns list of annotations to put on the service resources"""
@@ -268,13 +283,7 @@ class K8sServiceModuleProcessor(ModuleProcessor):
         if "ports" in data:
             raise UserErrors("Cannot specify both port and ports")
 
-        # TODO: Use mapping from portspec class
-        port_type_mapping = {
-            "http": ("http", None),
-            "tcp": ("tcp", None),
-            "grpc": ("http", "grpc"),
-            "websocket": ("http", "websocket"),  # TODO: HTTP type?
-        }
+        port_type_mapping = PortSpec.legacy_port_type_mapping()
 
         port_config = data["port"]
         if len(port_config) > 1:
@@ -282,7 +291,11 @@ class K8sServiceModuleProcessor(ModuleProcessor):
 
         # This will only run once, but is a clean way to get the only key,value pair
         for type, port in port_config.items():
-            type_config = port_type_mapping[type]
+            try:
+                type_config = port_type_mapping[type]
+            except KeyError:
+                raise UserErrors(f"Unknown port type {type}")
+
             port_spec = {
                 "name": "main",
                 "type": type_config[0],
@@ -602,30 +615,47 @@ def reconcile_nginx_extra_ports(*, update_config_map: bool = True) -> Dict[int, 
 
     port_mapping: Dict[int, str] = {}
     for service in services:
+        id = f"{service.metadata.namespace}/{service.metadata.name}"
+
         extra_ports_annotation: str = service.metadata.annotations[
             NGINX_EXTRA_TCP_PORTS_ANNOTATION
         ]
 
         try:
             extra_ports: Dict[str, str] = json.loads(extra_ports_annotation)
-        except json.JSONDecodeError:
-            # TODO: Log decode error
+        except json.JSONDecodeError as e:
+            logger.warning(
+                "Error decoding the %s annotation on service %s",
+                NGINX_EXTRA_TCP_PORTS_ANNOTATION,
+                id,
+                exc_info=e,
+            )
             continue
 
         if not isinstance(extra_ports, dict):
-            # TODO: Log type error
+            logger.warning(
+                "Contents of the %s annotation not expected format on service %s",
+                NGINX_EXTRA_TCP_PORTS_ANNOTATION,
+                id,
+            )
             continue
 
         for nginx_port_str, target_port in extra_ports.items():
             try:
                 nginx_port = int(nginx_port_str)
             except ValueError:
-                # TODO: Log type error?
-                # Skip bad value
+                logger.warning(
+                    "Contents of the %s annotation not expected format (non-int key) on service %s",
+                    NGINX_EXTRA_TCP_PORTS_ANNOTATION,
+                    id,
+                )
                 continue
 
             if nginx_port in port_mapping:
-                # TODO: Log conflict?
+                logger.warning(
+                    "Multiple services found that bind to the %i ingress port. Prioritizing oldest service",
+                    nginx_port,
+                )
                 # Skip conflicting ports
                 continue
 
