@@ -79,7 +79,7 @@ class AwsK8sBaseProcessor(AWSK8sModuleProcessor, K8sBaseModuleProcessor):
     def post_hook(self, module_idx: int, exception: Optional[Exception]) -> None:
         if exception is not None:
             return
-        self.add_alpn_olicy()
+        self.add_alpn_policy()
         self.add_admin_roles()
 
     def add_admin_roles(self) -> None:
@@ -140,7 +140,7 @@ class AwsK8sBaseProcessor(AWSK8sModuleProcessor, K8sBaseModuleProcessor):
             "aws-auth", "kube-system", body=aws_auth_config_map
         )
 
-    def add_alpn_olicy(self) -> None:
+    def add_alpn_policy(self) -> None:
         # Manually set the AlpnPolicy to HTTP2Preferred cause the damn K8s service annotation doesn't do its job.
         providers = self.layer.gen_providers(0)
         region = providers["provider"]["aws"]["region"]
