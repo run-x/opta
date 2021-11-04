@@ -1,6 +1,6 @@
 locals {
   target_ports    = { http : "http", https : "https" }
-  container_ports = { http : 80, https : 443 }
+  container_ports = { http : 80, https : 443, healthcheck : 10254 }
   config          = merge({ ssl-redirect : false }, var.nginx_config)
   annotations     = "{\"exposed_ports\": { \"443\":{\"name\": \"opta-${var.layer_name}-https\"}}}"
   negs            = formatlist("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/networkEndpointGroups/opta-%s-https", data.google_client_config.current.project, var.zone_names, var.layer_name)
