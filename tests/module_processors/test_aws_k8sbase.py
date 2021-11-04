@@ -1,7 +1,6 @@
 # type: ignore
 import os
 
-import pytest
 from pytest_mock import MockFixture
 
 from opta.layer import Layer
