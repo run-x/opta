@@ -10,7 +10,7 @@ resource "helm_release" "ingress-nginx" {
   values = [
     yamlencode({
       controller : {
-        podLabels: {
+        podLabels : {
           "opta-ingress-healthcheck" : "yes"
         }
         extraArgs : var.private_key == "" ? {} : { default-ssl-certificate : "ingress-nginx/secret-tls" }
