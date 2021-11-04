@@ -32,11 +32,11 @@ inputs:
     default: [ ]
   - name: read_buckets
     user_facing: false
-    description: Buckets linked for reading
+    description: Buckets to grant read permissions for
     default: []
   - name: write_buckets
     user_facing: false
-    description: Buckets linked for writing
+    description: Buckets to grant write permissions for
     default: []
   - name: image
     user_facing: true
@@ -152,6 +152,11 @@ inputs:
       A list persistent storages to add to each instance of your service (need to give a `size` which is the size in GB
       for the storage volume to be, and `path` which is the path in the filesystem of each instance to place it under)
     default: []
+  - name: additional_iam_roles
+    user_facing: true
+    description: A list of extra project-level iam roles to grant to the service account created for this k8s service
+    validator: list(str(), required=False)
+    default: [ ]
 extra_validators:
   persistent_storage:
     size: int(required=True)
