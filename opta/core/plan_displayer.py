@@ -1,3 +1,4 @@
+import json
 from typing import Any, Dict, Tuple
 
 from colored import attr, fg
@@ -5,7 +6,8 @@ from tabulate import tabulate
 
 from opta.constants import TF_PLAN_PATH
 from opta.core.terraform import Terraform
-from opta.utils import logger
+from opta.crash_reporter import CURRENT_CRASH_REPORTER
+from opta.utils import ansi_scrub, logger
 
 LOW_RISK = "LOW"
 HIGH_RISK = "HIGH"
@@ -110,10 +112,14 @@ class PlanDisplayer:
 
     @staticmethod
     def display(detailed_plan: bool = False) -> None:
+        regular_plan = Terraform.show(TF_PLAN_PATH, capture_output=True)
+        CURRENT_CRASH_REPORTER.tf_plan_text = ansi_scrub(regular_plan or "")
         if detailed_plan:
-            Terraform.show(TF_PLAN_PATH)
+            print(regular_plan)
             return
-        plan_dict = Terraform.show_plan()
+        plan_dict = json.loads(
+            Terraform.show(*["-no-color", "-json", TF_PLAN_PATH], capture_output=True)  # type: ignore
+        )
         plan_risk = LOW_RISK
         module_changes: dict = {}
         resource_change: dict

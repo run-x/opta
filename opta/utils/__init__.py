@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 import sys
 from logging import Formatter, Logger, LogRecord
 from logging.handlers import QueueHandler, QueueListener
@@ -45,6 +46,11 @@ class LogFormatMultiplexer(Formatter):
         return self.formatter_mapping.get(
             record.levelname, self.default_formatter
         ).format(record)
+
+
+def ansi_scrub(text: str) -> str:
+    ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
+    return ansi_escape.sub("", text)
 
 
 def initialize_logger() -> Tuple[Logger, QueueListener, DatadogLogHandler]:

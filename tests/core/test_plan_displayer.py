@@ -1,4 +1,5 @@
 # type: ignore
+import json
 import os
 
 from pytest_mock import MockFixture
@@ -15,5 +16,5 @@ class TestPlanDisplayer:
         with open(path) as f:
             plan_dict = yaml.load(f)
         mocked_terraform = mocker.patch("opta.core.plan_displayer.Terraform")
-        mocked_terraform.show_plan.return_value = plan_dict
+        mocked_terraform.show.side_effect = ["bare show", json.dumps(plan_dict)]
         PlanDisplayer.display()
