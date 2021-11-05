@@ -35,7 +35,7 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
     {{- end }}
-    {{ if hasKey $.Values.annotations "ingress" }}
+    {{- if hasKey $.Values.annotations "ingress" }}
     {{- range $k, $v := $.Values.annotations.ingress }}
     {{ $k | quote }}: {{ $v | quote }}
     {{- end }}
