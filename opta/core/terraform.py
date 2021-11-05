@@ -1,5 +1,4 @@
 import errno
-import logging
 import os
 import time
 from pathlib import Path
