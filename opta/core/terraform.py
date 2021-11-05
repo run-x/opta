@@ -28,8 +28,7 @@ from googleapiclient import discovery
 from googleapiclient.errors import HttpError
 from oauth2client.client import GoogleCredentials
 
-from opta.amplitude import amplitude_client
-from opta.core.aws import AWS, get_aws_resource_id
+from opta.core.aws import AWS
 from opta.core.azure import Azure
 from opta.core.gcp import GCP
 from opta.core.local import Local
@@ -109,47 +108,9 @@ class Terraform:
             kwargs["stderr"] = PIPE
             kwargs["stdout"] = DEVNULL
 
-        try:
-            nice_run(
-                ["terraform", "apply", "-compact-warnings", *tf_flags],
-                check=True,
-                **kwargs,
-            )
-        except Exception as e:
-            logging.error(e)
-            logging.info("Terraform apply failed, would rollback, but skipping for now..")
-            raise e
-            # cls.rollback(layer)
-
-    @classmethod
-    def rollback(cls, layer: "Layer") -> None:
-        amplitude_client.send_event(amplitude_client.ROLLBACK_EVENT)
-
-        aws_resources = AWS(layer).get_opta_resources()
-        terraform_resources = set(cls.get_existing_module_resources(layer))
-
-        # Import all stale resources into terraform state (so they can be destroyed later).
-        stale_resources = []
-        for resource in aws_resources:
-            if resource in terraform_resources:
-                continue
-
-            try:
-                resource_id = get_aws_resource_id(aws_resources[resource])
-                cls.import_resource(resource, resource_id, layer=layer)
-                stale_resources.append(resource)
-            except Exception:
-                logging.debug(
-                    f"Resource {resource_id} failed to import. It probably no longer exists, skipping."
-                )
-                continue
-
-        # Skip destroy if no resources are stale.
-        if len(stale_resources) == 0:
-            return None
-
-        # Destroy stale terraform resources.
-        cls.destroy_resources(layer, stale_resources)
+        nice_run(
+            ["terraform", "apply", "-compact-warnings", *tf_flags], check=True, **kwargs,
+        )
 
     @classmethod
     def import_resource(
@@ -341,18 +302,15 @@ class Terraform:
         )
 
     @classmethod
-    def show_plan(cls) -> Dict[Any, Any]:
-        out = nice_run(
-            ["terraform", "show", "-no-color", "-json", "tf.plan"],
-            check=True,
-            capture_output=True,
-        ).stdout.decode("utf-8")
-        return json.loads(out)
-
-    @classmethod
-    def show(cls, *tf_flags: str) -> None:
+    def show(cls, *tf_flags: str, capture_output: bool = False) -> Optional[str]:
         kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
+        if capture_output:
+            out = nice_run(
+                ["terraform", "show", *tf_flags], check=True, capture_output=True,
+            ).stdout.decode("utf-8")
+            return out
         nice_run(["terraform", "show", *tf_flags], check=True, **kwargs)
+        return None
 
     @classmethod
     def get_existing_modules(cls, layer: "Layer") -> Set[str]:

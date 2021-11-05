@@ -25,6 +25,7 @@ from opta.constants import MODULE_DEPENDENCY, REGISTRY, VERSION
 from opta.core.aws import AWS
 from opta.core.gcp import GCP
 from opta.core.validator import validate_yaml
+from opta.crash_reporter import CURRENT_CRASH_REPORTER
 from opta.exceptions import UserErrors
 from opta.module import Module
 from opta.module_processors.atlas_mongo import AtlasMongoProcessor
@@ -203,6 +204,8 @@ class Layer:
             shutil.rmtree(t)
 
         cls.validate_layer(layer)
+        if not is_parent:
+            CURRENT_CRASH_REPORTER.set_layer(layer)
         return layer
 
     def structured_config(self) -> StructuredConfig:

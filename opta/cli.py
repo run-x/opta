@@ -2,10 +2,10 @@
 
 import os.path
 import sys
-from subprocess import CalledProcessError  # nosec
 
 import click
 from click_didyoumean import DYMGroup
+from colored import attr, fg
 
 import opta.sentry  # noqa: F401 This leads to initialization of sentry sdk
 from opta.cleanup_files import cleanup_files
@@ -24,6 +24,7 @@ from opta.commands.secret import secret
 from opta.commands.shell import shell
 from opta.commands.validate import validate
 from opta.commands.version import version
+from opta.crash_reporter import CURRENT_CRASH_REPORTER
 from opta.exceptions import UserErrors
 from opta.one_time import one_time
 from opta.upgrade import check_version_upgrade
@@ -63,22 +64,20 @@ if __name__ == "__main__":
         one_time()
         cleanup_files()
         cli()
-    except CalledProcessError as e:
-        logger.exception(e)
-        if e.stderr is not None:
-            logger.error(e.stderr.decode("utf-8"))
-        sys.exit(1)
     except UserErrors as e:
-        logger.error(e)
+        logger.error(str(e))
         logger.info(
-            "If you need more help please reach out to the contributors in our slack channel at: https://slack.opta.dev"
+            f"{fg('magenta')}If you need more help please reach out to the contributors in our slack channel at: https://slack.opta.dev{attr(0)}"
         )
         sys.exit(1)
     except Exception as e:
-        logger.exception(e)
+        logger.exception(str(e))
         logger.info(
-            "If you need more help please reach out to the contributors in our slack channel at: https://slack.opta.dev"
+            f"{fg('red')}Unhandled error encountered -- a crash report zipfile has been createded for you. "
+            "If you need more help please reach out (passing the crash report) to the contributors in our "
+            f"slack channel at: https://slack.opta.dev{attr(0)}"
         )
+        CURRENT_CRASH_REPORTER.generate_report()
         sys.exit(1)
     finally:
         # NOTE: Statements after the cli() invocation in the try clause are not executed.

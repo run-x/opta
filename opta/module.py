@@ -38,7 +38,7 @@ class Module:
         self.halt = REGISTRY[layer.cloud]["modules"][self.aliased_type or self.type].get(
             "halt", False
         )
-        self.module_dir_path = self.translate_location(
+        self.module_dir_path: str = self.translate_location(
             self.desc.get("terraform_module", self.aliased_type or self.type)
         )
 
