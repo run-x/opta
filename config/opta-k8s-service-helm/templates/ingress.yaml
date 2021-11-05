@@ -37,7 +37,7 @@ metadata:
     {{- end }}
     {{ if hasKey $.Values.annotations "ingress" }}
     {{- range $k, $v := $.Values.annotations.ingress }}
-    {{ $k }}: {{ $v }}
+    {{ $k | quote }}: {{ $v | quote }}
     {{- end }}
     {{- end }}
 spec:
