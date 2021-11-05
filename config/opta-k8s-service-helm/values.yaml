@@ -14,7 +14,7 @@ manualSecrets: []
 port: {}
 keepPathPrefix: false
 persistentStorage: []
-annotations: {}
+ingress_extra_annotations: {}
 
 serviceAccount:
   # The name of the service account to use.

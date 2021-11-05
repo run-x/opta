@@ -47,7 +47,7 @@ resource "helm_release" "k8s-service" {
       consistentHash : var.consistent_hash
       keepPathPrefix : var.keep_path_prefix
       persistentStorage : var.persistent_storage
-      annotations : var.annotations
+      ingress_extra_annotations : var.ingress_extra_annotations
     })
   ]
   atomic          = true
