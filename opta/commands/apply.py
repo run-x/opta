@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from subprocess import CalledProcessError
+from subprocess import CalledProcessError  # nosec
 from threading import Thread
 from typing import Any, Dict, List, Optional, Set
 
