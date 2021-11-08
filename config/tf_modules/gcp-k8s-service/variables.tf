@@ -184,6 +184,7 @@ variable "persistent_storage" {
 variable "ingress_extra_annotations" {
   type    = map(string)
   default = {}
+}
 variable "additional_iam_roles" {
   default = []
 }
