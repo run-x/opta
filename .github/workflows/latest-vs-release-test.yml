@@ -115,7 +115,6 @@ jobs:
           --auto-approve \
           --refresh
 
-
       - name: Set secret with Release Opta
         run: |
           OPTA_DISABLE_REPORTING=true ./dist/opta/opta secret update \
@@ -141,12 +140,15 @@ jobs:
           echo "This was the found secret value: ${secret_value}"
           [[ "$secret_value" =~ .*"foo".* ]] || exit 1
 
-      - name: Destroy environment (and test service) with Release Opta
+      - name: Destroy Test Service with Release Opta
         run: |
           yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
           --env ci \
           --config ./examples/ci-tests/create-and-destroy-aws/service.yml \
           --auto-approve
+
+      - name: Destroy Test Environment with Release Opta
+        run: |
           yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
           --config ./examples/ci-tests/create-and-destroy-aws/environment.yml \
           --auto-approve
