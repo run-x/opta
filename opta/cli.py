@@ -26,7 +26,6 @@ from opta.commands.validate import validate
 from opta.commands.version import version
 from opta.exceptions import UserErrors
 from opta.one_time import one_time
-from opta.pre_check import pre_check
 from opta.upgrade import check_version_upgrade
 from opta.utils import dd_handler, dd_listener, logger
 
@@ -62,7 +61,6 @@ if __name__ == "__main__":
         # However, we should still clean them up before the next command, or
         # else it may interfere with it.
         one_time()
-        pre_check()
         cleanup_files()
         cli()
     except CalledProcessError as e:

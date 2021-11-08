@@ -36,6 +36,7 @@ from opta.core.terraform import Terraform, get_terraform_outputs
 from opta.error_constants import USER_ERROR_TF_LOCK
 from opta.exceptions import MissingState, UserErrors
 from opta.layer import Layer, StructuredConfig
+from opta.pre_check import symlink_check
 from opta.utils import check_opta_file_exists, fmt_msg, is_tool, logger
 
 
@@ -146,6 +147,7 @@ def _apply(
     stdout_logs: bool = True,
     detailed_plan: bool = False,
 ) -> None:
+    symlink_check()
     _check_terraform_version()
     _clean_tf_folder()
     if local:
