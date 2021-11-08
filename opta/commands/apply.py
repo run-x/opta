@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from subprocess import CalledProcessError
 from threading import Thread
 from typing import Any, Dict, List, Optional, Set
 
@@ -296,14 +297,18 @@ def _apply(
                 )
                 logger.info("Planning your changes (might take a minute)")
 
-                Terraform.plan(
-                    "-lock=false",
-                    "-input=false",
-                    f"-out={TF_PLAN_PATH}",
-                    layer=layer,
-                    *targets,
-                    quiet=True,
-                )
+                try:
+                    Terraform.plan(
+                        "-lock=false",
+                        "-input=false",
+                        f"-out={TF_PLAN_PATH}",
+                        layer=layer,
+                        *targets,
+                        quiet=True,
+                    )
+                except CalledProcessError as e:
+                    logger.error((e.stderr or b"").decode("utf-8"))
+                    raise e
                 PlanDisplayer.display(detailed_plan=detailed_plan)
 
                 if not auto_approve:
