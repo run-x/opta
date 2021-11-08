@@ -13,7 +13,7 @@ modules:
     repository: https://airflow.apache.org
     chart: airflow
     namespace: airflow
-    version: 1.0.0
+    chart_version: 1.0.0
     create_namespace: true
     wait: false
     atomic: false

@@ -233,3 +233,8 @@ class LocalK8sServiceProcessor(LocalK8sModuleProcessor, K8sServiceModuleProcesso
                 "are for manipulating the redis cluster itself, which "
                 "I don't think is what you're looking for."
             )
+
+    def _process_ports(self, data: Dict[Any, Any]) -> None:
+        # Disable the mulitple ports processing
+        # TODO(patrick): remove once https://github.com/run-x/opta/pull/434 is merged
+        pass

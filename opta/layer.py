@@ -21,10 +21,11 @@ from google.auth import default
 from google.auth.exceptions import DefaultCredentialsError
 from google.oauth2 import service_account
 
-from opta.constants import REGISTRY, VERSION
+from opta.constants import MODULE_DEPENDENCY, REGISTRY, VERSION
 from opta.core.aws import AWS
 from opta.core.gcp import GCP
 from opta.core.validator import validate_yaml
+from opta.crash_reporter import CURRENT_CRASH_REPORTER
 from opta.exceptions import UserErrors
 from opta.module import Module
 from opta.module_processors.atlas_mongo import AtlasMongoProcessor
@@ -203,6 +204,8 @@ class Layer:
             shutil.rmtree(t)
 
         cls.validate_layer(layer)
+        if not is_parent:
+            CURRENT_CRASH_REPORTER.set_layer(layer)
         return layer
 
     def structured_config(self) -> StructuredConfig:
@@ -302,6 +305,20 @@ class Layer:
                     f"Module Type: '{module.type}' used twice in the configuration. Please check and update as required."
                 )
             unique_modules.add(module.type)
+
+        # Checks the Dependency Graph for Unresolved Dependencies.
+        previous_modules: Set[str] = set()
+        for module in layer.modules:
+            dependency_modules = MODULE_DEPENDENCY.get(
+                module.aliased_type or module.type, set()
+            )
+            for dependency_module in dependency_modules:
+                if not previous_modules.__contains__(dependency_module):
+                    raise UserErrors(
+                        f'Module: "{module.type}" has it\'s dependency on a missing Module: "{dependency_module}". '
+                        f"Please rectify the configuration before using it."
+                    )
+            previous_modules.add(module.aliased_type or module.type)
 
     @staticmethod
     def valid_name(name: str) -> bool:

@@ -12,7 +12,7 @@ from opta.core.aws import AWS
 from opta.core.kubernetes import configure_kubectl, list_namespaces
 from opta.core.terraform import Terraform
 from opta.exceptions import UserErrors
-from opta.module_processors.base import AWSK8sModuleProcessor
+from opta.module_processors.base import AWSK8sModuleProcessor, K8sBaseModuleProcessor
 from opta.utils import yaml
 
 if TYPE_CHECKING:
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from opta.module import Module
 
 
-class AwsK8sBaseProcessor(AWSK8sModuleProcessor):
+class AwsK8sBaseProcessor(AWSK8sModuleProcessor, K8sBaseModuleProcessor):
     def __init__(self, module: "Module", layer: "Layer"):
         if (module.aliased_type or module.type) != "aws-k8s-base":
             raise Exception(
@@ -44,6 +44,10 @@ class AwsK8sBaseProcessor(AWSK8sModuleProcessor):
             self.module.data[
                 "certificate_chain"
             ] = f"${{{{module.{byo_cert_module.name}.certificate_chain}}}}"
+
+        Terraform.download_state(self.layer)
+        configure_kubectl(self.layer)
+        self._process_nginx_extra_ports(self.module.data)
 
         aws_dns_module = None
         for module in self.layer.modules:
@@ -75,7 +79,7 @@ class AwsK8sBaseProcessor(AWSK8sModuleProcessor):
     def post_hook(self, module_idx: int, exception: Optional[Exception]) -> None:
         if exception is not None:
             return
-        self.add_alpn_olicy()
+        self.add_alpn_policy()
         self.add_admin_roles()
 
     def add_admin_roles(self) -> None:
@@ -136,7 +140,7 @@ class AwsK8sBaseProcessor(AWSK8sModuleProcessor):
             "aws-auth", "kube-system", body=aws_auth_config_map
         )
 
-    def add_alpn_olicy(self) -> None:
+    def add_alpn_policy(self) -> None:
         # Manually set the AlpnPolicy to HTTP2Preferred cause the damn K8s service annotation doesn't do its job.
         providers = self.layer.gen_providers(0)
         region = providers["provider"]["aws"]["region"]

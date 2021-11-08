@@ -28,7 +28,7 @@ class DatadogProcessor(ModuleProcessor):
                 configure_kubectl(layer)
                 break
             except Exception as err:
-                logger.exception(err)
+                logger.exception(str(err))
                 logger.info("Retrying attempt to talk to K8s cluster...")
         else:
             raise Exception("Couldn't connect to the K8s cluster")

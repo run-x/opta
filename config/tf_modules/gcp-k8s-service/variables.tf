@@ -43,9 +43,27 @@ variable "sticky_session_max_age" {
   default = 86400
 }
 
-variable "port" {
-  description = "Port to be exposed as :80"
-  type        = map(number)
+variable "ports" {
+  description = "Ports to be exposed"
+  type        = list(any)
+}
+
+variable "http_port" {
+  description = "The port that exposes an HTTP interface"
+  type        = any
+  default     = null
+}
+
+variable "probe_port" {
+  description = "The port that is used for health probes"
+  type        = any
+  default     = null
+}
+
+variable "service_annotations" {
+  description = "Annotations to add to the service resource"
+  type        = map(string)
+  default     = {}
 }
 
 variable "image" {
@@ -166,4 +184,6 @@ variable "persistent_storage" {
 variable "ingress_extra_annotations" {
   type    = map(string)
   default = {}
+variable "additional_iam_roles" {
+  default = []
 }

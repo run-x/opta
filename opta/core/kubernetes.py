@@ -2,7 +2,7 @@ import base64
 import datetime
 import time
 from threading import Thread
-from typing import TYPE_CHECKING, List, Optional, Set, Tuple
+from typing import TYPE_CHECKING, Dict, List, Optional, Set, Tuple
 
 import boto3
 import pytz
@@ -12,6 +12,7 @@ from kubernetes.client import (
     ApiException,
     AppsV1Api,
     CoreV1Api,
+    V1ConfigMap,
     V1Deployment,
     V1DeploymentList,
     V1Event,
@@ -21,6 +22,8 @@ from kubernetes.client import (
     V1Pod,
     V1Secret,
     V1SecretList,
+    V1Service,
+    V1ServiceList,
 )
 from kubernetes.config import load_kube_config
 from kubernetes.watch import Watch
@@ -354,6 +357,52 @@ def list_namespaces() -> None:
     except ApiException as e:
         if e.reason == "Unauthorized" or e.status == 401:
             raise UserErrors("User does not have access to Kubernetes Cluster.")
+
+
+def list_services(*, namespace: Optional[str] = None) -> List[V1Service]:
+    load_kube_config()
+    v1 = CoreV1Api()
+
+    services: V1ServiceList
+    if namespace:
+        services = v1.list_namespaced_service(namespace)
+    else:
+        services = v1.list_service_for_all_namespaces()
+
+    return services.items
+
+
+def get_config_map(namespace: str, name: str) -> V1ConfigMap:
+    load_kube_config()
+    v1 = CoreV1Api()
+    try:
+        cm: V1ConfigMap = v1.read_namespaced_config_map(name, namespace)
+    except ApiException as e:
+        if e.status == 404:
+            return None
+
+        raise
+
+    return cm
+
+
+def update_config_map_data(namespace: str, name: str, data: Dict[str, str]) -> None:
+    load_kube_config()
+    v1 = CoreV1Api()
+
+    # Pulled from https://github.com/kubernetes-client/python/issues/1549#issuecomment-921611078
+    manifest = [
+        {
+            "kind": "ConfigMap",
+            "apiVersion": "v1",
+            "metadata": {"name": name},
+            "op": "replace",
+            "path": "/data",
+            "value": data,
+        }
+    ]
+
+    v1.patch_namespaced_config_map(name, namespace, manifest)
 
 
 def get_secrets(layer_name: str) -> dict:

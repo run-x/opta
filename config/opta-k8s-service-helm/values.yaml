@@ -11,7 +11,10 @@ stickySessionMaxAge: 86400
 envVars: []
 linkSecrets: []
 manualSecrets: []
-port: {}
+ports: []
+probePort: null
+httpPort: null
+serviceAnnotations: {}
 keepPathPrefix: false
 persistentStorage: []
 ingress_extra_annotations: {}
