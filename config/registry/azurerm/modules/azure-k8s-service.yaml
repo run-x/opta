@@ -154,6 +154,12 @@ inputs: # (what users see)
       A list persistent storages to add to each instance of your service (need to give a `size` which is the size in GB
       for the storage volume to be, and `path` which is the path in the filesystem of each instance to place it under)
     default: []
+  - name: ingress_extra_annotations
+    user_facing: true
+    validator: map(required=False)
+    default: {}
+    description: |
+      These are extra annotations to add to ingress objects
 extra_validators:
   persistent_storage:
     size: int(required=True)

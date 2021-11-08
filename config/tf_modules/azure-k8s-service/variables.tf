@@ -178,3 +178,7 @@ variable "persistent_storage" {
   type    = list(map(string))
   default = []
 }
+variable "ingress_extra_annotations" {
+  type    = map(string)
+  default = {}
+}
