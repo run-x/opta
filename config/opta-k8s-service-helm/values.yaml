@@ -17,7 +17,7 @@ httpPort: null
 serviceAnnotations: {}
 keepPathPrefix: false
 persistentStorage: []
-ingress_extra_annotations: {}
+ingressExtraAnnotations: {}
 
 serviceAccount:
   # The name of the service account to use.
