@@ -166,7 +166,7 @@ class TestKubernetes:
             "opta.core.kubernetes.Thread", side_effect=[thread_1, thread_2]
         )
 
-        tail_module_log(layer, "mocked_module_name", seconds=3, start_color_idx=2)
+        tail_module_log(layer, "mocked_module_name", since_seconds=3, start_color_idx=2)
         mocked_watch_call.assert_called_once_with()
         mocked_core_v1_api_call.assert_called_once_with()
         mocked_load_kube_config.assert_called_once_with()
@@ -224,7 +224,7 @@ class TestKubernetes:
             "opta.core.kubernetes.Thread", side_effect=[thread_1, thread_2]
         )
 
-        tail_module_log(layer, "mocked_module_name", seconds=3, start_color_idx=2)
+        tail_module_log(layer, "mocked_module_name", since_seconds=3, start_color_idx=2)
         mocked_watch_call.assert_called_once_with()
         mocked_core_v1_api_call.assert_called_once_with()
         mocked_load_kube_config.assert_called_once_with()
@@ -273,14 +273,24 @@ class TestKubernetes:
         mocked_core_v1_api_call.assert_called_once_with()
         mocked_time.sleep.assert_has_calls(
             [
+                mocker.call(0),
                 mocker.call(1),
                 mocker.call(2),
+                mocker.call(3),
                 mocker.call(4),
+                mocker.call(5),
+                mocker.call(6),
+                mocker.call(7),
                 mocker.call(8),
-                mocker.call(16),
+                mocker.call(9),
+                mocker.call(10),
+                mocker.call(11),
+                mocker.call(12),
+                mocker.call(13),
+                mocker.call(14),
             ]
         )
-        assert mocked_time.sleep.call_count == 5
+        assert mocked_time.sleep.call_count == 15
 
         # Tailing should not retry upon encountering a 404 API exception.
         mocked_watch.stream.side_effect = [
@@ -346,8 +356,9 @@ class TestKubernetes:
             ApiException(status=400),
         ]
         mocked_time = mocker.patch("opta.core.kubernetes.time")
+        start_time = datetime.datetime.now(pytz.utc) - datetime.timedelta(seconds=2)
 
-        tail_namespace_events(layer, 2, 3)
+        tail_namespace_events(layer, start_time, 3)
 
         mocked_core_v1_api.list_namespaced_event.assert_called_once_with(
             namespace="mocked_layer"
