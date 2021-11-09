@@ -96,7 +96,8 @@ def destroy(
             abort=True,
         )
         tf_flags.append("-auto-approve")
-
+    modules = Terraform.get_existing_modules(layer)
+    layer.modules = [x for x in layer.modules if x.name in modules]
     gen_all(layer)
     Terraform.init(False, "-reconfigure", layer=layer)
     logger.info(f"Destroying {layer.name}")
