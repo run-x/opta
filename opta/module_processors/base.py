@@ -126,9 +126,9 @@ class PortSpec:
     def legacy_port_type_mapping() -> Dict[str, Tuple[str, Optional[str]]]:
         return {
             "http": ("http", None),
-            "tcp": ("tcp", None),
             "grpc": ("http", "grpc"),
             "websocket": ("http", "websocket"),
+            "tcp": ("http", "websocket"),
         }
 
     @property

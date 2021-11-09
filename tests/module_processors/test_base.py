@@ -364,7 +364,9 @@ class TestK8sServiceModuleProcessor:
             "port": {"tcp": 1234},
         }
         expected = {
-            "ports": [{"name": "main", "type": "tcp", "port": 1234}],
+            "ports": [
+                {"name": "main", "type": "http", "port": 1234, "protocol": "websocket"}
+            ],
         }
         self.transform_port_assert(
             processor, data, expected=expected,
