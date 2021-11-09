@@ -52,7 +52,6 @@ def destroy(
     """
 
     config = check_opta_file_exists(config)
-    symlink_check()
     if local:
         config = _handle_local_flag(config, False)
         _clean_tf_folder()
