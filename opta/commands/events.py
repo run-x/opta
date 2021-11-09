@@ -1,6 +1,8 @@
+import datetime
 from typing import Optional
 
 import click
+import pytz
 from kubernetes.config import load_kube_config
 
 from opta.amplitude import amplitude_client
@@ -33,8 +35,13 @@ def events(env: Optional[str], config: str, seconds: Optional[int]) -> None:
         amplitude_client.SHELL_EVENT,
         event_properties={"org_name": layer.org_name, "layer_name": layer.name},
     )
+    start_time = None
+    if seconds:
+        start_time = pytz.utc.localize(datetime.datetime.min) - datetime.timedelta(
+            seconds=seconds
+        )
     layer.verify_cloud_credentials()
     gen_all(layer)
     configure_kubectl(layer)
     load_kube_config()
-    tail_namespace_events(layer, seconds)
+    tail_namespace_events(layer, start_time)

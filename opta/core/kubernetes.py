@@ -5,7 +5,6 @@ from threading import Thread
 from typing import TYPE_CHECKING, Dict, List, Optional, Set, Tuple
 
 import boto3
-import pytz
 from botocore.exceptions import ClientError, NoCredentialsError
 from colored import attr, fg
 from kubernetes.client import (
@@ -412,7 +411,8 @@ def get_secrets(layer_name: str) -> dict:
 def tail_module_log(
     layer: "Layer",
     module_name: str,
-    seconds: Optional[int] = None,
+    since_seconds: Optional[int] = None,
+    earliest_pod_start_time: Optional[datetime.datetime] = None,
     start_color_idx: int = 1,
 ) -> None:
     current_pods_monitored: Set[str] = set()
@@ -421,7 +421,6 @@ def tail_module_log(
     watch = Watch()
     count = 0
     """Using the UTC Time stamp as the Kubernetes uses the UTC Timestamps."""
-    start_time = datetime.datetime.utcnow().replace(tzinfo=pytz.UTC)
     for event in watch.stream(
         v1.list_namespaced_pod,
         namespace=layer.name,
@@ -429,14 +428,17 @@ def tail_module_log(
     ):
         pod: V1Pod = event["object"]
         color_idx = count % (256 - start_color_idx) + start_color_idx
-        if pod.metadata.creation_timestamp < start_time:
+        if (
+            earliest_pod_start_time is not None
+            and pod.metadata.creation_timestamp < earliest_pod_start_time
+        ):
             continue
 
         if pod.metadata.name not in current_pods_monitored:
             current_pods_monitored.add(pod.metadata.name)
             new_thread = Thread(
                 target=tail_pod_log,
-                args=(layer.name, pod, color_idx, seconds),
+                args=(layer.name, pod, color_idx, since_seconds),
                 daemon=True,
             )
             new_thread.start()
@@ -470,11 +472,11 @@ def tail_pod_log(
                     )
                     return
 
-            if retry_count < 5:
+            if retry_count < 15:
                 print(
                     f"{fg(color_idx)}Couldn't get logs, waiting a bit and retrying{attr(0)}"
                 )
-                time.sleep(1 << retry_count)
+                time.sleep(retry_count)
                 retry_count += 1
             else:
                 logger.error(
@@ -484,26 +486,29 @@ def tail_pod_log(
 
 
 def tail_namespace_events(
-    layer: "Layer", seconds: Optional[int] = None, color_idx: int = 1,
+    layer: "Layer",
+    earliest_event_start_time: Optional[datetime.datetime] = None,
+    color_idx: int = 1,
 ) -> None:
     load_kube_config()
     v1 = CoreV1Api()
     watch = Watch()
     print(f"{fg(color_idx)}Showing events for namespace {layer.name}{attr(0)}")
     retry_count = 0
-    start_time = pytz.utc.localize(datetime.datetime.min)
-    if seconds is not None:
-        start_time = datetime.datetime.now(pytz.utc) - datetime.timedelta(seconds=seconds)
     old_events: List[V1Event] = v1.list_namespaced_event(namespace=layer.name).items
     # Filter by time
-    old_events = list(
-        filter(lambda x: (x.last_timestamp or x.event_time) > start_time, old_events,)
-    )
+    if earliest_event_start_time is not None:
+        old_events = list(
+            filter(
+                lambda x: (x.last_timestamp or x.event_time) > earliest_event_start_time,
+                old_events,
+            )
+        )
     # Sort by timestamp
     old_events = sorted(old_events, key=lambda x: (x.last_timestamp or x.event_time))
     event: V1Event
     for event in old_events:
-        start_time = event.last_timestamp or event.event_time
+        earliest_event_start_time = event.last_timestamp or event.event_time
         print(
             f"{fg(color_idx)}{event.last_timestamp or event.event_time} Namespace {layer.name} event: {event.message}{attr(0)}"
         )
@@ -514,7 +519,11 @@ def tail_namespace_events(
                 v1.list_namespaced_event, namespace=layer.name,
             ):
                 event = stream_obj["object"]
-                if (event.last_timestamp or event.event_time) > start_time:
+                if (
+                    earliest_event_start_time is None
+                    or (event.last_timestamp or event.event_time)
+                    > earliest_event_start_time
+                ):
                     if "Deleted pod:" in event.message:
                         deleted_pods.add(event.message.split(" ")[-1])
                     involved_object: Optional[V1ObjectReference] = event.involved_object
