@@ -79,7 +79,7 @@ spec:
           {{- end }}
           {{- if .Values.readinessProbePath }}
           readinessProbe:
-            initialDelaySeconds: {{ .Values.initialReadynessDelay }}
+            initialDelaySeconds: {{ .Values.initialReadinessDelay }}
             periodSeconds: 10
             {{- if eq .Values.probePort.type "tcp" }}
             tcpSocket:

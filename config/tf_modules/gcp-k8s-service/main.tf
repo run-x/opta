@@ -37,7 +37,7 @@ resource "helm_release" "k8s-service" {
       livenessProbePath : var.healthcheck_path == null || var.liveness_probe_path != null ? var.liveness_probe_path : var.healthcheck_path,
       initialLivenessDelay : var.initial_liveness_delay
       readinessProbePath : var.healthcheck_path == null || var.readiness_probe_path != null ? var.readiness_probe_path : var.healthcheck_path,
-      initialReadynessDelay : var.initial_readyness_delay
+      initialReadinessDelay : var.initial_readiness_delay
       envVars : var.env_vars,
       linkSecrets : var.link_secrets,
       manualSecrets : var.manual_secrets,

@@ -184,7 +184,7 @@ variable "initial_liveness_delay" {
   default = 30
 }
 
-variable "initial_readyness_delay" {
+variable "initial_readiness_delay" {
   type    = number
   default = 30
 }
