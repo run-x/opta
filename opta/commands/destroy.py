@@ -17,7 +17,6 @@ from opta.core.terraform import Terraform
 from opta.error_constants import USER_ERROR_TF_LOCK
 from opta.exceptions import UserErrors
 from opta.layer import Layer
-from opta.pre_check import symlink_check
 from opta.utils import check_opta_file_exists, fmt_msg, logger
 
 
@@ -52,7 +51,6 @@ def destroy(
     """
 
     config = check_opta_file_exists(config)
-    symlink_check()
     if local:
         config = _handle_local_flag(config, False)
         _clean_tf_folder()
