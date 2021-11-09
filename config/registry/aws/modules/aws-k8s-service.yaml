@@ -54,8 +54,8 @@ inputs:
     # TODO(patrick): In description, mention deprecation
     description: |
       Specifies what port your app was made to be listened to. Currently it must be a map of the form
-      `http: [PORT_NUMBER_HERE]` or `tcp: [PORT_NUMBER_HERE]`. Use http if you just have a vanilla http server and tcp for
-      websockets.
+      `http: [PORT_NUMBER_HERE]` or `websocket: [PORT_NUMBER_HERE]`. Use `http` if you just have a vanilla http server
+      and `websocket` for websockets.
   - name: ports
     user_facing: true
     validator: list(include('port_definition'), required=False)
