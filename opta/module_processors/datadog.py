@@ -9,7 +9,6 @@ from requests import codes, get
 from opta.core.kubernetes import configure_kubectl
 from opta.exceptions import UserErrors
 from opta.module_processors.base import ModuleProcessor
-from opta.utils import exp_backoff, logger
 
 if TYPE_CHECKING:
     from opta.layer import Layer
@@ -22,52 +21,40 @@ class DatadogProcessor(ModuleProcessor):
             raise Exception(
                 f"The module {module.name} was expected to be of type datadog"
             )
-        # If the k8s cluster was recently created, it may take some time for it to be ready.
-        for _ in exp_backoff(num_tries=3):
-            try:
-                configure_kubectl(layer)
-                break
-            except Exception as err:
-                logger.exception(str(err))
-                logger.info("Retrying attempt to talk to K8s cluster...")
-        else:
-            raise Exception("Couldn't connect to the K8s cluster")
-
-        load_kube_config()
-        self.v1 = CoreV1Api()
         super(DatadogProcessor, self).__init__(module, layer)
 
     def process(self, module_idx: int) -> None:
+        configure_kubectl(self.layer)
+        load_kube_config()
+        v1 = CoreV1Api()
         # Update the secrets
-        namespaces = self.v1.list_namespace(
-            field_selector=f"metadata.name={self.layer.name}"
-        )
+        namespaces = v1.list_namespace(field_selector=f"metadata.name={self.layer.name}")
         if len(namespaces.items) == 0:
-            self.v1.create_namespace(
+            v1.create_namespace(
                 body=V1Namespace(metadata=V1ObjectMeta(name=self.layer.name))
             )
         try:
-            secret = self.v1.read_namespaced_secret("secret", self.layer.name)
+            secret = v1.read_namespaced_secret("secret", self.layer.name)
             if (
                 "DATADOG_API_KEY" not in secret.data
                 or secret.data["DATADOG_API_KEY"] == ""
             ):
-                api_key = self.create_secret()
+                api_key = self.create_secret(v1)
             else:
                 api_key = base64.b64decode(secret.data["DATADOG_API_KEY"]).decode("utf-8")
         except ApiException:
-            self.v1.create_namespaced_secret(
+            v1.create_namespaced_secret(
                 namespace=self.layer.name,
                 body=V1Secret(
                     metadata=V1ObjectMeta(name="secret"),
                     string_data={"DATADOG_API_KEY": ""},
                 ),
             )
-            api_key = self.create_secret()
+            api_key = self.create_secret(v1)
         self.module.data["api_key"] = api_key
         super(DatadogProcessor, self).process(module_idx)
 
-    def create_secret(self) -> str:
+    def create_secret(self, v1: CoreV1Api) -> str:
         value = self.module.data.get("api_key") or click.prompt(
             "Please enter your datadog api key (from https://app.datadoghq.com/account/settings#api)",
             type=click.STRING,
@@ -83,7 +70,7 @@ class DatadogProcessor(ModuleProcessor):
         patch = [
             {"op": "replace", "path": "/data/DATADOG_API_KEY", "value": secret_value}
         ]
-        self.v1.patch_namespaced_secret("secret", self.layer.name, patch)
+        v1.patch_namespaced_secret("secret", self.layer.name, patch)
         return value
 
     def validate_api_key(self, api_key: str) -> bool:
