@@ -189,3 +189,7 @@ variable "initial_readiness_delay" {
   default = 30
 }
 
+variable "ingress_extra_annotations" {
+  type    = map(string)
+  default = {}
+}

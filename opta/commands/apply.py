@@ -1,10 +1,13 @@
+import datetime
 import os
 from pathlib import Path
+from subprocess import CalledProcessError  # nosec
 from threading import Thread
 from typing import Any, Dict, List, Optional, Set
 
 import boto3
 import click
+import pytz
 import semver
 from botocore.config import Config
 from botocore.exceptions import ClientError
@@ -296,14 +299,18 @@ def _apply(
                 )
                 logger.info("Planning your changes (might take a minute)")
 
-                Terraform.plan(
-                    "-lock=false",
-                    "-input=false",
-                    f"-out={TF_PLAN_PATH}",
-                    layer=layer,
-                    *targets,
-                    quiet=True,
-                )
+                try:
+                    Terraform.plan(
+                        "-lock=false",
+                        "-input=false",
+                        f"-out={TF_PLAN_PATH}",
+                        layer=layer,
+                        *targets,
+                        quiet=True,
+                    )
+                except CalledProcessError as e:
+                    logger.error((e.stderr or b"").decode("utf-8"))
+                    raise e
                 PlanDisplayer.display(detailed_plan=detailed_plan)
 
                 if not auto_approve:
@@ -329,13 +336,25 @@ def _apply(
                     )
                     new_thread = Thread(
                         target=tail_module_log,
-                        args=(layer, service_module.name, 10, 2),
+                        args=(
+                            layer,
+                            service_module.name,
+                            10,
+                            datetime.datetime.utcnow().replace(tzinfo=pytz.UTC),
+                            2,
+                        ),
                         daemon=True,
                     )
                     # Tailing events
                     new_thread.start()
                     new_thread = Thread(
-                        target=tail_namespace_events, args=(layer, 0, 1), daemon=True,
+                        target=tail_namespace_events,
+                        args=(
+                            layer,
+                            datetime.datetime.utcnow().replace(tzinfo=pytz.UTC),
+                            1,
+                        ),
+                        daemon=True,
                     )
                     new_thread.start()
 

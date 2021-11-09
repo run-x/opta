@@ -163,7 +163,6 @@ class Terraform:
 
     @classmethod
     def destroy_all(cls, layer: "Layer", *tf_flags: str) -> None:
-        existing_modules = Terraform.get_existing_modules(layer)
 
         # Refreshing the state is necessary to update terraform outputs.
         # This includes fetching the latest EKS cluster auth token, which is
@@ -175,9 +174,6 @@ class Terraform:
         for module in reversed(layer.modules):
             module_address_prefix = f"module.{module.name}"
 
-            if module.name not in existing_modules:
-                idx -= 1
-                continue
             cls.refresh(layer, f"-target={module_address_prefix}")
             nice_run(
                 ["terraform", "destroy", f"-target={module_address_prefix}", *tf_flags],

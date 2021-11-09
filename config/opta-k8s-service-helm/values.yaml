@@ -17,6 +17,7 @@ httpPort: null
 serviceAnnotations: {}
 keepPathPrefix: false
 persistentStorage: []
+ingressExtraAnnotations: {}
 
 serviceAccount:
   # The name of the service account to use.
