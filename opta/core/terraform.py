@@ -164,11 +164,12 @@ class Terraform:
     @classmethod
     def destroy_all(cls, layer: "Layer", *tf_flags: str) -> None:
         existing_modules = Terraform.get_existing_modules(layer)
+        targets = list(map(lambda x: f"-target=module.{x}", sorted(existing_modules)))
 
         # Refreshing the state is necessary to update terraform outputs.
         # This includes fetching the latest EKS cluster auth token, which is
         # necessary for destroying many k8s resources.
-        cls.refresh(layer)
+        cls.refresh(layer, *targets)
         kwargs = cls.insert_extra_env(layer)
 
         idx = len(layer.modules) - 1
