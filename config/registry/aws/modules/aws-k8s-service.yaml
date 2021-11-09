@@ -196,6 +196,7 @@ extra_validators:
     http: int(required=False)
     tcp: int(required=False)
     grpc: int(required=False)
+    websocket: int(required=False)
 outputs:
   - name: docker_repo_url
     export: true

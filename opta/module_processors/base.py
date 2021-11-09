@@ -264,7 +264,6 @@ class K8sServiceModuleProcessor(ModuleProcessor):
         port_mapping = {port.port: port.name for port in ports if port.is_tcp}
 
         if not port_mapping:
-            logger.debug("no tcp ports")
             return {}
 
         return {
