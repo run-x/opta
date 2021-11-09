@@ -180,3 +180,13 @@ variable "persistent_storage" {
   type    = list(map(string))
   default = []
 }
+
+variable "initial_liveness_delay" {
+  type    = number
+  default = 30
+}
+
+variable "initial_readyness_delay" {
+  type    = number
+  default = 30
+}

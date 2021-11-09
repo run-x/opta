@@ -185,3 +185,14 @@ variable "persistent_storage" {
 variable "additional_iam_roles" {
   default = []
 }
+
+variable "initial_liveness_delay" {
+  type    = number
+  default = 30
+}
+
+variable "initial_readyness_delay" {
+  type    = number
+  default = 30
+}
+

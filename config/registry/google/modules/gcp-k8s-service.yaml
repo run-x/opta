@@ -107,6 +107,16 @@ inputs:
     validator: str(required=False)
     description: Use if liveness probe != readiness probe
     default: null
+  - name: initial_liveness_delay
+    user_facing: true
+    validator: int(required=False)
+    description: Use if the initial delay needs to be changed.
+    default: 30
+  - name: initial_readiness_delay
+    user_facing: true
+    validator: int(required=False)
+    description: Use if the initial delay needs to be changed.
+    default: 30
   - name: consistent_hash
     user_facing: true
     validator: str(required=False)

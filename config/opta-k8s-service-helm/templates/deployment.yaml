@@ -67,7 +67,7 @@ spec:
             {{ end }}
           {{- if .Values.livenessProbePath }}
           livenessProbe:
-            initialDelaySeconds: 30
+            initialDelaySeconds: {{ .Values.initialLivenessDelay }}
             {{- if eq .Values.probePort.type "tcp" }}
             tcpSocket:
               port: {{ .Values.probePort.name | quote }}
@@ -79,7 +79,7 @@ spec:
           {{- end }}
           {{- if .Values.readinessProbePath }}
           readinessProbe:
-            initialDelaySeconds: 30
+            initialDelaySeconds: {{ .Values.initialReadynessDelay }}
             periodSeconds: 10
             {{- if eq .Values.probePort.type "tcp" }}
             tcpSocket:
