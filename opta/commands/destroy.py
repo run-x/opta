@@ -17,7 +17,6 @@ from opta.core.terraform import Terraform
 from opta.error_constants import USER_ERROR_TF_LOCK
 from opta.exceptions import UserErrors
 from opta.layer import Layer
-from opta.pre_check import symlink_check
 from opta.utils import check_opta_file_exists, fmt_msg, logger
 
 
