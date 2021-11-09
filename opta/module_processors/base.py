@@ -2,7 +2,18 @@ import dataclasses
 import math
 from platform import system
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Set, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+)
 
 from dns.rdtypes.ANY.NS import NS
 from dns.resolver import Answer, NoNameservers, query
@@ -105,7 +116,9 @@ class PortSpec:
             name=raw["name"],
             type=raw["type"],
             port=raw["port"],
-            service_port=raw.get("service_port", raw["port"]),
+            service_port=raw.get(
+                "service_port", cls._default_service_port(raw["type"], raw["port"])
+            ),
             protocol=raw.get("protocol"),
             tls=raw.get("tls", False),
         )
@@ -150,6 +163,13 @@ class PortSpec:
             return "http"
 
         return "tcp"
+
+    @staticmethod
+    def _default_service_port(type: str, port: int) -> int:
+        if type == "http":
+            return 80
+
+        return port
 
     def __to_json__(self) -> Dict[str, Any]:
         values = dataclasses.asdict(self)
@@ -328,7 +348,7 @@ class K8sServiceModuleProcessor(ModuleProcessor):
             raise UserErrors("Multiple `type: http` ports not supported")
 
         # Check for duplicate port numbers or names
-        uniques = {
+        uniques: Dict[str, Callable[[PortSpec], Any]] = {
             "port name": lambda port: port.name,
             "port number": lambda port: port.port,
             "service port number": lambda port: port.service_port,
