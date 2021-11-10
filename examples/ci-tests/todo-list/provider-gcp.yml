@@ -1,0 +1,10 @@
+name: gcpenv
+org_name: runx-ci
+providers:
+  google:
+    region: us-central1
+    project: opta-ci-1
+modules:
+  - type: base
+  - type: k8s-cluster
+  - type: k8s-base

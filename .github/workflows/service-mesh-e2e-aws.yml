@@ -1,9 +1,9 @@
-name: K8s Service mesh
+name: K8s Service mesh AWS
 
 on: workflow_dispatch
 
 jobs:
-  todo-example-test:
+  service-mesh-e2e-aws:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout Opta Repository
@@ -68,7 +68,7 @@ jobs:
       - name: Create Test Enrironment using Release build
         run: |
           OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
-          --config ./examples/ci-tests/todo-list/provider.yml \
+          --config ./examples/ci-tests/todo-list/provider-aws.yml \
           --auto-approve \
           --refresh
 
@@ -77,6 +77,7 @@ jobs:
           OPTA_DISABLE_REPORTING=true ./dist/opta/opta deploy \
           --image todo-api:v1 \
           --config ./examples/ci-tests/todo-list/api-service.yml \
+          --env awsenv \
           --auto-approve
 
       - name: Create Test Front End Service using Release build
@@ -84,17 +85,19 @@ jobs:
           OPTA_DISABLE_REPORTING=true ./dist/opta/opta deploy \
           --image todo-frontend:v1 \
           --config ./examples/ci-tests/todo-list/frontend-service.yml \
+          --env awsenv \
           --auto-approve
 
       - name: Create Test Prometheus Service using Release build
         run: |
           OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
           --config ./examples/ci-tests/todo-list/monitoring-service.yml \
+          --env awsenv \
           --auto-approve
 
       - name: Ping tests for API, Frotend and Grafana
         run: |
-          export HOST_NAME=`./dist/opta/opta output -c ./examples/ci-tests/todo-list/provider.yml | jq -r '.load_balancer_raw_dns'`
+          export HOST_NAME=`./dist/opta/opta output -c ./examples/ci-tests/todo-list/provider-aws.yml | jq -r '.load_balancer_raw_dns'`
           curl $HOST_NAME/frontend --fail
           curl $HOST_NAME/djangoapi/ht/ --fail
           curl $HOST_NAME/grafana --fail
@@ -103,22 +106,25 @@ jobs:
         run: |
           yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
           --config ./examples/ci-tests/todo-list/monitoring-service.yml \
+          --env awsenv \
           --auto-approve
 
       - name: Destroy Test Front End Service using Release build
         run: |
           yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
           --config ./examples/ci-tests/todo-list/frontend-service.yml \
+          --env awsenv \
           --auto-approve
 
       - name: Destroy Test API Service using Release build
         run: |
           yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
           --config ./examples/ci-tests/todo-list/api-service.yml \
+          --env awsenv \
           --auto-approve
 
       - name: Destroy Test Enrironment using Release build
         run: |
           yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
-          --config ./examples/ci-tests/todo-list/provider.yml \
+          --config ./examples/ci-tests/todo-list/provider-aws.yml \
           --auto-approve
