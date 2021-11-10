@@ -640,7 +640,7 @@ def _validate_providers(providers: dict) -> None:
     """
     if providers is None:
         raise UserErrors(
-            "Environment Configuration contains an the Provider Section.\n"
+            "Environment Configuration needs a Provider Section.\n"
             "Please follow `https://docs.opta.dev/getting-started/` to get started."
         )
 
