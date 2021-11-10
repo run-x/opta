@@ -1,9 +1,9 @@
-name: K8s Service mesh
+name: K8s Service mesh GCP
 
 on: workflow_dispatch
 
 jobs:
-  todo-example-test:
+  service-mesh-e2e-gcp:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout Opta Repository
@@ -32,16 +32,12 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Configure GCP credentials
+        uses: google-github-actions/setup-gcloud@master
         with:
-          aws-access-key-id: ${{ secrets.AWS_OPTA_CI_ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.AWS_OPTA_CI_SECRET_KEY }}
-          aws-region: us-east-1
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+          service_account_key: ${{ secrets.CI_GKE_SA_KEY }}
+          project_id: opta-ci-1
+          export_default_credentials: true
 
       - name: Set up Python 3.8
         uses: actions/setup-python@v2
@@ -68,7 +64,7 @@ jobs:
       - name: Create Test Enrironment using Release build
         run: |
           OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
-          --config ./examples/ci-tests/todo-list/provider.yml \
+          --config ./examples/ci-tests/todo-list/provider-gcp.yml \
           --auto-approve \
           --refresh
 
@@ -77,6 +73,7 @@ jobs:
           OPTA_DISABLE_REPORTING=true ./dist/opta/opta deploy \
           --image todo-api:v1 \
           --config ./examples/ci-tests/todo-list/api-service.yml \
+          --env gcpenv \
           --auto-approve
 
       - name: Create Test Front End Service using Release build
@@ -84,17 +81,19 @@ jobs:
           OPTA_DISABLE_REPORTING=true ./dist/opta/opta deploy \
           --image todo-frontend:v1 \
           --config ./examples/ci-tests/todo-list/frontend-service.yml \
+          --env gcpenv \
           --auto-approve
 
       - name: Create Test Prometheus Service using Release build
         run: |
           OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
           --config ./examples/ci-tests/todo-list/monitoring-service.yml \
+          --env gcpenv \
           --auto-approve
 
       - name: Ping tests for API, Frotend and Grafana
         run: |
-          export HOST_NAME=`./dist/opta/opta output -c ./examples/ci-tests/todo-list/provider.yml | jq -r '.load_balancer_raw_dns'`
+          export HOST_NAME=`./dist/opta/opta output -c ./examples/ci-tests/todo-list/provider-gcp.yml | jq -r '.load_balancer_raw_ip'`
           curl $HOST_NAME/frontend --fail
           curl $HOST_NAME/djangoapi/ht/ --fail
           curl $HOST_NAME/grafana --fail
@@ -103,22 +102,25 @@ jobs:
         run: |
           yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
           --config ./examples/ci-tests/todo-list/monitoring-service.yml \
+          --env gcpenv \
           --auto-approve
 
       - name: Destroy Test Front End Service using Release build
         run: |
           yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
           --config ./examples/ci-tests/todo-list/frontend-service.yml \
+          --env gcpenv \
           --auto-approve
 
       - name: Destroy Test API Service using Release build
         run: |
           yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
           --config ./examples/ci-tests/todo-list/api-service.yml \
+          --env gcpenv \
           --auto-approve
 
       - name: Destroy Test Enrironment using Release build
         run: |
           yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
-          --config ./examples/ci-tests/todo-list/provider.yml \
+          --config ./examples/ci-tests/todo-list/provider-gcp.yml \
           --auto-approve

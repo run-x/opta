@@ -1,8 +1,9 @@
 name: todoapi
 environments:
-  - name: awsenv
-    path: "provider.yml"
-
+      - name: awsenv
+        path: "provider-aws.yml"
+      - name: gcpenv
+        path: "provider-gcp.yml"
 modules:
   - name: todoapi
     type: k8s-service

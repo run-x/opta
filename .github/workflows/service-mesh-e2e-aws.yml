@@ -1,0 +1,130 @@
+name: K8s Service mesh AWS
+
+on: workflow_dispatch
+
+jobs:
+  service-mesh-e2e-aws:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout Opta Repository
+        uses: actions/checkout@v2
+
+      - name: Checkout Opta Examples Repository
+        uses: actions/checkout@v2
+        with:
+          repository: run-x/opta-examples
+          path: "opta-examples"
+          ssh-key: ${{ secrets.SSH_KEY }}
+
+      - name: Pin terraform version
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.0.0
+          terraform_wrapper: false
+
+      - name: Limit concurrency to 1.
+        uses: softprops/turnstyle@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.ALL_GITHUB_TOKEN }}
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.4.1
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_OPTA_CI_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_OPTA_CI_SECRET_KEY }}
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install dependencies
+        run: |
+          pip install pipenv
+          pipenv install --deploy --dev
+          source $(pipenv --venv)/bin/activate
+
+      - name: Build Release Binary
+        run: |
+          source $(pipenv --venv)/bin/activate
+          export PYTHONPATH=$(pwd)
+          make build-binary
+
+      - name: Build Dockers for API and FrontEnd service
+        run: |
+          docker build opta-examples/full-stack-example/api/todo-python-django/ --tag todo-api:v1
+          docker build opta-examples/full-stack-example/frontend/todo-vuejs --tag todo-frontend:v1
+
+      - name: Create Test Enrironment using Release build
+        run: |
+          OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
+          --config ./examples/ci-tests/todo-list/provider-aws.yml \
+          --auto-approve \
+          --refresh
+
+      - name: Create Test API Service using Release build
+        run: |
+          OPTA_DISABLE_REPORTING=true ./dist/opta/opta deploy \
+          --image todo-api:v1 \
+          --config ./examples/ci-tests/todo-list/api-service.yml \
+          --env awsenv \
+          --auto-approve
+
+      - name: Create Test Front End Service using Release build
+        run: |
+          OPTA_DISABLE_REPORTING=true ./dist/opta/opta deploy \
+          --image todo-frontend:v1 \
+          --config ./examples/ci-tests/todo-list/frontend-service.yml \
+          --env awsenv \
+          --auto-approve
+
+      - name: Create Test Prometheus Service using Release build
+        run: |
+          OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
+          --config ./examples/ci-tests/todo-list/monitoring-service.yml \
+          --env awsenv \
+          --auto-approve
+
+      - name: Ping tests for API, Frotend and Grafana
+        run: |
+          export HOST_NAME=`./dist/opta/opta output -c ./examples/ci-tests/todo-list/provider-aws.yml | jq -r '.load_balancer_raw_dns'`
+          curl $HOST_NAME/frontend --fail
+          curl $HOST_NAME/djangoapi/ht/ --fail
+          curl $HOST_NAME/grafana --fail
+
+      - name: Destroy Test Prometheus Service using Release build
+        run: |
+          yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
+          --config ./examples/ci-tests/todo-list/monitoring-service.yml \
+          --env awsenv \
+          --auto-approve
+
+      - name: Destroy Test Front End Service using Release build
+        run: |
+          yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
+          --config ./examples/ci-tests/todo-list/frontend-service.yml \
+          --env awsenv \
+          --auto-approve
+
+      - name: Destroy Test API Service using Release build
+        run: |
+          yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
+          --config ./examples/ci-tests/todo-list/api-service.yml \
+          --env awsenv \
+          --auto-approve
+
+      - name: Destroy Test Enrironment using Release build
+        run: |
+          yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
+          --config ./examples/ci-tests/todo-list/provider-aws.yml \
+          --auto-approve
