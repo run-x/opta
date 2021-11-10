@@ -93,7 +93,7 @@ jobs:
 
       - name: Ping tests for API, Frotend and Grafana
         run: |
-          export HOST_NAME=`./dist/opta/opta output -c ./examples/ci-tests/todo-list/provider-gcp.yml | jq -r '.load_balancer_raw_dns'`
+          export HOST_NAME=`./dist/opta/opta output -c ./examples/ci-tests/todo-list/provider-gcp.yml | jq -r '.load_balancer_raw_ip'`
           curl $HOST_NAME/frontend --fail
           curl $HOST_NAME/djangoapi/ht/ --fail
           curl $HOST_NAME/grafana --fail
