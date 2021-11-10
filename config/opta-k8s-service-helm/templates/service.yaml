@@ -15,7 +15,7 @@ metadata:
 spec:
   ports:
     {{- range $portSpec := .Values.ports }}
-    - port: {{ $portSpec.port }}
+    - port: {{ $portSpec.servicePort }}
       targetPort: {{ $portSpec.name | quote }}
       name: {{ $portSpec.name | quote }}
       protocol: TCP

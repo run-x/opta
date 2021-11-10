@@ -2,7 +2,18 @@ import dataclasses
 import math
 from platform import system
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Set, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+)
 
 from dns.rdtypes.ANY.NS import NS
 from dns.resolver import Answer, NoNameservers, query
@@ -95,6 +106,7 @@ class PortSpec:
     name: str
     type: str
     port: int
+    service_port: int
     protocol: Optional[str] = None
     tls: bool = False
 
@@ -104,6 +116,9 @@ class PortSpec:
             name=raw["name"],
             type=raw["type"],
             port=raw["port"],
+            service_port=raw.get(
+                "service_port", cls._default_service_port(raw["type"], raw["port"])
+            ),
             protocol=raw.get("protocol"),
             tls=raw.get("tls", False),
         )
@@ -149,9 +164,19 @@ class PortSpec:
 
         return "tcp"
 
+    @staticmethod
+    def _default_service_port(type: str, port: int) -> int:
+        if type == "http":
+            return 80
+
+        return port
+
     def __to_json__(self) -> Dict[str, Any]:
         values = dataclasses.asdict(self)
         values["probeType"] = self.probe_type
+
+        values["servicePort"] = self.service_port
+        del values["service_port"]
 
         return values
 
@@ -261,10 +286,9 @@ class K8sServiceModuleProcessor(ModuleProcessor):
         if not self.FLAG_MULTIPLE_PORTS_SUPPORTED:
             return {}
 
-        port_mapping = {port.port: port.name for port in ports if port.is_tcp}
+        port_mapping = {port.service_port: port.name for port in ports if port.is_tcp}
 
         if not port_mapping:
-            logger.debug("no tcp ports")
             return {}
 
         return {
@@ -300,6 +324,7 @@ class K8sServiceModuleProcessor(ModuleProcessor):
                 "name": "main",
                 "type": type_config[0],
                 "port": port,
+                "service_port": 80,
             }
 
             if type_config[1]:
@@ -323,17 +348,20 @@ class K8sServiceModuleProcessor(ModuleProcessor):
             raise UserErrors("Multiple `type: http` ports not supported")
 
         # Check for duplicate port numbers or names
-        port_nums = set()
-        port_names = set()
-        for port in ports:
-            if port.name in port_names:
-                raise UserErrors(f"Duplicate port name `{port.name}`")
+        uniques: Dict[str, Callable[[PortSpec], Any]] = {
+            "port name": lambda port: port.name,
+            "port number": lambda port: port.port,
+            "service port number": lambda port: port.service_port,
+        }
 
-            if port.port in port_nums:
-                raise UserErrors(f"Duplicate port number `{port.port}`")
+        for key, resolver in uniques.items():
+            values = set()
+            for port in ports:
+                value = resolver(port)
+                if value in values:
+                    raise UserErrors(f"Duplicate {key} `{value}`")
 
-            port_names.add(port.name)
-            port_nums.add(port.port)
+                values.add(value)
 
 
 class K8sBaseModuleProcessor:
