@@ -233,6 +233,7 @@ class Layer:
             )
         org_name = conf.pop("org_name", None)
         providers = conf.pop("providers", {})
+        _validate_providers(providers)
         if "aws" in providers:
             providers["aws"]["account_id"] = providers["aws"].get("account_id", "")
             account_id = str(providers["aws"]["account_id"])
@@ -627,3 +628,33 @@ class Layer:
                 raise UserErrors(
                     "Azure Cloud are not configured properly.\n" f" Error: {e.message}"
                 )
+
+
+def _validate_providers(providers: dict) -> None:
+    """
+    Validates Configuration and throws Exception when providers section is provided but left Empty
+    name: Test Name
+    org_name: Test Org Name
+    providers:
+    modules:...
+    """
+    if providers is None:
+        raise UserErrors(
+            "Environment Configuration contains an the Provider Section.\n"
+            "Please follow `https://docs.opta.dev/getting-started/` to get started."
+        )
+
+    """
+    Validates Configuration and throws Exception when proviers is provided but left Empty.
+    name: Test Name
+    org_name: Test Org Name
+    providers:
+        aws/google/azurerm:
+    modules:...
+    """
+    if (
+        ("aws" in providers and providers.get("aws") is None)
+        or ("google" in providers and providers.get("google") is None)
+        or ("azurerm" in providers and providers.get("azurerm") is None)
+    ):
+        raise UserErrors("Please provide the Details of Cloud Provider Used.")
