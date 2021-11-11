@@ -1,4 +1,4 @@
-name: Release tests
+name: Version Upgrade Test AWS
 
 on: workflow_dispatch
 

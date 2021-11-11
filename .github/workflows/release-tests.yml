@@ -1,0 +1,87 @@
+name: Release Testing
+on: workflow_dispatch
+
+jobs:
+  create-destroy-tests-aws:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Pin terraform version
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.0.0
+          terraform_wrapper: false
+      - name: Create and destroy test-service and opta environment for AWS
+        run: ./scripts/dispatch_workflow.sh opta create-and-destroy-aws.yml main
+        env:
+          github_token: ${{ secrets.ALL_GITHUB_TOKEN }}
+
+  create-destroy-tests-gcp:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Pin terraform version
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.0.0
+          terraform_wrapper: false
+      - name: Create and destroy test-service and opta environment for GCP
+        run: ./scripts/dispatch_workflow.sh opta create-and-destroy-gcp.yml main
+        env:
+          github_token: ${{ secrets.ALL_GITHUB_TOKEN }}
+
+  create-destroy-tests-local:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Pin terraform version
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.0.0
+          terraform_wrapper: false
+      - name: Create and destroy Opta Example on Local
+        run: ./scripts/dispatch_workflow.sh opta create-and-destroy-local.yml main
+        env:
+          github_token: ${{ secrets.ALL_GITHUB_TOKEN }}
+
+  latest-vs-release-test-aws:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Pin terraform version
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.0.0
+          terraform_wrapper: false
+      - name: Latest Vs Release testing
+        run: ./scripts/dispatch_workflow.sh opta latest-vs-release-test-aws.yml main
+        env:
+          github_token: ${{ secrets.ALL_GITHUB_TOKEN }}
+
+  service-mesh-e2e-aws:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Pin terraform version
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.0.0
+          terraform_wrapper: false
+      - name: Service Mesh E2E AWS
+        run: ./scripts/dispatch_workflow.sh opta service-mesh-e2e-aws.yml main
+        env:
+          github_token: ${{ secrets.ALL_GITHUB_TOKEN }}
+
+  service-mesh-e2e-gcp:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Pin terraform version
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.0.0
+          terraform_wrapper: false
+      - name: Service Mesh E2E GCP
+        run: ./scripts/dispatch_workflow.sh opta service-mesh-e2e-gcp.yml main
+        env:
+          github_token: ${{ secrets.ALL_GITHUB_TOKEN }}
