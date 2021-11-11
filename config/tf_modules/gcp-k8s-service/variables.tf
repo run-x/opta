@@ -188,3 +188,14 @@ variable "ingress_extra_annotations" {
 variable "additional_iam_roles" {
   default = []
 }
+
+variable "initial_liveness_delay" {
+  type    = number
+  default = 30
+}
+
+variable "initial_readiness_delay" {
+  type    = number
+  default = 30
+}
+
