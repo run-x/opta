@@ -1,4 +1,4 @@
-name: Release tests
+name: Version Upgrade Test GCP
 
 on: workflow_dispatch
 
@@ -32,12 +32,12 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Configure GCP credentials
+        uses: google-github-actions/setup-gcloud@master
         with:
-          aws-access-key-id: ${{ secrets.AWS_OPTA_CI_ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.AWS_OPTA_CI_SECRET_KEY }}
-          aws-region: us-east-1
+          service_account_key: ${{ secrets.CI_GKE_SA_KEY }}
+          project_id: opta-ci-1
+          export_default_credentials: true
 
       - name: Set up Python 3.8
         uses: actions/setup-python@v2
@@ -59,17 +59,13 @@ jobs:
       - name: Install Latest Opta Version
         run: /bin/bash -c "$(curl -fsSL https://docs.opta.dev/install.sh)"
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-
       - name: Build test-service image
         run: docker build -t app:latest -f test-service/Dockerfile test-service/
 
       - name: Apply Environment with Latest Opta
         run: |
           OPTA_DISABLE_REPORTING=true /home/runner/.opta/opta apply \
-          --config ./examples/ci-tests/create-and-destroy-aws/environment.yml \
+          --config ./examples/ci-tests/create-and-destroy-gcp/environment.yml \
           --detailed-plan \
           --auto-approve \
           --refresh
@@ -77,24 +73,24 @@ jobs:
       - name: Set secret with Latest Opta
         run: |
           OPTA_DISABLE_REPORTING=true /home/runner/.opta/opta secret update \
-          --env ci \
-          --config ./examples/ci-tests/create-and-destroy-aws/service.yml \
+          --env gcp-release \
+          --config ./examples/ci-tests/create-and-destroy-gcp/service.yml \
           FAKE_SECRET foo
 
       - name: Deploy test-service with Latest Opta
         run: |
           OPTA_DISABLE_REPORTING=true /home/runner/.opta/opta deploy \
           --image app:latest \
-          --env ci \
-          --config ./examples/ci-tests/create-and-destroy-aws/service.yml \
+          --env gcp-release \
+          --config ./examples/ci-tests/create-and-destroy-gcp/service.yml \
           --tag ${{ github.sha }} \
           --auto-approve
 
       - name: View secret and check value with Latest Opta
         run: |
           secret_value=$(OPTA_DISABLE_REPORTING=true /home/runner/.opta/opta secret view \
-          --env ci \
-          --config ./examples/ci-tests/create-and-destroy-aws/service.yml \
+          --env gcp-release \
+          --config ./examples/ci-tests/create-and-destroy-gcp/service.yml \
           FAKE_SECRET | tail -1)
           echo "This was the found secret value: ${secret_value}"
           [[ "$secret_value" =~ .*"foo".* ]] || exit 1
@@ -103,14 +99,14 @@ jobs:
         env:
           OPTA_DISABLE_REPORTING: true
         run: |
-          export PARENT_DOMAIN=`/home/runner/.opta/opta output --env ci --config ./examples/ci-tests/create-and-destroy-aws/service.yml | jq -r '."parent.domain"'`
-          export HOST=`/home/runner/.opta/opta output --env ci --config ./examples/ci-tests/create-and-destroy-aws/service.yml | jq -r '.load_balancer_raw_dns'`
+          export PARENT_DOMAIN=`/home/runner/.opta/opta output --env gcp-release --config ./examples/ci-tests/create-and-destroy-aws/service.yml | jq -r '."parent.domain"'`
+          export HOST=`/home/runner/.opta/opta output --env gcp-release --config ./examples/ci-tests/create-and-destroy-aws/service.yml | jq -r '.load_balancer_raw_ip'`
           curl -X POST -L --header "Host: test-service.${PARENT_DOMAIN}" --fail ${HOST}/stateful
 
       - name: Apply Environment with Release Opta
         run: |
           OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
-          --config ./examples/ci-tests/create-and-destroy-aws/environment.yml \
+          --config ./examples/ci-tests/create-and-destroy-gcp/environment.yml \
           --detailed-plan \
           --auto-approve \
           --refresh
@@ -118,24 +114,24 @@ jobs:
       - name: Set secret with Release Opta
         run: |
           OPTA_DISABLE_REPORTING=true ./dist/opta/opta secret update \
-          --env ci \
-          --config ./examples/ci-tests/create-and-destroy-aws/service.yml \
+          --env gcp-release \
+          --config ./examples/ci-tests/create-and-destroy-gcp/service.yml \
           FAKE_SECRET foo
 
       - name: Deploy test-service with Release Opta
         run: |
           OPTA_DISABLE_REPORTING=true ./dist/opta/opta deploy \
           --image app:latest \
-          --env ci \
-          --config ./examples/ci-tests/create-and-destroy-aws/service.yml \
+          --env gcp-release \
+          --config ./examples/ci-tests/create-and-destroy-gcp/service.yml \
           --tag ${{ github.sha }} \
           --auto-approve
 
       - name: View secret and check value with Release Opta
         run: |
           secret_value=$(OPTA_DISABLE_REPORTING=true ./dist/opta/opta secret view \
-          --env ci \
-          --config ./examples/ci-tests/create-and-destroy-aws/service.yml \
+          --env gcp-release \
+          --config ./examples/ci-tests/create-and-destroy-gcp/service.yml \
           FAKE_SECRET | tail -1)
           echo "This was the found secret value: ${secret_value}"
           [[ "$secret_value" =~ .*"foo".* ]] || exit 1
@@ -143,14 +139,14 @@ jobs:
       - name: Destroy Test Service with Release Opta
         run: |
           yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
-          --env ci \
-          --config ./examples/ci-tests/create-and-destroy-aws/service.yml \
+          --env gcp-release \
+          --config ./examples/ci-tests/create-and-destroy-gcp/service.yml \
           --auto-approve
 
       - name: Destroy Test Environment with Release Opta
         run: |
           yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
-          --config ./examples/ci-tests/create-and-destroy-aws/environment.yml \
+          --config ./examples/ci-tests/create-and-destroy-gcp/environment.yml \
           --auto-approve
 
       - name: Start SSH via Ngrok
