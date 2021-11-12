@@ -45,6 +45,8 @@ jobs:
           github_token: ${{ secrets.ALL_GITHUB_TOKEN }}
 
   latest-vs-release-test-aws:
+    needs: create-destroy-tests-aws
+    if: ${{ always() }}
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
@@ -59,6 +61,8 @@ jobs:
           github_token: ${{ secrets.ALL_GITHUB_TOKEN }}
 
   latest-vs-release-test-gcp:
+    needs: create-destroy-tests-gcp
+    if: ${{ always() }}
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
@@ -73,6 +77,8 @@ jobs:
           github_token: ${{ secrets.ALL_GITHUB_TOKEN }}
 
   service-mesh-e2e-aws:
+    needs: [create-destroy-tests-aws, latest-vs-release-test-aws]
+    if: ${{ always() }}
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
@@ -87,6 +93,8 @@ jobs:
           github_token: ${{ secrets.ALL_GITHUB_TOKEN }}
 
   service-mesh-e2e-gcp:
+    needs: [create-destroy-tests-gcp, latest-vs-release-test-gcp]
+    if: ${{ always() }}
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
