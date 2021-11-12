@@ -6,6 +6,7 @@ locals {
   env_short    = substr(replace(var.env_name, "-", ""), 0, 9)
   layer_short  = substr(replace(var.layer_name, "-", ""), 0, 9)
   module_short = substr(replace(var.module_name, "-", ""), 0, 9)
+  get_buckets = concat(var.read_buckets, var.write_buckets)
 }
 
 variable "env_name" {
