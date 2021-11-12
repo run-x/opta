@@ -16,7 +16,6 @@ from opta.module import Module
 
 @fixture
 def basic_mocks(mocker: MockFixture) -> None:
-    mocker.patch("opta.commands.apply.is_tool", return_value=True)
     mocker.patch("opta.commands.apply.amplitude_client.send_event")
     mocker.patch("opta.commands.apply.gen_opta_resource_tags")
     mocker.patch("opta.commands.apply.PlanDisplayer")

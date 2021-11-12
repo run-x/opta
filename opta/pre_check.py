@@ -1,8 +1,14 @@
 import os
 from typing import Tuple
 
+from opta.core.terraform import Terraform
 from opta.exceptions import UserErrors
 from opta.nice_subprocess import nice_run
+
+
+def dependency_check() -> None:
+    """Check dependencies that are required globally"""
+    Terraform.validate_version()
 
 
 def symlink_check() -> None:

@@ -1,11 +1,18 @@
 from subprocess import CalledProcessError  # nosec
-from typing import List
+from typing import FrozenSet, List
 
 from opta.exceptions import UserErrors
 from opta.nice_subprocess import nice_run
 from opta.utils import is_tool, json
+from opta.utils.dependencies import register_path_executable
 
 HELM_INSTALL_URL = "https://helm.sh/docs/intro/install/"
+
+register_path_executable("helm", install_url=HELM_INSTALL_URL)
+
+
+def get_required_path_executables() -> FrozenSet[str]:
+    return frozenset({"helm"})
 
 
 def helm_check() -> None:

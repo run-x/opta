@@ -110,6 +110,7 @@ def deploy(
         event_properties={"org_name": layer.org_name, "layer_name": layer.name},
     )
     layer.verify_cloud_credentials()
+    layer.validate_required_path_dependencies()
     if Terraform.download_state(layer):
         tf_lock_exists, _ = Terraform.tf_lock_details(layer)
         if tf_lock_exists:

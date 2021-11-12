@@ -7,6 +7,7 @@ from typing import (
     Any,
     Callable,
     Dict,
+    FrozenSet,
     List,
     Literal,
     Optional,
@@ -69,6 +70,14 @@ class ModuleProcessor:
 
     def post_delete(self, module_idx: int) -> None:
         pass
+
+    @property
+    def required_path_dependencies(self) -> FrozenSet[str]:
+        """
+        Returns a frozen set of executables that are required to be on the PATH in order for this module processor to function.
+        Should be extended by module processors as needed.
+        """
+        return frozenset()
 
 
 class DNSModuleProcessor(ModuleProcessor):
@@ -184,6 +193,12 @@ class PortSpec:
 class K8sServiceModuleProcessor(ModuleProcessor):
     # TODO(patrick): Remove this flag and references to it once all clouds support multiple ports
     FLAG_MULTIPLE_PORTS_SUPPORTED = False
+
+    @property
+    def required_path_dependencies(self) -> FrozenSet[str]:
+        return super().required_path_dependencies | kubernetes.get_required_path_executables(
+            self.layer.cloud
+        )
 
     def process(self, module_idx: int) -> None:
         self._process_ports(self.module.data)

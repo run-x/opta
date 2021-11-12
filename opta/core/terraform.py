@@ -26,20 +26,26 @@ from google.cloud.exceptions import NotFound
 from googleapiclient import discovery
 from googleapiclient.errors import HttpError
 from oauth2client.client import GoogleCredentials
+from packaging import version
 
+from opta.constants import MAX_TERRAFORM_VERSION, MIN_TERRAFORM_VERSION
 from opta.core.aws import AWS
 from opta.core.azure import Azure
 from opta.core.gcp import GCP
 from opta.core.local import Local
 from opta.exceptions import MissingState, UserErrors
 from opta.nice_subprocess import nice_run
-from opta.utils import deep_merge, fmt_msg, json, logger
+from opta.utils import deep_merge, fmt_msg, is_tool, json, logger
+from opta.utils.dependencies import register_path_executable
 
 if TYPE_CHECKING:
     from opta.layer import Layer
 EXTRA_ENV = (
     {"KUBE_CONFIG_PATH": "~/.kube/config"} if os.path.isfile("~/.kube/config") else {}
 )
+
+
+register_path_executable("terraform")
 
 
 class Terraform:
@@ -91,6 +97,23 @@ class Terraform:
                 "KUBE_CONFIG_PATH"
             ]  # needed for helm templates with vlookup
         return kwargs
+
+    @classmethod
+    def validate_version(cls) -> None:
+        if not is_tool("terraform"):
+            raise UserErrors("Please install terraform on your machine")
+
+        current_version = Terraform.get_version()
+        current_parsed = version.parse(current_version)
+        if current_parsed < version.parse(MIN_TERRAFORM_VERSION):
+            raise UserErrors(
+                f"Invalid terraform version {current_version} -- must be at least {MIN_TERRAFORM_VERSION}"
+            )
+
+        if current_parsed >= version.parse(MAX_TERRAFORM_VERSION):
+            raise UserErrors(
+                f"Invalid terraform version {current_version} -- must be less than {MAX_TERRAFORM_VERSION}"
+            )
 
     @classmethod
     def apply(

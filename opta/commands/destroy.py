@@ -60,6 +60,7 @@ def destroy(
         amplitude_client.DESTROY_EVENT, event_properties=event_properties,
     )
     layer.verify_cloud_credentials()
+    layer.validate_required_path_dependencies()
     if not Terraform.download_state(layer):
         logger.info(
             "The opta state could not be found. This may happen if destroy ran successfully before."
