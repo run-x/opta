@@ -58,6 +58,20 @@ jobs:
         env:
           github_token: ${{ secrets.ALL_GITHUB_TOKEN }}
 
+  latest-vs-release-test-gcp:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Pin terraform version
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.0.0
+          terraform_wrapper: false
+      - name: Latest Vs Release testing
+        run: ./scripts/dispatch_workflow.sh opta latest-vs-release-test-gcp.yml main
+        env:
+          github_token: ${{ secrets.ALL_GITHUB_TOKEN }}
+
   service-mesh-e2e-aws:
     runs-on: ubuntu-20.04
     steps:
