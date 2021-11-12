@@ -1,8 +1,6 @@
 environments:
   - name: awsenv
-    path: "provider-aws.yml"
-  - name: gcpenv
-    path: "provider-gcp.yml"
+    path: "environment.yml"
 name: websocket
 modules:
   - name: app

@@ -59,6 +59,30 @@ jobs:
           --config ./examples/ci-tests/create-and-destroy-aws/environment.yml \
           --auto-approve \
           --refresh
+
+      - name: Apply Websocket Service with Opta
+        run: |
+          OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
+          --env awsenv \
+          --config ./examples/ci-tests/create-and-destroy-aws/websocket-service.yml \
+          --tag ${{ github.sha }} \
+          --auto-approve
+
+      - name: Test Websocket
+        env:
+          OPTA_DISABLE_REPORTING: true
+        run: |
+          export HOST=`./dist/opta/opta output --env awsenv --config ./examples/ci-tests/create-and-destroy-aws/websocket-service.yml | jq -r '.load_balancer_raw_dns'`
+          python ./examples/ci-tests/websocket/validate.py
+          exit $?
+
+      - name: Destroy Websocket Service with Opta
+        run: |
+          yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
+          --env ci \
+          --config ./examples/ci-tests/create-and-destroy-aws/websocket-service.yml \
+          --auto-approve
+
       - name: Add additional Node Group to Opta Environment.
         run: |
           OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
