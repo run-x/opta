@@ -12,10 +12,10 @@ resource "google_service_account_iam_binding" "trust_k8s_workload_idu" {
 }
 
 resource "google_storage_bucket_iam_member" "bucket_get" {
-  count  = length(local.get_buckets)
-  bucket = local.get_buckets[count.index]
-  role   = "roles/storage.legacyBucketReader"
-  member = "serviceAccount:${google_service_account.k8s_service.email}"
+  for_each = local.get_buckets
+  bucket   = each.key
+  role     = "roles/storage.legacyBucketReader"
+  member   = "serviceAccount:${google_service_account.k8s_service.email}"
 }
 
 resource "google_storage_bucket_iam_member" "bucket_viewer" {
