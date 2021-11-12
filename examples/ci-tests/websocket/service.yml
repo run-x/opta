@@ -1,0 +1,13 @@
+environments:
+  - name: awsenv
+    path: "provider-aws.yml"
+  - name: gcpenv
+    path: "provider-gcp.yml"
+name: websocket
+modules:
+  - name: app
+    type: k8s-service
+    image: ksdn117/web-socket-test
+    port:
+      tcp: 8010
+    public_uri: "/websocket"
