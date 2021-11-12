@@ -12,7 +12,7 @@ locals {
   env_short       = substr(var.env_name, 0, 9)
   layer_short     = substr(var.layer_name, 0, 9)
   module_short    = substr(var.module_name, 0, 9)
-  get_buckets  = concat(var.read_buckets, var.write_buckets)
+  get_buckets     = concat(var.read_buckets, var.write_buckets)
   uppercase_image = upper(var.image)
 }
 
