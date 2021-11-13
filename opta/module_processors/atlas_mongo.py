@@ -10,14 +10,14 @@ if TYPE_CHECKING:
     from opta.module import Module
 
 
-class AtlasMongoProcessor(ModuleProcessor):
+class MongodbAtlasProcessor(ModuleProcessor):
     def __init__(self, module: "Module", layer: "Layer"):
-        if module.data["type"] != "atlas-mongo":
+        if module.data["type"] != "mongodb-atlas":
             raise Exception(
                 f"The module {module.name} was expected to be of type atlas_mongo"
             )
 
-        super(AtlasMongoProcessor, self).__init__(module, layer)
+        super(MongodbAtlasProcessor, self).__init__(module, layer)
 
     def pre_hook(self, module_idx: int) -> None:
         required_env_set = set(["MONGODB_ATLAS_PUBLIC_KEY", "MONGODB_ATLAS_PRIVATE_KEY"])
@@ -29,7 +29,7 @@ class AtlasMongoProcessor(ModuleProcessor):
                 )
             )
 
-        super(AtlasMongoProcessor, self).pre_hook(module_idx)
+        super(MongodbAtlasProcessor, self).pre_hook(module_idx)
 
     def process(self, module_idx: int) -> None:
 
@@ -41,4 +41,4 @@ class AtlasMongoProcessor(ModuleProcessor):
         root_outputs = get_terraform_outputs(base_layer)
         self.module.data["public_nat_ips"] = root_outputs["public_nat_ips"]
 
-        super(AtlasMongoProcessor, self).process(module_idx)
+        super(MongodbAtlasProcessor, self).process(module_idx)

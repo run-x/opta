@@ -92,7 +92,7 @@ class AwsK8sServiceProcessor(
                 self.handle_sns_link(module, link_permissions)
             elif module_type == "aws-dynamodb":
                 self.handle_dynamodb_link(module, link_permissions)
-            elif module_type == "atlas-mongo":
+            elif module_type == "mongodb-atlas":
                 LinkerHelper.handle_link(
                     module=self.module,
                     linked_module=module,
@@ -100,7 +100,7 @@ class AwsK8sServiceProcessor(
                     required_vars=[
                         "db_password",
                         "db_user",
-                        "mongo_atlas_connection_string",
+                        "mongodb_atlas_connection_string",
                     ],
                 )
             else:

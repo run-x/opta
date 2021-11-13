@@ -1,4 +1,4 @@
-variable "mongo_atlas_project_id" {
+variable "mongodb_atlas_project_id" {
   type        = string
   description = "The MongoDB Atlas Project Name"
 }
@@ -41,9 +41,9 @@ variable "public_nat_ips" {
   description = "The IP address(es) from where clients can connect"
 }
 
-variable "mongo_instance_size" {
+variable "mongodb_instance_size" {
   type        = string
-  description = "Atlas Mongo Cluster size, see this: https://docs.atlas.mongodb.com/cluster-tier/"
+  description = "MongoDB Atlas Cluster size, see this: https://docs.atlas.mongodb.com/cluster-tier/"
   default     = "M0"
 
 }
