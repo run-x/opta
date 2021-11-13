@@ -28,7 +28,6 @@ from opta.core.validator import validate_yaml
 from opta.crash_reporter import CURRENT_CRASH_REPORTER
 from opta.exceptions import UserErrors
 from opta.module import Module
-from opta.module_processors.mongodb_atlas import MongodbAtlasProcessor
 from opta.module_processors.aws_dns import AwsDnsProcessor
 from opta.module_processors.aws_document_db import AwsDocumentDbProcessor
 from opta.module_processors.aws_dynamodb import AwsDynamodbProcessor
@@ -55,6 +54,7 @@ from opta.module_processors.gcp_k8s_service import GcpK8sServiceProcessor
 from opta.module_processors.gcp_service_account import GcpServiceAccountProcessor
 from opta.module_processors.helm_chart import HelmChartProcessor
 from opta.module_processors.local_k8s_service import LocalK8sServiceProcessor
+from opta.module_processors.mongodb_atlas import MongodbAtlasProcessor
 from opta.module_processors.runx import RunxProcessor
 from opta.plugins.derived_providers import DerivedProviders
 from opta.utils import deep_merge, hydrate, logger, yaml
