@@ -44,8 +44,8 @@ class TestLocalK8sServiceProcessor:
             {"name": "BLAH", "value": "${{module.database2.db_password}}"},
             {"name": "DBHOST2", "value": "${{module.database2.db_host}}"},
             {"name": "CACHEHOST2", "value": "${{module.redis2.cache_host}}"},
-            {"name": "DB_PASSWORD", "value": "${{module.atlasmongo.db_password}}"},
-            {"name": "DB_USER", "value": "${{module.atlasmongo.db_user}}"},
+            {"name": "DB_PASSWORD", "value": "${{module.mongodbatlas.db_password}}"},
+            {"name": "DB_USER", "value": "${{module.mongodbatlas.db_user}}"},
             {
                 "name": "MONGODB_URI",
                 "value": "${{module.mongodbatlas.mongodb_atlas_connection_string}}",

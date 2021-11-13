@@ -28,7 +28,7 @@ from opta.core.validator import validate_yaml
 from opta.crash_reporter import CURRENT_CRASH_REPORTER
 from opta.exceptions import UserErrors
 from opta.module import Module
-from opta.module_processors.atlas_mongodb import AtlasMongodbProcessor
+from opta.module_processors.mongodb_atlas import MongodbAtlasProcessor
 from opta.module_processors.aws_dns import AwsDnsProcessor
 from opta.module_processors.aws_document_db import AwsDocumentDbProcessor
 from opta.module_processors.aws_dynamodb import AwsDynamodbProcessor
@@ -94,7 +94,7 @@ class Layer:
         "gcp-service-account": GcpServiceAccountProcessor,
         "custom-terraform": CustomTerraformProcessor,
         "aws-dynamodb": AwsDynamodbProcessor,
-        "mongodb-atlas": AtlasMongodbProcessor,
+        "mongodb-atlas": MongodbAtlasProcessor,
     }
 
     def __init__(
