@@ -14,7 +14,7 @@ class MongodbAtlasProcessor(ModuleProcessor):
     def __init__(self, module: "Module", layer: "Layer"):
         if module.data["type"] != "mongodb-atlas":
             raise Exception(
-                f"The module {module.name} was expected to be of type atlas_mongo"
+                f"The module {module.name} was expected to be of type mongodb-atlas"
             )
 
         super(MongodbAtlasProcessor, self).__init__(module, layer)

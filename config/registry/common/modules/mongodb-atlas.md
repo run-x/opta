@@ -28,7 +28,7 @@ links:
   - db:
       - db_user: DBUSER
         db_password: DBPASS
-        db_mongo_connection_string: DBCONNSTRING
+        db_mongodb_connection_string: DBCONNSTRING
 ```
 
 If present, this map must have renames for all 3 fields.
