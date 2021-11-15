@@ -117,6 +117,7 @@ inputs:
     validator: int(required=False)
     description: Use if the initial delay needs to be changed.
     default: 30
+    force_update_default_counter: 2
   - name: consistent_hash
     user_facing: true
     validator: str(required=False)

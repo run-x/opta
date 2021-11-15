@@ -5,6 +5,7 @@ import boto3
 from botocore.config import Config
 from mypy_boto3_dynamodb import DynamoDBClient
 
+from opta.core.cloud_client import CloudClient
 from opta.exceptions import UserErrors
 from opta.utils import fmt_msg, json, logger
 
@@ -22,10 +23,10 @@ class AwsArn(TypedDict):
     resource_type: Optional[str]
 
 
-class AWS:
+class AWS(CloudClient):
     def __init__(self, layer: "Layer"):
-        self.layer = layer
         self.region = layer.root().providers["aws"]["region"]
+        super(AWS, self).__init__(layer)
 
     def __get_dynamodb(self, dynamodb_table: str) -> DynamoDBClient:
         dynamodb_client: DynamoDBClient = boto3.client(

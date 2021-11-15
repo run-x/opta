@@ -2,15 +2,15 @@ import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
+from opta.core.cloud_client import CloudClient
 from opta.utils import json, logger
 
 if TYPE_CHECKING:
     from opta.layer import Layer, StructuredConfig
 
 
-class Local:
+class Local(CloudClient):
     def __init__(self, layer: "Layer"):
-        self.layer = layer
         local_dir = os.path.join(os.path.join(str(Path.home()), ".opta", "local"))
         self.tf_file = os.path.join(
             str(Path.home()), ".opta", "local", "tfstate", layer.name
@@ -20,6 +20,7 @@ class Local:
         )
         if not os.path.exists(os.path.dirname(self.config_file_path)):
             os.makedirs(os.path.dirname(self.config_file_path))
+        super(Local, self).__init__(layer)
 
     def get_remote_config(self) -> Optional["StructuredConfig"]:
         try:
@@ -55,3 +56,6 @@ class Local:
             logger.info("Deleted opta tf backup config from local")
         else:
             logger.warn(f"Did not find opta tf state {self.tf_file} to delete")
+
+    def get_terraform_lock_id(self) -> str:
+        return ""
