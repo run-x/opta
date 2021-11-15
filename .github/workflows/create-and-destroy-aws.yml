@@ -71,6 +71,7 @@ jobs:
         env:
           OPTA_DISABLE_REPORTING: true
         run: |
+          source $(pipenv --venv)/bin/activate
           export HOST=`./dist/opta/opta output --env awsenv --config ./examples/ci-tests/create-and-destroy-aws/websocket-service.yml | jq -r '.load_balancer_raw_dns'`
           python ./examples/ci-tests/create-and-destroy-aws/websocket-validate.py
           exit $?
