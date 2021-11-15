@@ -57,6 +57,6 @@ class LocalTests(unittest.TestCase):
             ["opta_version", "original_spec", "date", "defaults"]
         )
 
-    def test_delete_local_tf_state(self) -> None:
-        self.local.delete_local_tf_state()
+    def test_delete_remote_state(self) -> None:
+        self.local.delete_remote_state()
         assert os.path.isfile(self.local.tf_file) is False
