@@ -47,7 +47,7 @@ class Local(CloudClient):
         else:
             logger.warn(f"Did not find opta config {self.config_file_path} to delete")
 
-    def delete_local_tf_state(self) -> None:
+    def delete_remote_state(self) -> None:
 
         if os.path.isfile(self.tf_file):
             os.remove(self.tf_file)
