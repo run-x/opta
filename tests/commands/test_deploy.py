@@ -38,6 +38,7 @@ def test_deploy_basic(mocker: MockFixture) -> None:
     result = runner.invoke(cli, ["deploy", "-i", "local_image:local_tag"])
 
     assert result.exit_code == 0
+    mocked_layer.validate_required_path_dependencies.assert_called_once()
     mock_tf_download_state.assert_called_once_with(mocked_layer)
     mock_push.assert_called_once_with(
         image="local_image:local_tag", config="opta.yml", env=None, tag=None

@@ -1,6 +1,6 @@
 from pytest_mock import MockFixture
 
-from opta.core.helm import Helm
+from opta.core.helm import Helm, get_required_path_executables
 
 
 class TestHelm:
@@ -8,6 +8,10 @@ class TestHelm:
     MOCK_NAMESPACE = "mock_namesapce"
     MOCK_REVISION_1 = "1"
     MOCK_REVISION_X = "X"
+
+    def test_get_required_path_executables(self) -> None:
+        deps = get_required_path_executables()
+        assert len(deps) == 1
 
     def test_rollback_helm_base_revision_1(self, mocker: MockFixture) -> None:
         mock_helm_check = mocker.patch("opta.core.helm.helm_check", return_value=None)

@@ -102,6 +102,7 @@ def test_apply(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None
     mocked_layer.get_module_by_type.assert_has_calls(
         [mocker.call("k8s-service"), mocker.call("k8s-service", 0)]
     )
+    mocked_layer.validate_required_path_dependencies.assert_called_once()
     tf_create_storage.assert_called_once_with(mocked_layer)
     mocked_thread.assert_has_calls(
         [

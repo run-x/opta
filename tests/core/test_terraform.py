@@ -1,10 +1,12 @@
 from typing import List
 
+import pytest
 from botocore.exceptions import ClientError
 from google.api_core.exceptions import ClientError as GoogleClientError
 from pytest_mock import MockFixture
 
 from opta.core.terraform import Terraform, fetch_terraform_state_resources
+from opta.exceptions import UserErrors
 from opta.layer import Layer
 from opta.module import Module
 from tests.util import get_call_args
@@ -24,6 +26,54 @@ class TestTerraform:
         # Calling terraform plan should also call terraform init
         Terraform.plan(layer=fake_layer)
         assert tf_init.call_count == 2
+
+    def test_validate_version_good(self, mocker: MockFixture) -> None:
+        is_tool = mocker.patch("opta.core.terraform.is_tool", return_value=True)
+        get_version = mocker.patch("opta.core.terraform.Terraform.get_version")
+        get_version.return_value = "1.0.0"
+
+        Terraform.validate_version()
+
+        is_tool.assert_called_once_with("terraform")
+        get_version.assert_called_once()
+
+    def test_validate_version_missing(self, mocker: MockFixture) -> None:
+        is_tool = mocker.patch("opta.core.terraform.is_tool", return_value=False)
+        get_version = mocker.patch("opta.core.terraform.Terraform.get_version")
+
+        with pytest.raises(UserErrors) as e:
+            Terraform.validate_version()
+
+        is_tool.assert_called_once_with("terraform")
+        assert str(e.value) == "Please install terraform on your machine"
+
+        get_version.assert_not_called()
+
+    def test_validate_version_low(self, mocker: MockFixture) -> None:
+        mocker.patch("opta.core.terraform.is_tool", return_value=True)
+        get_version = mocker.patch("opta.core.terraform.Terraform.get_version")
+        get_version.return_value = "0.14.9"
+
+        with pytest.raises(UserErrors) as e:
+            Terraform.validate_version()
+
+        assert (
+            str(e.value) == "Invalid terraform version 0.14.9 -- must be at least 0.15.0"
+        )
+        get_version.assert_called_once()
+
+    def test_validate_version_high(self, mocker: MockFixture) -> None:
+        mocker.patch("opta.core.terraform.is_tool", return_value=True)
+        get_version = mocker.patch("opta.core.terraform.Terraform.get_version")
+        get_version.return_value = "1.1.0"
+
+        with pytest.raises(UserErrors) as e:
+            Terraform.validate_version()
+
+        assert (
+            str(e.value) == "Invalid terraform version 1.1.0 -- must be less than 1.1.0"
+        )
+        get_version.assert_called_once()
 
     def test_get_modules(self, mocker: MockFixture) -> None:
         mocker.patch("opta.core.terraform.Terraform.download_state", return_value=True)

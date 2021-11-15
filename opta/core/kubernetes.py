@@ -58,7 +58,7 @@ def get_required_path_executables(cloud: str) -> FrozenSet[str]:
         "azurerm": {"az"},
     }
 
-    return frozenset("kubectl") | exec_map.get(cloud, set())
+    return frozenset({"kubectl"}) | exec_map.get(cloud, set())
 
 
 def configure_kubectl(layer: "Layer") -> None:

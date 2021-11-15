@@ -8,6 +8,7 @@ from pytest_mock import MockFixture
 
 from opta.core.kubernetes import (
     configure_kubectl,
+    get_required_path_executables,
     tail_module_log,
     tail_namespace_events,
     tail_pod_log,
@@ -128,6 +129,14 @@ class TestKubernetes:
                 ),
             ]
         )
+
+    def test_get_required_path_executables(self) -> None:
+        assert len(get_required_path_executables("local")) == 1
+
+        aws_deps = get_required_path_executables("aws")
+        assert len(aws_deps) == 2
+        for dep in ["aws", "kubectl"]:
+            assert dep in aws_deps
 
     def test_tail_module_log(self, mocker: MockFixture) -> None:
         base_start_time_timestamp = datetime.datetime.utcnow().timestamp()
