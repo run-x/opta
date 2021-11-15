@@ -1,0 +1,5 @@
+{
+  "$id": "https://app.runx.dev/schemas/runx",
+  "type": "object",
+  "description": "Integrates with the RunX UI"
+}

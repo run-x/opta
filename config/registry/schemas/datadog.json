@@ -1,0 +1,22 @@
+{
+  "$id": "https://app.runx.dev/schemas/datadog",
+  "description": "Integrates datadog for observability",
+  "type": "object",
+  "properties": {
+    "api_key": {
+      "type": "string",
+      "description": "Datadog API key. If you don't provide this in the yaml, Opta will prompt you for it and store it in secrets.",
+      "default": null
+    },
+    "timeout": {
+      "type": "number",
+      "description": "Datadog API timeout in seconds",
+      "default": 600
+    },
+    "values": {
+      "type": "object",
+      "description": "Additional configuration for datadog. [Available options](https://github.com/DataDog/helm-charts/blob/master/charts/datadog/README.md#values)",
+      "default": {}
+    }
+  }
+}

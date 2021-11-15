@@ -1,0 +1,42 @@
+{
+  "$id": "https://app.runx.dev/schemas/atlas-mongo",
+  "description": "Creates an Atlas Mongo database instance",
+  "type": "object",
+  "properties": {
+    "region": {
+      "type": "string",
+      "description": "MongoDB Atlas Cluster Region, must be a mongo region for the provider."
+    },
+    "mongo_instance_size": {
+      "type": "string",
+      "description": "Atlas Mongo Cluster size, see this: https://docs.atlas.mongodb.com/cluster-tier/",
+      "default": "M0"
+    },
+    "mongodbversion": {
+      "type": "string",
+      "description": "The version of the database to use.",
+      "default": "4.4"
+    },
+    "database_name": {
+      "type": "string",
+      "description": "The name of the database to create.",
+      "default": "mongo_database"
+    },
+    "public_nat_ips": {
+      "type": "array",
+      "items": {
+        "$ref": "/common-types/ip-address"
+      }
+    },
+    "cloud_provider": {
+      "enum": ["AWS", "AZURE", "GCP"],
+      "default": "AWS"
+    }
+  },
+  "required": [
+    "region",
+    "mongo_instance_size",
+    "cloud_provider",
+    "mongo_atlas_project_id"
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "$id": "https://app.runx.dev/schemas/external-ssl-cert",
+  "description": "External SSL Certicate",
+  "type": "object",
+  "properties": {
+    "domain": {
+      "type": "string",
+      "description": "Domain name"
+    },
+    "private_key_file": {
+      "type": "string",
+      "description": "The private key pem file for the ssl certificate."
+    },
+    "certificate_body_file": {
+      "type": "string",
+      "description": "The body of the ssl certificate in the form of a pem file. This file should just have the final certificate and not other certificates on the chain."
+    },
+    "certificate_chain_file": {
+      "type": "string",
+      "description": "The file containing the chain certificate for the current ssl certificate."
+    }
+  },
+  "required": [
+    "domain",
+    "private_key_file",
+    "certificate_body_file",
+    "certificate_chain_file"
+  ]
+}

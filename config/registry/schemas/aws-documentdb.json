@@ -1,5 +1,5 @@
 {
-  "$id": "https://app.runx.dev/schemas/aws/aws-documentdb",
+  "$id": "https://app.runx.dev/schemas/aws-documentdb",
   "description": "Creates an AWS Documentdb cluster",
   "type": "object",
   "properties": {

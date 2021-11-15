@@ -1,5 +1,5 @@
 {
-  "$id": "https://app.runx.dev/schemas/aws/aws-dynamodb",
+  "$id": "https://app.runx.dev/schemas/aws-dynamodb",
   "description": "Creates a DynamoDB table",
   "type": "object",
   "properties": {

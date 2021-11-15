@@ -1,0 +1,68 @@
+{
+  "$id": "https://app.runx.dev/schemas/helm-chart",
+  "type": "object",
+  "description": "Plugs a custom helm chart into your Opta k8s cluster",
+  "properties": {
+    "chart": {
+      "type": "string",
+      "description": "Name of the helm chart. Note that you don't need to use `<repo_name>/<chart_name>` - as repo is specified separately. Just do `<chart_name>`. If you're using a local chart, then this will be the path to the chart."
+    },
+    "repository": {
+      "type": "string",
+      "description": "The helm repository to use (null means local chart)"
+    },
+    "namespace": {
+      "type": "string",
+      "description": "The kubernetes namespace to put the chart in"
+    },
+    "create_namespace": {
+      "type": "boolean",
+      "description": "Create namespace as well.",
+      "default": true
+    },
+    "atomic": {
+      "type": "boolean",
+      "description": "If set, installation process purges chart on fail. The wait flag will be set automatically if atomic is used.",
+      "default": true
+    },
+    "cleanup_on_fail": {
+      "type": "boolean",
+      "description": "Allow deletion of new resources created in this upgrade when upgrade fails",
+      "default": true
+    },
+    "chart_version": {
+      "type": "string",
+      "description": "User side of the version of the helm chart to install. Note-- this IS required for remote charts (in a repository and not from local filesystem).",
+      "default": null
+    },
+    "values_files": {
+      "type": "array",
+      "description": "A list of paths to a values files. Values will be merged, in order, as Helm does with multiple -f options.",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "values": {
+      "type": "object",
+      "description": "A map of values to be passed to the helm chart. Note that this is not a list of values, but a single map of values.",
+      "default": {}
+    },
+    "timeout": {
+      "type": "number",
+      "description": "Time in seconds to wait for any individual kubernetes operation (like Jobs for hooks).",
+      "default": 600
+    },
+    "dependency_update": {
+      "type": "boolean",
+      "description": "Runs helm dependency update before installing the chart.",
+      "default": false
+    },
+    "wait": {
+      "type": "boolean",
+      "description": "Will wait (for as long as timeout) until all resources are in a ready state before marking the release as successful.",
+      "default": true
+    }
+  },
+  "required": ["chart"]
+}
