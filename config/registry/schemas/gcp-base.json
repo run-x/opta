@@ -1,5 +1,5 @@
 {
-  "$id": "https://app.runx.dev/schemas/gcp-base",
+  "$id": "https://app.runx.dev/modules/gcp-base",
   "type": "object",
   "description": "Sets up VPC, private subnet, firewall, default kms key, and private service access. Also activates the container registry",
   "properties": {

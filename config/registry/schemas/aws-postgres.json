@@ -1,5 +1,5 @@
 {
-  "$id": "https://app.runx.dev/schemas/aws-postgres",
+  "$id": "https://app.runx.dev/modules/aws-postgres",
   "description": "Creates a postgres Aurora RDS database instance",
   "type": "object",
   "properties": {

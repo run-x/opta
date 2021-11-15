@@ -1,5 +1,5 @@
 {
-  "$id": "https://app.runx.dev/schemas/aws-sqs",
+  "$id": "https://app.runx.dev/modules/aws-sqs",
   "description": "Sets up a AWS SQS queue",
   "type": "object",
   "properties": {

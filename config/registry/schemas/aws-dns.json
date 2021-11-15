@@ -1,5 +1,5 @@
 {
-  "$id": "https://app.runx.dev/schemas/aws-dns",
+  "$id": "https://app.runx.dev/modules/aws-dns",
   "description": "Adds dns to your environment",
   "type": "object",
   "properties": {

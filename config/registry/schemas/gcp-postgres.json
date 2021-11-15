@@ -1,5 +1,5 @@
 {
-  "$id": "https://app.runx.dev/schemas/gcp-postgres",
+  "$id": "https://app.runx.dev/modules/gcp-postgres",
   "type": "object",
   "description": "Creates a postgres (GCP Cloud SQL) database instance",
   "properties": {

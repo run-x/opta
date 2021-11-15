@@ -1,5 +1,5 @@
 {
-  "$id": "https://app.runx.dev/schemas/gcp-nodepool",
+  "$id": "https://app.runx.dev/modules/gcp-nodepool",
   "type": "object",
   "description": "Creates an additional nodepool for the primary GKE cluster.",
   "properties": {

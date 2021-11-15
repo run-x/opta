@@ -1,5 +1,5 @@
 {
-  "$id": "https://app.runx.dev/schemas/external-ssl-cert",
+  "$id": "https://app.runx.dev/modules/external-ssl-cert",
   "description": "External SSL Certicate",
   "type": "object",
   "properties": {

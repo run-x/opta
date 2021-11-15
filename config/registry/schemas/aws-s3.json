@@ -1,5 +1,5 @@
 {
-  "$id": "https://app.runx.dev/schemas/aws-s3",
+  "$id": "https://app.runx.dev/modules/aws-s3",
   "description": "Creates an S3 bucket for storage purposes",
   "type": "object",
   "properties": {

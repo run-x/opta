@@ -1,5 +1,5 @@
 {
-  "$id": "https://app.runx.dev/schemas/datadog",
+  "$id": "https://app.runx.dev/modules/datadog",
   "description": "Integrates datadog for observability",
   "type": "object",
   "properties": {

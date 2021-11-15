@@ -1,5 +1,5 @@
 {
-  "$id": "https://app.runx.dev/schemas/azure-k8s-base",
+  "$id": "https://app.runx.dev/modules/azure-k8s-base",
   "description": "Creates base infrastructure that is packaged into Opta environments",
   "type": "object",
   "properties": {

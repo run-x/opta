@@ -1,5 +1,5 @@
 {
-  "$id": "https://app.runx.dev/schemas/atlas-mongo",
+  "$id": "https://app.runx.dev/modules/atlas-mongo",
   "description": "Creates an Atlas Mongo database instance",
   "type": "object",
   "properties": {

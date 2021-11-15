@@ -1,5 +1,5 @@
 {
-  "$id": "https://app.runx.dev/schemas/gcp-dns",
+  "$id": "https://app.runx.dev/modules/gcp-dns",
   "type": "object",
   "description": "Adds dns to your environment",
   "properties": {

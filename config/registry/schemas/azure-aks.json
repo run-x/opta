@@ -1,5 +1,5 @@
 {
-  "$id": "https://app.runx.dev/schemas/azure-aks",
+  "$id": "https://app.runx.dev/modules/azure-aks",
   "description": "Creates an AKS cluster and a default node pool to host your applications in",
   "type": "object",
   "properties": {

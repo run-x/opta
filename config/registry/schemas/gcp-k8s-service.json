@@ -1,5 +1,5 @@
 {
-  "$id": "https://app.runx.dev/schemas/gcp-k8s-service",
+  "$id": "https://app.runx.dev/modules/gcp-k8s-service",
   "description": "Deploys a kubernetes app",
   "allOf": [
     {

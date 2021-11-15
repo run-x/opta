@@ -1,5 +1,5 @@
 {
-  "$id": "https://app.runx.dev/schemas/gcp-redis",
+  "$id": "https://app.runx.dev/modules/gcp-redis",
   "type": "object",
   "description": "Creates a redis cache via Memorystore",
   "properties": {

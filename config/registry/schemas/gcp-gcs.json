@@ -1,5 +1,5 @@
 {
-  "$id": "https://app.runx.dev/schemas/gcp-gcs",
+  "$id": "https://app.runx.dev/modules/gcp-gcs",
   "type": "object",
   "description": "Creates a GCS bucket for storage purposes",
   "properties": {

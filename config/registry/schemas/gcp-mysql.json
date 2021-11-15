@@ -1,5 +1,5 @@
 {
-  "$id": "https://app.runx.dev/schemas/gcp-mysql",
+  "$id": "https://app.runx.dev/modules/gcp-mysql",
   "type": "object",
   "description": "Creates a MySQL database instance",
   "properties": {

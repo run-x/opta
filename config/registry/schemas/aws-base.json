@@ -1,5 +1,5 @@
 {
-  "$id": "https://app.runx.dev/schemas/aws-base",
+  "$id": "https://app.runx.dev/modules/aws-base",
   "description": "Sets up VPCs, a default KMS key, and the db/cache subnets for your environment",
   "type": "object",
   "properties": {

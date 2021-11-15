@@ -1,5 +1,5 @@
 {
-  "$id": "https://app.runx.dev/schemas/aws-iam-user",
+  "$id": "https://app.runx.dev/modules/aws-iam-user",
   "description": "Creates an IAM user",
   "type": "object",
   "properties": {

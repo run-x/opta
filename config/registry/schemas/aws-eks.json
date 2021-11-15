@@ -1,5 +1,5 @@
 {
-  "$id": "https://app.runx.dev/schemas/aws-eks",
+  "$id": "https://app.runx.dev/modules/aws-eks",
   "description": "Creates an EKS cluster and a default nodegroup to host your applications in",
   "type": "object",
   "properties": {

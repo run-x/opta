@@ -1,5 +1,5 @@
 {
-  "$id": "https://app.runx.dev/schemas/aws-iam-role",
+  "$id": "https://app.runx.dev/modules/aws-iam-role",
   "description": "Creates an IAM role",
   "type": "object",
   "properties": {

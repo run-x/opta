@@ -1,5 +1,5 @@
 {
-  "$id": "https://app.runx.dev/schemas/aws-k8s-base",
+  "$id": "https://app.runx.dev/modules/aws-k8s-base",
   "description": "Creates base infrastructure for k8s environments",
   "type": "object",
   "properties": {

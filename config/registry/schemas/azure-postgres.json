@@ -1,5 +1,5 @@
 {
-  "$id": "https://app.runx.dev/schemas/azure-postgres",
+  "$id": "https://app.runx.dev/modules/azure-postgres",
   "description": "Creates a postgres database",
   "type": "object",
   "properties": {

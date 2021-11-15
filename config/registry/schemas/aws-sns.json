@@ -1,5 +1,5 @@
 {
-  "$id": "https://app.runx.dev/schemas/aws-ses",
+  "$id": "https://app.runx.dev/modules/aws-ses",
   "description": "Sets up an AWS SNS topic",
   "type": "object",
   "properties": {

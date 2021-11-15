@@ -1,5 +1,5 @@
 {
-  "$id": "https://app.runx.dev/schemas/helm-chart",
+  "$id": "https://app.runx.dev/modules/helm-chart",
   "type": "object",
   "description": "Plugs a custom helm chart into your Opta k8s cluster",
   "properties": {

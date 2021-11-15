@@ -1,5 +1,5 @@
 {
-  "$id": "https://app.runx.dev/schemas/aws-nodegroup",
+  "$id": "https://app.runx.dev/modules/aws-nodegroup",
   "description": "Deploys a kubernetes app",
   "type": "object",
   "properties": {

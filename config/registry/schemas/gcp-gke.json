@@ -1,5 +1,5 @@
 {
-  "$id": "https://app.runx.dev/schemas/gcp-gke",
+  "$id": "https://app.runx.dev/modules/gcp-gke",
   "type": "object",
   "description": "Creates a GKE cluster and a default nodegroup to host your applications in",
   "properties": {

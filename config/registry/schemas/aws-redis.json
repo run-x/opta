@@ -1,5 +1,5 @@
 {
-  "$id": "https://app.runx.dev/schemas/aws-redis",
+  "$id": "https://app.runx.dev/modules/aws-redis",
   "description": "Creates a redis cache via elasticache",
   "type": "object",
   "properties": {
