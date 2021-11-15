@@ -5,7 +5,7 @@ if TYPE_CHECKING:
     from opta.layer import Layer, StructuredConfig
 
 
-class CloudClient:
+class CloudClient(ABC):
     def __init__(self, layer: "Layer"):
         self.layer = layer
 
