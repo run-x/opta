@@ -26,7 +26,7 @@ class AwsArn(TypedDict):
 class AWS(CloudClient):
     def __init__(self, layer: "Layer"):
         self.region = layer.root().providers["aws"]["region"]
-        super(AWS, self).__init__(layer)
+        super().__init__(layer)
 
     def __get_dynamodb(self, dynamodb_table: str) -> DynamoDBClient:
         dynamodb_client: DynamoDBClient = boto3.client(
