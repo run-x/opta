@@ -65,7 +65,7 @@ jobs:
           OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
           --env awsenv \
           --config ./examples/ci-tests/create-and-destroy-aws/websocket-service.yml \
-          --tag ${{ github.sha }} \
+          --image-tag ${{ github.sha }} \
           --auto-approve
 
       - name: Test Websocket
