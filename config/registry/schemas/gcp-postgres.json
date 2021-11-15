@@ -1,0 +1,22 @@
+{
+  "$id": "https://app.runx.dev/schemas/gcp-postgres",
+  "type": "object",
+  "description": "Creates a postgres (GCP Cloud SQL) database instance",
+  "properties": {
+    "instance_tier": {
+      "type": "string",
+      "description": "This is the RDS instance type used for the cloud sql instance [instances](https://cloud.google.com/sql/pricing).",
+      "default": "db-f1-micro"
+    },
+    "safety": {
+      "type": "boolean",
+      "description": "Set to \"true\", if you want to disable the database deletion in Opta. You would have to manually set this \"false\" to enable DB deletion.",
+      "default": true
+    },
+    "engine_version": {
+      "type": "string",
+      "description": "The version of the database to use.",
+      "default": "11"
+    }
+  }
+}

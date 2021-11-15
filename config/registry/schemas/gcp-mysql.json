@@ -1,0 +1,22 @@
+{
+  "$id": "https://app.runx.dev/schemas/gcp-mysql",
+  "type": "object",
+  "description": "Creates a MySQL database instance",
+  "properties": {
+    "instance_tier": {
+      "type": "string",
+      "description": "This is the RDS instance type used for the cloud sql instance [instances](https://cloud.google.com/sql/pricing).",
+      "default": "db-f1-micro"
+    },
+    "safety": {
+      "type": "boolean",
+      "description": "This is the safety flag for the cloud sql instance. If set to true, the instance will be deleted when the project is deleted.",
+      "default": false
+    },
+    "engine_version": {
+      "type": "string",
+      "description": "The version of the database to use.",
+      "default": "5_7"
+    }
+  }
+}

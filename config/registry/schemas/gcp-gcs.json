@@ -1,0 +1,16 @@
+{
+  "$id": "https://app.runx.dev/schemas/gcp-gcs",
+  "type": "object",
+  "description": "Creates a GCS bucket for storage purposes",
+  "properties": {
+    "bucket_name": {
+      "type": "string",
+      "description": "The name of the bucket to create"
+    },
+    "block_public": {
+      "type": "boolean",
+      "description": "Block all public access."
+    }
+  },
+  "required": ["bucket_name"]
+}

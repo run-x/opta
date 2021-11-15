@@ -1,0 +1,25 @@
+{
+  "$id": "https://app.runx.dev/schemas/gcp-dns",
+  "type": "object",
+  "description": "Adds dns to your environment",
+  "properties": {
+    "domain": {
+      "type": "string",
+      "description": "The domain you want (you will also get the subdomains for your use).",
+      "default": null
+    },
+    "delegated": {
+      "type": "boolean",
+      "description": "If you want to use a delegated domain.",
+      "default": false
+    },
+    "subdomains": {
+      "type": "array",
+      "description": "A list of subdomains to also get ssl certs for.",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    }
+  }
+}
