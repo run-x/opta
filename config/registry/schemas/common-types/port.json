@@ -1,0 +1,26 @@
+{
+  "$id": "https://app.runx.dev/common-types/port",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the port",
+      "pattern": "^[a-zA-Z0-9-]+$"
+    },
+    "type": {
+      "enum": ["http", "tcp"],
+      "description": "HTTP or TCP"
+    },
+    "port": {
+      "type": "integer",
+      "description": "Port number",
+      "min": 1,
+      "max": 65535
+    },
+    "protocol": {
+      "enum": ["grcp", "websocket"],
+      "description": "Protocol to use for the port. Defaults to TCP"
+    },
+    "required": ["name", "type", "port"]
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "$id": "https://app.runx.dev/schemas/azure-base",
+  "description": "Sets up virtual network, private subnet, security groups (and their rules), default encryption key vault, and the container registry",
+  "type": "object",
+  "properties": {
+    "private_ipv4_cidr_block": {
+      "$ref": "/common-types/cidr-block",
+      "description": "The CIDR block for the private subnet",
+      "default": "10.0.0.0/16"
+    },
+    "location": {
+      "type": "string",
+      "description": "Geographic location",
+      "default": null
+    }
+  }
+}

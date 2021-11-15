@@ -1,0 +1,8 @@
+{
+  "$id": "https://app.runx.dev/schemas/azure-k8s-service",
+  "description": "Deploys a kubernetes app",
+  "type": "object",
+  "properties": {
+    "$ref": "/common-types/k8s-service"
+  }
+}

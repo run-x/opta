@@ -1,0 +1,23 @@
+{
+  "$id": "https://app.runx.dev/schemas/aws/aws-documentdb",
+  "description": "Creates an AWS Documentdb cluster",
+  "type": "object",
+  "properties": {
+    "engine_version": {
+      "type": "string",
+      "description": "The version of MongoDB to use",
+      "default": "4.0.0"
+    },
+    "instance_class": {
+      "description": "This is the RDS instance type used for the documentdb cluster [instances](https://aws.amazon.com/documentdb/pricing/).",
+      "$ref": "/common-types/rds-instance-types",
+      "default": "db.r5.large"
+    },
+    "instance_count": {
+      "description": "This is to specify the count of instances for Document DB Cluster. Note -> These would be Multi-AZ.",
+      "type": "integer",
+      "minimum": 1,
+      "default": 1
+    }
+  }
+}

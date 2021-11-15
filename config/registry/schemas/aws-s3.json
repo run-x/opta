@@ -1,0 +1,70 @@
+{
+  "$id": "https://app.runx.dev/schemas/aws-s3",
+  "description": "Creates an S3 bucket for storage purposes",
+  "type": "object",
+  "properties": {
+    "bucket_name": {
+      "type": "string",
+      "description": "The name of the bucket to create."
+    },
+    "same_region_replication": {
+      "type": "boolean",
+      "description": "Create a same-region bucket for replica storage (needed for compliance). Can be added later without destroying the resource."
+    },
+    "block_public": {
+      "type": "boolean",
+      "description": "Block public access to the bucket."
+    },
+    "bucket_policy": {
+      "anyOf": [
+        {
+          "type": "string",
+          "description": "The bucket policy as a JSON string."
+        },
+        {
+          "type": "object",
+          "description": "The bucket policy as an object."
+        }
+      ]
+    },
+    "cors_rule": {
+      "type": "object",
+      "description": "A custom cors policy.",
+      "fields": {
+        "allowed_origins": {
+          "type": "array",
+          "description": "The allowed origins for the CORS policy.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "allowed_headers": {
+          "type": "array",
+          "description": "The allowed headers for the CORS policy.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "allowed_methods": {
+          "type": "array",
+          "description": "The allowed methods for the CORS policy.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "expose_headers": {
+          "type": "array",
+          "description": "The exposed headers for the CORS policy.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "max_age_seconds": {
+          "type": "integer",
+          "description": "The max age for the CORS policy.",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

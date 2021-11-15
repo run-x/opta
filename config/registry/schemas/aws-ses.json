@@ -1,0 +1,11 @@
+{
+  "$id": "https://app.runx.dev/schemas/aws-ses",
+  "description": "Sets up AWS SES for sending domains via your root domain",
+  "type": "object",
+  "properties": {
+    "mail_from_prefix": {
+      "type": "string",
+      "description": "Subdomain to use with root domain"
+    }
+  }
+}

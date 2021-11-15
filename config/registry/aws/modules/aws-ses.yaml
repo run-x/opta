@@ -14,7 +14,7 @@ inputs:
     description: Opta Module name
     default: None
   - name: mail_from_prefix
-    user_facing: bool
+    user_facing: true
     validator: str(required=False)
     description: Subdomain to use with root domain.
     default: mail

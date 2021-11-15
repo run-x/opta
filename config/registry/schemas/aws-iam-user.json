@@ -1,0 +1,18 @@
+{
+  "$id": "https://app.runx.dev/schemas/aws-iam-user",
+  "description": "Creates an IAM user",
+  "type": "object",
+  "properties": {
+    "extra_iam_policies": {
+      "description": "The arns of additional IAM policies to be attached to this role.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "links": {
+      "$ref": "/common-types/links"
+    }
+  }
+}
