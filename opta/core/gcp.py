@@ -25,7 +25,7 @@ class GCP(CloudClient):
     def __init__(self, layer: "Layer"):
         self.layer = layer
         self.region = layer.root().providers["google"]["region"]
-        super(GCP, self).__init__(layer)
+        super().__init__(layer)
 
     @classmethod
     def get_credentials(cls) -> Tuple[Credentials, str]:
