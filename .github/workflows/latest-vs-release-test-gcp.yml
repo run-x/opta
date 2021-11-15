@@ -99,8 +99,8 @@ jobs:
         env:
           OPTA_DISABLE_REPORTING: true
         run: |
-          export PARENT_DOMAIN=`/home/runner/.opta/opta output --env gcp-release --config ./examples/ci-tests/create-and-destroy-aws/service.yml | jq -r '."parent.domain"'`
-          export HOST=`/home/runner/.opta/opta output --env gcp-release --config ./examples/ci-tests/create-and-destroy-aws/service.yml | jq -r '.load_balancer_raw_ip'`
+          export PARENT_DOMAIN=`/home/runner/.opta/opta output --env gcp-release --config ./examples/ci-tests/create-and-destroy-gcp/service.yml | jq -r '."parent.domain"'`
+          export HOST=`/home/runner/.opta/opta output --env gcp-release --config ./examples/ci-tests/create-and-destroy-gcp/service.yml | jq -r '.load_balancer_raw_ip'`
           curl -X POST -L --header "Host: test-service.${PARENT_DOMAIN}" --fail ${HOST}/stateful
 
       - name: Apply Environment with Release Opta
