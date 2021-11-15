@@ -20,7 +20,8 @@ class Local(CloudClient):
         )
         if not os.path.exists(os.path.dirname(self.config_file_path)):
             os.makedirs(os.path.dirname(self.config_file_path))
-        super(Local, self).__init__(layer)
+
+        super().__init__(layer)
 
     def get_remote_config(self) -> Optional["StructuredConfig"]:
         try:
