@@ -58,7 +58,7 @@ class Module:
 
     def resolve_default_input(
         self,
-        input: dict[str, Any],
+        input: Dict[str, Any],
         existing_defaults: Optional[List["StructuredDefault"]] = None,
     ) -> Tuple[Any, int]:
         """If there is no existing default list (because folks have not yet run the version where we have started
