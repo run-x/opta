@@ -2,6 +2,9 @@ required_providers:
   google:
     source: "hashicorp/google"
     version: "3.83.0"
+  helm:
+    source: "hashicorp/helm"
+    version: "2.4.1"
 backend:
   gcs:
     bucket: "{state_storage}"
