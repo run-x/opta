@@ -4,11 +4,7 @@ from typing import FrozenSet, List
 from opta.exceptions import UserErrors
 from opta.nice_subprocess import nice_run
 from opta.utils import json
-from opta.utils.dependencies import ensure_installed, register_path_executable
-
-HELM_INSTALL_URL = "https://helm.sh/docs/intro/install/"
-
-register_path_executable("helm", install_url=HELM_INSTALL_URL)
+from opta.utils.dependencies import ensure_installed
 
 
 class Helm:

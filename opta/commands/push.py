@@ -14,9 +14,7 @@ from opta.exceptions import UserErrors
 from opta.layer import Layer
 from opta.nice_subprocess import nice_run
 from opta.utils import check_opta_file_exists, fmt_msg, yaml
-from opta.utils.dependencies import ensure_installed, register_path_executable
-
-register_path_executable("docker")
+from opta.utils.dependencies import ensure_installed
 
 
 def get_push_tag(local_image: str, tag_override: Optional[str]) -> str:

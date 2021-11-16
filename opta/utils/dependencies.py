@@ -64,3 +64,27 @@ def validate_installed_path_executables(names: FrozenSet[str]) -> None:
     message = "Missing required executables on PATH: {}".format("; ".join(nice_missing))
 
     raise UserErrors(message)
+
+
+AWS_CLI_INSTALL_URL = (
+    "https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html"
+)
+AZ_CLI_INSTALL_URL = "https://docs.microsoft.com/en-us/cli/azure/install-azure-cli"
+DOCKER_INSTALL_URL = "https://docs.docker.com/get-docker/"
+GCP_CLI_INSTALL_URL = "https://cloud.google.com/sdk/docs/install"
+HELM_INSTALL_URL = "https://helm.sh/docs/intro/install/"
+KUBECTL_INSTALL_URL = "https://kubernetes.io/docs/tasks/tools/install-kubectl-macos/"
+TERRAFORM_INSTALL_URL = "https://learn.hashicorp.com/tutorials/terraform/install-cli"
+
+
+def _register_all() -> None:
+    register_path_executable("aws", install_url=AWS_CLI_INSTALL_URL)
+    register_path_executable("az", install_url=AZ_CLI_INSTALL_URL)
+    register_path_executable("docker", install_url=DOCKER_INSTALL_URL)
+    register_path_executable("gcloud", install_url=GCP_CLI_INSTALL_URL)
+    register_path_executable("helm", install_url=HELM_INSTALL_URL)
+    register_path_executable("kubectl", install_url=KUBECTL_INSTALL_URL)
+    register_path_executable("terraform")
+
+
+_register_all()

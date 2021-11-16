@@ -36,16 +36,14 @@ from opta.core.local import Local
 from opta.exceptions import MissingState, UserErrors
 from opta.nice_subprocess import nice_run
 from opta.utils import deep_merge, fmt_msg, json, logger
-from opta.utils.dependencies import ensure_installed, register_path_executable
+from opta.utils.dependencies import ensure_installed
 
 if TYPE_CHECKING:
     from opta.layer import Layer
+
 EXTRA_ENV = (
     {"KUBE_CONFIG_PATH": "~/.kube/config"} if os.path.isfile("~/.kube/config") else {}
 )
-
-
-register_path_executable("terraform")
 
 
 class Terraform:

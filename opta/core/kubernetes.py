@@ -32,23 +32,10 @@ from opta.core.terraform import get_terraform_outputs
 from opta.exceptions import UserErrors
 from opta.nice_subprocess import nice_run
 from opta.utils import deep_merge, fmt_msg, logger
-from opta.utils.dependencies import ensure_installed, register_path_executable
+from opta.utils.dependencies import ensure_installed
 
 if TYPE_CHECKING:
     from opta.layer import Layer
-
-
-KUBECTL_INSTALL_URL = "https://kubernetes.io/docs/tasks/tools/install-kubectl-macos/"
-AWS_CLI_INSTALL_URL = (
-    "https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html"
-)
-GCP_CLI_INSTALL_URL = "https://cloud.google.com/sdk/docs/install"
-
-
-register_path_executable("kubectl", install_url=KUBECTL_INSTALL_URL)
-register_path_executable("aws", install_url=AWS_CLI_INSTALL_URL)
-register_path_executable("gcloud", install_url=GCP_CLI_INSTALL_URL)
-register_path_executable("az")
 
 
 def get_required_path_executables(cloud: str) -> FrozenSet[str]:
