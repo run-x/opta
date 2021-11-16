@@ -7,7 +7,6 @@ import click
 def init() -> None:
     """
     Opens the interactive UI
-    You can choose to create an environment configuration or a service file by using the command.
     """
     print(
         "You will now be redirected to Opta's Yaml Generation UI. If the browser doesn't open, please follow the link: "
