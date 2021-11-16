@@ -1,10 +1,11 @@
 from unittest import mock
+
 import pytest
 from pytest_mock import MockFixture
 
-
 from opta.exceptions import UserErrors
 from opta.utils import dependencies
+
 
 class TestDependencies:
     def test_get_missing_path_executables(self, mocker: MockFixture) -> None:
@@ -54,15 +55,23 @@ class TestDependencies:
         assert str(e.value) == "foo already registered as a path executable"
 
     def test_validate_installed_path_executables(self, mocker: MockFixture) -> None:
-        mocker.patch("opta.utils.dependencies.get_missing_path_executables", return_value={"foo": "bar", "spam": None})
+        mocker.patch(
+            "opta.utils.dependencies.get_missing_path_executables",
+            return_value={"foo": "bar", "spam": None},
+        )
 
         with pytest.raises(UserErrors) as e:
             dependencies.validate_installed_path_executables({"foo", "spam"})
 
-        assert str(e.value) == "Missing required executables on PATH: foo (visit bar to install); spam"
+        assert (
+            str(e.value)
+            == "Missing required executables on PATH: foo (visit bar to install); spam"
+        )
 
     def test_validate_installed_path_executables_none(self, mocker: MockFixture) -> None:
-        mock_get_missing = mocker.patch("opta.utils.dependencies.get_missing_path_executables", return_value={})
+        mock_get_missing = mocker.patch(
+            "opta.utils.dependencies.get_missing_path_executables", return_value={}
+        )
         mock_sorted = mocker.patch("opta.utils.dependencies.sorted")
 
         dependencies.validate_installed_path_executables({"foo"})

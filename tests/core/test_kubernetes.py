@@ -52,7 +52,9 @@ class TestKubernetes:
         configure_kubectl(layer)
 
         mocked_terraform_output.assert_called_once_with(layer)
-        mocked_ensure_installed.assert_has_calls([mocker.call("kubectl"), mocker.call("az")])
+        mocked_ensure_installed.assert_has_calls(
+            [mocker.call("kubectl"), mocker.call("az")]
+        )
         mocked_nice_run.assert_has_calls(
             [
                 mocker.call(
@@ -108,7 +110,9 @@ class TestKubernetes:
 
         mock_sts_client.assert_called_once_with("sts")
         mocked_terraform_output.assert_called_once_with(layer)
-        mocked_ensure_installed.assert_has_calls([mocker.call("kubectl"), mocker.call("aws")])
+        mocked_ensure_installed.assert_has_calls(
+            [mocker.call("kubectl"), mocker.call("aws")]
+        )
         mocked_nice_run.assert_has_calls(
             [
                 # TODO: nsarupri -> change the AWS to Boto

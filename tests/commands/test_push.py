@@ -183,7 +183,9 @@ def test_no_tag(mocker: MockFixture) -> None:
 
 
 def test_no_docker(mocker: MockFixture) -> None:
-    mocker.patch("opta.utils.os.path.exists", return_value=True)  # Make check_opta_file_exists succeed
+    mocker.patch(
+        "opta.utils.os.path.exists", return_value=True
+    )  # Make check_opta_file_exists succeed
     mocker.patch("opta.commands.push.ensure_installed", side_effect=UserErrors("foobar"))
 
     runner = CliRunner()

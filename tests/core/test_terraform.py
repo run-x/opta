@@ -38,7 +38,9 @@ class TestTerraform:
         get_version.assert_called_once()
 
     def test_validate_version_missing(self, mocker: MockFixture) -> None:
-        ensure_installed = mocker.patch("opta.core.terraform.ensure_installed", side_effect=UserErrors("foobar"))
+        ensure_installed = mocker.patch(
+            "opta.core.terraform.ensure_installed", side_effect=UserErrors("foobar")
+        )
         get_version = mocker.patch("opta.core.terraform.Terraform.get_version")
 
         with pytest.raises(UserErrors) as e:

@@ -14,7 +14,9 @@ class TestHelm:
         assert len(deps) == 1
 
     def test_rollback_helm_base_revision_1(self, mocker: MockFixture) -> None:
-        mock_validate_helm_installed = mocker.patch("opta.core.helm.Helm.validate_helm_installed", return_value=None)
+        mock_validate_helm_installed = mocker.patch(
+            "opta.core.helm.Helm.validate_helm_installed", return_value=None
+        )
         mock_nice_run_helm_uninstall = mocker.patch("opta.core.helm.nice_run")
 
         Helm.rollback_helm(
@@ -28,7 +30,9 @@ class TestHelm:
         )
 
     def test_rollback_helm_base_revision_x(self, mocker: MockFixture) -> None:
-        mock_validate_helm_installed = mocker.patch("opta.core.helm.Helm.validate_helm_installed", return_value=None)
+        mock_validate_helm_installed = mocker.patch(
+            "opta.core.helm.Helm.validate_helm_installed", return_value=None
+        )
         mock_nice_run_helm_rollback = mocker.patch("opta.core.helm.nice_run")
 
         Helm.rollback_helm(
@@ -49,7 +53,9 @@ class TestHelm:
         )
 
     def test_get_helm_list_without_namespace(self, mocker: MockFixture) -> None:
-        mock_validate_helm_installed = mocker.patch("opta.core.helm.Helm.validate_helm_installed", return_value=None)
+        mock_validate_helm_installed = mocker.patch(
+            "opta.core.helm.Helm.validate_helm_installed", return_value=None
+        )
         mock_namespace_placeholder = ["--all-namespaces"]
         mock_nice_run_helm_list_process = mocker.patch("opta.core.helm.nice_run")
 
@@ -65,7 +71,9 @@ class TestHelm:
         mock_json_loads.assert_called_once()
 
     def test_get_helm_list_with_namespace(self, mocker: MockFixture) -> None:
-        mock_validate_helm_installed = mocker.patch("opta.core.helm.Helm.validate_helm_installed", return_value=None)
+        mock_validate_helm_installed = mocker.patch(
+            "opta.core.helm.Helm.validate_helm_installed", return_value=None
+        )
         mock_namespace_placeholder = ["--namespace", self.MOCK_NAMESPACE]
         mock_nice_run_helm_list_process = mocker.patch("opta.core.helm.nice_run")
 
