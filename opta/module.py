@@ -1,6 +1,6 @@
 import os
 import re
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Tuple
 
 import hcl2
 
@@ -11,7 +11,7 @@ from opta.utils import deep_merge, json
 
 TAGS_OVERRIDE_FILE = "tags_override.tf.json"
 if TYPE_CHECKING:
-    from opta.layer import Layer
+    from opta.layer import Layer, StructuredDefault
 
 
 class Module:
@@ -41,6 +41,7 @@ class Module:
         self.module_dir_path: str = self.translate_location(
             self.desc.get("terraform_module", self.aliased_type or self.type)
         )
+        self.used_defaults: List["StructuredDefault"] = []
 
     def outputs(self) -> Iterable[str]:
         ret = []
@@ -55,9 +56,39 @@ class Module:
         pattern = "^[A-Za-z0-9]*$"
         return bool(re.match(pattern, name))
 
+    def resolve_default_input(
+        self,
+        input: Dict[str, Any],
+        existing_defaults: Optional[List["StructuredDefault"]] = None,
+    ) -> Tuple[Any, int]:
+        """If there is no existing default list (because folks have not yet run the version where we have started
+        storing the defaults) then use the hard coded one. If we can't find the input name in the list of existing
+        inputs, then also use the hard coded one. If we do find the existing input, but the force_update_default_counter
+        was increased, then use the hard coded one. Otherwise keep using the existing one"""
+        input_name = input["name"]
+        input_counter = input.get("force_update_default_counter", 0)
+        if existing_defaults is None:
+            return input["default"], input_counter
+        try:
+            existing_default: "StructuredDefault" = next(
+                x for x in existing_defaults if x["input_name"] == input_name
+            )
+        except StopIteration:
+            return input["default"], input_counter
+        if input_counter > existing_default["force_update_default_counter"]:
+            return input["default"], input_counter
+        return (
+            existing_default["default"],
+            existing_default["force_update_default_counter"],
+        )
+
     def gen_tf(
-        self, depends_on: Optional[List[str]] = None, output_prefix: Optional[str] = None
+        self,
+        depends_on: Optional[List[str]] = None,
+        output_prefix: Optional[str] = None,
+        existing_defaults: Optional[List["StructuredDefault"]] = None,
     ) -> Dict[Any, Any]:
+        self.used_defaults = []
         if self.module_dir_path == "":
             return {}
         module_blk: Dict[Any, Any] = {
@@ -76,7 +107,17 @@ class Module:
             elif not input["required"]:
                 # TODO(patrick): This cannot handle inputs that have defaults but are removed by a module's `process` method
                 if "default" in input:
-                    module_blk["module"][self.name][input_name] = input["default"]
+                    default, counter = self.resolve_default_input(
+                        input, existing_defaults
+                    )
+                    module_blk["module"][self.name][input_name] = default
+                    self.used_defaults.append(
+                        {
+                            "input_name": input_name,
+                            "default": default,
+                            "force_update_default_counter": counter,
+                        }
+                    )
             else:
                 raise Exception(f"Unable to hydrate {input_name}")
         for output in self.desc["outputs"]:

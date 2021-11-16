@@ -60,10 +60,17 @@ from opta.plugins.derived_providers import DerivedProviders
 from opta.utils import deep_merge, hydrate, logger, yaml
 
 
+class StructuredDefault(TypedDict):
+    input_name: str
+    default: Any
+    force_update_default_counter: int
+
+
 class StructuredConfig(TypedDict):
     opta_version: str
     date: str
     original_spec: str
+    defaults: Dict[str, List[StructuredDefault]]
 
 
 class Layer:
@@ -213,6 +220,7 @@ class Layer:
             "opta_version": VERSION,
             "date": datetime.utcnow().isoformat(),
             "original_spec": self.original_spec,
+            "defaults": {module.name: module.used_defaults for module in self.modules},
         }
 
     @classmethod
@@ -357,7 +365,9 @@ class Layer:
             ret += module.outputs()
         return ret
 
-    def gen_tf(self, module_idx: int) -> Dict[Any, Any]:
+    def gen_tf(
+        self, module_idx: int, existing_config: Optional[StructuredConfig] = None
+    ) -> Dict[Any, Any]:
         ret: Dict[Any, Any] = {}
         for module in self.modules[0 : module_idx + 1]:
             module_type = module.aliased_type or module.type
@@ -373,9 +383,16 @@ class Layer:
                 None if len(self.get_module_by_type(module.type)) == 1 else module.name
             )
             try:
+                existing_defaults: Optional[List[StructuredDefault]] = None
+                if existing_config is not None:
+                    existing_defaults = existing_config.get("defaults", {}).get(
+                        module.name
+                    )
                 ret = deep_merge(
                     module.gen_tf(
-                        depends_on=previous_module_reference, output_prefix=output_prefix,
+                        depends_on=previous_module_reference,
+                        output_prefix=output_prefix,
+                        existing_defaults=existing_defaults,
                     ),
                     ret,
                 )

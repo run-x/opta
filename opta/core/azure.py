@@ -5,17 +5,15 @@ from azure.core.exceptions import ResourceNotFoundError
 from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient, ContainerClient, StorageStreamDownloader
 
+from opta.core.cloud_client import CloudClient
 from opta.utils import json, logger
 
 if TYPE_CHECKING:
-    from opta.layer import Layer, StructuredConfig
+    from opta.layer import StructuredConfig
 
 
-class Azure:
+class Azure(CloudClient):
     project_id: Optional[str] = None
-
-    def __init__(self, layer: "Layer"):
-        self.layer = layer
 
     @classmethod
     def get_credentials(cls) -> Any:

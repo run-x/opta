@@ -1,20 +1,22 @@
-from typing import TYPE_CHECKING, Generator, List, Tuple
+from typing import TYPE_CHECKING, Generator, List, Optional, Tuple
 
 from opta import gen_tf
 from opta.constants import TF_FILE_PATH
 from opta.utils import deep_merge, logger
 
 if TYPE_CHECKING:
-    from opta.layer import Layer
+    from opta.layer import Layer, StructuredConfig
     from opta.module import Module
 
 
-def gen_all(layer: "Layer") -> None:
+def gen_all(layer: "Layer", previous_config: Optional["StructuredConfig"] = None) -> None:
     # Just run the generator till the end
-    list(gen(layer))
+    list(gen(layer, previous_config))
 
 
-def gen(layer: "Layer") -> Generator[Tuple[int, List["Module"], int], None, None]:
+def gen(
+    layer: "Layer", previous_config: Optional["StructuredConfig"] = None
+) -> Generator[Tuple[int, List["Module"], int], None, None]:
     """Generate TF file based on opta config file"""
     logger.debug("Loading infra blocks")
 
@@ -26,7 +28,7 @@ def gen(layer: "Layer") -> Generator[Tuple[int, List["Module"], int], None, None
         if not module.halt and module_idx + 1 != total_module_count:
             continue
         ret = layer.gen_providers(module_idx)
-        ret = deep_merge(layer.gen_tf(module_idx), ret)
+        ret = deep_merge(layer.gen_tf(module_idx, previous_config), ret)
 
         gen_tf.gen(ret, TF_FILE_PATH)
 

@@ -10,6 +10,7 @@ from google.cloud.exceptions import NotFound
 from google.oauth2 import service_account
 from googleapiclient import discovery
 
+from opta.core.cloud_client import CloudClient
 from opta.exceptions import UserErrors
 from opta.utils import fmt_msg, json, logger
 
@@ -17,13 +18,14 @@ if TYPE_CHECKING:
     from opta.layer import Layer, StructuredConfig
 
 
-class GCP:
+class GCP(CloudClient):
     project_id: Optional[str] = None
     credentials: Optional[Credentials] = None
 
     def __init__(self, layer: "Layer"):
         self.layer = layer
         self.region = layer.root().providers["google"]["region"]
+        super().__init__(layer)
 
     @classmethod
     def get_credentials(cls) -> Tuple[Credentials, str]:
