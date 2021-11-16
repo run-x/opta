@@ -76,7 +76,7 @@ class Module:
         except StopIteration:
             return input["default"], input_counter
         if (
-            input.get("force_update_default_counter", 0)
+            input_counter
             > existing_default["force_update_default_counter"]
         ):
             return input["default"], input_counter
