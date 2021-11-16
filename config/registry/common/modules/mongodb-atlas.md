@@ -1,10 +1,10 @@
 ---
-title: "Mongdb Atlas"
-linkTitle: "Mongdb Atlas"
+title: "mongodb-atlas"
+linkTitle: "mongodb-atlas"
 date: 2021-10-12
 draft: false
 weight: 1
-description: Creates an Mongdb Atlas database instance
+description: Creates an Mongodb Atlas database instance
 ---
 
 This module creates an Atlas MongoDB cluster. Currently only supports AWS and Local providers in Opta.
