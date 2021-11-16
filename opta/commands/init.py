@@ -6,7 +6,7 @@ import click
 @click.command()
 def init() -> None:
     """
-    This command brings to you an interactive way of creating an opta configuration files.
+    Opens the interactive UI
     You can choose to create an environment configuration or a service file by using the command.
     """
     print(
