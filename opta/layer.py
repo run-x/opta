@@ -70,7 +70,7 @@ class StructuredConfig(TypedDict):
     opta_version: str
     date: str
     original_spec: str
-    defaults: dict[str, list[StructuredDefault]]
+    defaults: Dict[str, List[StructuredDefault]]
 
 
 class Layer:
