@@ -24,13 +24,16 @@ def get_missing_path_executables(names: StringSetOrFrozen) -> Dict[str, Optional
     missing: Dict[str, Optional[str]] = {}
 
     for name in names:
+        # Ensure that name is registered so we raise an exception even if the name is found on PATH
+        try:
+            install_url = _registered_path_executables[name]
+        except KeyError:
+            raise ValueError(f"{name} is not a registered path executable")
+
         if is_tool(name):
             continue
 
-        try:
-            missing[name] = _registered_path_executables[name]
-        except KeyError:
-            raise ValueError(f"{name} is not a registered path executable")
+        missing[name] = install_url
 
     return missing
 

@@ -35,8 +35,8 @@ from opta.core.gcp import GCP
 from opta.core.local import Local
 from opta.exceptions import MissingState, UserErrors
 from opta.nice_subprocess import nice_run
-from opta.utils import deep_merge, fmt_msg, is_tool, json, logger
-from opta.utils.dependencies import register_path_executable
+from opta.utils import deep_merge, fmt_msg, json, logger
+from opta.utils.dependencies import ensure_installed, register_path_executable
 
 if TYPE_CHECKING:
     from opta.layer import Layer
@@ -100,8 +100,7 @@ class Terraform:
 
     @classmethod
     def validate_version(cls) -> None:
-        if not is_tool("terraform"):
-            raise UserErrors("Please install terraform on your machine")
+        ensure_installed("terraform")
 
         current_version = Terraform.get_version()
         current_parsed = version.parse(current_version)

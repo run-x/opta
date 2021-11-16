@@ -28,29 +28,29 @@ class TestTerraform:
         assert tf_init.call_count == 2
 
     def test_validate_version_good(self, mocker: MockFixture) -> None:
-        is_tool = mocker.patch("opta.core.terraform.is_tool", return_value=True)
+        ensure_installed = mocker.patch("opta.core.terraform.ensure_installed")
         get_version = mocker.patch("opta.core.terraform.Terraform.get_version")
         get_version.return_value = "1.0.0"
 
         Terraform.validate_version()
 
-        is_tool.assert_called_once_with("terraform")
+        ensure_installed.assert_called_once_with("terraform")
         get_version.assert_called_once()
 
     def test_validate_version_missing(self, mocker: MockFixture) -> None:
-        is_tool = mocker.patch("opta.core.terraform.is_tool", return_value=False)
+        ensure_installed = mocker.patch("opta.core.terraform.ensure_installed", side_effect=UserErrors("foobar"))
         get_version = mocker.patch("opta.core.terraform.Terraform.get_version")
 
         with pytest.raises(UserErrors) as e:
             Terraform.validate_version()
 
-        is_tool.assert_called_once_with("terraform")
-        assert str(e.value) == "Please install terraform on your machine"
+        ensure_installed.assert_called_once_with("terraform")
+        assert str(e.value) == "foobar"
 
         get_version.assert_not_called()
 
     def test_validate_version_low(self, mocker: MockFixture) -> None:
-        mocker.patch("opta.core.terraform.is_tool", return_value=True)
+        mocker.patch("opta.core.terraform.ensure_installed")
         get_version = mocker.patch("opta.core.terraform.Terraform.get_version")
         get_version.return_value = "0.14.9"
 
@@ -63,7 +63,7 @@ class TestTerraform:
         get_version.assert_called_once()
 
     def test_validate_version_high(self, mocker: MockFixture) -> None:
-        mocker.patch("opta.core.terraform.is_tool", return_value=True)
+        mocker.patch("opta.core.terraform.ensure_installed")
         get_version = mocker.patch("opta.core.terraform.Terraform.get_version")
         get_version.return_value = "1.1.0"
 

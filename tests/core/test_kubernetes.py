@@ -18,9 +18,7 @@ from opta.layer import Layer
 
 class TestKubernetes:
     def test_azure_configure_kubectl(self, mocker: MockFixture) -> None:
-        mocked_is_tool = mocker.patch(
-            "opta.core.kubernetes.is_tool", side_effect=[True, True]
-        )
+        mocked_ensure_installed = mocker.patch("opta.core.kubernetes.ensure_installed")
         layer = mocker.Mock(spec=Layer)
         layer.parent = None
         layer.cloud = "azurerm"
@@ -54,7 +52,7 @@ class TestKubernetes:
         configure_kubectl(layer)
 
         mocked_terraform_output.assert_called_once_with(layer)
-        mocked_is_tool.assert_has_calls([mocker.call("kubectl"), mocker.call("az")])
+        mocked_ensure_installed.assert_has_calls([mocker.call("kubectl"), mocker.call("az")])
         mocked_nice_run.assert_has_calls(
             [
                 mocker.call(
@@ -75,9 +73,7 @@ class TestKubernetes:
         )
 
     def test_configure_kubectl(self, mocker: MockFixture) -> None:
-        mocked_is_tool = mocker.patch(
-            "opta.core.kubernetes.is_tool", side_effect=[True, True]
-        )
+        mocked_ensure_installed = mocker.patch("opta.core.kubernetes.ensure_installed")
         mocked_nice_run = mocker.patch(
             "opta.core.kubernetes.nice_run",
             side_effect=[
@@ -112,7 +108,7 @@ class TestKubernetes:
 
         mock_sts_client.assert_called_once_with("sts")
         mocked_terraform_output.assert_called_once_with(layer)
-        mocked_is_tool.assert_has_calls([mocker.call("kubectl"), mocker.call("aws")])
+        mocked_ensure_installed.assert_has_calls([mocker.call("kubectl"), mocker.call("aws")])
         mocked_nice_run.assert_has_calls(
             [
                 # TODO: nsarupri -> change the AWS to Boto

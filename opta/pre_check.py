@@ -11,6 +11,11 @@ def dependency_check() -> None:
     Terraform.validate_version()
 
 
+def pre_check() -> None:
+    symlink_check()
+    dependency_check()
+
+
 def symlink_check() -> None:
     is_symlink, cwd_path = is_symlinked_path()
     if is_symlink:

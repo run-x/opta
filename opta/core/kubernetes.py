@@ -31,8 +31,8 @@ from opta.core.gcp import GCP
 from opta.core.terraform import get_terraform_outputs
 from opta.exceptions import UserErrors
 from opta.nice_subprocess import nice_run
-from opta.utils import deep_merge, fmt_msg, is_tool, logger
-from opta.utils.dependencies import register_path_executable
+from opta.utils import deep_merge, fmt_msg, logger
+from opta.utils.dependencies import ensure_installed, register_path_executable
 
 if TYPE_CHECKING:
     from opta.layer import Layer
@@ -66,10 +66,7 @@ def configure_kubectl(layer: "Layer") -> None:
     # Make sure the user has the prerequisite CLI tools installed
     # kubectl may not *technically* be required for this opta command to run, but require
     # it anyways since user must install it to access the cluster.
-    if not is_tool("kubectl"):
-        raise UserErrors(
-            f"Please visit this link to install kubectl first: {KUBECTL_INSTALL_URL}"
-        )
+    ensure_installed("kubectl")
     if layer.cloud == "aws":
         _aws_configure_kubectl(layer)
     elif layer.cloud == "google":
@@ -89,10 +86,8 @@ def _local_configure_kubectl(layer: "Layer") -> None:
 
 
 def _gcp_configure_kubectl(layer: "Layer") -> None:
-    if not is_tool("gcloud"):
-        raise UserErrors(
-            f"Please visit the link to install the gcloud CLI first: {GCP_CLI_INSTALL_URL}"
-        )
+    ensure_installed("gcloud")
+
     try:
         if GCP.using_service_account():
             service_account_key_path = GCP.get_service_account_key_path()
@@ -159,8 +154,8 @@ def _gcp_configure_kubectl(layer: "Layer") -> None:
 def _azure_configure_kubectl(layer: "Layer") -> None:
     root_layer = layer.root()
     providers = root_layer.gen_providers(0)
-    if not is_tool("az"):
-        raise UserErrors("Please install az CLI first")
+
+    ensure_installed("az")
 
     rg_name = providers["terraform"]["backend"]["azurerm"]["resource_group_name"]
     cluster_name = get_cluster_name(root_layer)
@@ -187,10 +182,7 @@ def _azure_configure_kubectl(layer: "Layer") -> None:
 
 
 def _aws_configure_kubectl(layer: "Layer") -> None:
-    if not is_tool("aws"):
-        raise UserErrors(
-            f"Please visit the link to install the AWS CLI first: {AWS_CLI_INSTALL_URL}"
-        )
+    ensure_installed("aws")
 
     # Get the current account details from the AWS CLI.
     try:

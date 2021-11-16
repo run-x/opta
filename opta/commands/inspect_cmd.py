@@ -7,8 +7,9 @@ from opta.constants import TF_FILE_PATH
 from opta.core.generator import gen_all
 from opta.core.terraform import fetch_terraform_state_resources
 from opta.layer import Layer
+from opta.pre_check import pre_check
 from opta.resource import Resource
-from opta.utils import check_opta_file_exists, column_print, deep_merge, is_tool, json
+from opta.utils import check_opta_file_exists, column_print, deep_merge, json
 
 
 @click.command(hidden=True)
@@ -20,6 +21,8 @@ from opta.utils import check_opta_file_exists, column_print, deep_merge, is_tool
 )
 def inspect(config: str, env: Optional[str]) -> None:
     """ Displays important resources and AWS/Datadog links to them """
+
+    pre_check()
 
     config = check_opta_file_exists(config)
     layer = Layer.load_from_yaml(config, env)
@@ -39,10 +42,6 @@ class InspectCommand:
         self.terraform_state = fetch_terraform_state_resources(self.layer)
 
     def run(self) -> None:
-        # Make sure the user has the prerequisite CLI tools installed
-        if not is_tool("terraform"):
-            raise Exception("Please install terraform on your machine")
-
         inspect_details = []
         target_resources = self._get_opta_config_terraform_resources()
         for resource in target_resources:

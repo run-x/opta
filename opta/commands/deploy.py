@@ -12,6 +12,7 @@ from opta.core.terraform import Terraform
 from opta.error_constants import USER_ERROR_TF_LOCK
 from opta.exceptions import MissingState, UserErrors
 from opta.layer import Layer
+from opta.pre_check import pre_check
 from opta.utils import check_opta_file_exists, fmt_msg, logger
 
 
@@ -70,6 +71,8 @@ def deploy(
     opta deploy -c my_config.yaml -i my_container:latest --local
 
     """
+
+    pre_check()
 
     config = check_opta_file_exists(config)
     if not is_service_config(config):
