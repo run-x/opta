@@ -3,29 +3,26 @@ from typing import FrozenSet, List
 
 from opta.exceptions import UserErrors
 from opta.nice_subprocess import nice_run
-from opta.utils import is_tool, json
-from opta.utils.dependencies import register_path_executable
+from opta.utils import json
+from opta.utils.dependencies import ensure_installed, register_path_executable
 
 HELM_INSTALL_URL = "https://helm.sh/docs/intro/install/"
 
 register_path_executable("helm", install_url=HELM_INSTALL_URL)
 
 
-def get_required_path_executables() -> FrozenSet[str]:
-    return frozenset({"helm"})
-
-
-def helm_check() -> None:
-    if not is_tool("helm"):
-        raise UserErrors(
-            f"Please visit this link to install helm first: {HELM_INSTALL_URL}"
-        )
-
-
 class Helm:
+    @staticmethod
+    def get_required_path_executables() -> FrozenSet[str]:
+        return frozenset({"helm"})
+
+    @staticmethod
+    def validate_helm_installed() -> None:
+        ensure_installed("helm")
+
     @classmethod
     def rollback_helm(cls, release: str, namespace: str, revision: str = "") -> None:
-        helm_check()
+        cls.validate_helm_installed()
         try:
             if revision == "1":
                 nice_run(
@@ -47,7 +44,7 @@ class Helm:
 
     @classmethod
     def get_helm_list(cls, **kwargs) -> List:  # type: ignore # nosec
-        helm_check()
+        cls.validate_helm_installed()
         namespaces: List[str] = []
         if kwargs.get("namespace") is not None:
             namespaces.append("--namespace")

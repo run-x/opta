@@ -9,6 +9,13 @@ _registered_path_executables: Dict[str, Optional[str]] = {}
 StringSetOrFrozen = Union[Set[str], FrozenSet[str]]
 
 
+def ensure_installed(*names: str) -> None:
+    """
+    Convienince function to make calling validate_installed_path_executables easier with hardcoded names (using the `fozenset({"name"})` syntax isn't required).
+    """
+    validate_installed_path_executables(frozenset(names))
+
+
 def get_missing_path_executables(names: StringSetOrFrozen) -> Dict[str, Optional[str]]:
     """
     Returns a dict whose keys are executables missing from the PATH, limited to `names`.
