@@ -1,4 +1,5 @@
 import json
+from copy import deepcopy
 from os import listdir
 from os.path import dirname, isfile, join
 
@@ -21,7 +22,7 @@ FOLDER_NAME_TO_CLOUD_LIST = {
 }
 
 
-def generate_json_schema() -> None:
+def check_json_schema(write: bool = False) -> None:
     for cloud in ["aws", "azurerm", "google", "common"]:
         cloud_path = join(registry_path, cloud)
         module_path = join(cloud_path, "modules")
@@ -39,6 +40,8 @@ def generate_json_schema() -> None:
             json_schema_file = open(json_schema_file_path)
             json_schema = json.load(json_schema_file)
 
+            new_json_schema = deepcopy(json_schema)
+
             if "properties" in json_schema:
                 module_inputs = module_registry_dict["inputs"]
                 for i in module_registry_dict["inputs"]:
@@ -53,18 +56,24 @@ def generate_json_schema() -> None:
                         if "default" in i:
                             input_property_dict["default"] = i["default"]
 
-                json_schema["required"] = [
+                new_json_schema["required"] = [
                     i["name"]
                     for i in module_inputs
                     if i["user_facing"] and "required=True" in i["validator"]
                 ]
 
-            json_schema["opta_metadata"] = {
+            new_json_schema["opta_metadata"] = {
                 "module_type": "environment"
                 if module_registry_dict["environment_module"]
                 else "service",
                 "clouds": FOLDER_NAME_TO_CLOUD_LIST[cloud],
             }
 
-            with open(json_schema_file_path, "w") as f:
-                json.dump(json_schema, f, indent=2)
+            if write:
+                with open(json_schema_file_path, "w") as f:
+                    json.dump(new_json_schema, f, indent=2)
+            else:
+                if json.dumps(json_schema) != json.dumps(new_json_schema):
+                    raise Exception(
+                        f"Module {module_name}'s json schema file seems to be out of date. Rerun this script with the --write flag to fix this."
+                    )

@@ -34,6 +34,23 @@ jobs:
           source $(pipenv --venv)/bin/activate
       - name: Lint
         run: ./scripts/lint.py
+
+  json_schema:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install python dependencies
+        run: |
+          pip install pipenv
+          pipenv install --deploy --dev
+          source $(pipenv --venv)/bin/activate
+      - name: Check JSON Schema
+        run: ./scripts/json_schema.py
+
   security:
     runs-on: ubuntu-18.04
     steps:
@@ -215,8 +232,8 @@ jobs:
   deploy_test_service:
     if: ${{ github.ref == 'refs/heads/main' }}
     needs:
-    - test_cli_aws
-    - test_cli_gcp
+      - test_cli_aws
+      - test_cli_gcp
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
