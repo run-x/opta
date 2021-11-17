@@ -5,7 +5,7 @@
   "properties": {
     "region": {
       "type": "string",
-      "description": "MongoDB Atlas Cluster Region, must be a mongo region for the provider.",
+      "description": "MongoDB Atlas Cluster Region, must be a mongodb region for the provider.",
       "default": "None"
     },
     "mongo_instance_size": {
@@ -20,8 +20,8 @@
     },
     "database_name": {
       "type": "string",
-      "description": "The name of the mongo database",
-      "default": "mongo_database"
+      "description": "The name of the mongodb database",
+      "default": "mongodb_database"
     },
     "public_nat_ips": {
       "type": "array",
@@ -37,16 +37,21 @@
       ],
       "default": "AWS"
     },
-    "mongo_atlas_project_id": {
+    "mongodb_atlas_project_id": {
       "type": "string",
       "description": "The Atlas project ID",
       "default": "Notknown"
+    },
+    "mongodb_instance_size": {
+      "type": "string",
+      "description": "MongoDB Atlas Cluster size, see this: https://docs.atlas.mongodb.com/cluster-tier/",
+      "default": "M0"
     }
   },
   "required": [
     "region",
-    "mongo_instance_size",
-    "mongo_atlas_project_id"
+    "mongodb_instance_size",
+    "mongodb_atlas_project_id"
   ],
   "opta_metadata": {
     "module_type": "service",

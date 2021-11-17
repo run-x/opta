@@ -23,7 +23,7 @@
     },
     "port": {
       "ref": "/common-types/port-deprecated",
-      "description": "Specifies what port your app was made to be listened to. Currently it must be a map of the form\n`http: [PORT_NUMBER_HERE]` or `tcp: [PORT_NUMBER_HERE]`. Use http if you just have a vanilla http server and tcp for\nwebsockets.\n"
+      "description": "Specifies what port your app was made to be listened to. Currently it must be a map of the form\n`http: [PORT_NUMBER_HERE]` or `websocket: [PORT_NUMBER_HERE]`. Use `http` if you just have a vanilla http server\nand `websocket` for websockets.\n"
     },
     "image": {
       "type": "string",
@@ -83,6 +83,16 @@
       "type": "string",
       "description": "Use if liveness probe != readiness probe",
       "default": null
+    },
+    "initial_liveness_delay": {
+      "type": "integer",
+      "description": "Use if the initial delay needs to be changed.",
+      "default": 30
+    },
+    "initial_readiness_delay": {
+      "type": "integer",
+      "description": "Use if the initial delay needs to be changed.",
+      "default": 30
     },
     "consistent_hash": {
       "description": "Use [consistent hashing](https://www.nginx.com/resources/wiki/modules/consistent_hash/)",

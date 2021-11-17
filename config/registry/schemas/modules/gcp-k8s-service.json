@@ -69,6 +69,16 @@
       "description": "Use if liveness probe != readiness probe",
       "default": null
     },
+    "initial_liveness_delay": {
+      "type": "integer",
+      "description": "Use if the initial delay needs to be changed.",
+      "default": 30
+    },
+    "initial_readiness_delay": {
+      "type": "integer",
+      "description": "Use if the initial delay needs to be changed.",
+      "default": 30
+    },
     "consistent_hash": {
       "description": "Use [consistent hashing](https://www.nginx.com/resources/wiki/modules/consistent_hash/)",
       "type": "string",

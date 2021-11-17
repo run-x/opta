@@ -9,5 +9,7 @@
       "azure",
       "gcp"
     ]
-  }
+  },
+  "properties": {},
+  "required": []
 }
