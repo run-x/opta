@@ -27,5 +27,8 @@
    "gcp",
    "azure"
   ]
- }
+ },
+ "required": [
+  "domain"
+ ]
 }

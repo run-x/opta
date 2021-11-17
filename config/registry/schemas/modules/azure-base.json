@@ -18,5 +18,6 @@
    "description": "Geographic location",
    "default": null
   }
- }
+ },
+ "required": []
 }

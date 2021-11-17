@@ -64,5 +64,9 @@
  },
  "opta_metadata": {
   "module_type": "service"
- }
+ },
+ "required": [
+  "hash_key",
+  "attributes"
+ ]
 }

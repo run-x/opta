@@ -39,9 +39,7 @@
    "default": false
   }
  },
- "required": [
-  "image"
- ],
+ "required": [],
  "opta_metadata": {
   "module_type": "environment",
   "clouds": [

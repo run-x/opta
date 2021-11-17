@@ -24,5 +24,6 @@
    "description": "Add deletion protection to stop accidental db deletions",
    "default": false
   }
- }
+ },
+ "required": []
 }

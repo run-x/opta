@@ -13,5 +13,6 @@
    "description": "The version of the database to use.",
    "default": "11"
   }
- }
+ },
+ "required": []
 }

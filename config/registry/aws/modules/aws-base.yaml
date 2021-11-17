@@ -23,12 +23,20 @@ inputs:
     user_facing: true
     validator: any(required=False)
     description: These are the cidr blocks to use for the private subnets, one for each AZ.
-    default: ["10.0.128.0/21", "10.0.136.0/21", "10.0.144.0/21"]
+    default: [
+        "10.0.128.0/21",
+        "10.0.136.0/21",
+        "10.0.144.0/21"
+    ]
   - name: public_ipv4_cidr_blocks
     user_facing: true
     validator: any(required=False)
     description: These are the cidr blocks to use for the public subnets, one for each AZ.
-    default: ["10.0.0.0/21", "10.0.8.0/21", "10.0.16.0/21"]
+    default: [
+        "10.0.0.0/21",
+        "10.0.8.0/21",
+        "10.0.16.0/21"
+    ]
 outputs:
   - name: kms_account_key_arn
     export: true
@@ -51,9 +59,9 @@ outputs:
   - name: "public_nat_ips"
     export: true
     description: Public static IP of nat gateway(s)
-output_providers: {}
+output_providers: { }
 output_data:
   aws_caller_identity:
-    provider: {}
+    provider: { }
   aws_region:
-    provider: {}
+    provider: { }

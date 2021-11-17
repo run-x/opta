@@ -33,6 +33,7 @@ def generate_json_schema() -> None:
             json_schema = json.load(json_schema_file)
 
             if "properties" in json_schema:
+                module_inputs = module_registry_dict["inputs"]
                 for i in module_registry_dict["inputs"]:
                     if i["user_facing"]:
                         input_name = i["name"]
@@ -44,5 +45,12 @@ def generate_json_schema() -> None:
                         input_property_dict["description"] = i["description"]
                         if "default" in i:
                             input_property_dict["default"] = i["default"]
+
+                json_schema["required"] = [
+                    i["name"]
+                    for i in module_inputs
+                    if i["user_facing"] and "required=True" in i["validator"]
+                ]
+
             with open(json_schema_file_path, "w") as f:
                 json.dump(json_schema, f, indent=True)

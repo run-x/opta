@@ -72,5 +72,8 @@
    },
    "default": null
   }
- }
+ },
+ "required": [
+  "bucket_name"
+ ]
 }

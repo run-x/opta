@@ -23,5 +23,6 @@
    "description": "Additional configuration for nginx ingress. [Available options](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/#configuration-options)",
    "default": {}
   }
- }
+ },
+ "required": []
 }

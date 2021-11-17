@@ -21,5 +21,8 @@
    },
    "default": []
   }
- }
+ },
+ "required": [
+  "domain"
+ ]
 }

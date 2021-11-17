@@ -26,5 +26,6 @@
    "minimum": 0,
    "default": 2
   }
- }
+ },
+ "required": []
 }

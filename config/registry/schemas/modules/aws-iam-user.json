@@ -22,5 +22,6 @@
   "clouds": [
    "aws"
   ]
- }
+ },
+ "required": []
 }

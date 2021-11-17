@@ -85,5 +85,6 @@
    "description": "Window during which the snapshot would be taken.",
    "default": "04:00-05:00"
   }
- }
+ },
+ "required": []
 }

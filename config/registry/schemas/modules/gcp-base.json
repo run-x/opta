@@ -23,5 +23,6 @@
    "$ref": "/common-types/cidr-block",
    "default": "10.0.80.0/28"
   }
- }
+ },
+ "required": []
 }

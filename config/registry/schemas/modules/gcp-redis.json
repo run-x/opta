@@ -18,5 +18,6 @@
    "description": "the redis version to use for this instance",
    "default": true
   }
- }
+ },
+ "required": []
 }

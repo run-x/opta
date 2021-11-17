@@ -57,5 +57,6 @@
   "clouds": [
    "aws"
   ]
- }
+ },
+ "required": []
 }
