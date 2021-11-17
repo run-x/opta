@@ -3,8 +3,8 @@ from subprocess import (  # nosec
     PIPE,
     CalledProcessError,
     CompletedProcess,
-    Popen,
     TimeoutExpired,
+    DEVNULL
 )
 from typing import Optional, Union
 from subprocess_tee import run
@@ -27,11 +27,11 @@ def nice_run(  # type: ignore # nosec
     **kwargs,
 ) -> CompletedProcess:
 
-    kwargs["stdout"] = PIPE
+    kwargs["stdout"] = DEVNULL
     kwargs["stderr"] = PIPE
 
     try:
-        result = run(*popenargs, input=input, timeout=timeout, check=check, **kwargs)
+        result = run(*popenargs, input=input, timeout=timeout, check=check, capture_output=capture_output, **kwargs)
     except TimeoutExpired as exc:
         print("Timeout while running command")
         raise exc
