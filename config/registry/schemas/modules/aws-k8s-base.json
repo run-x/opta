@@ -16,7 +16,7 @@
   "linkerd_enabled": {
    "type": "boolean",
    "description": "Enable the linkerd service mesh installation.",
-   "default": false
+   "default": true
   },
   "admin_arns": {
    "type": "array",

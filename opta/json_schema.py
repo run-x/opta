@@ -42,6 +42,7 @@ def generate_json_schema() -> None:
                             )
                         input_property_dict = json_schema["properties"][input_name]
                         input_property_dict["description"] = i["description"]
-                        print(i["default"], type(i["default"]))
+                        if "default" in i:
+                            input_property_dict["default"] = i["default"]
             with open(json_schema_file_path, "w") as f:
                 json.dump(json_schema, f, indent=True)

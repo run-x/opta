@@ -8,7 +8,8 @@
    "type": "array",
    "items": {
     "type": "string"
-   }
+   },
+   "default": []
   },
   "allowed_k8s_services": {
    "description": "K8s service accounts that this role should have access to.",
@@ -42,7 +43,8 @@
   },
   "links": {
    "$ref": "/common-types/links",
-   "description": "The list of links to add permissions for to this role."
+   "description": "The list of links to add permissions for to this role.",
+   "default": []
   }
  },
  "opta_metadata": {

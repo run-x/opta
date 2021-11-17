@@ -19,7 +19,8 @@
    "items": {
     "type": "string",
     "description": "The ARN of the SQS queue to subscribe to."
-   }
+   },
+   "default": []
   }
  }
 }

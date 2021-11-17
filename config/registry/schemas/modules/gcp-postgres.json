@@ -11,7 +11,7 @@
   "safety": {
    "type": "boolean",
    "description": "Set to \"true\", if you want to disable the database deletion in Opta. You would have to manually set this \"false\" to enable DB deletion.",
-   "default": true
+   "default": false
   },
   "engine_version": {
    "type": "string",

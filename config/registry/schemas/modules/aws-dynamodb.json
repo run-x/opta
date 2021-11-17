@@ -31,7 +31,7 @@
   "range_key": {
    "description": "The range key for your table",
    "type": "string",
-   "default": ""
+   "default": null
   },
   "attributes": {
    "description": "The list of attributes (name and type) for this dynamodb table",
@@ -59,7 +59,7 @@
      "type"
     ]
    },
-   "default": null
+   "default": "None"
   }
  },
  "opta_metadata": {

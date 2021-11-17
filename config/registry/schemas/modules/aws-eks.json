@@ -33,7 +33,8 @@
    "description": "List of security groups to add to the control plane access.",
    "items": {
     "type": "string"
-   }
+   },
+   "default": []
   },
   "spot_instances": {
    "type": "boolean",

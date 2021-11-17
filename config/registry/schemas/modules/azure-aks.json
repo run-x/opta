@@ -88,14 +88,16 @@
   },
   "kubernetes_version": {
    "type": "string",
-   "description": "The Kubernetes version for the cluster. Must be [supported by AKS](https://docs.microsoft.com/en-us/azure/aks/supported-kubernetes-versions) to bind the cluster too. Gives you automatic K8s version management for the cluster and node pools."
+   "description": "The Kubernetes version for the cluster. Must be [supported by AKS](https://docs.microsoft.com/en-us/azure/aks/supported-kubernetes-versions) to bind the cluster too. Gives you automatic K8s version management for the cluster and node pools.",
+   "default": "1.19.11"
   },
   "admin_group_object_ids": {
    "type": "array",
    "description": "ids of the Active Directory [groups](https://docs.microsoft.com/en-us/azure/active-directory/fundamentals/active-directory-groups-create-azure-portal) to make admins in the K8s cluster.",
    "items": {
     "type": "string"
-   }
+   },
+   "default": []
   },
   "service_cidr": {
    "$ref": "/common-types/cidr-block",

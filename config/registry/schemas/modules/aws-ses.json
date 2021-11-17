@@ -5,7 +5,8 @@
  "properties": {
   "mail_from_prefix": {
    "type": "string",
-   "description": "Subdomain to use with root domain."
+   "description": "Subdomain to use with root domain.",
+   "default": "mail"
   }
  }
 }

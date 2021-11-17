@@ -29,7 +29,8 @@
     "RAPID",
     "REGULAR",
     "STABLE"
-   ]
+   ],
+   "default": "REGULAR"
   },
   "preemptible": {
    "type": "boolean",

@@ -5,15 +5,18 @@
  "properties": {
   "bucket_name": {
    "type": "string",
-   "description": "The name of the bucket to create."
+   "description": "The name of the bucket to create.",
+   "default": null
   },
   "same_region_replication": {
    "type": "boolean",
-   "description": "Create a same-region bucket for replica storage (needed for compliance). Can be added later without destroying the resource."
+   "description": "Create a same-region bucket for replica storage (needed for compliance). Can be added later without destroying the resource.",
+   "default": false
   },
   "block_public": {
    "type": "boolean",
-   "description": "Block all public access."
+   "description": "Block all public access.",
+   "default": true
   },
   "bucket_policy": {
    "anyOf": [
@@ -26,7 +29,8 @@
      "description": "The bucket policy as an object."
     }
    ],
-   "description": "A custom s3 policy json/yaml to add."
+   "description": "A custom s3 policy json/yaml to add.",
+   "default": null
   },
   "cors_rule": {
    "type": "object",
@@ -65,7 +69,8 @@
      "description": "The max age for the CORS policy.",
      "minimum": 0
     }
-   }
+   },
+   "default": null
   }
  }
 }

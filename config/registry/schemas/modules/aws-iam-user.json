@@ -13,7 +13,8 @@
   },
   "links": {
    "$ref": "/common-types/links",
-   "description": "The list of links to add permissions for to this role."
+   "description": "The list of links to add permissions for to this role.",
+   "default": []
   }
  },
  "opta_metadata": {
