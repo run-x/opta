@@ -72,7 +72,7 @@ class Terraform:
     def get_version(cls) -> str:
         out = nice_run(
             ["terraform", "version", "-json"], check=True, capture_output=True
-        ).stdout.decode("utf-8")
+        ).stdout
         terraform_data = json.loads(out)
         return terraform_data["terraform_version"]
 
@@ -336,7 +336,7 @@ class Terraform:
             kwargs["stderr"] = PIPE
             kwargs["stdout"] = DEVNULL
         try:
-            nice_run(
+            result = nice_run(
                 ["terraform", "plan", "-compact-warnings", *tf_flags],
                 check=True,
                 bufsize=1,
@@ -344,10 +344,9 @@ class Terraform:
             )
         except CalledProcessError as e:
             # If quiet is True, then this works. If quiet it set to false, then e.stderr is None and command outputs are sent directly to user's terminal
-            raise UserErrors(
-                f"Terraform plan had issues.\n"
-                "Following error was raised by Terraform plan:\n" + open("/tmp/optaout.txt","r").read()  
-            )
+            print ("WHAT HAVE WE HERE!")
+            logger.error(e.stderr)
+            raise
 
     @classmethod
     def show(cls, *tf_flags: str, capture_output: bool = False) -> Optional[str]:
@@ -356,7 +355,7 @@ class Terraform:
             if capture_output:
                 out = nice_run(
                     ["terraform", "show", *tf_flags], check=True, capture_output=True,
-                ).stdout.decode("utf-8")
+                ).stdout
                 return out
             nice_run(["terraform", "show", *tf_flags], check=True, **kwargs)
         except CalledProcessError as e:

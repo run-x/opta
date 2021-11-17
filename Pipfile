@@ -60,6 +60,8 @@ dnspython = "2.1.0"
 docker = "5.0.0"
 tabulate = "0.8.9"
 types-tabulate = "0.8.2"
+subprocess-tee = "*"
+
 [requires]
 python_version = "3.8"
 

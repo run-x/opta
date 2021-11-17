@@ -259,7 +259,7 @@ def _apply(
                         quiet=False,
                     )
                 except CalledProcessError as e:
-                    logger.error((e.stderr or b"").decode("utf-8"))
+                    logger.error(e.stderr or b"")
                     raise e
                 PlanDisplayer.display(detailed_plan=detailed_plan)
 
