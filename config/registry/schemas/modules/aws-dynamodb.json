@@ -60,6 +60,12 @@
         ]
       },
       "default": "None"
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "aws-dynamodb"
+      ]
     }
   },
   "opta_metadata": {
@@ -70,6 +76,8 @@
   },
   "required": [
     "hash_key",
-    "attributes"
-  ]
+    "attributes",
+    "type"
+  ],
+  "name": "aws-dynamodb"
 }

@@ -50,6 +50,12 @@
         "max": 65535
       },
       "default": []
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "aws-k8s-base"
+      ]
     }
   },
   "opta_metadata": {
@@ -58,5 +64,8 @@
       "aws"
     ]
   },
-  "required": []
+  "required": [
+    "type"
+  ],
+  "name": "aws-k8s-base"
 }

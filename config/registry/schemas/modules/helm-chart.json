@@ -70,10 +70,17 @@
       "type": "boolean",
       "description": "Will wait (for as long as timeout) until all resources are in a ready state before marking the release as successful.",
       "default": true
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "helm-chart"
+      ]
     }
   },
   "required": [
-    "chart"
+    "chart",
+    "type"
   ],
   "opta_metadata": {
     "module_type": "service",
@@ -82,5 +89,6 @@
       "azure",
       "gcp"
     ]
-  }
+  },
+  "name": "helm-chart"
 }

@@ -180,6 +180,12 @@
       "type": "object",
       "description": "These are extra annotations to add to ingress objects\n",
       "default": {}
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "aws-k8s-service"
+      ]
     }
   },
   "opta_metadata": {
@@ -189,6 +195,8 @@
     ]
   },
   "required": [
-    "image"
-  ]
+    "image",
+    "type"
+  ],
+  "name": "aws-k8s-service"
 }

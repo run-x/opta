@@ -35,6 +35,12 @@
       "$ref": "/common-types/cidr-block",
       "description": "This is the total cidr block for the VPC.",
       "default": "10.0.0.0/16"
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "aws-base"
+      ]
     }
   },
   "opta_metadata": {
@@ -43,5 +49,8 @@
       "aws"
     ]
   },
-  "required": []
+  "required": [
+    "type"
+  ],
+  "name": "aws-base"
 }

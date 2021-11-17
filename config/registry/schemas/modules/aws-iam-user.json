@@ -15,6 +15,12 @@
       "$ref": "/common-types/links",
       "description": "The list of links to add permissions for to this role.",
       "default": []
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "aws-iam-user"
+      ]
     }
   },
   "opta_metadata": {
@@ -23,5 +29,8 @@
       "aws"
     ]
   },
-  "required": []
+  "required": [
+    "type"
+  ],
+  "name": "aws-iam-user"
 }

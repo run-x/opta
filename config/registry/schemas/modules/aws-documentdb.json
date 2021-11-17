@@ -18,6 +18,12 @@
       "type": "integer",
       "minimum": 1,
       "default": 1
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "aws-documentdb"
+      ]
     }
   },
   "opta_metadata": {
@@ -26,5 +32,8 @@
       "aws"
     ]
   },
-  "required": []
+  "required": [
+    "type"
+  ],
+  "name": "aws-documentdb"
 }

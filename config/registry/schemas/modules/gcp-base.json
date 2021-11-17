@@ -22,13 +22,22 @@
       "description": "This is the cidr block reserved for the master/control plane in the GKE cluster.",
       "$ref": "/common-types/cidr-block",
       "default": "10.0.80.0/28"
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "gcp-base"
+      ]
     }
   },
-  "required": [],
+  "required": [
+    "type"
+  ],
   "opta_metadata": {
     "module_type": "environment",
     "clouds": [
       "gcp"
     ]
-  }
+  },
+  "name": "gcp-base"
 }

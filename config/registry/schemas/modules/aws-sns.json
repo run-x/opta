@@ -21,13 +21,22 @@
         "description": "The ARN of the SQS queue to subscribe to."
       },
       "default": []
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "aws-sns"
+      ]
     }
   },
-  "required": [],
+  "required": [
+    "type"
+  ],
   "opta_metadata": {
     "module_type": "service",
     "clouds": [
       "aws"
     ]
-  }
+  },
+  "name": "aws-sns"
 }

@@ -191,24 +191,28 @@ def _print_errors(errors: List[str]) -> None:
     print(attr("reset"), end="")
 
 
-def validate_yaml(config_file_path: str, cloud: str) -> Literal[True]:
-    data = yamale.make_data(config_file_path, parser="ruamel")
-    if cloud == "aws":
-        yamale_result = yamale.validate(aws_main_schema, data, _raise_error=False)
-    elif cloud == "google":
-        yamale_result = yamale.validate(gcp_main_schema, data, _raise_error=False)
-    elif cloud == "azurerm":
-        yamale_result = yamale.validate(azure_main_schema, data, _raise_error=False)
-    elif cloud == "local":
-        yamale_result = yamale.validate(local_main_schema, data, _raise_error=False)
+def validate_yaml(
+    config_file_path: str, cloud: str, json_schema: bool = False
+) -> Literal[True]:
+    if json_schema:
+        print("TODO")
     else:
-        yamale_result = yamale.validate(vanilla_main_schema, data, _raise_error=False)
-    errors = []
-    for result in yamale_result:
-        errors.extend(result.errors)
+        CLOUD_TO_SCHEMA = {
+            "aws": aws_main_schema,
+            "google": gcp_main_schema,
+            "azurerm": azure_main_schema,
+            "local": local_main_schema,
+        }
+        DEFAULT_SCHEMA = vanilla_main_schema
+        data = yamale.make_data(config_file_path, parser="ruamel")
+        schema = CLOUD_TO_SCHEMA.get(cloud, DEFAULT_SCHEMA)
+        yamale_result = yamale.validate(schema, data, _raise_error=False)
+        errors = []
+        for result in yamale_result:
+            errors.extend(result.errors)
 
-    if len(errors) > 0:
-        _print_errors(errors)
-        raise UserErrors(f"{config_file_path} is not a valid Opta file.")
+        if len(errors) > 0:
+            _print_errors(errors)
+            raise UserErrors(f"{config_file_path} is not a valid Opta file.")
 
     return True

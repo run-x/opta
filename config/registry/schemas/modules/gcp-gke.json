@@ -36,13 +36,22 @@
       "type": "boolean",
       "description": "A boolean specifying whether to use [preemptible instances](https://cloud.google.com/compute/docs/instances/preemptible)\nfor the default nodegroup or not. The preemptible instances will be configured to have the max price equal to the on-demand\nprice (so no danger of overcharging). _WARNING_: By using preemptible instances you must accept the real risk of frequent abrupt\nnode terminations and possibly (although extremely rarely) even full blackouts (all nodes die). The former is a small\nrisk as containers of Opta services will be automatically restarted on surviving nodes. So just make sure to specify\na minimum of more than 1 containers -- Opta by default attempts to spread them out amongst many nodes.\n",
       "default": false
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "gcp-gke"
+      ]
     }
   },
-  "required": [],
+  "required": [
+    "type"
+  ],
   "opta_metadata": {
     "module_type": "environment",
     "clouds": [
       "gcp"
     ]
-  }
+  },
+  "name": "gcp-gke"
 }

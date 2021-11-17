@@ -15,6 +15,10 @@ from opta.utils import check_opta_file_exists
     help="The env to use when loading the config file",
     show_default=True,
 )
-def validate(config: str, env: Optional[str]) -> None:
+@click.option(
+    "--json-schema", default=False, help="Validate using JSON schema instead of Yamale"
+)
+def validate(config: str, json_schema: bool, env: Optional[str]) -> None:
     config = check_opta_file_exists(config)
-    Layer.load_from_yaml(config, env)
+
+    Layer.load_from_yaml(config, env, json_schema)

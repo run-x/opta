@@ -36,13 +36,22 @@
       "type": "integer",
       "description": "The seconds for which a ReceiveMessage call will wait for a message to arrive (long polling) before returning. Must be an int from 0-20.",
       "default": 0
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "aws-sqs"
+      ]
     }
   },
-  "required": [],
+  "required": [
+    "type"
+  ],
   "opta_metadata": {
     "module_type": "service",
     "clouds": [
       "aws"
     ]
-  }
+  },
+  "name": "aws-sqs"
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import argparse
 
-from opta.json_schema import check_json_schema
+from opta.json_schema import check_schemas
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -13,4 +13,4 @@ if __name__ == "__main__":
         help="Allow script to overwrite file contents for autofixable errors",
     )
     args = parser.parse_args()
-    check_json_schema(write=args.write)
+    check_schemas(write=args.write)

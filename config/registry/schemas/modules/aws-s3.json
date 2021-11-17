@@ -71,15 +71,23 @@
         }
       },
       "default": null
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "aws-s3"
+      ]
     }
   },
   "required": [
-    "bucket_name"
+    "bucket_name",
+    "type"
   ],
   "opta_metadata": {
     "module_type": "service",
     "clouds": [
       "aws"
     ]
-  }
+  },
+  "name": "aws-s3"
 }

@@ -1,5 +1,5 @@
-from opta.json_schema import check_json_schema
+from opta.json_schema import check_schemas
 
 
 def test_returns_without_error() -> None:
-    check_json_schema()
+    check_schemas()

@@ -84,13 +84,22 @@
       "type": "string",
       "description": "Window during which the snapshot would be taken.",
       "default": "04:00-05:00"
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "aws-redis"
+      ]
     }
   },
-  "required": [],
+  "required": [
+    "type"
+  ],
   "opta_metadata": {
     "module_type": "service",
     "clouds": [
       "aws"
     ]
-  }
+  },
+  "name": "aws-redis"
 }

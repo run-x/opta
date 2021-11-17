@@ -57,6 +57,12 @@
       },
       "default": {},
       "description": "Custom launch template for the underlying ec2s."
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "aws-eks"
+      ]
     }
   },
   "opta_metadata": {
@@ -65,5 +71,8 @@
       "aws"
     ]
   },
-  "required": []
+  "required": [
+    "type"
+  ],
+  "name": "aws-eks"
 }

@@ -7,13 +7,22 @@
       "type": "string",
       "description": "Subdomain to use with root domain.",
       "default": "mail"
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "aws-ses"
+      ]
     }
   },
-  "required": [],
+  "required": [
+    "type"
+  ],
   "opta_metadata": {
     "module_type": "environment",
     "clouds": [
       "aws"
     ]
-  }
+  },
+  "name": "aws-ses"
 }

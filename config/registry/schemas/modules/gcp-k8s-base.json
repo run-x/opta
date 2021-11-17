@@ -22,13 +22,22 @@
       "type": "object",
       "description": "Additional configuration for nginx ingress. [Available options](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/#configuration-options)",
       "default": {}
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "gcp-k8s-base"
+      ]
     }
   },
-  "required": [],
+  "required": [
+    "type"
+  ],
   "opta_metadata": {
     "module_type": "environment",
     "clouds": [
       "gcp"
     ]
-  }
+  },
+  "name": "gcp-k8s-base"
 }

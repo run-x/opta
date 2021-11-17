@@ -108,13 +108,22 @@
       "$ref": "/common-types/ip-address",
       "description": "The ip to use for the internal coredns service",
       "default": "10.0.128.10"
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "azure-aks"
+      ]
     }
   },
-  "required": [],
+  "required": [
+    "type"
+  ],
   "opta_metadata": {
     "module_type": "environment",
     "clouds": [
       "azure"
     ]
-  }
+  },
+  "name": "azure-aks"
 }

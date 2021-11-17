@@ -17,13 +17,22 @@
       "type": "boolean",
       "description": "the redis version to use for this instance",
       "default": true
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "gcp-redis"
+      ]
     }
   },
-  "required": [],
+  "required": [
+    "type"
+  ],
   "opta_metadata": {
     "module_type": "service",
     "clouds": [
       "gcp"
     ]
-  }
+  },
+  "name": "gcp-redis"
 }

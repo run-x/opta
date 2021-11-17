@@ -1,0 +1,60 @@
+{
+  "type": "object",
+  "description": "The Opta configuration for an Azure environment",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name of the environment"
+    },
+    "org_name": {
+      "$ref": "https://app.runx.dev/common-types/org-name"
+    },
+    "providers": {
+      "type": "object",
+      "properties": {
+        "google": {
+          "type": "object",
+          "properties": {
+            "region": {
+              "type": "string",
+              "description": "The GCP region to use"
+            },
+            "project": {
+              "type": "string",
+              "description": "The name of the GCP project"
+            }
+          },
+          "required": ["region", "project"]
+        }
+      },
+      "required": ["google"]
+    },
+    "modules": {
+      "type": "array",
+      "description": "The Opta modules to run in this environment",
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "https://app.runx.dev/modules/azure-k8s-base"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/azure-aks"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/azure-base"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/external-ssl-cert"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/runx"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/datadog"
+          }
+        ]
+      }
+    }
+  },
+  "required": ["name", "org_name", "providers", "modules"]
+}

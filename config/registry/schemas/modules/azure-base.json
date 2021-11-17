@@ -17,13 +17,22 @@
       "type": "string",
       "description": "Geographic location",
       "default": null
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "azure-base"
+      ]
     }
   },
-  "required": [],
+  "required": [
+    "type"
+  ],
   "opta_metadata": {
     "module_type": "environment",
     "clouds": [
       "azure"
     ]
-  }
+  },
+  "name": "azure-base"
 }

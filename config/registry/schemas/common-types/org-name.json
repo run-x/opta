@@ -1,0 +1,6 @@
+{
+  "$id": "https://app.runx.dev/common-types/org-name",
+  "type": "string",
+  "description": "An org name.",
+  "pattern": "^[a-z0-9-]{,15}$"
+}

@@ -18,6 +18,12 @@
       "type": "boolean",
       "description": "Deprecated",
       "default": false
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "aws-dns"
+      ]
     }
   },
   "opta_metadata": {
@@ -27,6 +33,8 @@
     ]
   },
   "required": [
-    "domain"
-  ]
+    "domain",
+    "type"
+  ],
+  "name": "aws-dns"
 }

@@ -22,13 +22,20 @@
       "type": "string",
       "description": "The file containing the chain certificate for the current ssl certificate.",
       "default": null
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "external-ssl-cert"
+      ]
     }
   },
   "required": [
     "domain",
     "private_key_file",
     "certificate_body_file",
-    "certificate_chain_file"
+    "certificate_chain_file",
+    "type"
   ],
   "opta_metadata": {
     "module_type": "environment",
@@ -37,5 +44,6 @@
       "azure",
       "gcp"
     ]
-  }
+  },
+  "name": "external-ssl-cert"
 }

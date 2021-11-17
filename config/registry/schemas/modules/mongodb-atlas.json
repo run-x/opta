@@ -46,12 +46,19 @@
       "type": "string",
       "description": "MongoDB Atlas Cluster size, see this: https://docs.atlas.mongodb.com/cluster-tier/",
       "default": "M0"
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "mongodb-atlas"
+      ]
     }
   },
   "required": [
     "region",
     "mongodb_instance_size",
-    "mongodb_atlas_project_id"
+    "mongodb_atlas_project_id",
+    "type"
   ],
   "opta_metadata": {
     "module_type": "service",
@@ -60,5 +67,6 @@
       "azure",
       "gcp"
     ]
-  }
+  },
+  "name": "mongodb-atlas"
 }

@@ -1,0 +1,74 @@
+{
+  "$id": "https://app.runx.dev/opta-config-files/env-aws",
+  "description": "The Opta configuration for an AWS environment",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name of the environment"
+    },
+    "org_name": {
+      "$ref": "https://app.runx.dev/common-types/org-name"
+    },
+    "providers": {
+      "type": "object",
+      "properties": {
+        "aws": {
+          "type": "object",
+          "properties": {
+            "region": {
+              "type": "string",
+              "description": "The AWS region to use"
+            },
+            "account_id": {
+              "type": "string",
+              "description": "The AWS access key ID"
+            }
+          },
+          "required": ["region", "account_id"]
+        }
+      },
+      "required": ["aws"]
+    },
+    "modules": {
+      "type": "array",
+      "description": "The Opta modules to run in this environment",
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "https://app.runx.dev/modules/aws-nodegroup"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/aws-dns"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/aws-ses"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/aws-k8s-base"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/aws-base"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/aws-eks"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/external-ssl-cert"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/runx"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/datadog"
+          }
+        ]
+      }
+    }
+  },
+  "opta_metadata": {
+    "module_type": "environment",
+    "clouds": ["aws"]
+  },
+  "required": ["name", "org_name", "providers", "modules"]
+}
