@@ -134,7 +134,6 @@ class Terraform:
                 **kwargs,
             )
         except CalledProcessError as e:
-            logger.error(e.stderr)
             raise e
 
     @classmethod
@@ -188,7 +187,6 @@ class Terraform:
                     **kwargs,
                 )
             except CalledProcessError as e:
-                logger.error(e.stderr)
                 raise e
 
     @classmethod
@@ -219,7 +217,6 @@ class Terraform:
                 layer.post_delete(idx)
                 idx -= 1
             except CalledProcessError as e:
-                logger.error(e.stderr)
                 raise e
 
         # After the layer is completely deleted, remove the opta config from the state bucket.
@@ -334,9 +331,6 @@ class Terraform:
                 **kwargs,
             )
         except CalledProcessError as e:
-            # If quiet is True, then this works. If quiet it set to false, then e.stderr is None and command outputs are sent directly to user's terminal
-            print ("WHAT HAVE WE HERE!")
-            logger.error(e.stderr)
             raise e
 
     @classmethod
@@ -350,7 +344,6 @@ class Terraform:
                 return out
             nice_run(["terraform", "show", *tf_flags], check=True, **kwargs)
         except CalledProcessError as e:
-            logger.error(e.stderr)
             raise e
 
         return None

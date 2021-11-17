@@ -27,9 +27,6 @@ def nice_run(  # type: ignore # nosec
     **kwargs,
 ) -> CompletedProcess:
 
-    kwargs["stdout"] = DEVNULL
-    kwargs["stderr"] = PIPE
-
     try:
         result = run(*popenargs, input=input, timeout=timeout, check=check, capture_output=capture_output, **kwargs)
     except TimeoutExpired as exc:
