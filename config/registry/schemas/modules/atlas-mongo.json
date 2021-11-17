@@ -30,7 +30,11 @@
       }
     },
     "cloud_provider": {
-      "enum": ["AWS", "AZURE", "GCP"],
+      "enum": [
+        "AWS",
+        "AZURE",
+        "GCP"
+      ],
       "default": "AWS"
     },
     "mongo_atlas_project_id": {
@@ -39,9 +43,17 @@
       "default": "Notknown"
     }
   },
-  "required": ["region", "mongo_instance_size", "mongo_atlas_project_id"],
+  "required": [
+    "region",
+    "mongo_instance_size",
+    "mongo_atlas_project_id"
+  ],
   "opta_metadata": {
     "module_type": "service",
-    "clouds": ["aws", "azure", "gcp"]
+    "clouds": [
+      "aws",
+      "azure",
+      "gcp"
+    ]
   }
 }

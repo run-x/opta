@@ -1,43 +1,184 @@
 {
   "$id": "https://app.runx.dev/modules/aws-k8s-service",
   "description": "Deploys a kubernetes app",
-  "allOf": [
-    {
-      "$ref": "/common-types/k8s-service"
+  "properties": {
+    "probe_port": {
+      "type": "str",
+      "description": "The name of the port to use for readiness and liveness probes. Defaults to the first port listed."
     },
-    {
+    "additional_iam_policies": {
+      "type": "array",
+      "description": "A list of extra IAM role policies not captured by Opta which you wish to give to your service.",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "ports": {
+      "type": "array",
+      "description": "Specifies which port(s) your app exposes.",
+      "items": {
+        "$ref": "/common-types/port"
+      }
+    },
+    "port": {
+      "ref": "/common-types/port-deprecated",
+      "description": "Specifies what port your app was made to be listened to. Currently it must be a map of the form\n`http: [PORT_NUMBER_HERE]` or `tcp: [PORT_NUMBER_HERE]`. Use http if you just have a vanilla http server and tcp for\nwebsockets.\n"
+    },
+    "image": {
+      "type": "string",
+      "description": "Set to AUTO to create a private repo for your own images. Otherwises attempts to pull image from public dockerhub",
+      "default": null
+    },
+    "min_containers": {
+      "type": "integer",
+      "description": "The minimum number of replicas your app can autoscale to.",
+      "default": 1,
+      "minimum": 0
+    },
+    "max_containers": {
+      "type": "integer",
+      "description": "The maximum number of replicas your app can autoscale to.",
+      "default": 3,
+      "minimum": 0
+    },
+    "autoscaling_target_cpu_percentage": {
+      "type": "integer",
+      "description": "See the [autoscaling]({{< relref \"#autoscaling\" >}}) section.",
+      "default": 80,
+      "minimum": 0,
+      "maximum": 100
+    },
+    "autoscaling_target_mem_percentage": {
+      "type": "integer",
+      "description": "See the [autoscaling]({{< relref \"#autoscaling\" >}}) section.",
+      "default": 80,
+      "minimum": 0,
+      "maximum": 100
+    },
+    "secrets": {
+      "type": "array",
+      "description": "A list of secrets to add as environment variables for your container. All secrets must be set following the [secrets instructions](/tutorials/secrets) prior to deploying the app.",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "env_vars": {
+      "description": "A map of key values to add to the container as environment variables (key is name, value is value).\n```yaml\nenv_vars:\n FLAG: \"true\"\n```\n",
+      "$ref": "/common-types/env-vars",
+      "default": []
+    },
+    "healthcheck_path": {
+      "type": "string",
+      "description": "See the See the [liveness/readiness]({{< relref \"#livenessreadiness-probe\" >}}) section. Default `null` (i.e., no user-specified healthchecks)",
+      "default": null
+    },
+    "liveness_probe_path": {
+      "type": "string",
+      "description": "Use if liveness probe != readiness probe",
+      "default": null
+    },
+    "readiness_probe_path": {
+      "type": "string",
+      "description": "Use if liveness probe != readiness probe",
+      "default": null
+    },
+    "consistent_hash": {
+      "description": "Use [consistent hashing](https://www.nginx.com/resources/wiki/modules/consistent_hash/)",
+      "type": "string",
+      "default": null
+    },
+    "sticky_session": {
+      "description": "Use [sticky sessions](https://stackoverflow.com/questions/10494431/sticky-and-non-sticky-sessions) via cookies for your service (first request will send you a cookie called opta_cookie which you should add on future requests).",
+      "type": "boolean",
+      "default": false
+    },
+    "sticky_session_max_age": {
+      "description": "If the sticky session is enabled, how long should the cookie last?",
+      "type": "integer",
+      "default": 86400
+    },
+    "resource_request": {
+      "description": "See the [container resources]({{< relref \"#container-resources\" >}}) section. Default\n```yaml\ncpu: 100 # in millicores\nmemory: 128 # in megabytes\n```\nCPU is given in millicores, and Memory is in megabytes.\n",
       "type": "object",
       "properties": {
-        "probe_port": {
-          "type": "str",
-          "description": "The name of the port to use for readiness and liveness probes. Defaults to the first port listed."
+        "cpu": {
+          "type": "integer",
+          "description": "The number of CPU units to allocate.",
+          "default": 100,
+          "minimum": 0
         },
-        "additional_iam_policies": {
+        "memory": {
+          "type": "integer",
+          "description": "The amount of memory to allocate in megabytes.",
+          "default": 128,
+          "minimum": 0
+        }
+      },
+      "default": {
+        "cpu": 100,
+        "memory": 128
+      }
+    },
+    "public_uri": {
+      "description": "The full domain to expose your app under as well as path prefix. Must be the full parent domain or a subdomain referencing the parent as such: \"dummy.{parent[domain]}/my/path/prefix\"\n",
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
           "type": "array",
-          "description": "A list of additional IAM policies to attach to the service.",
           "items": {
             "type": "string"
-          },
-          "default": []
-        },
-        "ports": {
-          "type": "array",
-          "description": "List of ports to expose",
-          "items": {
-            "$ref": "/common-types/port"
           }
-        },
-        "port": {
-          "ref": "/common-types/port-deprecated",
-          "description": "Specifies what port your app was made to be listened to. Currently it must be a map of the form `http: [PORT_NUMBER_HERE]` or `tcp: [PORT_NUMBER_HERE]`. Use http if you just have a vanilla http server and tcp for websockets."
         }
-      }
+      ],
+      "default": []
+    },
+    "keep_path_prefix": {
+      "type": "boolean",
+      "description": "Should we keep the prefix path which you set in the public uri when forwarding requests to your service?",
+      "default": false
+    },
+    "links": {
+      "$ref": "/common-types/links",
+      "description": "A list of extra IAM role policies not captured by Opta which you wish to give to your service.",
+      "default": []
+    },
+    "persistent_storage": {
+      "type": "list",
+      "description": "A list persistent storages to add to each instance of your service (need to give a `size` which is the size in GB\nfor the storage volume to be, and `path` which is the path in the filesystem of each instance to place it under)\n",
+      "items": {
+        "type": "object",
+        "properties": {
+          "size": {
+            "type": "integer"
+          },
+          "path": {
+            "type": "string"
+          },
+          "required": [
+            "size",
+            "path"
+          ]
+        }
+      },
+      "default": []
+    },
+    "ingress_extra_annotations": {
+      "type": "object",
+      "description": "These are extra annotations to add to ingress objects\n",
+      "default": {}
     }
-  ],
+  },
   "opta_metadata": {
     "module_type": "service",
     "clouds": [
       "aws"
     ]
-  }
+  },
+  "required": [
+    "image"
+  ]
 }
