@@ -14,5 +14,9 @@
     "links": {
       "$ref": "/common-types/links"
     }
+  },
+  "opta_metadata": {
+    "module_type": "service",
+    "clouds": ["aws"]
   }
 }

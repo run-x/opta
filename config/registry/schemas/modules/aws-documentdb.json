@@ -19,5 +19,9 @@
       "minimum": 1,
       "default": 1
     }
+  },
+  "opta_metadata": {
+    "module_type": "service",
+    "clouds": ["aws"]
   }
 }

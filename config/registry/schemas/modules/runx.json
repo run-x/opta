@@ -1,0 +1,9 @@
+{
+  "$id": "https://app.runx.dev/modules/runx",
+  "type": "object",
+  "description": "Integrates with the RunX UI",
+  "opta_metadata": {
+    "module_type": "environment",
+    "clouds": ["aws", "gcp", "azure"]
+  }
+}

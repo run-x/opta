@@ -51,5 +51,9 @@
       },
       "default": []
     }
+  },
+  "opta_metadata": {
+    "module_type": "environment",
+    "clouds": ["aws"]
   }
 }

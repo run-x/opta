@@ -18,5 +18,9 @@
       "description": "Additional configuration for datadog. [Available options](https://github.com/DataDog/helm-charts/blob/master/charts/datadog/README.md#values)",
       "default": {}
     }
+  },
+  "opta_metadata": {
+    "module_type": "environment",
+    "clouds": ["aws", "gcp", "azure"]
   }
 }

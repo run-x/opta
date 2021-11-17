@@ -1,5 +1,0 @@
-{
-  "$id": "https://app.runx.dev/modules/runx",
-  "type": "object",
-  "description": "Integrates with the RunX UI"
-}

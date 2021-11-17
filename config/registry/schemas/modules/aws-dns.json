@@ -19,5 +19,9 @@
       "description": "Deprecated",
       "default": false
     }
+  },
+  "opta_metadata": {
+    "module_type": "environment",
+    "clouds": ["aws", "gcp", "azure"]
   }
 }

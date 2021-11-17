@@ -37,5 +37,9 @@
       "default": false
     }
   },
-  "required": ["image"]
+  "required": ["image"],
+  "opta_metadata": {
+    "module_type": "environment",
+    "clouds": ["aws"]
+  }
 }

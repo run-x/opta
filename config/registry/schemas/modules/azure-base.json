@@ -8,6 +8,11 @@
       "description": "The CIDR block for the private subnet",
       "default": "10.0.0.0/16"
     },
+    "subnet_ipv4_cidr_block": {
+      "$ref": "/common-types/cidr_block",
+      "description": "The CIDR block for the subnet.",
+      "default": "10.0.0.0/17"
+    },
     "location": {
       "type": "string",
       "description": "Geographic location",

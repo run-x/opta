@@ -49,5 +49,8 @@
       },
       "default": null
     }
+  },
+  "opta_metadata": {
+    "module_type": "service"
   }
 }

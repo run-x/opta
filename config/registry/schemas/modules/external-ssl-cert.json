@@ -25,5 +25,9 @@
     "private_key_file",
     "certificate_body_file",
     "certificate_chain_file"
-  ]
+  ],
+  "opta_metadata": {
+    "module_type": "environment",
+    "clouds": ["aws", "gcp", "azure"]
+  }
 }
