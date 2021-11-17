@@ -56,12 +56,13 @@ If you'd like to try it out or have any questions - feel free to join our [Slack
 # Try out Opta
 
 
-To use Opta, you first need to create some simple yaml configuration files that describe your needs. You can use 
-our [magical UI](https://app.runx.dev/yaml-generator) to help generate these files or do it manually.
+To use Opta, you first need to create some simple yaml configuration files that describe your needs. You can use:
 
-### Checkout our [Getting started](https://docs.opta.dev/getting-started/) guide.
+### Our [magical UI](https://app.runx.dev/yaml-generator) to help generate these files.
 
-### Check out more [examples](https://github.com/run-x/opta/tree/main/examples)
+### The more detailed [getting started](https://docs.opta.dev/getting-started/) guide.
+
+### Also, check out more [examples](https://github.com/run-x/opta/tree/main/examples)
 
 # What you get with Opta
 * Production ready [Architecture](https://docs.opta.dev/architecture/aws/)
