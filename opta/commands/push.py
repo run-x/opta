@@ -13,7 +13,8 @@ from opta.core.terraform import get_terraform_outputs
 from opta.exceptions import UserErrors
 from opta.layer import Layer
 from opta.nice_subprocess import nice_run
-from opta.utils import check_opta_file_exists, fmt_msg, is_tool, yaml
+from opta.utils import check_opta_file_exists, fmt_msg, yaml
+from opta.utils.dependencies import ensure_installed
 
 
 def get_push_tag(local_image: str, tag_override: Optional[str]) -> str:
@@ -175,8 +176,7 @@ def push(image: str, config: str, env: Optional[str], tag: Optional[str]) -> Non
 def _push(
     image: str, config: str, env: Optional[str], tag: Optional[str]
 ) -> Tuple[str, str]:
-    if not is_tool("docker"):
-        raise Exception("Please install docker on your machine")
+    ensure_installed("docker")
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(
         amplitude_client.PUSH_EVENT,

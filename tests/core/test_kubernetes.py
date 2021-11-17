@@ -8,6 +8,7 @@ from pytest_mock import MockFixture
 
 from opta.core.kubernetes import (
     configure_kubectl,
+    get_required_path_executables,
     tail_module_log,
     tail_namespace_events,
     tail_pod_log,
@@ -17,9 +18,7 @@ from opta.layer import Layer
 
 class TestKubernetes:
     def test_azure_configure_kubectl(self, mocker: MockFixture) -> None:
-        mocked_is_tool = mocker.patch(
-            "opta.core.kubernetes.is_tool", side_effect=[True, True]
-        )
+        mocked_ensure_installed = mocker.patch("opta.core.kubernetes.ensure_installed")
         layer = mocker.Mock(spec=Layer)
         layer.parent = None
         layer.cloud = "azurerm"
@@ -53,7 +52,9 @@ class TestKubernetes:
         configure_kubectl(layer)
 
         mocked_terraform_output.assert_called_once_with(layer)
-        mocked_is_tool.assert_has_calls([mocker.call("kubectl"), mocker.call("az")])
+        mocked_ensure_installed.assert_has_calls(
+            [mocker.call("kubectl"), mocker.call("az")]
+        )
         mocked_nice_run.assert_has_calls(
             [
                 mocker.call(
@@ -74,9 +75,7 @@ class TestKubernetes:
         )
 
     def test_configure_kubectl(self, mocker: MockFixture) -> None:
-        mocked_is_tool = mocker.patch(
-            "opta.core.kubernetes.is_tool", side_effect=[True, True]
-        )
+        mocked_ensure_installed = mocker.patch("opta.core.kubernetes.ensure_installed")
         mocked_nice_run = mocker.patch(
             "opta.core.kubernetes.nice_run",
             side_effect=[
@@ -111,7 +110,9 @@ class TestKubernetes:
 
         mock_sts_client.assert_called_once_with("sts")
         mocked_terraform_output.assert_called_once_with(layer)
-        mocked_is_tool.assert_has_calls([mocker.call("kubectl"), mocker.call("aws")])
+        mocked_ensure_installed.assert_has_calls(
+            [mocker.call("kubectl"), mocker.call("aws")]
+        )
         mocked_nice_run.assert_has_calls(
             [
                 # TODO: nsarupri -> change the AWS to Boto
@@ -128,6 +129,14 @@ class TestKubernetes:
                 ),
             ]
         )
+
+    def test_get_required_path_executables(self) -> None:
+        assert len(get_required_path_executables("local")) == 1
+
+        aws_deps = get_required_path_executables("aws")
+        assert len(aws_deps) == 2
+        for dep in ["aws", "kubectl"]:
+            assert dep in aws_deps
 
     def test_tail_module_log(self, mocker: MockFixture) -> None:
         base_start_time_timestamp = datetime.datetime.utcnow().timestamp()

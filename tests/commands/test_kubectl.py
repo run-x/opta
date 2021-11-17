@@ -23,7 +23,7 @@ def test_configure_kubectl(mocker: MockFixture) -> None:
     mocker.patch("opta.commands.kubectl.gen_all")
 
     # Mock that the kubectl and aws comamnds exist in the env.
-    mocker.patch("opta.core.kubernetes.is_tool", return_value=True)
+    mocked_ensure_installed = mocker.patch("opta.core.kubernetes.ensure_installed")
 
     # Mock aws commands, including fetching the current aws account id.
     fake_aws_account_id = 1234567890123
@@ -64,6 +64,7 @@ def test_configure_kubectl(mocker: MockFixture) -> None:
     result = runner.invoke(configure_kubectl, [])
     mocked_layer_class.load_from_yaml.assert_called_with("opta.yml", None)
     mock_sts_client.assert_called()
+    mocked_ensure_installed.assert_has_calls([mocker.call("kubectl"), mocker.call("aws")])
     assert result.exit_code == 0
 
     # If the current aws account id does not match the specified opta env's, then
