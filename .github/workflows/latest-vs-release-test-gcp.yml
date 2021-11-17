@@ -95,13 +95,13 @@ jobs:
           echo "This was the found secret value: ${secret_value}"
           [[ "$secret_value" =~ .*"foo".* ]] || exit 1
 
-      - name: Set stateful data
-        env:
-          OPTA_DISABLE_REPORTING: true
-        run: |
-          export PARENT_DOMAIN=`/home/runner/.opta/opta output --env gcpenv-ci --config ./examples/ci-tests/create-and-destroy-gcp/service.yml | jq -r '."parent.domain"'`
-          export HOST=`/home/runner/.opta/opta output --env gcpenv-ci --config ./examples/ci-tests/create-and-destroy-gcp/service.yml | jq -r '.load_balancer_raw_ip'`
-          curl -X POST -L --header "Host: test-service.${PARENT_DOMAIN}" --fail ${HOST}/stateful
+#      - name: Set stateful data
+#        env:
+#          OPTA_DISABLE_REPORTING: true
+#        run: |
+#          export PARENT_DOMAIN=`/home/runner/.opta/opta output --env gcpenv-ci --config ./examples/ci-tests/create-and-destroy-gcp/service.yml | jq -r '."parent.domain"'`
+#          export HOST=`/home/runner/.opta/opta output --env gcpenv-ci --config ./examples/ci-tests/create-and-destroy-gcp/service.yml | jq -r '.load_balancer_raw_ip'`
+#          curl -X POST -L --header "Host: test-service.${PARENT_DOMAIN}" --fail ${HOST}/stateful
 
       - name: Apply Environment with Release Opta
         run: |
