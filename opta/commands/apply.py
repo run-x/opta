@@ -256,7 +256,7 @@ def _apply(
                         f"-out={TF_PLAN_PATH}",
                         layer=layer,
                         *targets,
-                        quiet=True,
+                        quiet=False,
                     )
                 except CalledProcessError as e:
                     logger.error((e.stderr or b"").decode("utf-8"))

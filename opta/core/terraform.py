@@ -339,13 +339,14 @@ class Terraform:
             nice_run(
                 ["terraform", "plan", "-compact-warnings", *tf_flags],
                 check=True,
+                bufsize=1,
                 **kwargs,
             )
         except CalledProcessError as e:
+            # If quiet is True, then this works. If quiet it set to false, then e.stderr is None and command outputs are sent directly to user's terminal
             raise UserErrors(
                 f"Terraform plan had issues.\n"
-                "Following error was raised by Terraform plan:\n"
-                f"{e.stderr.decode('UTF-8')}\n"
+                "Following error was raised by Terraform plan:\n" + open("/tmp/optaout.txt","r").read()  
             )
 
     @classmethod

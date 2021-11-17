@@ -68,6 +68,16 @@ def nice_run(  # type: ignore # nosec
     with Popen(*popenargs, **kwargs) as process:
         try:
             stdout, stderr = process.communicate(input, timeout=timeout)
+            for line in iter(process.stderr.readline, b''):
+                print (line),
+                process.stdout.close()
+                process.wait()
+            for line in iter(process.stdout.readline, b''):
+                print (line),
+                process.stdout.close()
+                process.wait()
+
+
         except TimeoutExpired as exc:
             process.send_signal(signal.SIGINT)
             # Wait again, now that the child has received SIGINT, too.
