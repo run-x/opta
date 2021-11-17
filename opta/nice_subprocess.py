@@ -4,11 +4,10 @@ from subprocess import (  # nosec
     PIPE,
     CalledProcessError,
     CompletedProcess,
-    TimeoutExpired,
 )
 from typing import Optional, Union
-
-from subprocess_tee import run
+from asyncio import TimeoutError
+from opta.utils.runtee import run
 
 try:
     import _winapi  # noqa
@@ -40,7 +39,7 @@ def nice_run(  # type: ignore # nosec
             capture_output=capture_output,
             **kwargs,
         )
-    except TimeoutExpired as exc:
+    except TimeoutError as exc:
         print("Timeout while running command")
         raise exc
     except KeyboardInterrupt as k:
