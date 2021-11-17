@@ -63,7 +63,7 @@ jobs:
       - name: Apply Websocket Service with Opta
         run: |
           OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
-          --env awsenv \
+          --env awsenv-ci \
           --config ./examples/ci-tests/create-and-destroy-aws/websocket-service.yml \
           --auto-approve
 
@@ -72,14 +72,14 @@ jobs:
           OPTA_DISABLE_REPORTING: true
         run: |
           source $(pipenv --venv)/bin/activate
-          export HOST=`./dist/opta/opta output --env awsenv --config ./examples/ci-tests/create-and-destroy-aws/websocket-service.yml | jq -r '.load_balancer_raw_dns'`
+          export HOST=`./dist/opta/opta output --env awsenv-ci --config ./examples/ci-tests/create-and-destroy-aws/websocket-service.yml | jq -r '.load_balancer_raw_dns'`
           python ./examples/ci-tests/create-and-destroy-aws/websocket-validate.py
           exit $?
 
       - name: Destroy Websocket Service with Opta
         run: |
           yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
-          --env awsenv \
+          --env awsenv-ci \
           --config ./examples/ci-tests/create-and-destroy-aws/websocket-service.yml \
           --auto-approve
 
@@ -98,14 +98,14 @@ jobs:
       - name: Set secret
         run: |
           OPTA_DISABLE_REPORTING=true ./dist/opta/opta secret update \
-          --env ci \
+          --env awsenv-ci \
           --config ./examples/ci-tests/create-and-destroy-aws/service.yml \
           FAKE_SECRET foo
       - name: Deploy test-service
         run: |
           OPTA_DISABLE_REPORTING=true ./dist/opta/opta deploy \
           --image app:latest \
-          --env ci \
+          --env awsenv-ci \
           --config ./examples/ci-tests/create-and-destroy-aws/service.yml \
           --tag ${{ github.sha }} \
           --auto-approve
@@ -113,7 +113,7 @@ jobs:
         run: |
           OPTA_DISABLE_REPORTING=true ./dist/opta/opta deploy \
           --image app:latest \
-          --env ci \
+          --env awsenv-ci \
           --config ./examples/ci-tests/create-and-destroy-aws/service-additional-pg.yml \
           --tag ${{ github.sha }} \
           --auto-approve
@@ -121,14 +121,14 @@ jobs:
         run: |
           OPTA_DISABLE_REPORTING=true ./dist/opta/opta deploy \
           --image app:latest \
-          --env ci \
+          --env awsenv-ci \
           --config ./examples/ci-tests/create-and-destroy-aws/service.yml \
           --tag ${{ github.sha }} \
           --auto-approve
       - name: View secret and check value
         run: |
           secret_value=$(OPTA_DISABLE_REPORTING=true ./dist/opta/opta secret view \
-          --env ci \
+          --env awsenv-ci \
           --config ./examples/ci-tests/create-and-destroy-aws/service.yml \
           FAKE_SECRET | tail -1)
           echo "This was the found secret value: ${secret_value}"
@@ -136,7 +136,7 @@ jobs:
       - name: Destroy environment (and test service)
         run: |
           yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
-          --env ci \
+          --env awsenv-ci \
           --config ./examples/ci-tests/create-and-destroy-aws/service.yml \
           --auto-approve
           yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \

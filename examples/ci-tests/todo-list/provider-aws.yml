@@ -1,4 +1,4 @@
-name: awsenv
+name: awsenv-ci
 org_name: runx-ci
 providers:
   aws:

@@ -118,7 +118,7 @@ jobs:
       - name: Set secret with Release Opta
         run: |
           OPTA_DISABLE_REPORTING=true ./dist/opta/opta secret update \
-          --env ci \
+          --env awsenv-ci \
           --config ./examples/ci-tests/create-and-destroy-aws/service.yml \
           FAKE_SECRET foo
 
@@ -126,7 +126,7 @@ jobs:
         run: |
           OPTA_DISABLE_REPORTING=true ./dist/opta/opta deploy \
           --image app:latest \
-          --env ci \
+          --env awsenv-ci \
           --config ./examples/ci-tests/create-and-destroy-aws/service.yml \
           --tag ${{ github.sha }} \
           --auto-approve
@@ -134,7 +134,7 @@ jobs:
       - name: View secret and check value with Release Opta
         run: |
           secret_value=$(OPTA_DISABLE_REPORTING=true ./dist/opta/opta secret view \
-          --env ci \
+          --env awsenv-ci \
           --config ./examples/ci-tests/create-and-destroy-aws/service.yml \
           FAKE_SECRET | tail -1)
           echo "This was the found secret value: ${secret_value}"
@@ -143,7 +143,7 @@ jobs:
       - name: Destroy Test Service with Release Opta
         run: |
           yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
-          --env ci \
+          --env awsenv-ci \
           --config ./examples/ci-tests/create-and-destroy-aws/service.yml \
           --auto-approve
 

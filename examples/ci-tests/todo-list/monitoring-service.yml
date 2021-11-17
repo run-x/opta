@@ -1,8 +1,8 @@
-name: todomonitoring
+name: todomonitoring-ci
 environments:
-  - name: awsenv
+  - name: awsenv-ci
     path: "provider-aws.yml"
-  - name: gcpenv
+  - name: gcpenv-ci
     path: "provider-gcp.yml"
 modules:
   - name: monitoring

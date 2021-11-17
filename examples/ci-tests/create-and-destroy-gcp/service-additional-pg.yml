@@ -1,8 +1,8 @@
 environments:
-    - name: gcp-release
+    - name: gcpenv-ci
       path: "environment.yml"
       variables: {}
-name: testservice
+name: testservice-ci
 modules:
   - type: k8s-service
     port:

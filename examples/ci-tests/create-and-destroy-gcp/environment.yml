@@ -1,4 +1,4 @@
-name: gcp-release
+name: gcpenv-ci
 org_name: runx-ci
 providers:
   google:

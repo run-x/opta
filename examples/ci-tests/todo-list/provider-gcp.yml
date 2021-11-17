@@ -1,4 +1,4 @@
-name: gcpenv
+name: gcpenv-ci
 org_name: runx-ci
 providers:
   google:

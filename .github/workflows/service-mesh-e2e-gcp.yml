@@ -73,7 +73,7 @@ jobs:
           OPTA_DISABLE_REPORTING=true ./dist/opta/opta deploy \
           --image todo-api:v1 \
           --config ./examples/ci-tests/todo-list/api-service.yml \
-          --env gcpenv \
+          --env gcpenv-ci \
           --auto-approve
 
       - name: Create Test Front End Service using Release build
@@ -81,14 +81,14 @@ jobs:
           OPTA_DISABLE_REPORTING=true ./dist/opta/opta deploy \
           --image todo-frontend:v1 \
           --config ./examples/ci-tests/todo-list/frontend-service.yml \
-          --env gcpenv \
+          --env gcpenv-ci \
           --auto-approve
 
       - name: Create Test Prometheus Service using Release build
         run: |
           OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
           --config ./examples/ci-tests/todo-list/monitoring-service.yml \
-          --env gcpenv \
+          --env gcpenv-ci \
           --auto-approve
 
       - name: Ping tests for API, Frotend and Grafana
@@ -102,21 +102,21 @@ jobs:
         run: |
           yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
           --config ./examples/ci-tests/todo-list/monitoring-service.yml \
-          --env gcpenv \
+          --env gcpenv-ci \
           --auto-approve
 
       - name: Destroy Test Front End Service using Release build
         run: |
           yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
           --config ./examples/ci-tests/todo-list/frontend-service.yml \
-          --env gcpenv \
+          --env gcpenv-ci \
           --auto-approve
 
       - name: Destroy Test API Service using Release build
         run: |
           yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
           --config ./examples/ci-tests/todo-list/api-service.yml \
-          --env gcpenv \
+          --env gcpenv-ci \
           --auto-approve
 
       - name: Destroy Test Enrironment using Release build
