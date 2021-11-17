@@ -5,20 +5,23 @@
   "properties": {
     "chart": {
       "type": "string",
-      "description": "Name of the helm chart. Note that you don't need to use `<repo_name>/<chart_name>` - as repo is specified separately. Just do `<chart_name>`. If you're using a local chart, then this will be the path to the chart."
+      "description": "Name of the helm chart.\nNote that you don't need to use `<repo_name>/<chart_name>` - as repo is specified separately. Just do `<chart_name>`.\nIf you're using a local chart, then this will be the path to the chart.\n",
+      "default": null
     },
     "repository": {
       "type": "string",
-      "description": "The helm repository to use (null means local chart)"
+      "description": "The helm repository to use (null means local chart)",
+      "default": null
     },
     "namespace": {
       "type": "string",
-      "description": "The kubernetes namespace to put the chart in"
+      "description": "The kubernetes namespace to put the chart in",
+      "default": "default"
     },
     "create_namespace": {
       "type": "boolean",
       "description": "Create namespace as well.",
-      "default": true
+      "default": false
     },
     "atomic": {
       "type": "boolean",
@@ -45,8 +48,13 @@
     },
     "values": {
       "type": "object",
-      "description": "A map of values to be passed to the helm chart. Note that this is not a list of values, but a single map of values.",
+      "description": "Values override.",
       "default": {}
+    },
+    "values_file": {
+      "type": "string",
+      "description": "Path to a values file.",
+      "default": null
     },
     "timeout": {
       "type": "number",
@@ -56,7 +64,7 @@
     "dependency_update": {
       "type": "boolean",
       "description": "Runs helm dependency update before installing the chart.",
-      "default": false
+      "default": true
     },
     "wait": {
       "type": "boolean",
@@ -64,5 +72,15 @@
       "default": true
     }
   },
-  "required": ["chart"]
+  "required": [
+    "chart"
+  ],
+  "opta_metadata": {
+    "module_type": "service",
+    "clouds": [
+      "aws",
+      "azure",
+      "gcp"
+    ]
+  }
 }

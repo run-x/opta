@@ -1,34 +1,32 @@
 {
- "$id": "https://app.runx.dev/modules/aws-dns",
- "description": "Adds dns to your environment",
- "type": "object",
- "properties": {
-  "domain": {
-   "type": "string",
-   "description": "The domain you want (you will also get the subdomains for your use)",
-   "default": null
+  "$id": "https://app.runx.dev/modules/aws-dns",
+  "description": "Adds dns to your environment",
+  "type": "object",
+  "properties": {
+    "domain": {
+      "type": "string",
+      "description": "The domain you want (you will also get the subdomains for your use)",
+      "default": null
+    },
+    "delegated": {
+      "type": "boolean",
+      "description": "Set to true once the extra [dns setup is complete](/tutorials/ingress) and it will add the ssl certs.",
+      "default": false
+    },
+    "upload_cert": {
+      "deprecated": true,
+      "type": "boolean",
+      "description": "Deprecated",
+      "default": false
+    }
   },
-  "delegated": {
-   "type": "boolean",
-   "description": "Set to true once the extra [dns setup is complete](/tutorials/ingress) and it will add the ssl certs.",
-   "default": false
+  "opta_metadata": {
+    "module_type": "environment",
+    "clouds": [
+      "aws"
+    ]
   },
-  "upload_cert": {
-   "deprecated": true,
-   "type": "boolean",
-   "description": "Deprecated",
-   "default": false
-  }
- },
- "opta_metadata": {
-  "module_type": "environment",
-  "clouds": [
-   "aws",
-   "gcp",
-   "azure"
+  "required": [
+    "domain"
   ]
- },
- "required": [
-  "domain"
- ]
 }

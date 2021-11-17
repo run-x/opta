@@ -1,13 +1,19 @@
 {
- "$id": "https://app.runx.dev/modules/aws-ses",
- "description": "Sets up AWS SES for sending domains via your root domain",
- "type": "object",
- "properties": {
-  "mail_from_prefix": {
-   "type": "string",
-   "description": "Subdomain to use with root domain.",
-   "default": "mail"
+  "$id": "https://app.runx.dev/modules/aws-ses",
+  "description": "Sets up AWS SES for sending domains via your root domain",
+  "type": "object",
+  "properties": {
+    "mail_from_prefix": {
+      "type": "string",
+      "description": "Subdomain to use with root domain.",
+      "default": "mail"
+    }
+  },
+  "required": [],
+  "opta_metadata": {
+    "module_type": "environment",
+    "clouds": [
+      "aws"
+    ]
   }
- },
- "required": []
 }

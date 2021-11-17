@@ -1,18 +1,24 @@
 {
- "$id": "https://app.runx.dev/modules/azure-postgres",
- "description": "Creates a postgres database",
- "type": "object",
- "properties": {
-  "sku_name": {
-   "type": "string",
-   "description": "The name of the SKU, follows the tier + family + cores pattern for Azure postgres [instances](https://docs.microsoft.com/en-us/azure/postgresql/concepts-pricing-tiers).",
-   "default": "GP_Gen5_4"
+  "$id": "https://app.runx.dev/modules/azure-postgres",
+  "description": "Creates a postgres database",
+  "type": "object",
+  "properties": {
+    "sku_name": {
+      "type": "string",
+      "description": "The name of the SKU, follows the tier + family + cores pattern for Azure postgres [instances](https://docs.microsoft.com/en-us/azure/postgresql/concepts-pricing-tiers).",
+      "default": "GP_Gen5_4"
+    },
+    "engine_version": {
+      "type": "string",
+      "description": "The version of the database to use.",
+      "default": "11"
+    }
   },
-  "engine_version": {
-   "type": "string",
-   "description": "The version of the database to use.",
-   "default": "11"
+  "required": [],
+  "opta_metadata": {
+    "module_type": "service",
+    "clouds": [
+      "azure"
+    ]
   }
- },
- "required": []
 }

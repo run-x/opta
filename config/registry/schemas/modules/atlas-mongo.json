@@ -5,7 +5,8 @@
   "properties": {
     "region": {
       "type": "string",
-      "description": "MongoDB Atlas Cluster Region, must be a mongo region for the provider."
+      "description": "MongoDB Atlas Cluster Region, must be a mongo region for the provider.",
+      "default": "None"
     },
     "mongo_instance_size": {
       "type": "string",
@@ -19,7 +20,7 @@
     },
     "database_name": {
       "type": "string",
-      "description": "The name of the database to create.",
+      "description": "The name of the mongo database",
       "default": "mongo_database"
     },
     "public_nat_ips": {
@@ -31,15 +32,16 @@
     "cloud_provider": {
       "enum": ["AWS", "AZURE", "GCP"],
       "default": "AWS"
+    },
+    "mongo_atlas_project_id": {
+      "type": "string",
+      "description": "The Atlas project ID",
+      "default": "Notknown"
     }
   },
-  "required": [
-    "region",
-    "mongo_instance_size",
-    "cloud_provider",
-    "mongo_atlas_project_id"
-  ],
+  "required": ["region", "mongo_instance_size", "mongo_atlas_project_id"],
   "opta_metadata": {
-    "module_type": "environment"
+    "module_type": "service",
+    "clouds": ["aws", "azure", "gcp"]
   }
 }

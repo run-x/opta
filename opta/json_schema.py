@@ -13,9 +13,16 @@ module_schemas_path = join(
     dirname(dirname(__file__)), "config", "registry", "schemas", "modules"
 )
 
+FOLDER_NAME_TO_CLOUD_LIST = {
+    "aws": ["aws"],
+    "azurerm": ["azure"],
+    "google": ["gcp"],
+    "common": ["aws", "azure", "gcp"],
+}
+
 
 def generate_json_schema() -> None:
-    for cloud in ["aws", "azurerm", "google"]:
+    for cloud in ["aws", "azurerm", "google", "common"]:
         cloud_path = join(registry_path, cloud)
         module_path = join(cloud_path, "modules")
         module_names = [
@@ -52,5 +59,12 @@ def generate_json_schema() -> None:
                     if i["user_facing"] and "required=True" in i["validator"]
                 ]
 
+            json_schema["opta_metadata"] = {
+                "module_type": "environment"
+                if module_registry_dict["environment_module"]
+                else "service",
+                "clouds": FOLDER_NAME_TO_CLOUD_LIST[cloud],
+            }
+
             with open(json_schema_file_path, "w") as f:
-                json.dump(json_schema, f, indent=True)
+                json.dump(json_schema, f, indent=2)

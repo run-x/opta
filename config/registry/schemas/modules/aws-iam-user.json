@@ -1,27 +1,27 @@
 {
- "$id": "https://app.runx.dev/modules/aws-iam-user",
- "description": "Creates an IAM user",
- "type": "object",
- "properties": {
-  "extra_iam_policies": {
-   "description": "The arns of additional IAM policies to be attached to this role.",
-   "type": "array",
-   "items": {
-    "type": "string"
-   },
-   "default": []
+  "$id": "https://app.runx.dev/modules/aws-iam-user",
+  "description": "Creates an IAM user",
+  "type": "object",
+  "properties": {
+    "extra_iam_policies": {
+      "description": "The arns of additional IAM policies to be attached to this role.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "links": {
+      "$ref": "/common-types/links",
+      "description": "The list of links to add permissions for to this role.",
+      "default": []
+    }
   },
-  "links": {
-   "$ref": "/common-types/links",
-   "description": "The list of links to add permissions for to this role.",
-   "default": []
-  }
- },
- "opta_metadata": {
-  "module_type": "service",
-  "clouds": [
-   "aws"
-  ]
- },
- "required": []
+  "opta_metadata": {
+    "module_type": "service",
+    "clouds": [
+      "aws"
+    ]
+  },
+  "required": []
 }

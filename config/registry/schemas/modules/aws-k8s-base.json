@@ -1,62 +1,62 @@
 {
- "$id": "https://app.runx.dev/modules/aws-k8s-base",
- "description": "Creates base infrastructure for k8s environments",
- "type": "object",
- "properties": {
-  "nginx_high_availability": {
-   "type": "boolean",
-   "description": "Deploy the nginx ingress in a high-availability configuration.",
-   "default": false
+  "$id": "https://app.runx.dev/modules/aws-k8s-base",
+  "description": "Creates base infrastructure for k8s environments",
+  "type": "object",
+  "properties": {
+    "nginx_high_availability": {
+      "type": "boolean",
+      "description": "Deploy the nginx ingress in a high-availability configuration.",
+      "default": false
+    },
+    "linkerd_high_availability": {
+      "type": "boolean",
+      "description": "Deploy the linkerd service mesh in a high-availability configuration for its control plane.",
+      "default": false
+    },
+    "linkerd_enabled": {
+      "type": "boolean",
+      "description": "Enable the linkerd service mesh installation.",
+      "default": true
+    },
+    "admin_arns": {
+      "type": "array",
+      "description": "ARNs for users/roles who should be K8s admins. The user running Opta is by default an admin.",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "nginx_config": {
+      "type": "object",
+      "description": "Additional configuration for nginx ingress. [Available options](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/#configuration-options)",
+      "default": {}
+    },
+    "nginx_extra_tcp_ports": {
+      "type": "array",
+      "description": "Additional TCP ports to expose from nginx",
+      "items": {
+        "type": "integer",
+        "min": 1,
+        "max": 65535
+      },
+      "default": []
+    },
+    "nginx_extra_tcp_ports_tls": {
+      "type": "array",
+      "description": "Which additional TCP ports should have TLS enabled",
+      "items": {
+        "type": "integer",
+        "min": 1,
+        "max": 65535
+      },
+      "default": []
+    }
   },
-  "linkerd_high_availability": {
-   "type": "boolean",
-   "description": "Deploy the linkerd service mesh in a high-availability configuration for its control plane.",
-   "default": false
+  "opta_metadata": {
+    "module_type": "environment",
+    "clouds": [
+      "aws"
+    ]
   },
-  "linkerd_enabled": {
-   "type": "boolean",
-   "description": "Enable the linkerd service mesh installation.",
-   "default": true
-  },
-  "admin_arns": {
-   "type": "array",
-   "description": "ARNs for users/roles who should be K8s admins. The user running Opta is by default an admin.",
-   "items": {
-    "type": "string"
-   },
-   "default": []
-  },
-  "nginx_config": {
-   "type": "object",
-   "description": "Additional configuration for nginx ingress. [Available options](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/#configuration-options)",
-   "default": {}
-  },
-  "nginx_extra_tcp_ports": {
-   "type": "array",
-   "description": "Additional TCP ports to expose from nginx",
-   "items": {
-    "type": "integer",
-    "min": 1,
-    "max": 65535
-   },
-   "default": []
-  },
-  "nginx_extra_tcp_ports_tls": {
-   "type": "array",
-   "description": "Which additional TCP ports should have TLS enabled",
-   "items": {
-    "type": "integer",
-    "min": 1,
-    "max": 65535
-   },
-   "default": []
-  }
- },
- "opta_metadata": {
-  "module_type": "environment",
-  "clouds": [
-   "aws"
-  ]
- },
- "required": []
+  "required": []
 }

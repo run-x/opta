@@ -5,19 +5,23 @@
   "properties": {
     "domain": {
       "type": "string",
-      "description": "Domain name"
+      "description": "The domain which the ssl cert is for (used for validation of the certificate files).",
+      "default": "default_value"
     },
     "private_key_file": {
       "type": "string",
-      "description": "The private key pem file for the ssl certificate."
+      "description": "The private key pem file for the ssl certificate.",
+      "default": null
     },
     "certificate_body_file": {
       "type": "string",
-      "description": "The body of the ssl certificate in the form of a pem file. This file should just have the final certificate and not other certificates on the chain."
+      "description": "The body of the ssl certificate in the form of a pem file. This file should just have the final certificate and not other certificates on the chain",
+      "default": null
     },
     "certificate_chain_file": {
       "type": "string",
-      "description": "The file containing the chain certificate for the current ssl certificate."
+      "description": "The file containing the chain certificate for the current ssl certificate.",
+      "default": null
     }
   },
   "required": [
@@ -28,6 +32,10 @@
   ],
   "opta_metadata": {
     "module_type": "environment",
-    "clouds": ["aws", "gcp", "azure"]
+    "clouds": [
+      "aws",
+      "azure",
+      "gcp"
+    ]
   }
 }

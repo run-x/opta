@@ -4,6 +4,10 @@
   "description": "Integrates with the RunX UI",
   "opta_metadata": {
     "module_type": "environment",
-    "clouds": ["aws", "gcp", "azure"]
+    "clouds": [
+      "aws",
+      "azure",
+      "gcp"
+    ]
   }
 }

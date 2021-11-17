@@ -10,7 +10,7 @@
     },
     "timeout": {
       "type": "number",
-      "description": "Datadog API timeout in seconds",
+      "description": "Time to wait for this module to stabilize.",
       "default": 600
     },
     "values": {
@@ -21,6 +21,11 @@
   },
   "opta_metadata": {
     "module_type": "environment",
-    "clouds": ["aws", "gcp", "azure"]
-  }
+    "clouds": [
+      "aws",
+      "azure",
+      "gcp"
+    ]
+  },
+  "required": []
 }
