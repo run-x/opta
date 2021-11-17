@@ -1,4 +1,4 @@
-from unittest import mock
+from typing import Generator
 
 import pytest
 from pytest_mock import MockFixture
@@ -61,7 +61,7 @@ class TestDependencies:
         )
 
         with pytest.raises(UserErrors) as e:
-            dependencies.validate_installed_path_executables({"foo", "spam"})
+            dependencies.validate_installed_path_executables(frozenset({"foo", "spam"}))
 
         assert (
             str(e.value)
@@ -74,13 +74,13 @@ class TestDependencies:
         )
         mock_sorted = mocker.patch("opta.utils.dependencies.sorted")
 
-        dependencies.validate_installed_path_executables({"foo"})
+        dependencies.validate_installed_path_executables(frozenset({"foo"}))
 
-        mock_get_missing.assert_called_once_with({"foo"})
+        mock_get_missing.assert_called_once_with(frozenset({"foo"}))
         mock_sorted.assert_not_called()
 
     @pytest.fixture(autouse=True)
-    def registered_paths(self) -> None:
+    def registered_paths(self) -> Generator:
         old = dependencies._registered_path_executables
         dependencies._registered_path_executables = {}
 
