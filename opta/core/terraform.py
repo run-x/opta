@@ -134,11 +134,8 @@ class Terraform:
                 **kwargs,
             )
         except CalledProcessError as e:
-            raise UserErrors(
-                f"Terraform apply had issues.\n"
-                "Following error was raised by Terraform apply:\n"
-                f"{e.stderr.decode('UTF-8')}\n"
-            )
+            logger.error(e.stderr)
+            raise e
 
     @classmethod
     def import_resource(
@@ -191,11 +188,8 @@ class Terraform:
                     **kwargs,
                 )
             except CalledProcessError as e:
-                raise UserErrors(
-                    f"Terraform destroy had issues.\n"
-                    "Following error was raised by Terraform destroy:\n"
-                    f"{e.stderr.decode('UTF-8')}\n"
-                )
+                logger.error(e.stderr)
+                raise e
 
     @classmethod
     def destroy_all(cls, layer: "Layer", *tf_flags: str) -> None:
@@ -225,11 +219,8 @@ class Terraform:
                 layer.post_delete(idx)
                 idx -= 1
             except CalledProcessError as e:
-                raise UserErrors(
-                    f"Terraform destroy all had issues.\n"
-                    "Following error was raised by Terraform destroy all:\n"
-                    f"{e.stderr.decode('UTF-8')}\n"
-                )
+                logger.error(e.stderr)
+                raise e
 
         # After the layer is completely deleted, remove the opta config from the state bucket.
         if layer.cloud == "aws":
@@ -346,7 +337,7 @@ class Terraform:
             # If quiet is True, then this works. If quiet it set to false, then e.stderr is None and command outputs are sent directly to user's terminal
             print ("WHAT HAVE WE HERE!")
             logger.error(e.stderr)
-            raise
+            raise e
 
     @classmethod
     def show(cls, *tf_flags: str, capture_output: bool = False) -> Optional[str]:
@@ -359,11 +350,8 @@ class Terraform:
                 return out
             nice_run(["terraform", "show", *tf_flags], check=True, **kwargs)
         except CalledProcessError as e:
-            raise UserErrors(
-                f"Terraform show had issues.\n"
-                "Following error was raised by Terraform show:\n"
-                f"{e.stderr.decode('UTF-8')}\n"
-            )
+            logger.error(e.stderr)
+            raise e
 
         return None
 

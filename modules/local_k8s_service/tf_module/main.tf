@@ -33,7 +33,7 @@ resource "helm_release" "k8s-service" {
         memory : "${var.resource_request["memory"]}Mi"
       },
       deployPods : (local.uppercase_image != "AUTO") || (var.tag != null) || (var.digest != null),
-      image : local.uppercase_image == "AUTO" ? (var.digest != null ? "${var.local_registry_name}/${var.layer_name}/${var.module_name}@${var.digest}" : (var.tag == null ? "" : "${var.local_registry_name}/${var.layer_name}/${var.module_name}:${var.tag}")) : (var.tag == null ? var.image : "${var.image}:${var.tag}"),
+      imagee : local.uppercase_image == "AUTO" ? (var.digest != null ? "${var.local_registry_name}/${var.layer_name}/${var.module_name}@${var.digest}" : (var.tag == null ? "" : "${var.local_registry_name}/${var.layer_name}/${var.module_name}:${var.tag}")) : (var.tag == null ? var.image : "${var.image}:${var.tag}"),
       version : var.tag == null ? "latest" : var.tag
       livenessProbePath : var.healthcheck_path == null || var.liveness_probe_path != null ? var.liveness_probe_path : var.healthcheck_path,
       initialLivenessDelay : var.initial_liveness_delay

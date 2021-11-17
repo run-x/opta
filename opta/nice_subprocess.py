@@ -33,12 +33,12 @@ def nice_run(  # type: ignore # nosec
     try:
         result = run(*popenargs, input=input, timeout=timeout, check=check, **kwargs)
     except TimeoutExpired as exc:
-        logger.error("Timeout while running command")
-        raise
-    except KeyboardInterrupt:
+        print("Timeout while running command")
+        raise exc
+    except KeyboardInterrupt as k:
         print("Received keyboard interrupt")
         # Wait again, now that the child has received SIGINT, too.
-        raise
+        raise k
     except CalledProcessError as e:
         raise e
     except Exception:  # Including KeyboardInterrupt, communicate handled that.
