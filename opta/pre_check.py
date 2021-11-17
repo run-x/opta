@@ -28,11 +28,7 @@ def symlink_check() -> None:
 
 
 def is_symlinked_path() -> Tuple[bool, str]:
-    pwd_path = (
-        nice_run(["pwd"], capture_output=True, shell=True)  # nosec
-        .stdout
-        .strip()
-    )
+    pwd_path = nice_run(["pwd"], capture_output=True, shell=True).stdout.strip()  # nosec
     cwd_path = os.getcwd()
 
     return pwd_path != cwd_path, cwd_path

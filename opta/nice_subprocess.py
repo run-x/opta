@@ -1,12 +1,13 @@
 import signal
 from subprocess import (  # nosec
+    DEVNULL,
     PIPE,
     CalledProcessError,
     CompletedProcess,
     TimeoutExpired,
-    DEVNULL
 )
 from typing import Optional, Union
+
 from subprocess_tee import run
 
 try:
@@ -28,7 +29,17 @@ def nice_run(  # type: ignore # nosec
 ) -> CompletedProcess:
 
     try:
-        result = run(*popenargs, input=input, timeout=timeout, check=check, capture_output=capture_output, **kwargs)
+        listargs = list(popenargs)
+        listargs[0].insert(0, "exec")
+        popenargs = tuple(listargs)
+        result = run(
+            *popenargs,
+            input=input,
+            timeout=timeout,
+            check=check,
+            capture_output=capture_output,
+            **kwargs,
+        )
     except TimeoutExpired as exc:
         print("Timeout while running command")
         raise exc
@@ -41,6 +52,7 @@ def nice_run(  # type: ignore # nosec
     except Exception:  # Including KeyboardInterrupt, communicate handled that.
         raise
     return result
+
 
 # def nice_run(  # type: ignore # nosec
 #     *popenargs,
