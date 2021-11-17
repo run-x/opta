@@ -1,7 +1,9 @@
 name: todofrontend
 environments:
-  - name: awsenvironment
-    path: "provider.yml"
+  - name: awsenv
+    path: "provider-aws.yml"
+  - name: gcpenv
+    path: "provider-gcp.yml"
 modules:
   - name: todofrontend
     type: k8s-service

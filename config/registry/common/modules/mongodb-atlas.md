@@ -1,10 +1,10 @@
 ---
-title: "Atlas Mongo"
-linkTitle: "Atlas Mongo"
+title: "mongodb-atlas"
+linkTitle: "mongodb-atlas"
 date: 2021-10-12
 draft: false
 weight: 1
-description: Creates an Atlas Mongo database instance
+description: Creates an Mongodb Atlas database instance
 ---
 
 This module creates an Atlas MongoDB cluster. Currently only supports AWS and Local providers in Opta.
@@ -18,7 +18,7 @@ When linked to a k8s-service, it adds connection credentials to your container's
 
 - `{module_name}_db_user`
 - `{module_name}_db_password`
-- `{module_name}_mongo_connection_string
+- `{module_name}_mongodb_connection_string
 
 The permission list can optionally have one entry which should be a map for renaming the default environment variable
 names to a user-defined value:
@@ -28,7 +28,7 @@ links:
   - db:
       - db_user: DBUSER
         db_password: DBPASS
-        db_mongo_connection_string: DBCONNSTRING
+        db_mongodb_connection_string: DBCONNSTRING
 ```
 
 If present, this map must have renames for all 3 fields.

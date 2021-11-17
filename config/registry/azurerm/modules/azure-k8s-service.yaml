@@ -103,6 +103,16 @@ inputs: # (what users see)
     validator: str(required=False)
     description: Use if liveness probe != readiness probe
     default: null
+  - name: initial_liveness_delay
+    user_facing: true
+    validator: int(required=False)
+    description: Use if the initial delay needs to be changed.
+    default: 30
+  - name: initial_readiness_delay
+    user_facing: true
+    validator: int(required=False)
+    description: Use if the initial delay needs to be changed.
+    default: 30
   - name: consistent_hash
     user_facing: true
     validator: str(required=False)
@@ -171,6 +181,7 @@ extra_validators:
     name: regex('^[a-z0-9-]+$', name='valid service name')
     type: regex('^(http|tcp)$', name='http or tcp')
     port: int(min=1, max=65535)
+    service_port: int(min=1, max=65535, required=False)
     protocol: regex('^(grpc|websocket)$', name='grpc or websocket', required=False)
   service_port:
     http: int(required=False)

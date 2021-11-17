@@ -108,12 +108,14 @@ def test_apply(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None
         [
             mocker.call(
                 target=tail_module_log,
-                args=(mocked_layer, mocker.ANY, 10, 2),
+                args=(mocked_layer, mocker.ANY, 10, mocker.ANY, 2),
                 daemon=True,
             ),
             mocker.call().start(),
             mocker.call(
-                target=tail_namespace_events, args=(mocked_layer, 0, 1), daemon=True,
+                target=tail_namespace_events,
+                args=(mocked_layer, mocker.ANY, 1),
+                daemon=True,
             ),
             mocker.call().start(),
         ]
@@ -172,12 +174,14 @@ def test_auto_approve(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) 
         [
             mocker.call(
                 target=tail_module_log,
-                args=(mocked_layer, mocker.ANY, 10, 2),
+                args=(mocked_layer, mocker.ANY, 10, mocker.ANY, 2),
                 daemon=True,
             ),
             mocker.call().start(),
             mocker.call(
-                target=tail_namespace_events, args=(mocked_layer, 0, 1), daemon=True,
+                target=tail_namespace_events,
+                args=(mocked_layer, mocker.ANY, 1),
+                daemon=True,
             ),
             mocker.call().start(),
         ]

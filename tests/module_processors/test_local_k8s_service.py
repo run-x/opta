@@ -44,11 +44,11 @@ class TestLocalK8sServiceProcessor:
             {"name": "BLAH", "value": "${{module.database2.db_password}}"},
             {"name": "DBHOST2", "value": "${{module.database2.db_host}}"},
             {"name": "CACHEHOST2", "value": "${{module.redis2.cache_host}}"},
-            {"name": "DB_PASSWORD", "value": "${{module.atlasmongo.db_password}}"},
-            {"name": "DB_USER", "value": "${{module.atlasmongo.db_user}}"},
+            {"name": "DB_PASSWORD", "value": "${{module.mongodbatlas.db_password}}"},
+            {"name": "DB_USER", "value": "${{module.mongodbatlas.db_user}}"},
             {
-                "name": "MONGO_URI",
-                "value": "${{module.atlasmongo.mongo_atlas_connection_string}}",
+                "name": "MONGODB_URI",
+                "value": "${{module.mongodbatlas.mongodb_atlas_connection_string}}",
             },
         ]
         assert app_module.data["manual_secrets"] == [
@@ -163,6 +163,6 @@ class TestLocalK8sServiceProcessor:
             elif type(link_data) is dict:
                 link_permissions = list(link_data.values())[0]
         lp = LocalK8sServiceProcessor(app_module, layer)
-        lp.handle_mongo_link(mongodb_module, link_permissions)
+        lp.handle_mongodb_link(mongodb_module, link_permissions)
         link_secret_keys = [x["name"] for x in app_module.data["link_secrets"]]
         assert "mongodb_db_user" in link_secret_keys

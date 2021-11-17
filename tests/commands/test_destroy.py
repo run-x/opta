@@ -4,6 +4,7 @@ from click.testing import CliRunner
 from pytest_mock import MockFixture
 
 from opta.commands.destroy import destroy
+from opta.exceptions import UserErrors
 from tests.util import get_call_args
 
 FAKE_ENV_CONFIG = os.path.join(
@@ -42,6 +43,7 @@ def test_destroy_env_with_children(mocker: MockFixture) -> None:
     result = runner.invoke(destroy, ["--config", FAKE_ENV_CONFIG])
 
     assert result.exit_code == 1
+    assert isinstance(result.exception, UserErrors)
 
     assert not mocked_gen_all.called
 
@@ -53,6 +55,9 @@ def test_destroy_env_without_children(mocker: MockFixture) -> None:
     mocker.patch("opta.commands.destroy.amplitude_client.send_event")
     mocker.patch("opta.commands.destroy.Terraform.init")
     mocker.patch("opta.commands.destroy.Terraform.destroy_all")
+    mocker.patch(
+        "opta.commands.destroy.Terraform.get_existing_modules", return_value={"base"}
+    )
     mocker.patch("opta.commands.destroy.Terraform.download_state", return_value=True)
     mocker.patch("opta.commands.destroy.Layer.verify_cloud_credentials")
 
@@ -80,6 +85,9 @@ def test_destroy_service(mocker: MockFixture) -> None:
     mocker.patch("opta.commands.destroy.amplitude_client.send_event")
     mocker.patch("opta.commands.destroy.Terraform.init")
     mocker.patch("opta.commands.destroy.Terraform.destroy_all")
+    mocker.patch(
+        "opta.commands.destroy.Terraform.get_existing_modules", return_value={"base"}
+    )
     mocker.patch("opta.commands.destroy.Terraform.download_state", return_value=True)
     mocker.patch("opta.commands.destroy.Layer.verify_cloud_credentials")
 

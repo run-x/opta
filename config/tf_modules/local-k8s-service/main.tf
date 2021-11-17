@@ -36,7 +36,9 @@ resource "helm_release" "k8s-service" {
       image : local.uppercase_image == "AUTO" ? (var.digest != null ? "${var.local_registry_name}/${var.layer_name}/${var.module_name}@${var.digest}" : (var.tag == null ? "" : "${var.local_registry_name}/${var.layer_name}/${var.module_name}:${var.tag}")) : (var.tag == null ? var.image : "${var.image}:${var.tag}"),
       version : var.tag == null ? "latest" : var.tag
       livenessProbePath : var.healthcheck_path == null || var.liveness_probe_path != null ? var.liveness_probe_path : var.healthcheck_path,
+      initialLivenessDelay : var.initial_liveness_delay
       readinessProbePath : var.healthcheck_path == null || var.readiness_probe_path != null ? var.readiness_probe_path : var.healthcheck_path,
+      initialReadinessDelay : var.initial_readiness_delay
       healthcheck_path : var.healthcheck_path,
       envVars : var.env_vars,
       linkSecrets : var.link_secrets,

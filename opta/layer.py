@@ -28,7 +28,6 @@ from opta.core.validator import validate_yaml
 from opta.crash_reporter import CURRENT_CRASH_REPORTER
 from opta.exceptions import UserErrors
 from opta.module import Module
-from opta.module_processors.atlas_mongo import AtlasMongoProcessor
 from opta.module_processors.aws_dns import AwsDnsProcessor
 from opta.module_processors.aws_document_db import AwsDocumentDbProcessor
 from opta.module_processors.aws_dynamodb import AwsDynamodbProcessor
@@ -55,15 +54,23 @@ from opta.module_processors.gcp_k8s_service import GcpK8sServiceProcessor
 from opta.module_processors.gcp_service_account import GcpServiceAccountProcessor
 from opta.module_processors.helm_chart import HelmChartProcessor
 from opta.module_processors.local_k8s_service import LocalK8sServiceProcessor
+from opta.module_processors.mongodb_atlas import MongodbAtlasProcessor
 from opta.module_processors.runx import RunxProcessor
 from opta.plugins.derived_providers import DerivedProviders
 from opta.utils import deep_merge, hydrate, logger, yaml
+
+
+class StructuredDefault(TypedDict):
+    input_name: str
+    default: Any
+    force_update_default_counter: int
 
 
 class StructuredConfig(TypedDict):
     opta_version: str
     date: str
     original_spec: str
+    defaults: Dict[str, List[StructuredDefault]]
 
 
 class Layer:
@@ -94,7 +101,7 @@ class Layer:
         "gcp-service-account": GcpServiceAccountProcessor,
         "custom-terraform": CustomTerraformProcessor,
         "aws-dynamodb": AwsDynamodbProcessor,
-        "atlas-mongo": AtlasMongoProcessor,
+        "mongodb-atlas": MongodbAtlasProcessor,
     }
 
     def __init__(
@@ -213,6 +220,7 @@ class Layer:
             "opta_version": VERSION,
             "date": datetime.utcnow().isoformat(),
             "original_spec": self.original_spec,
+            "defaults": {module.name: module.used_defaults for module in self.modules},
         }
 
     @classmethod
@@ -233,6 +241,7 @@ class Layer:
             )
         org_name = conf.pop("org_name", None)
         providers = conf.pop("providers", {})
+        _validate_providers(providers)
         if "aws" in providers:
             providers["aws"]["account_id"] = providers["aws"].get("account_id", "")
             account_id = str(providers["aws"]["account_id"])
@@ -356,7 +365,9 @@ class Layer:
             ret += module.outputs()
         return ret
 
-    def gen_tf(self, module_idx: int) -> Dict[Any, Any]:
+    def gen_tf(
+        self, module_idx: int, existing_config: Optional[StructuredConfig] = None
+    ) -> Dict[Any, Any]:
         ret: Dict[Any, Any] = {}
         for module in self.modules[0 : module_idx + 1]:
             module_type = module.aliased_type or module.type
@@ -372,9 +383,16 @@ class Layer:
                 None if len(self.get_module_by_type(module.type)) == 1 else module.name
             )
             try:
+                existing_defaults: Optional[List[StructuredDefault]] = None
+                if existing_config is not None:
+                    existing_defaults = existing_config.get("defaults", {}).get(
+                        module.name
+                    )
                 ret = deep_merge(
                     module.gen_tf(
-                        depends_on=previous_module_reference, output_prefix=output_prefix,
+                        depends_on=previous_module_reference,
+                        output_prefix=output_prefix,
+                        existing_defaults=existing_defaults,
                     ),
                     ret,
                 )
@@ -627,3 +645,33 @@ class Layer:
                 raise UserErrors(
                     "Azure Cloud are not configured properly.\n" f" Error: {e.message}"
                 )
+
+
+def _validate_providers(providers: dict) -> None:
+    """
+    Validates Configuration and throws Exception when providers section is provided but left Empty
+    name: Test Name
+    org_name: Test Org Name
+    providers:
+    modules:...
+    """
+    if providers is None:
+        raise UserErrors(
+            "Environment Configuration needs a Provider Section.\n"
+            "Please follow `https://docs.opta.dev/getting-started/` to get started."
+        )
+
+    """
+    Validates Configuration and throws Exception when proviers is provided but left Empty.
+    name: Test Name
+    org_name: Test Org Name
+    providers:
+        aws/google/azurerm:
+    modules:...
+    """
+    if (
+        ("aws" in providers and providers.get("aws") is None)
+        or ("google" in providers and providers.get("google") is None)
+        or ("azurerm" in providers and providers.get("azurerm") is None)
+    ):
+        raise UserErrors("Please provide the Details of Cloud Provider Used.")

@@ -29,6 +29,7 @@ from oauth2client.client import GoogleCredentials
 
 from opta.core.aws import AWS
 from opta.core.azure import Azure
+from opta.core.cloud_client import CloudClient
 from opta.core.gcp import GCP
 from opta.core.local import Local
 from opta.exceptions import MissingState, UserErrors
@@ -163,7 +164,6 @@ class Terraform:
 
     @classmethod
     def destroy_all(cls, layer: "Layer", *tf_flags: str) -> None:
-        existing_modules = Terraform.get_existing_modules(layer)
 
         # Refreshing the state is necessary to update terraform outputs.
         # This includes fetching the latest EKS cluster auth token, which is
@@ -175,9 +175,6 @@ class Terraform:
         for module in reversed(layer.modules):
             module_address_prefix = f"module.{module.name}"
 
-            if module.name not in existing_modules:
-                idx -= 1
-                continue
             cls.refresh(layer, f"-target={module_address_prefix}")
             nice_run(
                 ["terraform", "destroy", f"-target={module_address_prefix}", *tf_flags],
@@ -189,25 +186,19 @@ class Terraform:
 
         # After the layer is completely deleted, remove the opta config from the state bucket.
         if layer.cloud == "aws":
-            aws = AWS(layer)
-            aws.delete_opta_config()
-            aws.delete_remote_state()
+            cloud_client: CloudClient = AWS(layer)
         elif layer.cloud == "google":
-            gcp = GCP(layer)
-            gcp.delete_opta_config()
-            gcp.delete_remote_state()
+            cloud_client = GCP(layer)
         elif layer.cloud == "azurerm":
-            azure = Azure(layer)
-            azure.delete_opta_config()
-            azure.delete_remote_state()
+            cloud_client = Azure(layer)
         elif layer.cloud == "local":
-            local = Local(layer)
-            local.delete_opta_config()
-            local.delete_local_tf_state()
+            cloud_client = Local(layer)
         else:
             raise Exception(
                 f"Can not handle opta config deletion for cloud {layer.cloud}"
             )
+        cloud_client.delete_opta_config()
+        cloud_client.delete_remote_state()
 
         # If this is the env layer, delete the state bucket & dynamo table as well.
         if layer.name == layer.root().name:

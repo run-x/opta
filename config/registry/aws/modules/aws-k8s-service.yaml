@@ -54,8 +54,8 @@ inputs:
     # TODO(patrick): In description, mention deprecation
     description: |
       Specifies what port your app was made to be listened to. Currently it must be a map of the form
-      `http: [PORT_NUMBER_HERE]` or `tcp: [PORT_NUMBER_HERE]`. Use http if you just have a vanilla http server and tcp for
-      websockets.
+      `http: [PORT_NUMBER_HERE]` or `websocket: [PORT_NUMBER_HERE]`. Use `http` if you just have a vanilla http server
+      and `websocket` for websockets.
   - name: ports
     user_facing: true
     validator: list(include('port_definition'), required=False)
@@ -118,6 +118,16 @@ inputs:
     validator: str(required=False)
     description: Use if liveness probe != readiness probe
     default: null
+  - name: initial_liveness_delay
+    user_facing: true
+    validator: int(required=False)
+    description: Use if the initial delay needs to be changed.
+    default: 30
+  - name: initial_readiness_delay
+    user_facing: true
+    validator: int(required=False)
+    description: Use if the initial delay needs to be changed.
+    default: 30
   - name: consistent_hash
     user_facing: true
     validator: str(required=False)
@@ -191,11 +201,13 @@ extra_validators:
     name: regex('^[a-z0-9-]+$', name='valid service name')
     type: regex('^(http|tcp)$', name='http or tcp')
     port: int(min=1, max=65535)
+    service_port: int(min=1, max=65535, required=False)
     protocol: regex('^(grpc|websocket)$', name='grpc or websocket', required=False)
   service_port:
     http: int(required=False)
     tcp: int(required=False)
     grpc: int(required=False)
+    websocket: int(required=False)
 outputs:
   - name: docker_repo_url
     export: true

@@ -66,7 +66,7 @@ class TestAzure:
         mocked_container_client_instance.download_blob = mocker.Mock()
         download_stream_mock = mocker.Mock()
         download_stream_mock.readall = mocker.Mock(
-            return_value='{"opta_version":"1", "date": "mock_date", "original_spec": "mock_spec"}'
+            return_value='{"opta_version":"1", "date": "mock_date", "original_spec": "mock_spec", "defaults": {}}'
         )
         mocked_container_client_instance.download_blob.return_value = download_stream_mock
         mocked_container_client = mocker.patch(
@@ -77,6 +77,7 @@ class TestAzure:
             "opta_version": "1",
             "date": "mock_date",
             "original_spec": "mock_spec",
+            "defaults": {},
         }
 
         assert Azure(azure_layer).get_remote_config() == mocked_structured_config

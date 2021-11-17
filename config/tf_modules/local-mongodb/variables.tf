@@ -16,13 +16,13 @@ variable "module_name" {
 variable "db_user" {
   description = "Database username"
   type        = string
-  default     = "mongo"
+  default     = "mongodb"
 }
 
 variable "db_password" {
   description = "Database password"
   type        = string
-  default     = "mongopassword"
+  default     = "mongodbpassword"
 }
 variable "db_name" {
   description = "Database name"

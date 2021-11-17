@@ -9,7 +9,7 @@ output "db_password" {
   sensitive = true
 }
 
-output "mongo_atlas_connection_string" {
+output "mongodb_atlas_connection_string" {
   value = mongodbatlas_cluster.cluster.connection_strings[0].standard_srv
 }
 

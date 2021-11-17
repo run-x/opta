@@ -26,6 +26,11 @@ spec:
         ad.datadoghq.com/linkerd-proxy.check_names: '["linkerd"]'
         ad.datadoghq.com/linkerd-proxy.init_configs: '[{}]'
         ad.datadoghq.com/linkerd-proxy.instances: '[{"prometheus_url": "http://%%host%%:4191/metrics"}]'
+        # See https://linkerd.io/2021/05/27/linkerd-vs-istio-benchmarks/
+        config.linkerd.io/proxy-cpu-limit: "0.1"
+        config.linkerd.io/proxy-cpu-request: "0.05"
+        config.linkerd.io/proxy-memory-limit: "20Mi"
+        config.linkerd.io/proxy-memory-request: "10Mi"
     spec:
       serviceAccountName: {{ include "k8s-service.serviceAccountName" . }}
       containers:
@@ -67,7 +72,7 @@ spec:
             {{ end }}
           {{- if .Values.livenessProbePath }}
           livenessProbe:
-            initialDelaySeconds: 30
+            initialDelaySeconds: {{ .Values.initialLivenessDelay }}
             {{- if eq .Values.probePort.type "tcp" }}
             tcpSocket:
               port: {{ .Values.probePort.name | quote }}
@@ -79,7 +84,7 @@ spec:
           {{- end }}
           {{- if .Values.readinessProbePath }}
           readinessProbe:
-            initialDelaySeconds: 30
+            initialDelaySeconds: {{ .Values.initialReadinessDelay }}
             periodSeconds: 10
             {{- if eq .Values.probePort.type "tcp" }}
             tcpSocket:

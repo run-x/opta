@@ -10,11 +10,11 @@ modules:
     type: redis
   - name: database2
     type: postgres
-  - name: atlasmongo
-    type: atlas-mongo
-    mongo_instance_size: M10
+  - name: mongodbatlas
+    type: mongodb-atlas
+    mongodb_instance_size: M10
     region: US_EAST_1
-    mongo_atlas_project_id: XXXXXXXXXXXXX
+    mongodb_atlas_project_id: XXXXXXXXXXXXX
   - name: redis2
     type: redis
   - name: mongodb
@@ -39,8 +39,8 @@ modules:
             db_password: BLAH
       - redis2:
           - cache_host: CACHEHOST2
-      - atlasmongo:
-          - mongo_atlas_connection_string: MONGO_URI
+      - mongodbatlas:
+          - mongodb_atlas_connection_string: MONGODB_URI
             db_user: DB_USER
             db_password: DB_PASSWORD
             

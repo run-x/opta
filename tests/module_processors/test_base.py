@@ -271,8 +271,8 @@ class TestK8sServiceModuleProcessor:
             "probe_port": "b",
         }
 
-        port_a = PortSpec("a", "http", 1)
-        port_b = PortSpec("b", "tcp", 2)
+        port_a = PortSpec("a", "http", 1, 80)
+        port_b = PortSpec("b", "tcp", 2, 2)
 
         expected = {
             "ports": [port_a, port_b],
@@ -364,7 +364,15 @@ class TestK8sServiceModuleProcessor:
             "port": {"tcp": 1234},
         }
         expected = {
-            "ports": [{"name": "main", "type": "tcp", "port": 1234}],
+            "ports": [
+                {
+                    "name": "main",
+                    "type": "http",
+                    "port": 1234,
+                    "service_port": 80,
+                    "protocol": "websocket",
+                }
+            ],
         }
         self.transform_port_assert(
             processor, data, expected=expected,
@@ -376,7 +384,13 @@ class TestK8sServiceModuleProcessor:
         }
         expected = {
             "ports": [
-                {"name": "main", "type": "http", "port": 5678, "protocol": "grpc"},
+                {
+                    "name": "main",
+                    "type": "http",
+                    "port": 5678,
+                    "service_port": 80,
+                    "protocol": "grpc",
+                },
             ],
         }
 
@@ -414,8 +428,8 @@ class TestK8sServiceModuleProcessor:
         processor.FLAG_MULTIPLE_PORTS_SUPPORTED = False
 
         ports = [
-            PortSpec("a", "http", 1),
-            PortSpec("b", "http", 2),
+            PortSpec("a", "http", 1, 80),
+            PortSpec("b", "http", 2, 80),
         ]
 
         self.validate_ports_assert(
@@ -431,7 +445,7 @@ class TestK8sServiceModuleProcessor:
         processor.FLAG_MULTIPLE_PORTS_SUPPORTED = False
 
         ports = [
-            PortSpec("a", "tcp", 1),
+            PortSpec("a", "tcp", 1, 80),
         ]
 
         self.validate_ports_assert(
@@ -445,8 +459,8 @@ class TestK8sServiceModuleProcessor:
         self, processor: K8sServiceModuleProcessor
     ) -> None:
         ports = [
-            PortSpec("a", "http", 1),
-            PortSpec("b", "http", 2),
+            PortSpec("a", "http", 1, 80),
+            PortSpec("b", "http", 2, 80),
         ]
 
         self.validate_ports_assert(
@@ -460,8 +474,8 @@ class TestK8sServiceModuleProcessor:
         self, processor: K8sServiceModuleProcessor
     ) -> None:
         ports = [
-            PortSpec("a", "http", 1),
-            PortSpec("a", "tcp", 2),
+            PortSpec("a", "http", 1, 80),
+            PortSpec("a", "tcp", 2, 80),
         ]
 
         self.validate_ports_assert(
@@ -475,8 +489,8 @@ class TestK8sServiceModuleProcessor:
         self, processor: K8sServiceModuleProcessor
     ) -> None:
         ports = [
-            PortSpec("a", "http", 1),
-            PortSpec("b", "tcp", 1),
+            PortSpec("a", "http", 1, 80),
+            PortSpec("b", "tcp", 1, 80),
         ]
 
         self.validate_ports_assert(
@@ -520,7 +534,7 @@ class TestK8sServiceModuleProcessor:
         raw = [{"name": "a", "port": 1, "type": "http"}]
 
         expected = [
-            PortSpec("a", "http", 1),
+            PortSpec("a", "http", 1, 80),
         ]
 
         self.read_ports_assert(processor, raw, expected=expected)
@@ -563,13 +577,13 @@ class TestPortSpec:
     def test_from_raw_simple(self) -> None:
         self.from_raw_assert(
             {"name": "a", "type": "http", "port": 1},
-            expected=PortSpec("a", "http", 1, None, False),
+            expected=PortSpec("a", "http", 1, 80, None, False),
         )
 
     def test_from_raw_advanced(self) -> None:
         self.from_raw_assert(
             {"name": "a", "type": "http", "port": 1, "protocol": "grpc", "tls": True},
-            expected=PortSpec("a", "http", 1, "grpc", True),
+            expected=PortSpec("a", "http", 1, 80, "grpc", True),
         )
 
     def test_from_raw_invalid_type(self) -> None:
@@ -604,12 +618,12 @@ class TestPortSpec:
             assert type_protocol in valid_types
 
     def test_is_http(self) -> None:
-        assert PortSpec("a", "http", 1).is_http is True
-        assert PortSpec("a", "tcp", 1).is_http is False
+        assert PortSpec("a", "http", 1, 80).is_http is True
+        assert PortSpec("a", "tcp", 1, 80).is_http is False
 
     def test_is_tcp(self) -> None:
-        assert PortSpec("a", "http", 1).is_tcp is False
-        assert PortSpec("a", "tcp", 1).is_tcp is True
+        assert PortSpec("a", "http", 1, 80).is_tcp is False
+        assert PortSpec("a", "tcp", 1, 80).is_tcp is True
 
     def test_probe_type(self) -> None:
         tests: Dict[Tuple[str, Optional[str]], str] = {
@@ -619,15 +633,16 @@ class TestPortSpec:
         }
 
         for input, expected in tests.items():
-            spec = PortSpec("a", input[0], 1, input[1])
+            spec = PortSpec("a", input[0], 1, 80, input[1])
             assert spec.probe_type == expected
 
     def test_to_json(self) -> None:
-        spec = PortSpec("a", "http", 1, "grpc", True)
+        spec = PortSpec("a", "http", 1, 80, "grpc", True)
         expected = {
             "name": "a",
             "type": "http",
             "port": 1,
+            "servicePort": 80,
             "protocol": "grpc",
             "tls": True,
             "probeType": "tcp",

@@ -1,4 +1,4 @@
-name: Create-n-Destoy AWS Resources using Different Opta Versions
+name: Opta Version upgrade test on AWS
 
 on:
   workflow_dispatch:

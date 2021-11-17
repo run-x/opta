@@ -1,10 +1,13 @@
+import datetime
 import os
 from pathlib import Path
+from subprocess import CalledProcessError  # nosec
 from threading import Thread
-from typing import Any, Dict, List, Optional, Set
+from typing import Dict, List, Optional, Set
 
 import boto3
 import click
+import pytz
 import semver
 from botocore.config import Config
 from botocore.exceptions import ClientError
@@ -21,6 +24,7 @@ from opta.constants import (
 )
 from opta.core.aws import AWS
 from opta.core.azure import Azure
+from opta.core.cloud_client import CloudClient
 from opta.core.gcp import GCP
 from opta.core.generator import gen, gen_opta_resource_tags
 from opta.core.kubernetes import (
@@ -202,8 +206,9 @@ def _apply(
 
     Terraform.create_state_storage(layer)
     gen_opta_resource_tags(layer)
+    cloud_client: CloudClient
     if layer.cloud == "aws":
-        cloud_client: Any = AWS(layer)
+        cloud_client = AWS(layer)
     elif layer.cloud == "google":
         cloud_client = GCP(layer)
     elif layer.cloud == "azurerm":
@@ -215,7 +220,7 @@ def _apply(
     else:
         raise Exception(f"Cannot handle upload config for cloud {layer.cloud}")
 
-    previous_config: StructuredConfig = cloud_client.get_remote_config()
+    previous_config: Optional[StructuredConfig] = cloud_client.get_remote_config()
     if previous_config is not None and "opta_version" in previous_config:
         old_opta_version = previous_config["opta_version"]
         if (
@@ -229,7 +234,6 @@ def _apply(
             raise UserErrors(
                 f"ou're trying to run an older version of opta (last run was at {previous_config['date']} with version {old_opta_version}). Please update to the latest version and try again!"
             )
-    cloud_client.upload_opta_config()
 
     service_modules = layer.get_module_by_type("k8s-service")
     try:
@@ -261,7 +265,7 @@ def _apply(
 
         existing_modules: Set[str] = set()
         first_loop = True
-        for module_idx, current_modules, total_block_count in gen(layer):
+        for module_idx, current_modules, total_block_count in gen(layer, previous_config):
             if first_loop:
                 # This is set during the first iteration, since the tf file must exist.
                 existing_modules = Terraform.get_existing_modules(layer)
@@ -296,14 +300,18 @@ def _apply(
                 )
                 logger.info("Planning your changes (might take a minute)")
 
-                Terraform.plan(
-                    "-lock=false",
-                    "-input=false",
-                    f"-out={TF_PLAN_PATH}",
-                    layer=layer,
-                    *targets,
-                    quiet=True,
-                )
+                try:
+                    Terraform.plan(
+                        "-lock=false",
+                        "-input=false",
+                        f"-out={TF_PLAN_PATH}",
+                        layer=layer,
+                        *targets,
+                        quiet=True,
+                    )
+                except CalledProcessError as e:
+                    logger.error((e.stderr or b"").decode("utf-8"))
+                    raise e
                 PlanDisplayer.display(detailed_plan=detailed_plan)
 
                 if not auto_approve:
@@ -329,13 +337,25 @@ def _apply(
                     )
                     new_thread = Thread(
                         target=tail_module_log,
-                        args=(layer, service_module.name, 10, 2),
+                        args=(
+                            layer,
+                            service_module.name,
+                            10,
+                            datetime.datetime.utcnow().replace(tzinfo=pytz.UTC),
+                            2,
+                        ),
                         daemon=True,
                     )
                     # Tailing events
                     new_thread.start()
                     new_thread = Thread(
-                        target=tail_namespace_events, args=(layer, 0, 1), daemon=True,
+                        target=tail_namespace_events,
+                        args=(
+                            layer,
+                            datetime.datetime.utcnow().replace(tzinfo=pytz.UTC),
+                            1,
+                        ),
+                        daemon=True,
                     )
                     new_thread.start()
 
@@ -351,6 +371,7 @@ def _apply(
                     raise e
                 else:
                     layer.post_hook(module_idx, None)
+                cloud_client.upload_opta_config()
                 logger.info("Opta updates complete!")
     except Exception as e:
         event_properties["success"] = False

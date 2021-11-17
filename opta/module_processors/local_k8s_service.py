@@ -73,10 +73,10 @@ class LocalK8sServiceProcessor(LocalK8sModuleProcessor, K8sServiceModuleProcesso
             elif module_type == "local-redis":
                 self.handle_redis_link(module, link_permissions)
             elif module_type == "local-mongodb":
-                self.handle_mongo_link(module, link_permissions)
+                self.handle_mongodb_link(module, link_permissions)
             elif module_type == "local-mysql":
                 self.handle_mysql_link(module, link_permissions)
-            elif module_type == "atlas-mongo":
+            elif module_type == "mongodb-atlas":
                 LinkerHelper.handle_link(
                     module=self.module,
                     linked_module=module,
@@ -84,7 +84,7 @@ class LocalK8sServiceProcessor(LocalK8sModuleProcessor, K8sServiceModuleProcesso
                     required_vars=[
                         "db_password",
                         "db_user",
-                        "mongo_atlas_connection_string",
+                        "mongodb_atlas_connection_string",
                     ],
                 )
             else:
@@ -169,7 +169,7 @@ class LocalK8sServiceProcessor(LocalK8sModuleProcessor, K8sServiceModuleProcesso
                 "I don't think is what you're looking for."
             )
 
-    def handle_mongo_link(
+    def handle_mongodb_link(
         self, linked_module: "Module", link_permissions: List[Any]
     ) -> None:
         required_db_vars = ["db_user", "db_name", "db_password", "db_host"]
@@ -234,7 +234,7 @@ class LocalK8sServiceProcessor(LocalK8sModuleProcessor, K8sServiceModuleProcesso
                 "I don't think is what you're looking for."
             )
 
-    def _process_ports(self, data: Dict[Any, Any]) -> None:
-        # Disable the mulitple ports processing
-        # TODO(patrick): remove once https://github.com/run-x/opta/pull/434 is merged
-        pass
+    # def _process_ports(self, data: Dict[Any, Any]) -> None:
+    #     # Disable the mulitple ports processing
+    #     # TODO(patrick): remove once https://github.com/run-x/opta/pull/434 is merged
+    #     pass
