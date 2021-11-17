@@ -49,7 +49,10 @@ jobs:
           pipenv install --deploy --dev
           source $(pipenv --venv)/bin/activate
       - name: Check JSON Schema
-        run: ./scripts/json_schema.py
+        run: |
+          source $(pipenv --venv)/bin/activate
+          export PYTHONPATH=$(pwd)
+          ./scripts/json_schema.py
 
   security:
     runs-on: ubuntu-18.04
