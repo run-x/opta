@@ -1,37 +1,37 @@
 {
-  "$id": "https://app.runx.dev/modules/aws-k8s-service",
-  "description": "Deploys a kubernetes app",
-  "allOf": [
-    {
-      "$ref": "/common-types/k8s-service"
+ "$id": "https://app.runx.dev/modules/aws-k8s-service",
+ "description": "Deploys a kubernetes app",
+ "allOf": [
+  {
+   "$ref": "/common-types/k8s-service"
+  },
+  {
+   "type": "object",
+   "properties": {
+    "probe_port": {
+     "type": "str",
+     "description": "The name of the port to use for readiness and liveness probes. Defaults to the first port listed."
     },
-    {
-      "type": "object",
-      "properties": {
-        "probe_port": {
-          "type": "str",
-          "description": "The name of the port to use for readiness and liveness probes. Defaults to the first port listed."
-        },
-        "additional_iam_policies": {
-          "type": "array",
-          "description": "A list of additional IAM policies to attach to the service.",
-          "items": {
-            "type": "string"
-          },
-          "default": []
-        },
-        "ports": {
-          "type": "array",
-          "description": "List of ports to expose",
-          "items": {
-            "$ref": "/common-types/port"
-          }
-        },
-        "port": {
-          "ref": "/common-types/port-deprecated",
-          "description": "Specifies what port your app was made to be listened to. Currently it must be a map of the form `http: [PORT_NUMBER_HERE]` or `tcp: [PORT_NUMBER_HERE]`. Use http if you just have a vanilla http server and tcp for websockets."
-        }
-      }
+    "additional_iam_policies": {
+     "type": "array",
+     "description": "A list of additional IAM policies to attach to the service.",
+     "items": {
+      "type": "string"
+     },
+     "default": []
+    },
+    "ports": {
+     "type": "array",
+     "description": "List of ports to expose",
+     "items": {
+      "$ref": "/common-types/port"
+     }
+    },
+    "port": {
+     "ref": "/common-types/port-deprecated",
+     "description": "Specifies what port your app was made to be listened to. Currently it must be a map of the form `http: [PORT_NUMBER_HERE]` or `tcp: [PORT_NUMBER_HERE]`. Use http if you just have a vanilla http server and tcp for websockets."
     }
-  ]
+   }
+  }
+ ]
 }

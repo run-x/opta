@@ -1,41 +1,41 @@
 {
-  "$id": "https://app.runx.dev/modules/aws-sqs",
-  "description": "Sets up a AWS SQS queue",
-  "type": "object",
-  "properties": {
-    "fifo": {
-      "type": "boolean",
-      "description": "Whether or not this queue is a FIFO queue",
-      "default": false
-    },
-    "content_based_deduplication": {
-      "type": "boolean",
-      "description": "Whether or not to enable content based deduplication",
-      "default": false
-    },
-    "sqs_subscribers": {
-      "type": "array",
-      "description": "List of SQS ARNs to push from this topic.",
-      "items": {
-        "type": "string",
-        "description": "The ARN of the SQS queue to subscribe to."
-      },
-      "default": []
-    },
-    "delay_seconds": {
-      "type": "integer",
-      "description": "The time in seconds that the delivery of all messages in the queue will be delayed.",
-      "default": 0
-    },
-    "message_retention_seconds": {
-      "type": "integer",
-      "description": "The number of seconds for which Amazon SQS retains a message.",
-      "default": 345600
-    },
-    "receive_wait_time_seconds": {
-      "type": "integer",
-      "description": "The time for which a ReceiveMessage call will wait for a message to arrive.",
-      "default": 0
-    }
+ "$id": "https://app.runx.dev/modules/aws-sqs",
+ "description": "Sets up a AWS SQS queue",
+ "type": "object",
+ "properties": {
+  "fifo": {
+   "type": "boolean",
+   "description": "FIFO queue or not",
+   "default": false
+  },
+  "content_based_deduplication": {
+   "type": "boolean",
+   "description": "FIFO queue or not",
+   "default": false
+  },
+  "sqs_subscribers": {
+   "type": "array",
+   "description": "List of SQS ARNs to push from this topic.",
+   "items": {
+    "type": "string",
+    "description": "The ARN of the SQS queue to subscribe to."
+   },
+   "default": []
+  },
+  "delay_seconds": {
+   "type": "integer",
+   "description": "Seconds to delay passing the message forward",
+   "default": 0
+  },
+  "message_retention_seconds": {
+   "type": "integer",
+   "description": "The number of seconds SQS retains a message.",
+   "default": 345600
+  },
+  "receive_wait_time_seconds": {
+   "type": "integer",
+   "description": "The seconds for which a ReceiveMessage call will wait for a message to arrive (long polling) before returning. Must be an int from 0-20.",
+   "default": 0
   }
+ }
 }

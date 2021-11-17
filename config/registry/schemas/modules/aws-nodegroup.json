@@ -1,45 +1,50 @@
 {
-  "$id": "https://app.runx.dev/modules/aws-nodegroup",
-  "description": "Deploys a kubernetes app",
-  "type": "object",
-  "properties": {
-    "labels": {
-      "type": "object",
-      "description": "Labels to apply to the nodegroup"
-    },
-    "max_nodes": {
-      "type": "integer",
-      "description": "Max number of nodes to allow via autoscaling",
-      "default": 15
-    },
-    "min_nodes": {
-      "type": "integer",
-      "description": "Min number of nodes to allow via autoscaling",
-      "default": 3
-    },
-    "node_disk_size": {
-      "type": "integer",
-      "description": "The size of disk to give the nodes' ec2s in GB.",
-      "default": 20
-    },
-    "node_instance_type": {
-      "$ref": "/common-types/ec2-instance-type",
-      "default": "t3.medium"
-    },
-    "use_gpu": {
-      "type": "boolean",
-      "description": "Should we expect and use the gpus present in the ec2?",
-      "default": false
-    },
-    "spot_instances": {
-      "type": "boolean",
-      "description": "A boolean specifying whether to use [spot instances](https://aws.amazon.com/ec2/spot/) for the default nodegroup or not. The spot instances will be configured to have the max price equal to the on-demand price (so no danger of overcharging). _WARNING_: By using spot instances you must accept the real risk of frequent abrupt node terminations and possibly (although extremely rarely) even full blackouts (all nodes die). The former is a small risk as containers of Opta services will be automatically restarted on surviving nodes. So just make sure to specify a minimum of more than 1 containers -- Opta by default attempts to spread them out amongst many nodes. The former is a graver concern which can be addressed by having multiple node groups of different instance types (see aws nodegroup module) and ideally at least one non-spot.",
-      "default": false
-    }
+ "$id": "https://app.runx.dev/modules/aws-nodegroup",
+ "description": "Deploys a kubernetes app",
+ "type": "object",
+ "properties": {
+  "labels": {
+   "type": "object",
+   "description": "labels for the kubernetes nodes"
   },
-  "required": ["image"],
-  "opta_metadata": {
-    "module_type": "environment",
-    "clouds": ["aws"]
+  "max_nodes": {
+   "type": "integer",
+   "description": "Max number of nodes to allow via autoscaling",
+   "default": 15
+  },
+  "min_nodes": {
+   "type": "integer",
+   "description": "Min number of nodes to allow via autoscaling",
+   "default": 3
+  },
+  "node_disk_size": {
+   "type": "integer",
+   "description": "The size of disk to give the nodes' ec2s in GB.",
+   "default": 20
+  },
+  "node_instance_type": {
+   "$ref": "/common-types/ec2-instance-type",
+   "default": "t3.medium",
+   "description": "The [ec2 instance type](https://aws.amazon.com/ec2/instance-types/) for the nodes."
+  },
+  "use_gpu": {
+   "type": "boolean",
+   "description": "Should we expect and use the gpus present in the ec2?",
+   "default": false
+  },
+  "spot_instances": {
+   "type": "boolean",
+   "description": "A boolean specifying whether to use [spot instances](https://aws.amazon.com/ec2/spot/)\nfor the default nodegroup or not. The spot instances will be configured to have the max price equal to the on-demand\nprice (so no danger of overcharging). _WARNING_: By using spot instances you must accept the real risk of frequent abrupt\nnode terminations and possibly (although extremely rarely) even full blackouts (all nodes die). The former is a small\nrisk as containers of Opta services will be automatically restarted on surviving nodes. So just make sure to specify\na minimum of more than 1 containers -- Opta by default attempts to spread them out amongst many nodes. The former\nis a graver concern which can be addressed by having multiple node groups of different instance types (see aws\nnodegroup module) and ideally at least one non-spot.\n",
+   "default": false
   }
+ },
+ "required": [
+  "image"
+ ],
+ "opta_metadata": {
+  "module_type": "environment",
+  "clouds": [
+   "aws"
+  ]
+ }
 }

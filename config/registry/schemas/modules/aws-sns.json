@@ -1,25 +1,25 @@
 {
-  "$id": "https://app.runx.dev/modules/aws-ses",
-  "description": "Sets up an AWS SNS topic",
-  "type": "object",
-  "properties": {
-    "fifo": {
-      "type": "boolean",
-      "description": "Whether or not this queue is a FIFO queue",
-      "default": false
-    },
-    "content_based_deduplication": {
-      "type": "boolean",
-      "description": "Whether or not to enable content based deduplication",
-      "default": false
-    },
-    "sqs_subscribers": {
-      "type": "array",
-      "description": "List of SQS ARNs to push from this topic.",
-      "items": {
-        "type": "string",
-        "description": "The ARN of the SQS queue to subscribe to."
-      }
-    }
+ "$id": "https://app.runx.dev/modules/aws-ses",
+ "description": "Sets up an AWS SNS topic",
+ "type": "object",
+ "properties": {
+  "fifo": {
+   "type": "boolean",
+   "description": "FIFO queue or not.",
+   "default": false
+  },
+  "content_based_deduplication": {
+   "type": "boolean",
+   "description": "Duplicate content",
+   "default": false
+  },
+  "sqs_subscribers": {
+   "type": "array",
+   "description": "List of SQS ARNs to push from this topic.",
+   "items": {
+    "type": "string",
+    "description": "The ARN of the SQS queue to subscribe to."
+   }
   }
+ }
 }

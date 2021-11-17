@@ -1,22 +1,22 @@
 {
-  "$id": "https://app.runx.dev/modules/gcp-k8s-service",
-  "description": "Deploys a kubernetes app",
-  "allOf": [
-    {
-      "$ref": "/common-types/k8s-service"
-    },
-    {
-      "type": "object",
-      "properties": {
-        "additional_iam_roles": {
-          "description": "A list of extra project-level iam roles to grant to the service account created for this k8s service",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "default": []
-        }
-      }
+ "$id": "https://app.runx.dev/modules/gcp-k8s-service",
+ "description": "Deploys a kubernetes app",
+ "allOf": [
+  {
+   "$ref": "/common-types/k8s-service"
+  },
+  {
+   "type": "object",
+   "properties": {
+    "additional_iam_roles": {
+     "description": "A list of extra project-level iam roles to grant to the service account created for this k8s service",
+     "type": "array",
+     "items": {
+      "type": "string"
+     },
+     "default": []
     }
-  ]
+   }
+  }
+ ]
 }

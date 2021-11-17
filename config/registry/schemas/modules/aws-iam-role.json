@@ -1,47 +1,54 @@
 {
-  "$id": "https://app.runx.dev/modules/aws-iam-role",
-  "description": "Creates an IAM role",
-  "type": "object",
-  "properties": {
-    "allowed_iams": {
-      "description": "The arns of IAM users/roles allowed to assume this role.",
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "allowed_k8s_services": {
-      "description": "The arns of IAM users/roles allowed to assume this role.",
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "service_name": {
-            "type": "string",
-            "description": "The name of the service to allow"
-          },
-          "namespace": {
-            "type": "string",
-            "description": "The namespace of the service to allow"
-          }
-        },
-        "required": ["service_name", "namespace"]
-      },
-      "default": []
-    },
-    "extra_iam_policies": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "default": []
-    },
-    "links": {
-      "$ref": "/common-types/links"
-    }
+ "$id": "https://app.runx.dev/modules/aws-iam-role",
+ "description": "Creates an IAM role",
+ "type": "object",
+ "properties": {
+  "allowed_iams": {
+   "description": "The arns of IAM users/roles allowed to assume this role.",
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
   },
-  "opta_metadata": {
-    "module_type": "service",
-    "clouds": ["aws"]
+  "allowed_k8s_services": {
+   "description": "K8s service accounts that this role should have access to.",
+   "type": "array",
+   "items": {
+    "type": "object",
+    "properties": {
+     "service_name": {
+      "type": "string",
+      "description": "The name of the service to allow"
+     },
+     "namespace": {
+      "type": "string",
+      "description": "The namespace of the service to allow"
+     }
+    },
+    "required": [
+     "service_name",
+     "namespace"
+    ]
+   },
+   "default": []
+  },
+  "extra_iam_policies": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   },
+   "default": [],
+   "description": "The arns of additional IAM policies to be attached to this role."
+  },
+  "links": {
+   "$ref": "/common-types/links",
+   "description": "The list of links to add permissions for to this role."
   }
+ },
+ "opta_metadata": {
+  "module_type": "service",
+  "clouds": [
+   "aws"
+  ]
+ }
 }
