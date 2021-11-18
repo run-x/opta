@@ -31,7 +31,7 @@ def _deep_equals(obj1: dict, obj2: dict) -> bool:
     """
     Deep compare two objects.
     """
-    return json.dumps(obj1) == json.dumps(obj2)
+    return json.dumps(obj1, sort_keys=True) == json.dumps(obj2, sort_keys=True)
 
 
 def _get_json_schema_module_path(module_name: str) -> str:
