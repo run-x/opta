@@ -60,7 +60,8 @@ def destroy(
     layer = Layer.load_from_yaml(config, env)
     event_properties: Dict = layer.get_event_properties()
     amplitude_client.send_event(
-        amplitude_client.DESTROY_EVENT, event_properties=event_properties,
+        amplitude_client.DESTROY_EVENT,
+        event_properties=event_properties,
     )
     layer.verify_cloud_credentials()
     layer.validate_required_path_dependencies()

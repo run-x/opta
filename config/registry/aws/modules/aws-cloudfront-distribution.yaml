@@ -1,0 +1,67 @@
+halt: false
+environment_module: false
+inputs:
+  - name: env_name
+    user_facing: false
+    description: Opta Environment name
+    default: None
+  - name: layer_name
+    user_facing: false
+    description: Opta Layer name
+    default: None
+  - name: module_name
+    user_facing: false
+    description: Opta Module name
+    default: None
+  - name: s3_log_bucket_name
+    user_facing: false
+    description: Name of the access log bucket
+    default: null
+  - name: bucket_name
+    user_facing: false
+    description: The name of the s3 bucket to link to this cloudfront distribution
+    default: ""
+  - name: origin_access_identity_path
+    user_facing: false
+    description: The Cloudfront OAI path to use to access the buckets
+    default: ""
+  - name: access_type
+    user_facing: false
+    description: The Cloudfront-S3 access type. Can be read, read_write, or read_write_delete
+    default: "read"
+  - name: default_page_file
+    user_facing: true
+    validator: str(required=False)
+    description: The name of the existing s3 object in your bucket which will serve as the default page.
+    default: null
+  - name: price_class
+    user_facing: true
+    validator: str(required=False)
+    description: The cloudfront price class for this distribution. Can be PriceClass_All, PriceClass_200, or PriceClass_100
+    default: PriceClass_200
+  - name: acm_cert_arn
+    user_facing: true
+    validator: str(required=False)
+    description: The ACM certificate arn you wish to use to handle ssl (needed if you want https for your site)
+    default: null
+  - name: domains
+    user_facing: true
+    validator: list(str(), required=False)
+    description: The domains which you want your cloudfront distribution to support.
+    default: []
+  - name: links
+    user_facing: true
+    validator: list(any(str(), map(str, include('links'))), required=True)
+    description: |
+      The linked s3 buckets to attach to your cloudfront distribution (currently only supports one).
+      Please designate access_type as shown in description (defaults to read if none specified)
+    default: []
+extra_validators:
+  links:
+    access: str(required=True)
+outputs:
+  - name: cloudfront_domain
+    export: true
+    description: The domain of the cloudfront distribution
+output_providers: { }
+output_data: { }

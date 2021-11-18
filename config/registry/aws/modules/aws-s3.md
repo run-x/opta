@@ -12,7 +12,7 @@ This module creates an S3 bucket for storage purposes. It is created with server
 
 ### Example
 
-```
+```yaml
   - name: bucky
     type: aws-s3
     bucket_name: dev-runx-bucky
@@ -24,6 +24,34 @@ This module creates an S3 bucket for storage purposes. It is created with server
         - "runx.dev"
 ```
 
+### File uploading
+To help the basic use case of uploading local files to S3, the Opta S3 module now comes with a `files` field. Simply
+set this field to the path (relative to the yaml or absolute) of a directory holding the files (and any subdirectory) 
+which you wish to upload and Opta will automatically upload them to the bucket it just created with the keys being their
+filename and subdirectory path, if any. 
+
+So for example if you called the module like so:
+```yaml
+  - type: s3
+    name: blah
+    bucket_name: "opta-is-testing-cloudfront"
+    files: "../blah"
+```
+
+And the `../blah` directory had the following structure:
+```
+../blah
+├── hello2.html
+├── hello2.txt
+├── hello3.txt
+└── subdir
+    └── hello3.html
+```
+
+Then Opta would upload 4 files to your S3 bucket, with the S3 keys being `hello2.html`, `hello2.txt`, `hello3.txt` and
+`subdir/hello3.html`.
+
+Opta will also catch any changes to the files on the next `opta apply` and will push updates as needed.
 
 ### Linking
 
