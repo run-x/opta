@@ -63,12 +63,13 @@ def py_check(files_changed: Collection[str], precommit: bool, apply: bool) -> in
         && {flake8} {' '.join(files_changed)}\
         && {mypy} {' '.join(files_changed)}"
 
+    logging.info("Running JSON schema check...")
+    check_schemas(write=precommit or apply)
+
     logging.info("Running py checks...")
     logging.info(cmd)
 
-    os.system(cmd)
-
-    check_schemas(write=precommit or apply)
+    return os.system(cmd)
 
 
 if __name__ == "__main__":
