@@ -93,6 +93,10 @@ def _check_opta_config_schemas(write: bool = False) -> None:
                 json.dump(new_json_schema, f, indent=2)
         else:
             if not _deep_equals(new_json_schema, json_schema):
+                print("------------EXPECTED SCHEMA-------------")
+                print(json.dumps(new_json_schema, indent=2))
+                print("------------ACTUAL SCHEMA-------------")
+                print(json.dumps(json_schema, indent=2))
                 raise Exception(
                     f"{json_schema_file_path} seems to be out of date. Rerun this script with the --write flag to fix this."
                 )
@@ -157,8 +161,6 @@ def _check_module_schemas(write: bool = False) -> None:
                     json.dump(new_json_schema, f, indent=2)
             else:
                 if not _deep_equals(new_json_schema, json_schema):
-                    print(new_json_schema)
-                    print(json_schema)
                     raise Exception(
                         f"Module {module_name}'s json schema file seems to be out of date. Rerun this script with the --write flag to fix this."
                     )
