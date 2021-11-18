@@ -144,7 +144,8 @@ def _azure_get_configs(layer: "Layer") -> List[str]:
     prefix = "opta_config/"
     blobs = storage_client.list_blobs(name_starts_with=prefix)
     configs = [blob.name[len(prefix) :] for blob in blobs]
-    configs.remove(layer.name)
+    if layer.name in configs:
+        configs.remove(layer.name)
     return configs
 
 
@@ -159,7 +160,8 @@ def _aws_get_configs(layer: "Layer") -> List[str]:
     s3_config_paths = [obj["Key"] for obj in resp.get("Contents", [])]
 
     configs = [config_path[len(s3_config_dir) :] for config_path in s3_config_paths]
-    configs.remove(layer.name)
+    if layer.name in configs:
+        configs.remove(layer.name)
     return configs
 
 
@@ -179,7 +181,8 @@ def _gcp_get_configs(layer: "Layer") -> List[str]:
         gcs_client.list_blobs(bucket_object, prefix=gcs_config_dir)
     )
     configs = [blob.name[len(gcs_config_dir) :] for blob in blobs]
-    configs.remove(layer.name)
+    if layer.name in configs:
+        configs.remove(layer.name)
     return configs
 
 
@@ -188,5 +191,6 @@ def _local_get_configs(layer: "Layer") -> List[str]:
         os.path.join(str(Path.home()), ".opta", "local", "opta_config")
     )
     configs = os.listdir(local_config_dir)
-    configs.remove(f"opta-{layer.org_name}-{layer.name}")
+    if f"opta-{layer.org_name}-{layer.name}" in configs:
+        configs.remove(f"opta-{layer.org_name}-{layer.name}")
     return configs
