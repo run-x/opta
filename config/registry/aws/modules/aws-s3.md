@@ -51,7 +51,8 @@ And the `../blah` directory had the following structure:
 Then Opta would upload 4 files to your S3 bucket, with the S3 keys being `hello2.html`, `hello2.txt`, `hello3.txt` and
 `subdir/hello3.html`.
 
-Opta will also catch any changes to the files on the next `opta apply` and will push updates as needed.
+Opta will also catch any changes to the files on the next `opta apply` and will push updates as needed. Opta supports
+extensive MIME parsing, so it also makes sure to set the content type correctly.
 
 ### Linking
 
