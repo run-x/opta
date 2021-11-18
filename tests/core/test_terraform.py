@@ -156,7 +156,7 @@ class TestTerraform:
         )
         mocked_open.assert_called_once_with("./tmp.tfstate", "r")
         patched_init.assert_not_called()
-        mocked_boto_client.assert_called_once_with("s3")
+        mocked_boto_client.assert_called_once_with("s3", config=mocker.ANY)
 
     def test_google_download_state(self, mocker: MockFixture) -> None:
         layer = mocker.Mock(spec=Layer)
@@ -347,7 +347,7 @@ class TestTerraform:
         )
         mocked_boto3.client.assert_has_calls(
             [
-                mocker.call("s3"),
+                mocker.call("s3", config=mocker.ANY),
                 mocker.call("dynamodb", config=mocker.ANY),
                 mocker.call("iam", config=mocker.ANY),
             ]
