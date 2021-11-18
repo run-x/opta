@@ -78,7 +78,7 @@ class AWS(CloudClient):
         bucket = self.layer.state_storage()
         config_path = f"opta_config/{self.layer.name}"
 
-        s3_client = boto3.client("s3")
+        s3_client = boto3.client("s3", config=Config(region_name=self.region))
         try:
             obj = s3_client.get_object(Bucket=bucket, Key=config_path)
             return json.loads(obj["Body"].read())
@@ -93,7 +93,7 @@ class AWS(CloudClient):
         bucket = self.layer.state_storage()
         config_path = f"opta_config/{self.layer.name}"
 
-        s3_client = boto3.client("s3")
+        s3_client = boto3.client("s3", config=Config(region_name=self.region))
         s3_client.put_object(
             Body=json.dumps(self.layer.structured_config()).encode("utf-8"),
             Bucket=bucket,
@@ -105,13 +105,13 @@ class AWS(CloudClient):
         bucket = self.layer.state_storage()
         config_path = f"opta_config/{self.layer.name}"
 
-        s3_client = boto3.client("s3")
+        s3_client = boto3.client("s3", config=Config(region_name=self.region))
         resp = s3_client.delete_object(Bucket=bucket, Key=config_path)
 
         if resp["ResponseMetadata"]["HTTPStatusCode"] != 204:
             raise Exception(f"Failed to delete opta config in {bucket}/{config_path}.")
 
-        for version in self.get_all_versions(bucket, config_path):
+        for version in self.get_all_versions(bucket, config_path, self.region):
             s3_client.delete_object(Bucket=bucket, Key=config_path, VersionId=version)
 
         logger.info("Deleted opta config from s3")
@@ -126,7 +126,7 @@ class AWS(CloudClient):
             Key={"LockID": {"S": f"{bucket}/{self.layer.name}-md5"}},
         )
 
-        s3_client = boto3.client("s3")
+        s3_client = boto3.client("s3", config=Config(region_name=self.region))
         resp = s3_client.delete_object(Bucket=bucket, Key=self.layer.name)
 
         if resp["ResponseMetadata"]["HTTPStatusCode"] != 204:
@@ -134,7 +134,7 @@ class AWS(CloudClient):
                 f"Failed to delete opta tf state in {bucket}/{self.layer.name}."
             )
 
-        for version in self.get_all_versions(bucket, self.layer.name):
+        for version in self.get_all_versions(bucket, self.layer.name, self.region):
             s3_client.delete_object(Bucket=bucket, Key=self.layer.name, VersionId=version)
         logger.info(f"Deleted opta tf state for {self.layer.name}")
 
@@ -154,8 +154,8 @@ class AWS(CloudClient):
             return ""
 
     @staticmethod
-    def get_all_versions(bucket: str, filename: str) -> List[str]:
-        s3 = boto3.client("s3")
+    def get_all_versions(bucket: str, filename: str, region: str) -> List[str]:
+        s3 = boto3.client("s3", config=Config(region_name=region))
         results = []
         for k in ["Versions", "DeleteMarkers"]:
             response = s3.list_object_versions(Bucket=bucket).get(k, [])  # type: ignore
@@ -294,7 +294,7 @@ class AWS(CloudClient):
         }
 
     @staticmethod
-    def delete_bucket(bucket_name: str) -> None:
+    def delete_bucket(bucket_name: str, region: str) -> None:
         # Before a bucket can be deleted, all of the objects inside must be removed.
         bucket = boto3.resource("s3").Bucket(bucket_name)
         bucket.objects.all().delete()
@@ -304,7 +304,7 @@ class AWS(CloudClient):
             "Sleeping 10 seconds for eventual consistency in deleting all bucket resources"
         )
         sleep(10)
-        client = boto3.client("s3")
+        client = boto3.client("s3", config=Config(region_name=region))
         client.delete_bucket(Bucket=bucket_name)
         print(f"Bucket ({bucket_name}) successfully deleted.")
 

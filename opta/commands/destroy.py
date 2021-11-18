@@ -5,6 +5,7 @@ from typing import Dict, List, Optional
 import boto3
 import click
 from azure.storage.blob import ContainerClient
+from botocore.config import Config
 from google.cloud import storage  # type: ignore
 from google.cloud.exceptions import NotFound
 
@@ -153,8 +154,9 @@ def _aws_get_configs(layer: "Layer") -> List[str]:
     # Opta configs for every layer are saved in the opta_config/ directory
     # in the state bucket.
     bucket_name = layer.state_storage()
+    region = layer.root().providers["aws"]["region"]
     s3_config_dir = "opta_config/"
-    s3_client = boto3.client("s3")
+    s3_client = boto3.client("s3", config=Config(region_name=region))
 
     resp = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=s3_config_dir)
     s3_config_paths = [obj["Key"] for obj in resp.get("Contents", [])]

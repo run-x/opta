@@ -291,7 +291,8 @@ class Terraform:
     @classmethod
     def _aws_verify_storage(cls, layer: "Layer") -> bool:
         bucket = layer.state_storage()
-        s3 = boto3.client("s3")
+        region = layer.root().providers["aws"]["region"]
+        s3 = boto3.client("s3", config=Config(region_name=region))
         try:
             s3.get_bucket_encryption(Bucket=bucket,)
         except ClientError as e:
@@ -374,12 +375,13 @@ class Terraform:
         providers = layer.gen_providers(0)
         if "s3" in providers.get("terraform", {}).get("backend", {}):
             bucket = providers["terraform"]["backend"]["s3"]["bucket"]
+            region = providers["terraform"]["backend"]["s3"]["region"]
             key = providers["terraform"]["backend"]["s3"]["key"]
             logger.debug(
                 f"Found an s3 backend in bucket {bucket} and key {key}, "
                 "gonna try to download the statefile from there"
             )
-            s3 = boto3.client("s3")
+            s3 = boto3.client("s3", config=Config(region_name=region))
             try:
                 s3.download_file(Bucket=bucket, Key=key, Filename=state_file)
             except ClientError as e:
@@ -460,11 +462,12 @@ class Terraform:
 
         # Delete the state storage bucket
         bucket_name = providers["terraform"]["backend"]["s3"]["bucket"]
-        AWS.delete_bucket(bucket_name)
+        region = providers["terraform"]["backend"]["s3"]["region"]
+        AWS.delete_bucket(bucket_name, region)
 
         # Delete the dynamodb state lock table
         dynamodb_table = providers["terraform"]["backend"]["s3"]["dynamodb_table"]
-        region = providers["terraform"]["backend"]["s3"]["region"]
+
         AWS.delete_dynamodb_table(dynamodb_table, region)
         logger.info("Successfully deleted AWS state storage")
 
@@ -736,7 +739,7 @@ class Terraform:
         bucket_name = providers["terraform"]["backend"]["s3"]["bucket"]
         dynamodb_table = providers["terraform"]["backend"]["s3"]["dynamodb_table"]
         region = providers["terraform"]["backend"]["s3"]["region"]
-        s3 = boto3.client("s3")
+        s3 = boto3.client("s3", config=Config(region_name=region))
         dynamodb = boto3.client("dynamodb", config=Config(region_name=region))
         iam = boto3.client("iam", config=Config(region_name=region))
         try:
