@@ -1,0 +1,82 @@
+{
+  "$id": "https://app.runx.dev/modules/aws-dynamodb",
+  "description": "Creates a DynamoDB table",
+  "type": "object",
+  "properties": {
+    "read_capacity": {
+      "description": "This is the read capacaity for your dynamodb table",
+      "type": "integer",
+      "minimum": 0,
+      "default": 20
+    },
+    "write_capacity": {
+      "description": "This is the write capacaity for your dynamodb table",
+      "type": "integer",
+      "minimum": 0,
+      "default": 20
+    },
+    "billing_mode": {
+      "description": "The billing mode for you dynamodb table",
+      "enum": [
+        "PROVISIONED",
+        "PAY_PER_REQUEST"
+      ],
+      "default": "PROVISIONED"
+    },
+    "hash_key": {
+      "description": "The hash key for your table",
+      "type": "string",
+      "default": ""
+    },
+    "range_key": {
+      "description": "The range key for your table",
+      "type": "string",
+      "default": null
+    },
+    "attributes": {
+      "description": "The list of attributes (name and type) for this dynamodb table",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "The name of the attribute",
+            "type": "string"
+          },
+          "type": {
+            "description": "The type of the attribute",
+            "enum": [
+              "B",
+              "BOOL",
+              "N",
+              "S",
+              "SS"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ]
+      },
+      "default": "None"
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "aws-dynamodb"
+      ]
+    }
+  },
+  "opta_metadata": {
+    "module_type": "service",
+    "clouds": [
+      "aws"
+    ]
+  },
+  "required": [
+    "hash_key",
+    "attributes",
+    "type"
+  ]
+}

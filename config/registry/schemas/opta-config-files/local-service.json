@@ -1,0 +1,43 @@
+{
+  "$id": "https://app.runx.dev/opta-config-files/gcp-service",
+  "description": "The Opta configuration for an GCP service",
+  "type": "object",
+  "properties": {
+    "environments": {
+      "$ref": "/common-types/environments-array"
+    },
+    "name": {
+      "type": "string",
+      "description": "The name of the service"
+    },
+    "modules": {
+      "type": "array",
+      "description": "The Opta modules to run in this environment",
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "https://app.runx.dev/modules/helm-chart"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/local-k8s-service"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/local-mongodb"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/local-mysql"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/local-postgres"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/local-redis"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/mongodb-atlas"
+          }
+        ]
+      }
+    }
+  }
+}

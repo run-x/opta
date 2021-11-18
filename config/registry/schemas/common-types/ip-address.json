@@ -1,0 +1,6 @@
+{
+  "$id": "https://app.runx.dev/common-types/cidr-block",
+  "type": "string",
+  "description": "An IPv4 CIDR block format",
+  "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+}

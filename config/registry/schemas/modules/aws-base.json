@@ -1,0 +1,56 @@
+{
+  "$id": "https://app.runx.dev/modules/aws-base",
+  "description": "Sets up VPCs, a default KMS key, and the db/cache subnets for your environment",
+  "type": "object",
+  "properties": {
+    "private_ipv4_cidr_block": {
+      "$ref": "/common-types/cidr-block",
+      "default": "10.0.0.0/19"
+    },
+    "private_ipv4_cidr_blocks": {
+      "type": "array",
+      "description": "These are the cidr blocks to use for the private subnets, one for each AZ.",
+      "items": {
+        "$ref": "/common-types/cidr-block"
+      },
+      "default": [
+        "10.0.128.0/21",
+        "10.0.136.0/21",
+        "10.0.144.0/21"
+      ]
+    },
+    "public_ipv4_cidr_blocks": {
+      "type": "array",
+      "description": "These are the cidr blocks to use for the public subnets, one for each AZ.",
+      "items": {
+        "$ref": "/common-types/cidr-block"
+      },
+      "default": [
+        "10.0.0.0/21",
+        "10.0.8.0/21",
+        "10.0.16.0/21"
+      ]
+    },
+    "total_ipv4_cidr_block": {
+      "$ref": "/common-types/cidr-block",
+      "description": "This is the total cidr block for the VPC.",
+      "default": "10.0.0.0/16"
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "aws-base",
+        "base"
+      ]
+    }
+  },
+  "opta_metadata": {
+    "module_type": "env",
+    "clouds": [
+      "aws"
+    ]
+  },
+  "required": [
+    "type"
+  ]
+}

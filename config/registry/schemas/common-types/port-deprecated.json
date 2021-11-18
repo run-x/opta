@@ -1,0 +1,25 @@
+{
+  "$id": "https://app.runx.dev/common-types/port-deprecated",
+  "deprecated": true,
+  "anyOf": [
+    {
+      "type": "object",
+      "properties": {
+        "http": {
+          "type": "integer"
+        }
+      },
+      "required": ["http"]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "tcp": {
+          "type": "integer"
+        }
+      },
+      "required": ["tcp"]
+    }
+  ],
+  "description": "Deprecated. Use ports instead"
+}

@@ -1,0 +1,44 @@
+{
+  "$id": "https://app.runx.dev/modules/aws-postgres",
+  "description": "Creates a postgres Aurora RDS database instance",
+  "type": "object",
+  "properties": {
+    "instance_class": {
+      "type": "string",
+      "description": "This is the RDS instance type used for the Aurora cluster [instances](https://aws.amazon.com/rds/instance-types/).",
+      "$ref": "/common-types/rds-instance-types",
+      "default": "db.t3.medium"
+    },
+    "engine_version": {
+      "type": "string",
+      "description": "The version of the database to use.",
+      "default": "11.9"
+    },
+    "multi_az": {
+      "type": "boolean",
+      "description": "Enable read-write replication across different availability zones on the same reason (doubles the cost, but needed for compliance). Can be added and updated at a later date without need to recreate.",
+      "default": false
+    },
+    "safety": {
+      "type": "boolean",
+      "description": "Add deletion protection to stop accidental db deletions",
+      "default": false
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "aws-postgres",
+        "postgres"
+      ]
+    }
+  },
+  "required": [
+    "type"
+  ],
+  "opta_metadata": {
+    "module_type": "service",
+    "clouds": [
+      "aws"
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "$id": "https://app.runx.dev/opta-config-files/azure-service",
+  "description": "The Opta configuration for an Azure service",
+  "type": "object",
+  "properties": {
+    "environments": {
+      "$ref": "/common-types/environments-array"
+    },
+    "name": {
+      "type": "string",
+      "description": "The name of the service"
+    },
+    "modules": {
+      "type": "array",
+      "description": "The Opta modules to run in this environment",
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "https://app.runx.dev/modules/azure-k8s-service"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/azure-postgres"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/azure-redis"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/helm-chart"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/mongodb-atlas"
+          }
+        ]
+      }
+    }
+  }
+}

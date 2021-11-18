@@ -173,7 +173,12 @@ class Layer:
 
     @classmethod
     def load_from_yaml(
-        cls, config: str, env: Optional[str], is_parent: bool = False, local: bool = False
+        cls,
+        config: str,
+        env: Optional[str],
+        is_parent: bool = False,
+        local: bool = False,
+        json_schema: bool = False,
     ) -> Layer:
         t = None
         if config.startswith("git@"):
@@ -218,7 +223,7 @@ class Layer:
         layer = cls.load_from_dict(conf, env, is_parent)
         if local:
             pass
-        validate_yaml(config_path, layer.cloud)
+        validate_yaml(config_path, layer.cloud, json_schema)
         if t is not None:
             shutil.rmtree(t)
 

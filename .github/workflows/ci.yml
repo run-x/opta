@@ -33,7 +33,11 @@ jobs:
           pipenv install --deploy --dev
           source $(pipenv --venv)/bin/activate
       - name: Lint
-        run: ./scripts/lint.py
+        run: |
+          source $(pipenv --venv)/bin/activate
+          export PYTHONPATH=$(pwd)
+          ./scripts/lint.py
+
   security:
     runs-on: ubuntu-18.04
     steps:
@@ -215,8 +219,8 @@ jobs:
   deploy_test_service:
     if: ${{ github.ref == 'refs/heads/main' }}
     needs:
-    - test_cli_aws
-    - test_cli_gcp
+      - test_cli_aws
+      - test_cli_gcp
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2

@@ -1,0 +1,23 @@
+{
+  "$id": "https://app.runx.dev/modules/local-mongodb",
+  "type": "object",
+  "description": "Creates a Mongodb cluster for Local",
+  "properties": {
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "local-mongodb",
+        "mongodb"
+      ]
+    }
+  },
+  "required": [
+    "type"
+  ],
+  "opta_metadata": {
+    "module_type": "service",
+    "clouds": [
+      "local"
+    ]
+  }
+}

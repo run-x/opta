@@ -1,0 +1,43 @@
+{
+  "$id": "https://app.runx.dev/modules/gcp-base",
+  "type": "object",
+  "description": "Sets up VPC, private subnet, firewall, default kms key, and private service access. Also activates the container registry",
+  "properties": {
+    "private_ipv4_cidr_block": {
+      "description": "Cidr block for private subnet. Don't need to worry about AZs in GCP",
+      "$ref": "/common-types/cidr-block",
+      "default": "10.0.0.0/19"
+    },
+    "cluster_ipv4_cidr_block": {
+      "description": "This is the cidr block reserved for pod ips in the GKE cluster.",
+      "$ref": "/common-types/cidr-block",
+      "default": "10.0.32.0/19"
+    },
+    "services_ipv4_cidr_block": {
+      "description": "This is the cidr block reserved for service cluster ips in the GKE cluster.",
+      "$ref": "/common-types/cidr-block",
+      "default": "10.0.64.0/20"
+    },
+    "k8s_master_ipv4_cidr_block": {
+      "description": "This is the cidr block reserved for the master/control plane in the GKE cluster.",
+      "$ref": "/common-types/cidr-block",
+      "default": "10.0.80.0/28"
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "gcp-base",
+        "base"
+      ]
+    }
+  },
+  "required": [
+    "type"
+  ],
+  "opta_metadata": {
+    "module_type": "env",
+    "clouds": [
+      "gcp"
+    ]
+  }
+}
