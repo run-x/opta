@@ -39,24 +39,12 @@
       "description": "The Opta modules to run in this environment",
       "items": {
         "oneOf": [
-          {
-            "$ref": "https://app.runx.dev/modules/azure-k8s-base"
-          },
-          {
-            "$ref": "https://app.runx.dev/modules/azure-aks"
-          },
-          {
-            "$ref": "https://app.runx.dev/modules/azure-base"
-          },
-          {
-            "$ref": "https://app.runx.dev/modules/external-ssl-cert"
-          },
-          {
-            "$ref": "https://app.runx.dev/modules/runx"
-          },
-          {
-            "$ref": "https://app.runx.dev/modules/datadog"
-          }
+          "https://app.runx.dev/modules/azure-aks",
+          "https://app.runx.dev/modules/azure-base",
+          "https://app.runx.dev/modules/azure-k8s-base",
+          "https://app.runx.dev/modules/datadog",
+          "https://app.runx.dev/modules/external-ssl-cert",
+          "https://app.runx.dev/modules/runx"
         ]
       }
     }
