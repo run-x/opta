@@ -40,7 +40,8 @@
     "type": {
       "description": "The name of this module",
       "enum": [
-        "gcp-gke"
+        "gcp-gke",
+        "k8s-cluster"
       ]
     }
   },

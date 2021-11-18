@@ -61,7 +61,8 @@
     "type": {
       "description": "The name of this module",
       "enum": [
-        "aws-eks"
+        "aws-eks",
+        "k8s-cluster"
       ]
     }
   },

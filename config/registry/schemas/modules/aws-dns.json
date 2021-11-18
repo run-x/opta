@@ -22,7 +22,8 @@
     "type": {
       "description": "The name of this module",
       "enum": [
-        "aws-dns"
+        "aws-dns",
+        "dns"
       ]
     }
   },

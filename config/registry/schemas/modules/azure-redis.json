@@ -29,7 +29,8 @@
     "type": {
       "description": "The name of this module",
       "enum": [
-        "azure-redis"
+        "azure-redis",
+        "redis"
       ]
     }
   },

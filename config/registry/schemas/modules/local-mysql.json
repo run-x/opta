@@ -6,7 +6,8 @@
     "type": {
       "description": "The name of this module",
       "enum": [
-        "local-mysql"
+        "local-mysql",
+        "mysql"
       ]
     }
   },

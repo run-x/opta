@@ -54,7 +54,8 @@
     "type": {
       "description": "The name of this module",
       "enum": [
-        "aws-k8s-base"
+        "aws-k8s-base",
+        "k8s-base"
       ]
     }
   },

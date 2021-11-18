@@ -112,7 +112,8 @@
     "type": {
       "description": "The name of this module",
       "enum": [
-        "azure-aks"
+        "azure-aks",
+        "k8s-cluster"
       ]
     }
   },

@@ -24,7 +24,8 @@
     "type": {
       "description": "The name of this module",
       "enum": [
-        "gcp-dns"
+        "gcp-dns",
+        "dns"
       ]
     }
   },

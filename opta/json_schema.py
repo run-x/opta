@@ -121,6 +121,9 @@ def _check_opta_config_schemas(write: bool = False) -> None:
 
 def _check_module_schemas(write: bool = False) -> None:
     for cloud in CLOUD_FOLDER_NAMES + ["common"]:
+        if cloud != "common":
+            index_yaml = yaml.load(open(join(registry_path, cloud, "index.yaml")))
+
         module_names = _get_all_modules_names(cloud)
 
         for module_name in module_names:
@@ -140,9 +143,16 @@ def _check_module_schemas(write: bool = False) -> None:
                     f"JSON schema at for module {module_name} missing {missing_fields} field(s)"
                 )
 
+            if cloud == "common":
+                module_aliases = []
+            else:
+                module_aliases = [
+                    k for k, v in index_yaml["module_aliases"].items() if v == module_name
+                ]
+
             new_json_schema["properties"]["type"] = {
                 "description": "The name of this module",
-                "enum": [module_name],
+                "enum": [module_name] + module_aliases,
             }
 
             module_inputs = module_registry_dict["inputs"]

@@ -166,7 +166,8 @@
     "type": {
       "description": "The name of this module",
       "enum": [
-        "local-k8s-service"
+        "local-k8s-service",
+        "k8s-service"
       ]
     }
   },

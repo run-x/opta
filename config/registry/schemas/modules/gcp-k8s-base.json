@@ -26,7 +26,8 @@
     "type": {
       "description": "The name of this module",
       "enum": [
-        "gcp-k8s-base"
+        "gcp-k8s-base",
+        "k8s-base"
       ]
     }
   },

@@ -88,7 +88,8 @@
     "type": {
       "description": "The name of this module",
       "enum": [
-        "aws-redis"
+        "aws-redis",
+        "redis"
       ]
     }
   },

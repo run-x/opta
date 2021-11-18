@@ -165,7 +165,8 @@
     "type": {
       "description": "The name of this module",
       "enum": [
-        "azure-k8s-service"
+        "azure-k8s-service",
+        "k8s-service"
       ]
     }
   },

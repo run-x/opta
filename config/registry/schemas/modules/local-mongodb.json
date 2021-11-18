@@ -6,7 +6,8 @@
     "type": {
       "description": "The name of this module",
       "enum": [
-        "local-mongodb"
+        "local-mongodb",
+        "mongodb"
       ]
     }
   },

@@ -173,7 +173,8 @@
     "type": {
       "description": "The name of this module",
       "enum": [
-        "gcp-k8s-service"
+        "gcp-k8s-service",
+        "k8s-service"
       ]
     }
   },

@@ -16,7 +16,8 @@
     "type": {
       "description": "The name of this module",
       "enum": [
-        "azure-postgres"
+        "azure-postgres",
+        "postgres"
       ]
     }
   },

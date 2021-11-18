@@ -21,7 +21,8 @@
     "type": {
       "description": "The name of this module",
       "enum": [
-        "gcp-mysql"
+        "gcp-mysql",
+        "mysql"
       ]
     }
   },

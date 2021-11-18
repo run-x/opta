@@ -184,7 +184,8 @@
     "type": {
       "description": "The name of this module",
       "enum": [
-        "aws-k8s-service"
+        "aws-k8s-service",
+        "k8s-service"
       ]
     }
   },

@@ -21,7 +21,8 @@
     "type": {
       "description": "The name of this module",
       "enum": [
-        "azure-base"
+        "azure-base",
+        "base"
       ]
     }
   },

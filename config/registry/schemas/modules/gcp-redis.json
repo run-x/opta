@@ -21,7 +21,8 @@
     "type": {
       "description": "The name of this module",
       "enum": [
-        "gcp-redis"
+        "gcp-redis",
+        "redis"
       ]
     }
   },

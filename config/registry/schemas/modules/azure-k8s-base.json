@@ -26,7 +26,8 @@
     "type": {
       "description": "The name of this module",
       "enum": [
-        "azure-k8s-base"
+        "azure-k8s-base",
+        "k8s-base"
       ]
     }
   },
