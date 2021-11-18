@@ -17,6 +17,7 @@ from opta.core.terraform import Terraform
 from opta.error_constants import USER_ERROR_TF_LOCK
 from opta.exceptions import UserErrors
 from opta.layer import Layer
+from opta.pre_check import pre_check
 from opta.utils import check_opta_file_exists, fmt_msg, logger
 
 
@@ -50,6 +51,8 @@ def destroy(
     opta destroy -c my_config.yaml --auto-approve
     """
 
+    pre_check()
+
     config = check_opta_file_exists(config)
     if local:
         config = _handle_local_flag(config, False)
@@ -60,6 +63,7 @@ def destroy(
         amplitude_client.DESTROY_EVENT, event_properties=event_properties,
     )
     layer.verify_cloud_credentials()
+    layer.validate_required_path_dependencies()
     if not Terraform.download_state(layer):
         logger.info(
             "The opta state could not be found. This may happen if destroy ran successfully before."

@@ -47,8 +47,8 @@ def test_inspect(mocker: MockFixture) -> None:
     mocked_layer.org_name = "dummy_org_name"
     mocked_layer.name = "dummy_name"
     mocker.patch("opta.commands.inspect_cmd.gen_all")
-    # Mock that the terraform CLI tool exists.
-    mocker.patch("opta.commands.inspect_cmd.is_tool", return_value=True)
+    # Mock precheck call
+    mocked_pre_check = mocker.patch("opta.commands.inspect_cmd.pre_check")
     # Mock the inspect config
     mocker.patch("opta.module.REGISTRY", REGISTRY)
     # Mock fetching the terraform state
@@ -80,6 +80,7 @@ def test_inspect(mocker: MockFixture) -> None:
     result = runner.invoke(inspect)
 
     assert result.exit_code == 0
+    mocked_pre_check.assert_called_once()
     # Using split to compare without whitespaces
     assert (
         result.output.split()

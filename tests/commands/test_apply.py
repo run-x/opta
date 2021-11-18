@@ -16,7 +16,6 @@ from opta.module import Module
 
 @fixture
 def basic_mocks(mocker: MockFixture) -> None:
-    mocker.patch("opta.commands.apply.is_tool", return_value=True)
     mocker.patch("opta.commands.apply.amplitude_client.send_event")
     mocker.patch("opta.commands.apply.gen_opta_resource_tags")
     mocker.patch("opta.commands.apply.PlanDisplayer")
@@ -103,6 +102,7 @@ def test_apply(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None
     mocked_layer.get_module_by_type.assert_has_calls(
         [mocker.call("k8s-service"), mocker.call("k8s-service", 0)]
     )
+    mocked_layer.validate_required_path_dependencies.assert_called_once()
     tf_create_storage.assert_called_once_with(mocked_layer)
     mocked_thread.assert_has_calls(
         [

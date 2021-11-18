@@ -2,7 +2,7 @@ import base64
 import datetime
 import time
 from threading import Thread
-from typing import TYPE_CHECKING, Dict, List, Optional, Set, Tuple
+from typing import TYPE_CHECKING, Dict, FrozenSet, List, Optional, Set, Tuple
 
 import boto3
 from botocore.exceptions import ClientError, NoCredentialsError
@@ -31,17 +31,21 @@ from opta.core.gcp import GCP
 from opta.core.terraform import get_terraform_outputs
 from opta.exceptions import UserErrors
 from opta.nice_subprocess import nice_run
-from opta.utils import deep_merge, fmt_msg, is_tool, logger
+from opta.utils import deep_merge, fmt_msg, logger
+from opta.utils.dependencies import ensure_installed
 
 if TYPE_CHECKING:
     from opta.layer import Layer
 
 
-KUBECTL_INSTALL_URL = "https://kubernetes.io/docs/tasks/tools/install-kubectl-macos/"
-AWS_CLI_INSTALL_URL = (
-    "https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html"
-)
-GCP_CLI_INSTALL_URL = "https://cloud.google.com/sdk/docs/install"
+def get_required_path_executables(cloud: str) -> FrozenSet[str]:
+    exec_map = {
+        "aws": {"aws"},
+        "google": {"gcloud"},
+        "azurerm": {"az"},
+    }
+
+    return frozenset({"kubectl"}) | exec_map.get(cloud, set())
 
 
 def configure_kubectl(layer: "Layer") -> None:
@@ -49,10 +53,7 @@ def configure_kubectl(layer: "Layer") -> None:
     # Make sure the user has the prerequisite CLI tools installed
     # kubectl may not *technically* be required for this opta command to run, but require
     # it anyways since user must install it to access the cluster.
-    if not is_tool("kubectl"):
-        raise UserErrors(
-            f"Please visit this link to install kubectl first: {KUBECTL_INSTALL_URL}"
-        )
+    ensure_installed("kubectl")
     if layer.cloud == "aws":
         _aws_configure_kubectl(layer)
     elif layer.cloud == "google":
@@ -72,10 +73,8 @@ def _local_configure_kubectl(layer: "Layer") -> None:
 
 
 def _gcp_configure_kubectl(layer: "Layer") -> None:
-    if not is_tool("gcloud"):
-        raise UserErrors(
-            f"Please visit the link to install the gcloud CLI first: {GCP_CLI_INSTALL_URL}"
-        )
+    ensure_installed("gcloud")
+
     try:
         if GCP.using_service_account():
             service_account_key_path = GCP.get_service_account_key_path()
@@ -142,8 +141,8 @@ def _gcp_configure_kubectl(layer: "Layer") -> None:
 def _azure_configure_kubectl(layer: "Layer") -> None:
     root_layer = layer.root()
     providers = root_layer.gen_providers(0)
-    if not is_tool("az"):
-        raise UserErrors("Please install az CLI first")
+
+    ensure_installed("az")
 
     rg_name = providers["terraform"]["backend"]["azurerm"]["resource_group_name"]
     cluster_name = get_cluster_name(root_layer)
@@ -170,10 +169,7 @@ def _azure_configure_kubectl(layer: "Layer") -> None:
 
 
 def _aws_configure_kubectl(layer: "Layer") -> None:
-    if not is_tool("aws"):
-        raise UserErrors(
-            f"Please visit the link to install the AWS CLI first: {AWS_CLI_INSTALL_URL}"
-        )
+    ensure_installed("aws")
 
     # Get the current account details from the AWS CLI.
     try:

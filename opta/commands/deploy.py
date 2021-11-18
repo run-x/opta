@@ -12,6 +12,7 @@ from opta.core.terraform import Terraform
 from opta.error_constants import USER_ERROR_TF_LOCK
 from opta.exceptions import MissingState, UserErrors
 from opta.layer import Layer
+from opta.pre_check import pre_check
 from opta.utils import check_opta_file_exists, fmt_msg, logger
 
 
@@ -71,6 +72,8 @@ def deploy(
 
     """
 
+    pre_check()
+
     config = check_opta_file_exists(config)
     if not is_service_config(config):
         raise UserErrors(
@@ -110,6 +113,7 @@ def deploy(
         event_properties={"org_name": layer.org_name, "layer_name": layer.name},
     )
     layer.verify_cloud_credentials()
+    layer.validate_required_path_dependencies()
     if Terraform.download_state(layer):
         tf_lock_exists, _ = Terraform.tf_lock_details(layer)
         if tf_lock_exists:

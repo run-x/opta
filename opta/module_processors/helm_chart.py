@@ -1,8 +1,9 @@
 import os
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, FrozenSet
 
 from ruamel.yaml.compat import StringIO
 
+from opta.core.helm import Helm
 from opta.exceptions import UserErrors
 from opta.module_processors.base import ModuleProcessor
 from opta.utils import logger, yaml
@@ -19,6 +20,10 @@ class HelmChartProcessor(ModuleProcessor):
                 f"The module {module.name} was expected to be of type k8s service"
             )
         super(HelmChartProcessor, self).__init__(module, layer)
+
+    @property
+    def required_path_dependencies(self) -> FrozenSet[str]:
+        return super().required_path_dependencies | Helm.get_required_path_executables()
 
     def process(self, module_idx: int) -> None:
         if "repository" in self.module.data and "chart_version" not in self.module.data:

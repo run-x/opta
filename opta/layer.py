@@ -9,7 +9,18 @@ from datetime import datetime
 from os import path
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Type, TypedDict
+from typing import (
+    Any,
+    Dict,
+    FrozenSet,
+    Iterable,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    TypedDict,
+)
 
 import boto3
 import click
@@ -58,6 +69,7 @@ from opta.module_processors.mongodb_atlas import MongodbAtlasProcessor
 from opta.module_processors.runx import RunxProcessor
 from opta.plugins.derived_providers import DerivedProviders
 from opta.utils import deep_merge, hydrate, logger, yaml
+from opta.utils.dependencies import validate_installed_path_executables
 
 
 class StructuredDefault(TypedDict):
@@ -148,7 +160,7 @@ class Layer:
         else:
             raise UserErrors("No cloud provider (AWS, GCP, or Azure) found")
         self.variables = variables or {}
-        self.modules = []
+        self.modules: List[Module] = []
         for module_data in modules_data:
             self.modules.append(Module(self, module_data, self.parent,))
         module_names: set = set()
@@ -353,6 +365,18 @@ class Layer:
                 return module
         return None
 
+    def get_required_path_dependencies(self) -> FrozenSet[str]:
+        deps: Set[str] = set()
+        for module in self.modules:
+            module_deps = self.processor_for(module).required_path_dependencies
+            deps |= module_deps
+
+        return frozenset(deps)
+
+    def validate_required_path_dependencies(self) -> None:
+        deps = self.get_required_path_dependencies()
+        validate_installed_path_executables(deps)
+
     def get_module_by_type(
         self, module_type: str, module_idx: Optional[int] = None
     ) -> list[Module]:
@@ -375,9 +399,8 @@ class Layer:
     ) -> Dict[Any, Any]:
         ret: Dict[Any, Any] = {}
         for module in self.modules[0 : module_idx + 1]:
-            module_type = module.aliased_type or module.type
-            processor = self.PROCESSOR_DICT.get(module_type, ModuleProcessor)
-            processor(module, self).process(module_idx)
+            self.processor_for(module).process(module_idx)
+
         if self.parent is not None and self.parent.get_module("runx") is not None:
             RunxProcessor(self.parent.get_module("runx"), self).process(  # type:ignore
                 module_idx
@@ -411,9 +434,8 @@ class Layer:
 
     def pre_hook(self, module_idx: int) -> None:
         for module in self.modules[0 : module_idx + 1]:
-            module_type = module.aliased_type or module.type
-            processor = self.PROCESSOR_DICT.get(module_type, ModuleProcessor)
-            processor(module, self).pre_hook(module_idx)
+            self.processor_for(module).pre_hook(module_idx)
+
         if self.parent is not None and self.parent.get_module("runx") is not None:
             RunxProcessor(self.parent.get_module("runx"), self).pre_hook(  # type:ignore
                 module_idx
@@ -421,9 +443,8 @@ class Layer:
 
     def post_hook(self, module_idx: int, exception: Optional[Exception]) -> None:
         for module in self.modules[0 : module_idx + 1]:
-            module_type = module.aliased_type or module.type
-            processor = self.PROCESSOR_DICT.get(module_type, ModuleProcessor)
-            processor(module, self).post_hook(module_idx, exception)
+            self.processor_for(module).post_hook(module_idx, exception)
+
         if self.parent is not None and self.parent.get_module("runx") is not None:
             RunxProcessor(self.parent.get_module("runx"), self).post_hook(  # type:ignore
                 module_idx, exception
@@ -432,9 +453,12 @@ class Layer:
     def post_delete(self, module_idx: int) -> None:
         module = self.modules[module_idx]
         logger.debug(f"Running post delete for module {module.name}")
+        self.processor_for(module).post_delete(module_idx)
+
+    def processor_for(self, module: Module) -> ModuleProcessor:
         module_type = module.aliased_type or module.type
-        processor = self.PROCESSOR_DICT.get(module_type, ModuleProcessor)
-        processor(module, self).post_delete(module_idx)
+        processor_class = self.PROCESSOR_DICT.get(module_type, ModuleProcessor)
+        return processor_class(module, self)
 
     def metadata_hydration(self) -> Dict[Any, Any]:
         parent_name = self.parent.name if self.parent is not None else "nil"
@@ -460,9 +484,7 @@ class Layer:
     def get_event_properties(self) -> Dict[str, Any]:
         current_keys: Dict[str, Any] = {}
         for module in self.modules:
-            module_type = module.aliased_type or module.type
-            processor = self.PROCESSOR_DICT.get(module_type, ModuleProcessor)
-            new_keys = processor(module, self).get_event_properties()
+            new_keys = self.processor_for(module).get_event_properties()
             for key, val in new_keys.items():
                 current_keys[key] = current_keys.get(key, 0) + val
         current_keys["total_resources"] = sum([x for x in current_keys.values()])

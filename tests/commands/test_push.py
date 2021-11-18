@@ -13,6 +13,7 @@ from opta.commands.push import (
     get_registry_url,
     push_to_docker,
 )
+from opta.exceptions import UserErrors
 from opta.layer import Layer
 from tests.fixtures.basic_apply import BASIC_APPLY
 
@@ -182,16 +183,14 @@ def test_no_tag(mocker: MockFixture) -> None:
 
 
 def test_no_docker(mocker: MockFixture) -> None:
-    # Opta file check
-    mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
-    mocked_os_path_exists.return_value = True
-
-    is_tool_mock = mocker.patch("opta.commands.push.is_tool")
-    is_tool_mock.return_value = False
+    mocker.patch(
+        "opta.utils.os.path.exists", return_value=True
+    )  # Make check_opta_file_exists succeed
+    mocker.patch("opta.commands.push.ensure_installed", side_effect=UserErrors("foobar"))
 
     runner = CliRunner()
     result = runner.invoke(cli, ["push", "local_image:local_tag"])
-    assert str(result.exception) == "Please install docker on your machine"
+    assert str(result.exception) == "foobar"
 
 
 def test_no_tag_override(mocker: MockFixture) -> None:
