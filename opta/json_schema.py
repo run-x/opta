@@ -140,7 +140,7 @@ def _check_module_schemas(write: bool = False) -> None:
                     field for field in REQUIRED_FIELDS if field not in json_schema
                 ]
                 raise Exception(
-                    f"JSON schema at for module {module_name} missing {missing_fields} field(s)"
+                    f"JSON schema for module {module_name} missing field(s): {missing_fields}"
                 )
 
             if cloud == "common":
