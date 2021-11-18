@@ -82,12 +82,12 @@ resource "aws_cloudfront_origin_access_identity" "read_write_delete" {
 data "aws_iam_policy_document" "s3_policy" {
   source_json = var.bucket_policy == null ? "" : var.bucket_policy
   statement {
-    sid = "Cloudfront Reading"
+    sid       = "Cloudfront Reading"
     actions   = ["s3:ListBucket", "s3:GetObject"]
     resources = [aws_s3_bucket.bucket.arn, "${aws_s3_bucket.bucket.arn}/*"]
 
     principals {
-      type        = "AWS"
+      type = "AWS"
       identifiers = [
         aws_cloudfront_origin_access_identity.read.iam_arn,
       ]
@@ -95,12 +95,12 @@ data "aws_iam_policy_document" "s3_policy" {
   }
 
   statement {
-    sid = "Cloudfront Writing"
+    sid       = "Cloudfront Writing"
     actions   = ["s3:ListBucket", "s3:GetObject", "s3:PutObject"]
     resources = [aws_s3_bucket.bucket.arn, "${aws_s3_bucket.bucket.arn}/*"]
 
     principals {
-      type        = "AWS"
+      type = "AWS"
       identifiers = [
         aws_cloudfront_origin_access_identity.read_write.iam_arn,
       ]
@@ -108,12 +108,12 @@ data "aws_iam_policy_document" "s3_policy" {
   }
 
   statement {
-    sid = "Cloudfront Writing and deleting"
+    sid       = "Cloudfront Writing and deleting"
     actions   = ["s3:ListBucket", "s3:GetObject", "s3:PutObject", "s3:DeleteObject", "s3:DeleteObjectVersion"]
     resources = [aws_s3_bucket.bucket.arn, "${aws_s3_bucket.bucket.arn}/*"]
 
     principals {
-      type        = "AWS"
+      type = "AWS"
       identifiers = [
         aws_cloudfront_origin_access_identity.read_write_delete.iam_arn
       ]

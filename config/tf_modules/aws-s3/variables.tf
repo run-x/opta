@@ -1,6 +1,6 @@
 locals {
   files_to_upload = var.files == null ? toset([]) : fileset(var.files, "**")
-  mime_types = jsondecode(file("${path.module}/mime.json"))
+  mime_types      = jsondecode(file("${path.module}/mime.json"))
 }
 
 variable "env_name" {
@@ -19,7 +19,7 @@ variable "module_name" {
 }
 
 variable "files" {
-  type = string
+  type    = string
   default = null
 }
 
@@ -43,7 +43,7 @@ variable "cors_rule" {
 }
 
 variable "s3_log_bucket_name" {
-  type = string
+  type    = string
   default = null
 }
 
