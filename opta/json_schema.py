@@ -27,6 +27,11 @@ FOLDER_NAME_TO_CLOUD_LIST = {
 CLOUD_NAME_TO_JSON_SCHEMA_NAME = {"aws": "aws", "google": "gcp", "azurerm": "azure"}
 
 
+CONFIG_TYPE_ENV = "env"
+CONFIG_TYPE_SERVICE = "service"
+CONFIG_TYPES = [CONFIG_TYPE_ENV, CONFIG_TYPE_SERVICE]
+
+
 def _deep_equals(obj1: dict, obj2: dict) -> bool:
     """
     Deep compare two objects.
@@ -68,40 +73,44 @@ def _get_all_modules(cloud: str) -> List[dict]:
 
 def _check_opta_config_schemas(write: bool = False) -> None:
     for cloud in ["aws", "azurerm", "google"]:
-        all_modules = _get_all_modules(cloud)
-        json_schema_file_path = join(
-            opta_config_schemas_path, f"env-{CLOUD_NAME_TO_JSON_SCHEMA_NAME[cloud]}.json"
-        )
+        for config_type in CONFIG_TYPES:
+            all_modules = _get_all_modules(cloud)
+            json_schema_file_path = join(
+                opta_config_schemas_path,
+                f"{CLOUD_NAME_TO_JSON_SCHEMA_NAME[cloud]}-{config_type}.json",
+            )
 
-        json_schema_file = open(json_schema_file_path)
-        json_schema = json.load(json_schema_file)
-        new_json_schema = deepcopy(json_schema)
+            json_schema_file = open(json_schema_file_path)
+            json_schema = json.load(json_schema_file)
+            new_json_schema = deepcopy(json_schema)
 
-        allowed_module_ids = sorted(
-            [
-                module["$id"]
-                for module in all_modules
-                if module["opta_metadata"]["module_type"] == "environment"
-            ]
-        )
-        new_json_schema["properties"]["modules"] = {
-            "type": "array",
-            "description": "The Opta modules to run in this environment",
-            "items": {"oneOf": [{"$ref": module_id} for module_id in allowed_module_ids]},
-        }
+            allowed_module_ids = sorted(
+                [
+                    module["$id"]
+                    for module in all_modules
+                    if module["opta_metadata"]["module_type"] == config_type
+                ]
+            )
+            new_json_schema["properties"]["modules"] = {
+                "type": "array",
+                "description": "The Opta modules to run in this environment",
+                "items": {
+                    "oneOf": [{"$ref": module_id} for module_id in allowed_module_ids]
+                },
+            }
 
-        if write:
-            with open(json_schema_file_path, "w") as f:
-                json.dump(new_json_schema, f, indent=2)
-        else:
-            if not _deep_equals(new_json_schema, json_schema):
-                print("------------EXPECTED SCHEMA-------------")
-                print(json.dumps(new_json_schema, indent=2))
-                print("------------ACTUAL SCHEMA-------------")
-                print(json.dumps(json_schema, indent=2))
-                raise Exception(
-                    f"{json_schema_file_path} seems to be out of date. Rerun this script with the --write flag to fix this."
-                )
+            if write:
+                with open(json_schema_file_path, "w") as f:
+                    json.dump(new_json_schema, f, indent=2)
+            else:
+                if not _deep_equals(new_json_schema, json_schema):
+                    print("------------EXPECTED SCHEMA-------------")
+                    print(json.dumps(new_json_schema, indent=2))
+                    print("------------ACTUAL SCHEMA-------------")
+                    print(json.dumps(json_schema, indent=2))
+                    raise Exception(
+                        f"{json_schema_file_path} seems to be out of date. Rerun this script with the --write flag to fix this."
+                    )
 
 
 def _check_module_schemas(write: bool = False) -> None:
@@ -151,9 +160,9 @@ def _check_module_schemas(write: bool = False) -> None:
             ] + ["type"]
 
             new_json_schema["opta_metadata"] = {
-                "module_type": "environment"
+                "module_type": CONFIG_TYPE_ENV
                 if module_registry_dict["environment_module"]
-                else "service",
+                else CONFIG_TYPE_SERVICE,
                 "clouds": FOLDER_NAME_TO_CLOUD_LIST[cloud],
             }
 

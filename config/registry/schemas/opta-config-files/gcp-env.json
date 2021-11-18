@@ -1,4 +1,5 @@
 {
+  "$id": "https://app.runx.dev/opta-config-files/gcp-env",
   "type": "object",
   "description": "The Opta configuration for an GCP environment",
   "properties": {

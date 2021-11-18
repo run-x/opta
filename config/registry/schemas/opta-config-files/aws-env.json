@@ -1,5 +1,5 @@
 {
-  "$id": "https://app.runx.dev/opta-config-files/env-aws",
+  "$id": "https://app.runx.dev/opta-config-files/aws-env",
   "description": "The Opta configuration for an AWS environment",
   "type": "object",
   "properties": {

@@ -1,0 +1,24 @@
+{
+  "$id": "https://app.runx.dev/common-types/environments-array",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "The name of an Opta environment"
+      },
+      "path": {
+        "type": "string",
+        "description": "The path to the environment's configuration file"
+      },
+      "variables": {
+        "type": "object"
+      },
+      "vars": {
+        "type": "object"
+      }
+    }
+  },
+  "required": ["name", "path"]
+}

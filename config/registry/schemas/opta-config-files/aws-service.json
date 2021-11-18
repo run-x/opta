@@ -1,0 +1,58 @@
+{
+  "$id": "https://app.runx.dev/opta-config-files/aws-service",
+  "description": "The Opta configuration for an AWS service",
+  "type": "object",
+  "properties": {
+    "environments": {
+      "$ref": "/common-types/environments-array"
+    },
+    "name": {
+      "type": "string",
+      "description": "The name of the service"
+    },
+    "modules": {
+      "type": "array",
+      "description": "The Opta modules to run in this environment",
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "https://app.runx.dev/modules/atlas-mongo"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/aws-documentdb"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/aws-dynamodb"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/aws-iam-role"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/aws-iam-user"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/aws-k8s-service"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/aws-postgres"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/aws-redis"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/aws-s3"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/aws-ses"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/aws-sqs"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/helm-chart"
+          }
+        ]
+      }
+    }
+  }
+}
