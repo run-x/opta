@@ -60,8 +60,7 @@ def destroy(
     layer = Layer.load_from_yaml(config, env)
     event_properties: Dict = layer.get_event_properties()
     amplitude_client.send_event(
-        amplitude_client.DESTROY_EVENT,
-        event_properties=event_properties,
+        amplitude_client.DESTROY_EVENT, event_properties=event_properties,
     )
     layer.verify_cloud_credentials()
     layer.validate_required_path_dependencies()
@@ -132,6 +131,7 @@ def _fetch_children_layers(layer: "Layer") -> List[str]:
 # Get the names for all services for this environment based on the bucket file paths
 def _azure_get_configs(layer: "Layer") -> List[str]:
     providers = layer.gen_providers(0)
+
     credentials = Azure.get_credentials()
     storage_account_name = providers["terraform"]["backend"]["azurerm"][
         "storage_account_name"

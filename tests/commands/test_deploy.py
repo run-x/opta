@@ -18,8 +18,7 @@ def test_deploy_basic(mocker: MockFixture) -> None:
         "opta.commands.deploy.Terraform.download_state", return_value=True
     )
     mocker.patch(
-        "opta.commands.deploy.Terraform.tf_lock_details",
-        return_value=(False, ""),
+        "opta.commands.deploy.Terraform.tf_lock_details", return_value=(False, ""),
     )
 
     mock_push = mocker.patch(
@@ -66,8 +65,7 @@ def test_deploy_auto_approve(mocker: MockFixture) -> None:
         "opta.commands.deploy.Terraform.download_state", return_value=True
     )
     mocker.patch(
-        "opta.commands.deploy.Terraform.tf_lock_details",
-        return_value=(False, ""),
+        "opta.commands.deploy.Terraform.tf_lock_details", return_value=(False, ""),
     )
 
     mock_push = mocker.patch(
@@ -115,8 +113,7 @@ def test_deploy_all_flags(mocker: MockFixture) -> None:
         "opta.commands.deploy.Terraform.download_state", return_value=True
     )
     mocker.patch(
-        "opta.commands.deploy.Terraform.tf_lock_details",
-        return_value=(False, ""),
+        "opta.commands.deploy.Terraform.tf_lock_details", return_value=(False, ""),
     )
 
     mock_push = mocker.patch(
@@ -174,8 +171,7 @@ def test_deploy_ecr_apply(mocker: MockFixture) -> None:
         "opta.commands.deploy.Terraform.download_state", return_value=True
     )
     mocker.patch(
-        "opta.commands.deploy.Terraform.tf_lock_details",
-        return_value=(False, ""),
+        "opta.commands.deploy.Terraform.tf_lock_details", return_value=(False, ""),
     )
 
     mock_push = mocker.patch(
@@ -188,8 +184,7 @@ def test_deploy_ecr_apply(mocker: MockFixture) -> None:
     mocked_layer.org_name = "dummy_org_name"
     mocked_layer.name = "dummy_name"
     mock_terraform_outputs = mocker.patch(
-        "opta.commands.deploy.Terraform.get_outputs",
-        return_value={},
+        "opta.commands.deploy.Terraform.get_outputs", return_value={},
     )
     runner = CliRunner()
     result = runner.invoke(
