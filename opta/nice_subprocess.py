@@ -1,20 +1,20 @@
+import os
 import signal
-from subprocess import (  # nosec
-    DEVNULL,
-    PIPE,
-    CalledProcessError,
-    CompletedProcess,
-)
-from typing import Optional, Union
 from asyncio import TimeoutError
+from subprocess import CalledProcessError, CompletedProcess  # nosec
+from typing import Optional, Union
+
+import psutil
+
 from opta.utils.runtee import run
 
-try:
-    import _winapi  # noqa
 
-    _mswindows = True
-except ModuleNotFoundError:
-    _mswindows = False
+def signal_all_child_processes(sig=signal.SIGINT):
+    current_process = psutil.Process()
+    children = current_process.children(recursive=True)
+    for child in children:
+        print(child.pid)
+        os.kill(child.pid, sig)
 
 
 def nice_run(  # type: ignore # nosec
@@ -41,6 +41,7 @@ def nice_run(  # type: ignore # nosec
         )
     except TimeoutError as exc:
         print("Timeout while running command")
+        signal_all_child_processes()
         raise exc
     except KeyboardInterrupt as k:
         print("Received keyboard interrupt")
@@ -48,8 +49,8 @@ def nice_run(  # type: ignore # nosec
         raise k
     except CalledProcessError as e:
         raise e
-    except Exception:  # Including KeyboardInterrupt, communicate handled that.
-        raise
+    except Exception as e:  # Including KeyboardInterrupt, communicate handled that.
+        raise e
     return result
 
 

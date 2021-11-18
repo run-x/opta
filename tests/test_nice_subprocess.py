@@ -1,6 +1,7 @@
 # type: ignore
 import os
 from asyncio import TimeoutError
+
 import pytest
 
 from opta.nice_subprocess import nice_run

@@ -2,6 +2,7 @@
 import asyncio
 import os
 import platform
+import signal
 import subprocess
 import sys
 from asyncio import StreamReader
@@ -60,58 +61,69 @@ async def _stream_subprocess(args: str, **kwargs: Any) -> CompletedProcess:
 
         # Some users are reporting that default (undocumented) limit 64k is too
         # low
-        process = await asyncio.create_subprocess_shell(
-            args,
-            limit=STREAM_LIMIT,
-            stdin=kwargs.get("stdin", False),
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-            **platform_settings,
-        )
-
-        out: List[str] = []
-        err: List[str] = []
-
-        def tee_func(line: bytes, sink: List[str], pipe: Optional[Any]) -> None:
-            line_str = line.decode("utf-8").rstrip()
-            sink.append(line_str)
-            if not kwargs.get("quiet", False):
-                if pipe and hasattr(pipe, "write"):
-                    print(line_str, file=pipe)
-                else:
-                    print(line_str)
-
-        loop = asyncio.get_event_loop_policy().get_event_loop()
-        tasks = []
-        if process.stdout:
-            tasks.append(
-                loop.create_task(
-                    _read_stream(process.stdout, lambda l: tee_func(l, out, stdout))
-                )
+        try:
+            process = await asyncio.create_subprocess_shell(
+                args,
+                limit=STREAM_LIMIT,
+                stdin=kwargs.get("stdin", False),
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+                **platform_settings,
             )
-        if process.stderr:
-            tasks.append(
-                loop.create_task(
-                    _read_stream(process.stderr, lambda l: tee_func(l, err, stderr))
+
+            out: List[str] = []
+            err: List[str] = []
+
+            def tee_func(line: bytes, sink: List[str], pipe: Optional[Any]) -> None:
+                line_str = line.decode("utf-8").rstrip()
+                sink.append(line_str)
+                if not kwargs.get("quiet", False):
+                    if pipe and hasattr(pipe, "write"):
+                        print(line_str, file=pipe)
+                    else:
+                        print(line_str)
+
+            loop = asyncio.get_event_loop_policy().get_event_loop()
+            tasks = []
+            if process.stdout:
+                tasks.append(
+                    loop.create_task(
+                        _read_stream(process.stdout, lambda l: tee_func(l, out, stdout))
+                    )
                 )
+            if process.stderr:
+                tasks.append(
+                    loop.create_task(
+                        _read_stream(process.stderr, lambda l: tee_func(l, err, stderr))
+                    )
+                )
+            if kwargs.get("timeout", None):
+                await asyncio.wait_for(
+                    process.wait(), timeout=kwargs.get("timeout", None)
+                )
+
+            await asyncio.wait(
+                set(tasks),
+                timeout=kwargs.get("timeout", None),
+                return_when=asyncio.FIRST_EXCEPTION,
             )
-        if kwargs.get("timeout", -1):
-            await asyncio.wait_for(process.wait(), timeout=kwargs.get("timeout", -1))
-        await asyncio.wait(set(tasks))
 
-        # We need to be sure we keep the stdout/stderr output identical with
-        # the ones procued by subprocess.run(), at least when in text mode.
-        check = kwargs.get("check", False)
-        stdout = None if check else ""
-        stderr = None if check else ""
-        if out:
-            stdout = os.linesep.join(out) + os.linesep
-        if err:
-            stderr = os.linesep.join(err) + os.linesep
+            # We need to be sure we keep the stdout/stderr output identical with
+            # the ones procued by subprocess.run(), at least when in text mode.
+            check = kwargs.get("check", False)
+            stdout = None if check else ""
+            stderr = None if check else ""
+            if out:
+                stdout = os.linesep.join(out) + os.linesep
+            if err:
+                stderr = os.linesep.join(err) + os.linesep
 
-        return CompletedProcess(
-            args=args, returncode=await process.wait(), stdout=stdout, stderr=stderr,
-        )
+            return CompletedProcess(
+                args=args, returncode=await process.wait(), stdout=stdout, stderr=stderr,
+            )
+
+        except TimeoutError as e:
+            raise e
 
 
 def run(args: Union[str, List[str]], **kwargs: Any) -> CompletedProcess:
