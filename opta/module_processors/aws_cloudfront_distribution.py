@@ -40,6 +40,14 @@ class AwsCloudfrontDstributionProcessor(ModuleProcessor):
             )
 
         links = self.module.data.get("links", [])
+        if links == [] and (
+            "bucket_name" not in self.module.data
+            or "origin_access_identity_path" not in self.module.data
+        ):
+            raise UserErrors(
+                "You need to either link 1 opta s3 bucket or provide the bucket_name and "
+                "origin_access_identity_path for your bucket."
+            )
 
         for module_name in links:
             linked_module = self.layer.get_module(module_name, module_idx)

@@ -19,11 +19,13 @@ inputs:
     description: Name of the access log bucket
     default: null
   - name: bucket_name
-    user_facing: false
+    user_facing: true
+    validator: str(required=False)
     description: The name of the s3 bucket to link to this cloudfront distribution
     default: ""
   - name: origin_access_identity_path
-    user_facing: false
+    user_facing: true
+    validator: str(required=False)
     description: The Cloudfront OAI path to use to access the buckets
     default: ""
   - name: default_page_file
@@ -48,7 +50,7 @@ inputs:
     default: []
   - name: links
     user_facing: true
-    validator: list(str(), required=True)
+    validator: list(str(), required=False)
     description: The linked s3 buckets to attach to your cloudfront distribution (currently only supports one).
     default: []
 extra_validators: { }

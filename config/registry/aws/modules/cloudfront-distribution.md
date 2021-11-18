@@ -37,6 +37,11 @@ bucket (both those uploaded with Opta and outside of Opta) being served there-- 
 path (e.g. if in your bucket you have hello.txt and subdir/hello.txt, then you should see them via 
 https://the.cloudfront.domain/hello.txt and https://the.cloudfront.domain/subdir/hello.txt).
 
+### Non-opta S3 bucket handling
+If you wish to link to a bucket created outside of opta, then you can manually set the `bucket_name` and 
+`origin_access_identity_path` fields to the name of the bucket which you wish to link to, and the path of an
+origin access identity that has read permissions to your bucket.
+
 ### Cloudfront Caching
 While your S3 bucket is the ultimate source of truth about what cloudfront serves, Cloudfronts flagship feature is its
 caching capabilities. That means that while delivery speeds are significantly faster, cloudfront may take some time
