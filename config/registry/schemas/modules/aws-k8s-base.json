@@ -66,6 +66,5 @@
   },
   "required": [
     "type"
-  ],
-  "name": "aws-k8s-base"
+  ]
 }

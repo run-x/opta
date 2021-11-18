@@ -23,6 +23,5 @@
     "clouds": [
       "aws"
     ]
-  },
-  "name": "aws-ses"
+  }
 }

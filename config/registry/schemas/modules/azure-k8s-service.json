@@ -178,6 +178,5 @@
   "required": [
     "image",
     "type"
-  ],
-  "name": "azure-k8s-service"
+  ]
 }

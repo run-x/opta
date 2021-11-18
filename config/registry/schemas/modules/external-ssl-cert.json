@@ -44,6 +44,5 @@
       "azure",
       "gcp"
     ]
-  },
-  "name": "external-ssl-cert"
+  }
 }

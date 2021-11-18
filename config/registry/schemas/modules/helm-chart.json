@@ -89,6 +89,5 @@
       "azure",
       "gcp"
     ]
-  },
-  "name": "helm-chart"
+  }
 }

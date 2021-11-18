@@ -1,0 +1,22 @@
+{
+  "$id": "https://app.runx.dev/modules/local-base",
+  "type": "object",
+  "description": "Sets up virtual network, private subnet, security groups (and their rules), default encryption key vault, and the container registry",
+  "properties": {
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "local-base"
+      ]
+    }
+  },
+  "required": [
+    "type"
+  ],
+  "opta_metadata": {
+    "module_type": "env",
+    "clouds": [
+      "local"
+    ]
+  }
+}

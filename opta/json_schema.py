@@ -15,16 +15,22 @@ schemas_path = join(dirname(dirname(__file__)), "config", "registry", "schemas")
 module_schemas_path = join(schemas_path, "modules")
 opta_config_schemas_path = join(schemas_path, "opta-config-files")
 
-CLOUD_FOLDER_NAMES = ["aws", "google", "azurerm"]
+CLOUD_FOLDER_NAMES = ["aws", "google", "azurerm", "local"]
 
 FOLDER_NAME_TO_CLOUD_LIST = {
     "aws": ["aws"],
     "azurerm": ["azure"],
     "google": ["gcp"],
     "common": ["aws", "azure", "gcp"],
+    "local": ["local"],
 }
 
-CLOUD_NAME_TO_JSON_SCHEMA_NAME = {"aws": "aws", "google": "gcp", "azurerm": "azure"}
+CLOUD_NAME_TO_JSON_SCHEMA_NAME = {
+    "aws": "aws",
+    "google": "gcp",
+    "azurerm": "azure",
+    "local": "local",
+}
 
 
 CONFIG_TYPE_ENV = "env"
@@ -72,7 +78,7 @@ def _get_all_modules(cloud: str) -> List[dict]:
 
 
 def _check_opta_config_schemas(write: bool = False) -> None:
-    for cloud in ["aws", "azurerm", "google"]:
+    for cloud in CLOUD_FOLDER_NAMES:
         for config_type in CONFIG_TYPES:
             all_modules = _get_all_modules(cloud)
             json_schema_file_path = join(
@@ -114,7 +120,7 @@ def _check_opta_config_schemas(write: bool = False) -> None:
 
 
 def _check_module_schemas(write: bool = False) -> None:
-    for cloud in ["aws", "azurerm", "google", "common"]:
+    for cloud in CLOUD_FOLDER_NAMES + ["common"]:
         module_names = _get_all_modules_names(cloud)
 
         for module_name in module_names:
@@ -124,7 +130,7 @@ def _check_module_schemas(write: bool = False) -> None:
             json_schema = _get_module_json(module_name)
 
             new_json_schema = deepcopy(json_schema)
-
+            new_json_schema["$id"] = f"https://app.runx.dev/modules/{module_name}"
             REQUIRED_FIELDS = ["description", "properties"]
             if any(p not in json_schema for p in REQUIRED_FIELDS):
                 missing_fields = [
@@ -169,6 +175,7 @@ def _check_module_schemas(write: bool = False) -> None:
             if write:
                 json_schema_file_path = _get_json_schema_module_path(module_name)
                 with open(json_schema_file_path, "w") as f:
+                    del new_json_schema["name"]
                     json.dump(new_json_schema, f, indent=2)
             else:
                 if not _deep_equals(new_json_schema, json_schema):
@@ -178,5 +185,7 @@ def _check_module_schemas(write: bool = False) -> None:
 
 
 def check_schemas(write: bool = False) -> None:
+    print("checking module schemas...")
     _check_module_schemas(write)
+    print("checking config schemas...")
     _check_opta_config_schemas(write)

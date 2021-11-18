@@ -197,6 +197,5 @@
   "required": [
     "image",
     "type"
-  ],
-  "name": "aws-k8s-service"
+  ]
 }

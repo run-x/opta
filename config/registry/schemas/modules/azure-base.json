@@ -33,6 +33,5 @@
     "clouds": [
       "azure"
     ]
-  },
-  "name": "azure-base"
+  }
 }

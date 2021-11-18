@@ -1,5 +1,5 @@
 {
-  "$id": "https://app.runx.dev/modules/atlas-mongo",
+  "$id": "https://app.runx.dev/modules/mongodb-atlas",
   "description": "Creates an Atlas Mongo database instance",
   "type": "object",
   "properties": {
@@ -67,6 +67,5 @@
       "azure",
       "gcp"
     ]
-  },
-  "name": "mongodb-atlas"
+  }
 }

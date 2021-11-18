@@ -53,6 +53,5 @@
     "clouds": [
       "aws"
     ]
-  },
-  "name": "aws-nodegroup"
+  }
 }

@@ -38,6 +38,5 @@
     "clouds": [
       "gcp"
     ]
-  },
-  "name": "gcp-k8s-base"
+  }
 }

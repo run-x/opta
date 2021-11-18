@@ -88,6 +88,5 @@
     "clouds": [
       "aws"
     ]
-  },
-  "name": "aws-s3"
+  }
 }

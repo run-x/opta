@@ -124,6 +124,5 @@
     "clouds": [
       "azure"
     ]
-  },
-  "name": "azure-aks"
+  }
 }

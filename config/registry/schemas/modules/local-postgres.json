@@ -1,0 +1,22 @@
+{
+  "$id": "https://app.runx.dev/modules/local-postgres",
+  "type": "object",
+  "description": "Creates a postgres database on the local Kubernetes cluster",
+  "properties": {
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "local-postgres"
+      ]
+    }
+  },
+  "required": [
+    "type"
+  ],
+  "opta_metadata": {
+    "module_type": "service",
+    "clouds": [
+      "local"
+    ]
+  }
+}

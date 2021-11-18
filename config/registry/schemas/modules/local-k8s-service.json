@@ -1,19 +1,21 @@
 {
-  "$id": "https://app.runx.dev/modules/gcp-k8s-service",
+  "$id": "https://app.runx.dev/modules/local-k8s-service",
+  "type": "object",
   "description": "Deploys a kubernetes app",
   "properties": {
-    "additional_iam_roles": {
-      "description": "A list of extra project-level iam roles to grant to the service account created for this k8s service",
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
+    "links": {
+      "$ref": "/common-types/links",
+      "description": "A list of extra IAM role policies not captured by Opta which you wish to give to your service.",
       "default": []
     },
     "image": {
       "type": "string",
       "description": "Set to AUTO to create a private repo for your own images. Otherwises attempts to pull image from public dockerhub",
       "default": null
+    },
+    "port": {
+      "ref": "/common-types/port-deprecated",
+      "description": "Specifies what port your app was made to be listened to. Currently it must be a map of the form\n`http: [PORT_NUMBER_HERE]` or `tcp: [PORT_NUMBER_HERE]`. Use http if you just have a vanilla http server and tcp for\nwebsockets.\n"
     },
     "min_containers": {
       "type": "integer",
@@ -43,7 +45,7 @@
     },
     "secrets": {
       "type": "array",
-      "description": "Optional. A list of secrets to add as environment variables for your container. All secrets must be set following the [secrets instructions](/tutorials/secrets) prior to deploying the app.",
+      "description": "A list of secrets to add as environment variables for your container. All secrets must be set following the [secrets instructions](/miscellaneous/secrets) prior to deploying the app.",
       "items": {
         "type": "string"
       },
@@ -136,11 +138,6 @@
       "description": "Should we keep the prefix path which you set in the public uri when forwarding requests to your service?",
       "default": false
     },
-    "links": {
-      "$ref": "/common-types/links",
-      "description": "A list of extra IAM role policies not captured by Opta which you wish to give to your service.",
-      "default": []
-    },
     "persistent_storage": {
       "type": "list",
       "description": "A list persistent storages to add to each instance of your service (need to give a `size` which is the size in GB\nfor the storage volume to be, and `path` which is the path in the filesystem of each instance to place it under)\n",
@@ -166,25 +163,21 @@
       "description": "These are extra annotations to add to ingress objects\n",
       "default": {}
     },
-    "port": {
-      "ref": "/common-types/port-deprecated",
-      "description": "Specifies what port your app was made to be listened to. Currently it must be a map of the form\n`http: [PORT_NUMBER_HERE]` or `tcp: [PORT_NUMBER_HERE]`. Use http if you just have a vanilla http server and tcp for\nwebsockets.\n"
-    },
     "type": {
       "description": "The name of this module",
       "enum": [
-        "gcp-k8s-service"
+        "local-k8s-service"
       ]
     }
-  },
-  "opta_metadata": {
-    "module_type": "service",
-    "clouds": [
-      "gcp"
-    ]
   },
   "required": [
     "image",
     "type"
-  ]
+  ],
+  "opta_metadata": {
+    "module_type": "service",
+    "clouds": [
+      "local"
+    ]
+  }
 }

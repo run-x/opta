@@ -73,6 +73,5 @@
   },
   "required": [
     "type"
-  ],
-  "name": "aws-eks"
+  ]
 }

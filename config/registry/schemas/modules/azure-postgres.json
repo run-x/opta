@@ -28,6 +28,5 @@
     "clouds": [
       "azure"
     ]
-  },
-  "name": "azure-postgres"
+  }
 }

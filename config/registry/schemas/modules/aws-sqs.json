@@ -52,6 +52,5 @@
     "clouds": [
       "aws"
     ]
-  },
-  "name": "aws-sqs"
+  }
 }

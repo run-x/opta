@@ -51,6 +51,5 @@
   },
   "required": [
     "type"
-  ],
-  "name": "aws-base"
+  ]
 }

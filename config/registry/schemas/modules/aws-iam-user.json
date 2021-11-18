@@ -31,6 +31,5 @@
   },
   "required": [
     "type"
-  ],
-  "name": "aws-iam-user"
+  ]
 }

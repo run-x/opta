@@ -38,6 +38,5 @@
     "clouds": [
       "azure"
     ]
-  },
-  "name": "azure-k8s-base"
+  }
 }

@@ -78,6 +78,5 @@
     "hash_key",
     "attributes",
     "type"
-  ],
-  "name": "aws-dynamodb"
+  ]
 }

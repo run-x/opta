@@ -35,6 +35,5 @@
   },
   "required": [
     "type"
-  ],
-  "name": "datadog"
+  ]
 }

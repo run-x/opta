@@ -20,6 +20,5 @@
   },
   "required": [
     "type"
-  ],
-  "name": "runx"
+  ]
 }

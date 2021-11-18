@@ -16,9 +16,6 @@
       "items": {
         "oneOf": [
           {
-            "$ref": "https://app.runx.dev/modules/atlas-mongo"
-          },
-          {
             "$ref": "https://app.runx.dev/modules/aws-documentdb"
           },
           {
@@ -43,13 +40,16 @@
             "$ref": "https://app.runx.dev/modules/aws-s3"
           },
           {
-            "$ref": "https://app.runx.dev/modules/aws-ses"
+            "$ref": "https://app.runx.dev/modules/aws-sns"
           },
           {
             "$ref": "https://app.runx.dev/modules/aws-sqs"
           },
           {
             "$ref": "https://app.runx.dev/modules/helm-chart"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/mongodb-atlas"
           }
         ]
       }
