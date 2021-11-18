@@ -87,7 +87,7 @@ def _check_opta_config_schemas(write: bool = False) -> None:
         new_json_schema["properties"]["modules"] = {
             "type": "array",
             "description": "The Opta modules to run in this environment",
-            "items": {"oneOf": [module_id for module_id in allowed_module_ids]},
+            "items": {"oneOf": [{"$ref": module_id} for module_id in allowed_module_ids]},
         }
 
         if write:
