@@ -25,10 +25,9 @@ This module creates an S3 bucket for storage purposes. It is created with server
 ```
 
 ### File uploading
-To help the basic use case of uploading local files to S3, the Opta S3 module now comes with a `files` field. Simply
-set this field to the path (relative to the yaml or absolute) of a directory holding the files (and any subdirectory) 
-which you wish to upload and Opta will automatically upload them to the bucket it just created with the keys being their
-filename and subdirectory path, if any. 
+To upload files to s3, just set the `files` field to the path (relative to the yaml or absolute) of a local directory. 
+On the next apply, all the files and subdirectories will be automatically uploaded to the bucket!
+
 
 So for example if you called the module like so:
 ```yaml

@@ -49,8 +49,7 @@ inputs:
   - name: links
     user_facing: true
     validator: list(str(), required=True)
-    description: |
-      The linked s3 buckets to attach to your cloudfront distribution (currently only supports one).
+    description: The linked s3 buckets to attach to your cloudfront distribution (currently only supports one).
     default: []
 extra_validators: { }
 outputs:
