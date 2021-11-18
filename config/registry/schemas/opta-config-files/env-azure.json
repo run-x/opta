@@ -24,10 +24,15 @@
               "description": "The name of the GCP project"
             }
           },
-          "required": ["region", "project"]
+          "required": [
+            "region",
+            "project"
+          ]
         }
       },
-      "required": ["google"]
+      "required": [
+        "google"
+      ]
     },
     "modules": {
       "type": "array",
@@ -56,5 +61,10 @@
       }
     }
   },
-  "required": ["name", "org_name", "providers", "modules"]
+  "required": [
+    "name",
+    "org_name",
+    "providers",
+    "modules"
+  ]
 }

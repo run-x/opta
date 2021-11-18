@@ -25,10 +25,15 @@
               "description": "The AWS access key ID"
             }
           },
-          "required": ["region", "account_id"]
+          "required": [
+            "region",
+            "account_id"
+          ]
         }
       },
-      "required": ["aws"]
+      "required": [
+        "aws"
+      ]
     },
     "modules": {
       "type": "array",
@@ -68,7 +73,14 @@
   },
   "opta_metadata": {
     "module_type": "environment",
-    "clouds": ["aws"]
+    "clouds": [
+      "aws"
+    ]
   },
-  "required": ["name", "org_name", "providers", "modules"]
+  "required": [
+    "name",
+    "org_name",
+    "providers",
+    "modules"
+  ]
 }
