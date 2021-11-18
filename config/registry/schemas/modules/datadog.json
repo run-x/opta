@@ -26,7 +26,7 @@
     }
   },
   "opta_metadata": {
-    "module_type": "environment",
+    "module_type": "env",
     "clouds": [
       "aws",
       "azure",

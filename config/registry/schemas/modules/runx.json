@@ -3,7 +3,7 @@
   "type": "object",
   "description": "Integrates with the RunX UI",
   "opta_metadata": {
-    "module_type": "environment",
+    "module_type": "env",
     "clouds": [
       "aws",
       "azure",
