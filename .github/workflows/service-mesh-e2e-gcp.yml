@@ -73,7 +73,7 @@ jobs:
           OPTA_DISABLE_REPORTING=true ./dist/opta/opta deploy \
           --image todo-api:v1 \
           --config ./examples/ci-tests/todo-list/api-service.yml \
-          --env gcpenv \
+          --env gcpenv-ci \
           --auto-approve
 
       - name: Create Test Front End Service using Release build
@@ -81,19 +81,20 @@ jobs:
           OPTA_DISABLE_REPORTING=true ./dist/opta/opta deploy \
           --image todo-frontend:v1 \
           --config ./examples/ci-tests/todo-list/frontend-service.yml \
-          --env gcpenv \
+          --env gcpenv-ci \
           --auto-approve
 
       - name: Create Test Prometheus Service using Release build
         run: |
           OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
           --config ./examples/ci-tests/todo-list/monitoring-service.yml \
-          --env gcpenv \
+          --env gcpenv-ci \
           --auto-approve
 
       - name: Ping tests for API, Frotend and Grafana
         run: |
-          export HOST_NAME=`./dist/opta/opta output -c ./examples/ci-tests/todo-list/provider-gcp.yml | jq -r '.load_balancer_raw_ip'`
+          DIRTY_HOST_NAME="{`./dist/opta/opta output -c ./examples/ci-tests/todo-list/provider-gcp.yml | grep load_balancer_raw_ip`\"\":\"\"}"
+          export HOST_NAME=`echo $DIRTY_HOST_NAME | jq -r '.load_balancer_raw_ip'`
           curl $HOST_NAME/frontend --fail
           curl $HOST_NAME/djangoapi/ht/ --fail
           curl $HOST_NAME/grafana --fail
@@ -102,21 +103,21 @@ jobs:
         run: |
           yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
           --config ./examples/ci-tests/todo-list/monitoring-service.yml \
-          --env gcpenv \
+          --env gcpenv-ci \
           --auto-approve
 
       - name: Destroy Test Front End Service using Release build
         run: |
           yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
           --config ./examples/ci-tests/todo-list/frontend-service.yml \
-          --env gcpenv \
+          --env gcpenv-ci \
           --auto-approve
 
       - name: Destroy Test API Service using Release build
         run: |
           yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
           --config ./examples/ci-tests/todo-list/api-service.yml \
-          --env gcpenv \
+          --env gcpenv-ci \
           --auto-approve
 
       - name: Destroy Test Enrironment using Release build

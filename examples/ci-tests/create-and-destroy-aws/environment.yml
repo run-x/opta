@@ -1,5 +1,5 @@
 # This opta environment is used by the test-ci job in the runxc repo.
-name: opta-ci
+name: awsenv-ci
 org_name: runx
 providers:
   aws:

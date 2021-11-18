@@ -1,7 +1,7 @@
 environments:
-  - name: awsenv
+  - name: awsenv-ci
     path: "environment.yml"
-name: websocket
+name: websocket-ci
 modules:
   - name: app
     type: k8s-service

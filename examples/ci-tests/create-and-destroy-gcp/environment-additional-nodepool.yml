@@ -1,5 +1,5 @@
-name: gcp-release
-org_name: runx-ci
+name: gcpenv-ci
+org_name: runx
 providers:
   google:
     region: us-central1

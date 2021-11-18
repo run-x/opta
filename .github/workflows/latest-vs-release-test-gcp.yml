@@ -73,7 +73,7 @@ jobs:
       - name: Set secret with Latest Opta
         run: |
           OPTA_DISABLE_REPORTING=true /home/runner/.opta/opta secret update \
-          --env gcp-release \
+          --env gcpenv-ci \
           --config ./examples/ci-tests/create-and-destroy-gcp/service.yml \
           FAKE_SECRET foo
 
@@ -81,7 +81,7 @@ jobs:
         run: |
           OPTA_DISABLE_REPORTING=true /home/runner/.opta/opta deploy \
           --image app:latest \
-          --env gcp-release \
+          --env gcpenv-ci \
           --config ./examples/ci-tests/create-and-destroy-gcp/service.yml \
           --tag ${{ github.sha }} \
           --auto-approve
@@ -89,19 +89,19 @@ jobs:
       - name: View secret and check value with Latest Opta
         run: |
           secret_value=$(OPTA_DISABLE_REPORTING=true /home/runner/.opta/opta secret view \
-          --env gcp-release \
+          --env gcpenv-ci \
           --config ./examples/ci-tests/create-and-destroy-gcp/service.yml \
           FAKE_SECRET | tail -1)
           echo "This was the found secret value: ${secret_value}"
           [[ "$secret_value" =~ .*"foo".* ]] || exit 1
 
-      - name: Set stateful data
-        env:
-          OPTA_DISABLE_REPORTING: true
-        run: |
-          export PARENT_DOMAIN=`/home/runner/.opta/opta output --env gcp-release --config ./examples/ci-tests/create-and-destroy-gcp/service.yml | jq -r '."parent.domain"'`
-          export HOST=`/home/runner/.opta/opta output --env gcp-release --config ./examples/ci-tests/create-and-destroy-gcp/service.yml | jq -r '.load_balancer_raw_ip'`
-          curl -X POST -L --header "Host: test-service.${PARENT_DOMAIN}" --fail ${HOST}/stateful
+#      - name: Set stateful data
+#        env:
+#          OPTA_DISABLE_REPORTING: true
+#        run: |
+#          export PARENT_DOMAIN=`/home/runner/.opta/opta output --env gcpenv-ci --config ./examples/ci-tests/create-and-destroy-gcp/service.yml | jq -r '."parent.domain"'`
+#          export HOST=`/home/runner/.opta/opta output --env gcpenv-ci --config ./examples/ci-tests/create-and-destroy-gcp/service.yml | jq -r '.load_balancer_raw_ip'`
+#          curl -X POST -L --header "Host: test-service.${PARENT_DOMAIN}" --fail ${HOST}/stateful
 
       - name: Apply Environment with Release Opta
         run: |
@@ -114,7 +114,7 @@ jobs:
       - name: Set secret with Release Opta
         run: |
           OPTA_DISABLE_REPORTING=true ./dist/opta/opta secret update \
-          --env gcp-release \
+          --env gcpenv-ci \
           --config ./examples/ci-tests/create-and-destroy-gcp/service.yml \
           FAKE_SECRET foo
 
@@ -122,7 +122,7 @@ jobs:
         run: |
           OPTA_DISABLE_REPORTING=true ./dist/opta/opta deploy \
           --image app:latest \
-          --env gcp-release \
+          --env gcpenv-ci \
           --config ./examples/ci-tests/create-and-destroy-gcp/service.yml \
           --tag ${{ github.sha }} \
           --auto-approve
@@ -130,7 +130,7 @@ jobs:
       - name: View secret and check value with Release Opta
         run: |
           secret_value=$(OPTA_DISABLE_REPORTING=true ./dist/opta/opta secret view \
-          --env gcp-release \
+          --env gcpenv-ci \
           --config ./examples/ci-tests/create-and-destroy-gcp/service.yml \
           FAKE_SECRET | tail -1)
           echo "This was the found secret value: ${secret_value}"
@@ -139,7 +139,7 @@ jobs:
       - name: Destroy Test Service with Release Opta
         run: |
           yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
-          --env gcp-release \
+          --env gcpenv-ci \
           --config ./examples/ci-tests/create-and-destroy-gcp/service.yml \
           --auto-approve
 
