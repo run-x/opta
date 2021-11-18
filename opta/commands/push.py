@@ -101,7 +101,7 @@ def get_acr_auth_info(layer: Layer) -> Tuple[str, str]:
         ],
         check=True,
         capture_output=True,
-    ).stdout.decode("utf-8")
+    ).stdout
     return "00000000-0000-0000-0000-000000000000", token
 
 
