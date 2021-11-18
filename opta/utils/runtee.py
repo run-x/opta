@@ -4,7 +4,7 @@
 import asyncio
 import os
 import platform
-import subprocess
+import subprocess # nosec
 import sys
 from asyncio import StreamReader
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
@@ -17,7 +17,7 @@ else:
 try:
     from shlex import join  # type: ignore
 except ImportError:
-    from subprocess import list2cmdline as join  # pylint: disable=ungrouped-imports
+    from subprocess import list2cmdline as join  # pylint: disable=ungrouped-imports # nosec
 
 
 STREAM_LIMIT = 2 ** 23  # 8MB instead of default 64kb, override it if you need
