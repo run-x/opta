@@ -73,7 +73,9 @@ class AmplitudeClient:
             return
         event_properties = event_properties or {}
         user_properties = user_properties or {}
-        insert_id = "".join(random.choices(string.ascii_letters + string.digits, k=16))
+        insert_id = "".join(
+            random.choices(string.ascii_letters + string.digits, k=16)  # nosec
+        )
         if event_type not in self.VALID_EVENTS:
             raise Exception(f"Invalid event type: {event_type}")
         body = {
