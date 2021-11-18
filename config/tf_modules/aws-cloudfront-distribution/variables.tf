@@ -1,5 +1,5 @@
 locals {
-  s3_origin_id    = "optaDefaultOriginId"
+  s3_origin_id = "optaDefaultOriginId"
 }
 
 variable "env_name" {
