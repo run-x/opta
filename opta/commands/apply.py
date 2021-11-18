@@ -256,7 +256,7 @@ def _apply(
                         f"-out={TF_PLAN_PATH}",
                         layer=layer,
                         *targets,
-                        quiet=False,
+                        quiet=True,
                     )
                 except CalledProcessError as e:
                     logger.error(e.stderr or b"")

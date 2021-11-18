@@ -9,7 +9,7 @@ import psutil
 from opta.utils.runtee import run
 
 
-def signal_all_child_processes(sig=signal.SIGINT):
+def signal_all_child_processes(sig: int = signal.SIGINT) -> None:
     current_process = psutil.Process()
     children = current_process.children(recursive=True)
     for child in children:

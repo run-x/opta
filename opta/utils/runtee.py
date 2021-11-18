@@ -1,8 +1,8 @@
+# type: ignore
 """tee like run implementation."""
 import asyncio
 import os
 import platform
-import signal
 import subprocess
 import sys
 from asyncio import StreamReader

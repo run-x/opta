@@ -324,10 +324,9 @@ class Terraform:
             kwargs["stderr"] = PIPE
             kwargs["stdout"] = DEVNULL
         try:
-            result = nice_run(
+            _ = nice_run(
                 ["terraform", "plan", "-compact-warnings", *tf_flags],
                 check=True,
-                bufsize=1,
                 **kwargs,
             )
         except CalledProcessError as e:
