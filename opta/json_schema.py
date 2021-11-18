@@ -77,15 +77,17 @@ def _check_opta_config_schemas(write: bool = False) -> None:
         json_schema = json.load(json_schema_file)
         new_json_schema = deepcopy(json_schema)
 
-        allowed_modules = [
-            module
-            for module in all_modules
-            if module["opta_metadata"]["module_type"] == "environment"
-        ]
+        allowed_module_ids = sorted(
+            [
+                module["$id"]
+                for module in all_modules
+                if module["opta_metadata"]["module_type"] == "environment"
+            ]
+        )
         new_json_schema["properties"]["modules"] = {
             "type": "array",
             "description": "The Opta modules to run in this environment",
-            "items": {"oneOf": [{"$ref": module["$id"]} for module in allowed_modules]},
+            "items": {"oneOf": [module_id for module_id in allowed_module_ids]},
         }
 
         if write:
