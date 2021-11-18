@@ -7,6 +7,8 @@ import subprocess
 import sys
 from typing import Collection
 
+from opta.json_schema import check_schemas
+
 # One script for all linting
 # By default runs all checks on the whole repo (used via CI)
 # With --precommit runs checks on staged files
@@ -64,7 +66,9 @@ def py_check(files_changed: Collection[str], precommit: bool, apply: bool) -> in
     logging.info("Running py checks...")
     logging.info(cmd)
 
-    return os.system(cmd)
+    os.system(cmd)
+
+    check_schemas(write=precommit or apply)
 
 
 if __name__ == "__main__":
