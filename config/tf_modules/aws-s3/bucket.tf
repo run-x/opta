@@ -71,14 +71,6 @@ resource "aws_cloudfront_origin_access_identity" "read" {
 }
 
 
-resource "aws_cloudfront_origin_access_identity" "read_write" {
-  comment = "For writing to bucket ${var.bucket_name}"
-}
-
-resource "aws_cloudfront_origin_access_identity" "read_write_delete" {
-  comment = "For deleting and writing to bucket ${var.bucket_name}"
-}
-
 data "aws_iam_policy_document" "s3_policy" {
   source_json = var.bucket_policy == null ? "" : var.bucket_policy
   statement {
@@ -90,32 +82,6 @@ data "aws_iam_policy_document" "s3_policy" {
       type = "AWS"
       identifiers = [
         aws_cloudfront_origin_access_identity.read.iam_arn,
-      ]
-    }
-  }
-
-  statement {
-    sid       = "Cloudfront Writing"
-    actions   = ["s3:ListBucket", "s3:GetObject", "s3:PutObject"]
-    resources = [aws_s3_bucket.bucket.arn, "${aws_s3_bucket.bucket.arn}/*"]
-
-    principals {
-      type = "AWS"
-      identifiers = [
-        aws_cloudfront_origin_access_identity.read_write.iam_arn,
-      ]
-    }
-  }
-
-  statement {
-    sid       = "Cloudfront Writing and deleting"
-    actions   = ["s3:ListBucket", "s3:GetObject", "s3:PutObject", "s3:DeleteObject", "s3:DeleteObjectVersion"]
-    resources = [aws_s3_bucket.bucket.arn, "${aws_s3_bucket.bucket.arn}/*"]
-
-    principals {
-      type = "AWS"
-      identifiers = [
-        aws_cloudfront_origin_access_identity.read_write_delete.iam_arn
       ]
     }
   }

@@ -1,5 +1,6 @@
 halt: false
 environment_module: false
+terraform_module: aws-cloudfront-distribution
 inputs:
   - name: env_name
     user_facing: false
@@ -25,10 +26,6 @@ inputs:
     user_facing: false
     description: The Cloudfront OAI path to use to access the buckets
     default: ""
-  - name: access_type
-    user_facing: false
-    description: The Cloudfront-S3 access type. Can be read, read_write, or read_write_delete
-    default: "read"
   - name: default_page_file
     user_facing: true
     validator: str(required=False)
@@ -51,14 +48,11 @@ inputs:
     default: []
   - name: links
     user_facing: true
-    validator: list(any(str(), map(str, include('links'))), required=True)
+    validator: list(str(), required=True)
     description: |
       The linked s3 buckets to attach to your cloudfront distribution (currently only supports one).
-      Please designate access_type as shown in description (defaults to read if none specified)
     default: []
-extra_validators:
-  links:
-    access: str(required=True)
+extra_validators: { }
 outputs:
   - name: cloudfront_domain
     export: true

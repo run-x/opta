@@ -35,6 +35,4 @@ module_aliases:
   base: aws-base
   k8s-base: aws-k8s-base
   k8s-cluster: aws-eks
-  cloudfront-distribution: aws-cloudfront-distribution
-  s3: aws-s3
   dns: aws-dns

@@ -117,7 +117,7 @@ class Layer:
         "custom-terraform": CustomTerraformProcessor,
         "aws-dynamodb": AwsDynamodbProcessor,
         "mongodb-atlas": MongodbAtlasProcessor,
-        "aws-cloudfront-distribution": AwsCloudfrontDstributionProcessor,
+        "cloudfront-distribution": AwsCloudfrontDstributionProcessor,
     }
 
     def __init__(

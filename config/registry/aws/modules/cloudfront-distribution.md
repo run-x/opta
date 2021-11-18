@@ -8,7 +8,8 @@ description: Set up a cloudfront distribution to serve static files form your s3
 ---
 
 This module sets up a cloudfront distribution for you, tailored towards serving static websites/files from an Opta s3 
-bucket. Now, hosting your static site with opta can be as simple as:
+bucket (currently just for a single S3, but will expand for more complex usage in the future). Now, hosting your 
+static site with opta can be as simple as:
 
 ```yaml
 name: testing-cloufront
@@ -18,7 +19,7 @@ providers:
     region: us-east-1
     account_id: XXXXXXXXXX
 modules:
-  - type: s3
+  - type: aws-s3
     name: blah
     bucket_name: "opta-is-testing-cloudfront"
     files: "./my-site-files" # See S3 module for more info about uploading your files t S3
@@ -51,14 +52,3 @@ If you are ready to start hosting your site with your domain via the cloudfront 
    record for the domain you wish to use for cloudfront and point it at the `cloudfront_domain` gotten above.
 3. Set the acm_cert_arn and domains fields in opta accordingly
 4. Opta apply and you're done!
-
-### Bucket Access level
-By default, the Cloudfront distribution will only allow the public to read (i.e. view/download) the files in your bucket,
-but that doesn't need to be the case. If you so wish you can allow the public to upload files to your bucket, or even
-delete. This can be enabled via the optional "access" field in the link:
-```yaml
-    links:
-      - blah:
--         access: "read_write"
-```
-Possible values are read (the default, same behavior as if not mentioning the access), read_write, and read_write_delete.

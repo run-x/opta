@@ -55,7 +55,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   aliases = var.domains
 
   default_cache_behavior {
-    allowed_methods  = local.allowed_methods
+    allowed_methods  = ["GET", "HEAD", "OPTIONS"]
     cached_methods   = ["GET", "HEAD", "OPTIONS"]
     target_origin_id = local.s3_origin_id
 

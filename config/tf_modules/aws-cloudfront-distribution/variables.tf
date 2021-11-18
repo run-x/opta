@@ -1,6 +1,5 @@
 locals {
   s3_origin_id    = "optaDefaultOriginId"
-  allowed_methods = var.access_type == "read" ? ["GET", "HEAD", "OPTIONS"] : var.access_type == "read_write" ? ["GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"] : ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
 }
 
 variable "env_name" {
@@ -44,10 +43,6 @@ variable "origin_access_identity_path" {}
 variable "price_class" {
   type    = string
   default = "PriceClass_200"
-}
-
-variable "access_type" {
-  type = string
 }
 
 variable "acm_cert_arn" {

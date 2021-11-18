@@ -25,7 +25,7 @@ class AwsS3Processor(ModuleProcessor):
             aws_base_modules = self.layer.parent.get_module_by_type("aws-base")
 
         if len(aws_base_modules) == 0:
-            logger.warn(
+            logger.debug(
                 "Did not find the aws-base module. "
                 "This is highly recommended even for SPA as it sets up logging/auditing buckets"
             )
