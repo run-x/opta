@@ -1,6 +1,7 @@
 # type: ignore
 import os
 from asyncio import TimeoutError
+from time import sleep
 
 import pytest
 
@@ -32,7 +33,7 @@ class TestNiceRun:
 
         with pytest.raises(TimeoutError):
             nice_run(["python", SIGNAL_HANDLER_SCRIPT], timeout=3)
-
+        sleep(5)
         assert os.path.exists(GRACEFUL_TERMINATION_FILE)
 
         # clean up
