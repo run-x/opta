@@ -8,6 +8,8 @@ description: Creates an S3 bucket for storage purposes
 ---
 
 This module creates an S3 bucket for storage purposes. It is created with server-side AES256 encryption.
+It additionally creates a Cloudfront Origin Access Identity with read privileges to be used if the bucket
+is ever used to serve static files with Cloudfront.
 
 
 ### Example
@@ -52,6 +54,10 @@ Then Opta would upload 4 files to your S3 bucket, with the S3 keys being `hello2
 
 Opta will also catch any changes to the files on the next `opta apply` and will push updates as needed. Opta supports
 extensive MIME parsing, so it also makes sure to set the content type correctly.
+
+### Cloudfront
+This module can be [linked to Opta's cloudfront module](/reference/aws/service_modules/cloudfront-distribution/) in order to serve static files.
+
 
 ### Linking
 

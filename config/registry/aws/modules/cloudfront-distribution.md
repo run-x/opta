@@ -4,7 +4,7 @@ linkTitle: "cloudfront-distribution"
 date: 2021-11-16
 draft: false
 weight: 1
-description: Set up a cloudfront distribution to serve static files from your s3 bucket
+description: Set up a cloudfront distribution
 ---
 
 This module sets up a cloudfront distribution for you, tailored towards serving static websites/files from an Opta s3 

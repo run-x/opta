@@ -66,6 +66,7 @@ resource "aws_s3_bucket" "bucket" {
   }
 }
 
+# It's fine adding this as it's just creating something akin to an IAM role.
 resource "aws_cloudfront_origin_access_identity" "read" {
   comment = "For reading bucket ${var.bucket_name}"
 }

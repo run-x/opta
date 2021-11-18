@@ -3,6 +3,6 @@ resource "aws_s3_bucket_object" "user_files" {
   bucket       = aws_s3_bucket.bucket.id
   key          = each.key
   source       = "${var.files}/${each.key}"
-  content_type = lookup(local.mime_types, regex("\\.[^.]+$", each.key), "binary/octet-stream")
+  content_type = lookup(local.mime_types, try(regex("\\.[^.]+$", each.key), ""), "binary/octet-stream")
   source_hash  = filemd5("${var.files}/${each.key}")
 }
