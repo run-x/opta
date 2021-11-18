@@ -20,6 +20,11 @@ waivers[waiver] {
     "rule_id": "FG_R00100",
     "resource_id": "aws_s3_bucket.bucket"
   }
+} {
+  waiver := {
+    "rule_id": "FG_R00010",
+    "resource_id": "aws_cloudfront_distribution.s3_distribution"
+  }
 }
 
 rules[rule] {
@@ -45,6 +50,16 @@ rules[rule] {
 } {
   rule := {
     "rule_id": "FG_R00433",
+    "status": "DISABLED"
+  }
+} {
+  rule := {
+    "rule_id": "FG_R00018",
+    "status": "DISABLED"
+  }
+} {
+  rule := {
+    "rule_id": "FG_R00073",
     "status": "DISABLED"
   }
 }
