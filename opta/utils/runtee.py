@@ -1,4 +1,5 @@
 # type: ignore
+# nosec
 """tee like run implementation."""
 import asyncio
 import os

@@ -6,7 +6,7 @@ from typing import Optional, Union
 
 import psutil
 
-from opta.utils.runtee import run
+from opta.utils.runtee import run  # type: ignore
 
 
 def signal_all_child_processes(sig: int = signal.SIGINT) -> None:
