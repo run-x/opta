@@ -32,7 +32,8 @@ inputs:
     user_facing: true
     validator: str(required=False)
     description: The name of the existing s3 object in your bucket which will serve as the default page.
-    default: null
+    default: "index.html"
+    force_update_default_counter: 1
   - name: price_class
     user_facing: true
     validator: str(required=False)

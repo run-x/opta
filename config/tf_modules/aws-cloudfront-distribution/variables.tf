@@ -23,7 +23,7 @@ variable "s3_log_bucket_name" {
 
 variable "default_page_file" {
   type    = string
-  default = null
+  default = "index.html"
 }
 
 variable "status_404_page_file" {

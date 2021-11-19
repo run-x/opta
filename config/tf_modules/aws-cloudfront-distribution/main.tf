@@ -1,17 +1,5 @@
-resource "random_string" "default-suffix" {
-  length  = 7
-  special = false
-}
-
 data "aws_s3_bucket" "current_bucket" {
   bucket = var.bucket_name
-}
-
-resource "aws_s3_bucket_object" "default_page" {
-  bucket       = data.aws_s3_bucket.current_bucket.id
-  key          = "opta-default-page-${random_string.default-suffix.result}.html"
-  source       = "${path.module}/default.html"
-  content_type = "text/html"
 }
 
 resource "aws_cloudfront_distribution" "s3_distribution" {
@@ -27,7 +15,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   enabled             = true
   is_ipv6_enabled     = true
   comment             = "Opta managed cloudfront distribution ${var.layer_name}-${var.module_name}"
-  default_root_object = var.default_page_file == null ? aws_s3_bucket_object.default_page.key : var.default_page_file
+  default_root_object = var.default_page_file
 
   dynamic "logging_config" {
     for_each = var.s3_log_bucket_name == null ? [] : [1]
@@ -38,18 +26,24 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     }
   }
 
-  custom_error_response {
-    error_caching_min_ttl = 10
-    error_code            = 404
-    response_code         = 404
-    response_page_path    = var.status_404_page_file == null ? "/${aws_s3_bucket_object.default_page.key}" : var.status_404_page_file
+  dynamic "custom_error_response" {
+    for_each = var.status_404_page_file == null ? [] : [1]
+    content {
+      error_caching_min_ttl = 10
+      error_code            = 404
+      response_code         = 404
+      response_page_path    = var.status_404_page_file
+    }
   }
 
-  custom_error_response {
-    error_caching_min_ttl = 10
-    error_code            = 500
-    response_code         = 500
-    response_page_path    = var.status_500_page_file == null ? "/${aws_s3_bucket_object.default_page.key}" : var.status_500_page_file
+  dynamic "custom_error_response" {
+    for_each = var.status_500_page_file == null ? [] : [1]
+    content {
+      error_caching_min_ttl = 10
+      error_code            = 500
+      response_code         = 500
+      response_page_path    = var.status_500_page_file
+    }
   }
 
   aliases = var.domains
