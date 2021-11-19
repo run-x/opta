@@ -15,7 +15,7 @@ class AwsCloudfrontDstributionProcessor(ModuleProcessor):
             raise Exception(
                 f"The module {module.name} was expected to be of type aws cloudfront distribution"
             )
-        super(AwsCloudfrontDstributionProcessor, self).__init__(module, layer)
+        super().__init__(module, layer)
 
     def process(self, module_idx: int) -> None:
         aws_base_modules = self.layer.get_module_by_type("aws-base", module_idx)
