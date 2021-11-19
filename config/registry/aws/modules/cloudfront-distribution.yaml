@@ -34,6 +34,16 @@ inputs:
     description: The name of the existing s3 object in your bucket which will serve as the default page.
     default: "index.html"
     force_update_default_counter: 1
+  - name: status_404_page_file
+    user_facing: true
+    validator: str(required=False)
+    description: The name of the existing s3 object in your bucket which will serve as the 404 page.
+    default: null
+  - name: status_500_page_file
+    user_facing: true
+    validator: str(required=False)
+    description: The name of the existing s3 object in your bucket which will serve as the 500 page.
+    default: null
   - name: price_class
     user_facing: true
     validator: str(required=False)

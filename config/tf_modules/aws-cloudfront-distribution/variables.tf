@@ -23,17 +23,14 @@ variable "s3_log_bucket_name" {
 
 variable "default_page_file" {
   type    = string
-  default = "index.html"
 }
 
 variable "status_404_page_file" {
   type    = string
-  default = null
 }
 
 variable "status_500_page_file" {
   type    = string
-  default = null
 }
 
 variable "bucket_name" {}
@@ -42,12 +39,10 @@ variable "origin_access_identity_path" {}
 
 variable "price_class" {
   type    = string
-  default = "PriceClass_200"
 }
 
 variable "acm_cert_arn" {
   type    = string
-  default = null
 }
 
 variable "domains" {

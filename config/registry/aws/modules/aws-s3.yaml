@@ -46,7 +46,7 @@ inputs:
     user_facing: true
     validator: str(required=False)
     description: |
-      The path (can be relative) to a directory holding files which you wish to upload to the s3 bucket.
+      The path (can be relative to the opta yaml) to a directory holding files which you wish to upload to the s3 bucket.
       The files will have the same names and any subdirectories will similarly be included and uploaded as subdir/path/filename.
     default: null
 extra_validators:

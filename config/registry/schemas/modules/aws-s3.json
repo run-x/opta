@@ -20,7 +20,7 @@
     },
     "files": {
       "type": "string",
-      "description": "The path (can be relative) to a directory holding files which you wish to upload to the s3 bucket.\nThe files will have the same names and any subdirectories will similarly be included and uploaded as subdir/path/filename.\n",
+      "description": "The path (can be relative to the opta yaml) to a directory holding files which you wish to upload to the s3 bucket.\nThe files will have the same names and any subdirectories will similarly be included and uploaded as subdir/path/filename.\n",
       "default": null
     },
     "bucket_policy": {
