@@ -10,3 +10,6 @@ description: Creates a GKE cluster and a default nodegroup to host your applicat
 This module creates a [GKE cluster](https://cloud.google.com/kubernetes-engine/docs/concepts/kubernetes-engine-overview), and a default
 node pool to host your applications in. This needs to be added in the environment Opta yml if you wish to deploy services
 as Opta services run on Kubernetes.
+
+For information about the default IAM permissions given to the node pool please see 
+[here](/reference/google/environment_modules/gcp-nodepool).
