@@ -22,15 +22,15 @@ variable "s3_log_bucket_name" {
 }
 
 variable "default_page_file" {
-  type    = string
+  type = string
 }
 
 variable "status_404_page_file" {
-  type    = string
+  type = string
 }
 
 variable "status_500_page_file" {
-  type    = string
+  type = string
 }
 
 variable "bucket_name" {}
@@ -38,11 +38,11 @@ variable "bucket_name" {}
 variable "origin_access_identity_path" {}
 
 variable "price_class" {
-  type    = string
+  type = string
 }
 
 variable "acm_cert_arn" {
-  type    = string
+  type = string
 }
 
 variable "domains" {
