@@ -13,6 +13,16 @@
       "description": "The cloudfront price class for this distribution. Can be PriceClass_All, PriceClass_200, or PriceClass_100",
       "default": "PriceClass_200"
     },
+    "origin_access_identity_path": {
+      "type": "string",
+      "description": "The Cloudfront OAI path to use to access the buckets",
+      "default": ""
+    },
+    "bucket_name": {
+      "type": "string",
+      "description": "The name of the s3 bucket to link to this cloudfront distribution",
+      "default": ""
+    },
     "acm_cert_arn": {
       "type": "string",
       "description": "The ACM certificate arn you wish to use to handle ssl (needed if you want https for your site)",
@@ -50,7 +60,6 @@
     }
   },
   "required": [
-    "links",
     "type"
   ],
   "opta_metadata": {
