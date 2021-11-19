@@ -4,7 +4,7 @@
 import asyncio
 import os
 import platform
-import subprocess # nosec
+import subprocess  # nosec
 import sys
 from asyncio import StreamReader
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
@@ -17,7 +17,9 @@ else:
 try:
     from shlex import join  # type: ignore
 except ImportError:
-    from subprocess import list2cmdline as join  # pylint: disable=ungrouped-imports # nosec
+    from subprocess import (
+        list2cmdline as join,  # pylint: disable=ungrouped-imports # nosec
+    )
 
 
 STREAM_LIMIT = 2 ** 23  # 8MB instead of default 64kb, override it if you need
@@ -66,7 +68,7 @@ async def _stream_subprocess(args: str, **kwargs: Any) -> CompletedProcess:
             process = await asyncio.create_subprocess_shell(
                 args,
                 limit=STREAM_LIMIT,
-                stdin=kwargs.get("stdin", False),
+                stdin=kwargs.get("input", False),
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
                 **platform_settings,
