@@ -1,6 +1,7 @@
 import os
 import signal
 from asyncio import TimeoutError
+from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess  # nosec
 from typing import Optional, Union
 
@@ -23,22 +24,29 @@ def nice_run(  # type: ignore # nosec
     capture_output: bool = False,
     timeout: Optional[float] = None,
     exit_timeout: Optional[float] = None,
+    tee: Optional[bool] = True,
     check: bool = False,
     **kwargs,
 ) -> CompletedProcess:
 
     try:
+        Path("/tmp/optainput.tmp").touch()
+        if input:
+            with open("/tmp/optainput.tmp", "wb") as f:
+                f.write(input)  # type: ignore
         listargs = list(popenargs)
         listargs[0].insert(0, "exec")
         popenargs = tuple(listargs)
         result = run(
             *popenargs,
-            input=input,
+            input=open("/tmp/optainput.tmp", "rb"),
             timeout=timeout,
             check=check,
+            tee=tee,
             capture_output=capture_output,
             **kwargs,
         )
+        os.remove("/tmp/optainput.tmp")
     except TimeoutError as exc:
         print("Timeout while running command")
         signal_all_child_processes()

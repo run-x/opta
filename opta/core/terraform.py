@@ -71,7 +71,7 @@ class Terraform:
     @classmethod
     def get_version(cls) -> str:
         out = nice_run(
-            ["terraform", "version", "-json"], check=True, capture_output=True
+            ["terraform", "version", "-json"], check=True, capture_output=True, tee=False
         ).stdout
         terraform_data = json.loads(out)
         return terraform_data["terraform_version"]
@@ -327,6 +327,7 @@ class Terraform:
             _ = nice_run(
                 ["terraform", "plan", "-compact-warnings", *tf_flags],
                 check=True,
+                tee=False,
                 **kwargs,
             )
         except CalledProcessError as e:
@@ -338,7 +339,10 @@ class Terraform:
         try:
             if capture_output:
                 out = nice_run(
-                    ["terraform", "show", *tf_flags], check=True, capture_output=True,
+                    ["terraform", "show", *tf_flags],
+                    check=True,
+                    capture_output=True,
+                    tee=False,
                 ).stdout
                 return out
             nice_run(["terraform", "show", *tf_flags], check=True, **kwargs)
