@@ -31,22 +31,32 @@ def nice_run(  # type: ignore # nosec
 
     try:
         Path("/tmp/optainput.tmp").touch()
-        if input:
-            with open("/tmp/optainput.tmp", "wb") as f:
-                f.write(input)  # type: ignore
         listargs = list(popenargs)
         listargs[0].insert(0, "exec")
         popenargs = tuple(listargs)
-        result = run(
-            *popenargs,
-            input=open("/tmp/optainput.tmp", "rb"),
-            timeout=timeout,
-            check=check,
-            tee=tee,
-            capture_output=capture_output,
-            **kwargs,
-        )
-        os.remove("/tmp/optainput.tmp")
+        if input:
+            with open("/tmp/optainput.tmp", "wb") as f:
+                f.write(input)  # type: ignore
+            result = run(
+                *popenargs,
+                input=open("/tmp/optainput.tmp", "rb"),
+                timeout=timeout,
+                check=check,
+                tee=tee,
+                capture_output=capture_output,
+                **kwargs,
+            )
+            os.remove("/tmp/optainput.tmp")
+        else:
+            result = run(
+                *popenargs,
+                timeout=timeout,
+                check=check,
+                tee=tee,
+                capture_output=capture_output,
+                **kwargs,
+            )
+
     except TimeoutError as exc:
         print("Timeout while running command")
         signal_all_child_processes()
