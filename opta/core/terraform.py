@@ -58,11 +58,8 @@ class Terraform:
             kwargs["stdout"] = DEVNULL
         try:
             nice_run(["terraform", "init", *tf_flags], check=True, **kwargs)
-        except CalledProcessError as e:
-            logger.error("TERRAFORM INIT")
-            logger.error("STDOUT:\n{}".format(e.stdout))
-            logger.error("STDERR:\n{}".format(e.stderr))
-            raise e
+        except CalledProcessError:
+            raise
 
     # Get outputs of the current terraform state
     @classmethod
@@ -85,11 +82,8 @@ class Terraform:
             ).stdout
             terraform_data = json.loads(out)
             return terraform_data["terraform_version"]
-        except CalledProcessError as e:
-            logger.error("TERRAFORM GET VERSION")
-            logger.error("STDOUT:\n{}".format(e.stdout))
-            logger.error("STDERR:\n{}".format(e.stderr))
-            raise e
+        except CalledProcessError:
+            raise
 
     # Get the full terraform state.
     @classmethod
@@ -148,11 +142,8 @@ class Terraform:
                 check=True,
                 **kwargs,
             )
-        except CalledProcessError as e:
-            logger.error("TERRAFORM APPLY ERROR")
-            logger.error("STDOUT:\n{}".format(e.stdout))
-            logger.error("STDERR:\n{}".format(e.stderr))
-            raise e
+        except CalledProcessError:
+            raise
 
     @classmethod
     def import_resource(
@@ -204,11 +195,8 @@ class Terraform:
                     check=True,
                     **kwargs,
                 )
-            except CalledProcessError as e:
-                logger.error("TERRAFORM DESTROY")
-                logger.error("STDOUT:\n{}".format(e.stdout))
-                logger.error("STDERR:\n{}".format(e.stderr))
-                raise e
+            except CalledProcessError:
+                raise
 
     @classmethod
     def destroy_all(cls, layer: "Layer", *tf_flags: str) -> None:
@@ -237,11 +225,8 @@ class Terraform:
                 )
                 layer.post_delete(idx)
                 idx -= 1
-            except CalledProcessError as e:
-                logger.error("TERRAFORM DESTROY ALL")
-                logger.error("STDOUT:\n{}".format(e.stdout))
-                logger.error("STDERR:\n{}".format(e.stderr))
-                raise e
+            except CalledProcessError:
+                raise
 
         # After the layer is completely deleted, remove the opta config from the state bucket.
         if layer.cloud == "aws":
@@ -354,11 +339,8 @@ class Terraform:
                 tee=False,
                 **kwargs,
             )
-        except CalledProcessError as e:
-            logger.error("TERRAFORM PLAN")
-            logger.error("STDOUT:\n{}".format(e.stdout))
-            logger.error("STDERR:\n{}".format(e.stderr))
-            raise e
+        except CalledProcessError:
+            raise
 
     @classmethod
     def show(cls, *tf_flags: str, capture_output: bool = False) -> Optional[str]:
@@ -373,11 +355,8 @@ class Terraform:
                 ).stdout
                 return out
             nice_run(["terraform", "show", *tf_flags], check=True, **kwargs)
-        except CalledProcessError as e:
-            logger.error("TERRAFORM SHOW")
-            logger.error("STDOUT:\n{}".format(e.stdout))
-            logger.error("STDERR:\n{}".format(e.stderr))
-            raise e
+        except CalledProcessError:
+            raise
 
         return None
 

@@ -1,6 +1,7 @@
 # type: ignore
 # nosec
 """tee like run implementation."""
+"""Originally from here:  https://github.com/pycontribs/subprocess-tee/, MIT license"""
 import asyncio
 import os
 import platform
