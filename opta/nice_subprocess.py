@@ -4,9 +4,10 @@ import signal
 import sys
 from asyncio import TimeoutError
 from pathlib import Path
-from subprocess import CalledProcessError, CompletedProcess #nosec
-from typing import Optional, Union
+from subprocess import CalledProcessError, CompletedProcess  # nosec
 from traceback import format_exc
+from typing import Optional, Union
+
 import psutil
 
 from opta.constants import DEV_VERSION, VERSION
@@ -14,19 +15,24 @@ from opta.datadog_logging import DatadogLogHandler
 from opta.utils import ansi_scrub
 from opta.utils.runtee import run  # type: ignore
 
+# Datadog logging setup for nice subprocess
+dd_handler = DatadogLogHandler()
+nice_logger = logging.getLogger(__name__)
+nice_logger.setLevel(logging.DEBUG)
+nice_logger.addHandler(dd_handler)
+nice_logger.propagate = False
+
 
 def log_to_datadog(msg: str, severity: str) -> None:
     msg = ansi_scrub(msg)
-    dd_handler = DatadogLogHandler()
     if hasattr(sys, "_called_from_test") or VERSION == DEV_VERSION or not VERSION:
-        print("Not logging to Datadog as this is a dev/test version of opta")
-        print("Would have logged this string:\n")
+        print("Not logging to Datadog as this appears to be a dev/test version of opta")
+        print("Would have logged this string to DD:\n")
+        print(">>>>>>>>>>>>>>>>>>>>Datadog log start")
         print(msg)
+        print("<<<<<<<<<<<<<<<<<<<<Datadog log end")
         dd_handler.setLevel(logging.CRITICAL)
-    nice_logger = logging.getLogger(__name__)
-    nice_logger.setLevel(logging.DEBUG)
-    nice_logger.addHandler(dd_handler)
-    nice_logger.propagate = False
+
     if severity == "ERROR":
         nice_logger.error(msg)
     else:
@@ -94,7 +100,7 @@ def nice_run(  # type: ignore # nosec
         raise k
     except CalledProcessError as e:
         log_to_datadog(
-            "SUBPROCESS CALLEDPROCESSERROR STDOUT:\n{}\nSTDERR:\n{}\n".format(
+            "SUBPROCESS CALLEDPROCESSERROR\n STDOUT:\n{}\nSTDERR:\n{}\n".format(
                 e.stdout, e.stderr
             ),
             "ERROR",
@@ -105,9 +111,6 @@ def nice_run(  # type: ignore # nosec
         raise e
 
     log_to_datadog(
-        "SUBPROCESS NORMAL RUN\nSTDOUT:\n{}\nSTDERR:\n{}\n".format(
-            result.stdout, result.stderr
-        ),
-        "INFO",
+        "SUBPROCESS NORMAL RUN\nSTDOUT:\n{}\n".format(result.stdout), "INFO",
     )
     return result
