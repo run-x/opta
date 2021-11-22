@@ -46,6 +46,9 @@
             "$ref": "https://app.runx.dev/modules/aws-sqs"
           },
           {
+            "$ref": "https://app.runx.dev/modules/cloudfront-distribution"
+          },
+          {
             "$ref": "https://app.runx.dev/modules/helm-chart"
           },
           {

@@ -20,7 +20,7 @@ from opta.utils import check_opta_file_exists, column_print, deep_merge, json
     "-e", "--env", default=None, help="The env to use when loading the config file"
 )
 def inspect(config: str, env: Optional[str]) -> None:
-    """ Displays important resources and AWS/Datadog links to them """
+    """Displays important resources and AWS/Datadog links to them"""
 
     pre_check()
 

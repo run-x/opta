@@ -39,6 +39,9 @@ from opta.core.validator import validate_yaml
 from opta.crash_reporter import CURRENT_CRASH_REPORTER
 from opta.exceptions import UserErrors
 from opta.module import Module
+from opta.module_processors.aws_cloudfront_distribution import (
+    AwsCloudfrontDstributionProcessor,
+)
 from opta.module_processors.aws_dns import AwsDnsProcessor
 from opta.module_processors.aws_document_db import AwsDocumentDbProcessor
 from opta.module_processors.aws_dynamodb import AwsDynamodbProcessor
@@ -114,6 +117,7 @@ class Layer:
         "custom-terraform": CustomTerraformProcessor,
         "aws-dynamodb": AwsDynamodbProcessor,
         "mongodb-atlas": MongodbAtlasProcessor,
+        "cloudfront-distribution": AwsCloudfrontDstributionProcessor,
     }
 
     def __init__(

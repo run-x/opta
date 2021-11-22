@@ -132,6 +132,7 @@ def _fetch_children_layers(layer: "Layer") -> List[str]:
 # Get the names for all services for this environment based on the bucket file paths
 def _azure_get_configs(layer: "Layer") -> List[str]:
     providers = layer.gen_providers(0)
+
     credentials = Azure.get_credentials()
     storage_account_name = providers["terraform"]["backend"]["azurerm"][
         "storage_account_name"

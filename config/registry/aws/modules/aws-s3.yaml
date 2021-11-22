@@ -38,9 +38,16 @@ inputs:
     description: A custom s3 policy json/yaml to add.
     default: null
   - name: cors_rule
-    user_facing: bool
+    user_facing: true
     validator: include('cors', required=False)
     description: A custom cors policy.
+    default: null
+  - name: files
+    user_facing: true
+    validator: str(required=False)
+    description: |
+      The path (can be relative to the opta yaml) to a directory holding files which you wish to upload to the s3 bucket.
+      The files will have the same names and any subdirectories will similarly be included and uploaded as subdir/path/filename.
     default: null
 extra_validators:
   cors:
@@ -56,5 +63,8 @@ outputs:
   - name: bucket_arn
     export: true
     description: The arn of the S3 bucket
+  - name: cloudfront_read_path
+    export: true
+    description: The path of the cloud front origin access identity created for reading objects in this bucket
 output_providers: { }
 output_data: { }

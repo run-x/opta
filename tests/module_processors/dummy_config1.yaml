@@ -94,3 +94,7 @@ modules:
         type: S
       - name: baloney
         type: N
+  - type: cloudfront-distribution
+    name: cloudfront
+    links:
+      - bucket1

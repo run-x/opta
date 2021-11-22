@@ -1,7 +1,8 @@
-from typing import TYPE_CHECKING
+import os
+from typing import TYPE_CHECKING, Optional
 
-from opta.exceptions import UserErrors
 from opta.module_processors.base import ModuleProcessor
+from opta.utils import logger
 
 if TYPE_CHECKING:
     from opta.layer import Layer
@@ -18,21 +19,28 @@ class AwsS3Processor(ModuleProcessor):
 
     def process(self, module_idx: int) -> None:
         aws_base_modules = self.layer.get_module_by_type("aws-base", module_idx)
+        from_parent = False
         if len(aws_base_modules) == 0 and self.layer.parent is not None:
             from_parent = True
             aws_base_modules = self.layer.parent.get_module_by_type("aws-base")
 
         if len(aws_base_modules) == 0:
-            raise UserErrors(
-                "Did not find the aws-eks module in the layer or the parent layer"
+            logger.debug(
+                "Did not find the aws-base module. "
+                "This is highly recommended even for SPA as it sets up logging/auditing buckets"
             )
-
-        module_source = (
-            "data.terraform_remote_state.parent.outputs"
-            if from_parent
-            else f"module.{aws_base_modules[0].name}"
-        )
-        self.module.data["s3_log_bucket_name"] = self.module.data.get(
-            "s3_log_bucket_name", f"${{{{{module_source}.s3_log_bucket_name}}}}"
-        )
+        else:
+            module_source = (
+                "data.terraform_remote_state.parent.outputs"
+                if from_parent
+                else f"module.{aws_base_modules[0].name}"
+            )
+            self.module.data["s3_log_bucket_name"] = self.module.data.get(
+                "s3_log_bucket_name", f"${{{{{module_source}.s3_log_bucket_name}}}}"
+            )
+        file_path: Optional[str] = self.module.data.get("files")
+        if file_path is not None and not file_path.startswith("/"):
+            self.module.data["files"] = os.path.join(
+                os.path.dirname(self.layer.path), file_path
+            )
         super(AwsS3Processor, self).process(module_idx)

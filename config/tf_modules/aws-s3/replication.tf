@@ -77,9 +77,12 @@ resource "aws_s3_bucket" "replica" {
     enabled = true
   }
 
-  logging {
-    target_bucket = var.s3_log_bucket_name
-    target_prefix = "log/"
+  dynamic "logging" {
+    for_each = var.s3_log_bucket_name == null ? [] : [1]
+    content {
+      target_bucket = var.s3_log_bucket_name
+      target_prefix = "log/"
+    }
   }
 
   lifecycle_rule {

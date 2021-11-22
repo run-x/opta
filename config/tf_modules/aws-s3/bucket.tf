@@ -12,10 +12,12 @@ resource "aws_s3_bucket" "bucket" {
   versioning {
     enabled = true
   }
-
-  logging {
-    target_bucket = var.s3_log_bucket_name
-    target_prefix = "log/"
+  dynamic "logging" {
+    for_each = var.s3_log_bucket_name == null ? [] : [1]
+    content {
+      target_bucket = var.s3_log_bucket_name
+      target_prefix = "log/"
+    }
   }
 
   lifecycle_rule {
@@ -64,6 +66,28 @@ resource "aws_s3_bucket" "bucket" {
   }
 }
 
+# It's fine adding this as it's just creating something akin to an IAM role.
+resource "aws_cloudfront_origin_access_identity" "read" {
+  comment = "For reading bucket ${var.bucket_name}"
+}
+
+
+data "aws_iam_policy_document" "s3_policy" {
+  source_json = var.bucket_policy == null ? "" : var.bucket_policy
+  statement {
+    sid       = "Cloudfront Reading"
+    actions   = ["s3:ListBucket", "s3:GetObject"]
+    resources = [aws_s3_bucket.bucket.arn, "${aws_s3_bucket.bucket.arn}/*"]
+
+    principals {
+      type = "AWS"
+      identifiers = [
+        aws_cloudfront_origin_access_identity.read.iam_arn,
+      ]
+    }
+  }
+}
+
 resource "aws_s3_bucket_public_access_block" "block" {
   count  = var.block_public ? 1 : 0
   bucket = aws_s3_bucket.bucket.id
@@ -75,7 +99,6 @@ resource "aws_s3_bucket_public_access_block" "block" {
 }
 
 resource "aws_s3_bucket_policy" "policy" {
-  count  = var.bucket_policy == null ? 0 : 1
   bucket = aws_s3_bucket.bucket.id
-  policy = var.bucket_policy == null ? null : jsonencode(var.bucket_policy)
+  policy = data.aws_iam_policy_document.s3_policy.json
 }

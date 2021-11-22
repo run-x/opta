@@ -170,7 +170,7 @@ class TestLayer:
         assert layer.name == "dummy-config-1"
         assert layer.parent is not None
         assert layer.parent == layer.root()
-        assert len(layer.modules) == 15
+        assert len(layer.modules) == 16
         assert layer.pre_hook(13) is None
         assert layer.post_hook(13, None) is None
 
