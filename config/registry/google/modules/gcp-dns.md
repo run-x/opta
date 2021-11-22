@@ -20,8 +20,8 @@ remove their current dns module, and then add a new one after applying.
 Take for example, if we had the current running environment:
 
 ```yaml
-name: blah
-org_name: baloney
+name: staging
+org_name: mycompany
 providers:
   google:
     region: us-central1
@@ -29,7 +29,7 @@ providers:
 modules:
   - type: base
   - type: dns
-    domain: baloney.dev
+    domain: mycompany.dev
   - type: k8s-cluster
   - type: k8s-base
 ```
@@ -37,8 +37,8 @@ modules:
 Supposed we wished to change the domain to "otherdomain.dev". First we would remove the dns module:
 
 ```yaml
-name: blah
-org_name: baloney
+name: staging
+org_name: mycompany
 providers:
   google:
     region: us-central1
@@ -54,8 +54,8 @@ Next we would `opta apply` the new yaml and see that the dns resources have been
 Afterwards we would add the new dns module entry with the new domain like so:
 
 ```yaml
-name: blah
-org_name: baloney
+name: staging
+org_name: mycompany
 providers:
   google:
     region: us-central1
