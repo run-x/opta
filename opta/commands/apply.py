@@ -259,7 +259,7 @@ def _apply(
                         quiet=True,
                     )
                 except CalledProcessError as e:
-                    logger.error(e.stderr or b"")
+                    logger.error(e.stderr or "")
                     raise e
                 PlanDisplayer.display(detailed_plan=detailed_plan)
 
