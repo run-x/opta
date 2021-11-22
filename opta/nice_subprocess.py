@@ -2,6 +2,7 @@ import logging
 import os
 import signal
 import sys
+import tempfile
 from asyncio import TimeoutError
 from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess  # nosec
@@ -9,7 +10,7 @@ from traceback import format_exc
 from typing import Optional, Union
 
 import psutil
-import tempfile
+
 from opta.constants import DEV_VERSION, VERSION
 from opta.datadog_logging import DatadogLogHandler
 from opta.utils import ansi_scrub
@@ -65,7 +66,7 @@ def nice_run(  # type: ignore # nosec
         log_to_datadog(
             "Calling subprocess with these arguments:\n" + " ".join(*popenargs), "INFO"
         )
-        
+
         with tempfile.TemporaryFile() as f:
             if input:
                 f.write(input)  # type: ignore
