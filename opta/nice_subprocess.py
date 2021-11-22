@@ -63,6 +63,7 @@ def nice_run(  # type: ignore # nosec
         listargs = list(popenargs)
         listargs[0].insert(0, "exec")
         popenargs = tuple(listargs)
+        log_to_datadog("Calling subprocess with these arguments:\n" + " ".join(*popenargs),"INFO")
         if input:
             with open("/tmp/optainput.tmp", "wb") as f:
                 f.write(input)  # type: ignore
