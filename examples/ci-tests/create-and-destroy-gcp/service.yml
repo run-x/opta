@@ -15,6 +15,8 @@ modules:
         value: "{env}"
       - name: CLOUD_PROVIDER
         value: gcp
+      - name: BUCKET_NAME
+        value: "${{module.bucket.bucket_id}}"
     secrets:
       - FAKE_SECRET
     links:
