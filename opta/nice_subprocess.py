@@ -9,7 +9,7 @@ from traceback import format_exc
 from typing import Optional, Union
 
 import psutil
-
+import tempfile
 from opta.constants import DEV_VERSION, VERSION
 from opta.datadog_logging import DatadogLogHandler
 from opta.utils import ansi_scrub
@@ -59,35 +59,35 @@ def nice_run(  # type: ignore # nosec
 ) -> CompletedProcess:
 
     try:
-        Path("/tmp/optainput.tmp").touch()
         listargs = list(popenargs)
         listargs[0].insert(0, "exec")
         popenargs = tuple(listargs)
         log_to_datadog(
             "Calling subprocess with these arguments:\n" + " ".join(*popenargs), "INFO"
         )
-        if input:
-            with open("/tmp/optainput.tmp", "wb") as f:
+        
+        with tempfile.TemporaryFile() as f:
+            if input:
                 f.write(input)  # type: ignore
-            result = run(
-                *popenargs,
-                input=open("/tmp/optainput.tmp", "rb"),
-                timeout=timeout,
-                check=check,
-                tee=tee,
-                capture_output=capture_output,
-                **kwargs,
-            )
-            os.remove("/tmp/optainput.tmp")
-        else:
-            result = run(
-                *popenargs,
-                timeout=timeout,
-                check=check,
-                tee=tee,
-                capture_output=capture_output,
-                **kwargs,
-            )
+                f.seek(0)
+                result = run(
+                    *popenargs,
+                    input=f,
+                    timeout=timeout,
+                    check=check,
+                    tee=tee,
+                    capture_output=capture_output,
+                    **kwargs,
+                )
+            else:
+                result = run(
+                    *popenargs,
+                    timeout=timeout,
+                    check=check,
+                    tee=tee,
+                    capture_output=capture_output,
+                    **kwargs,
+                )
 
     except TimeoutError as exc:
         print("Timeout while running command")
