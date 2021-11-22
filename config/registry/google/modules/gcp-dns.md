@@ -23,9 +23,9 @@ Take for example, if we had the current running environment:
 name: blah
 org_name: baloney
 providers:
-  aws:
-    region: us-east-1
-    account_id: XXXXXXXXXXXX
+  google:
+    region: us-central1
+    project: XXX
 modules:
   - type: base
   - type: dns
@@ -40,9 +40,9 @@ Supposed we wished to change the domain to "otherdomain.dev". First we would rem
 name: blah
 org_name: baloney
 providers:
-  aws:
-    region: us-east-1
-    account_id: XXXXXXXXXXXX
+  google:
+    region: us-central1
+    project: XXX
 modules:
   - type: base
   - type: k8s-cluster
@@ -57,9 +57,9 @@ Afterwards we would add the new dns module entry with the new domain like so:
 name: blah
 org_name: baloney
 providers:
-  aws:
-    region: us-east-1
-    account_id: XXXXXXXXXXXX
+  google:
+    region: us-central1
+    project: XXX
 modules:
   - type: base
   - type: dns
