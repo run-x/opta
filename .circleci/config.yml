@@ -2,14 +2,115 @@
 # See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
 
+parameters:
+  # A parameter per package
+  run-create-and-destroy:
+    type: boolean
+    default: false
+  run-aws-create-and-destroy:
+    type: boolean
+    default: false
+  run-gcp-create-and-destroy:
+    type: boolean
+    default: false
+
+
+orbs:
+  terraform: circleci/terraform@3.0.0
+
+executors:
+  ubuntu_machine:
+    machine:
+      image: ubuntu-2004:202111-01
+  base:
+    docker:
+      - image: cimg/base:stable
+
+commands:
+  install-python:
+    steps:
+      - run:
+          name: "Installing python version 3.8"
+          command: |
+            pyenv install 3.8.0
+            pyenv global 3.8.0
+  install-python-dependencies:
+    steps:
+      - run:
+          name: "Install python dependencies"
+          command: |
+            pip install pipenv
+            pipenv install --deploy --dev
+            source $(pipenv --venv)/bin/activate
+
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
+  no-pdb:
+    executor: ubuntu_machine
+    steps:
+      - checkout
+      - run:
+          name: "No PDB"
+          command: |
+            cd scripts
+            ./no_pdb.sh
+  lint:
+    executor: ubuntu_machine
+    steps:
+      - checkout
+      - install-python
+      - install-python-dependencies
+      - run:
+          name: "Lint"
+          command: |
+            source $(pipenv --venv)/bin/activate
+            export PYTHONPATH=$(pwd)
+            ./scripts/lint.py
+
+  python-security:
+    executor: ubuntu_machine
+    steps:
+      - checkout
+      - install-python
+      - install-python-dependencies
+      - run:
+          name: "Security"
+          command: "make security_tests"
+
+  terraform-formatter:
+    executor: ubuntu_machine
+    steps:
+      - checkout
+      - terraform/install:
+          arch: amd64
+          os: linux
+          terraform_version: 1.0.0
+      - run:
+          name: "Run terraform format"
+          command: "terraform fmt -recursive -check ./config/tf_modules"
+
+  run-aws-create-and-destroy:
+    executor: base
+    steps:
+      - checkout
+      - terraform/install:
+          arch: amd64
+          os: linux
+          terraform_version: 0.14.2
+      - run:
+          name: "Say hello"
+          command: "echo Hello, World!"
+  run-gcp-create-and-destroy:
+    executor: base
+    steps:
+      - checkout
+      - run:
+          name: "Say hello"
+          command: "echo Hello, World!"
+
   say-hello:
-    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
-    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
-    docker:
-      - image: cimg/base:stable
+    executor: base
     # Add steps to the job
     # See: https://circleci.com/docs/2.0/configuration-reference/#steps
     steps:
@@ -21,6 +122,39 @@ jobs:
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
-  say-hello-workflow:
+  version: 2
+  run-create-and-destroy:
+    when: << pipeline.parameters.run-create-and-destroy >>
+    jobs:
+      - run-aws-create-and-destroy
+      - run-gcp-create-and-destroy
+
+  run-aws-create-and-destroy:
+    when: << pipeline.parameters.run-aws-create-and-destroy >>
+    jobs:
+      - run-aws-create-and-destroy
+
+  run-gcp-create-and-destroy:
+    when: << pipeline.parameters.run-gcp-create-and-destroy >>
+    jobs:
+      - run-gcp-create-and-destroy
+
+  run-ci:
     jobs:
       - say-hello
+      - no-pdb
+      - lint
+      - python-security
+      - terraform-formatter
+
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 2 * * *"
+          filters:
+            branches:
+              only:
+                - main
+    jobs:
+      - run-aws-create-and-destroy
+      - run-gcp-create-and-destroy
