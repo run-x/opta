@@ -6,12 +6,6 @@ parameters:
   # A parameter per package
   run-create-and-destroy:
     type: boolean
-    default: false
-  run-aws-create-and-destroy:
-    type: boolean
-    default: true
-  run-gcp-create-and-destroy:
-    type: boolean
     default: true
   no-ci:
     type: boolean
@@ -50,6 +44,16 @@ commands:
             pip install pipenv
             pipenv install --deploy --dev
             source $(pipenv --venv)/bin/activate
+
+  install-opta-dependencies:
+    steps:
+      - terraform/install:
+          arch: amd64
+          os: linux
+          terraform_version: 1.0.0
+      - kubernetes/install-kubectl
+      - helm/install-helm-client:
+          version: v3.7.1
 
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
@@ -129,6 +133,96 @@ jobs:
       - run:
           name: "Run terraform format"
           command: "terraform fmt -recursive -check ./config/tf_modules"
+
+  build-opta-binary:
+    executor: ubuntu_machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - install-python
+      - install-python-dependencies
+      - run:
+          name: "Build opta binary"
+          command: |
+            source $(pipenv --venv)/bin/activate
+            export PYTHONPATH=$(pwd)
+            make build-binary
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - dist
+
+  aws-create-env:
+    executor: ubuntu_machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - attach_workspace:
+          at: ./
+      - checkout
+      - install-opta-dependencies
+      - aws-cli/install
+      - aws-cli/setup
+      - run:
+          name: "Deploy opta environment"
+          command: |
+            ./dist/opta/opta apply \
+            --config ./examples/ci-tests/create-and-destroy-aws/environment.yml \
+            --auto-approve \
+            --refresh
+  gcp-create-env:
+    executor: ubuntu_machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - attach_workspace:
+          at: ./
+      - checkout
+      - install-opta-dependencies
+      - gcp-cli/install
+      - gcp-cli/initialize
+      - run:
+          name: "Deploy opta environment"
+          command: |
+            ./dist/opta/opta apply \
+            --config ./examples/ci-tests/create-and-destroy-gcp/environment.yml \
+            --auto-approve \
+            --refresh
+
+  aws-test-websocket:
+    executor: ubuntu_machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - attach_workspace:
+          at: ./
+      - checkout
+      - install-opta-dependencies
+      - aws-cli/install
+      - aws-cli/setup
+      - run:
+          name: "Apply Websocket Service with Opta"
+          command: |
+            OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-aws/websocket-service.yml \
+            --auto-approve
+      - run:
+          name: "Test Websocket"
+          command: |
+            sleep 20
+            source $(pipenv --venv)/bin/activate
+            export HOST=`./dist/opta/opta output --env awsenv-ci --config ./examples/ci-tests/create-and-destroy-aws/websocket-service.yml | jq -r '.load_balancer_raw_dns'`
+            python ./examples/ci-tests/create-and-destroy-aws/websocket-validate.py
+            exit $?
+      - run:
+          name: "Destroy Websocket Service with Opta"
+          command: |
+            yes | ./dist/opta/opta destroy \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-aws/websocket-service.yml \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   run-aws-create-and-destroy:
     executor: ubuntu_machine
@@ -373,18 +467,16 @@ workflows:
   run-create-and-destroy:
     when: << pipeline.parameters.run-create-and-destroy >>
     jobs:
-      - run-aws-create-and-destroy
-      - run-gcp-create-and-destroy
-
-  run-aws-create-and-destroy:
-    when: << pipeline.parameters.run-aws-create-and-destroy >>
-    jobs:
-      - run-aws-create-and-destroy
-
-  run-gcp-create-and-destroy:
-    when: << pipeline.parameters.run-gcp-create-and-destroy >>
-    jobs:
-      - run-gcp-create-and-destroy
+      - build-opta-binary
+      - aws-create-env:
+          requires:
+            - build-opta-binary
+      - aws-test-websocket:
+          requires:
+            -  aws-create-env
+      - gcp-create-env:
+          requires:
+            - build-opta-binary
 
   run-ci:
     when:
