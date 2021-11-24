@@ -17,6 +17,7 @@ parameters:
 
 orbs:
   terraform: circleci/terraform@3.0.0
+  codecov: codecov/codecov@3.1.1
 
 executors:
   ubuntu_machine:
@@ -92,6 +93,20 @@ jobs:
           name: "Security"
           command: "make security_tests"
 
+  pytest:
+    executor: python-docker
+    steps:
+      - checkout
+      - install-python-dependencies
+      - run:
+          name: "Test with pytest"
+          command: |
+            export PYTHONPATH=$(pwd)
+            pipenv run pytest --cov=./opta --cov-report=xml
+      - codecov/upload:
+          flags: unittests
+          file: ./coverage.xml
+
   terraform-formatter:
     executor: ubuntu_machine
     steps:
@@ -162,6 +177,7 @@ workflows:
       - python-security
       - terraform-formatter
       - regula-lint
+      - pytest
 
   nightly:
     triggers:
