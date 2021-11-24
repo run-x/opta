@@ -210,7 +210,7 @@ jobs:
             --image app:latest \
             --env awsenv-ci \
             --config ./examples/ci-tests/create-and-destroy-aws/service.yml \
-            --tag ${{ github.sha }} \
+            --tag $CIRCLE_SHA1 \
             --auto-approve
       - run:
           name: "Deploy test-service with Additional PG"
@@ -219,7 +219,7 @@ jobs:
             --image app:latest \
             --env awsenv-ci \
             --config ./examples/ci-tests/create-and-destroy-aws/service-additional-pg.yml \
-            --tag ${{ github.sha }} \
+            --tag $CIRCLE_SHA1 \
             --auto-approve
       - run:
           name: "Deploy test-service remove Additional PG"
@@ -228,7 +228,7 @@ jobs:
             --image app:latest \
             --env awsenv-ci \
             --config ./examples/ci-tests/create-and-destroy-aws/service.yml \
-            --tag ${{ github.sha }} \
+            --tag $CIRCLE_SHA1 \
             --auto-approve
       - run:
           name: "View secret and check value"
