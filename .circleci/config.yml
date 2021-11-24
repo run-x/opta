@@ -9,13 +9,13 @@ parameters:
     default: false
   run-aws-create-and-destroy:
     type: boolean
-    default: false
+    default: true
   run-gcp-create-and-destroy:
     type: boolean
     default: false
   no-ci:
     type: boolean
-    default: false
+    default: true
 
 
 orbs:
@@ -153,7 +153,7 @@ jobs:
       - run:
           name: "Deploy opta environment"
           command: |
-            /dist/opta/opta apply \
+            ./dist/opta/opta apply \
             --config ./examples/ci-tests/create-and-destroy-aws/environment.yml \
             --auto-approve \
             --refresh
