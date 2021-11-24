@@ -169,6 +169,7 @@ jobs:
       - run:
           name: "Test Websocket"
           command: |
+            sleep 20
             source $(pipenv --venv)/bin/activate
             export HOST=`./dist/opta/opta output --env awsenv-ci --config ./examples/ci-tests/create-and-destroy-aws/websocket-service.yml | jq -r '.load_balancer_raw_dns'`
             python ./examples/ci-tests/create-and-destroy-aws/websocket-validate.py
@@ -176,10 +177,10 @@ jobs:
       - run:
           name: "Destroy Websocket Service with Opta"
           command: |
-            yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
+            yes | ./dist/opta/opta destroy \
             --env awsenv-ci \
             --config ./examples/ci-tests/create-and-destroy-aws/websocket-service.yml \
-            --auto-approve
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
       - run:
           name: "Add additional Node Group to Opta Environment."
           command: |
@@ -244,10 +245,10 @@ jobs:
             yes | ./dist/opta/opta destroy \
             --env awsenv-ci \
             --config ./examples/ci-tests/create-and-destroy-aws/service.yml \
-            --auto-approve
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
             yes | ./dist/opta/opta destroy \
             --config ./examples/ci-tests/create-and-destroy-aws/environment.yml \
-            --auto-approve
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   run-gcp-create-and-destroy:
     executor: ubuntu_machine
