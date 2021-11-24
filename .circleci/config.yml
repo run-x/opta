@@ -24,6 +24,7 @@ orbs:
   aws-cli: circleci/aws-cli@2.0
   kubernetes: circleci/kubernetes@0.12.1
   helm: circleci/helm@1.2.0
+  gcp-cli: circleci/gcp-cli@2.4.0
 
 executors:
   ubuntu_machine:
@@ -255,11 +256,105 @@ jobs:
 
   run-gcp-create-and-destroy:
     executor: ubuntu_machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - terraform/install:
+          arch: amd64
+          os: linux
+          terraform_version: 1.0.0
+      - kubernetes/install-kubectl
+      - helm/install-helm-client:
+          version: v3.7.1
       - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
+          name: "Git clone the test service"
+          command: "git clone git@github.com:run-x/test-service.git"
+      - install-python
+      - install-python-dependencies
+      - gcp-cli/install
+      - gcp-cli/initialize
+      - run:
+          name: "Build opta binary"
+          command: |
+            source $(pipenv --venv)/bin/activate
+            export PYTHONPATH=$(pwd)
+            make build-binary
+      - run:
+          name: "Deploy opta environment"
+          command: |
+            ./dist/opta/opta apply \
+            --config ./examples/ci-tests/create-and-destroy-gcp/environment.yml \
+            --auto-approve \
+            --refresh
+      - run:
+          name: "Add additional Node Group to Opta Environment."
+          command: |
+            ./dist/opta/opta apply \
+            --config ./examples/ci-tests/create-and-destroy-gcp/environment-additional-nodegroup.yml \
+            --auto-approve
+      - run:
+          name: "Remove additional Node Group from Opta Environment"
+          command: |
+            ./dist/opta/opta apply \
+            --config ./examples/ci-tests/create-and-destroy-gcp/environment.yml \
+            --auto-approve
+      - run:
+          name: "Build test-service image"
+          command: docker build -t app:latest -f test-service/Dockerfile test-service/
+      - run:
+          name: "Set secret"
+          command: |
+            ./dist/opta/opta secret update \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-gcp/service.yml \
+            FAKE_SECRET foo
+      - run:
+          name: "Deploy test-service"
+          command: |
+            ./dist/opta/opta deploy \
+            --image app:latest \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-gcp/service.yml \
+            --tag $CIRCLE_SHA1 \
+            --auto-approve
+      - run:
+          name: "Deploy test-service with Additional PG"
+          command: |
+            ./dist/opta/opta deploy \
+            --image app:latest \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-gcp/service-additional-pg.yml \
+            --tag $CIRCLE_SHA1 \
+            --auto-approve
+      - run:
+          name: "Deploy test-service remove Additional PG"
+          command: |
+            ./dist/opta/opta deploy \
+            --image app:latest \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-gcp/service.yml \
+            --tag $CIRCLE_SHA1 \
+            --auto-approve
+      - run:
+          name: "View secret and check value"
+          command: |
+            secret_value=$(./dist/opta/opta secret view \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-gcp/service.yml \
+            FAKE_SECRET | tail -1)
+            echo "This was the found secret value: ${secret_value}"
+            [[ "$secret_value" =~ .*"foo".* ]] || exit 1
+      - run:
+          name: "Destroy environment (and test service)"
+          command: |
+            yes | ./dist/opta/opta destroy \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-gcp/service.yml \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+            yes | ./dist/opta/opta destroy \
+            --config ./examples/ci-tests/create-and-destroy-gcp/environment.yml \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   say-hello:
     executor: ubuntu_machine
