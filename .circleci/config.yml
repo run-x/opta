@@ -136,7 +136,7 @@ jobs:
       - terraform/install:
           arch: amd64
           os: linux
-          terraform_version: 0.14.2
+          terraform_version: 1.0.0
       - run:
           name: "Git clone the test service"
           command: "git clone git@github.com:run-x/test-service.git"
