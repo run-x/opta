@@ -145,9 +145,6 @@ jobs:
       - aws-cli/install
       - aws-cli/setup
       - run:
-          name: "Git clone the test service"
-          command: "git clone git@github.com:run-x/test-service.git"
-      - run:
           name: "Build opta binary"
           command: |
             source $(pipenv --venv)/bin/activate
