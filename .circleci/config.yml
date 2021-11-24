@@ -158,9 +158,9 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
+      - checkout
       - attach_workspace:
           at: ./
-      - checkout
       - install-opta-dependencies
       - aws-cli/install
       - aws-cli/setup
@@ -176,9 +176,9 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
+      - checkout
       - attach_workspace:
           at: ./
-      - checkout
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -195,9 +195,9 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
+      - checkout
       - attach_workspace:
           at: ./
-      - checkout
       - install-opta-dependencies
       - aws-cli/install
       - aws-cli/setup
