@@ -141,7 +141,7 @@ jobs:
           terraform_version: 1.0.0
       - kubernetes/install-kubectl
       - helm/install-helm-client:
-          helm-version: v3.7.1
+          version: v3.7.1
       - run:
           name: "Git clone the test service"
           command: "git clone git@github.com:run-x/test-service.git"
