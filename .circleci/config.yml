@@ -461,7 +461,7 @@ jobs:
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
   version: 2
-  run-create-and-destroy:
+  run-create-and-destroy: &id001
     when: << pipeline.parameters.run-create-and-destroy >>
     jobs:
       - build-opta-binary
@@ -517,6 +517,4 @@ workflows:
             branches:
               only:
                 - main
-    jobs:
-      - run-aws-create-and-destroy
-      - run-gcp-create-and-destroy
+    jobs: *id001
