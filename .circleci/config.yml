@@ -461,9 +461,9 @@ jobs:
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
   version: 2
-  run-create-and-destroy: &id001
+  run-create-and-destroy:
     when: << pipeline.parameters.run-create-and-destroy >>
-    jobs:
+    jobs: &id001
       - build-opta-binary
       - aws-create-env:
           requires:
@@ -493,7 +493,6 @@ workflows:
             - gcp-create-env
       - gcp-destroy-env:
           requires:
-            - gcp-test-websocket
             - gcp-test-additional-nodegroup
             - gcp-test-service
 
