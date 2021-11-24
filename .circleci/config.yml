@@ -22,6 +22,7 @@ orbs:
   terraform: circleci/terraform@3.0.0
   codecov: codecov/codecov@3.1.1
   aws-cli: circleci/aws-cli@2.0
+  kubernetes: circleci/kubernetes@0.12.1
 
 executors:
   ubuntu_machine:
@@ -137,6 +138,7 @@ jobs:
           arch: amd64
           os: linux
           terraform_version: 1.0.0
+      - kubernetes/install-kubectl
       - run:
           name: "Git clone the test service"
           command: "git clone git@github.com:run-x/test-service.git"
