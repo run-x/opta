@@ -13,11 +13,15 @@ parameters:
   run-gcp-create-and-destroy:
     type: boolean
     default: false
+  no-ci:
+    type: boolean
+    default: false
 
 
 orbs:
   terraform: circleci/terraform@3.0.0
   codecov: codecov/codecov@3.1.1
+  aws-cli: circleci/aws-cli@2.0
 
 executors:
   ubuntu_machine:
@@ -125,6 +129,8 @@ jobs:
 
   run-aws-create-and-destroy:
     executor: ubuntu_machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
       - terraform/install:
@@ -132,8 +138,117 @@ jobs:
           os: linux
           terraform_version: 0.14.2
       - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
+          name: "Git clone the test service"
+          command: "git clone git@github.com:run-x/test-service.git"
+      - install-python
+      - install-python-dependencies
+      - aws-cli/install
+      - aws-cli/setup
+      - run:
+          name: "Git clone the test service"
+          command: "git clone git@github.com:run-x/test-service.git"
+      - run:
+          name: "Build opta binary"
+          command: |
+            source $(pipenv --venv)/bin/activate
+            export PYTHONPATH=$(pwd)
+            make build-binary
+      - run:
+          name: "Deploy opta environment"
+          command: |
+            /dist/opta/opta apply \
+            --config ./examples/ci-tests/create-and-destroy-aws/environment.yml \
+            --auto-approve \
+            --refresh
+      - run:
+          name: "Apply Websocket Service with Opta"
+          command: |
+            OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-aws/websocket-service.yml \
+            --auto-approve
+      - run:
+          name: "Test Websocket"
+          command: |
+            source $(pipenv --venv)/bin/activate
+            export HOST=`./dist/opta/opta output --env awsenv-ci --config ./examples/ci-tests/create-and-destroy-aws/websocket-service.yml | jq -r '.load_balancer_raw_dns'`
+            python ./examples/ci-tests/create-and-destroy-aws/websocket-validate.py
+            exit $?
+      - run:
+          name: "Destroy Websocket Service with Opta"
+          command: |
+            yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-aws/websocket-service.yml \
+            --auto-approve
+      - run:
+          name: "Add additional Node Group to Opta Environment."
+          command: |
+            ./dist/opta/opta apply \
+            --config ./examples/ci-tests/create-and-destroy-aws/environment-additional-nodegroup.yml \
+            --auto-approve
+      - run:
+          name: "Remove additional Node Group from Opta Environment"
+          command: |
+            ./dist/opta/opta apply \
+            --config ./examples/ci-tests/create-and-destroy-aws/environment.yml \
+            --auto-approve
+      - run:
+          name: "Build test-service image"
+          command: docker build -t app:latest -f test-service/Dockerfile test-service/
+      - run:
+          name: "Set secret"
+          command: |
+            ./dist/opta/opta secret update \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-aws/service.yml \
+            FAKE_SECRET foo
+      - run:
+          name: "Deploy test-service"
+          command: |
+            ./dist/opta/opta deploy \
+            --image app:latest \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-aws/service.yml \
+            --tag ${{ github.sha }} \
+            --auto-approve
+      - run:
+          name: "Deploy test-service with Additional PG"
+          command: |
+            ./dist/opta/opta deploy \
+            --image app:latest \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-aws/service-additional-pg.yml \
+            --tag ${{ github.sha }} \
+            --auto-approve
+      - run:
+          name: "Deploy test-service remove Additional PG"
+          command: |
+            ./dist/opta/opta deploy \
+            --image app:latest \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-aws/service.yml \
+            --tag ${{ github.sha }} \
+            --auto-approve
+      - run:
+          name: "View secret and check value"
+          command: |
+            secret_value=$(./dist/opta/opta secret view \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-aws/service.yml \
+            FAKE_SECRET | tail -1)
+            echo "This was the found secret value: ${secret_value}"
+            [[ "$secret_value" =~ .*"foo".* ]] || exit 1
+      - run:
+          name: "Destroy environment (and test service)"
+          command: |
+            yes | ./dist/opta/opta destroy \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-aws/service.yml \
+            --auto-approve
+            yes | ./dist/opta/opta destroy \
+            --config ./examples/ci-tests/create-and-destroy-aws/environment.yml \
+            --auto-approve
 
   run-gcp-create-and-destroy:
     executor: ubuntu_machine
@@ -174,6 +289,8 @@ workflows:
       - run-gcp-create-and-destroy
 
   run-ci:
+    when:
+      not: << pipeline.parameters.no-ci >>
     jobs:
       - say-hello
       - no-pdb
