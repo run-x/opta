@@ -12,7 +12,7 @@ parameters:
     default: true
   run-gcp-create-and-destroy:
     type: boolean
-    default: false
+    default: true
   no-ci:
     type: boolean
     default: true
