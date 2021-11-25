@@ -355,7 +355,7 @@ jobs:
           name: "Add additional Node Group to Opta Environment."
           command: |
             ./dist/opta/opta apply \
-            --config ./examples/ci-tests/create-and-destroy-gcp/environment-additional-nodegroup.yml \
+            --config ./examples/ci-tests/create-and-destroy-gcp/environment-additional-nodepool.yml \
             --auto-approve
       - run:
           name: "Remove additional Node Group from Opta Environment"
@@ -375,6 +375,9 @@ jobs:
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
+      - run:
+          name: "Git clone the test service"
+          command: "git clone git@github.com:run-x/test-service.git"
       - run:
           name: "Build test-service image"
           command: docker build -t app:latest -f test-service/Dockerfile test-service/
