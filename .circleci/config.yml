@@ -352,6 +352,9 @@ jobs:
       - gcp-cli/install
       - gcp-cli/initialize
       - run:
+          name: "Setting up gcp envar"
+          command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+      - run:
           name: "Add additional Node Group to Opta Environment."
           command: |
             ./dist/opta/opta apply \
@@ -375,6 +378,9 @@ jobs:
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
+      - run:
+          name: "Setting up gcp envar"
+          command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
       - run:
           name: "Git clone the test service"
           command: "git clone git@github.com:run-x/test-service.git"
@@ -443,6 +449,9 @@ jobs:
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
+      - run:
+          name: "Setting up gcp envar"
+          command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
       - run:
           name: "Destroy environment"
           command: |
