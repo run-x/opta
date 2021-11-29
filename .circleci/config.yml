@@ -773,7 +773,7 @@ workflows:
             - gcp-test-service-gcs
 
   run-ci:
-    when: << pipeline.parameters.no-ci >>
+    when: << pipeline.parameters.run-ci >>
     jobs:
       - say-hello
       - no-pdb
