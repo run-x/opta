@@ -153,6 +153,26 @@ jobs:
           paths:
             - dist
 
+  build-test-service-image:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - run:
+          name: "Git clone the test service"
+          command: "git clone git@github.com:run-x/test-service.git"
+      - run:
+          name: "Build test-service image"
+          command: docker build -t app:latest -f test-service/Dockerfile test-service/
+      - run:
+          name: "Save test service"
+          command: docker save -o test-service-image app:latest
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - test-service-image
+
   aws-create-env:
     executor: ubuntu-machine
     environment:
@@ -231,7 +251,7 @@ jobs:
             --config ./examples/ci-tests/create-and-destroy-aws/environment.yml \
             --auto-approve
 
-  aws-test-service:
+  aws-test-service-helm:
     executor: ubuntu-machine
     environment:
       OPTA_DISABLE_REPORTING: "true"
@@ -243,17 +263,133 @@ jobs:
       - aws-cli/install
       - aws-cli/setup
       - run:
-          name: "Git clone the test service"
-          command: "git clone git@github.com:run-x/test-service.git"
+          name: "Deploy test-service-helm"
+          command: |
+            ./dist/opta/opta apply \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-aws/service-helm.yml \
+            --auto-approve
       - run:
-          name: "Build test-service image"
-          command: docker build -t app:latest -f test-service/Dockerfile test-service/
+          name: "Destroy test-service-helm"
+          command: |
+            yes | ./dist/opta/opta destroy \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-aws/service-helm.yml \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+
+  aws-test-service-s3:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - aws-cli/install
+      - aws-cli/setup
+      - run:
+          name: "Load test-service image"
+          command: docker load -i test-service-image
+      - run:
+          name: "Deploy test-service-s3"
+          command: |
+            ./dist/opta/opta deploy \
+            --image app:latest \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-aws/service-s3.yml \
+            --tag $CIRCLE_SHA1 \
+            --auto-approve
+      - run:
+          name: "Destroy test-service-s3"
+          command: |
+            yes | ./dist/opta/opta destroy \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-aws/service-s3.yml \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+
+  aws-test-service-redis:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - aws-cli/install
+      - aws-cli/setup
+      - run:
+          name: "Load test-service image"
+          command: docker load -i test-service-image
+      - run:
+          name: "Deploy test-service-redis"
+          command: |
+            ./dist/opta/opta deploy \
+            --image app:latest \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-aws/service-redis.yml \
+            --tag $CIRCLE_SHA1 \
+            --auto-approve
+      - run:
+          name: "Destroy test-service-redis"
+          command: |
+            yes | ./dist/opta/opta destroy \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-aws/service-redis.yml \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+
+  aws-test-service-docdb:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - aws-cli/install
+      - aws-cli/setup
+      - run:
+          name: "Load test-service image"
+          command: docker load -i test-service-image
+      - run:
+          name: "Deploy test-service-redis"
+          command: |
+            ./dist/opta/opta deploy \
+            --image app:latest \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-aws/service-docdb.yml \
+            --tag $CIRCLE_SHA1 \
+            --auto-approve
+      - run:
+          name: "Destroy test-service-redis"
+          command: |
+            yes | ./dist/opta/opta destroy \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-aws/service-docdb.yml \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+
+  aws-test-service-pg:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - aws-cli/install
+      - aws-cli/setup
+      - run:
+          name: "Load test-service image"
+          command: docker load -i test-service-image
       - run:
           name: "Set secret"
           command: |
             ./dist/opta/opta secret update \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-aws/service.yml \
+            --config ./examples/ci-tests/create-and-destroy-aws/service-pg.yml \
             FAKE_SECRET foo
       - run:
           name: "Deploy test-service"
@@ -261,7 +397,7 @@ jobs:
             ./dist/opta/opta deploy \
             --image app:latest \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-aws/service.yml \
+            --config ./examples/ci-tests/create-and-destroy-aws/service-pg.yml \
             --tag $CIRCLE_SHA1 \
             --auto-approve
       - run:
@@ -279,7 +415,7 @@ jobs:
             ./dist/opta/opta deploy \
             --image app:latest \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-aws/service.yml \
+            --config ./examples/ci-tests/create-and-destroy-aws/service-pg.yml \
             --tag $CIRCLE_SHA1 \
             --auto-approve
       - run:
@@ -287,7 +423,7 @@ jobs:
           command: |
             secret_value=$(./dist/opta/opta secret view \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-aws/service.yml \
+            --config ./examples/ci-tests/create-and-destroy-aws/service-pg.yml \
             FAKE_SECRET | tail -1)
             echo "This was the found secret value: ${secret_value}"
             [[ "$secret_value" =~ .*"foo".* ]] || exit 1
@@ -296,7 +432,7 @@ jobs:
           command: |
             yes | ./dist/opta/opta destroy \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-aws/service.yml \
+            --config ./examples/ci-tests/create-and-destroy-aws/service-pg.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
 
@@ -367,7 +503,7 @@ jobs:
             --config ./examples/ci-tests/create-and-destroy-gcp/environment.yml \
             --auto-approve
 
-  gcp-test-service:
+  gcp-test-service-helm:
     executor: ubuntu-machine
     environment:
       OPTA_DISABLE_REPORTING: "true"
@@ -382,25 +518,122 @@ jobs:
           name: "Setting up gcp envar"
           command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
       - run:
-          name: "Git clone the test service"
-          command: "git clone git@github.com:run-x/test-service.git"
+          name: "Load test-service image"
+          command: docker load -i test-service-image
       - run:
-          name: "Build test-service image"
-          command: docker build -t app:latest -f test-service/Dockerfile test-service/
+          name: "Deploy test-service-helm"
+          command: |
+            ./dist/opta/opta apply \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-gcp/service-helm.yml \
+            --auto-approve
+      - run:
+          name: "Destroy test-service-helm"
+          command: |
+            yes | ./dist/opta/opta destroy \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-gcp/service-helm.yml \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+
+  gcp-test-service-redis:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - gcp-cli/install
+      - gcp-cli/initialize
+      - run:
+          name: "Setting up gcp envar"
+          command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+      - run:
+          name: "Load test-service image"
+          command: docker load -i test-service-image
+      - run:
+          name: "Deploy test-service-redis"
+          command: |
+            ./dist/opta/opta deploy \
+            --image app:latest \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-gcp/service-redis.yml \
+            --tag $CIRCLE_SHA1 \
+            --auto-approve
+      - run:
+          name: "Destroy test-service-redis"
+          command: |
+            yes | ./dist/opta/opta destroy \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-gcp/service-redis.yml \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+
+  gcp-test-service-gcs:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - gcp-cli/install
+      - gcp-cli/initialize
+      - run:
+          name: "Setting up gcp envar"
+          command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+      - run:
+          name: "Load test-service image"
+          command: docker load -i test-service-image
+      - run:
+          name: "Deploy test-service-gcs"
+          command: |
+            ./dist/opta/opta deploy \
+            --image app:latest \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-gcp/service-gcs.yml \
+            --tag $CIRCLE_SHA1 \
+            --auto-approve
+      - run:
+          name: "Destroy test-service-gcs"
+          command: |
+            yes | ./dist/opta/opta destroy \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-gcp/service-gcs.yml \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+
+  gcp-test-service-pg:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - gcp-cli/install
+      - gcp-cli/initialize
+      - run:
+          name: "Setting up gcp envar"
+          command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+      - run:
+          name: "Load test-service image"
+          command: docker load -i test-service-image
       - run:
           name: "Set secret"
           command: |
             ./dist/opta/opta secret update \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-gcp/service.yml \
+            --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
             FAKE_SECRET foo
       - run:
-          name: "Deploy test-service"
+          name: "Deploy test-service-pg"
           command: |
             ./dist/opta/opta deploy \
             --image app:latest \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-gcp/service.yml \
+            --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
             --tag $CIRCLE_SHA1 \
             --auto-approve
       - run:
@@ -418,7 +651,7 @@ jobs:
             ./dist/opta/opta deploy \
             --image app:latest \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-gcp/service.yml \
+            --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
             --tag $CIRCLE_SHA1 \
             --auto-approve
       - run:
@@ -426,16 +659,16 @@ jobs:
           command: |
             secret_value=$(./dist/opta/opta secret view \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-gcp/service.yml \
+            --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
             FAKE_SECRET | tail -1)
             echo "This was the found secret value: ${secret_value}"
             [[ "$secret_value" =~ .*"foo".* ]] || exit 1
       - run:
-          name: "Destroy test service"
+          name: "Destroy test-service-pg"
           command: |
             yes | ./dist/opta/opta destroy \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-gcp/service.yml \
+            --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   gcp-destroy-env:
@@ -476,7 +709,10 @@ workflows:
   run-create-and-destroy:
     when: << pipeline.parameters.run-create-and-destroy >>
     jobs: &id001
-      - build-opta-binary
+      - build-test-service-image
+      - build-opta-binary:
+          requires:
+            - build-test-service-image
       - aws-create-env:
           requires:
             - build-opta-binary
@@ -486,27 +722,55 @@ workflows:
       - aws-test-additional-nodegroup:
           requires:
             - aws-create-env
-      - aws-test-service:
+      - aws-test-service-pg:
+          requires:
+            - aws-create-env
+      - aws-test-service-redis:
+          requires:
+            - aws-create-env
+      - aws-test-service-docdb:
+          requires:
+            - aws-create-env
+      - aws-test-service-s3:
+          requires:
+            - aws-create-env
+      - aws-test-service-helm:
           requires:
             - aws-create-env
       - aws-destroy-env:
           requires:
             - aws-test-websocket
             - aws-test-additional-nodegroup
-            - aws-test-service
+            - aws-test-service-pg
+            - aws-test-service-s3
+            - aws-test-service-docdb
+            - aws-test-service-redis
+            - aws-test-service-helm
       - gcp-create-env:
           requires:
             - build-opta-binary
       - gcp-test-additional-nodegroup:
           requires:
             - gcp-create-env
-      - gcp-test-service:
+      - gcp-test-service-pg:
+          requires:
+            - gcp-create-env
+      - gcp-test-service-redis:
+          requires:
+            - gcp-create-env
+      - gcp-test-service-helm:
+          requires:
+            - gcp-create-env
+      - gcp-test-service-gcs:
           requires:
             - gcp-create-env
       - gcp-destroy-env:
           requires:
             - gcp-test-additional-nodegroup
-            - gcp-test-service
+            - gcp-test-service-pg
+            - gcp-test-service-redis
+            - gcp-test-service-helm
+            - gcp-test-service-gcs
 
   run-ci:
     when:

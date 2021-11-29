@@ -2,7 +2,7 @@ environments:
     - name: gcpenv-ci
       path: "environment.yml"
       variables: {}
-name: testservice-ci
+name: testservice-ci-pg
 modules:
   - type: k8s-service
     port:
@@ -15,28 +15,18 @@ modules:
         value: "{env}"
       - name: CLOUD_PROVIDER
         value: gcp
-      - name: BUCKET_NAME
-        value: "${{module.bucket.bucket_id}}"
+      - name: TEST_GCS
+        value: "0"
+      - name: TEST_REDIS
+        value: "0"
     secrets:
       - FAKE_SECRET
     links:
       - pg
       - addpg
-      - redis
-      - bucket
   - name: pg
     type: postgres
     safety: false
   - name: addpg
     type: postgres
     safety: false
-  - name: redis
-    type: redis
-  - name: bucket
-    type: gcp-gcs
-    bucket_name: "runx-test-service-bucket-{env}"
-  - name: redishelm
-    type: helm-chart
-    chart: redis
-    chart_version: "15.3.2"
-    repository: "https://charts.bitnami.com/bitnami"

@@ -15,7 +15,7 @@ modules:
         value: "{env}"
       - name: CLOUD_PROVIDER
         value: aws
-      - name: TEST_GCS
+      - name: TEST_S3
         value: "0"
       - name: TEST_REDIS
         value: "0"
@@ -25,10 +25,6 @@ modules:
       - FAKE_SECRET
     links:
       - pg
-      - addpg
   - name: pg
-    type: postgres
-    safety: false
-  - name: addpg
     type: postgres
     safety: false

@@ -1,0 +1,29 @@
+environments:
+  - name: awsenv-ci
+    path: "environment.yml"
+    variables: {}
+name: testservice-ci-redis
+modules:
+  - type: k8s-service
+    port:
+      http: 5000
+    image: AUTO
+    healthcheck_path: "/healthcheck"
+    env_vars:
+      - name: APPENV
+        value: "{env}"
+      - name: CLOUD_PROVIDER
+        value: aws
+      - name: BUCKET_NAME
+        value: "${{module.bucket.bucket_id}}"
+      - name: TEST_S3
+        value: "0"
+      - name: TEST_POSTGRES
+        value: "0"
+      - name: TEST_DOCDB
+        value: "0"
+    links:
+      - redis
+  - name: redis
+    type: redis
+    node_type: "cache.t3.micro"

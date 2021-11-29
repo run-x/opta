@@ -1,0 +1,11 @@
+environments:
+  - name: gcpenv-ci
+    path: "environment.yml"
+    variables: {}
+name: testservice-ci-helm
+modules:
+  - name: redishelm
+    type: helm-chart
+    chart: redis
+    chart_version: "15.3.2"
+    repository: "https://charts.bitnami.com/bitnami"
