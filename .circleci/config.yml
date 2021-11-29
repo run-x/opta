@@ -7,9 +7,9 @@ parameters:
   run-create-and-destroy:
     type: boolean
     default: false
-  no-ci:
+  run-ci:
     type: boolean
-    default: true
+    default: false
 
 
 orbs:
@@ -773,8 +773,7 @@ workflows:
             - gcp-test-service-gcs
 
   run-ci:
-    when:
-      not: << pipeline.parameters.no-ci >>
+    when: << pipeline.parameters.no-ci >>
     jobs:
       - say-hello
       - no-pdb
