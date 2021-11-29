@@ -4,6 +4,12 @@ environments:
       variables: {}
 name: ci-pg
 modules:
+  - name: pg
+    type: postgres
+    safety: false
+  - name: addpg
+    type: postgres
+    safety: false
   - type: k8s-service
     port:
       http: 5000
@@ -24,9 +30,3 @@ modules:
     links:
       - pg
       - addpg
-  - name: pg
-    type: postgres
-    safety: false
-  - name: addpg
-    type: postgres
-    safety: false
