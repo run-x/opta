@@ -15,7 +15,7 @@ modules:
         value: "{env}"
       - name: CLOUD_PROVIDER
         value: aws
-      - name: TEST_GCS
+      - name: TEST_S3
         value: "0"
       - name: TEST_REDIS
         value: "0"
