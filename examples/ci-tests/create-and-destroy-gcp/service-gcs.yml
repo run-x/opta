@@ -24,4 +24,4 @@ modules:
       - bucket
   - name: bucket
     type: gcp-gcs
-    bucket_name: "runx-test-service-bucket-{env}"
+    bucket_name: "runx-test-ci-gcs-bucket-{env}"
