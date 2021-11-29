@@ -524,14 +524,14 @@ jobs:
           name: "Deploy test-service-helm"
           command: |
             ./dist/opta/opta apply \
-            --env awsenv-ci \
+            --env gcpenv-ci \
             --config ./examples/ci-tests/create-and-destroy-gcp/service-helm.yml \
             --auto-approve
       - run:
           name: "Destroy test-service-helm"
           command: |
             yes | ./dist/opta/opta destroy \
-            --env awsenv-ci \
+            --env gcpenv-ci \
             --config ./examples/ci-tests/create-and-destroy-gcp/service-helm.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
@@ -557,7 +557,7 @@ jobs:
           command: |
             ./dist/opta/opta deploy \
             --image app:latest \
-            --env awsenv-ci \
+            --env gcpenv-ci \
             --config ./examples/ci-tests/create-and-destroy-gcp/service-redis.yml \
             --tag $CIRCLE_SHA1 \
             --auto-approve
@@ -565,7 +565,7 @@ jobs:
           name: "Destroy test-service-redis"
           command: |
             yes | ./dist/opta/opta destroy \
-            --env awsenv-ci \
+            --env gcpenv-ci \
             --config ./examples/ci-tests/create-and-destroy-gcp/service-redis.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
@@ -591,7 +591,7 @@ jobs:
           command: |
             ./dist/opta/opta deploy \
             --image app:latest \
-            --env awsenv-ci \
+            --env gcpenv-ci \
             --config ./examples/ci-tests/create-and-destroy-gcp/service-gcs.yml \
             --tag $CIRCLE_SHA1 \
             --auto-approve
@@ -599,7 +599,7 @@ jobs:
           name: "Destroy test-service-gcs"
           command: |
             yes | ./dist/opta/opta destroy \
-            --env awsenv-ci \
+            --env gcpenv-ci \
             --config ./examples/ci-tests/create-and-destroy-gcp/service-gcs.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
@@ -624,7 +624,7 @@ jobs:
           name: "Set secret"
           command: |
             ./dist/opta/opta secret update \
-            --env awsenv-ci \
+            --env gcpenv-ci \
             --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
             FAKE_SECRET foo
       - run:
@@ -632,7 +632,7 @@ jobs:
           command: |
             ./dist/opta/opta deploy \
             --image app:latest \
-            --env awsenv-ci \
+            --env gcpenv-ci \
             --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
             --tag $CIRCLE_SHA1 \
             --auto-approve
@@ -641,7 +641,7 @@ jobs:
           command: |
             ./dist/opta/opta deploy \
             --image app:latest \
-            --env awsenv-ci \
+            --env gcpenv-ci \
             --config ./examples/ci-tests/create-and-destroy-gcp/service-additional-pg.yml \
             --tag $CIRCLE_SHA1 \
             --auto-approve
@@ -650,7 +650,7 @@ jobs:
           command: |
             ./dist/opta/opta deploy \
             --image app:latest \
-            --env awsenv-ci \
+            --env gcpenv-ci \
             --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
             --tag $CIRCLE_SHA1 \
             --auto-approve
@@ -658,7 +658,7 @@ jobs:
           name: "View secret and check value"
           command: |
             secret_value=$(./dist/opta/opta secret view \
-            --env awsenv-ci \
+            --env gcpenv-ci \
             --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
             FAKE_SECRET | tail -1)
             echo "This was the found secret value: ${secret_value}"
@@ -667,7 +667,7 @@ jobs:
           name: "Destroy test-service-pg"
           command: |
             yes | ./dist/opta/opta destroy \
-            --env awsenv-ci \
+            --env gcpenv-ci \
             --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
