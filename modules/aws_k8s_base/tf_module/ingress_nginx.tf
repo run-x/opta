@@ -65,6 +65,7 @@ resource "helm_release" "ingress-nginx" {
           targetPorts : local.target_ports
           annotations : {
             "service.beta.kubernetes.io/aws-load-balancer-backend-protocol" : "ssl"
+            "service.beta.kubernetes.io/aws-load-balancer-name" : "opta-${var.layer_name}-lb"
             "service.beta.kubernetes.io/aws-load-balancer-proxy-protocol" : "*"
             "service.beta.kubernetes.io/aws-load-balancer-type" : "nlb"
             "service.beta.kubernetes.io/aws-load-balancer-access-log-enabled" : true
@@ -82,6 +83,7 @@ resource "helm_release" "ingress-nginx" {
   ]
   depends_on = [
     helm_release.linkerd,
-    helm_release.opta_base
+    helm_release.opta_base,
+    helm_release.load_balancer
   ]
 }
