@@ -2,7 +2,7 @@ environments:
   - name: gcpenv-ci
     path: "environment.yml"
     variables: {}
-name: testservice-ci-gcs
+name: ci-gcs
 modules:
   - type: k8s-service
     port:

@@ -2,7 +2,7 @@ environments:
     - name: gcpenv-ci
       path: "environment.yml"
       variables: {}
-name: testservice-ci-pg
+name: ci-pg
 modules:
   - type: k8s-service
     port:

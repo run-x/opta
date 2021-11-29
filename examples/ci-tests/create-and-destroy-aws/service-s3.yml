@@ -2,7 +2,7 @@ environments:
   - name: awsenv-ci
     path: "environment.yml"
     variables: {}
-name: testservice-ci-s3
+name: ci-s3
 modules:
   - type: k8s-service
     port:
@@ -26,4 +26,4 @@ modules:
       - bucket
   - name: bucket
     type: aws-s3
-    bucket_name: "runx-testservice-ci-bucket-{env}"
+    bucket_name: "runx-ci-bucket-{env}"

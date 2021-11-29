@@ -2,7 +2,7 @@ environments:
   - name: gcpenv-ci
     path: "environment.yml"
     variables: {}
-name: testservice-ci-helm
+name: ci-helm
 modules:
   - name: redishelm
     type: helm-chart

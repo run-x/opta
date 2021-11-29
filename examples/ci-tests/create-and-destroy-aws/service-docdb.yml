@@ -2,7 +2,7 @@ environments:
   - name: awsenv-ci
     path: "environment.yml"
     variables: {}
-name: testservice-ci-docdb
+name: ci-docdb
 modules:
   - type: k8s-service
     name: app

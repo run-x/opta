@@ -2,7 +2,7 @@ environments:
   - name: awsenv-ci
     path: "environment.yml"
     variables: {}
-name: testservice-ci-redis
+name: ci-redis
 modules:
   - type: k8s-service
     port:
