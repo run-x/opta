@@ -6,7 +6,6 @@ name: ci-docdb
 modules:
   - type: k8s-service
     name: app
-    public_uri: "test-service.{parent.domain}"
     port:
       http: 5000
     image: AUTO
