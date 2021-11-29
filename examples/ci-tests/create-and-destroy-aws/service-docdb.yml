@@ -22,8 +22,6 @@ modules:
         value: "0"
       - name: TEST_POSTGRES
         value: "0"
-    secrets:
-      - FAKE_SECRET
     links:
       - docdb
   - name: docdb

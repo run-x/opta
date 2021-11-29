@@ -14,8 +14,6 @@ modules:
         value: "{env}"
       - name: CLOUD_PROVIDER
         value: aws
-      - name: BUCKET_NAME
-        value: "${{module.bucket.bucket_id}}"
       - name: TEST_S3
         value: "0"
       - name: TEST_POSTGRES
