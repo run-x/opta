@@ -6,7 +6,7 @@ parameters:
   # A parameter per package
   run-create-and-destroy:
     type: boolean
-    default: true
+    default: false
   no-ci:
     type: boolean
     default: true
