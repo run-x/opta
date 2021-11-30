@@ -6,7 +6,7 @@ from opta.amplitude import amplitude_client
 from opta.core.generator import gen_all
 from opta.core.terraform import get_terraform_outputs
 from opta.layer import Layer
-from opta.utils import check_opta_file_exists, json, logger
+from opta.utils import check_opta_file_exists, json
 
 
 @click.command(hidden=True)
@@ -41,9 +41,6 @@ def _load_extra_aws_outputs(current_outputs: dict) -> dict:
             "parent.load_balancer_raw_dns"
         ]
         del current_outputs["parent.load_balancer_raw_dns"]
-    logger.info(
-        "Could not find load balancer for current environment/service. Please re-run opta apply on the environment file."
-    )
     return current_outputs
 
 
