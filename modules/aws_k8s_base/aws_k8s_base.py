@@ -79,7 +79,6 @@ class AwsK8sBaseProcessor(AWSK8sModuleProcessor, K8sBaseModuleProcessor):
     def post_hook(self, module_idx: int, exception: Optional[Exception]) -> None:
         if exception is not None:
             return
-        self.add_alpn_policy()
         self.add_admin_roles()
 
     def add_admin_roles(self) -> None:
@@ -139,25 +138,6 @@ class AwsK8sBaseProcessor(AWSK8sModuleProcessor, K8sBaseModuleProcessor):
         v1.replace_namespaced_config_map(
             "aws-auth", "kube-system", body=aws_auth_config_map
         )
-
-    def add_alpn_policy(self) -> None:
-        # Manually set the AlpnPolicy to HTTP2Preferred cause the damn K8s service annotation doesn't do its job.
-        providers = self.layer.gen_providers(0)
-        region = providers["provider"]["aws"]["region"]
-        client: ElasticLoadBalancingv2Client = boto3.client(
-            "elbv2", config=Config(region_name=region)
-        )
-        current_load_balancer = self._get_load_balancer(client)
-        if current_load_balancer is not None:
-            listeners = client.describe_listeners(
-                LoadBalancerArn=current_load_balancer["LoadBalancerArn"]
-            )
-            for listener in listeners["Listeners"]:
-                if listener["Port"] == 443 and len(listener.get("Certificates", [])) > 0:
-                    client.modify_listener(
-                        ListenerArn=listener["ListenerArn"], AlpnPolicy=["HTTP2Preferred"]
-                    )
-                    return
 
     def _get_load_balancer(
         self, client: ElasticLoadBalancingv2Client

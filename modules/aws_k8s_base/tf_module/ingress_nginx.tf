@@ -81,6 +81,7 @@ resource "helm_release" "ingress-nginx" {
             "service.beta.kubernetes.io/aws-load-balancer-ssl-negotiation-policy" : "ELBSecurityPolicy-TLS-1-2-2017-01"
             "service.beta.kubernetes.io/aws-load-balancer-ssl-cert" : var.cert_arn
             "external-dns.alpha.kubernetes.io/hostname" : var.domain == "" ? "" : join(",", [var.domain, "*.${var.domain}"])
+            "service.beta.kubernetes.io/aws-load-balancer-alpn-policy": "HTTP2Preferred"
           }
         }
       },
