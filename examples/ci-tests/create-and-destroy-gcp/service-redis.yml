@@ -1,0 +1,24 @@
+environments:
+  - name: gcpenv-ci
+    path: "environment.yml"
+    variables: {}
+name: ci-redis
+modules:
+  - type: k8s-service
+    port:
+      http: 5000
+    image: AUTO
+    healthcheck_path: "/healthcheck"
+    env_vars:
+      - name: APPENV
+        value: "{env}"
+      - name: CLOUD_PROVIDER
+        value: gcp
+      - name: TEST_GCS
+        value: "0"
+      - name: TEST_POSTGRES
+        value: "0"
+    links:
+      - redis
+  - name: redis
+    type: redis

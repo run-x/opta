@@ -1,15 +1,15 @@
 environments:
-    - name: awsenv-ci
-      path: "environment.yml"
-      variables: {}
-name: ci-pg
+  - name: awsenv-ci
+    path: "environment.yml"
+    variables: {}
+name: ci-docdb
 modules:
   - type: k8s-service
+    name: app
     port:
       http: 5000
     image: AUTO
     healthcheck_path: "/healthcheck"
-    public_uri: "test-service.{parent.domain}"
     env_vars:
       - name: APPENV
         value: "{env}"
@@ -19,16 +19,9 @@ modules:
         value: "0"
       - name: TEST_REDIS
         value: "0"
-      - name: TEST_DOCDB
+      - name: TEST_POSTGRES
         value: "0"
-    secrets:
-      - FAKE_SECRET
     links:
-      - pg
-      - addpg
-  - name: pg
-    type: postgres
-    safety: false
-  - name: addpg
-    type: postgres
-    safety: false
+      - docdb
+  - name: docdb
+    type: aws-documentdb

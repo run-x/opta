@@ -1,0 +1,27 @@
+environments:
+  - name: gcpenv-ci
+    path: "environment.yml"
+    variables: {}
+name: ci-gcs
+modules:
+  - type: k8s-service
+    port:
+      http: 5000
+    image: AUTO
+    healthcheck_path: "/healthcheck"
+    env_vars:
+      - name: APPENV
+        value: "{env}"
+      - name: CLOUD_PROVIDER
+        value: gcp
+      - name: BUCKET_NAME
+        value: "${{module.bucket.bucket_id}}"
+      - name: TEST_POSTGRES
+        value: "0"
+      - name: TEST_REDIS
+        value: "0"
+    links:
+      - bucket
+  - name: bucket
+    type: gcp-gcs
+    bucket_name: "runx-test-ci-gcs-bucket-{env}"

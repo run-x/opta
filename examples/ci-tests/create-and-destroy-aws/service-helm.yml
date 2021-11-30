@@ -1,0 +1,11 @@
+environments:
+  - name: awsenv-ci
+    path: "environment.yml"
+    variables: {}
+name: ci-helm
+modules:
+  - name: redishelm
+    type: helm-chart
+    chart: redis
+    chart_version: "15.3.2"
+    repository: "https://charts.bitnami.com/bitnami"

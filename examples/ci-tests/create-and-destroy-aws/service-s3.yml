@@ -1,34 +1,29 @@
 environments:
-    - name: awsenv-ci
-      path: "environment.yml"
-      variables: {}
-name: ci-pg
+  - name: awsenv-ci
+    path: "environment.yml"
+    variables: {}
+name: ci-s3
 modules:
   - type: k8s-service
     port:
       http: 5000
     image: AUTO
     healthcheck_path: "/healthcheck"
-    public_uri: "test-service.{parent.domain}"
     env_vars:
       - name: APPENV
         value: "{env}"
       - name: CLOUD_PROVIDER
         value: aws
-      - name: TEST_S3
+      - name: BUCKET_NAME
+        value: "${{module.bucket.bucket_id}}"
+      - name: TEST_POSTGRES
         value: "0"
       - name: TEST_REDIS
         value: "0"
       - name: TEST_DOCDB
         value: "0"
-    secrets:
-      - FAKE_SECRET
     links:
-      - pg
-      - addpg
-  - name: pg
-    type: postgres
-    safety: false
-  - name: addpg
-    type: postgres
-    safety: false
+      - bucket
+  - name: bucket
+    type: aws-s3
+    bucket_name: "runx-ci-bucket-{env}"

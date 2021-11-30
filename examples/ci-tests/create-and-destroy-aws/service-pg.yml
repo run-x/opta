@@ -25,10 +25,6 @@ modules:
       - FAKE_SECRET
     links:
       - pg
-      - addpg
   - name: pg
-    type: postgres
-    safety: false
-  - name: addpg
     type: postgres
     safety: false
