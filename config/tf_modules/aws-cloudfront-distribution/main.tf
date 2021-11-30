@@ -2,6 +2,11 @@ data "aws_s3_bucket" "current_bucket" {
   bucket = var.bucket_name
 }
 
+data "aws_s3_bucket" "logging_bucket" {
+  count = var.s3_log_bucket_name == null ? 0 : 1
+  bucket = var.s3_log_bucket_name
+}
+
 resource "aws_cloudfront_distribution" "s3_distribution" {
   origin {
     domain_name = data.aws_s3_bucket.current_bucket.bucket_regional_domain_name
@@ -21,7 +26,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     for_each = var.s3_log_bucket_name == null ? [] : [1]
     content {
       include_cookies = true
-      bucket          = var.s3_log_bucket_name
+      bucket          = data.aws_s3_bucket.logging_bucket[0].bucket_domain_name
       prefix          = "cloudfront/${var.layer_name}/${var.module_name}"
     }
   }
