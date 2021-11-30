@@ -67,11 +67,11 @@ resource "helm_release" "ingress-nginx" {
           enableHttps : var.cert_arn == "" && var.private_key == "" ? false : true
           targetPorts : local.target_ports
           annotations : {
-            "service.beta.kubernetes.io/aws-load-balancer-scheme": "internet-facing"
-            "service.beta.kubernetes.io/aws-load-balancer-type": "external"
-            "service.beta.kubernetes.io/aws-load-balancer-nlb-target-type": "instance"
-            "service.beta.kubernetes.io/aws-load-balancer-healthcheck-protocol": "HTTP"
-            "service.beta.kubernetes.io/aws-load-balancer-healthcheck-path": "/healthz"
+            "service.beta.kubernetes.io/aws-load-balancer-scheme" : "internet-facing"
+            "service.beta.kubernetes.io/aws-load-balancer-type" : "external"
+            "service.beta.kubernetes.io/aws-load-balancer-nlb-target-type" : "instance"
+            "service.beta.kubernetes.io/aws-load-balancer-healthcheck-protocol" : "HTTP"
+            "service.beta.kubernetes.io/aws-load-balancer-healthcheck-path" : "/healthz"
             "service.beta.kubernetes.io/aws-load-balancer-backend-protocol" : "ssl"
             "service.beta.kubernetes.io/aws-load-balancer-name" : "opta-${var.layer_name}-lb"
             "service.beta.kubernetes.io/aws-load-balancer-access-log-enabled" : true
@@ -81,7 +81,7 @@ resource "helm_release" "ingress-nginx" {
             "service.beta.kubernetes.io/aws-load-balancer-ssl-negotiation-policy" : "ELBSecurityPolicy-TLS-1-2-2017-01"
             "service.beta.kubernetes.io/aws-load-balancer-ssl-cert" : var.cert_arn
             "external-dns.alpha.kubernetes.io/hostname" : var.domain == "" ? "" : join(",", [var.domain, "*.${var.domain}"])
-            "service.beta.kubernetes.io/aws-load-balancer-alpn-policy": "HTTP2Preferred"
+            "service.beta.kubernetes.io/aws-load-balancer-alpn-policy" : "HTTP2Preferred"
           }
         }
       },
@@ -96,6 +96,6 @@ resource "helm_release" "ingress-nginx" {
 }
 
 data "aws_lb" "ingress-nginx" {
-  name = "opta-${var.layer_name}-lb"
+  name       = "opta-${var.layer_name}-lb"
   depends_on = [helm_release.ingress-nginx]
 }

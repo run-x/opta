@@ -1,8 +1,6 @@
 from typing import TYPE_CHECKING, Optional
 
-import boto3
 import mypy_boto3_elbv2.type_defs
-from botocore.config import Config
 from kubernetes.client import CoreV1Api, V1ConfigMap
 from kubernetes.config import load_kube_config
 from mypy_boto3_elbv2 import ElasticLoadBalancingv2Client
