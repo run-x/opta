@@ -1,0 +1,45 @@
+halt: false
+environment_module: false
+metric_count: 1
+inputs:
+  - name: env_name
+    user_facing: false
+    description: Opta Environment name
+    default: None
+  - name: layer_name
+    user_facing: false
+    description: Opta Layer name
+    default: None
+  - name: module_name
+    user_facing: false
+    description: Opta Module name
+    default: None
+  - name: node_type
+    user_facing: true
+    validator: str(required=False)
+    description: This is the redis instance type used for the [instances](https://aws.amazon.com/elasticache/pricing/).
+    default: cache.m4.large
+  - name: redis_version
+    user_facing: true
+    validator: str(required=False)
+    description: the redis version to use for this instance
+    default: "6.x"
+  - name: snapshot_retention_limit
+    user_facing: true
+    validator: int(required=False)
+    description: Retentions days for which the snapshot will be retained.
+    default: 0
+  - name: snapshot_window
+    user_facing: true
+    validator: str(required=False)
+    description: Window during which the snapshot would be taken.
+    default: "04:00-05:00"
+outputs:
+  - name: cache_host
+    export: true
+    description: The host through which to access the redis cache
+  - name: cache_auth_token
+    export: false
+    description: The security auth token for the redis cache
+output_providers: { }
+output_data: { }

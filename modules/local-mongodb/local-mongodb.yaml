@@ -1,0 +1,32 @@
+halt: false
+environment_module: false
+metric_count: 1
+inputs:
+  - name: env_name
+    user_facing: false
+    description: Opta Environment name
+    default: None
+  - name: layer_name
+    user_facing: false
+    description: Opta Layer name
+    default: None
+  - name: module_name
+    user_facing: false
+    description: Opta Module name
+    default: None
+  - name: paasns
+    user_facing: false
+    description: Namespace for paas helm installations
+    default: "paas-{layer_name}"
+outputs:
+  - name: db_host
+    export: true
+    description: The host of the database.
+  - name: db_user
+    export: true
+    description: The user of the database.
+  - name: db_password
+    export: false
+    description: The password of the database.
+output_providers: {}
+output_data: {}

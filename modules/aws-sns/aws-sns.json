@@ -1,0 +1,41 @@
+{
+  "$id": "https://app.runx.dev/modules/aws-sns",
+  "description": "Sets up an AWS SNS topic",
+  "type": "object",
+  "properties": {
+    "fifo": {
+      "type": "boolean",
+      "description": "FIFO queue or not.",
+      "default": false
+    },
+    "content_based_deduplication": {
+      "type": "boolean",
+      "description": "Duplicate content",
+      "default": false
+    },
+    "sqs_subscribers": {
+      "type": "array",
+      "description": "List of SQS ARNs to push from this topic.",
+      "items": {
+        "type": "string",
+        "description": "The ARN of the SQS queue to subscribe to."
+      },
+      "default": []
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "aws-sns"
+      ]
+    }
+  },
+  "required": [
+    "type"
+  ],
+  "opta_metadata": {
+    "module_type": "service",
+    "clouds": [
+      "aws"
+    ]
+  }
+}

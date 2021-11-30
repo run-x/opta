@@ -1,0 +1,91 @@
+halt: false
+environment_module: true
+is_unique: true
+terraform_module: k8s-base
+inputs:
+  - name: env_name
+    user_facing: false
+    description: Opta Environment name
+    default: None
+  - name: layer_name
+    user_facing: false
+    description: Opta Layer name
+    default: None
+  - name: module_name
+    user_facing: false
+    description: Opta Module name
+    default: None
+  - name: eks_cluster_name
+    user_facing: false
+    description: The eks cluster name
+    default: None
+  - name: s3_log_bucket_name
+    user_facing: false
+    description: The s3 log bucket name
+    default: None
+  - name: openid_provider_url
+    user_facing: false
+    description: The url for the open id for the eks cluster
+    default: null
+  - name: openid_provider_arn
+    user_facing: false
+    description: The arn for the open id for the eks cluster.
+    default: false
+  - name: domain
+    user_facing: false
+    description: Domain to setup the ingress with
+    default: ""
+  - name: cert_arn
+    user_facing: false
+    description: Cert arn
+    default: ""
+  - name: private_key
+    user_facing: false
+    description: Private key for external ssl cert
+    default: ""
+  - name: certificate_body
+    user_facing: false
+    description: Cert body for external ssl cert
+    default: ""
+  - name: certificate_chain
+    user_facing: false
+    description: Cert body for external ssl cert
+    default: ""
+  - name: nginx_high_availability
+    user_facing: true
+    validator: bool(required=False)
+    description: Deploy the nginx ingress in a high-availability configuration.
+    default: false
+  - name: linkerd_high_availability
+    user_facing: true
+    validator: bool(required=False)
+    description: Deploy the linkerd service mesh in a high-availability configuration for its control plane.
+    default: false
+  - name: linkerd_enabled
+    user_facing: true
+    validator: bool(required=False)
+    description: Enable the linkerd service mesh installation.
+    default: true
+  - name: admin_arns
+    user_facing: true
+    validator: list(str(), required=False)
+    description: ARNs for users/roles who should be K8s admins. The user running Opta is by default an admin.
+    default: [ ]
+  - name: nginx_config
+    user_facing: true
+    validator: any(required=False)
+    description: Additional configuration for nginx ingress. [Available options](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/#configuration-options)
+    default: {}
+  - name: nginx_extra_tcp_ports
+    user_facing: true
+    validator: list(int(min=1, max=65535), required=False)
+    description: Additional TCP ports to expose from nginx
+    default: []
+  - name: nginx_extra_tcp_ports_tls
+    user_facing: true
+    validator: list(int(min=1, max=65535), required=False)
+    description: Which additional TCP ports should have TLS enabled
+    default: []
+outputs: []
+output_providers: {}
+output_data: {}
