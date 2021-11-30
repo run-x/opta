@@ -2,7 +2,7 @@ data "aws_region" "current" {}
 
 locals {
   target_ports    = var.cert_arn == "" && var.private_key == "" ? { http : "http" } : { http : "http", https : "https" }
-  container_ports = { http : 80, https : 443 }
+  container_ports = { http : 80, https : 443, healthcheck : 10254 }
   nginx_tls_ports = var.cert_arn == "" && var.private_key == "" ? "" : join(",", compact(flatten([
     ["https"],
     [for port in var.nginx_extra_tcp_ports_tls : "${port}-tcp"],

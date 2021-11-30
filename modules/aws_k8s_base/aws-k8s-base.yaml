@@ -86,7 +86,10 @@ inputs:
     validator: list(int(min=1, max=65535), required=False)
     description: Which additional TCP ports should have TLS enabled
     default: []
-outputs: []
+outputs:
+  - name: load_balancer_raw_dns
+    export: true
+    description: Blah
 output_providers: {}
 output_data: {}
 clouds:
