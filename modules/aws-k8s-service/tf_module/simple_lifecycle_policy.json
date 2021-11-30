@@ -1,0 +1,42 @@
+{
+  "rules": [
+    {
+      "rulePriority": 10,
+      "description": "Keep only 5 untagged image, expire all others",
+      "selection": {
+        "tagStatus": "untagged",
+        "countType": "imageCountMoreThan",
+        "countNumber": 5
+      },
+      "action": {
+        "type": "expire"
+      }
+    },
+    {
+      "rulePriority": 20,
+      "description": "Keep only the last 10 tagged production images, expire all others",
+      "selection": {
+        "tagStatus": "tagged",
+        "countType": "imageCountMoreThan",
+        "tagPrefixList": ["prod"],
+        "countNumber": 10
+      },
+      "action": {
+        "type": "expire"
+      }
+    },
+    {
+      "rulePriority": 30,
+      "description": "Keep only the last 20 tagged development images, expire all others",
+      "selection": {
+        "tagStatus": "tagged",
+        "countType": "imageCountMoreThan",
+        "tagPrefixList": ["dev"],
+        "countNumber": 20
+      },
+      "action": {
+        "type": "expire"
+      }
+    }
+  ]
+}

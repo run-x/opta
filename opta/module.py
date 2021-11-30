@@ -174,9 +174,19 @@ class Module:
     def translate_location(self, loc: str) -> str:
         if loc == "":
             return ""
+        # relative_path = os.path.relpath(
+        #     os.path.join(
+        #         os.path.dirname(os.path.dirname(__file__)), "config", "tf_modules", loc
+        #     ),
+        #     os.getcwd(),
+        # )
+        if loc=="k8s-base":
+            loc = "aws-k8s-base"
+        if loc=="k8s-service":
+            loc = "aws-k8s-service"
         relative_path = os.path.relpath(
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)), "config", "tf_modules", loc
+                os.path.dirname(os.path.dirname(__file__)), "modules", loc, "tf_module"
             ),
             os.getcwd(),
         )

@@ -1,8 +1,8 @@
 ---
-title: "Azure"
-linkTitle: "Azure"
+title: "AWS"
+linkTitle: "AWS"
 date: 2021-07-21
 draft: false
 weight: 1
-description: Azure provider
+description: AWS provider
 ---
