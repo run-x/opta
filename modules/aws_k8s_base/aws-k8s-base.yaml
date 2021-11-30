@@ -89,7 +89,7 @@ inputs:
 outputs:
   - name: load_balancer_raw_dns
     export: true
-    description: Blah
+    description: The dns of the network load balancer provisioned to handle ingress to your environment
 output_providers: {}
 output_data: {}
 clouds:
