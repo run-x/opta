@@ -9,7 +9,7 @@ from mypy_boto3_ec2.type_defs import NetworkInterfaceTypeDef
 from mypy_boto3_logs import CloudWatchLogsClient
 
 from opta.exceptions import UserErrors
-from opta.module_processors.base import ModuleProcessor
+from modules.base import ModuleProcessor
 from opta.utils import logger
 
 if TYPE_CHECKING:

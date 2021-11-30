@@ -12,7 +12,7 @@ from opta.core.aws import AWS
 from opta.core.kubernetes import configure_kubectl, list_namespaces
 from opta.core.terraform import Terraform
 from opta.exceptions import UserErrors
-from opta.module_processors.base import AWSK8sModuleProcessor, K8sBaseModuleProcessor
+from modules.base  import AWSK8sModuleProcessor, K8sBaseModuleProcessor
 from opta.utils import yaml
 
 if TYPE_CHECKING:

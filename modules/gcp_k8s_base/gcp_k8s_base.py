@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 from opta.core.gcp import GCP
-from opta.module_processors.base import GcpK8sModuleProcessor
+from modules.base import GcpK8sModuleProcessor
 
 if TYPE_CHECKING:
     from opta.layer import Layer

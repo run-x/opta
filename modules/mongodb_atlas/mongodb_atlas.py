@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 from opta.core.terraform import get_terraform_outputs
 from opta.exceptions import UserErrors
-from opta.module_processors.base import ModuleProcessor
+from modules.base import ModuleProcessor
 
 if TYPE_CHECKING:
     from opta.layer import Layer

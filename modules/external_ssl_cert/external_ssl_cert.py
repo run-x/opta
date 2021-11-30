@@ -12,7 +12,7 @@ from OpenSSL.crypto import (
 )
 
 from opta.exceptions import UserErrors
-from opta.module_processors.base import ModuleProcessor
+from modules.base import ModuleProcessor
 
 if TYPE_CHECKING:
     from opta.layer import Layer

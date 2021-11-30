@@ -8,7 +8,7 @@ from requests import codes, get
 
 from opta.core.kubernetes import configure_kubectl
 from opta.exceptions import UserErrors
-from opta.module_processors.base import ModuleProcessor
+from modules.base import ModuleProcessor
 
 if TYPE_CHECKING:
     from opta.layer import Layer

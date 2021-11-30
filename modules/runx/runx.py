@@ -17,7 +17,7 @@ from mypy_boto3_ssm.client import SSMClient
 from opta.constants import VERSION
 from opta.core.gcp import GCP
 from opta.exceptions import UserErrors
-from opta.module_processors.base import ModuleProcessor
+from modules.base import ModuleProcessor
 from opta.utils import logger
 
 if TYPE_CHECKING:

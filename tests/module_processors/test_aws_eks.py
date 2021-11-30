@@ -4,7 +4,7 @@ import os
 from pytest_mock import MockFixture
 
 from opta.layer import Layer
-from opta.module_processors.aws_eks import AwsEksProcessor
+from modules.aws_eks import AwsEksProcessor
 
 
 class TestAwsEksModuleProcessor:

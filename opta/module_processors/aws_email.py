@@ -9,7 +9,7 @@ from email_validator import EmailNotValidError, validate_email
 from mypy_boto3_sesv2.client import SESV2Client
 
 from opta.exceptions import UserErrors
-from opta.module_processors.base import ModuleProcessor
+from modules.base import ModuleProcessor
 from opta.utils import logger
 
 if TYPE_CHECKING:

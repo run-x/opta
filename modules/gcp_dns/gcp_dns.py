@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 from opta.exceptions import UserErrors
-from opta.module_processors.base import DNSModuleProcessor
+from modules.base import DNSModuleProcessor
 
 if TYPE_CHECKING:
     from opta.layer import Layer

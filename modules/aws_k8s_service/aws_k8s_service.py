@@ -6,12 +6,12 @@ from opta.core.kubernetes import (
     list_namespaces,
 )
 from opta.exceptions import UserErrors
-from opta.module_processors.base import (
+from modules.base  import (
     AWSIamAssembler,
     AWSK8sModuleProcessor,
     K8sServiceModuleProcessor,
 )
-from opta.module_processors.linker_helper import LinkerHelper
+from modules.linker_helper import LinkerHelper
 
 if TYPE_CHECKING:
     from opta.layer import Layer

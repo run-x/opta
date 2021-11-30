@@ -5,7 +5,7 @@ from ruamel.yaml.compat import StringIO
 
 from opta.core.helm import Helm
 from opta.exceptions import UserErrors
-from opta.module_processors.base import ModuleProcessor
+from modules.base import ModuleProcessor
 from opta.utils import logger, yaml
 
 if TYPE_CHECKING:

@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Union
 
 from opta.core.kubernetes import create_namespace_if_not_exists, get_manual_secrets
 from opta.exceptions import UserErrors
-from opta.module_processors.base import GcpK8sModuleProcessor, K8sServiceModuleProcessor
+from modules.base import GcpK8sModuleProcessor, K8sServiceModuleProcessor
 
 if TYPE_CHECKING:
     from opta.layer import Layer

@@ -18,7 +18,7 @@ from OpenSSL.crypto import (
 )
 
 from opta.exceptions import UserErrors
-from opta.module_processors.base import DNSModuleProcessor
+from modules.base import DNSModuleProcessor
 from opta.utils import logger
 
 if TYPE_CHECKING:

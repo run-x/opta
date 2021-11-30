@@ -4,7 +4,7 @@ import os
 from pytest_mock import MockFixture
 
 from opta.layer import Layer
-from opta.module_processors.linker_helper import LinkerHelper
+from modules.linker_helper import LinkerHelper
 
 
 class TestLinkerHelper:

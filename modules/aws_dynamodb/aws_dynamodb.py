@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Optional
 
 from opta.exceptions import UserErrors
-from opta.module_processors.base import AWSIamAssembler, ModuleProcessor
+from modules.base import AWSIamAssembler, ModuleProcessor
 
 if TYPE_CHECKING:
     from opta.layer import Layer

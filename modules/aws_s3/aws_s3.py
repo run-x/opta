@@ -1,7 +1,7 @@
 import os
 from typing import TYPE_CHECKING, Optional
 
-from opta.module_processors.base import ModuleProcessor
+from modules.base import ModuleProcessor
 from opta.utils import logger
 
 if TYPE_CHECKING:
