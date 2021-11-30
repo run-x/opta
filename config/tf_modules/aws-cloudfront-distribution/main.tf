@@ -3,7 +3,7 @@ data "aws_s3_bucket" "current_bucket" {
 }
 
 data "aws_s3_bucket" "logging_bucket" {
-  count = var.s3_log_bucket_name == null ? 0 : 1
+  count  = var.s3_log_bucket_name == null ? 0 : 1
   bucket = var.s3_log_bucket_name
 }
 
