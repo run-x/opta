@@ -20,7 +20,7 @@ class TestAwsEksModuleProcessor:
         aws_eks_module = layer.get_module("awseks", 8)
         aws_eks_module.data["enable_metrics"] = True
         mocked_autoscaling_client = mocker.Mock()
-        mocked_boto3 = mocker.patch("modules.aws_eks.boto3")
+        mocked_boto3 = mocker.patch("modules.aws_eks.aws_eks.boto3")
         mocked_boto3.client.return_value = mocked_autoscaling_client
         cluster_name = f"opta-{layer.root().name}"
 

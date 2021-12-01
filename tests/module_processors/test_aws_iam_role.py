@@ -21,10 +21,10 @@ class TestAwsIamRoleProcessor:
         )
         app_module = layer.get_module("deployerrole", 8)
         mocked_handle_iam_policy = mocker.patch(
-            "modules.aws_iam_role.AwsIamRoleProcessor.handle_iam_policy"
+            "modules.aws_iam_role.aws_iam_role.AwsIamRoleProcessor.handle_iam_policy"
         )
         mocked_handle_k8s_trusts = mocker.patch(
-            "modules.aws_iam_role.AwsIamRoleProcessor.handle_k8s_trusts"
+            "modules.aws_iam_role.aws_iam_role.AwsIamRoleProcessor.handle_k8s_trusts"
         )
         AwsIamRoleProcessor(app_module, layer).process(8)
         mocked_handle_iam_policy.assert_called_once_with(8)
@@ -43,10 +43,10 @@ class TestAwsIamRoleProcessor:
         del app_module.data["allowed_iams"]
         del app_module.data["allowed_k8s_services"]
         mocked_handle_iam_policy = mocker.patch(
-            "modules.aws_iam_role.AwsIamRoleProcessor.handle_iam_policy"
+            "modules.aws_iam_role.aws_iam_role.AwsIamRoleProcessor.handle_iam_policy"
         )
         mocked_handle_k8s_trusts = mocker.patch(
-            "modules.aws_iam_role.AwsIamRoleProcessor.handle_k8s_trusts"
+            "modules.aws_iam_role.aws_iam_role.AwsIamRoleProcessor.handle_k8s_trusts"
         )
         with pytest.raises(UserErrors):
             AwsIamRoleProcessor(app_module, layer).process(8)

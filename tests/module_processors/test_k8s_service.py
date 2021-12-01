@@ -21,7 +21,7 @@ class TestK8sServiceProcessor:
         idx = len(layer.modules)
         app_module = layer.get_module("app", idx)
         mocked_process = mocker.patch(
-            "modules.aws_k8s_service.AWSK8sModuleProcessor.process"
+            "modules.aws_k8s_service.aws_k8s_service.AWSK8sModuleProcessor.process"
         )
         AwsK8sServiceProcessor(app_module, layer).process(idx)
         mocked_process.assert_called_once_with(idx)

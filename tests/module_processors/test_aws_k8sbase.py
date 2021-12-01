@@ -25,13 +25,13 @@ class TestAwsK8sBaseProcessor:
             "arn:aws:iam::445935066876:user/silly-user",
         ]
 
-        mocker.patch("modules.aws_k8s_base.Terraform")
-        mocker.patch("modules.aws_k8s_base.configure_kubectl")
-        mocker.patch("modules.aws_k8s_base.load_kube_config")
+        mocker.patch("modules.aws_k8s_base.aws_k8s_base.Terraform")
+        mocker.patch("modules.aws_k8s_base.aws_k8s_base.configure_kubectl")
+        mocker.patch("modules.aws_k8s_base.aws_k8s_base.load_kube_config")
 
         mocked_core_v1_api = mocker.Mock()
         mocker.patch(
-            "modules.aws_k8s_base.CoreV1Api",
+            "modules.aws_k8s_base.aws_k8s_base.CoreV1Api",
             return_value=mocked_core_v1_api,
         )
         mocked_aws_auth_config_map = mocker.Mock()

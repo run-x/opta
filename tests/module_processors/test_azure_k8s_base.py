@@ -20,7 +20,7 @@ class TestAzureK8sBaseProcessor:
         idx = len(layer.modules)
         k8s_base_module = layer.get_module_by_type("azure-k8s-base", idx)[0]
         mocked_process = mocker.patch(
-            "modules.azure_k8s_base.ModuleProcessor.process"
+            "modules.azure_k8s_base.azure_k8s_base.ModuleProcessor.process"
         )
         AzureK8sBaseProcessor(k8s_base_module, layer).process(idx)
         mocked_process.assert_called_once_with(idx)

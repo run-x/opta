@@ -33,10 +33,10 @@ class TestRunxProcessor:
 
     def test_post_hook(self, mocker: MockFixture):
         mocked_fetch_secret = mocker.patch(
-            "modules.runx.RunxProcessor.fetch_secret"
+            "modules.runx.runx.RunxProcessor.fetch_secret"
         )
         mocked_fetch_jwt = mocker.patch(
-            "modules.runx.RunxProcessor.fetch_jwt"
+            "modules.runx.runx.RunxProcessor.fetch_jwt"
         )
         mocked_fetch_jwt.return_value = ({"org_id": "dummy_or"}, "blah")
         layer = Layer.load_from_yaml(
@@ -49,7 +49,7 @@ class TestRunxProcessor:
         )
         runx_module = layer.parent.get_module("runx", 7)
 
-        mocked_request = mocker.patch("modules.runx.requests")
+        mocked_request = mocker.patch("modules.runx.runx.requests")
         mocked_response = mocker.Mock()
         mocked_request.post.return_value = mocked_response
         mocked_response.status_code = 201
@@ -64,7 +64,7 @@ class TestRunxProcessor:
         mocked_fetch_secret.assert_called_once_with()
 
     def test_fetch_jwt(self, mocker: MockFixture):
-        mocked_request = mocker.patch("modules.runx.requests")
+        mocked_request = mocker.patch("modules.runx.runx.requests")
         mocked_response = mocker.Mock()
         mocked_request.post.return_value = mocked_response
         mocked_response.status_code = 200
@@ -88,7 +88,7 @@ class TestRunxProcessor:
         )
 
     def test_fetch_jwt_404(self, mocker: MockFixture):
-        mocked_request = mocker.patch("modules.runx.requests")
+        mocked_request = mocker.patch("modules.runx.runx.requests")
         mocked_response = mocker.Mock()
         mocked_request.post.return_value = mocked_response
         mocked_response.status_code = 404
@@ -106,7 +106,7 @@ class TestRunxProcessor:
             RunxProcessor(runx_module, layer).fetch_jwt("blah")
 
     def test_fetch_jwt_500(self, mocker: MockFixture):
-        mocked_request = mocker.patch("modules.runx.requests")
+        mocked_request = mocker.patch("modules.runx.runx.requests")
         mocked_response = mocker.Mock()
         mocked_request.post.return_value = mocked_response
         mocked_response.status_code = 500

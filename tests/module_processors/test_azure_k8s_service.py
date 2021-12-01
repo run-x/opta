@@ -20,7 +20,7 @@ class TestAzureK8sServiceProcessor:
         idx = len(layer.modules)
         app_module = layer.get_module("app", idx)
         mocked_process = mocker.patch(
-            "modules.azure_k8s_service.K8sServiceModuleProcessor.process"
+            "modules.azure_k8s_service.azure_k8s_service.K8sServiceModuleProcessor.process"
         )
         AzureK8sServiceProcessor(app_module, layer).process(idx)
         mocked_process.assert_called_once_with(idx)
@@ -58,10 +58,10 @@ class TestAzureK8sServiceProcessor:
         idx = len(layer.modules)
         app_module = layer.get_module("app", idx)
         mocked_create_namespace_if_not_exists = mocker.patch(
-            "modules.azure_k8s_service.create_namespace_if_not_exists"
+            "modules.azure_k8s_service.azure_k8s_service.create_namespace_if_not_exists"
         )
         mocked_get_manual_secrets = mocker.patch(
-            "modules.azure_k8s_service.get_manual_secrets"
+            "modules.azure_k8s_service.azure_k8s_service.get_manual_secrets"
         )
         mocked_get_manual_secrets.return_value = {"BALONEY": "blah"}
         AzureK8sServiceProcessor(app_module, layer).pre_hook(idx)

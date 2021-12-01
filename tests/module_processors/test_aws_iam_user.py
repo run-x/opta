@@ -19,7 +19,7 @@ class TestAwsIamUserProcessor:
         )
         app_module = layer.get_module("deployeruser", 8)
         mocked_handle_iam_policy = mocker.patch(
-            "modules.aws_iam_user.AwsIamUserProcessor.handle_iam_policy"
+            "modules.aws_iam_user.aws_iam_user.AwsIamUserProcessor.handle_iam_policy"
         )
         AwsIamUserProcessor(app_module, layer).process(8)
         mocked_handle_iam_policy.assert_called_once_with(8)

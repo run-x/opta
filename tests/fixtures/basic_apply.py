@@ -25,7 +25,7 @@ BASIC_APPLY = (
         },
         "module": {
             "core": {
-                "source": "./config/tf_modules/aws-base",
+                "source": "./modules/aws_base/tf_module",
                 "env_name": "dev1",
                 "layer_name": "dev1",
                 "module_name": "core",
