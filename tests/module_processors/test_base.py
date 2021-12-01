@@ -365,9 +365,7 @@ class TestK8sServiceModuleProcessor:
             ],
         }
         self.transform_port_assert(
-            processor,
-            data,
-            expected=expected,
+            processor, data, expected=expected,
         )
 
     def test_transform_port_grpc(self, processor: K8sServiceModuleProcessor) -> None:
@@ -387,9 +385,7 @@ class TestK8sServiceModuleProcessor:
         }
 
         self.transform_port_assert(
-            processor,
-            data,
-            expected=expected,
+            processor, data, expected=expected,
         )
 
     @staticmethod

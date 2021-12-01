@@ -800,8 +800,7 @@ class TestTerraform:
 
         mocker.patch("opta.core.terraform.AWS")
         mock_get_aws_lock_id = mocker.patch(
-            "opta.core.terraform.Terraform._get_aws_lock_id",
-            return_value="",
+            "opta.core.terraform.Terraform._get_aws_lock_id", return_value="",
         )
         mock_force_unlock_nice_run = mocker.patch("opta.core.terraform.nice_run")
 

@@ -9,6 +9,5 @@ def apply(d: dict, v: str) -> dict:
 
 
 azureSubscriptionIdVariable = TemplateVariable(
-    prompt="Azure subscription ID",
-    applier=apply,
+    prompt="Azure subscription ID", applier=apply,
 )

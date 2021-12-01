@@ -47,9 +47,7 @@ class TestKubernetes:
             "opta.core.kubernetes.get_terraform_outputs",
             return_value={"k8s_cluster_name": "mocked_cluster_name"},
         )
-        mocked_nice_run = mocker.patch(
-            "opta.core.kubernetes.nice_run",
-        )
+        mocked_nice_run = mocker.patch("opta.core.kubernetes.nice_run",)
 
         configure_kubectl(layer)
 

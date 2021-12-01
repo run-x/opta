@@ -14,8 +14,7 @@ class TestLayer:
         with pytest.raises(UserErrors):
             Layer.load_from_yaml(
                 os.path.join(
-                    os.path.dirname(os.path.dirname(__file__)),
-                    "infinite_loop.yaml",
+                    os.path.dirname(os.path.dirname(__file__)), "infinite_loop.yaml",
                 ),
                 None,
             )
