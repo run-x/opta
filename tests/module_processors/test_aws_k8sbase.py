@@ -3,8 +3,8 @@ import os
 
 from pytest_mock import MockFixture
 
-from opta.layer import Layer
 from modules.aws_k8s_base.aws_k8s_base import AwsK8sBaseProcessor
+from opta.layer import Layer
 
 
 class TestAwsK8sBaseProcessor:

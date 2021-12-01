@@ -1,13 +1,13 @@
 from typing import TYPE_CHECKING, Any, Dict, List, Union
 
+from modules.base import K8sServiceModuleProcessor, LocalK8sModuleProcessor
+from modules.linker_helper import LinkerHelper
 from opta.core.kubernetes import (
     create_namespace_if_not_exists,
     get_manual_secrets,
     list_namespaces,
 )
 from opta.exceptions import UserErrors
-from modules.base import K8sServiceModuleProcessor, LocalK8sModuleProcessor
-from modules.linker_helper import LinkerHelper
 
 if TYPE_CHECKING:
     from opta.layer import Layer

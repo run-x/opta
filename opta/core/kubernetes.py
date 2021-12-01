@@ -89,7 +89,9 @@ def _gcp_configure_kubectl(layer: "Layer") -> None:
             )
 
         out: str = nice_run(
-            ["gcloud", "config", "get-value", "project"], check=True, capture_output=True,
+            ["gcloud", "config", "get-value", "project"],
+            check=True,
+            capture_output=True,
         ).stdout.decode("utf-8")
     except Exception as err:
         raise UserErrors(
@@ -512,7 +514,8 @@ def tail_namespace_events(
     while True:
         try:
             for stream_obj in watch.stream(
-                v1.list_namespaced_event, namespace=layer.name,
+                v1.list_namespaced_event,
+                namespace=layer.name,
             ):
                 event = stream_obj["object"]
                 if (

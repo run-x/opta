@@ -196,8 +196,9 @@ class K8sServiceModuleProcessor(ModuleProcessor):
 
     @property
     def required_path_dependencies(self) -> FrozenSet[str]:
-        return super().required_path_dependencies | kubernetes.get_required_path_executables(
-            self.layer.cloud
+        return (
+            super().required_path_dependencies
+            | kubernetes.get_required_path_executables(self.layer.cloud)
         )
 
     def process(self, module_idx: int) -> None:

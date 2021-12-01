@@ -15,9 +15,7 @@ init_template_path = os.path.join(
 version_path = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), "config", "version.txt"
 )
-tf_modules_path = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)), "modules"
-)
+tf_modules_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "modules")
 
 one_time_run = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".first_time_run")
 

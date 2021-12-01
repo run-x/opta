@@ -1,17 +1,13 @@
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
+from modules.base import AWSIamAssembler, AWSK8sModuleProcessor, K8sServiceModuleProcessor
+from modules.linker_helper import LinkerHelper
 from opta.core.kubernetes import (
     create_namespace_if_not_exists,
     get_manual_secrets,
     list_namespaces,
 )
 from opta.exceptions import UserErrors
-from modules.base  import (
-    AWSIamAssembler,
-    AWSK8sModuleProcessor,
-    K8sServiceModuleProcessor,
-)
-from modules.linker_helper import LinkerHelper
 
 if TYPE_CHECKING:
     from opta.layer import Layer

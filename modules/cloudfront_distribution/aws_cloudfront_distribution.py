@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
-from opta.exceptions import UserErrors
 from modules.base import ModuleProcessor
+from opta.exceptions import UserErrors
 from opta.utils import logger
 
 if TYPE_CHECKING:

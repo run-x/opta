@@ -4,20 +4,16 @@ import os
 import pytest
 from pytest_mock import MockFixture
 
+from modules.runx.runx import OPTA_DOMAIN, RunxProcessor
 from opta.exceptions import UserErrors
 from opta.layer import Layer
-from modules.runx.runx import OPTA_DOMAIN, RunxProcessor
 
 
 class TestRunxProcessor:
     def test_process(self, mocker: MockFixture):
-        mocked_fetch_secret = mocker.patch(
-            "modules.runx.runx.RunxProcessor.fetch_secret"
-        )
+        mocked_fetch_secret = mocker.patch("modules.runx.runx.RunxProcessor.fetch_secret")
         mocked_fetch_secret.return_value = None
-        mocked_set_secret = mocker.patch(
-            "modules.runx.runx.RunxProcessor.set_secret"
-        )
+        mocked_set_secret = mocker.patch("modules.runx.runx.RunxProcessor.set_secret")
         layer = Layer.load_from_yaml(
             os.path.join(
                 os.path.dirname(os.path.dirname(__file__)),
@@ -32,12 +28,8 @@ class TestRunxProcessor:
         mocked_set_secret.assert_called_once_with()
 
     def test_post_hook(self, mocker: MockFixture):
-        mocked_fetch_secret = mocker.patch(
-            "modules.runx.runx.RunxProcessor.fetch_secret"
-        )
-        mocked_fetch_jwt = mocker.patch(
-            "modules.runx.runx.RunxProcessor.fetch_jwt"
-        )
+        mocked_fetch_secret = mocker.patch("modules.runx.runx.RunxProcessor.fetch_secret")
+        mocked_fetch_jwt = mocker.patch("modules.runx.runx.RunxProcessor.fetch_jwt")
         mocked_fetch_jwt.return_value = ({"org_id": "dummy_or"}, "blah")
         layer = Layer.load_from_yaml(
             os.path.join(

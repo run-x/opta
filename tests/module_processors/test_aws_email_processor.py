@@ -4,9 +4,9 @@ import os
 import pytest
 from pytest_mock import MockFixture
 
+from modules.aws_email import AwsEmailProcessor
 from opta.exceptions import UserErrors
 from opta.layer import Layer
-from modules.aws_email import AwsEmailProcessor
 
 
 class TestAwsEmailProcessor:

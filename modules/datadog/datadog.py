@@ -6,9 +6,9 @@ from kubernetes.client import ApiException, CoreV1Api, V1Namespace, V1ObjectMeta
 from kubernetes.config import load_kube_config
 from requests import codes, get
 
+from modules.base import ModuleProcessor
 from opta.core.kubernetes import configure_kubectl
 from opta.exceptions import UserErrors
-from modules.base import ModuleProcessor
 
 if TYPE_CHECKING:
     from opta.layer import Layer

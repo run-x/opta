@@ -14,7 +14,9 @@ FAKE_ENV_CONFIG = os.path.join(
 )
 
 FAKE_SERVICE_CONFIG = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)), "module_processors", "dummy_config1.yaml",
+    os.path.dirname(os.path.dirname(__file__)),
+    "module_processors",
+    "dummy_config1.yaml",
 )
 
 FAKE_SERVICE_CONFIG_MULTIPLE_ENV = os.path.join(
@@ -26,7 +28,8 @@ FAKE_SERVICE_CONFIG_MULTIPLE_ENV = os.path.join(
 
 def test_destroy_env_with_children(mocker: MockFixture) -> None:
     mocker.patch(
-        "opta.commands.destroy.Terraform.tf_lock_details", return_value=(False, ""),
+        "opta.commands.destroy.Terraform.tf_lock_details",
+        return_value=(False, ""),
     )
     mocker.patch("opta.commands.destroy.amplitude_client.send_event")
     mocker.patch("opta.commands.destroy.Terraform.init")
@@ -34,7 +37,8 @@ def test_destroy_env_with_children(mocker: MockFixture) -> None:
     mocker.patch("opta.commands.destroy.Terraform.download_state", return_value=True)
 
     mocker.patch(
-        "opta.commands.destroy._aws_get_configs", return_value=["a", "b"],
+        "opta.commands.destroy._aws_get_configs",
+        return_value=["a", "b"],
     )
 
     mocked_gen_all = mocker.patch("opta.commands.destroy.gen_all")
@@ -50,7 +54,8 @@ def test_destroy_env_with_children(mocker: MockFixture) -> None:
 
 def test_destroy_env_without_children(mocker: MockFixture) -> None:
     mocker.patch(
-        "opta.commands.destroy.Terraform.tf_lock_details", return_value=(False, ""),
+        "opta.commands.destroy.Terraform.tf_lock_details",
+        return_value=(False, ""),
     )
     mocker.patch("opta.commands.destroy.amplitude_client.send_event")
     mocker.patch("opta.commands.destroy.Terraform.init")
@@ -62,7 +67,8 @@ def test_destroy_env_without_children(mocker: MockFixture) -> None:
     mocker.patch("opta.commands.destroy.Layer.verify_cloud_credentials")
 
     mocker.patch(
-        "opta.commands.destroy._aws_get_configs", return_value=[],
+        "opta.commands.destroy._aws_get_configs",
+        return_value=[],
     )
 
     mocked_gen_all = mocker.patch("opta.commands.destroy.gen_all")
@@ -80,7 +86,8 @@ def test_destroy_env_without_children(mocker: MockFixture) -> None:
 
 def test_destroy_service(mocker: MockFixture) -> None:
     mocker.patch(
-        "opta.commands.destroy.Terraform.tf_lock_details", return_value=(False, ""),
+        "opta.commands.destroy.Terraform.tf_lock_details",
+        return_value=(False, ""),
     )
     mocker.patch("opta.commands.destroy.amplitude_client.send_event")
     mocker.patch("opta.commands.destroy.Terraform.init")
@@ -92,7 +99,8 @@ def test_destroy_service(mocker: MockFixture) -> None:
     mocker.patch("opta.commands.destroy.Layer.verify_cloud_credentials")
 
     mocker.patch(
-        "opta.commands.destroy._aws_get_configs", return_value=[],
+        "opta.commands.destroy._aws_get_configs",
+        return_value=[],
     )
 
     mocked_gen_all = mocker.patch("opta.commands.destroy.gen_all")
@@ -116,7 +124,8 @@ def test_destroy_service_single_env_wrong_input(mocker: MockFixture) -> None:
     mocker.patch("opta.commands.destroy.Layer.verify_cloud_credentials")
 
     mocker.patch(
-        "opta.commands.destroy._aws_get_configs", return_value=[],
+        "opta.commands.destroy._aws_get_configs",
+        return_value=[],
     )
 
     runner = CliRunner()
@@ -134,7 +143,8 @@ def test_destroy_service_multiple_env_wrong_input(mocker: MockFixture) -> None:
     mocker.patch("opta.commands.destroy.Layer.verify_cloud_credentials")
 
     mocker.patch(
-        "opta.commands.destroy._aws_get_configs", return_value=[],
+        "opta.commands.destroy._aws_get_configs",
+        return_value=[],
     )
 
     runner = CliRunner()

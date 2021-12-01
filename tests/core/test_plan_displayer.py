@@ -11,7 +11,9 @@ from opta.core.plan_displayer import PlanDisplayer
 class TestPlanDisplayer:
     def test_run(self, mocker: MockFixture):
         path = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)), "core", "dummy_changes.yaml",
+            os.path.dirname(os.path.dirname(__file__)),
+            "core",
+            "dummy_changes.yaml",
         )
         with open(path) as f:
             plan_dict = yaml.load(f)

@@ -11,8 +11,8 @@ from OpenSSL.crypto import (
     load_privatekey,
 )
 
-from opta.exceptions import UserErrors
 from modules.base import ModuleProcessor
+from opta.exceptions import UserErrors
 
 if TYPE_CHECKING:
     from opta.layer import Layer

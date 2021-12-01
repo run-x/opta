@@ -3,8 +3,8 @@ import os
 
 from pytest_mock import MockFixture
 
-from opta.layer import Layer
 from modules.aws_eks.aws_eks import AwsEksProcessor
+from opta.layer import Layer
 
 
 class TestAwsEksModuleProcessor:

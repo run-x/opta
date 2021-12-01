@@ -3,9 +3,9 @@ from typing import TYPE_CHECKING, FrozenSet
 
 from ruamel.yaml.compat import StringIO
 
+from modules.base import ModuleProcessor
 from opta.core.helm import Helm
 from opta.exceptions import UserErrors
-from modules.base import ModuleProcessor
 from opta.utils import logger, yaml
 
 if TYPE_CHECKING:

@@ -3,12 +3,12 @@ import os
 
 from pytest_mock import MockFixture
 
-from opta.layer import Layer
 from modules.aws_dns.aws_dns import (
     CERTIFICATE_BODY_FILE_NAME,
     PRIVATE_KEY_FILE_NAME,
     AwsDnsProcessor,
 )
+from opta.layer import Layer
 
 
 class TestAwsDnsProcessor:

@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Optional
 
-from opta.exceptions import UserErrors
 from modules.base import AWSIamAssembler, ModuleProcessor
+from opta.exceptions import UserErrors
 
 if TYPE_CHECKING:
     from opta.layer import Layer
@@ -16,9 +16,9 @@ class AwsDynamodbProcessor(ModuleProcessor, AWSIamAssembler):
         attributes: list[dict] = self.module.data["attributes"]
         range_key: Optional[str] = self.module.data.get("range_key", None)
         hash_key: str = self.module.data["hash_key"]
-        valid_keys: list[str] = [hash_key, range_key] if range_key is not None else [
-            hash_key
-        ]
+        valid_keys: list[str] = (
+            [hash_key, range_key] if range_key is not None else [hash_key]
+        )
         for attribute in attributes:
             if attribute["name"] not in valid_keys:
                 raise UserErrors(

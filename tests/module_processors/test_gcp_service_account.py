@@ -4,8 +4,8 @@ import os
 import pytest
 from pytest_mock import MockFixture
 
-from opta.layer import Layer
 from modules.gcp_service_account.gcp_service_account import GcpServiceAccountProcessor
+from opta.layer import Layer
 
 
 class TestGCPK8sServiceProcessor:

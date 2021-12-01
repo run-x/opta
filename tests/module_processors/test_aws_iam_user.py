@@ -3,8 +3,8 @@ import os
 
 from pytest_mock import MockFixture
 
-from opta.layer import Layer
 from modules.aws_iam_user.aws_iam_user import AwsIamUserProcessor
+from opta.layer import Layer
 
 
 class TestAwsIamUserProcessor:

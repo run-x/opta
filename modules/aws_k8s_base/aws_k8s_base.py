@@ -8,11 +8,11 @@ from kubernetes.config import load_kube_config
 from mypy_boto3_elbv2 import ElasticLoadBalancingv2Client
 from ruamel.yaml.compat import StringIO
 
+from modules.base import AWSK8sModuleProcessor, K8sBaseModuleProcessor
 from opta.core.aws import AWS
 from opta.core.kubernetes import configure_kubectl, list_namespaces
 from opta.core.terraform import Terraform
 from opta.exceptions import UserErrors
-from modules.base  import AWSK8sModuleProcessor, K8sBaseModuleProcessor
 from opta.utils import yaml
 
 if TYPE_CHECKING:

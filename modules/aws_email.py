@@ -8,8 +8,8 @@ from colored import attr, fg
 from email_validator import EmailNotValidError, validate_email
 from mypy_boto3_sesv2.client import SESV2Client
 
-from opta.exceptions import UserErrors
 from modules.base import ModuleProcessor
+from opta.exceptions import UserErrors
 from opta.utils import logger
 
 if TYPE_CHECKING:

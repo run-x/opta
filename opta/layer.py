@@ -32,16 +32,6 @@ from google.auth import default
 from google.auth.exceptions import DefaultCredentialsError
 from google.oauth2 import service_account
 
-from opta.constants import MODULE_DEPENDENCY, REGISTRY, VERSION
-from opta.core.aws import AWS
-from opta.core.gcp import GCP
-from opta.core.validator import validate_yaml
-from opta.crash_reporter import CURRENT_CRASH_REPORTER
-from opta.exceptions import UserErrors
-from opta.module import Module
-from modules.cloudfront_distribution.aws_cloudfront_distribution import (
-    AwsCloudfrontDstributionProcessor,
-)
 from modules.aws_dns.aws_dns import AwsDnsProcessor
 from modules.aws_documentdb.aws_documentdb import AwsDocumentDbProcessor
 from modules.aws_dynamodb.aws_dynamodb import AwsDynamodbProcessor
@@ -58,6 +48,9 @@ from modules.azure_base.azure_base import AzureBaseProcessor
 from modules.azure_k8s_base.azure_k8s_base import AzureK8sBaseProcessor
 from modules.azure_k8s_service.azure_k8s_service import AzureK8sServiceProcessor
 from modules.base import ModuleProcessor
+from modules.cloudfront_distribution.aws_cloudfront_distribution import (
+    AwsCloudfrontDstributionProcessor,
+)
 from modules.custom_terraform import CustomTerraformProcessor
 from modules.datadog.datadog import DatadogProcessor
 from modules.external_ssl_cert.external_ssl_cert import ExternalSSLCert
@@ -70,6 +63,13 @@ from modules.helm_chart.helm_chart import HelmChartProcessor
 from modules.local_k8s_service.local_k8s_service import LocalK8sServiceProcessor
 from modules.mongodb_atlas.mongodb_atlas import MongodbAtlasProcessor
 from modules.runx.runx import RunxProcessor
+from opta.constants import MODULE_DEPENDENCY, REGISTRY, VERSION
+from opta.core.aws import AWS
+from opta.core.gcp import GCP
+from opta.core.validator import validate_yaml
+from opta.crash_reporter import CURRENT_CRASH_REPORTER
+from opta.exceptions import UserErrors
+from opta.module import Module
 from opta.plugins.derived_providers import DerivedProviders
 from opta.utils import deep_merge, hydrate, logger, yaml
 from opta.utils.dependencies import validate_installed_path_executables
@@ -166,7 +166,13 @@ class Layer:
         self.variables = variables or {}
         self.modules: List[Module] = []
         for module_data in modules_data:
-            self.modules.append(Module(self, module_data, self.parent,))
+            self.modules.append(
+                Module(
+                    self,
+                    module_data,
+                    self.parent,
+                )
+            )
         module_names: set = set()
         for module in self.modules:
             if module.name in module_names:

@@ -3,8 +3,8 @@ import os
 
 from pytest_mock import MockFixture
 
-from opta.layer import Layer
 from modules.local_k8s_service.local_k8s_service import LocalK8sServiceProcessor
+from opta.layer import Layer
 
 
 class TestLocalK8sServiceProcessor:

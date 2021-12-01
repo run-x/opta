@@ -3,8 +3,8 @@ import os
 
 from pytest_mock import MockFixture
 
-from opta.layer import Layer
 from modules.azure_k8s_base.azure_k8s_base import AzureK8sBaseProcessor
+from opta.layer import Layer
 
 
 class TestAzureK8sBaseProcessor:

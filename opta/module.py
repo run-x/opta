@@ -180,11 +180,11 @@ class Module:
         #     ),
         #     os.getcwd(),
         # )
-        if loc=="k8s-base":
+        if loc == "k8s-base":
             loc = "aws-k8s-base"
-        if loc=="k8s-service":
+        if loc == "k8s-service":
             loc = "aws-k8s-service"
-        loc = "_".join(loc.split('-'))
+        loc = "_".join(loc.split("-"))
         relative_path = os.path.relpath(
             os.path.join(
                 os.path.dirname(os.path.dirname(__file__)), "modules", loc, "tf_module"

@@ -14,10 +14,10 @@ from google.api_core.exceptions import NotFound
 from google.cloud import secretmanager
 from mypy_boto3_ssm.client import SSMClient
 
+from modules.base import ModuleProcessor
 from opta.constants import VERSION
 from opta.core.gcp import GCP
 from opta.exceptions import UserErrors
-from modules.base import ModuleProcessor
 from opta.utils import logger
 
 if TYPE_CHECKING:
@@ -84,7 +84,10 @@ class RunxProcessor(ModuleProcessor):
 
     def set_secret(self) -> None:
         while True:
-            value = click.prompt("Please enter your runx api key", type=click.STRING,)
+            value = click.prompt(
+                "Please enter your runx api key",
+                type=click.STRING,
+            )
             try:
                 self.fetch_jwt(value)
             except UserErrors:

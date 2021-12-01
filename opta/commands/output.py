@@ -17,8 +17,11 @@ from opta.utils import check_opta_file_exists, json, logger
 @click.option(
     "-e", "--env", default=None, help="The env to use when loading the config file"
 )
-def output(config: str, env: Optional[str],) -> None:
-    """ Print TF outputs """
+def output(
+    config: str,
+    env: Optional[str],
+) -> None:
+    """Print TF outputs"""
 
     config = check_opta_file_exists(config)
     layer = Layer.load_from_yaml(config, env)

@@ -1,9 +1,9 @@
 import os
 from typing import TYPE_CHECKING
 
+from modules.base import ModuleProcessor
 from opta.core.terraform import get_terraform_outputs
 from opta.exceptions import UserErrors
-from modules.base import ModuleProcessor
 
 if TYPE_CHECKING:
     from opta.layer import Layer

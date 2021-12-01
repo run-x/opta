@@ -8,8 +8,8 @@ from mypy_boto3_ec2 import EC2Client
 from mypy_boto3_ec2.type_defs import NetworkInterfaceTypeDef
 from mypy_boto3_logs import CloudWatchLogsClient
 
-from opta.exceptions import UserErrors
 from modules.base import ModuleProcessor
+from opta.exceptions import UserErrors
 from opta.utils import logger
 
 if TYPE_CHECKING:

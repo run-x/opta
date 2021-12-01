@@ -47,7 +47,9 @@ class TestGenerator:
     def test_gen_resource_tags(self, mocker: MockFixture) -> None:
         gen_tags_file = "pytest-override.tf.json"
         mocker.patch("opta.module.TAGS_OVERRIDE_FILE", gen_tags_file)
-        gen_tags_file_path = os.path.join(tf_modules_path, "aws_base/tf_module", gen_tags_file)
+        gen_tags_file_path = os.path.join(
+            tf_modules_path, "aws_base/tf_module", gen_tags_file
+        )
 
         mocker.patch("opta.layer.open")
         mocker.patch("opta.layer.os.path.exists")

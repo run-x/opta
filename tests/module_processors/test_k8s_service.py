@@ -4,8 +4,8 @@ import os
 import pytest
 from pytest_mock import MockFixture
 
-from opta.layer import Layer
 from modules.aws_k8s_service.aws_k8s_service import AwsK8sServiceProcessor
+from opta.layer import Layer
 
 
 class TestK8sServiceProcessor:

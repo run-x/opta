@@ -3,8 +3,8 @@ import os
 
 from pytest_mock import MockFixture
 
-from opta.layer import Layer
 from modules.azure_base.azure_base import AzureBaseProcessor
+from opta.layer import Layer
 
 
 class TestAzureBaseProcessor:
