@@ -151,7 +151,6 @@ class TestLocalK8sServiceProcessor:
         idx = len(layer.modules)
         app_module = layer.get_module("app", idx)
         mongodb_module = layer.get_module("mongodb", idx)
-
         mongodb_module.data["link_secrets"] = []
         mongodb_module.data["manual_secrets"] = []
         app_module.data["link_secrets"] = []
