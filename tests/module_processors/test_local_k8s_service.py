@@ -4,7 +4,7 @@ import os
 from pytest_mock import MockFixture
 
 from opta.layer import Layer
-from opta.module_processors.local_k8s_service import LocalK8sServiceProcessor
+from modules.local_k8s_service.local_k8s_service import LocalK8sServiceProcessor
 
 
 class TestLocalK8sServiceProcessor:
@@ -20,7 +20,7 @@ class TestLocalK8sServiceProcessor:
         idx = len(layer.modules)
         app_module = layer.get_module("app", idx)
         mocked_process = mocker.patch(
-            "opta.module_processors.local_k8s_service.LocalK8sModuleProcessor.process"
+            "modules.local_k8s_service.LocalK8sModuleProcessor.process"
         )
         LocalK8sServiceProcessor(app_module, layer).process(idx)
         mocked_process.assert_called_once_with(idx)

@@ -4,7 +4,7 @@ import os
 from pytest_mock import MockFixture
 
 from opta.layer import Layer
-from opta.module_processors.azure_base import AzureBaseProcessor
+from modules.azure_base.azure_base import AzureBaseProcessor
 
 
 class TestAzureBaseProcessor:
@@ -20,7 +20,7 @@ class TestAzureBaseProcessor:
         idx = len(layer.modules)
         k8s_base_module = layer.get_module_by_type("azure-base", idx)[0]
         mocked_process = mocker.patch(
-            "opta.module_processors.azure_base.ModuleProcessor.process"
+            "modules.azure_base.ModuleProcessor.process"
         )
         AzureBaseProcessor(k8s_base_module, layer).process(idx)
         mocked_process.assert_called_once_with(idx)

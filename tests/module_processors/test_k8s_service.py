@@ -5,7 +5,7 @@ import pytest
 from pytest_mock import MockFixture
 
 from opta.layer import Layer
-from opta.module_processors.aws_k8s_service import AwsK8sServiceProcessor
+from modules.aws_k8s_service.aws_k8s_service import AwsK8sServiceProcessor
 
 
 class TestK8sServiceProcessor:
@@ -21,7 +21,7 @@ class TestK8sServiceProcessor:
         idx = len(layer.modules)
         app_module = layer.get_module("app", idx)
         mocked_process = mocker.patch(
-            "opta.module_processors.aws_k8s_service.AWSK8sModuleProcessor.process"
+            "modules.aws_k8s_service.AWSK8sModuleProcessor.process"
         )
         AwsK8sServiceProcessor(app_module, layer).process(idx)
         mocked_process.assert_called_once_with(idx)

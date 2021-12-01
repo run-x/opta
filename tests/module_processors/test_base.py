@@ -8,7 +8,7 @@ from pytest_mock import MockFixture
 
 from opta.exceptions import UserErrors
 from opta.layer import Layer
-from opta.module_processors.base import (
+from modules.base import (
     DNSModuleProcessor,
     K8sBaseModuleProcessor,
     K8sServiceModuleProcessor,
@@ -33,7 +33,7 @@ class TestBaseModuleProcessors:
         del dns_module.data["upload_cert"]
         dns_module.data["delegated"] = False
         mocked_get_terraform_outputs = mocker.patch(
-            "opta.module_processors.base.get_terraform_outputs"
+            "modules.base.get_terraform_outputs"
         )
         processor = DNSModuleProcessor(dns_module, layer)
         processor.validate_dns()
@@ -54,7 +54,7 @@ class TestBaseModuleProcessors:
         del dns_module.data["upload_cert"]
         dns_module.data["delegated"] = True
         mocked_get_terraform_outputs = mocker.patch(
-            "opta.module_processors.base.get_terraform_outputs"
+            "modules.base.get_terraform_outputs"
         )
         mocked_get_terraform_outputs.return_value = {}
         processor = DNSModuleProcessor(dns_module, layer)
@@ -78,12 +78,12 @@ class TestBaseModuleProcessors:
         dns_module.data["delegated"] = True
         processor = DNSModuleProcessor(dns_module, layer)
         mocked_get_terraform_outputs = mocker.patch(
-            "opta.module_processors.base.get_terraform_outputs"
+            "modules.base.get_terraform_outputs"
         )
         mocked_get_terraform_outputs.return_value = {
             "name_servers": ["blah.com", "baloney.com"]
         }
-        mocked_query = mocker.patch("opta.module_processors.base.query")
+        mocked_query = mocker.patch("modules.base.query")
         mocked_query.side_effect = NoNameservers("No name servers found")  # type: ignore
         with pytest.raises(UserErrors):
             processor.validate_dns()
@@ -105,12 +105,12 @@ class TestBaseModuleProcessors:
         dns_module.data["delegated"] = True
         processor = DNSModuleProcessor(dns_module, layer)
         mocked_get_terraform_outputs = mocker.patch(
-            "opta.module_processors.base.get_terraform_outputs"
+            "modules.base.get_terraform_outputs"
         )
         mocked_get_terraform_outputs.return_value = {
             "name_servers": ["blah.com.", "baloney.com"]
         }
-        mocked_query = mocker.patch("opta.module_processors.base.query")
+        mocked_query = mocker.patch("modules.base.query")
         mocked_1 = mocker.Mock()
         mocked_1.target = mocker.Mock()
         mocked_1.target.to_text.return_value = "baloney.com"
@@ -137,12 +137,12 @@ class TestBaseModuleProcessors:
         dns_module.data["delegated"] = True
         processor = DNSModuleProcessor(dns_module, layer)
         mocked_get_terraform_outputs = mocker.patch(
-            "opta.module_processors.base.get_terraform_outputs"
+            "modules.base.get_terraform_outputs"
         )
         mocked_get_terraform_outputs.return_value = {
             "name_servers": ["blah.com.", "baloney.com"]
         }
-        mocked_query = mocker.patch("opta.module_processors.base.query")
+        mocked_query = mocker.patch("modules.base.query")
         mocked_1 = mocker.Mock()
         mocked_1.target = mocker.Mock()
         mocked_1.target.to_text.return_value = "baloney.com"
