@@ -20,13 +20,7 @@ from opta.core.azure import Azure
 from opta.core.cloud_client import CloudClient
 from opta.core.gcp import GCP
 from opta.core.generator import gen, gen_opta_resource_tags
-from opta.core.kubernetes import (
-    configure_kubectl,
-    current_image_digest_tag,
-    get_cluster_name,
-    tail_module_log,
-    tail_namespace_events,
-)
+from opta.core.kubernetes import get_cluster_name, tail_module_log, tail_namespace_events
 from opta.core.local import Local
 from opta.core.plan_displayer import PlanDisplayer
 from opta.core.terraform import Terraform, get_terraform_outputs
@@ -214,37 +208,12 @@ def _apply(
                 f"ou're trying to run an older version of opta (last run was at {previous_config['date']} with version {old_opta_version}). Please update to the latest version and try again!"
             )
 
-    service_modules = layer.get_module_by_type("k8s-service")
     try:
-        if len(service_modules) > 0 and (get_cluster_name(layer.root()) is not None):
-            configure_kubectl(layer)
-
-            for service_module in service_modules:
-                current_image_info = current_image_digest_tag(layer)
-                if (
-                    image_digest is None
-                    and (
-                        current_image_info["tag"] is not None
-                        or current_image_info["digest"] is not None
-                    )
-                    and image_tag is None
-                    and service_module.data.get("image", "").upper() == "AUTO"
-                    and not test
-                ):
-                    if click.confirm(
-                        f"WARNING There is an existing deployment (tag={current_image_info['tag']}, "
-                        f"digest={current_image_info['digest']}) and the pods will be killed as you "
-                        f"did not specify an image tag. Would you like to keep the existing deployment alive? (y/n)",
-                    ):
-                        image_tag = current_image_info["tag"]
-                        image_digest = current_image_info["digest"]
-
-        layer.variables["image_tag"] = image_tag
-        layer.variables["image_digest"] = image_digest
-
         existing_modules: Set[str] = set()
         first_loop = True
-        for module_idx, current_modules, total_block_count in gen(layer, previous_config):
+        for module_idx, current_modules, total_block_count in gen(
+            layer, previous_config, image_tag, image_digest, test
+        ):
             if first_loop:
                 # This is set during the first iteration, since the tf file must exist.
                 existing_modules = Terraform.get_existing_modules(layer)

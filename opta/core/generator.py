@@ -1,7 +1,14 @@
 from typing import TYPE_CHECKING, Generator, List, Optional, Tuple
 
+import click
+
 from opta import gen_tf
 from opta.constants import TF_FILE_PATH
+from opta.core.kubernetes import (
+    configure_kubectl,
+    current_image_digest_tag,
+    get_cluster_name,
+)
 from opta.utils import deep_merge, logger
 
 if TYPE_CHECKING:
@@ -15,7 +22,11 @@ def gen_all(layer: "Layer", previous_config: Optional["StructuredConfig"] = None
 
 
 def gen(
-    layer: "Layer", previous_config: Optional["StructuredConfig"] = None
+    layer: "Layer",
+    previous_config: Optional["StructuredConfig"] = None,
+    image_tag: Optional[str] = None,
+    image_digest: Optional[str] = None,
+    test: bool = False,
 ) -> Generator[Tuple[int, List["Module"], int], None, None]:
     """Generate TF file based on opta config file"""
     logger.debug("Loading infra blocks")
@@ -27,6 +38,31 @@ def gen(
         current_modules.append(module)
         if not module.halt and module_idx + 1 != total_module_count:
             continue
+        service_modules = layer.get_module_by_type("k8s-service", module_idx)
+        if len(service_modules) > 0 and (get_cluster_name(layer.root()) is not None):
+            configure_kubectl(layer)
+
+            for service_module in service_modules:
+                current_image_info = current_image_digest_tag(layer)
+                if (
+                    image_digest is None
+                    and (
+                        current_image_info["tag"] is not None
+                        or current_image_info["digest"] is not None
+                    )
+                    and image_tag is None
+                    and service_module.data.get("image", "").upper() == "AUTO"
+                    and not test
+                ):
+                    if click.confirm(
+                        f"WARNING There is an existing deployment (tag={current_image_info['tag']}, "
+                        f"digest={current_image_info['digest']}) and the pods will be killed as you "
+                        f"did not specify an image tag. Would you like to keep the existing deployment alive? (y/n)",
+                    ):
+                        image_tag = current_image_info["tag"]
+                        image_digest = current_image_info["digest"]
+        layer.variables["image_tag"] = image_tag
+        layer.variables["image_digest"] = image_digest
         ret = layer.gen_providers(module_idx)
         ret = deep_merge(layer.gen_tf(module_idx, previous_config), ret)
 

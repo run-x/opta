@@ -363,7 +363,7 @@ class Layer:
     def get_module(
         self, module_name: str, module_idx: Optional[int] = None
     ) -> Optional[Module]:
-        module_idx = module_idx or len(self.modules) - 1
+        module_idx = len(self.modules) - 1 if module_idx is None else module_idx
         for module in self.modules[0 : module_idx + 1]:
             if module.name == module_name:
                 return module
@@ -384,7 +384,7 @@ class Layer:
     def get_module_by_type(
         self, module_type: str, module_idx: Optional[int] = None
     ) -> list[Module]:
-        module_idx = module_idx or len(self.modules) - 1
+        module_idx = len(self.modules) - 1 if module_idx is None else module_idx
         modules = []
         for module in self.modules[0 : module_idx + 1]:
             if module.type == module_type or module.aliased_type == module_type:
@@ -393,7 +393,7 @@ class Layer:
 
     def outputs(self, module_idx: Optional[int] = None) -> Iterable[str]:
         ret: List[str] = []
-        module_idx = module_idx or len(self.modules) - 1
+        module_idx = len(self.modules) - 1 if module_idx is None else module_idx
         for module in self.modules[0 : module_idx + 1]:
             ret += module.outputs()
         return ret
