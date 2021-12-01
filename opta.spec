@@ -10,6 +10,7 @@ a = Analysis(['opta/cli.py'],
              binaries=[],
              datas=[
                ('./config', 'config'),
+               ('./modules', 'modules'),
                ('roots.pem', 'grpc/_cython/_credentials/'),
              ] + collect_data_files('hcl2'),
              hiddenimports=[],
