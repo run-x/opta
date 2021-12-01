@@ -4,9 +4,9 @@ import os
 import pytest
 from pytest_mock import MockFixture
 
+from modules.aws_email import AwsEmailProcessor
 from opta.exceptions import UserErrors
 from opta.layer import Layer
-from opta.module_processors.aws_email import AwsEmailProcessor
 
 
 class TestAwsEmailProcessor:
@@ -40,7 +40,7 @@ class TestAwsEmailProcessor:
         aws_email_module = layer.get_module("awsses", 8)
 
         mocked_sesv2 = mocker.Mock()
-        mocked_boto3 = mocker.patch("opta.module_processors.aws_email.boto3")
+        mocked_boto3 = mocker.patch("modules.aws_email.boto3")
         mocked_boto3.client.return_value = mocked_sesv2
         mocked_sesv2.get_account.return_value = {"ProductionAccessEnabled": True}
         aws_dns_modules = layer.get_module("awsdns", 8)
@@ -60,9 +60,9 @@ class TestAwsEmailProcessor:
         )
         aws_email_module = layer.get_module("awsses", 8)
 
-        patched_logger = mocker.patch("opta.module_processors.aws_email.logger")
+        patched_logger = mocker.patch("modules.aws_email.logger")
         mocked_sesv2 = mocker.Mock()
-        mocked_boto3 = mocker.patch("opta.module_processors.aws_email.boto3")
+        mocked_boto3 = mocker.patch("modules.aws_email.boto3")
         mocked_boto3.client.return_value = mocked_sesv2
         mocked_sesv2.get_account.return_value = {
             "ProductionAccessEnabled": False,
@@ -87,9 +87,9 @@ class TestAwsEmailProcessor:
         )
         aws_email_module = layer.get_module("awsses", 8)
 
-        patched_logger = mocker.patch("opta.module_processors.aws_email.logger")
+        patched_logger = mocker.patch("modules.aws_email.logger")
         mocked_sesv2 = mocker.Mock()
-        mocked_boto3 = mocker.patch("opta.module_processors.aws_email.boto3")
+        mocked_boto3 = mocker.patch("modules.aws_email.boto3")
         mocked_boto3.client.return_value = mocked_sesv2
         mocked_sesv2.get_account.return_value = {
             "ProductionAccessEnabled": False,
@@ -114,11 +114,11 @@ class TestAwsEmailProcessor:
         )
         aws_email_module = layer.get_module("awsses", 8)
 
-        patched_prompt = mocker.patch("opta.module_processors.aws_email.prompt")
+        patched_prompt = mocker.patch("modules.aws_email.prompt")
         patched_prompt.side_effect = ["www.blah.com", "hello, world", "blah@runx.dev"]
-        patched_logger = mocker.patch("opta.module_processors.aws_email.logger")
+        patched_logger = mocker.patch("modules.aws_email.logger")
         mocked_sesv2 = mocker.Mock()
-        mocked_boto3 = mocker.patch("opta.module_processors.aws_email.boto3")
+        mocked_boto3 = mocker.patch("modules.aws_email.boto3")
         mocked_boto3.client.return_value = mocked_sesv2
         mocked_sesv2.get_account.return_value = {
             "ProductionAccessEnabled": False,

@@ -30,9 +30,7 @@ class Module(Validator):
 
         type: str = value["type"]
         if type in REGISTRY[self.cloud]["module_aliases"]:
-            value["type"] = REGISTRY[self.cloud]["module_aliases"][  # type: ignore
-                type
-            ]
+            value["type"] = REGISTRY[self.cloud]["module_aliases"][type]  # type: ignore
             type = value["type"]
         elif type not in REGISTRY[self.cloud]["modules"]:
             raise UserErrors(f"Module {type} is not supported for cloud {self.cloud}")

@@ -1,0 +1,113 @@
+halt: true
+environment_module: true
+is_unique: true
+inputs:
+  - name: env_name
+    user_facing: false
+    description: Opta Environment name
+    default: None
+  - name: layer_name
+    user_facing: false
+    description: Opta Layer name
+    default: None
+  - name: module_name
+    user_facing: false
+    description: Opta Module name
+    default: None
+  - name: kms_account_key_arn
+    user_facing: false
+    description: KMS account key arn
+    default: None
+  - name: private_subnet_ids
+    user_facing: false
+    description: Private subnet ids
+    default: None
+  - name: vpc_id
+    user_facing: false
+    description: Opta vpc_id id
+    default: None
+  - name: max_nodes
+    user_facing: true
+    validator: any(str(), int(), required=False)
+    description: The maximum number of nodes to be set by the autoscaler in for the default nodegroup.
+    default: 5
+  - name: min_nodes
+    user_facing: true
+    validator: any(str(), int(), required=False)
+    description: The minimum number of nodes to be set by the autoscaler in for the default nodegroup.
+    default: 3
+  - name: node_disk_size
+    user_facing: true
+    validator: any(str(), int(), required=False)
+    description: The size of disk to give the nodes' ec2s in GB.
+    default: 20
+  - name: node_instance_type
+    user_facing: true
+    validator: str(required=False)
+    description: The [ec2 instance type](https://aws.amazon.com/ec2/instance-types/) for the nodes.
+    default: "t3.medium"
+  - name: k8s_version
+    user_facing: true
+    validator: str(required=False)
+    description: The Kubernetes version for the cluster. Must be [supported by EKS](https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html)
+    default: "1.18"
+  - name: control_plane_security_groups
+    user_facing: true
+    validator: list(str(), required=False)
+    description: List of security groups to add to the control plane access.
+    default: []
+  - name: spot_instances
+    user_facing: true
+    validator: bool(required=False)
+    description: |
+      A boolean specifying whether to use [spot instances](https://aws.amazon.com/ec2/spot/)
+      for the default nodegroup or not. The spot instances will be configured to have the max price equal to the on-demand
+      price (so no danger of overcharging). _WARNING_: By using spot instances you must accept the real risk of frequent abrupt
+      node terminations and possibly (although extremely rarely) even full blackouts (all nodes die). The former is a small
+      risk as containers of Opta services will be automatically restarted on surviving nodes. So just make sure to specify
+      a minimum of more than 1 containers -- Opta by default attempts to spread them out amongst many nodes. The former
+      is a graver concern which can be addressed by having multiple node groups of different instance types (see aws
+      nodegroup module) and ideally at least one non-spot.
+    default: false
+  - name: enable_metrics
+    user_facing: true
+    validator: bool(required=False)
+    description: Enable autoscaling group cloudwatch metrics collection for the default nodegroup.
+    default: false
+  - name: node_launch_template
+    user_facing: true
+    validator: any(include('node_launch_template'), required=False)
+    description: Custom launch template for the underlying ec2s.
+    default: {}
+extra_validators:
+  node_launch_template:
+    user_data: str(required=False)
+outputs:
+  - name: k8s_endpoint
+    export: true
+    description: The endpoint to communicate to the kubernetes cluster through.
+  - name: k8s_ca_data
+    export: true
+    description: The certificate authority used by the kubernetes cluster for ssl.
+  - name: k8s_cluster_name
+    export: true
+    description: The name of the kubernetes cluster.
+  - name: k8s_openid_provider_url
+    export: true
+    description: The openid provider url for AWS IAM <--> Kubernetes RBAC integration.
+  - name: k8s_openid_provider_arn
+    export: true
+    description: The openid provider arn for AWS IAM <--> Kubernetes RBAC integration.
+  - name: k8s_node_group_security_id
+    export: true
+    description: The id of the security group of the cluster nodepools.
+output_providers:
+  helm:
+    kubernetes:
+      host: "${{{module_source}.k8s_endpoint}}"
+      token: "${{data.aws_eks_cluster_auth.k8s.token}}"
+      cluster_ca_certificate: "${{base64decode({module_source}.k8s_ca_data)}}"
+output_data:
+  aws_eks_cluster_auth:
+    k8s:
+      name: "${{{module_source}.k8s_cluster_name}}"

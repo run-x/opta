@@ -3,8 +3,8 @@ import os
 
 from pytest_mock import MockFixture
 
+from modules.aws_iam_user.aws_iam_user import AwsIamUserProcessor
 from opta.layer import Layer
-from opta.module_processors.aws_iam_user import AwsIamUserProcessor
 
 
 class TestAwsIamUserProcessor:
@@ -19,7 +19,7 @@ class TestAwsIamUserProcessor:
         )
         app_module = layer.get_module("deployeruser", 8)
         mocked_handle_iam_policy = mocker.patch(
-            "opta.module_processors.aws_iam_user.AwsIamUserProcessor.handle_iam_policy"
+            "modules.aws_iam_user.aws_iam_user.AwsIamUserProcessor.handle_iam_policy"
         )
         AwsIamUserProcessor(app_module, layer).process(8)
         mocked_handle_iam_policy.assert_called_once_with(8)

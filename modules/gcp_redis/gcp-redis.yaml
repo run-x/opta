@@ -1,0 +1,40 @@
+halt: false
+environment_module: false
+metric_count: 1
+inputs:
+  - name: env_name
+    user_facing: false
+    description: Opta Environment name
+    default: None
+  - name: layer_name
+    user_facing: false
+    description: Opta Layer name
+    default: None
+  - name: module_name
+    user_facing: false
+    description: Opta Module name
+    default: None
+  - name: memory_size_gb
+    user_facing: true
+    validator: str(required=False)
+    description: The size in GB for the redis cache's memory
+    default: 2
+  - name: redis_version
+    user_facing: true
+    validator: str(required=False)
+    description: the redis version to use for this instance
+    default: "REDIS_5_0"
+  - name: high_availability
+    user_facing: true
+    validator: bool(required=False)
+    description: the redis version to use for this instance
+    default: true
+outputs:
+  - name: cache_host
+    export: true
+    description: The host through which to access the redis cache
+  - name: cache_auth_token
+    export: false
+    description: The security auth token for the redis cache
+output_providers: { }
+output_data: { }

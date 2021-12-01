@@ -7,6 +7,15 @@ parameters:
   run-create-and-destroy:
     type: boolean
     default: false
+  run-destroy-gcp-env:
+    type: boolean
+    default: false
+  run-destroy-aws-env:
+    type: boolean
+    default: false
+  run-destroy-all-envs:
+    type: boolean
+    default: false
   run-ci:
     type: boolean
     default: false
@@ -782,6 +791,33 @@ workflows:
       - terraform-formatter
       - regula-lint
       - pytest
+
+  run-destroy-gcp-env:
+    when: << pipeline.parameters.run-destroy-gcp-env >>
+    jobs:
+      - build-opta-binary
+      - gcp-destroy-env:
+          requires:
+            - build-opta-binary
+
+  run-destroy-aws-env:
+    when: << pipeline.parameters.run-destroy-aws-env >>
+    jobs:
+      - build-opta-binary
+      - aws-destroy-env:
+          requires:
+            - build-opta-binary
+
+  run-destroy-all-envs:
+    when: << pipeline.parameters.run-destroy-all-envs >>
+    jobs:
+      - build-opta-binary
+      - gcp-destroy-env:
+          requires:
+            - build-opta-binary
+      - aws-destroy-env:
+          requires:
+            - build-opta-binary
 
   nightly:
     triggers:

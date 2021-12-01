@@ -3,12 +3,12 @@ import os
 
 from pytest_mock import MockFixture
 
-from opta.layer import Layer
-from opta.module_processors.aws_dns import (
+from modules.aws_dns.aws_dns import (
     CERTIFICATE_BODY_FILE_NAME,
     PRIVATE_KEY_FILE_NAME,
     AwsDnsProcessor,
 )
+from opta.layer import Layer
 
 
 class TestAwsDnsProcessor:
@@ -22,7 +22,7 @@ class TestAwsDnsProcessor:
             None,
         )
         dns_module = layer.get_module("aws-dns", 6)
-        patched_prompt = mocker.patch("opta.module_processors.aws_dns.prompt")
+        patched_prompt = mocker.patch("modules.aws_dns.aws_dns.prompt")
         patched_prompt.side_effect = [
             "",
             os.path.join(
@@ -58,7 +58,7 @@ class TestAwsDnsProcessor:
             None,
         )
         dns_module = layer.get_module("aws-dns", 6)
-        patched_prompt = mocker.patch("opta.module_processors.aws_dns.prompt")
+        patched_prompt = mocker.patch("modules.aws_dns.aws_dns.prompt")
         patched_prompt.side_effect = [
             "",
             os.path.join(
@@ -89,7 +89,7 @@ class TestAwsDnsProcessor:
             None,
         )
         dns_module = layer.get_module("aws-dns", 6)
-        patched_prompt = mocker.patch("opta.module_processors.aws_dns.prompt")
+        patched_prompt = mocker.patch("modules.aws_dns.aws_dns.prompt")
         patched_prompt.side_effect = [
             os.path.join(
                 os.path.dirname(os.path.dirname(__file__)),
@@ -116,7 +116,7 @@ class TestAwsDnsProcessor:
         )
         dns_module = layer.get_module("awsdns", 6)
         mocked_ssm = mocker.Mock()
-        mocked_boto3 = mocker.patch("opta.module_processors.aws_dns.boto3")
+        mocked_boto3 = mocker.patch("modules.aws_dns.aws_dns.boto3")
         mocked_boto3.client.return_value = mocked_ssm
         mocked_ssm.get_parameters_by_path.return_value = {
             "Parameters": [
@@ -139,11 +139,11 @@ class TestAwsDnsProcessor:
         )
         dns_module = layer.get_module("awsdns", 6)
         mocked_ssm = mocker.Mock()
-        mocked_boto3 = mocker.patch("opta.module_processors.aws_dns.boto3")
+        mocked_boto3 = mocker.patch("modules.aws_dns.aws_dns.boto3")
         mocked_boto3.client.return_value = mocked_ssm
         mocked_ssm.get_parameters_by_path.return_value = {"Parameters": []}
 
-        patched_prompt = mocker.patch("opta.module_processors.aws_dns.prompt")
+        patched_prompt = mocker.patch("modules.aws_dns.aws_dns.prompt")
         patched_prompt.side_effect = [
             os.path.join(
                 os.path.dirname(os.path.dirname(__file__)),
@@ -191,7 +191,7 @@ class TestAwsDnsProcessor:
         del dns_module.data["upload_cert"]
         dns_module.data["external_cert_arn"] = "blah"
         mocked_acm = mocker.Mock()
-        mocked_boto3 = mocker.patch("opta.module_processors.aws_dns.boto3")
+        mocked_boto3 = mocker.patch("modules.aws_dns.aws_dns.boto3")
         mocked_boto3.client.return_value = mocked_acm
         mocked_acm.describe_certificate.return_value = {
             "Certificate": {"DomainName": "www.blah.com", "SubjectAlternativeNames": []}

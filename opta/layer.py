@@ -32,6 +32,37 @@ from google.auth import default
 from google.auth.exceptions import DefaultCredentialsError
 from google.oauth2 import service_account
 
+from modules.aws_dns.aws_dns import AwsDnsProcessor
+from modules.aws_documentdb.aws_documentdb import AwsDocumentDbProcessor
+from modules.aws_dynamodb.aws_dynamodb import AwsDynamodbProcessor
+from modules.aws_eks.aws_eks import AwsEksProcessor
+from modules.aws_email import AwsEmailProcessor
+from modules.aws_iam_role.aws_iam_role import AwsIamRoleProcessor
+from modules.aws_iam_user.aws_iam_user import AwsIamUserProcessor
+from modules.aws_k8s_base.aws_k8s_base import AwsK8sBaseProcessor
+from modules.aws_k8s_service.aws_k8s_service import AwsK8sServiceProcessor
+from modules.aws_s3.aws_s3 import AwsS3Processor
+from modules.aws_sns.aws_sns import AwsSnsProcessor
+from modules.aws_sqs.aws_sqs import AwsSqsProcessor
+from modules.azure_base.azure_base import AzureBaseProcessor
+from modules.azure_k8s_base.azure_k8s_base import AzureK8sBaseProcessor
+from modules.azure_k8s_service.azure_k8s_service import AzureK8sServiceProcessor
+from modules.base import ModuleProcessor
+from modules.cloudfront_distribution.aws_cloudfront_distribution import (
+    AwsCloudfrontDstributionProcessor,
+)
+from modules.custom_terraform import CustomTerraformProcessor
+from modules.datadog.datadog import DatadogProcessor
+from modules.external_ssl_cert.external_ssl_cert import ExternalSSLCert
+from modules.gcp_dns.gcp_dns import GCPDnsProcessor
+from modules.gcp_gke.gcp_gke import GcpGkeProcessor
+from modules.gcp_k8s_base.gcp_k8s_base import GcpK8sBaseProcessor
+from modules.gcp_k8s_service.gcp_k8s_service import GcpK8sServiceProcessor
+from modules.gcp_service_account.gcp_service_account import GcpServiceAccountProcessor
+from modules.helm_chart.helm_chart import HelmChartProcessor
+from modules.local_k8s_service.local_k8s_service import LocalK8sServiceProcessor
+from modules.mongodb_atlas.mongodb_atlas import MongodbAtlasProcessor
+from modules.runx.runx import RunxProcessor
 from opta.constants import MODULE_DEPENDENCY, REGISTRY, VERSION
 from opta.core.aws import AWS
 from opta.core.gcp import GCP
@@ -39,37 +70,6 @@ from opta.core.validator import validate_yaml
 from opta.crash_reporter import CURRENT_CRASH_REPORTER
 from opta.exceptions import UserErrors
 from opta.module import Module
-from opta.module_processors.aws_cloudfront_distribution import (
-    AwsCloudfrontDstributionProcessor,
-)
-from opta.module_processors.aws_dns import AwsDnsProcessor
-from opta.module_processors.aws_document_db import AwsDocumentDbProcessor
-from opta.module_processors.aws_dynamodb import AwsDynamodbProcessor
-from opta.module_processors.aws_eks import AwsEksProcessor
-from opta.module_processors.aws_email import AwsEmailProcessor
-from opta.module_processors.aws_iam_role import AwsIamRoleProcessor
-from opta.module_processors.aws_iam_user import AwsIamUserProcessor
-from opta.module_processors.aws_k8s_base import AwsK8sBaseProcessor
-from opta.module_processors.aws_k8s_service import AwsK8sServiceProcessor
-from opta.module_processors.aws_s3 import AwsS3Processor
-from opta.module_processors.aws_sns import AwsSnsProcessor
-from opta.module_processors.aws_sqs import AwsSqsProcessor
-from opta.module_processors.azure_base import AzureBaseProcessor
-from opta.module_processors.azure_k8s_base import AzureK8sBaseProcessor
-from opta.module_processors.azure_k8s_service import AzureK8sServiceProcessor
-from opta.module_processors.base import ModuleProcessor
-from opta.module_processors.custom_terraform import CustomTerraformProcessor
-from opta.module_processors.datadog import DatadogProcessor
-from opta.module_processors.external_ssl_cert import ExternalSSLCert
-from opta.module_processors.gcp_dns import GCPDnsProcessor
-from opta.module_processors.gcp_gke import GcpGkeProcessor
-from opta.module_processors.gcp_k8s_base import GcpK8sBaseProcessor
-from opta.module_processors.gcp_k8s_service import GcpK8sServiceProcessor
-from opta.module_processors.gcp_service_account import GcpServiceAccountProcessor
-from opta.module_processors.helm_chart import HelmChartProcessor
-from opta.module_processors.local_k8s_service import LocalK8sServiceProcessor
-from opta.module_processors.mongodb_atlas import MongodbAtlasProcessor
-from opta.module_processors.runx import RunxProcessor
 from opta.plugins.derived_providers import DerivedProviders
 from opta.utils import deep_merge, hydrate, logger, yaml
 from opta.utils.dependencies import validate_installed_path_executables

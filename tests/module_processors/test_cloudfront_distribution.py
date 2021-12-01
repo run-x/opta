@@ -2,10 +2,10 @@ import os
 
 from pytest_mock import MockFixture
 
-from opta.layer import Layer
-from opta.module_processors.aws_cloudfront_distribution import (
+from modules.cloudfront_distribution.aws_cloudfront_distribution import (
     AwsCloudfrontDstributionProcessor,
 )
+from opta.layer import Layer
 
 
 class TestAwsCloudfrontDstributionProcessor:

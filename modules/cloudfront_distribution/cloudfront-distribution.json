@@ -1,0 +1,81 @@
+{
+  "$id": "https://app.runx.dev/modules/cloudfront-distribution",
+  "description": "Creates a cloudfront distribution to serve static files from your s3 bucket",
+  "type": "object",
+  "properties": {
+    "default_page_file": {
+      "type": "string",
+      "description": "The name of the existing s3 object in your bucket which will serve as the default page.",
+      "default": "index.html"
+    },
+    "price_class": {
+      "type": "string",
+      "description": "The cloudfront price class for this distribution. Can be PriceClass_All, PriceClass_200, or PriceClass_100",
+      "default": "PriceClass_200"
+    },
+    "origin_access_identity_path": {
+      "type": "string",
+      "description": "The Cloudfront OAI path to use to access the buckets",
+      "default": ""
+    },
+    "status_404_page_file": {
+      "type": "string",
+      "description": "The name of the existing s3 object in your bucket which will serve as the 404 page.",
+      "default": null
+    },
+    "status_500_page_file": {
+      "type": "string",
+      "description": "The name of the existing s3 object in your bucket which will serve as the 500 page.",
+      "default": null
+    },
+    "bucket_name": {
+      "type": "string",
+      "description": "The name of the s3 bucket to link to this cloudfront distribution",
+      "default": ""
+    },
+    "acm_cert_arn": {
+      "type": "string",
+      "description": "The ACM certificate arn you wish to use to handle ssl (needed if you want https for your site)",
+      "default": null
+    },
+    "domains": {
+      "type": "list",
+      "description": "The domains which you want your cloudfront distribution to support.",
+      "items": {
+        "oneOf": [
+          {
+            "type": "string"
+          }
+        ]
+      },
+      "default": []
+    },
+    "links": {
+      "type": "list",
+      "description": "The linked s3 buckets to attach to your cloudfront distribution (currently only supports one).",
+      "items": {
+        "oneOf": [
+          {
+            "type": "string"
+          }
+        ]
+      },
+      "default": []
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "cloudfront-distribution"
+      ]
+    }
+  },
+  "required": [
+    "type"
+  ],
+  "opta_metadata": {
+    "module_type": "service",
+    "clouds": [
+      "aws"
+    ]
+  }
+}

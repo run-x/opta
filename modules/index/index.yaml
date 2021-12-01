@@ -1,0 +1,38 @@
+required_providers:
+  aws:
+    source: "hashicorp/aws"
+    version: "3.58.0"
+  helm:
+    source: "hashicorp/helm"
+    version: "2.4.1"
+backend:
+  s3:
+    bucket: "{state_storage}"
+    key: "{layer_name}"
+    dynamodb_table: "{state_storage}"
+    region: "{provider[region]}"
+validator:
+  name: str()
+  org_name: regex('^[a-z0-9-]{,15}$', name="Valid identifier, regex='[a-z0-9-]{,15}'")
+  providers:
+    aws:
+      region: str()
+      account_id: aws_id()
+  modules: list(module())
+service_validator:
+  - environments: list(include('env'), required=False)
+    name: str()
+    modules: list(module())
+  - env:
+      name: str()
+      path: str()
+      variables: map(required=False)
+      vars: map(required=False)
+module_aliases:
+  postgres: aws-postgres
+  redis: aws-redis
+  k8s-service: aws-k8s-service
+  base: aws-base
+  k8s-base: aws-k8s-base
+  k8s-cluster: aws-eks
+  dns: aws-dns

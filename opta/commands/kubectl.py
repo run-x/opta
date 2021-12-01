@@ -17,7 +17,7 @@ from opta.utils import check_opta_file_exists
     "-e", "--env", default=None, help="The env to use when loading the config file"
 )
 def configure_kubectl(config: str, env: Optional[str]) -> None:
-    """ Configure the kubectl CLI tool for the given cluster """
+    """Configure the kubectl CLI tool for the given cluster"""
 
     config = check_opta_file_exists(config)
     layer = Layer.load_from_yaml(config, env)

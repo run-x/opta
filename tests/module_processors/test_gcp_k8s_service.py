@@ -4,8 +4,8 @@ import os
 import pytest
 from pytest_mock import MockFixture
 
+from modules.gcp_k8s_service.gcp_k8s_service import GcpK8sServiceProcessor
 from opta.layer import Layer
-from opta.module_processors.gcp_k8s_service import GcpK8sServiceProcessor
 
 
 class TestGCPK8sServiceProcessor:
@@ -21,7 +21,7 @@ class TestGCPK8sServiceProcessor:
         idx = len(layer.modules)
         app_module = layer.get_module("app", idx)
         mocked_process = mocker.patch(
-            "opta.module_processors.gcp_k8s_service.GcpK8sModuleProcessor.process"
+            "modules.gcp_k8s_service.gcp_k8s_service.GcpK8sModuleProcessor.process"
         )
         GcpK8sServiceProcessor(app_module, layer).process(idx)
         mocked_process.assert_called_once_with(idx)
