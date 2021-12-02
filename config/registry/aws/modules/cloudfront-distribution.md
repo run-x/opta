@@ -20,8 +20,8 @@ providers:
     account_id: XXXXXXXXXX
 modules:
   - type: aws-s3
-    name: blah
-    bucket_name: "opta-is-testing-cloudfront"
+    name: testmodule
+    bucket_name: "a-unique-s3-bucket-name"
     files: "./my-site-files" # See S3 module for more info about uploading your files t S3
   - type: cloudfront-distribution
     # Uncomment the following and fill in to support your domain with ssl
@@ -29,13 +29,10 @@ modules:
 #    domains:
 #      - "your.domain.com"
     links:
-      - blah
+      - testmodule
 ```
 
-Once you Opta apply, check out the `cloudfront_domain` output and go to the site. You should see the files of your S3
-bucket (both those uploaded with Opta and outside of Opta) being served there-- simply refer to them by key name in the
-path (e.g. if in your bucket you have hello.txt and subdir/hello.txt, then you should see them via 
-https://the.cloudfront.domain/hello.txt and https://the.cloudfront.domain/subdir/hello.txt).
+Once you Opta apply, run `opta output` to get the value of your `cloudfront_domain`. `index.html` is automatically served at this domain.
 
 ### Non-opta S3 bucket handling
 If you wish to link to a bucket created outside of opta, then you can manually set the `bucket_name` and 
@@ -53,7 +50,7 @@ If you are ready to start hosting your site with your domain via the cloudfront 
 1. Get an [AWS ACM certificate](https://docs.aws.amazon.com/acm/latest/userguide/gs-acm-request-public.html) for your site. 
    Make sure that you get it in region us-east-1. If you already have one at hand in your account (e.g. from another 
    active Opta deployment), then feel free to reuse that.
-2. In whatever hosted zone you are using to manage the DNS for your domain (or the parent domain), create a new CNAME 
-   record for the domain you wish to use for cloudfront and point it at the `cloudfront_domain` gotten above.
+2. [Validate](https://docs.aws.amazon.com/acm/latest/userguide/dns-validation.html) the certificate by adding the correct CNAME entries in your domain's DNS settings. 
+3. Create a new separate CNAME record for the domain you wish to use for cloudfront and point it at the `cloudfront_domain` gotten above.
 3. Set the acm_cert_arn and domains fields in opta accordingly
 4. Opta apply and you're done!
