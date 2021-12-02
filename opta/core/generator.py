@@ -27,6 +27,7 @@ def gen(
     image_tag: Optional[str] = None,
     image_digest: Optional[str] = None,
     test: bool = False,
+    check_image: bool = False,
 ) -> Generator[Tuple[int, List["Module"], int], None, None]:
     """Generate TF file based on opta config file"""
     logger.debug("Loading infra blocks")
@@ -39,7 +40,11 @@ def gen(
         if not module.halt and module_idx + 1 != total_module_count:
             continue
         service_modules = layer.get_module_by_type("k8s-service", module_idx)
-        if len(service_modules) > 0 and (get_cluster_name(layer.root()) is not None):
+        if (
+            check_image
+            and len(service_modules) > 0
+            and (get_cluster_name(layer.root()) is not None)
+        ):
             configure_kubectl(layer)
 
             for service_module in service_modules:
