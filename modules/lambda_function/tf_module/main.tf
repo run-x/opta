@@ -78,6 +78,12 @@ resource "aws_lambda_function" "lambda" {
   source_code_hash = var.filename == null ? filebase64sha256("${path.module}/default.zip") : filebase64sha256(var.filename)
   handler          = var.handler
 
+  dynamic "environment" {
+    for_each = length(var.env_vars) == 0 ? [] : [1]
+    content {
+      variables = var.env_vars
+    }
+  }
 
   dynamic "vpc_config" {
     for_each = var.vpc_id == null ? [] : [1]
