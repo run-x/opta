@@ -1,10 +1,11 @@
 import json
 from copy import deepcopy
-from os import listdir
-from os.path import dirname, exists, isfile, join
+from os.path import dirname, exists, join
 from typing import List
 
 from ruamel.yaml import YAML
+
+from opta.registry import _get_all_module_info
 
 yaml = YAML(
     typ="safe"
@@ -12,7 +13,8 @@ yaml = YAML(
 
 registry_path = join(dirname(dirname(__file__)), "config", "registry")
 schemas_path = join(dirname(dirname(__file__)), "config", "registry", "schemas")
-module_schemas_path = join(schemas_path, "modules")
+modules_path = join(dirname(dirname(__file__)), "modules")
+
 opta_config_schemas_path = join(schemas_path, "opta-config-files")
 
 CLOUD_FOLDER_NAMES = ["aws", "google", "azurerm", "local"]
@@ -45,25 +47,16 @@ def _deep_equals(obj1: dict, obj2: dict) -> bool:
     return json.dumps(obj1, sort_keys=True) == json.dumps(obj2, sort_keys=True)
 
 
-def _get_json_schema_module_path(module_name: str) -> str:
-    return join(module_schemas_path, f"{module_name}.json")
+def _get_json_schema_module_path(module_name: str, directory: str) -> str:
+    return join(directory, f"{module_name}.json")
 
 
-def _get_all_modules_names(cloud: str) -> list:
-    dir_path = join(registry_path, cloud, "modules")
-    return [
-        f.split(".")[0]
-        for f in listdir(dir_path)
-        if isfile(join(dir_path, f)) and f.endswith("yaml")
-    ]
-
-
-def _get_module_json(module_name: str) -> dict:
-    json_schema_file_path = _get_json_schema_module_path(module_name)
+def _get_module_json(module_name: str, directory: str) -> dict:
+    json_schema_file_path = _get_json_schema_module_path(module_name, directory)
 
     if not exists(json_schema_file_path):
         raise Exception(
-            f"No JSON Schema file detected for module {module_name}. Please create a file named {module_name}.json in the config/registry/schemas/modules"
+            f"No JSON Schema file detected for module {module_name}. Please create a file named {module_name}.json in the modules' subdirectory for this module."
         )
 
     json_schema_file = open(json_schema_file_path)
@@ -73,8 +66,11 @@ def _get_module_json(module_name: str) -> dict:
 
 
 def _get_all_modules(cloud: str) -> List[dict]:
-    module_names = _get_all_modules_names(cloud) + _get_all_modules_names("common")
-    return [_get_module_json(module_name) for module_name in module_names]
+    module_info = _get_all_module_info(modules_path, cloud)
+    rtn_array = []
+    for yaml_path, module_name in module_info:
+        rtn_array.append(_get_module_json(module_name, dirname(yaml_path)))
+    return rtn_array
 
 
 def _check_opta_config_schemas(write: bool = False) -> None:
@@ -124,13 +120,11 @@ def _check_module_schemas(write: bool = False) -> None:
         if cloud != "common":
             index_yaml = yaml.load(open(join(registry_path, cloud, "index.yaml")))
 
-        module_names = _get_all_modules_names(cloud)
+        module_info = _get_all_module_info(modules_path, cloud)
 
-        for module_name in module_names:
-            module_registry_dict = yaml.load(
-                open(join(registry_path, cloud, "modules", f"{module_name}.yaml"))
-            )
-            json_schema = _get_module_json(module_name)
+        for yaml_path, module_name in module_info:
+            module_registry_dict = yaml.load(open(yaml_path))
+            json_schema = _get_module_json(module_name, dirname(yaml_path))
 
             new_json_schema = deepcopy(json_schema)
             new_json_schema["$id"] = f"https://app.runx.dev/modules/{module_name}"
@@ -183,7 +177,9 @@ def _check_module_schemas(write: bool = False) -> None:
             }
 
             if write:
-                json_schema_file_path = _get_json_schema_module_path(module_name)
+                json_schema_file_path = _get_json_schema_module_path(
+                    module_name, dirname(yaml_path)
+                )
                 with open(json_schema_file_path, "w") as f:
                     del new_json_schema["name"]
                     json.dump(new_json_schema, f, indent=2)
