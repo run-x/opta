@@ -193,3 +193,5 @@ outputs:
     description: Url to the docker repository created for images to be deployed in this env
 output_providers: { }
 output_data: { }
+clouds:
+  - azure

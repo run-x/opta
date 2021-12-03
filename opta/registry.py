@@ -25,6 +25,31 @@ description: This section provides the list of module types for the user to use 
 """
 
 
+# def make_registry_dict() -> Dict[Any, Any]:
+#     registry_path = os.path.join(
+#         os.path.dirname(os.path.dirname(__file__)), "config", "registry"
+#     )
+#     registry_dict: Dict[Any, Any] = yaml.load(
+#         open(os.path.join(registry_path, "index.yaml"))
+#     )
+#     common_modules_path = os.path.join(registry_path, "common", "modules")
+#     with open(os.path.join(registry_path, "index.md"), "r") as f:
+#         registry_dict["text"] = f.read()
+#     for cloud in ["aws", "azurerm", "google", "local"]:
+#         cloud_path = os.path.join(registry_path, cloud)
+#         cloud_dict = yaml.load(open(os.path.join(cloud_path, "index.yaml")))
+#         cloud_dict["modules"] = {}
+#         with open(os.path.join(cloud_path, "index.md"), "r") as f:
+#             cloud_dict["text"] = f.read()
+#         module_path = os.path.join(cloud_path, "modules")
+#         cloud_dict["modules"] = {
+#             **_make_module_registry_dict(module_path),
+#             **_make_module_registry_dict(common_modules_path),
+#         }
+#         registry_dict[cloud] = cloud_dict
+
+#     return registry_dict
+
 def make_registry_dict() -> Dict[Any, Any]:
     registry_path = os.path.join(
         os.path.dirname(os.path.dirname(__file__)), "config", "registry"
@@ -35,20 +60,24 @@ def make_registry_dict() -> Dict[Any, Any]:
     common_modules_path = os.path.join(registry_path, "common", "modules")
     with open(os.path.join(registry_path, "index.md"), "r") as f:
         registry_dict["text"] = f.read()
+    module_path =  os.path.join(
+        os.path.dirname(os.path.dirname(__file__)), "modules"
+    )
     for cloud in ["aws", "azurerm", "google", "local"]:
         cloud_path = os.path.join(registry_path, cloud)
         cloud_dict = yaml.load(open(os.path.join(cloud_path, "index.yaml")))
         cloud_dict["modules"] = {}
         with open(os.path.join(cloud_path, "index.md"), "r") as f:
             cloud_dict["text"] = f.read()
-        module_path = os.path.join(cloud_path, "modules")
+        
         cloud_dict["modules"] = {
-            **_make_module_registry_dict(module_path),
+            **_make_module_registry_dict(module_path, cloud),
             **_make_module_registry_dict(common_modules_path),
         }
         registry_dict[cloud] = cloud_dict
 
     return registry_dict
+
 
 
 INPUTS_TABLE_HEADING = """
@@ -99,7 +128,10 @@ def _make_module_docs(vanilla_text: str, module_dict: Dict[Any, Any]) -> str:
     return result
 
 
-def _make_module_registry_dict(directory: str) -> Dict[Any, Any]:
+def _get_cloud_module_names(directory: str, cloud = None) -> List(str) :
+    
+
+def _make_module_registry_dict(directory: str, cloud = None) -> Dict[Any, Any]:
     if not os.path.exists(directory):
         raise Exception(f"Non-existing directory given as input: {directory}")
     module_names = [

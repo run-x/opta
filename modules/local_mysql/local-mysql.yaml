@@ -33,3 +33,5 @@ outputs:
     description: The database ip
 output_providers: {}
 output_data: {}
+clouds:
+  - local

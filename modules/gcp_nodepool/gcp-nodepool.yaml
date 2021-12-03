@@ -68,3 +68,5 @@ inputs:
 outputs: []
 output_providers: {}
 output_data: {}
+clouds:
+  - gcp

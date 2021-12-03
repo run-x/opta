@@ -87,3 +87,5 @@ output_data:
     k8s:
       name: "${{{module_source}.k8s_cluster_name}}"
       location: "{region}"
+clouds:
+  - gcp

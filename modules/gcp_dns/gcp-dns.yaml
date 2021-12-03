@@ -50,3 +50,5 @@ outputs:
     description: Self link to the certificate if delegated
 output_providers: {}
 output_data: {}
+clouds:
+  - gcp

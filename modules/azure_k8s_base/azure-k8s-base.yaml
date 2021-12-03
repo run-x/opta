@@ -52,3 +52,5 @@ outputs:
     description: str
 output_providers: { }
 output_data: { }
+clouds:
+  - azure

@@ -78,3 +78,5 @@ output_providers:
       client_key: "${{base64decode({module_source}.client_key)}}"
       cluster_ca_certificate: "${{base64decode({module_source}.k8s_ca_data)}}"
 output_data: { }
+clouds:
+  - azure
