@@ -17,22 +17,22 @@ variable "module_name" {
 }
 
 variable "expose_via_domain" {
-  type = bool
+  type    = bool
   default = false
 }
 
 variable "runtime" {
-  type = string
+  type    = string
   default = "nodejs14.x"
 }
 
 variable "filename" {
-  type = string
+  type    = string
   default = null
 }
 
 variable "handler" {
-  type = string
+  type    = string
   default = "index.handler"
 }
 
@@ -45,6 +45,6 @@ variable "extra_iam_policies" {
 }
 
 variable "vpc_id" {
-  type = string
+  type    = string
   default = null
 }

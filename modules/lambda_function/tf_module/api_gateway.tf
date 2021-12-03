@@ -1,11 +1,11 @@
 resource "aws_apigatewayv2_api" "api" {
-  count = var.expose_via_domain ? 1 : 0
-  name = "opta-${var.module_name}-${random_string.lambda.result}"
+  count         = var.expose_via_domain ? 1 : 0
+  name          = "opta-${var.module_name}-${random_string.lambda.result}"
   protocol_type = "HTTP"
 }
 
 resource "aws_apigatewayv2_route" "route" {
-  count = var.expose_via_domain ? 1 : 0
+  count     = var.expose_via_domain ? 1 : 0
   api_id    = aws_apigatewayv2_api.api[0].id
   route_key = "ANY /"
 
@@ -13,18 +13,18 @@ resource "aws_apigatewayv2_route" "route" {
 }
 
 resource "aws_apigatewayv2_integration" "lambda_integration" {
-  count = var.expose_via_domain ? 1 : 0
-  api_id           = aws_apigatewayv2_api.api[0].id
-  integration_type = "AWS_PROXY"
+  count                  = var.expose_via_domain ? 1 : 0
+  api_id                 = aws_apigatewayv2_api.api[0].id
+  integration_type       = "AWS_PROXY"
   payload_format_version = "2.0"
-  connection_type           = "INTERNET"
-  description               = "Lambda integration"
-  integration_method        = "POST"
-  integration_uri           = aws_lambda_function.lambda.invoke_arn
+  connection_type        = "INTERNET"
+  description            = "Lambda integration"
+  integration_method     = "POST"
+  integration_uri        = aws_lambda_function.lambda.invoke_arn
 }
 
 resource "aws_apigatewayv2_deployment" "deployment" {
-  count = var.expose_via_domain ? 1 : 0
+  count       = var.expose_via_domain ? 1 : 0
   api_id      = aws_apigatewayv2_api.api[0].id
   description = "Lambda deployment"
 
@@ -40,15 +40,15 @@ resource "aws_apigatewayv2_deployment" "deployment" {
 
 
 resource "aws_apigatewayv2_stage" "stage" {
-  count = var.expose_via_domain ? 1 : 0
-  api_id = aws_apigatewayv2_api.api[0].id
+  count         = var.expose_via_domain ? 1 : 0
+  api_id        = aws_apigatewayv2_api.api[0].id
   deployment_id = aws_apigatewayv2_deployment.deployment[0].id
-  name   = "$default"
+  name          = "$default"
 }
 
 # Permission
 resource "aws_lambda_permission" "apigw" {
-  count = var.expose_via_domain ? 1 : 0
+  count         = var.expose_via_domain ? 1 : 0
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.lambda.arn
   principal     = "apigateway.amazonaws.com"

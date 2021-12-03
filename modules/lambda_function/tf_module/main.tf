@@ -1,11 +1,11 @@
 resource "random_string" "lambda" {
-  length = 4
-  upper = false
+  length  = 4
+  upper   = false
   special = false
 }
 
 data "aws_subnet_ids" "private_subnets" {
-  count = var.vpc_id == null ? 0 : 1
+  count  = var.vpc_id == null ? 0 : 1
   vpc_id = var.vpc_id
   tags = {
     type = "private"
@@ -13,8 +13,8 @@ data "aws_subnet_ids" "private_subnets" {
 }
 
 resource "aws_security_group" "lambda" {
-  count = var.vpc_id == null ? 0 : 1
-  name = "opta-${var.module_name}-${random_string.lambda.result}"
+  count  = var.vpc_id == null ? 0 : 1
+  name   = "opta-${var.module_name}-${random_string.lambda.result}"
   vpc_id = var.vpc_id
 }
 
@@ -49,7 +49,7 @@ data "aws_iam_policy_document" "lambda_cloudwatch" {
   statement {
     actions = ["logs:CreateLogGroup",
       "logs:CreateLogStream",
-      "logs:PutLogEvents"]
+    "logs:PutLogEvents"]
     resources = ["arn:aws:logs:*:*:*"]
   }
 }
@@ -57,7 +57,7 @@ data "aws_iam_policy_document" "lambda_cloudwatch" {
 resource "aws_iam_policy" "lambda_logging" {
   name        = "opta-${var.module_name}-${random_string.lambda.result}-cloudwatch"
   description = "IAM policy for logging from a lambda"
-  policy = data.aws_iam_policy_document.lambda_cloudwatch.json
+  policy      = data.aws_iam_policy_document.lambda_cloudwatch.json
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_logs" {
@@ -71,12 +71,12 @@ resource "aws_cloudwatch_log_group" "logs" {
 }
 
 resource "aws_lambda_function" "lambda" {
-  function_name = "opta-${var.module_name}-${random_string.lambda.result}"
-  role          = aws_iam_role.iam_for_lambda.arn
-  runtime = var.runtime
-  filename = var.filename == null ? "${path.module}/default.zip" : var.filename
+  function_name    = "opta-${var.module_name}-${random_string.lambda.result}"
+  role             = aws_iam_role.iam_for_lambda.arn
+  runtime          = var.runtime
+  filename         = var.filename == null ? "${path.module}/default.zip" : var.filename
   source_code_hash = var.filename == null ? filebase64sha256("${path.module}/default.zip") : filebase64sha256(var.filename)
-  handler = var.handler
+  handler          = var.handler
 
 
   dynamic "vpc_config" {
