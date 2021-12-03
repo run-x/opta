@@ -60,6 +60,7 @@ from modules.gcp_k8s_base.gcp_k8s_base import GcpK8sBaseProcessor
 from modules.gcp_k8s_service.gcp_k8s_service import GcpK8sServiceProcessor
 from modules.gcp_service_account.gcp_service_account import GcpServiceAccountProcessor
 from modules.helm_chart.helm_chart import HelmChartProcessor
+from modules.lambda_function.lambda_function import LambdaFunctionProcessor
 from modules.local_k8s_service.local_k8s_service import LocalK8sServiceProcessor
 from modules.mongodb_atlas.mongodb_atlas import MongodbAtlasProcessor
 from modules.runx.runx import RunxProcessor
@@ -118,6 +119,7 @@ class Layer:
         "aws-dynamodb": AwsDynamodbProcessor,
         "mongodb-atlas": MongodbAtlasProcessor,
         "cloudfront-distribution": AwsCloudfrontDstributionProcessor,
+        "lambda-function": LambdaFunctionProcessor,
     }
 
     def __init__(
