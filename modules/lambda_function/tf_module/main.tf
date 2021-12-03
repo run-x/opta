@@ -72,7 +72,7 @@ resource "aws_iam_role_policy_attachment" "lambda_logs" {
 
 resource "aws_cloudwatch_log_group" "logs" {
   name              = "/aws/lambda/opta-${var.module_name}-${random_string.lambda.result}"
-  kms_key_id = var.vpc_id == null ? "" : data.aws_kms_key.main[0].arn
+  kms_key_id        = var.vpc_id == null ? "" : data.aws_kms_key.main[0].arn
   retention_in_days = 14
 }
 
