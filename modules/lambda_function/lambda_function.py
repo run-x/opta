@@ -33,7 +33,7 @@ class LambdaFunctionProcessor(ModuleProcessor):
             )
             self.module.data["vpc_id"] = f"${{{{{module_source}.vpc_id}}}}"
         file_path: str = self.module.data.get("filename")
-        if file_path.startswith("/"):
+        if not file_path.startswith("/"):
             self.module.data["filename"] = os.path.join(
                 os.path.dirname(self.layer.path), file_path
             )
