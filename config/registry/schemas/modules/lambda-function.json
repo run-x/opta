@@ -52,6 +52,8 @@
     }
   },
   "required": [
+    "runtime",
+    "filename",
     "type"
   ],
   "opta_metadata": {
