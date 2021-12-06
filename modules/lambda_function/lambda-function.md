@@ -7,9 +7,9 @@ weight: 1
 description: Creates a lambda deployment via opta.
 ---
 
-*NOTE* The lambda module is currently in beta, with only the following functionality. Enhanced features and integrated
-will be added in subsequent releases (and expedited as per user need). Please [reach out to the opta team](https://slack.opta.dev/)
-for any questions/requests.
+*NOTE* The lambda module is currently in beta, with only the following functionality. Enhanced features and integration 
+with other opta modules will be added in subsequent releases (and expedited as per user need). Please 
+[reach out to the opta team](https://slack.opta.dev/) for any questions/requests.
 
 Creates an [AWS Lambda](https://docs.aws.amazon.com/lambda/index.html) deployment via opta from the given zip file plus 
 much more setup. Currently, it also handles:
