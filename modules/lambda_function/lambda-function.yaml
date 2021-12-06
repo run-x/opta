@@ -66,3 +66,5 @@ outputs:
     description: The uri which you can send requests to to invoke your function.
 output_providers: { }
 output_data: { }
+clouds:
+  - aws
