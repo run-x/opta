@@ -1,7 +1,5 @@
 import datetime
 import os
-import shutil
-import tempfile
 from pathlib import Path
 from subprocess import CalledProcessError  # nosec
 from threading import Thread
@@ -367,20 +365,13 @@ def _verify_parent_layer(layer: Layer) -> None:
             "Would you like to create your environment?",
             abort=True,
         )
-        t = tempfile.mkdtemp()
-        try:
-            config_path = os.path.join(t, "opta.yml")
-            with open(config_path, "w") as f:
-                f.write(layer.parent.original_spec)
-            _apply(
-                config_path,
-                env=None,
-                refresh=False,
-                local=False,
-                image_tag=None,
-                test=False,
-                auto_approve=False,
-            )
-        finally:
-            shutil.rmtree(t)
-            cleanup_files()
+        _apply(
+            layer.parent.path,
+            env=None,
+            refresh=False,
+            local=False,
+            image_tag=None,
+            test=False,
+            auto_approve=False,
+        )
+        cleanup_files()

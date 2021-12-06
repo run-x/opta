@@ -222,7 +222,7 @@ class Layer:
             raise UserErrors(f"File {config} not found")
 
         conf["original_spec"] = config_string
-        conf["path"] = config
+        conf["path"] = config_path
 
         layer = cls.load_from_dict(conf, env, is_parent)
         if local:

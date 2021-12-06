@@ -234,6 +234,7 @@ def test_verify_parent_layer_missing_state(
     mocked_apply = mocker.patch("opta.commands.apply._apply")
     mocked_layer.parent = mocker.Mock(spec=Layer)
     mocked_layer.parent.name = "Parent Name"
+    mocked_layer.parent.path = ""
     mocked_layer.parent.original_spec = ""
     mocked_get_terraform_outputs.side_effect = MissingState(
         f"Unable to download state for layer {mocked_layer.parent.name}"
