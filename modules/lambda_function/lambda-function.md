@@ -20,8 +20,8 @@ much more setup. Currently, it also handles:
 * Allowing the user to pass in IAM policies to give to the lambda
 * Setting up security group and network location if you have the `aws-base` module in your environment.
 
-tl;dr -- Download [this zip](https://gist.github.com/juandiegopalomino/7400f836107459f3099c02e58d2d6897/raw/5c0b4cbbbf1d8a470f16c09d53e6ed68e59e06bd/baloney.zip), 
-put it in your current directory and this opta yaml will deploy a hello world lambda exposed to the public.
+Simple way to try out this module: Just download [this example zip file](https://gist.github.com/juandiegopalomino/7400f836107459f3099c02e58d2d6897/raw/5c0b4cbbbf1d8a470f16c09d53e6ed68e59e06bd/baloney.zip), 
+put it in the same directory as the opta.yml example below and run `opta apply`
 ```yaml
 name: testing-lambda
 org_name: myorg
