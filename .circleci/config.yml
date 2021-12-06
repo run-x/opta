@@ -126,7 +126,7 @@ jobs:
           name: "Test with pytest"
           command: |
             export PYTHONPATH=$(pwd)
-            pipenv run pytest --cov=./opta --cov-report=xml
+            pipenv run pytest --cov=./opta --cov=./modules --cov-report=xml
       - codecov/upload:
           flags: unittests
           file: ./coverage.xml

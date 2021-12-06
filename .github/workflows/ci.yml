@@ -101,7 +101,7 @@ jobs:
           source $(pipenv --venv)/bin/activate
       - name: Test with pytest
         run: |
-          pipenv run pytest --cov=./opta --cov-report=xml
+          pipenv run pytest --cov=./opta --cov=./modules --cov-report=xml
         env:
           PYTHONPATH: $(pwd)
 
