@@ -22,11 +22,11 @@ variable "expose_via_domain" {
 }
 
 variable "runtime" {
-  type    = string
+  type = string
 }
 
 variable "filename" {
-  type    = string
+  type = string
 }
 
 variable "handler" {
