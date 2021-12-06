@@ -12,7 +12,10 @@ class TestK8sServiceProcessor:
     def test_all_good(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.path.dirname(__file__),
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
                 "dummy_config1.yaml"
             ),
             None,
@@ -157,7 +160,10 @@ class TestK8sServiceProcessor:
     def test_get_event_properties(self):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.path.dirname(__file__),
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
                 "dummy_config1.yaml"
             ),
             None,
@@ -171,7 +177,10 @@ class TestK8sServiceProcessor:
     def test_bad_rds_permission(self):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.path.dirname(__file__),
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
                 "dummy_config1.yaml"
             ),
             None,
@@ -186,7 +195,10 @@ class TestK8sServiceProcessor:
     def test_bad_redis_permission(self):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.path.dirname(__file__),
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
                 "dummy_config1.yaml"
             ),
             None,
@@ -201,7 +213,10 @@ class TestK8sServiceProcessor:
     def test_bad_docdb_permission(self):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.path.dirname(__file__),
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
                 "dummy_config1.yaml"
             ),
             None,
@@ -216,7 +231,10 @@ class TestK8sServiceProcessor:
     def test_bad_s3_permission(self):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.path.dirname(__file__),
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
                 "dummy_config1.yaml"
             ),
             None,

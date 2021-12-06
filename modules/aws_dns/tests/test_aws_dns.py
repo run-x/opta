@@ -15,9 +15,11 @@ class TestAwsDnsProcessor:
     def test_fetch_private_key(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "dummy_config_parent.yaml",
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "dummy_config_parent.yaml"
             ),
             None,
         )
@@ -26,24 +28,32 @@ class TestAwsDnsProcessor:
         patched_prompt.side_effect = [
             "",
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "dummy_config1_parent.yaml",
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "dummy_config1_parent.yaml"
             ),
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "nonexistent_file",
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "nonexistent_file"
             ),
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "dummy_cert.pem",
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "dummy_cert.pem"
             ),
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "dummy_key.pem",
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "dummy_key.pem"
             ),
         ]
         AwsDnsProcessor(dns_module, layer).fetch_private_key()
@@ -51,9 +61,11 @@ class TestAwsDnsProcessor:
     def test_fetch_cert_body(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "dummy_config_parent.yaml",
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "dummy_config_parent.yaml"
             ),
             None,
         )
@@ -62,19 +74,25 @@ class TestAwsDnsProcessor:
         patched_prompt.side_effect = [
             "",
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "dummy_config1_parent.yaml",
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "dummy_config1_parent.yaml"
             ),
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "nonexistent_file",
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "nonexistent_file"
             ),
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "dummy_cert.pem",
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "dummy_cert.pem"
             ),
         ]
         AwsDnsProcessor(dns_module, layer).fetch_cert_body()
@@ -82,9 +100,11 @@ class TestAwsDnsProcessor:
     def test_fetch_cert_chain(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "dummy_config_parent.yaml",
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "dummy_config_parent.yaml"
             ),
             None,
         )
@@ -92,14 +112,18 @@ class TestAwsDnsProcessor:
         patched_prompt = mocker.patch("modules.aws_dns.aws_dns.prompt")
         patched_prompt.side_effect = [
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "dummy_config1_parent.yaml",
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "dummy_config1_parent.yaml"
             ),
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "nonexistent_file",
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "nonexistent_file"
             ),
             "",
         ]
@@ -108,9 +132,11 @@ class TestAwsDnsProcessor:
     def test_process_preexisting(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "dummy_config_parent.yaml",
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "dummy_config_parent.yaml"
             ),
             None,
         )
@@ -131,9 +157,11 @@ class TestAwsDnsProcessor:
     def test_process_new(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "dummy_config_parent.yaml",
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "dummy_config_parent.yaml"
             ),
             None,
         )
@@ -146,14 +174,18 @@ class TestAwsDnsProcessor:
         patched_prompt = mocker.patch("modules.aws_dns.aws_dns.prompt")
         patched_prompt.side_effect = [
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "dummy_key.pem",
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "dummy_key.pem"
             ),
-            os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "dummy_cert.pem",
+              os.path.join(
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "dummy_cert.pem"
             ),
             "",
         ]
@@ -181,9 +213,11 @@ class TestAwsDnsProcessor:
     def test_process_new_external(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "dummy_config_parent.yaml",
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "dummy_config_parent.yaml"
             ),
             None,
         )

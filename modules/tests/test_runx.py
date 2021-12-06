@@ -16,9 +16,11 @@ class TestRunxProcessor:
         mocked_set_secret = mocker.patch("modules.runx.runx.RunxProcessor.set_secret")
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "dummy_config1.yaml",
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "dummy_config1.yaml"
             ),
             None,
         )
@@ -33,9 +35,11 @@ class TestRunxProcessor:
         mocked_fetch_jwt.return_value = ({"org_id": "dummy_or"}, "blah")
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "dummy_config1.yaml",
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "dummy_config1.yaml"
             ),
             None,
         )
@@ -64,9 +68,11 @@ class TestRunxProcessor:
         mocked_response.json.return_value = {"a": "b"}
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "dummy_config1.yaml",
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "dummy_config1.yaml"
             ),
             None,
         )
@@ -87,9 +93,11 @@ class TestRunxProcessor:
         mocked_response.json.return_value = {"message": "blah"}
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "dummy_config1.yaml",
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "dummy_config1.yaml"
             ),
             None,
         )
@@ -105,9 +113,11 @@ class TestRunxProcessor:
         mocked_response.json.return_value = {"message": "blah"}
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "dummy_config1.yaml",
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "dummy_config1.yaml"
             ),
             None,
         )

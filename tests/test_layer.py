@@ -32,10 +32,11 @@ class TestLayer:
     def test_get_event_properties(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
+                os.getcwd(),
                 "tests",
-                "module_processors",
-                "dummy_config1.yaml",
+                "fixtures",
+                "dummy_data",
+                "dummy_config1.yaml"
             ),
             None,
         )
@@ -55,10 +56,11 @@ class TestLayer:
     def test_parent(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
+                os.getcwd(),
                 "tests",
-                "module_processors",
-                "dummy_config_parent.yaml",
+                "fixtures",
+                "dummy_data",
+                "dummy_config_parent.yaml"
             ),
             None,
         )
@@ -142,12 +144,13 @@ class TestLayer:
     def test_child(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
+                os.getcwd(),
                 "tests",
-                "module_processors",
-                "dummy_config1.yaml",
+                "fixtures",
+                "dummy_data",
+                "dummy_config1.yaml"
             ),
-            "dummy-env",
+            None,
         )
         mocked_k8s_service_processor = mocker.patch("opta.layer.AwsK8sServiceProcessor")
         layer.PROCESSOR_DICT["aws-k8s-service"] = mocked_k8s_service_processor

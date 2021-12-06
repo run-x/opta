@@ -11,9 +11,11 @@ class TestAzureBaseProcessor:
     def test_all_good(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "azure_dummy_config_parent.yaml",
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "azure_dummy_config_parent.yaml"
             ),
             None,
         )

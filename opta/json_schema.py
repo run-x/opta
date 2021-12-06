@@ -173,8 +173,7 @@ def _check_module_schemas(write: bool = False) -> None:
                 "module_type": CONFIG_TYPE_ENV
                 if module_registry_dict["environment_module"]
                 else CONFIG_TYPE_SERVICE,
-                # "clouds": FOLDER_NAME_TO_CLOUD_LIST[cloud],
-                "clouds": json_schema["opta_metadata"]["clouds"],  # @Quinn ok by you?
+                "clouds": json_schema["opta_metadata"]["clouds"],
             }
 
             if write:

@@ -12,9 +12,11 @@ class TestGCPK8sServiceProcessor:
     def test_all_good(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "gcp_dummy_config.yaml",
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "gcp_dummy_config.yaml"
             ),
             None,
         )
@@ -32,9 +34,11 @@ class TestGCPK8sServiceProcessor:
     def test_bad_gcs_permission(self):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "gcp_dummy_config.yaml",
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "gcp_dummy_config.yaml"
             ),
             None,
         )

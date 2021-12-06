@@ -1,92 +1,69 @@
 # type: ignore
 import os
 
-import pytest
 from pytest_mock import MockFixture
 
-from modules.aws_iam_role.aws_iam_role import AwsIamRoleProcessor
-from opta.exceptions import UserErrors
+from modules.aws_iam_user.aws_iam_user import AwsIamUserProcessor
 from opta.layer import Layer
 
 
-class TestAwsIamRoleProcessor:
+class TestAwsIamUserProcessor:
     def test_process(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "dummy_config1.yaml",
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "dummy_config1.yaml"
             ),
             None,
         )
-        app_module = layer.get_module("deployerrole", 8)
+        app_module = layer.get_module("deployeruser", 8)
         mocked_handle_iam_policy = mocker.patch(
-            "modules.aws_iam_role.aws_iam_role.AwsIamRoleProcessor.handle_iam_policy"
+            "modules.aws_iam_user.aws_iam_user.AwsIamUserProcessor.handle_iam_policy"
         )
-        mocked_handle_k8s_trusts = mocker.patch(
-            "modules.aws_iam_role.aws_iam_role.AwsIamRoleProcessor.handle_k8s_trusts"
-        )
-        AwsIamRoleProcessor(app_module, layer).process(8)
+        AwsIamUserProcessor(app_module, layer).process(8)
         mocked_handle_iam_policy.assert_called_once_with(8)
-        mocked_handle_k8s_trusts.assert_called_once_with(8)
-
-    def test_process_no_trusts(self, mocker: MockFixture):
-        layer = Layer.load_from_yaml(
-            os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "dummy_config1.yaml",
-            ),
-            None,
-        )
-        app_module = layer.get_module("deployerrole", 8)
-        del app_module.data["allowed_iams"]
-        del app_module.data["allowed_k8s_services"]
-        mocked_handle_iam_policy = mocker.patch(
-            "modules.aws_iam_role.aws_iam_role.AwsIamRoleProcessor.handle_iam_policy"
-        )
-        mocked_handle_k8s_trusts = mocker.patch(
-            "modules.aws_iam_role.aws_iam_role.AwsIamRoleProcessor.handle_k8s_trusts"
-        )
-        with pytest.raises(UserErrors):
-            AwsIamRoleProcessor(app_module, layer).process(8)
-        mocked_handle_iam_policy.assert_called_once_with(8)
-        mocked_handle_k8s_trusts.assert_called_once_with(8)
-
-    def test_handle_k8s_trusts(self, mocker: MockFixture):
-        layer = Layer.load_from_yaml(
-            os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "dummy_config1.yaml",
-            ),
-            None,
-        )
-        app_module = layer.get_module("deployerrole", 8)
-        processor = AwsIamRoleProcessor(app_module, layer)
-        processor.handle_k8s_trusts(module_idx=8)
-        assert processor.module.data["kubernetes_trusts"] == [
-            {
-                "open_id_url": "${{data.terraform_remote_state.parent.outputs.k8s_openid_provider_url}}",
-                "open_id_arn": "${{data.terraform_remote_state.parent.outputs.k8s_openid_provider_arn}}",
-                "service_name": "*",
-                "namespace": "*",
-            }
-        ]
 
     def test_handle_iam_policy(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "dummy_config1.yaml",
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "dummy_config1.yaml"
             ),
             None,
         )
-        app_module = layer.get_module("deployerrole", 10)
-        processor = AwsIamRoleProcessor(app_module, layer)
+        app_module = layer.get_module("deployeruser", 10)
+        processor = AwsIamUserProcessor(app_module, layer)
         processor.handle_iam_policy(module_idx=10)
         assert processor.module.data["iam_policy"]["Statement"] == [
+            {
+                "Sid": "AllowViewAccountInfo",
+                "Action": ["iam:GetAccountPasswordPolicy", "iam:GetAccountSummary"],
+                "Effect": "Allow",
+                "Resource": ["*"],
+            },
+            {
+                "Sid": "AllowManageOwnPasswords",
+                "Effect": "Allow",
+                "Action": ["iam:ChangePassword", "iam:GetUser"],
+                "Resource": "arn:aws:iam::*:user/${aws:username}",
+            },
+            {
+                "Sid": "AllowManageOwnAccessKeys",
+                "Effect": "Allow",
+                "Action": [
+                    "iam:CreateAccessKey",
+                    "iam:DeleteAccessKey",
+                    "iam:ListAccessKeys",
+                    "iam:UpdateAccessKey",
+                ],
+                "Resource": "arn:aws:iam::*:user/${aws:username}",
+            },
             {
                 "Sid": "PolicySimulatorAPI",
                 "Action": [

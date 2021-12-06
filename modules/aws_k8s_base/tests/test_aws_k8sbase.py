@@ -11,9 +11,11 @@ class TestAwsK8sBaseProcessor:
     def test_add_admin_roles(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "dummy_config_parent.yaml",
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "dummy_config_parent.yaml"
             ),
             None,
         )

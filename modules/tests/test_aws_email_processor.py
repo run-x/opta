@@ -13,9 +13,11 @@ class TestAwsEmailProcessor:
     def test_process(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "dummy_config_parent.yaml",
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "dummy_config_parent.yaml"
             ),
             None,
         )
@@ -31,9 +33,11 @@ class TestAwsEmailProcessor:
     def test_post_hook_production_enabled(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "dummy_config_parent.yaml",
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "dummy_config_parent.yaml"
             ),
             None,
         )
@@ -52,9 +56,11 @@ class TestAwsEmailProcessor:
     def test_post_hook_pending(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "dummy_config_parent.yaml",
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "dummy_config_parent.yaml"
             ),
             None,
         )
@@ -79,9 +85,11 @@ class TestAwsEmailProcessor:
     def test_post_hook_error(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "dummy_config_parent.yaml",
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "dummy_config_parent.yaml"
             ),
             None,
         )
@@ -106,9 +114,11 @@ class TestAwsEmailProcessor:
     def test_post_hook_prompt(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "module_processors",
-                "dummy_config_parent.yaml",
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "dummy_config_parent.yaml"
             ),
             None,
         )

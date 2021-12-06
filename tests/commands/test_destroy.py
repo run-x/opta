@@ -8,18 +8,28 @@ from opta.exceptions import UserErrors
 from tests.util import get_call_args
 
 FAKE_ENV_CONFIG = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)),
-    "module_processors",
-    "dummy_config_parent.yaml",
+        os.getcwd(),
+        "tests",
+        "fixtures",
+        "dummy_data",
+        "dummy_config_parent.yaml"
 )
 
+
+
 FAKE_SERVICE_CONFIG = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)), "module_processors", "dummy_config1.yaml",
+        os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "dummy_config1.yaml"
 )
 
 FAKE_SERVICE_CONFIG_MULTIPLE_ENV = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)),
-    "module_processors",
+       os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
     "dummy_config_2_env.yml",
 )
 
