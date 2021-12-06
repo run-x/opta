@@ -70,3 +70,5 @@ outputs:
     description: The domain of the cloudfront distribution
 output_providers: { }
 output_data: { }
+clouds:
+  - aws

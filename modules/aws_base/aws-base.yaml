@@ -65,3 +65,5 @@ output_data:
     provider: { }
   aws_region:
     provider: { }
+clouds:
+  - aws

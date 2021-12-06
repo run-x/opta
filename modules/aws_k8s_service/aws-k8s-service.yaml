@@ -214,3 +214,5 @@ outputs:
     description: The url of the docker repo created to host this app's images in this environment. Does not exist when using external images.
 output_providers: { }
 output_data: { }
+clouds:
+  - aws

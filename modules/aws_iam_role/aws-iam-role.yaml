@@ -62,3 +62,5 @@ outputs:
     description: The arn of the role just created
 output_providers: { }
 output_data: { }
+clouds:
+  - aws

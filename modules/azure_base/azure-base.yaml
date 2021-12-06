@@ -49,3 +49,5 @@ outputs:
     description: Public static IP of nat gateway(s)
 output_providers: { }
 output_data: { }
+clouds:
+  - azure

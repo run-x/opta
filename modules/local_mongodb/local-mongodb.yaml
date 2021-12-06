@@ -30,3 +30,5 @@ outputs:
     description: The password of the database.
 output_providers: {}
 output_data: {}
+clouds:
+  - local

@@ -32,3 +32,5 @@ outputs:
     description: The name of the bucket.
 output_providers: { }
 output_data: { }
+clouds:
+  - gcp

@@ -1,3 +1,4 @@
+import glob
 import os
 import shutil
 from typing import Any, Dict, List
@@ -32,20 +33,22 @@ def make_registry_dict() -> Dict[Any, Any]:
     registry_dict: Dict[Any, Any] = yaml.load(
         open(os.path.join(registry_path, "index.yaml"))
     )
-    common_modules_path = os.path.join(registry_path, "common", "modules")
     with open(os.path.join(registry_path, "index.md"), "r") as f:
         registry_dict["text"] = f.read()
+    module_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "modules")
     for cloud in ["aws", "azurerm", "google", "local"]:
         cloud_path = os.path.join(registry_path, cloud)
         cloud_dict = yaml.load(open(os.path.join(cloud_path, "index.yaml")))
         cloud_dict["modules"] = {}
         with open(os.path.join(cloud_path, "index.md"), "r") as f:
             cloud_dict["text"] = f.read()
-        module_path = os.path.join(cloud_path, "modules")
-        cloud_dict["modules"] = {
-            **_make_module_registry_dict(module_path),
-            **_make_module_registry_dict(common_modules_path),
-        }
+        if cloud == "azurerm":
+            alt_cloudname = "azure"
+        elif cloud == "google":
+            alt_cloudname = "gcp"
+        else:
+            alt_cloudname = cloud
+        cloud_dict["modules"] = {**_make_module_registry_dict(module_path, alt_cloudname)}
         registry_dict[cloud] = cloud_dict
 
     return registry_dict
@@ -99,18 +102,40 @@ def _make_module_docs(vanilla_text: str, module_dict: Dict[Any, Any]) -> str:
     return result
 
 
-def _make_module_registry_dict(directory: str) -> Dict[Any, Any]:
+def _get_all_module_info(directory: str, cloud: str) -> list:
+    rtn_list = []
+    all_yaml_files = glob.glob(directory + "/**/*.yaml", recursive=True)
+    for a_yaml_path in all_yaml_files:
+        try:
+            module_dict = yaml.load(open(a_yaml_path))
+            if not module_dict:
+                continue
+        except:  # nosec # noqa
+            continue
+        if "clouds" not in module_dict:
+            continue
+        if cloud not in module_dict["clouds"]:
+            continue
+        module_name = os.path.basename(a_yaml_path).split(".yaml")[0]
+        rtn_list.append((a_yaml_path, module_name))
+    return rtn_list
+
+
+def _make_module_registry_dict(directory: str, cloud: str = "") -> Dict[Any, Any]:
     if not os.path.exists(directory):
         raise Exception(f"Non-existing directory given as input: {directory}")
-    module_names = [
-        f.split(".")[0]
-        for f in os.listdir(directory)
-        if os.path.isfile(os.path.join(directory, f)) and f.endswith("yaml")
-    ]
     modules_dict = {}
-    for module_name in module_names:
-        module_dict = yaml.load(open(os.path.join(directory, f"{module_name}.yaml")))
-        with open(os.path.join(directory, f"{module_name}.md"), "r") as f:
+    cloud_yamls_module_names = _get_all_module_info(directory, cloud)
+    for a_yaml_path, module_name in cloud_yamls_module_names:
+        try:
+            module_dict = yaml.load(open(a_yaml_path))
+            if not module_dict:
+                continue
+        except:  # nosec # noqa
+            continue
+        with open(
+            os.path.join(os.path.dirname(a_yaml_path), f"{module_name}.md"), "r"
+        ) as f:
             module_dict["text"] = _make_module_docs(f.read(), module_dict)
         for input in module_dict["inputs"]:
             input["required"] = (

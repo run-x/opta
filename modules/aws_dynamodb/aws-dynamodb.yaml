@@ -63,3 +63,5 @@ outputs:
     description: The id of the table's kms encryption key
 output_providers: { }
 output_data: { }
+clouds:
+  - aws

@@ -111,3 +111,5 @@ output_data:
   aws_eks_cluster_auth:
     k8s:
       name: "${{{module_source}.k8s_cluster_name}}"
+clouds:
+  - aws

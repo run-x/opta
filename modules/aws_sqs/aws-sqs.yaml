@@ -53,3 +53,5 @@ outputs:
     description: Arn of the kms key created to encrypt this queue
 output_providers: {}
 output_data: {}
+clouds:
+  - aws

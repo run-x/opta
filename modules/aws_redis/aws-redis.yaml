@@ -43,3 +43,5 @@ outputs:
     description: The security auth token for the redis cache
 output_providers: { }
 output_data: { }
+clouds:
+  - aws
