@@ -13,6 +13,7 @@ from botocore.config import Config
 from botocore.exceptions import ClientError
 
 from opta.amplitude import amplitude_client
+from opta.cleanup_files import cleanup_files
 from opta.commands.local_flag import _clean_tf_folder, _handle_local_flag
 from opta.constants import DEV_VERSION, TF_PLAN_PATH, VERSION
 from opta.core.aws import AWS
@@ -358,8 +359,19 @@ def _verify_parent_layer(layer: Layer) -> None:
                 "Please fix these issues and try again!"
             )
     except MissingState as e:
-        raise MissingState(
-            f"Failed to get the Environment state {e.args[0]}"
-            "Usually, this means that the Environment mentioned in configuration file does not exist."
-            "You can read more about this in our getting started guide: https://docs.opta.dev/getting-started/"
+        click.confirm(
+            f"Failed to get the Environment state {e.args[0]} "
+            "Usually, this means that the Environment mentioned in configuration file does not exist. \n"
+            f"Would you like to create your environment using {layer.parent.path}?",
+            abort=True,
         )
+        _apply(
+            layer.parent.path,
+            env=None,
+            refresh=False,
+            local=False,
+            image_tag=None,
+            test=False,
+            auto_approve=False,
+        )
+        cleanup_files()
