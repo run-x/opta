@@ -1,0 +1,70 @@
+halt: false
+environment_module: false
+inputs:
+  - name: env_name
+    user_facing: false
+    description: Opta Environment name
+    default: None
+  - name: layer_name
+    user_facing: false
+    description: Opta Layer name
+    default: None
+  - name: module_name
+    user_facing: false
+    description: Opta Module name
+    default: None
+  - name: extra_iam_policies
+    user_facing: true
+    validator: list(str(), required=False)
+    description: The arns of additional IAM policies to be attached to this role.
+    default: []
+  - name: expose_via_domain
+    user_facing: true
+    validator: bool(required=False)
+    description: The arns of additional IAM policies to be attached to this role.
+    default: false
+  - name: runtime
+    user_facing: true
+    validator: str(required=True)
+    description: The AWS lambda runtime to use for this lambda (see https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html)
+    default: "nodejs14.x"
+  - name: filename
+    user_facing: true
+    validator: str(required=True)
+    description: The filename for your zip file containing your lambda code
+    default: null
+  - name: env_vars
+    user_facing: true
+    validator: map(str(), str(), required=False)
+    description: |
+      A map of key values to add to the container as environment variables (key is name, value is value).
+      ```yaml
+      env_vars:
+       FLAG: "true"
+      ```
+    default: { }
+  - name: vpc_id
+    user_facing: false
+    description: Opta vpc_id id
+    default: null
+extra_validators: {}
+outputs:
+  - name: function_name
+    export: true
+    description: The name of the function just created
+  - name: function_arn
+    export: true
+    description: The arn of the function just created
+  - name: cloudwatch_log_group_name
+    export: true
+    description: The name of the log group holding the logs for your function's invocations
+  - name: cloudwatch_log_group_url
+    export: true
+    description: A shortcut url to take you to your cloudwatch logs (assuming you are logged in to the AWS console ui)
+  - name: lambda_trigger_uri
+    export: true
+    description: The uri which you can send requests to to invoke your function.
+output_providers: { }
+output_data: { }
+clouds:
+  - aws

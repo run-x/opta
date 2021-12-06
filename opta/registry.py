@@ -142,6 +142,7 @@ def _make_module_registry_dict(directory: str, cloud: str = "") -> Dict[Any, Any
                 input["user_facing"] and "required=True" in input["validator"]
             )
         module_dict["validators"] = _make_module_validators(module_dict)
+        module_name = module_dict.get("name_override", module_name)
         modules_dict[module_name] = module_dict
     return modules_dict
 

@@ -1,0 +1,65 @@
+{
+  "$id": "https://app.runx.dev/modules/lambda-function",
+  "type": "object",
+  "description": "Create and deploy a lambda function using opta.",
+  "properties": {
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "lambda-function"
+      ]
+    },
+    "extra_iam_policies": {
+      "description": "The arns of additional IAM policies to be attached to this role.",
+      "enum": [
+        "lambda-function"
+      ],
+      "default": []
+    },
+    "expose_via_domain": {
+      "description": "The arns of additional IAM policies to be attached to this role.",
+      "enum": [
+        "lambda-function"
+      ],
+      "default": false
+    },
+    "runtime": {
+      "description": "The AWS lambda runtime to use for this lambda (see https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html)",
+      "enum": [
+        "lambda-function"
+      ],
+      "default": "nodejs14.x"
+    },
+    "filename": {
+      "description": "The filename for your zip file containing your lambda code",
+      "enum": [
+        "lambda-function"
+      ],
+      "default": null
+    },
+    "env_vars": {
+      "description": "A map of key values to add to the container as environment variables (key is name, value is value).\n```yaml\nenv_vars:\n FLAG: \"true\"\n```\n",
+      "enum": [
+        "lambda-function"
+      ],
+      "default": {}
+    },
+    "vpc_id": {
+      "description": "The name of this module",
+      "enum": [
+        "lambda-function"
+      ]
+    }
+  },
+  "required": [
+    "runtime",
+    "filename",
+    "type"
+  ],
+  "opta_metadata": {
+    "module_type": "service",
+    "clouds": [
+      "aws"
+    ]
+  }
+}
