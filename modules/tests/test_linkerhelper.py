@@ -11,11 +11,7 @@ class TestLinkerHelper:
     def test_handle_link(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.getcwd(),
-                "tests",
-                "fixtures",
-                "dummy_data",
-                "local_dummy_config.yaml"
+                os.getcwd(), "tests", "fixtures", "dummy_data", "local_dummy_config.yaml"
             ),
             None,
         )

@@ -20,11 +20,7 @@ class TestBaseModuleProcessors:
     def test_validate_dns_delegated_false(self, mocker: MockFixture) -> None:
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.getcwd(),
-                "tests",
-                "fixtures",
-                "dummy_data",
-                "dummy_config_parent.yaml"
+                os.getcwd(), "tests", "fixtures", "dummy_data", "dummy_config_parent.yaml"
             ),
             None,
         )
@@ -42,11 +38,7 @@ class TestBaseModuleProcessors:
     def test_validate_dns_no_outputs(self, mocker: MockFixture) -> None:
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.getcwd(),
-                "tests",
-                "fixtures",
-                "dummy_data",
-                "dummy_config_parent.yaml"
+                os.getcwd(), "tests", "fixtures", "dummy_data", "dummy_config_parent.yaml"
             ),
             None,
         )
@@ -65,11 +57,7 @@ class TestBaseModuleProcessors:
     def test_validate_dns_no_name_servers(self, mocker: MockFixture) -> None:
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.getcwd(),
-                "tests",
-                "fixtures",
-                "dummy_data",
-                "dummy_config_parent.yaml"
+                os.getcwd(), "tests", "fixtures", "dummy_data", "dummy_config_parent.yaml"
             ),
             None,
         )
@@ -92,11 +80,7 @@ class TestBaseModuleProcessors:
     def test_validate_dns_mismatch(self, mocker: MockFixture) -> None:
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.getcwd(),
-                "tests",
-                "fixtures",
-                "dummy_data",
-                "dummy_config_parent.yaml"
+                os.getcwd(), "tests", "fixtures", "dummy_data", "dummy_config_parent.yaml"
             ),
             None,
         )
@@ -124,11 +108,7 @@ class TestBaseModuleProcessors:
     def test_validate_all_good(self, mocker: MockFixture) -> None:
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.getcwd(),
-                "tests",
-                "fixtures",
-                "dummy_data",
-                "dummy_config_parent.yaml"
+                os.getcwd(), "tests", "fixtures", "dummy_data", "dummy_config_parent.yaml"
             ),
             None,
         )

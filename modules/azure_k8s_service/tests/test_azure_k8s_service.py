@@ -11,11 +11,7 @@ class TestAzureK8sServiceProcessor:
     def test_all_good(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.getcwd(),
-                "tests",
-                "fixtures",
-                "dummy_data",
-                "azure_dummy_config.yaml"
+                os.getcwd(), "tests", "fixtures", "dummy_data", "azure_dummy_config.yaml"
             ),
             None,
         )
@@ -51,11 +47,7 @@ class TestAzureK8sServiceProcessor:
     def test_prehook(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.getcwd(),
-                "tests",
-                "fixtures",
-                "dummy_data",
-                "azure_dummy_config.yaml"
+                os.getcwd(), "tests", "fixtures", "dummy_data", "azure_dummy_config.yaml"
             ),
             None,
         )

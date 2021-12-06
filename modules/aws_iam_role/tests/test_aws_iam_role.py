@@ -13,11 +13,7 @@ class TestAwsIamRoleProcessor:
     def test_process(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.getcwd(),
-                "tests",
-                "fixtures",
-                "dummy_data",
-                "dummy_config1.yaml"
+                os.getcwd(), "tests", "fixtures", "dummy_data", "dummy_config1.yaml"
             ),
             None,
         )
@@ -35,11 +31,7 @@ class TestAwsIamRoleProcessor:
     def test_process_no_trusts(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.getcwd(),
-                "tests",
-                "fixtures",
-                "dummy_data",
-                "dummy_config1.yaml"
+                os.getcwd(), "tests", "fixtures", "dummy_data", "dummy_config1.yaml"
             ),
             None,
         )
@@ -60,11 +52,7 @@ class TestAwsIamRoleProcessor:
     def test_handle_k8s_trusts(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.getcwd(),
-                "tests",
-                "fixtures",
-                "dummy_data",
-                "dummy_config1.yaml"
+                os.getcwd(), "tests", "fixtures", "dummy_data", "dummy_config1.yaml"
             ),
             None,
         )
@@ -83,11 +71,7 @@ class TestAwsIamRoleProcessor:
     def test_handle_iam_policy(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.getcwd(),
-                "tests",
-                "fixtures",
-                "dummy_data",
-                "dummy_config1.yaml"
+                os.getcwd(), "tests", "fixtures", "dummy_data", "dummy_config1.yaml"
             ),
             None,
         )

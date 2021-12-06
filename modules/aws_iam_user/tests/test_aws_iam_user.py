@@ -11,11 +11,7 @@ class TestAwsIamUserProcessor:
     def test_process(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.getcwd(),
-                "tests",
-                "fixtures",
-                "dummy_data",
-                "dummy_config1.yaml"
+                os.getcwd(), "tests", "fixtures", "dummy_data", "dummy_config1.yaml"
             ),
             None,
         )
@@ -29,11 +25,7 @@ class TestAwsIamUserProcessor:
     def test_handle_iam_policy(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.getcwd(),
-                "tests",
-                "fixtures",
-                "dummy_data",
-                "dummy_config1.yaml"
+                os.getcwd(), "tests", "fixtures", "dummy_data", "dummy_config1.yaml"
             ),
             None,
         )

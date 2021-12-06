@@ -11,11 +11,7 @@ class TestAwsEksModuleProcessor:
     def test_post_hook(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.getcwd(),
-                "tests",
-                "fixtures",
-                "dummy_data",
-                "dummy_config_parent.yaml"
+                os.getcwd(), "tests", "fixtures", "dummy_data", "dummy_config_parent.yaml"
             ),
             None,
         )
@@ -78,11 +74,7 @@ class TestAwsEksModuleProcessor:
     def test_process(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.getcwd(),
-                "tests",
-                "fixtures",
-                "dummy_data",
-                "dummy_config_parent.yaml"
+                os.getcwd(), "tests", "fixtures", "dummy_data", "dummy_config_parent.yaml"
             ),
             None,
         )

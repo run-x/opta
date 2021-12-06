@@ -11,11 +11,7 @@ class TestLocalK8sServiceProcessor:
     def test_all_good(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.getcwd(),
-                "tests",
-                "fixtures",
-                "dummy_data",
-                "local_dummy_config.yaml"
+                os.getcwd(), "tests", "fixtures", "dummy_data", "local_dummy_config.yaml"
             ),
             None,
         )
@@ -60,11 +56,7 @@ class TestLocalK8sServiceProcessor:
     def test_handle_pg_link(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.getcwd(),
-                "tests",
-                "fixtures",
-                "dummy_data",
-                "local_dummy_config.yaml"
+                os.getcwd(), "tests", "fixtures", "dummy_data", "local_dummy_config.yaml"
             ),
             None,
         )
@@ -90,11 +82,7 @@ class TestLocalK8sServiceProcessor:
     def test_handle_redis_link(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.getcwd(),
-                "tests",
-                "fixtures",
-                "dummy_data",
-                "local_dummy_config.yaml"
+                os.getcwd(), "tests", "fixtures", "dummy_data", "local_dummy_config.yaml"
             ),
             None,
         )
@@ -120,11 +108,7 @@ class TestLocalK8sServiceProcessor:
     def test_handle_mysql_link(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.getcwd(),
-                "tests",
-                "fixtures",
-                "dummy_data",
-                "local_dummy_config.yaml"
+                os.getcwd(), "tests", "fixtures", "dummy_data", "local_dummy_config.yaml"
             ),
             None,
         )
@@ -150,11 +134,7 @@ class TestLocalK8sServiceProcessor:
     def test_handle_mongodb_link(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.getcwd(),
-                "tests",
-                "fixtures",
-                "dummy_data",
-                "local_dummy_config.yaml"
+                os.getcwd(), "tests", "fixtures", "dummy_data", "local_dummy_config.yaml"
             ),
             None,
         )

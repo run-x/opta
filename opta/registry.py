@@ -110,7 +110,7 @@ def _get_all_module_info(directory: str, cloud: str) -> list:
             module_dict = yaml.load(open(a_yaml_path))
             if not module_dict:
                 continue
-        except:
+        except:  # nosec # noqa
             continue
         if "clouds" not in module_dict:
             continue
@@ -131,7 +131,7 @@ def _make_module_registry_dict(directory: str, cloud: str = "") -> Dict[Any, Any
             module_dict = yaml.load(open(a_yaml_path))
             if not module_dict:
                 continue
-        except:
+        except:  # nosec # noqa
             continue
         with open(
             os.path.join(os.path.dirname(a_yaml_path), f"{module_name}.md"), "r"

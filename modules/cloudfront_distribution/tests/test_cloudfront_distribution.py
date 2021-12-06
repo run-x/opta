@@ -12,11 +12,7 @@ class TestAwsCloudfrontDstributionProcessor:
     def test_all_good(self, mocker: MockFixture) -> None:
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.getcwd(),
-                "tests",
-                "fixtures",
-                "dummy_data",
-                "dummy_config1.yaml"
+                os.getcwd(), "tests", "fixtures", "dummy_data", "dummy_config1.yaml"
             ),
             None,
         )

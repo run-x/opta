@@ -15,7 +15,7 @@ class TestAzureBaseProcessor:
                 "tests",
                 "fixtures",
                 "dummy_data",
-                "azure_dummy_config_parent.yaml"
+                "azure_dummy_config_parent.yaml",
             ),
             None,
         )
