@@ -80,8 +80,8 @@ resource "aws_lambda_function" "lambda" {
   function_name    = "opta-${var.module_name}-${random_string.lambda.result}"
   role             = aws_iam_role.iam_for_lambda.arn
   runtime          = var.runtime
-  filename         = var.filename == null ? "${path.module}/default.zip" : var.filename
-  source_code_hash = var.filename == null ? filebase64sha256("${path.module}/default.zip") : filebase64sha256(var.filename)
+  filename         = var.filename
+  source_code_hash = filebase64sha256(var.filename)
   handler          = var.handler
 
   dynamic "environment" {

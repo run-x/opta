@@ -25,12 +25,12 @@ inputs:
     default: false
   - name: runtime
     user_facing: true
-    validator: str(required=False)
+    validator: str(required=True)
     description: The AWS lambda runtime to use for this lambda (see https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html)
     default: "nodejs14.x"
   - name: filename
     user_facing: true
-    validator: str(required=False)
+    validator: str(required=True)
     description: The filename for your zip file containing your lambda code
     default: null
   - name: env_vars

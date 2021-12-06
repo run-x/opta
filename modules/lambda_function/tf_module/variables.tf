@@ -23,12 +23,10 @@ variable "expose_via_domain" {
 
 variable "runtime" {
   type    = string
-  default = "nodejs14.x"
 }
 
 variable "filename" {
   type    = string
-  default = null
 }
 
 variable "handler" {

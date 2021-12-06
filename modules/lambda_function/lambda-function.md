@@ -20,7 +20,8 @@ much more setup. Currently, it also handles:
 * Allowing the user to pass in IAM policies to give to the lambda
 * Setting up security group and network location if you have the `aws-base` module in your environment.
 
-tl;dr -- this will deploy a hello world lambda
+tl;dr -- Download [this zip](https://gist.github.com/juandiegopalomino/7400f836107459f3099c02e58d2d6897/raw/5c0b4cbbbf1d8a470f16c09d53e6ed68e59e06bd/baloney.zip), 
+put it in your current directory and this opta yaml will deploy a hello world lambda exposed to the public.
 ```yaml
 name: testing-lambda
 org_name: myorg
@@ -31,6 +32,8 @@ providers:
 modules:
   - type: lambda-function
     expose_via_domain: true
+    filename: baloney.zip
+    runtime: "nodejs14.x"
 ```
 
 ## Adding your Own Function
@@ -66,7 +69,8 @@ You can have your lambda be automatically exposed to the world via a public ui b
 to true. This creates a new AWS API Gateway V2 and configures it to pass the request over to your lambda function via
 the official integration. Events (lambda inputs) for this use case will have the structure dictated 
 [here](https://docs.aws.amazon.com/lambda/latest/dg/services-apigateway.html#apigateway-example-event) and expect
-a response format dictated [here](https://docs.aws.amazon.com/lambda/latest/dg/services-apigateway.html#apigateway-types-transforms)
+a response format dictated [here](https://docs.aws.amazon.com/lambda/latest/dg/services-apigateway.html#apigateway-types-transforms).
+You can get the default domain by running `opta output` -- it will be the lambda_trigger_uri field.
 
 ## IAM Permissions
 As mentioned, a new IAM role will be created just for your lambda's usage. If you wish to give this role extra permissions,
@@ -107,4 +111,5 @@ modules:
   - type: lambda-function
     expose_via_domain: true
     filename: baloney.zip
+    runtime: "nodejs14.x"Z
 ```

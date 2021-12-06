@@ -1,5 +1,5 @@
 import os
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from modules.base import ModuleProcessor
 from opta.exceptions import UserErrors
@@ -32,8 +32,8 @@ class LambdaFunctionProcessor(ModuleProcessor):
                 else f"module.{aws_base_module.name}"
             )
             self.module.data["vpc_id"] = f"${{{{{module_source}.vpc_id}}}}"
-        file_path: Optional[str] = self.module.data.get("filename")
-        if file_path is not None and not file_path.startswith("/"):
+        file_path: str = self.module.data.get("filename")
+        if file_path.startswith("/"):
             self.module.data["filename"] = os.path.join(
                 os.path.dirname(self.layer.path), file_path
             )
