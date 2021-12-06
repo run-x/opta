@@ -32,11 +32,7 @@ class TestLayer:
     def test_get_event_properties(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.getcwd(),
-                "tests",
-                "fixtures",
-                "dummy_data",
-                "dummy_config1.yaml"
+                os.getcwd(), "tests", "fixtures", "dummy_data", "dummy_config1.yaml"
             ),
             None,
         )
@@ -56,11 +52,7 @@ class TestLayer:
     def test_parent(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.getcwd(),
-                "tests",
-                "fixtures",
-                "dummy_data",
-                "dummy_config_parent.yaml"
+                os.getcwd(), "tests", "fixtures", "dummy_data", "dummy_config_parent.yaml"
             ),
             None,
         )
@@ -144,11 +136,7 @@ class TestLayer:
     def test_child(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(
-                os.getcwd(),
-                "tests",
-                "fixtures",
-                "dummy_data",
-                "dummy_config1.yaml"
+                os.getcwd(), "tests", "fixtures", "dummy_data", "dummy_config1.yaml"
             ),
             None,
         )
