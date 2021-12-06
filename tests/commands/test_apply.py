@@ -48,6 +48,7 @@ def mocked_layer(mocker: MockFixture) -> Any:
     mocked_layer.gen_providers = lambda x: {"provider": {"aws": {"region": "us-east-1"}}}
     mocked_layer_class.load_from_yaml.return_value = mocked_layer
     mocked_layer.parent = None
+    mocked_layer.original_spec = ""
 
     return mocked_layer
 
@@ -227,11 +228,17 @@ def test_verify_parent_layer_missing_state(
     mocked_get_terraform_outputs = mocker.patch(
         "opta.commands.apply.get_terraform_outputs"
     )
+    mocked_click = mocker.patch("opta.commands.apply.click")
+    mocked_confirm = mocker.Mock()
+    mocked_click.confirm = mocked_confirm
+    mocked_apply = mocker.patch("opta.commands.apply._apply")
     mocked_layer.parent = mocker.Mock(spec=Layer)
     mocked_layer.parent.name = "Parent Name"
+    mocked_layer.parent.original_spec = ""
     mocked_get_terraform_outputs.side_effect = MissingState(
         f"Unable to download state for layer {mocked_layer.parent.name}"
     )
-    with pytest.raises(UserErrors):
-        _verify_parent_layer(mocked_layer)
+    _verify_parent_layer(mocked_layer)
+    mocked_confirm.assert_called_once()
+    mocked_apply.assert_called_once()
     mocked_get_terraform_outputs.assert_called_once_with(mocked_layer.parent)
