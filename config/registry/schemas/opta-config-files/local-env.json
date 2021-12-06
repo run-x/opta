@@ -28,12 +28,6 @@
       "items": {
         "oneOf": [
           {
-            "$ref": "https://app.runx.dev/modules/datadog"
-          },
-          {
-            "$ref": "https://app.runx.dev/modules/external-ssl-cert"
-          },
-          {
             "$ref": "https://app.runx.dev/modules/local-base"
           },
           {

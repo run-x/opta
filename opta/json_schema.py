@@ -76,10 +76,10 @@ def _get_all_modules(cloud: str) -> List[dict]:
 def _check_opta_config_schemas(write: bool = False) -> None:
     for cloud in CLOUD_FOLDER_NAMES:
         for config_type in CONFIG_TYPES:
-            all_modules = _get_all_modules(cloud)
+            cloudjs = CLOUD_NAME_TO_JSON_SCHEMA_NAME[cloud]
+            all_modules = _get_all_modules(cloudjs)
             json_schema_file_path = join(
-                opta_config_schemas_path,
-                f"{CLOUD_NAME_TO_JSON_SCHEMA_NAME[cloud]}-{config_type}.json",
+                opta_config_schemas_path, f"{cloudjs}-{config_type}.json",
             )
 
             json_schema_file = open(json_schema_file_path)
@@ -173,7 +173,8 @@ def _check_module_schemas(write: bool = False) -> None:
                 "module_type": CONFIG_TYPE_ENV
                 if module_registry_dict["environment_module"]
                 else CONFIG_TYPE_SERVICE,
-                "clouds": FOLDER_NAME_TO_CLOUD_LIST[cloud],
+                # "clouds": FOLDER_NAME_TO_CLOUD_LIST[cloud],
+                "clouds": json_schema["opta_metadata"]["clouds"],  # @Quinn ok by you?
             }
 
             if write:
