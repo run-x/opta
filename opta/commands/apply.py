@@ -1,5 +1,7 @@
 import datetime
 import os
+import shutil
+import tempfile
 from pathlib import Path
 from subprocess import CalledProcessError  # nosec
 from threading import Thread
@@ -13,6 +15,7 @@ from botocore.config import Config
 from botocore.exceptions import ClientError
 
 from opta.amplitude import amplitude_client
+from opta.cleanup_files import cleanup_files
 from opta.commands.local_flag import _clean_tf_folder, _handle_local_flag
 from opta.constants import DEV_VERSION, TF_PLAN_PATH, VERSION
 from opta.core.aws import AWS
@@ -358,8 +361,26 @@ def _verify_parent_layer(layer: Layer) -> None:
                 "Please fix these issues and try again!"
             )
     except MissingState as e:
-        raise MissingState(
-            f"Failed to get the Environment state {e.args[0]}"
-            "Usually, this means that the Environment mentioned in configuration file does not exist."
-            "You can read more about this in our getting started guide: https://docs.opta.dev/getting-started/"
+        click.confirm(
+            f"Failed to get the Environment state {e.args[0]} "
+            "Usually, this means that the Environment mentioned in configuration file does not exist. \n"
+            "Would you like to create your environment?",
+            abort=True,
         )
+        t = tempfile.mkdtemp()
+        try:
+            config_path = os.path.join(t, "opta.yml")
+            with open(config_path, "w") as f:
+                f.write(layer.parent.original_spec)
+            _apply(
+                config_path,
+                env=None,
+                refresh=False,
+                local=False,
+                image_tag=None,
+                test=False,
+                auto_approve=False,
+            )
+        finally:
+            shutil.rmtree(t)
+            cleanup_files()
