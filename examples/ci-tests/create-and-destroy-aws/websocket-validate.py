@@ -12,5 +12,6 @@ try:
     expected_result = f"Server received from client: {test_message}"
     assert expected_result == actual_result
     exit(0)
-except Exception:
+except Exception as e:
+    print(e)
     exit(1)
