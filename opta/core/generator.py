@@ -16,14 +16,14 @@ if TYPE_CHECKING:
     from opta.module import Module
 
 
-def gen_all(layer: "Layer", previous_config: Optional["StructuredConfig"] = None) -> None:
+def gen_all(layer: "Layer", existing_config: Optional["StructuredConfig"] = None) -> None:
     # Just run the generator till the end
-    list(gen(layer, previous_config))
+    list(gen(layer, existing_config))
 
 
 def gen(
     layer: "Layer",
-    previous_config: Optional["StructuredConfig"] = None,
+    existing_config: Optional["StructuredConfig"] = None,
     image_tag: Optional[str] = None,
     image_digest: Optional[str] = None,
     test: bool = False,
@@ -69,7 +69,7 @@ def gen(
         layer.variables["image_tag"] = image_tag
         layer.variables["image_digest"] = image_digest
         ret = layer.gen_providers(module_idx)
-        ret = deep_merge(layer.gen_tf(module_idx, previous_config), ret)
+        ret = deep_merge(layer.gen_tf(module_idx, existing_config), ret)
 
         gen_tf.gen(ret, TF_FILE_PATH)
 

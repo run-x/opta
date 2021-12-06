@@ -1,5 +1,6 @@
 import os
 import time
+from typing import Dict
 
 from ruamel.yaml import YAML
 
@@ -24,6 +25,12 @@ VERSION = open(version_path).read().strip()
 DEV_VERSION = "dev"
 
 SESSION_ID = int(time.time() * 1000)
+UPGRADE_WARNINGS: Dict[str, str] = {
+    "0.21.0": "Performing updates on AWS environments to the network load balancer which will cause a new one to be "
+    "spawned (old one will stick around, but should be manually deleted). Opta-internal references, like "
+    "those for the opts managed dns, will be switched to new load balancer automatically, but this may cuase "
+    "a 5 minute downtime as the new load balancer becomes operational."
+}
 
 # Path of the generated tf file.
 OPTA_DISABLE_REPORTING = "OPTA_DISABLE_REPORTING"

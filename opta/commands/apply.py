@@ -15,7 +15,7 @@ from botocore.exceptions import ClientError
 from opta.amplitude import amplitude_client
 from opta.cleanup_files import cleanup_files
 from opta.commands.local_flag import _clean_tf_folder, _handle_local_flag
-from opta.constants import DEV_VERSION, TF_PLAN_PATH, VERSION
+from opta.constants import DEV_VERSION, TF_PLAN_PATH, UPGRADE_WARNINGS, VERSION
 from opta.core.aws import AWS
 from opta.core.azure import Azure
 from opta.core.cloud_client import CloudClient
@@ -194,26 +194,17 @@ def _apply(
     else:
         raise Exception(f"Cannot handle upload config for cloud {layer.cloud}")
 
-    previous_config: Optional[StructuredConfig] = cloud_client.get_remote_config()
-    if previous_config is not None and "opta_version" in previous_config:
-        old_opta_version = previous_config["opta_version"]
-        if (
-            old_opta_version not in [DEV_VERSION, ""]
-            and VERSION not in [DEV_VERSION, ""]
-            and semver.VersionInfo.parse(VERSION.strip("v")).compare(
-                old_opta_version.strip("v")
-            )
-            < 0
-        ):
-            raise UserErrors(
-                f"ou're trying to run an older version of opta (last run was at {previous_config['date']} with version {old_opta_version}). Please update to the latest version and try again!"
-            )
+    existing_config: Optional[StructuredConfig] = cloud_client.get_remote_config()
+    if existing_config is not None and "opta_version" in existing_config:
+        old_semver_string = existing_config["opta_version"].strip("v")
+        current_semver_string = VERSION.strip("v")
+        _verify_semver(old_semver_string, current_semver_string)
 
     try:
         existing_modules: Set[str] = set()
         first_loop = True
         for module_idx, current_modules, total_block_count in gen(
-            layer, previous_config, image_tag, image_digest, test, True
+            layer, existing_config, image_tag, image_digest, test, True
         ):
             if first_loop:
                 # This is set during the first iteration, since the tf file must exist.
@@ -332,6 +323,38 @@ def _apply(
         amplitude_client.send_event(
             amplitude_client.FINISH_GEN_EVENT, event_properties=event_properties,
         )
+
+
+def _verify_semver(old_semver_string: str, current_semver_string: str) -> None:
+    if old_semver_string not in [DEV_VERSION, ""] and current_semver_string not in [
+        DEV_VERSION,
+        "",
+    ]:
+        old_semver = semver.VersionInfo.parse(old_semver_string)
+        current_semver = semver.VersionInfo.parse(current_semver_string)
+        if old_semver > current_semver:
+            raise UserErrors(
+                f"You're trying to run an older version of opta (last run with version {old_semver}). "
+                "Please update to the latest version and try again!"
+            )
+        current_upgrade_warnings = sorted(
+            [
+                (k, v)
+                for k, v in UPGRADE_WARNINGS.items()
+                if current_semver.compare(k) >= 0 and old_semver.compare(k) < 0
+            ],
+            key=lambda x: semver.VersionInfo.parse(x[0]),
+        )
+        for current_upgrade_warning in current_upgrade_warnings:
+            logger.info(
+                f"WARNING: Detecting an opta upgrade to or past version {current_upgrade_warning[0]}. "
+                f"Got the following warning: {current_upgrade_warning[1]}"
+            )
+        if len(current_upgrade_warnings) > 0:
+            click.confirm(
+                "Are you ok with the aforementioned warnings and done all precautionary steps you wish to do?",
+                abort=True,
+            )
 
 
 # Fetch the AZs of a region with boto3
