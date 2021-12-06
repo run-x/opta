@@ -58,9 +58,8 @@ resource "google_sql_database_instance" "instance" {
 }
 
 resource "google_sql_database" "main" {
-  instance   = google_sql_database_instance.instance.name
-  name       = "opta-${var.layer_name}-${var.module_name}-${random_id.key_suffix.hex}"
-  depends_on = [google_sql_user.root]
+  instance = google_sql_database_instance.instance.name
+  name     = "opta-${var.layer_name}-${var.module_name}-${random_id.key_suffix.hex}"
 }
 
 resource "google_sql_user" "root" {
@@ -69,4 +68,5 @@ resource "google_sql_user" "root" {
   password = random_password.root_auth.result
 
   deletion_policy = "ABANDON"
+  depends_on      = [google_sql_database.main]
 }
