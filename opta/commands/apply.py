@@ -362,7 +362,7 @@ def _verify_parent_layer(layer: Layer) -> None:
         click.confirm(
             f"Failed to get the Environment state {e.args[0]} "
             "Usually, this means that the Environment mentioned in configuration file does not exist. \n"
-            "Would you like to create your environment?",
+            f"Would you like to create your environment using {layer.parent.path}?",
             abort=True,
         )
         _apply(
