@@ -11,6 +11,7 @@ import pytz
 import semver
 from botocore.config import Config
 from botocore.exceptions import ClientError
+from colored import attr, fg
 
 from opta.amplitude import amplitude_client
 from opta.cleanup_files import cleanup_files
@@ -337,6 +338,7 @@ def _verify_semver(old_semver_string: str, current_semver_string: str) -> None:
                 f"You're trying to run an older version of opta (last run with version {old_semver}). "
                 "Please update to the latest version and try again!"
             )
+
         current_upgrade_warnings = sorted(
             [
                 (k, v)
@@ -347,7 +349,7 @@ def _verify_semver(old_semver_string: str, current_semver_string: str) -> None:
         )
         for current_upgrade_warning in current_upgrade_warnings:
             logger.info(
-                f"WARNING: Detecting an opta upgrade to or past version {current_upgrade_warning[0]}. "
+                f"{fg('magenta')}WARNING{attr(0)}: Detecting an opta upgrade to or past version {current_upgrade_warning[0]}. "
                 f"Got the following warning: {current_upgrade_warning[1]}"
             )
         if len(current_upgrade_warnings) > 0:

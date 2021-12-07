@@ -1,4 +1,5 @@
 from typing import Any
+from unittest.mock import patch
 
 import pytest
 from botocore.exceptions import ClientError
@@ -6,7 +7,7 @@ from click.testing import CliRunner, Result
 from pytest import fixture
 from pytest_mock import MockFixture
 
-from opta.commands.apply import _verify_parent_layer, apply
+from opta.commands.apply import _verify_parent_layer, _verify_semver, apply
 from opta.constants import TF_PLAN_PATH
 from opta.core.kubernetes import tail_module_log, tail_namespace_events
 from opta.exceptions import MissingState, UserErrors
@@ -196,6 +197,30 @@ def test_fail_on_2_azs(mocker: MockFixture, mocked_layer: Any) -> None:
     assert "Opta requires a region with at least *3* availability zones." in str(
         result.exception
     )
+
+
+def test_verify_semver_all_good(mocker: MockFixture, mocked_layer: Any) -> None:
+    _verify_semver("0.1.0", "0.2.0")
+
+
+def test_verify_semver_older_version(mocker: MockFixture, mocked_layer: Any) -> None:
+    with pytest.raises(UserErrors):
+        _verify_semver("0.2.0", "0.1.0")
+
+
+def test_verify_semver_upgrade_warning(mocker: MockFixture, mocked_layer: Any) -> None:
+    mocked_logger = mocker.patch("opta.commands.apply.logger")
+    mocked_click = mocker.patch("opta.commands.apply.click")
+    mocked_confirm = mocker.Mock()
+    mocked_click.confirm = mocked_confirm
+    with patch(
+        "opta.commands.apply.UPGRADE_WARNINGS", {"0.2.0": "blah", "0.3.0": "baloney"}
+    ):
+        _verify_semver("0.1.0", "0.3.0")
+    mocked_logger.info.assert_has_calls(
+        [mocker.call(mocker.ANY), mocker.call(mocker.ANY)]
+    )
+    mocked_confirm.assert_called_once()
 
 
 def test_verify_parent_layer(mocker: MockFixture, mocked_layer: Any) -> None:
