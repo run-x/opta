@@ -61,33 +61,3 @@ def force_unlock(config: str, env: Optional[str]) -> None:
                     namespace=release["namespace"],
                     revision=release["revision"],
                 )
-
-    # Terraform.init(layer=layer)
-    #
-    # click.confirm(
-    #     "This will remove the lock on the remote state."
-    #     "\nPlease make sure that no other instance of opta command is running on this file."
-    #     "\nDo you still want to proceed?",
-    #     abort=True,
-    # )
-    #
-    # Terraform.force_unlock(layer, *tf_flags)
-    #
-    # click.confirm(
-    #     "Do you also wish to Rollback the Helm releases in Pending-Upgrade State?"
-    #     "\nPlease make sure that no other instance of opta command is running on this file."
-    #     "\nDo you still want to proceed?",
-    #     abort=True,
-    # )
-    # configure_kubectl(layer)
-    #
-    # release_list = Helm.get_helm_list(status="pending-upgrade")
-    #
-    # for release in release_list:
-    #     Helm.rollback_helm(
-    #         release["name"], namespace=release["namespace"], revision=release["revision"]
-    #     )
-
-
-# def _check_cluster_exists(layer: "Layer") -> bool:
-#     if layer.get_module_by_type()
