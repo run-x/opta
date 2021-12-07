@@ -196,10 +196,13 @@ def _apply(
         raise Exception(f"Cannot handle upload config for cloud {layer.cloud}")
 
     existing_config: Optional[StructuredConfig] = cloud_client.get_remote_config()
-    if existing_config is not None and "opta_version" in existing_config:
-        old_semver_string = existing_config["opta_version"].strip("v")
-        current_semver_string = VERSION.strip("v")
-        _verify_semver(old_semver_string, current_semver_string)
+    old_semver_string = (
+        "0.0.1"
+        if existing_config is None
+        else existing_config.get("opta_version", "0.0.1").strip("v")
+    )
+    current_semver_string = VERSION.strip("v")
+    _verify_semver(old_semver_string, current_semver_string)
 
     try:
         existing_modules: Set[str] = set()
