@@ -4,7 +4,6 @@ import signal
 import sys
 import tempfile
 from asyncio import TimeoutError
-from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess  # nosec
 from traceback import format_exc
 from typing import Optional, Union
@@ -96,7 +95,7 @@ def nice_run(  # type: ignore # nosec
         log_to_datadog("SUBPROCESS TIMEOUT EXCEPTION\n{}".format(format_exc()), "ERROR")
         raise exc
 
-    except KeyboardInterrupt as k:
+    except KeyboardInterrupt:
         print("Received keyboard interrupt")
         log_to_datadog(
             "SUBPROCESS KEYBOARDINTERRUPT EXCEPTION\n{}".format(format_exc()), "ERROR"

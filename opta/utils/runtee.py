@@ -1,7 +1,7 @@
 # type: ignore
 # nosec
-"""tee like run implementation."""
-"""Originally from here:  https://github.com/pycontribs/subprocess-tee/, MIT license"""
+# tee like run implementation."""
+# Originally from here:  https://github.com/pycontribs/subprocess-tee/, MIT license
 import asyncio
 import os
 import platform
@@ -10,15 +10,15 @@ import sys
 from asyncio import StreamReader
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
-if TYPE_CHECKING:
-    CompletedProcess = subprocess.CompletedProcess[Any]  # pylint: disable=E1136
-else:
-    CompletedProcess = subprocess.CompletedProcess
-
 try:
     from shlex import join  # type: ignore
 except ImportError:
     from subprocess import list2cmdline as join  # nosec
+
+if TYPE_CHECKING:
+    CompletedProcess = subprocess.CompletedProcess[Any]  # pylint: disable=E1136
+else:
+    CompletedProcess = subprocess.CompletedProcess
 
 
 STREAM_LIMIT = 2 ** 23  # 8MB instead of default 64kb, override it if you need
