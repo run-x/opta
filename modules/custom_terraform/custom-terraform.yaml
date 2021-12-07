@@ -1,0 +1,20 @@
+halt: false
+environment_module: true
+is_unique: false
+inputs:
+  - name: path_to_module
+    user_facing: true
+    validator: str(required=True)
+    description: The path to your terraform module
+    default: null
+  - name: terraform_inputs
+    user_facing: true
+    validator: map(str(), any(), required=False)
+    description: The variables which you wish to pass into your custom module.
+    default: { }
+outputs: {}
+output_providers: {}
+output_data: {}
+clouds:
+  - gcp
+  - aws
