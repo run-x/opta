@@ -8,9 +8,8 @@ import platform
 import subprocess  # nosec
 import sys
 from asyncio import StreamReader
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
-
 from shlex import join
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
 if TYPE_CHECKING:
     CompletedProcess = subprocess.CompletedProcess[Any]  # pylint: disable=E1136
