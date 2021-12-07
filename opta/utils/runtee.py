@@ -10,10 +10,7 @@ import sys
 from asyncio import StreamReader
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
-try:
-    from shlex import join  # type: ignore
-except ImportError:
-    from subprocess import list2cmdline as join  # nosec
+from shlex import join
 
 if TYPE_CHECKING:
     CompletedProcess = subprocess.CompletedProcess[Any]  # pylint: disable=E1136
