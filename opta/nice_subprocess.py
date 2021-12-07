@@ -101,7 +101,7 @@ def nice_run(  # type: ignore # nosec
         log_to_datadog(
             "SUBPROCESS KEYBOARDINTERRUPT EXCEPTION\n{}".format(format_exc()), "ERROR"
         )
-        raise k
+        raise
     except CalledProcessError as e:
         log_to_datadog(
             "SUBPROCESS CALLEDPROCESSERROR\n STDOUT:\n{}\nSTDERR:\n{}\n".format(
