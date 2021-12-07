@@ -327,36 +327,34 @@ def _apply(
 
 
 def _verify_semver(old_semver_string: str, current_semver_string: str) -> None:
-    if old_semver_string not in [DEV_VERSION, ""] and current_semver_string not in [
+    if old_semver_string in [DEV_VERSION, ""] or current_semver_string in [
         DEV_VERSION,
         "",
     ]:
-        old_semver = semver.VersionInfo.parse(old_semver_string)
-        current_semver = semver.VersionInfo.parse(current_semver_string)
-        if old_semver > current_semver:
-            raise UserErrors(
-                f"You're trying to run an older version of opta (last run with version {old_semver}). "
-                "Please update to the latest version and try again!"
-            )
+        return
 
-        current_upgrade_warnings = sorted(
-            [
-                (k, v)
-                for k, v in UPGRADE_WARNINGS.items()
-                if current_semver.compare(k) >= 0 and old_semver.compare(k) < 0
-            ],
-            key=lambda x: semver.VersionInfo.parse(x[0]),
+    old_semver = semver.VersionInfo.parse(old_semver_string)
+    current_semver = semver.VersionInfo.parse(current_semver_string)
+    if old_semver > current_semver:
+        raise UserErrors(
+            f"You're trying to run an older version of opta (last run with version {old_semver}). "
+            "Please update to the latest version and try again!"
         )
-        for current_upgrade_warning in current_upgrade_warnings:
-            logger.info(
-                f"{fg('magenta')}WARNING{attr(0)}: Detecting an opta upgrade to or past version {current_upgrade_warning[0]}. "
-                f"Got the following warning: {current_upgrade_warning[1]}"
-            )
-        if len(current_upgrade_warnings) > 0:
-            click.confirm(
-                "Are you ok with the aforementioned warnings and done all precautionary steps you wish to do?",
-                abort=True,
-            )
+
+    current_upgrade_warnings = sorted(
+        [(k, v) for k, v in UPGRADE_WARNINGS.items() if current_semver >= k > old_semver],
+        key=lambda x: semver.VersionInfo.parse(x[0]),
+    )
+    for current_upgrade_warning in current_upgrade_warnings:
+        logger.info(
+            f"{fg('magenta')}WARNING{attr(0)}: Detecting an opta upgrade to or past version {current_upgrade_warning[0]}. "
+            f"Got the following warning: {current_upgrade_warning[1]}"
+        )
+    if len(current_upgrade_warnings) > 0:
+        click.confirm(
+            "Are you ok with the aforementioned warnings and done all precautionary steps you wish to do?",
+            abort=True,
+        )
 
 
 # Fetch the AZs of a region with boto3
