@@ -171,6 +171,18 @@ def _check_module_schemas(write: bool = False) -> None:
                             f"property *{input_name}* in json schema for module *{module_name}* is missing a type definition field. It should have one of the following fields: type, $ref, oneOf, anyOf"
                         )
 
+                    if (
+                        "default" in json_schema["properties"][input_name]
+                        and "enum" in json_schema["properties"][input_name]
+                    ):
+                        if (
+                            json_schema["properties"][input_name]["default"]
+                            not in json_schema["properties"][input_name]["enum"]
+                        ):
+                            raise Exception(
+                                f"property *{input_name}* in json schema for module *{module_name}* has a default value that is not in the enum list"
+                            )
+
                     new_input_property_dict = new_json_schema["properties"][input_name]
 
                     new_input_property_dict["description"] = i["description"]

@@ -36,7 +36,7 @@ outputs:
   - name: cache_auth_token
     export: false
     description: The security auth token for the redis cache
-output_providers: { }
-output_data: { }
+output_providers: {}
+output_data: {}
 clouds:
   - azure

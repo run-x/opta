@@ -5,9 +5,9 @@
   "properties": {
     "sku_name": {
       "enum": [
-        "Basic",
-        "Standard",
-        "Premium"
+        "basic",
+        "standard",
+        "premium"
       ],
       "type": "string",
       "description": "The SKU of Azure Cache's Redis to use. `Basic`, `Standard` and `Premium`.",
