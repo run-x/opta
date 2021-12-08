@@ -15,3 +15,8 @@ modules:
     max_nodes: 6
   - type: gcp-k8s-base
   - type: runx
+  - type: custom-terraform
+    name: custom1
+    path_to_module: "./blah"
+    terraform_inputs:
+      hello: "world"

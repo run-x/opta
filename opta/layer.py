@@ -51,7 +51,7 @@ from modules.base import ModuleProcessor
 from modules.cloudfront_distribution.aws_cloudfront_distribution import (
     AwsCloudfrontDstributionProcessor,
 )
-from modules.custom_terraform import CustomTerraformProcessor
+from modules.custom_terraform.custom_terraform import CustomTerraformProcessor
 from modules.datadog.datadog import DatadogProcessor
 from modules.external_ssl_cert.external_ssl_cert import ExternalSSLCert
 from modules.gcp_dns.gcp_dns import GCPDnsProcessor

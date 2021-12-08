@@ -54,3 +54,8 @@ modules:
       - bucket2:
           - write
       - bucket3
+  - type: custom-terraform
+    name: custom1
+    path_to_module: "./blah"
+    terraform_inputs:
+      hello: "world"

@@ -98,3 +98,8 @@ modules:
     name: cloudfront
     links:
       - bucket1
+  - type: custom-terraform
+    name: custom1
+    path_to_module: "./blah"
+    terraform_inputs:
+      hello: "world"
