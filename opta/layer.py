@@ -476,6 +476,12 @@ class Layer:
                     for k in self.parent.outputs()
                 }
             )
+        providers = self.providers
+        if self.parent is not None:
+            providers = deep_merge(providers, self.parent.providers)
+        provider_hydration = {}
+        for name, values in providers.items():
+            provider_hydration[name] = SimpleNamespace(**values)
 
         return {
             "parent": parent,
@@ -485,6 +491,7 @@ class Layer:
             "layer_name": self.name,
             "state_storage": self.state_storage(),
             "env": self.get_env(),
+            **provider_hydration,
         }
 
     def get_event_properties(self) -> Dict[str, Any]:
