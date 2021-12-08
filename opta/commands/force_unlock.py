@@ -45,7 +45,7 @@ def force_unlock(config: str, env: Optional[str]) -> None:
             tf_flags.append("-force")
             Terraform.force_unlock(layer, *tf_flags)
 
-        if "k8scluster" in modules:
+        if layer.parent is not None or "k8scluster" in modules:
             configure_kubectl(layer)
             pending_upgrade_release_list = Helm.get_helm_list(status="pending-upgrade")
             click.confirm(

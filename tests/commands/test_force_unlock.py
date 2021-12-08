@@ -21,6 +21,7 @@ def test_force_unlock_env(mocker: MockFixture) -> None:
     mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
     mocked_os_path_exists.return_value = True
     mocked_layer = mocker.Mock(spec=Layer)
+    mocked_layer.parent = None
     mocked_module_1 = mocker.Mock(spec=Module)
     mocked_module_1.name = "base"
     mocked_module_2 = mocker.Mock(spec=Module)
@@ -95,6 +96,7 @@ def test_force_unlock_env_no_cluster(mocker: MockFixture) -> None:
     mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
     mocked_os_path_exists.return_value = True
     mocked_layer = mocker.Mock(spec=Layer)
+    mocked_layer.parent = None
     mocked_module_1 = mocker.Mock(spec=Module)
     mocked_module_1.name = "base"
     mocked_module_2 = mocker.Mock(spec=Module)
@@ -158,6 +160,7 @@ def test_force_unlock_env_no_rollback(mocker: MockFixture) -> None:
     mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
     mocked_os_path_exists.return_value = True
     mocked_layer = mocker.Mock(spec=Layer)
+    mocked_layer.parent = None
     mocked_module_1 = mocker.Mock(spec=Module)
     mocked_module_1.name = "base"
     mocked_module_2 = mocker.Mock(spec=Module)
