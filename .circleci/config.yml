@@ -780,23 +780,23 @@ jobs:
           name: "Destroy Monitoring Service"
           command: |
             yes | ./dist/opta/opta destroy \
-          --config ./examples/ci-tests/todo-list/monitoring-service.yml \
-          --auto-approve \
-          --local || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+            --config ./examples/ci-tests/todo-list/monitoring-service.yml \
+            --auto-approve \
+            --local || if [[ $? -eq 141 ]]; then true; else exit $?; fi
       - run:
           name: "Destroy Todo-Frontend Service"
           command: |
             yes | ./dist/opta/opta destroy \
-          --config ./examples/ci-tests/todo-list/frontend-service.yml \
-          --auto-approve \
-          --local || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+            --config ./examples/ci-tests/todo-list/frontend-service.yml \
+            --auto-approve \
+            --local || if [[ $? -eq 141 ]]; then true; else exit $?; fi
       - run:
           name: "Destroy Todo-Api Service"
           command: |
             yes | ./dist/opta/opta destroy \
-          --config ./examples/ci-tests/todo-list/api-service.yml \
-          --auto-approve \
-          --local || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+            --config ./examples/ci-tests/todo-list/api-service.yml \
+            --auto-approve \
+            --local || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   say-hello:
     executor: ubuntu-machine
