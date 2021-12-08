@@ -182,6 +182,29 @@ jobs:
           paths:
             - test-service-image
 
+  build-opta-example-images:
+    executor: ubuntu-machine
+    steps:
+      - checkout
+      - run:
+          name: "Git clone Opta Example"
+          command: "git clone git@github.com:run-x/opta-examples.git"
+      - run:
+          name: "Build example images"
+          command: |
+          docker build -f opta-examples/full-stack-example/api/todo-python-django/Dockerfile --tag todo-api:v1
+          docker build -f opta-examples/full-stack-example/frontend/todo-vuejs --tag todo-frontend:v1
+      - run:
+          name: "Save Opta examples"
+          command: |
+            docker save -o todo-api todo-api:v1
+            docker save -o todo-frontend todo-frontend:v1
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - todo-api
+            - todo-frontend
+
   aws-create-env:
     executor: ubuntu-machine
     environment:
@@ -701,6 +724,77 @@ jobs:
             --config ./examples/ci-tests/create-and-destroy-gcp/environment.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
+  local-opta-example-create-svcs:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - run:
+          name: "Load Opta Example images"
+          command: |
+            docker load -i todo-api
+            docker load -i todo-frontend
+      - run:
+          name: "Deploy Todo-Api Service"
+          command: |
+            ./dist/opta/opta deploy \
+            --image todo-api:v1 \
+            --config ./examples/ci-tests/todo-list/api-service.yml \
+            --auto-approve \
+            --local
+      - run:
+          name: "Deploy Todo-Frontend Service"
+          command: |
+            ./dist/opta/opta deploy \
+            --image todo-frontend:v1 \
+            --config ./examples/ci-tests/todo-list/frontend-service.yml \
+            --auto-approve \
+            --local
+      - run:
+          name: "Deploy Monitoring Service"
+          command: |
+            ./dist/opta/opta apply \
+            --config ./examples/ci-tests/todo-list/monitoring-service.yml \
+            --auto-approve \
+            --local
+      - run:
+          name: "Ping Tests"
+          command: |
+            curl http://localhost:8080/frontend --fail
+            curl http://localhost:8080/djangoapi/ht/ --fail
+            curl http://localhost:8080/grafana --fail
+
+  local-opta-example-destroy-svcs:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - run:
+          name: "Destroy Monitoring Service"
+          command: |
+            yes | ./dist/opta/opta destroy \
+          --config ./examples/ci-tests/todo-list/monitoring-service.yml \
+          --auto-approve \
+          --local || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+      - run:
+          name: "Destroy Todo-Frontend Service"
+          command: |
+            yes | ./dist/opta/opta destroy \
+          --config ./examples/ci-tests/todo-list/frontend-service.yml \
+          --auto-approve \
+          --local || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+      - run:
+          name: "Destroy Todo-Api Service"
+          command: |
+            yes | ./dist/opta/opta destroy \
+          --config ./examples/ci-tests/todo-list/api-service.yml \
+          --auto-approve \
+          --local || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+
   say-hello:
     executor: ubuntu-machine
     # Add steps to the job
@@ -719,6 +813,7 @@ workflows:
     when: << pipeline.parameters.run-create-and-destroy >>
     jobs: &fullsuite
       - build-test-service-image
+      - build-opta-example-images
       - build-opta-binary:
           requires:
             - build-test-service-image
@@ -780,6 +875,13 @@ workflows:
             - gcp-test-service-redis
             - gcp-test-service-helm
             - gcp-test-service-gcs
+      - local-opta-example-create-svcs:
+          requires:
+            - build-opta-binary
+            - build-opta-example-images
+      - local-opta-example-destroy-svcs:
+          requires:
+            - local-opta-example-create-svcs
 
   run-ci:
     when: << pipeline.parameters.run-ci >>
@@ -818,6 +920,19 @@ workflows:
       - aws-destroy-env:
           requires:
             - build-opta-binary
+
+  run-create-destroy-local-example:
+    when: << pipeline.parameters.run-create-destroy-local >>
+    jobs:
+      - build-opta-binary
+      - build-opta-example-images
+      - local-opta-example-create-svcs:
+          requires:
+            - build-opta-binary
+            - build-opta-example-images
+      - local-opta-example-destroy-svcs:
+          requires:
+            - local-opta-example-create-svcs
 
   nightly:
     triggers:
