@@ -32,7 +32,8 @@
       "enum": [
         "gcp-k8s-base",
         "k8s-base"
-      ]
+      ],
+      "type": "string"
     }
   },
   "required": [

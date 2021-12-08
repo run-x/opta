@@ -87,7 +87,8 @@
       "description": "The name of this module",
       "enum": [
         "aws-s3"
-      ]
+      ],
+      "type": "string"
     }
   },
   "required": [

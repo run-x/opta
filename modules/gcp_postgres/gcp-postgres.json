@@ -26,7 +26,8 @@
       "enum": [
         "gcp-postgres",
         "postgres"
-      ]
+      ],
+      "type": "string"
     }
   },
   "required": [

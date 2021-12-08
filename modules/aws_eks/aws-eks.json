@@ -72,7 +72,8 @@
       "enum": [
         "aws-eks",
         "k8s-cluster"
-      ]
+      ],
+      "type": "string"
     }
   },
   "opta_metadata": {

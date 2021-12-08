@@ -56,7 +56,8 @@
       "description": "The name of this module",
       "enum": [
         "mongodb-atlas"
-      ]
+      ],
+      "type": "string"
     }
   },
   "required": [

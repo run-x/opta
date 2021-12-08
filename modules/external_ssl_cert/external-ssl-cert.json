@@ -31,7 +31,8 @@
       "description": "The name of this module",
       "enum": [
         "external-ssl-cert"
-      ]
+      ],
+      "type": "string"
     }
   },
   "required": [

@@ -25,7 +25,7 @@
       "required": false
     },
     "port": {
-      "ref": "/common-types/port-deprecated",
+      "$ref": "/common-types/port-deprecated",
       "description": "Specifies what port your app was made to be listened to. Currently it must be a map of the form\n`http: [PORT_NUMBER_HERE]` or `websocket: [PORT_NUMBER_HERE]`. Use `http` if you just have a vanilla http server\nand `websocket` for websockets.\n",
       "required": false
     },
@@ -211,7 +211,8 @@
       "enum": [
         "aws-k8s-service",
         "k8s-service"
-      ]
+      ],
+      "type": "string"
     }
   },
   "opta_metadata": {

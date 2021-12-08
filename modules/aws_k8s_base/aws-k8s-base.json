@@ -63,7 +63,8 @@
       "enum": [
         "aws-k8s-base",
         "k8s-base"
-      ]
+      ],
+      "type": "string"
     }
   },
   "opta_metadata": {

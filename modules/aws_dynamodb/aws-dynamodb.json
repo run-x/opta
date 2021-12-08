@@ -19,6 +19,7 @@
     },
     "billing_mode": {
       "description": "The billing mode for you dynamodb table",
+      "type": "string",
       "enum": [
         "PROVISIONED",
         "PAY_PER_REQUEST"
@@ -71,7 +72,8 @@
       "description": "The name of this module",
       "enum": [
         "aws-dynamodb"
-      ]
+      ],
+      "type": "string"
     }
   },
   "opta_metadata": {

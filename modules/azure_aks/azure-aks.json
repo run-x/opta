@@ -23,6 +23,7 @@
     },
     "node_instance_type": {
       "description": "The [Azure virtual machine size](https://docs.microsoft.com/en-us/azure/cloud-services/cloud-services-sizes-specs) for the nodes.",
+      "type": "string",
       "enum": [
         "ExtraSmall",
         "Small",
@@ -122,7 +123,8 @@
       "enum": [
         "azure-aks",
         "k8s-cluster"
-      ]
+      ],
+      "type": "string"
     }
   },
   "required": [

@@ -19,7 +19,8 @@
       "description": "The name of this module",
       "enum": [
         "gcp-gcs"
-      ]
+      ],
+      "type": "string"
     }
   },
   "required": [

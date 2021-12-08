@@ -29,7 +29,8 @@
       "enum": [
         "gcp-dns",
         "dns"
-      ]
+      ],
+      "type": "string"
     }
   },
   "required": [

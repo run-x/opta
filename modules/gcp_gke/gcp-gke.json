@@ -33,6 +33,7 @@
         "REGULAR",
         "STABLE"
       ],
+      "type": "string",
       "description": "The GKE K8s [release channel](https://cloud.google.com/kubernetes-engine/docs/concepts/release-channels) to bind the cluster too. Gives you automatic K8s version management for the cluster and node pools.",
       "default": "REGULAR",
       "required": false
@@ -48,7 +49,8 @@
       "enum": [
         "gcp-gke",
         "k8s-cluster"
-      ]
+      ],
+      "type": "string"
     }
   },
   "required": [

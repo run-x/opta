@@ -9,6 +9,7 @@
         "Standard",
         "Premium"
       ],
+      "type": "string",
       "description": "The SKU of Azure Cache's Redis to use. `Basic`, `Standard` and `Premium`.",
       "default": "standard",
       "required": false
@@ -20,6 +21,7 @@
       ],
       "description": "The family/pricing group to use. Optionas are `C` for Basic/Standard and `P` for Premium.",
       "default": "C",
+      "type": "string",
       "required": false
     },
     "capacity": {
@@ -34,7 +36,8 @@
       "enum": [
         "azure-redis",
         "redis"
-      ]
+      ],
+      "type": "string"
     }
   },
   "required": [

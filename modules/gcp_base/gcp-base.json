@@ -32,7 +32,8 @@
       "enum": [
         "gcp-base",
         "base"
-      ]
+      ],
+      "type": "string"
     }
   },
   "required": [

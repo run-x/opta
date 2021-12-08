@@ -17,10 +17,8 @@
     },
     "billing_mode": {
       "description": "The billing mode for you dynamodb table",
-      "enum": [
-        "PROVISIONED",
-        "PAY_PER_REQUEST"
-      ],
+      "type": "string",
+      "enum": ["PROVISIONED", "PAY_PER_REQUEST"],
       "default": "PROVISIONED"
     },
     "hash_key": {
@@ -45,38 +43,21 @@
           },
           "type": {
             "description": "The type of the attribute",
-            "enum": [
-              "B",
-              "BOOL",
-              "N",
-              "S",
-              "SS"
-            ]
+            "enum": ["B", "BOOL", "N", "S", "SS"]
           }
         },
-        "required": [
-          "name",
-          "type"
-        ]
+        "required": ["name", "type"]
       },
       "default": "None"
     },
     "type": {
       "description": "The name of this module",
-      "enum": [
-        "aws-dynamodb"
-      ]
+      "enum": ["aws-dynamodb"]
     }
   },
   "opta_metadata": {
     "module_type": "service",
-    "clouds": [
-      "aws"
-    ]
+    "clouds": ["aws"]
   },
-  "required": [
-    "hash_key",
-    "attributes",
-    "type"
-  ]
+  "required": ["hash_key", "attributes", "type"]
 }

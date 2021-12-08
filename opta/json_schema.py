@@ -150,6 +150,7 @@ def _check_module_schemas(write: bool = False) -> None:
             new_json_schema["properties"]["type"] = {
                 "description": "The name of this module",
                 "enum": [module_name] + module_aliases,
+                "type": "string",
             }
 
             module_inputs = module_registry_dict["inputs"]
@@ -160,6 +161,16 @@ def _check_module_schemas(write: bool = False) -> None:
                         raise Exception(
                             f"property {input_name} is missing from json schema for module {module_name}"
                         )
+
+                    type_definition_fields = ["type", "$ref", "oneOf", "anyOf"]
+                    if all(
+                        t not in json_schema["properties"][input_name]
+                        for t in type_definition_fields
+                    ):
+                        raise Exception(
+                            f"property *{input_name}* in json schema for module *{module_name}* is missing a type definition field. It should have one of the following fields: type, $ref, oneOf, anyOf"
+                        )
+
                     new_input_property_dict = new_json_schema["properties"][input_name]
 
                     new_input_property_dict["description"] = i["description"]

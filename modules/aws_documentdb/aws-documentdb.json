@@ -26,7 +26,8 @@
       "description": "The name of this module",
       "enum": [
         "aws-documentdb"
-      ]
+      ],
+      "type": "string"
     }
   },
   "opta_metadata": {

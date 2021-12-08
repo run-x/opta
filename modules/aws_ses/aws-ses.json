@@ -13,7 +13,8 @@
       "description": "The name of this module",
       "enum": [
         "aws-ses"
-      ]
+      ],
+      "type": "string"
     }
   },
   "required": [

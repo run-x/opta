@@ -54,7 +54,8 @@
       "description": "The name of this module",
       "enum": [
         "aws-iam-role"
-      ]
+      ],
+      "type": "string"
     }
   },
   "opta_metadata": {

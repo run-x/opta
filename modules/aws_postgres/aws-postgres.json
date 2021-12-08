@@ -33,7 +33,8 @@
       "enum": [
         "aws-postgres",
         "postgres"
-      ]
+      ],
+      "type": "string"
     }
   },
   "required": [

@@ -25,7 +25,8 @@
       "enum": [
         "azure-base",
         "base"
-      ]
+      ],
+      "type": "string"
     }
   },
   "required": [

@@ -44,7 +44,8 @@
       "enum": [
         "aws-base",
         "base"
-      ]
+      ],
+      "type": "string"
     }
   },
   "opta_metadata": {

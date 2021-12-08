@@ -88,7 +88,8 @@
       "description": "The name of this module",
       "enum": [
         "helm-chart"
-      ]
+      ],
+      "type": "string"
     }
   },
   "required": [

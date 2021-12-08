@@ -20,7 +20,8 @@
       "enum": [
         "azure-postgres",
         "postgres"
-      ]
+      ],
+      "type": "string"
     }
   },
   "required": [

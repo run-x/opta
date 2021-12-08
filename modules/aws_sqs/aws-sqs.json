@@ -46,7 +46,8 @@
       "description": "The name of this module",
       "enum": [
         "aws-sqs"
-      ]
+      ],
+      "type": "string"
     }
   },
   "required": [

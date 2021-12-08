@@ -75,7 +75,8 @@
       "description": "The name of this module",
       "enum": [
         "cloudfront-distribution"
-      ]
+      ],
+      "type": "string"
     }
   },
   "required": [
