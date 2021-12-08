@@ -776,6 +776,10 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
       - run:
           name: "Destroy Monitoring Service"
           command: |
