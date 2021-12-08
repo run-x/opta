@@ -6,7 +6,7 @@
     "instance_class": {
       "type": "string",
       "description": "This is the RDS instance type used for the Aurora cluster [instances](https://aws.amazon.com/rds/instance-types/).",
-      "$ref": "/common-types/rds-instance-types",
+      "$ref": "/common-types/rds-instance-type",
       "default": "db.t3.medium"
     },
     "engine_version": {

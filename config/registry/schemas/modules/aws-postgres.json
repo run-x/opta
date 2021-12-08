@@ -6,7 +6,7 @@
     "instance_class": {
       "type": "string",
       "description": "This is the RDS instance type used for the Aurora cluster [instances](https://aws.amazon.com/rds/instance-types/).",
-      "$ref": "/common-types/rds-instance-types",
+      "$ref": "/common-types/rds-instance-type",
       "default": "db.t3.medium"
     },
     "engine_version": {
@@ -26,19 +26,12 @@
     },
     "type": {
       "description": "The name of this module",
-      "enum": [
-        "aws-postgres",
-        "postgres"
-      ]
+      "enum": ["aws-postgres", "postgres"]
     }
   },
-  "required": [
-    "type"
-  ],
+  "required": ["type"],
   "opta_metadata": {
     "module_type": "service",
-    "clouds": [
-      "aws"
-    ]
+    "clouds": ["aws"]
   }
 }

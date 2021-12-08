@@ -10,7 +10,7 @@
     },
     "instance_class": {
       "description": "This is the RDS instance type used for the documentdb cluster [instances](https://aws.amazon.com/documentdb/pricing/).",
-      "$ref": "/common-types/rds-instance-types",
+      "$ref": "/common-types/rds-instance-type",
       "default": "db.r5.large"
     },
     "instance_count": {
@@ -21,18 +21,12 @@
     },
     "type": {
       "description": "The name of this module",
-      "enum": [
-        "aws-documentdb"
-      ]
+      "enum": ["aws-documentdb"]
     }
   },
   "opta_metadata": {
     "module_type": "service",
-    "clouds": [
-      "aws"
-    ]
+    "clouds": ["aws"]
   },
-  "required": [
-    "type"
-  ]
+  "required": ["type"]
 }
