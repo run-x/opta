@@ -6,26 +6,22 @@
     "max_nodes": {
       "type": "integer",
       "description": "The maximum number of nodes to be set by the autoscaler in for the default nodegroup.",
-      "default": 5,
-      "required": false
+      "default": 5
     },
     "min_nodes": {
       "type": "integer",
       "description": "The minimum number of nodes to be set by the autoscaler in for the default nodegroup.",
-      "default": 1,
-      "required": false
+      "default": 1
     },
     "node_disk_size": {
       "type": "integer",
       "description": "The size of disk to give the nodes' vms in GB.",
-      "default": 20,
-      "required": false
+      "default": 20
     },
     "node_instance_type": {
       "type": "string",
       "description": "The [gcloud machine type](https://cloud.google.com/compute/docs/machine-types) for the nodes.",
-      "default": "n2-highcpu-4",
-      "required": false
+      "default": "n2-highcpu-4"
     },
     "gke_channel": {
       "enum": [
@@ -35,14 +31,12 @@
       ],
       "type": "string",
       "description": "The GKE K8s [release channel](https://cloud.google.com/kubernetes-engine/docs/concepts/release-channels) to bind the cluster too. Gives you automatic K8s version management for the cluster and node pools.",
-      "default": "REGULAR",
-      "required": false
+      "default": "REGULAR"
     },
     "preemptible": {
       "type": "boolean",
       "description": "A boolean specifying whether to use [preemptible instances](https://cloud.google.com/compute/docs/instances/preemptible)\nfor the default nodegroup or not. The preemptible instances will be configured to have the max price equal to the on-demand\nprice (so no danger of overcharging). _WARNING_: By using preemptible instances you must accept the real risk of frequent abrupt\nnode terminations and possibly (although extremely rarely) even full blackouts (all nodes die). The former is a small\nrisk as containers of Opta services will be automatically restarted on surviving nodes. So just make sure to specify\na minimum of more than 1 containers -- Opta by default attempts to spread them out amongst many nodes.\n",
-      "default": false,
-      "required": false
+      "default": false
     },
     "type": {
       "description": "The name of this module",

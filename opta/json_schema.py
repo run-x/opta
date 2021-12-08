@@ -174,9 +174,6 @@ def _check_module_schemas(write: bool = False) -> None:
                     new_input_property_dict = new_json_schema["properties"][input_name]
 
                     new_input_property_dict["description"] = i["description"]
-                    new_input_property_dict["required"] = bool(
-                        i["user_facing"] and "required=True" in i["validator"]
-                    )
                     if "default" in i:
                         new_input_property_dict["default"] = i["default"]
 

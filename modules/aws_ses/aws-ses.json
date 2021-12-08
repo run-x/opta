@@ -6,8 +6,7 @@
     "mail_from_prefix": {
       "type": "string",
       "description": "Subdomain to use with root domain.",
-      "default": "mail",
-      "required": false
+      "default": "mail"
     },
     "type": {
       "description": "The name of this module",

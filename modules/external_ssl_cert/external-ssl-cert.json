@@ -6,26 +6,22 @@
     "domain": {
       "type": "string",
       "description": "The domain which the ssl cert is for (used for validation of the certificate files).",
-      "default": "default_value",
-      "required": true
+      "default": "default_value"
     },
     "private_key_file": {
       "type": "string",
       "description": "The private key pem file for the ssl certificate.",
-      "default": null,
-      "required": true
+      "default": null
     },
     "certificate_body_file": {
       "type": "string",
       "description": "The body of the ssl certificate in the form of a pem file. This file should just have the final certificate and not other certificates on the chain",
-      "default": null,
-      "required": true
+      "default": null
     },
     "certificate_chain_file": {
       "type": "string",
       "description": "The file containing the chain certificate for the current ssl certificate.",
-      "default": null,
-      "required": true
+      "default": null
     },
     "type": {
       "description": "The name of this module",

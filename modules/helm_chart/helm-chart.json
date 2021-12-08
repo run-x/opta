@@ -6,44 +6,37 @@
     "chart": {
       "type": "string",
       "description": "Name of the helm chart.\nNote that you don't need to use `<repo_name>/<chart_name>` - as repo is specified separately. Just do `<chart_name>`.\nIf you're using a local chart, then this will be the path to the chart.\n",
-      "default": null,
-      "required": true
+      "default": null
     },
     "repository": {
       "type": "string",
       "description": "The helm repository to use (null means local chart)",
-      "default": null,
-      "required": false
+      "default": null
     },
     "namespace": {
       "type": "string",
       "description": "The kubernetes namespace to put the chart in",
-      "default": "default",
-      "required": false
+      "default": "default"
     },
     "create_namespace": {
       "type": "boolean",
       "description": "Create namespace as well.",
-      "default": false,
-      "required": false
+      "default": false
     },
     "atomic": {
       "type": "boolean",
       "description": "If set, installation process purges chart on fail. The wait flag will be set automatically if atomic is used.",
-      "default": true,
-      "required": false
+      "default": true
     },
     "cleanup_on_fail": {
       "type": "boolean",
       "description": "Allow deletion of new resources created in this upgrade when upgrade fails",
-      "default": true,
-      "required": false
+      "default": true
     },
     "chart_version": {
       "type": "string",
       "description": "User side of the version of the helm chart to install. Note-- this IS required for remote charts (in a repository and not from local filesystem).",
-      "default": null,
-      "required": false
+      "default": null
     },
     "values_files": {
       "type": "array",
@@ -51,38 +44,32 @@
       "items": {
         "type": "string"
       },
-      "default": [],
-      "required": false
+      "default": []
     },
     "values": {
       "type": "object",
       "description": "Values override.",
-      "default": {},
-      "required": false
+      "default": {}
     },
     "values_file": {
       "type": "string",
       "description": "Path to a values file.",
-      "default": null,
-      "required": false
+      "default": null
     },
     "timeout": {
       "type": "number",
       "description": "Time in seconds to wait for any individual kubernetes operation (like Jobs for hooks).",
-      "default": 600,
-      "required": false
+      "default": 600
     },
     "dependency_update": {
       "type": "boolean",
       "description": "Runs helm dependency update before installing the chart.",
-      "default": true,
-      "required": false
+      "default": true
     },
     "wait": {
       "type": "boolean",
       "description": "Will wait (for as long as timeout) until all resources are in a ready state before marking the release as successful.",
-      "default": true,
-      "required": false
+      "default": true
     },
     "type": {
       "description": "The name of this module",

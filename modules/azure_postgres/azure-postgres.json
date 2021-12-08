@@ -6,14 +6,12 @@
     "sku_name": {
       "type": "string",
       "description": "The name of the SKU, follows the tier + family + cores pattern for Azure postgres [instances](https://docs.microsoft.com/en-us/azure/postgresql/concepts-pricing-tiers).",
-      "default": "GP_Gen5_4",
-      "required": false
+      "default": "GP_Gen5_4"
     },
     "engine_version": {
       "type": "string",
       "description": "The version of the database to use.",
-      "default": "11",
-      "required": false
+      "default": "11"
     },
     "type": {
       "description": "The name of this module",

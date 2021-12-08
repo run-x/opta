@@ -8,44 +8,38 @@
       "items": {
         "type": "string"
       },
-      "default": [],
-      "required": false
+      "default": []
     },
     "image": {
       "type": "string",
       "description": "Set to AUTO to create a private repo for your own images. Otherwises attempts to pull image from public dockerhub",
-      "default": null,
-      "required": true
+      "default": null
     },
     "min_containers": {
       "type": "integer",
       "description": "The minimum number of replicas your app can autoscale to.",
       "default": 1,
-      "minimum": 0,
-      "required": false
+      "minimum": 0
     },
     "max_containers": {
       "type": "integer",
       "description": "The maximum number of replicas your app can autoscale to.",
       "default": 3,
-      "minimum": 0,
-      "required": false
+      "minimum": 0
     },
     "autoscaling_target_cpu_percentage": {
       "type": "integer",
       "description": "See the [autoscaling]({{< relref \"#autoscaling\" >}}) section.",
       "default": 80,
       "minimum": 0,
-      "maximum": 100,
-      "required": false
+      "maximum": 100
     },
     "autoscaling_target_mem_percentage": {
       "type": "integer",
       "description": "See the [autoscaling]({{< relref \"#autoscaling\" >}}) section.",
       "default": 80,
       "minimum": 0,
-      "maximum": 100,
-      "required": false
+      "maximum": 100
     },
     "secrets": {
       "type": "array",
@@ -53,62 +47,52 @@
       "items": {
         "type": "string"
       },
-      "default": [],
-      "required": false
+      "default": []
     },
     "env_vars": {
       "description": "A map of key values to add to the container as environment variables (key is name, value is value).\n```yaml\nenv_vars:\n FLAG: \"true\"\n```\n",
       "$ref": "/common-types/env-vars",
-      "default": [],
-      "required": false
+      "default": []
     },
     "healthcheck_path": {
       "type": "string",
       "description": "See the See the [liveness/readiness]({{< relref \"#livenessreadiness-probe\" >}}) section. Default `null` (i.e., no user-specified healthchecks)",
-      "default": null,
-      "required": false
+      "default": null
     },
     "liveness_probe_path": {
       "type": "string",
       "description": "Use if liveness probe != readiness probe",
-      "default": null,
-      "required": false
+      "default": null
     },
     "readiness_probe_path": {
       "type": "string",
       "description": "Use if liveness probe != readiness probe",
-      "default": null,
-      "required": false
+      "default": null
     },
     "initial_liveness_delay": {
       "type": "integer",
       "description": "Use if the initial delay needs to be changed.",
-      "default": 30,
-      "required": false
+      "default": 30
     },
     "initial_readiness_delay": {
       "type": "integer",
       "description": "Use if the initial delay needs to be changed.",
-      "default": 30,
-      "required": false
+      "default": 30
     },
     "consistent_hash": {
       "description": "Use [consistent hashing](https://www.nginx.com/resources/wiki/modules/consistent_hash/)",
       "type": "string",
-      "default": null,
-      "required": false
+      "default": null
     },
     "sticky_session": {
       "description": "Use [sticky sessions](https://stackoverflow.com/questions/10494431/sticky-and-non-sticky-sessions) via cookies for your service (first request will send you a cookie called opta_cookie which you should add on future requests).",
       "type": "boolean",
-      "default": false,
-      "required": false
+      "default": false
     },
     "sticky_session_max_age": {
       "description": "If the sticky session is enabled, how long should the cookie last?",
       "type": "integer",
-      "default": 86400,
-      "required": false
+      "default": 86400
     },
     "resource_request": {
       "description": "See the [container resources]({{< relref \"#container-resources\" >}}) section. Default\n```yaml\ncpu: 100 # in millicores\nmemory: 128 # in megabytes\n```\nCPU is given in millicores, and Memory is in megabytes.\n",
@@ -130,8 +114,7 @@
       "default": {
         "cpu": 100,
         "memory": 128
-      },
-      "required": false
+      }
     },
     "public_uri": {
       "description": "The full domain to expose your app under as well as path prefix. Must be the full parent domain or a subdomain referencing the parent as such: \"dummy.{parent[domain]}/my/path/prefix\"\n",
@@ -146,20 +129,17 @@
           }
         }
       ],
-      "default": [],
-      "required": false
+      "default": []
     },
     "keep_path_prefix": {
       "type": "boolean",
       "description": "Should we keep the prefix path which you set in the public uri when forwarding requests to your service?",
-      "default": false,
-      "required": false
+      "default": false
     },
     "links": {
       "$ref": "/common-types/links",
       "description": "A list of extra IAM role policies not captured by Opta which you wish to give to your service.",
-      "default": [],
-      "required": false
+      "default": []
     },
     "persistent_storage": {
       "type": "array",
@@ -179,19 +159,16 @@
           ]
         }
       },
-      "default": [],
-      "required": false
+      "default": []
     },
     "ingress_extra_annotations": {
       "type": "object",
       "description": "These are extra annotations to add to ingress objects\n",
-      "default": {},
-      "required": false
+      "default": {}
     },
     "port": {
       "$ref": "/common-types/port-deprecated",
-      "description": "Specifies what port your app was made to be listened to. Currently it must be a map of the form\n`http: [PORT_NUMBER_HERE]` or `tcp: [PORT_NUMBER_HERE]`. Use http if you just have a vanilla http server and tcp for\nwebsockets.\n",
-      "required": false
+      "description": "Specifies what port your app was made to be listened to. Currently it must be a map of the form\n`http: [PORT_NUMBER_HERE]` or `tcp: [PORT_NUMBER_HERE]`. Use http if you just have a vanilla http server and tcp for\nwebsockets.\n"
     },
     "type": {
       "description": "The name of this module",

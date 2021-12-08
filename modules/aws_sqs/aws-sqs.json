@@ -6,14 +6,12 @@
     "fifo": {
       "type": "boolean",
       "description": "FIFO queue or not",
-      "default": false,
-      "required": false
+      "default": false
     },
     "content_based_deduplication": {
       "type": "boolean",
       "description": "FIFO queue or not",
-      "default": false,
-      "required": false
+      "default": false
     },
     "sqs_subscribers": {
       "type": "array",
@@ -27,20 +25,17 @@
     "delay_seconds": {
       "type": "integer",
       "description": "Seconds to delay passing the message forward",
-      "default": 0,
-      "required": false
+      "default": 0
     },
     "message_retention_seconds": {
       "type": "integer",
       "description": "The number of seconds SQS retains a message.",
-      "default": 345600,
-      "required": false
+      "default": 345600
     },
     "receive_wait_time_seconds": {
       "type": "integer",
       "description": "The seconds for which a ReceiveMessage call will wait for a message to arrive (long polling) before returning. Must be an int from 0-20.",
-      "default": 0,
-      "required": false
+      "default": 0
     },
     "type": {
       "description": "The name of this module",

@@ -6,20 +6,17 @@
     "memory_size_gb": {
       "type": "integer",
       "description": "The size in GB for the redis cache's memory",
-      "default": 2,
-      "required": false
+      "default": 2
     },
     "redis_version": {
       "type": "boolean",
       "description": "the redis version to use for this instance",
-      "default": "REDIS_5_0",
-      "required": false
+      "default": "REDIS_5_0"
     },
     "high_availability": {
       "type": "boolean",
       "description": "the redis version to use for this instance",
-      "default": true,
-      "required": false
+      "default": true
     },
     "type": {
       "description": "The name of this module",

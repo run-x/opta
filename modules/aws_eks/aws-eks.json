@@ -6,32 +6,27 @@
     "max_nodes": {
       "type": "integer",
       "description": "The maximum number of nodes to be set by the autoscaler in for the default nodegroup.",
-      "default": 5,
-      "required": false
+      "default": 5
     },
     "min_nodes": {
       "type": "integer",
       "description": "The minimum number of nodes to be set by the autoscaler in for the default nodegroup.",
-      "default": 3,
-      "required": false
+      "default": 3
     },
     "node_disk_size": {
       "type": "integer",
       "description": "The size of disk to give the nodes' ec2s in GB.",
-      "default": 20,
-      "required": false
+      "default": 20
     },
     "node_instance_type": {
       "$ref": "/common-types/ec2-instance-type",
       "default": "t3.medium",
-      "description": "The [ec2 instance type](https://aws.amazon.com/ec2/instance-types/) for the nodes.",
-      "required": false
+      "description": "The [ec2 instance type](https://aws.amazon.com/ec2/instance-types/) for the nodes."
     },
     "k8s_version": {
       "type": "string",
       "description": "The Kubernetes version for the cluster. Must be [supported by EKS](https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html)",
-      "default": "1.18",
-      "required": false
+      "default": "1.18"
     },
     "control_plane_security_groups": {
       "type": "array",
@@ -39,20 +34,17 @@
       "items": {
         "type": "string"
       },
-      "default": [],
-      "required": false
+      "default": []
     },
     "spot_instances": {
       "type": "boolean",
       "description": "A boolean specifying whether to use [spot instances](https://aws.amazon.com/ec2/spot/)\nfor the default nodegroup or not. The spot instances will be configured to have the max price equal to the on-demand\nprice (so no danger of overcharging). _WARNING_: By using spot instances you must accept the real risk of frequent abrupt\nnode terminations and possibly (although extremely rarely) even full blackouts (all nodes die). The former is a small\nrisk as containers of Opta services will be automatically restarted on surviving nodes. So just make sure to specify\na minimum of more than 1 containers -- Opta by default attempts to spread them out amongst many nodes. The former\nis a graver concern which can be addressed by having multiple node groups of different instance types (see aws\nnodegroup module) and ideally at least one non-spot.\n",
-      "default": false,
-      "required": false
+      "default": false
     },
     "enable_metrics": {
       "type": "boolean",
       "description": "Enable autoscaling group cloudwatch metrics collection for the default nodegroup.",
-      "default": false,
-      "required": false
+      "default": false
     },
     "node_launch_template": {
       "type": "object",
@@ -64,8 +56,7 @@
         }
       },
       "default": {},
-      "description": "Custom launch template for the underlying ec2s.",
-      "required": false
+      "description": "Custom launch template for the underlying ec2s."
     },
     "type": {
       "description": "The name of this module",

@@ -9,8 +9,7 @@
       "items": {
         "type": "string"
       },
-      "default": [],
-      "required": false
+      "default": []
     },
     "allowed_k8s_services": {
       "description": "K8s service accounts that this role should have access to.",
@@ -32,8 +31,7 @@
           "namespace"
         ]
       },
-      "default": [],
-      "required": false
+      "default": []
     },
     "extra_iam_policies": {
       "type": "array",
@@ -41,14 +39,12 @@
         "type": "string"
       },
       "default": [],
-      "description": "The arns of additional IAM policies to be attached to this role.",
-      "required": false
+      "description": "The arns of additional IAM policies to be attached to this role."
     },
     "links": {
       "$ref": "/common-types/links",
       "description": "The list of links to add permissions for to this role.",
-      "default": [],
-      "required": false
+      "default": []
     },
     "type": {
       "description": "The name of this module",

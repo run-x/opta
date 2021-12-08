@@ -7,15 +7,13 @@
       "description": "This is the read capacaity for your dynamodb table",
       "type": "integer",
       "minimum": 0,
-      "default": 20,
-      "required": false
+      "default": 20
     },
     "write_capacity": {
       "description": "This is the write capacaity for your dynamodb table",
       "type": "integer",
       "minimum": 0,
-      "default": 20,
-      "required": false
+      "default": 20
     },
     "billing_mode": {
       "description": "The billing mode for you dynamodb table",
@@ -24,20 +22,17 @@
         "PROVISIONED",
         "PAY_PER_REQUEST"
       ],
-      "default": "PROVISIONED",
-      "required": false
+      "default": "PROVISIONED"
     },
     "hash_key": {
       "description": "The hash key for your table",
       "type": "string",
-      "default": "",
-      "required": true
+      "default": ""
     },
     "range_key": {
       "description": "The range key for your table",
       "type": "string",
-      "default": null,
-      "required": false
+      "default": null
     },
     "attributes": {
       "description": "The list of attributes (name and type) for this dynamodb table",
@@ -65,8 +60,7 @@
           "type"
         ]
       },
-      "default": "None",
-      "required": true
+      "default": "None"
     },
     "type": {
       "description": "The name of this module",

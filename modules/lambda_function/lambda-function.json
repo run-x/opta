@@ -16,32 +16,27 @@
       "items": {
         "type": "string"
       },
-      "default": [],
-      "required": false
+      "default": []
     },
     "expose_via_domain": {
       "description": "The arns of additional IAM policies to be attached to this role.",
       "type": "boolean",
-      "default": false,
-      "required": false
+      "default": false
     },
     "runtime": {
       "description": "The AWS lambda runtime to use for this lambda (see https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html)",
       "type": "string",
-      "default": "nodejs14.x",
-      "required": true
+      "default": "nodejs14.x"
     },
     "filename": {
       "description": "The filename for your zip file containing your lambda code",
       "type": "string",
-      "default": null,
-      "required": true
+      "default": null
     },
     "env_vars": {
       "description": "A map of key values to add to the container as environment variables (key is name, value is value).\n```yaml\nenv_vars:\n FLAG: \"true\"\n```\n",
       "type": "object",
-      "default": {},
-      "required": false
+      "default": {}
     },
     "vpc_id": {
       "description": "The name of this module",

@@ -6,14 +6,12 @@
     "fifo": {
       "type": "boolean",
       "description": "FIFO queue or not.",
-      "default": false,
-      "required": false
+      "default": false
     },
     "content_based_deduplication": {
       "type": "boolean",
       "description": "Duplicate content",
-      "default": false,
-      "required": false
+      "default": false
     },
     "sqs_subscribers": {
       "type": "array",
@@ -22,8 +20,7 @@
         "type": "string",
         "description": "The ARN of the SQS queue to subscribe to."
       },
-      "default": [],
-      "required": false
+      "default": []
     },
     "type": {
       "description": "The name of this module",

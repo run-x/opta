@@ -9,14 +9,12 @@
       "items": {
         "type": "string"
       },
-      "default": [],
-      "required": false
+      "default": []
     },
     "links": {
       "$ref": "/common-types/links",
       "description": "The list of links to add permissions for to this role.",
-      "default": [],
-      "required": false
+      "default": []
     },
     "type": {
       "description": "The name of this module",
