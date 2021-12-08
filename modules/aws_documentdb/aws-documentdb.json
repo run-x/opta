@@ -6,18 +6,21 @@
     "engine_version": {
       "type": "string",
       "description": "The version of mongodb to use",
-      "default": "4.0.0"
+      "default": "4.0.0",
+      "required": false
     },
     "instance_class": {
       "description": "This is the RDS instance type used for the documentdb cluster [instances](https://aws.amazon.com/documentdb/pricing/).",
       "$ref": "/common-types/rds-instance-types",
-      "default": "db.r5.large"
+      "default": "db.r5.large",
+      "required": false
     },
     "instance_count": {
       "description": "This is to specify the count of instances for Document DB Cluster. Note -> These would be Multi-AZ.",
       "type": "integer",
       "minimum": 1,
-      "default": 1
+      "default": 1,
+      "required": false
     },
     "type": {
       "description": "The name of this module",
@@ -30,7 +33,8 @@
     "module_type": "service",
     "clouds": [
       "aws"
-    ]
+    ],
+    "name": "aws-documentdb"
   },
   "required": [
     "type"

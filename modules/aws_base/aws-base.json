@@ -17,7 +17,8 @@
         "10.0.128.0/21",
         "10.0.136.0/21",
         "10.0.144.0/21"
-      ]
+      ],
+      "required": false
     },
     "public_ipv4_cidr_blocks": {
       "type": "array",
@@ -29,12 +30,14 @@
         "10.0.0.0/21",
         "10.0.8.0/21",
         "10.0.16.0/21"
-      ]
+      ],
+      "required": false
     },
     "total_ipv4_cidr_block": {
       "$ref": "/common-types/cidr-block",
       "description": "This is the total cidr block for the VPC.",
-      "default": "10.0.0.0/16"
+      "default": "10.0.0.0/16",
+      "required": false
     },
     "type": {
       "description": "The name of this module",
@@ -48,7 +51,8 @@
     "module_type": "env",
     "clouds": [
       "aws"
-    ]
+    ],
+    "name": "aws-base"
   },
   "required": [
     "type"

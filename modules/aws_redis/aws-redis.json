@@ -68,22 +68,26 @@
         "cache.t1.micro"
       ],
       "default": "cache.m4.large",
-      "description": "This is the redis instance type used for the [instances](https://aws.amazon.com/elasticache/pricing/)."
+      "description": "This is the redis instance type used for the [instances](https://aws.amazon.com/elasticache/pricing/).",
+      "required": false
     },
     "redis_version": {
       "type": "string",
       "description": "the redis version to use for this instance",
-      "default": "6.x"
+      "default": "6.x",
+      "required": false
     },
     "snapshot_retention_limit": {
       "type": "integer",
       "description": "Retentions days for which the snapshot will be retained.",
-      "default": 0
+      "default": 0,
+      "required": false
     },
     "snapshot_window": {
       "type": "string",
       "description": "Window during which the snapshot would be taken.",
-      "default": "04:00-05:00"
+      "default": "04:00-05:00",
+      "required": false
     },
     "type": {
       "description": "The name of this module",
@@ -100,6 +104,7 @@
     "module_type": "service",
     "clouds": [
       "aws"
-    ]
+    ],
+    "name": "aws-redis"
   }
 }

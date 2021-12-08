@@ -6,12 +6,14 @@
     "fifo": {
       "type": "boolean",
       "description": "FIFO queue or not.",
-      "default": false
+      "default": false,
+      "required": false
     },
     "content_based_deduplication": {
       "type": "boolean",
       "description": "Duplicate content",
-      "default": false
+      "default": false,
+      "required": false
     },
     "sqs_subscribers": {
       "type": "array",
@@ -20,7 +22,8 @@
         "type": "string",
         "description": "The ARN of the SQS queue to subscribe to."
       },
-      "default": []
+      "default": [],
+      "required": false
     },
     "type": {
       "description": "The name of this module",
@@ -36,6 +39,7 @@
     "module_type": "service",
     "clouds": [
       "aws"
-    ]
+    ],
+    "name": "aws-sns"
   }
 }

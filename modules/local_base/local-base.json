@@ -18,6 +18,7 @@
     "module_type": "env",
     "clouds": [
       "local"
-    ]
+    ],
+    "name": "local-base"
   }
 }

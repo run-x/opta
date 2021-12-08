@@ -6,37 +6,44 @@
     "default_page_file": {
       "type": "string",
       "description": "The name of the existing s3 object in your bucket which will serve as the default page.",
-      "default": "index.html"
+      "default": "index.html",
+      "required": false
     },
     "price_class": {
       "type": "string",
       "description": "The cloudfront price class for this distribution. Can be PriceClass_All, PriceClass_200, or PriceClass_100",
-      "default": "PriceClass_200"
+      "default": "PriceClass_200",
+      "required": false
     },
     "origin_access_identity_path": {
       "type": "string",
       "description": "The Cloudfront OAI path to use to access the buckets",
-      "default": ""
+      "default": "",
+      "required": false
     },
     "status_404_page_file": {
       "type": "string",
       "description": "The name of the existing s3 object in your bucket which will serve as the 404 page.",
-      "default": null
+      "default": null,
+      "required": false
     },
     "status_500_page_file": {
       "type": "string",
       "description": "The name of the existing s3 object in your bucket which will serve as the 500 page.",
-      "default": null
+      "default": null,
+      "required": false
     },
     "bucket_name": {
       "type": "string",
       "description": "The name of the s3 bucket to link to this cloudfront distribution",
-      "default": ""
+      "default": "",
+      "required": false
     },
     "acm_cert_arn": {
       "type": "string",
       "description": "The ACM certificate arn you wish to use to handle ssl (needed if you want https for your site)",
-      "default": null
+      "default": null,
+      "required": false
     },
     "domains": {
       "type": "list",
@@ -48,7 +55,8 @@
           }
         ]
       },
-      "default": []
+      "default": [],
+      "required": false
     },
     "links": {
       "type": "list",
@@ -60,7 +68,8 @@
           }
         ]
       },
-      "default": []
+      "default": [],
+      "required": false
     },
     "type": {
       "description": "The name of this module",
@@ -76,6 +85,7 @@
     "module_type": "service",
     "clouds": [
       "aws"
-    ]
+    ],
+    "name": "cloudfront-distribution"
   }
 }

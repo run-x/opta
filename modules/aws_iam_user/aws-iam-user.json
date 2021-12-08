@@ -9,12 +9,14 @@
       "items": {
         "type": "string"
       },
-      "default": []
+      "default": [],
+      "required": false
     },
     "links": {
       "$ref": "/common-types/links",
       "description": "The list of links to add permissions for to this role.",
-      "default": []
+      "default": [],
+      "required": false
     },
     "type": {
       "description": "The name of this module",
@@ -27,7 +29,8 @@
     "module_type": "service",
     "clouds": [
       "aws"
-    ]
+    ],
+    "name": "aws-iam-user"
   },
   "required": [
     "type"

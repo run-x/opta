@@ -6,12 +6,14 @@
     "fifo": {
       "type": "boolean",
       "description": "FIFO queue or not",
-      "default": false
+      "default": false,
+      "required": false
     },
     "content_based_deduplication": {
       "type": "boolean",
       "description": "FIFO queue or not",
-      "default": false
+      "default": false,
+      "required": false
     },
     "sqs_subscribers": {
       "type": "array",
@@ -25,17 +27,20 @@
     "delay_seconds": {
       "type": "integer",
       "description": "Seconds to delay passing the message forward",
-      "default": 0
+      "default": 0,
+      "required": false
     },
     "message_retention_seconds": {
       "type": "integer",
       "description": "The number of seconds SQS retains a message.",
-      "default": 345600
+      "default": 345600,
+      "required": false
     },
     "receive_wait_time_seconds": {
       "type": "integer",
       "description": "The seconds for which a ReceiveMessage call will wait for a message to arrive (long polling) before returning. Must be an int from 0-20.",
-      "default": 0
+      "default": 0,
+      "required": false
     },
     "type": {
       "description": "The name of this module",
@@ -51,6 +56,7 @@
     "module_type": "service",
     "clouds": [
       "aws"
-    ]
+    ],
+    "name": "aws-sqs"
   }
 }

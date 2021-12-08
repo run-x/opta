@@ -9,7 +9,8 @@
       "items": {
         "type": "string"
       },
-      "default": []
+      "default": [],
+      "required": false
     },
     "allowed_k8s_services": {
       "description": "K8s service accounts that this role should have access to.",
@@ -31,7 +32,8 @@
           "namespace"
         ]
       },
-      "default": []
+      "default": [],
+      "required": false
     },
     "extra_iam_policies": {
       "type": "array",
@@ -39,12 +41,14 @@
         "type": "string"
       },
       "default": [],
-      "description": "The arns of additional IAM policies to be attached to this role."
+      "description": "The arns of additional IAM policies to be attached to this role.",
+      "required": false
     },
     "links": {
       "$ref": "/common-types/links",
       "description": "The list of links to add permissions for to this role.",
-      "default": []
+      "default": [],
+      "required": false
     },
     "type": {
       "description": "The name of this module",
@@ -57,7 +61,8 @@
     "module_type": "service",
     "clouds": [
       "aws"
-    ]
+    ],
+    "name": "aws-iam-role"
   },
   "required": [
     "type"

@@ -6,22 +6,26 @@
     "bucket_name": {
       "type": "string",
       "description": "The name of the bucket to create.",
-      "default": null
+      "default": null,
+      "required": true
     },
     "same_region_replication": {
       "type": "boolean",
       "description": "Create a same-region bucket for replica storage (needed for compliance). Can be added later without destroying the resource.",
-      "default": false
+      "default": false,
+      "required": false
     },
     "block_public": {
       "type": "boolean",
       "description": "Block all public access.",
-      "default": true
+      "default": true,
+      "required": false
     },
     "files": {
       "type": "string",
       "description": "The path (can be relative to the opta yaml) to a directory holding files which you wish to upload to the s3 bucket.\nThe files will have the same names and any subdirectories will similarly be included and uploaded as subdir/path/filename.\n",
-      "default": null
+      "default": null,
+      "required": false
     },
     "bucket_policy": {
       "anyOf": [
@@ -35,7 +39,8 @@
         }
       ],
       "description": "A custom s3 policy json/yaml to add.",
-      "default": null
+      "default": null,
+      "required": false
     },
     "cors_rule": {
       "type": "object",
@@ -75,7 +80,8 @@
           "minimum": 0
         }
       },
-      "default": null
+      "default": null,
+      "required": false
     },
     "type": {
       "description": "The name of this module",
@@ -92,6 +98,7 @@
     "module_type": "service",
     "clouds": [
       "aws"
-    ]
+    ],
+    "name": "aws-s3"
   }
 }

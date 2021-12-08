@@ -6,17 +6,20 @@
     "api_key": {
       "type": "string",
       "description": "Datadog API key. If you don't provide this in the yaml, Opta will prompt you for it and store it in secrets.",
-      "default": null
+      "default": null,
+      "required": false
     },
     "timeout": {
       "type": "number",
       "description": "Time to wait for this module to stabilize.",
-      "default": 600
+      "default": 600,
+      "required": false
     },
     "values": {
       "type": "object",
       "description": "Additional configuration for datadog. [Available options](https://github.com/DataDog/helm-charts/blob/master/charts/datadog/README.md#values)",
-      "default": {}
+      "default": {},
+      "required": false
     },
     "type": {
       "description": "The name of this module",
@@ -31,7 +34,8 @@
       "aws",
       "azure",
       "gcp"
-    ]
+    ],
+    "name": "datadog"
   },
   "required": [
     "type"

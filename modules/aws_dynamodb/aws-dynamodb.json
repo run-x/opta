@@ -7,13 +7,15 @@
       "description": "This is the read capacaity for your dynamodb table",
       "type": "integer",
       "minimum": 0,
-      "default": 20
+      "default": 20,
+      "required": false
     },
     "write_capacity": {
       "description": "This is the write capacaity for your dynamodb table",
       "type": "integer",
       "minimum": 0,
-      "default": 20
+      "default": 20,
+      "required": false
     },
     "billing_mode": {
       "description": "The billing mode for you dynamodb table",
@@ -21,17 +23,20 @@
         "PROVISIONED",
         "PAY_PER_REQUEST"
       ],
-      "default": "PROVISIONED"
+      "default": "PROVISIONED",
+      "required": false
     },
     "hash_key": {
       "description": "The hash key for your table",
       "type": "string",
-      "default": ""
+      "default": "",
+      "required": true
     },
     "range_key": {
       "description": "The range key for your table",
       "type": "string",
-      "default": null
+      "default": null,
+      "required": false
     },
     "attributes": {
       "description": "The list of attributes (name and type) for this dynamodb table",
@@ -59,7 +64,8 @@
           "type"
         ]
       },
-      "default": "None"
+      "default": "None",
+      "required": true
     },
     "type": {
       "description": "The name of this module",
@@ -72,7 +78,8 @@
     "module_type": "service",
     "clouds": [
       "aws"
-    ]
+    ],
+    "name": "aws-dynamodb"
   },
   "required": [
     "hash_key",

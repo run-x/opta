@@ -128,6 +128,7 @@ def _check_module_schemas(write: bool = False) -> None:
 
             new_json_schema = deepcopy(json_schema)
             new_json_schema["$id"] = f"https://app.runx.dev/modules/{module_name}"
+            new_json_schema["type"] = "object"
             REQUIRED_FIELDS = ["description", "properties"]
             if any(p not in json_schema for p in REQUIRED_FIELDS):
                 missing_fields = [
@@ -160,6 +161,9 @@ def _check_module_schemas(write: bool = False) -> None:
                     new_input_property_dict = new_json_schema["properties"][input_name]
 
                     new_input_property_dict["description"] = i["description"]
+                    new_input_property_dict["required"] = bool(
+                        i["user_facing"] and "required=True" in i["validator"]
+                    )
                     if "default" in i:
                         new_input_property_dict["default"] = i["default"]
 
@@ -174,6 +178,7 @@ def _check_module_schemas(write: bool = False) -> None:
                 if module_registry_dict["environment_module"]
                 else CONFIG_TYPE_SERVICE,
                 "clouds": json_schema["opta_metadata"]["clouds"],
+                "name": module_name,
             }
 
             if write:

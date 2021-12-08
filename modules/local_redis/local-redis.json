@@ -18,6 +18,7 @@
     "module_type": "service",
     "clouds": [
       "local"
-    ]
+    ],
+    "name": "local-redis"
   }
 }

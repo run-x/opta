@@ -6,18 +6,21 @@
     "domain": {
       "type": "string",
       "description": "The domain you want (you will also get the subdomains for your use)",
-      "default": null
+      "default": null,
+      "required": true
     },
     "delegated": {
       "type": "boolean",
       "description": "Set to true once the extra [dns setup is complete](/tutorials/ingress) and it will add the ssl certs.",
-      "default": false
+      "default": false,
+      "required": false
     },
     "upload_cert": {
       "deprecated": true,
       "type": "boolean",
       "description": "Deprecated",
-      "default": false
+      "default": false,
+      "required": false
     },
     "type": {
       "description": "The name of this module",
@@ -31,7 +34,8 @@
     "module_type": "env",
     "clouds": [
       "aws"
-    ]
+    ],
+    "name": "aws-dns"
   },
   "required": [
     "domain",

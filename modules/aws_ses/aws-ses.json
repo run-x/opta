@@ -6,7 +6,8 @@
     "mail_from_prefix": {
       "type": "string",
       "description": "Subdomain to use with root domain.",
-      "default": "mail"
+      "default": "mail",
+      "required": false
     },
     "type": {
       "description": "The name of this module",
@@ -22,6 +23,7 @@
     "module_type": "env",
     "clouds": [
       "aws"
-    ]
+    ],
+    "name": "aws-ses"
   }
 }
