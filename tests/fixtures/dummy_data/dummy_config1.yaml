@@ -102,4 +102,4 @@ modules:
     name: custom1
     path_to_module: "./blah"
     terraform_inputs:
-      hello: "world"
+      hello: "{aws.account_id}"

@@ -1,6 +1,7 @@
 # type: ignore
 
 import os
+from types import SimpleNamespace
 
 import pytest
 from pytest_mock import MockFixture
@@ -28,6 +29,79 @@ class TestLayer:
                 ),
                 None,
             )
+
+    def test_hydration_aws(self):
+        layer = Layer.load_from_yaml(
+            os.path.join(
+                os.getcwd(), "tests", "fixtures", "dummy_data", "dummy_config1.yaml"
+            ),
+            None,
+        )
+        assert layer.metadata_hydration() == {
+            "aws": SimpleNamespace(region="us-east-1", account_id="011111111111"),
+            "env": "dummy-parent",
+            "layer_name": "dummy-config-1",
+            "parent": SimpleNamespace(
+                kms_account_key_arn="${data.terraform_remote_state.parent.outputs.kms_account_key_arn}",
+                kms_account_key_id="${data.terraform_remote_state.parent.outputs.kms_account_key_id}",
+                vpc_id="${data.terraform_remote_state.parent.outputs.vpc_id}",
+                private_subnet_ids="${data.terraform_remote_state.parent.outputs.private_subnet_ids}",
+                public_subnets_ids="${data.terraform_remote_state.parent.outputs.public_subnets_ids}",
+                s3_log_bucket_name="${data.terraform_remote_state.parent.outputs.s3_log_bucket_name}",
+                public_nat_ips="${data.terraform_remote_state.parent.outputs.public_nat_ips}",
+                zone_id="${data.terraform_remote_state.parent.outputs.zone_id}",
+                name_servers="${data.terraform_remote_state.parent.outputs.name_servers}",
+                domain="${data.terraform_remote_state.parent.outputs.domain}",
+                cert_arn="${data.terraform_remote_state.parent.outputs.cert_arn}",
+                k8s_endpoint="${data.terraform_remote_state.parent.outputs.k8s_endpoint}",
+                k8s_ca_data="${data.terraform_remote_state.parent.outputs.k8s_ca_data}",
+                k8s_cluster_name="${data.terraform_remote_state.parent.outputs.k8s_cluster_name}",
+                k8s_openid_provider_url="${data.terraform_remote_state.parent.outputs.k8s_openid_provider_url}",
+                k8s_openid_provider_arn="${data.terraform_remote_state.parent.outputs.k8s_openid_provider_arn}",
+                k8s_node_group_security_id="${data.terraform_remote_state.parent.outputs.k8s_node_group_security_id}",
+            ),
+            "parent_name": "dummy-parent",
+            "state_storage": "opta-tf-state-opta-tests-dummy-parent",
+            "variables": SimpleNamespace(),
+            "vars": SimpleNamespace(),
+        }
+
+    def test_hydration_gcp(self):
+        layer = Layer.load_from_yaml(
+            os.path.join(
+                os.getcwd(), "tests", "fixtures", "dummy_data", "gcp_dummy_config.yaml"
+            ),
+            None,
+        )
+        assert layer.metadata_hydration() == {
+            "env": "gcp-dummy-parent",
+            "google": SimpleNamespace(region="us-central1", project="jds-throwaway-1"),
+            "layer_name": "gcp-dummy-config",
+            "parent": SimpleNamespace(
+                kms_account_key_id="${data.terraform_remote_state.parent.outputs.kms_account_key_id}",
+                kms_account_key_self_link="${data.terraform_remote_state.parent.outputs.kms_account_key_self_link}",
+                vpc_id="${data.terraform_remote_state.parent.outputs.vpc_id}",
+                vpc_self_link="${data.terraform_remote_state.parent.outputs.vpc_self_link}",
+                private_subnet_id="${data.terraform_remote_state.parent.outputs.private_subnet_id}",
+                private_subnet_self_link="${data.terraform_remote_state.parent.outputs.private_subnet_self_link}",
+                k8s_master_ipv4_cidr_block="${data.terraform_remote_state.parent.outputs.k8s_master_ipv4_cidr_block}",
+                public_nat_ips="${data.terraform_remote_state.parent.outputs.public_nat_ips}",
+                zone_id="${data.terraform_remote_state.parent.outputs.zone_id}",
+                zone_name="${data.terraform_remote_state.parent.outputs.zone_name}",
+                name_servers="${data.terraform_remote_state.parent.outputs.name_servers}",
+                domain="${data.terraform_remote_state.parent.outputs.domain}",
+                delegated="${data.terraform_remote_state.parent.outputs.delegated}",
+                cert_self_link="${data.terraform_remote_state.parent.outputs.cert_self_link}",
+                k8s_endpoint="${data.terraform_remote_state.parent.outputs.k8s_endpoint}",
+                k8s_ca_data="${data.terraform_remote_state.parent.outputs.k8s_ca_data}",
+                k8s_cluster_name="${data.terraform_remote_state.parent.outputs.k8s_cluster_name}",
+                load_balancer_raw_ip="${data.terraform_remote_state.parent.outputs.load_balancer_raw_ip}",
+            ),
+            "parent_name": "gcp-dummy-parent",
+            "state_storage": "opta-tf-state-opta-tests-gcp-dummy-parent",
+            "variables": SimpleNamespace(),
+            "vars": SimpleNamespace(),
+        }
 
     def test_get_event_properties(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
