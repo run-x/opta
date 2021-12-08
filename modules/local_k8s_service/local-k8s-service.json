@@ -139,7 +139,7 @@
     "public_uri": {
       "description": "The full domain to expose your app under as well as path prefix. Must be the full parent domain or a subdomain referencing the parent as such: \"dummy.{parent[domain]}/my/path/prefix\"\n",
       "oneOf": [
-      "type": "array"
+        {
           "type": "string"
         },
         {
