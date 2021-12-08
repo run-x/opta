@@ -19,6 +19,9 @@ parameters:
   run-ci:
     type: boolean
     default: false
+  run-create-destroy-local:
+    type: boolean
+    default: false
 
 
 orbs:
@@ -192,8 +195,8 @@ jobs:
       - run:
           name: "Build example images"
           command: |
-          docker build -f opta-examples/full-stack-example/api/todo-python-django/Dockerfile --tag todo-api:v1
-          docker build -f opta-examples/full-stack-example/frontend/todo-vuejs --tag todo-frontend:v1
+            docker build -f opta-examples/full-stack-example/api/todo-python-django/Dockerfile --tag todo-api:v1
+            docker build -f opta-examples/full-stack-example/frontend/todo-vuejs --tag todo-frontend:v1
       - run:
           name: "Save Opta examples"
           command: |
