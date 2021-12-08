@@ -6,17 +6,20 @@
     "instance_tier": {
       "type": "string",
       "description": "This is the RDS instance type used for the cloud sql instance [instances](https://cloud.google.com/sql/pricing).",
-      "default": "db-f1-micro"
+      "default": "db-f1-micro",
+      "required": false
     },
     "safety": {
       "type": "boolean",
       "description": "Set to \"true\", if you want to disable the database deletion in Opta. You would have to manually set this \"false\" to enable DB deletion.",
-      "default": false
+      "default": false,
+      "required": false
     },
     "engine_version": {
       "type": "string",
       "description": "The version of the database to use.",
-      "default": "5_7"
+      "default": "5_7",
+      "required": false
     },
     "type": {
       "description": "The name of this module",
@@ -33,6 +36,7 @@
     "module_type": "service",
     "clouds": [
       "gcp"
-    ]
+    ],
+    "name": "gcp-mysql"
   }
 }

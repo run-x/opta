@@ -6,17 +6,20 @@
     "memory_size_gb": {
       "type": "integer",
       "description": "The size in GB for the redis cache's memory",
-      "default": 2
+      "default": 2,
+      "required": false
     },
     "redis_version": {
       "type": "boolean",
       "description": "the redis version to use for this instance",
-      "default": "REDIS_5_0"
+      "default": "REDIS_5_0",
+      "required": false
     },
     "high_availability": {
       "type": "boolean",
       "description": "the redis version to use for this instance",
-      "default": true
+      "default": true,
+      "required": false
     },
     "type": {
       "description": "The name of this module",
@@ -33,6 +36,7 @@
     "module_type": "service",
     "clouds": [
       "gcp"
-    ]
+    ],
+    "name": "gcp-redis"
   }
 }

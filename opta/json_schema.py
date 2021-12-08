@@ -116,11 +116,13 @@ def _check_opta_config_schemas(write: bool = False) -> None:
 
 
 def _check_module_schemas(write: bool = False) -> None:
-    for cloud in CLOUD_FOLDER_NAMES + ["common"]:
+    for cloud in ["aws", "azurerm", "google", "local"]:
         if cloud != "common":
             index_yaml = yaml.load(open(join(registry_path, cloud, "index.yaml")))
 
-        module_info = _get_all_module_info(modules_path, cloud)
+        module_info = _get_all_module_info(
+            modules_path, CLOUD_NAME_TO_JSON_SCHEMA_NAME[cloud]
+        )
 
         for yaml_path, module_name in module_info:
             module_registry_dict = yaml.load(open(yaml_path))

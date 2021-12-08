@@ -191,7 +191,10 @@
           "path": {
             "type": "string"
           },
-          "required": ["size", "path"]
+          "required": [
+            "size",
+            "path"
+          ]
         }
       },
       "default": [],
@@ -205,14 +208,22 @@
     },
     "type": {
       "description": "The name of this module",
-      "enum": ["aws-k8s-service", "k8s-service"]
+      "enum": [
+        "aws-k8s-service",
+        "k8s-service"
+      ]
     }
   },
   "opta_metadata": {
     "module_type": "service",
-    "clouds": ["aws"],
+    "clouds": [
+      "aws"
+    ],
     "name": "aws-k8s-service"
   },
-  "required": ["image", "type"],
+  "required": [
+    "image",
+    "type"
+  ],
   "type": "object"
 }

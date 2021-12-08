@@ -6,12 +6,14 @@
     "bucket_name": {
       "type": "string",
       "description": "The name of the bucket to create.",
-      "default": null
+      "default": null,
+      "required": true
     },
     "block_public": {
       "type": "boolean",
       "description": "Block all public access.",
-      "default": true
+      "default": true,
+      "required": false
     },
     "type": {
       "description": "The name of this module",
@@ -28,6 +30,7 @@
     "module_type": "service",
     "clouds": [
       "gcp"
-    ]
+    ],
+    "name": "gcp-gcs"
   }
 }

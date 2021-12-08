@@ -6,22 +6,26 @@
     "nginx_high_availability": {
       "type": "boolean",
       "description": "Deploy the nginx ingress in a high-availability configuration.",
-      "default": false
+      "default": false,
+      "required": false
     },
     "linkerd_high_availability": {
       "type": "boolean",
       "description": "Deploy the linkerd service mesh in a high-availability configuration for its control plane.",
-      "default": false
+      "default": false,
+      "required": false
     },
     "linkerd_enabled": {
       "type": "boolean",
       "description": "Enable the linkerd service mesh installation.",
-      "default": true
+      "default": true,
+      "required": false
     },
     "nginx_config": {
       "type": "object",
       "description": "Additional configuration for nginx ingress. [Available options](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/#configuration-options)",
-      "default": {}
+      "default": {},
+      "required": false
     },
     "type": {
       "description": "The name of this module",
@@ -38,6 +42,7 @@
     "module_type": "env",
     "clouds": [
       "azure"
-    ]
+    ],
+    "name": "azure-k8s-base"
   }
 }

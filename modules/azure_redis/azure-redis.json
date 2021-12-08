@@ -10,7 +10,8 @@
         "Premium"
       ],
       "description": "The SKU of Azure Cache's Redis to use. `Basic`, `Standard` and `Premium`.",
-      "default": "standard"
+      "default": "standard",
+      "required": false
     },
     "family": {
       "enum": [
@@ -18,13 +19,15 @@
         "P"
       ],
       "description": "The family/pricing group to use. Optionas are `C` for Basic/Standard and `P` for Premium.",
-      "default": "C"
+      "default": "C",
+      "required": false
     },
     "capacity": {
       "type": "integer",
       "description": "The [size](https://azure.microsoft.com/en-us/pricing/details/cache/) (see the numbers following the C or P) of the Redis cache to deploy.",
       "minimum": 0,
-      "default": 2
+      "default": 2,
+      "required": false
     },
     "type": {
       "description": "The name of this module",
@@ -41,6 +44,7 @@
     "module_type": "service",
     "clouds": [
       "azure"
-    ]
+    ],
+    "name": "azure-redis"
   }
 }

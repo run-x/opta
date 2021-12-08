@@ -6,17 +6,20 @@
     "max_nodes": {
       "type": "integer",
       "description": "The maximum number of nodes to be set by the autoscaler in for the default nodegroup.",
-      "default": 5
+      "default": 5,
+      "required": false
     },
     "min_nodes": {
       "type": "integer",
       "description": "The minimum number of nodes to be set by the autoscaler in for the default nodegroup.",
-      "default": 3
+      "default": 3,
+      "required": false
     },
     "node_disk_size": {
       "type": "integer",
       "description": "The size of disk in GB to give the virtual machines of the nodes.",
-      "default": 30
+      "default": 30,
+      "required": false
     },
     "node_instance_type": {
       "description": "The [Azure virtual machine size](https://docs.microsoft.com/en-us/azure/cloud-services/cloud-services-sizes-specs) for the nodes.",
@@ -84,12 +87,14 @@
         "Standard_H16r",
         "Standard_H16mr"
       ],
-      "default": "Standard_D2_v2"
+      "default": "Standard_D2_v2",
+      "required": false
     },
     "kubernetes_version": {
       "type": "string",
       "description": "The Kubernetes version for the cluster. Must be [supported by AKS](https://docs.microsoft.com/en-us/azure/aks/supported-kubernetes-versions) to bind the cluster too. Gives you automatic K8s version management for the cluster and node pools.",
-      "default": "1.19.11"
+      "default": "1.19.11",
+      "required": false
     },
     "admin_group_object_ids": {
       "type": "array",
@@ -97,17 +102,20 @@
       "items": {
         "type": "string"
       },
-      "default": []
+      "default": [],
+      "required": false
     },
     "service_cidr": {
       "$ref": "/common-types/cidr-block",
       "description": "The cidr to be reserved for k8s service usage",
-      "default": "10.0.128.0/20"
+      "default": "10.0.128.0/20",
+      "required": false
     },
     "dns_service_ip": {
       "$ref": "/common-types/ip-address",
       "description": "The ip to use for the internal coredns service",
-      "default": "10.0.128.10"
+      "default": "10.0.128.10",
+      "required": false
     },
     "type": {
       "description": "The name of this module",
@@ -124,6 +132,7 @@
     "module_type": "env",
     "clouds": [
       "azure"
-    ]
+    ],
+    "name": "azure-aks"
   }
 }
