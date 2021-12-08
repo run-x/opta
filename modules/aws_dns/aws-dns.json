@@ -35,7 +35,8 @@
       "aws"
     ],
     "name": "aws-dns",
-    "display_name": "dns"
+    "display_name": "dns",
+    "tags": []
   },
   "required": [
     "domain",

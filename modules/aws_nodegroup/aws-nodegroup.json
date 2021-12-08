@@ -56,6 +56,7 @@
       "aws"
     ],
     "name": "aws-nodegroup",
-    "display_name": "aws-nodegroup"
+    "display_name": "aws-nodegroup",
+    "tags": []
   }
 }

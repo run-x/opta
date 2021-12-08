@@ -55,6 +55,7 @@
       "aws"
     ],
     "name": "aws-sqs",
-    "display_name": "aws-sqs"
+    "display_name": "aws-sqs",
+    "tags": []
   }
 }

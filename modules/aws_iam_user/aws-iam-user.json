@@ -31,7 +31,8 @@
       "aws"
     ],
     "name": "aws-iam-user",
-    "display_name": "aws-iam-user"
+    "display_name": "aws-iam-user",
+    "tags": []
   },
   "required": [
     "type"

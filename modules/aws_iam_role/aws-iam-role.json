@@ -61,7 +61,8 @@
       "aws"
     ],
     "name": "aws-iam-role",
-    "display_name": "aws-iam-role"
+    "display_name": "aws-iam-role",
+    "tags": []
   },
   "required": [
     "type"

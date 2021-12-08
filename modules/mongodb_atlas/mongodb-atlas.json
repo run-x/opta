@@ -70,6 +70,7 @@
       "gcp"
     ],
     "name": "mongodb-atlas",
-    "display_name": "mongodb-atlas"
+    "display_name": "mongodb-atlas",
+    "tags": []
   }
 }

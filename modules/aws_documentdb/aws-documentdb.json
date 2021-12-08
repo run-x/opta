@@ -34,7 +34,10 @@
       "aws"
     ],
     "name": "aws-documentdb",
-    "display_name": "aws-documentdb"
+    "display_name": "aws-documentdb",
+    "tags": [
+      "datastore"
+    ]
   },
   "required": [
     "type"

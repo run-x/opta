@@ -57,6 +57,7 @@
       "aws"
     ],
     "name": "lambda-function",
-    "display_name": "lambda-function"
+    "display_name": "lambda-function",
+    "tags": []
   }
 }

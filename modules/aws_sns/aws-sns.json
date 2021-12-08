@@ -40,6 +40,7 @@
       "aws"
     ],
     "name": "aws-sns",
-    "display_name": "aws-sns"
+    "display_name": "aws-sns",
+    "tags": []
   }
 }

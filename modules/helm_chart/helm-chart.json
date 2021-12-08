@@ -92,6 +92,7 @@
       "gcp"
     ],
     "name": "helm-chart",
-    "display_name": "helm-chart"
+    "display_name": "helm-chart",
+    "tags": []
   }
 }

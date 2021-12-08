@@ -37,6 +37,9 @@
       "gcp"
     ],
     "name": "gcp-redis",
-    "display_name": "redis"
+    "display_name": "redis",
+    "tags": [
+      "datastore"
+    ]
   }
 }

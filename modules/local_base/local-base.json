@@ -22,6 +22,7 @@
       "local"
     ],
     "name": "local-base",
-    "display_name": "base"
+    "display_name": "base",
+    "tags": []
   }
 }

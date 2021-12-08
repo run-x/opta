@@ -10,7 +10,8 @@
       "gcp"
     ],
     "name": "runx",
-    "display_name": "runx"
+    "display_name": "runx",
+    "tags": []
   },
   "properties": {
     "type": {

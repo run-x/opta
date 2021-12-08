@@ -47,6 +47,7 @@
       "gcp"
     ],
     "name": "external-ssl-cert",
-    "display_name": "external-ssl-cert"
+    "display_name": "external-ssl-cert",
+    "tags": []
   }
 }

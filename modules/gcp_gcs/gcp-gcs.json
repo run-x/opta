@@ -32,6 +32,7 @@
       "gcp"
     ],
     "name": "gcp-gcs",
-    "display_name": "gcp-gcs"
+    "display_name": "gcp-gcs",
+    "tags": []
   }
 }

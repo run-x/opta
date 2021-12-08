@@ -52,7 +52,8 @@
       "aws"
     ],
     "name": "aws-base",
-    "display_name": "base"
+    "display_name": "base",
+    "tags": []
   },
   "required": [
     "type"

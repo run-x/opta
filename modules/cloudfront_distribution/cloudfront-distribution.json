@@ -80,6 +80,7 @@
       "aws"
     ],
     "name": "cloudfront-distribution",
-    "display_name": "cloudfront-distribution"
+    "display_name": "cloudfront-distribution",
+    "tags": []
   }
 }

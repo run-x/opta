@@ -26,6 +26,7 @@
       "aws"
     ],
     "name": "aws-ses",
-    "display_name": "aws-ses"
+    "display_name": "aws-ses",
+    "tags": []
   }
 }

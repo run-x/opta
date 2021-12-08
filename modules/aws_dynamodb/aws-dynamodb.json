@@ -77,7 +77,8 @@
       "aws"
     ],
     "name": "aws-dynamodb",
-    "display_name": "aws-dynamodb"
+    "display_name": "aws-dynamodb",
+    "tags": []
   },
   "required": [
     "hash_key",

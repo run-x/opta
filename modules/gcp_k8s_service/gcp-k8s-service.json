@@ -186,7 +186,8 @@
       "gcp"
     ],
     "name": "gcp-k8s-service",
-    "display_name": "k8s-service"
+    "display_name": "k8s-service",
+    "tags": []
   },
   "required": [
     "image",

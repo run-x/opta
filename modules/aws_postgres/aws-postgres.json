@@ -43,6 +43,9 @@
       "aws"
     ],
     "name": "aws-postgres",
-    "display_name": "postgres"
+    "display_name": "postgres",
+    "tags": [
+      "datastore"
+    ]
   }
 }

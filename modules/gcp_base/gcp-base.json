@@ -42,6 +42,7 @@
       "gcp"
     ],
     "name": "gcp-base",
-    "display_name": "base"
+    "display_name": "base",
+    "tags": []
   }
 }

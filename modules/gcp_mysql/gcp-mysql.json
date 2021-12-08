@@ -37,6 +37,9 @@
       "gcp"
     ],
     "name": "gcp-mysql",
-    "display_name": "mysql"
+    "display_name": "mysql",
+    "tags": [
+      "datastore"
+    ]
   }
 }

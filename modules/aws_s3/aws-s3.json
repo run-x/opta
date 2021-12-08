@@ -96,6 +96,7 @@
       "aws"
     ],
     "name": "aws-s3",
-    "display_name": "aws-s3"
+    "display_name": "aws-s3",
+    "tags": []
   }
 }

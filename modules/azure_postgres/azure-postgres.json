@@ -32,6 +32,9 @@
       "azure"
     ],
     "name": "azure-postgres",
-    "display_name": "postgres"
+    "display_name": "postgres",
+    "tags": [
+      "datastore"
+    ]
   }
 }

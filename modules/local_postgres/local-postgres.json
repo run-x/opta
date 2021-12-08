@@ -22,6 +22,9 @@
       "local"
     ],
     "name": "local-postgres",
-    "display_name": "postgres"
+    "display_name": "postgres",
+    "tags": [
+      "datastore"
+    ]
   }
 }

@@ -37,6 +37,9 @@
       "gcp"
     ],
     "name": "gcp-postgres",
-    "display_name": "postgres"
+    "display_name": "postgres",
+    "tags": [
+      "datastore"
+    ]
   }
 }

@@ -129,6 +129,7 @@
       "azure"
     ],
     "name": "azure-aks",
-    "display_name": "k8s-cluster"
+    "display_name": "k8s-cluster",
+    "tags": []
   }
 }

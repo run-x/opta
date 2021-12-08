@@ -200,6 +200,11 @@ def _check_module_schemas(write: bool = False) -> None:
                 if i["user_facing"] and "required=True" in i["validator"]
             ] + ["type"]
 
+            tags = []
+            datastores = ["redis", "postgres", "documentdb", "mysql"]
+            if any(d in module_name for d in datastores):
+                tags.append("datastore")
+
             new_json_schema["opta_metadata"] = {
                 "module_type": CONFIG_TYPE_ENV
                 if module_registry_dict["environment_module"]
@@ -207,6 +212,7 @@ def _check_module_schemas(write: bool = False) -> None:
                 "clouds": json_schema["opta_metadata"]["clouds"],
                 "name": module_name,
                 "display_name": module_display_name,
+                "tags": tags,
             }
 
             if write:

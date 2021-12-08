@@ -42,6 +42,7 @@
       "gcp"
     ],
     "name": "gcp-k8s-base",
-    "display_name": "k8s-base"
+    "display_name": "k8s-base",
+    "tags": []
   }
 }

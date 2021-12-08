@@ -37,6 +37,7 @@
       "azure"
     ],
     "name": "azure-base",
-    "display_name": "base"
+    "display_name": "base",
+    "tags": []
   }
 }

@@ -105,6 +105,9 @@
       "aws"
     ],
     "name": "aws-redis",
-    "display_name": "redis"
+    "display_name": "redis",
+    "tags": [
+      "datastore"
+    ]
   }
 }

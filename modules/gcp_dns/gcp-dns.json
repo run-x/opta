@@ -41,6 +41,7 @@
       "gcp"
     ],
     "name": "gcp-dns",
-    "display_name": "dns"
+    "display_name": "dns",
+    "tags": []
   }
 }
