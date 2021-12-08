@@ -56,6 +56,7 @@
     "clouds": [
       "gcp"
     ],
-    "name": "gcp-gke"
+    "name": "gcp-gke",
+    "display_name": "k8s-cluster"
   }
 }

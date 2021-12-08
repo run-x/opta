@@ -34,7 +34,8 @@
       "azure",
       "gcp"
     ],
-    "name": "datadog"
+    "name": "datadog",
+    "display_name": "datadog"
   },
   "required": [
     "type"

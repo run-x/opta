@@ -46,6 +46,7 @@
     "clouds": [
       "azure"
     ],
-    "name": "azure-redis"
+    "name": "azure-redis",
+    "display_name": "redis"
   }
 }

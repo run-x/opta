@@ -196,7 +196,8 @@
     "clouds": [
       "aws"
     ],
-    "name": "aws-k8s-service"
+    "name": "aws-k8s-service",
+    "display_name": "k8s-service"
   },
   "required": [
     "image",

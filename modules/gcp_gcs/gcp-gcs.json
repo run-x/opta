@@ -31,6 +31,7 @@
     "clouds": [
       "gcp"
     ],
-    "name": "gcp-gcs"
+    "name": "gcp-gcs",
+    "display_name": "gcp-gcs"
   }
 }

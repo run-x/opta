@@ -36,6 +36,7 @@
     "clouds": [
       "gcp"
     ],
-    "name": "gcp-mysql"
+    "name": "gcp-mysql",
+    "display_name": "mysql"
   }
 }

@@ -147,10 +147,14 @@ def _check_module_schemas(write: bool = False) -> None:
                     k for k, v in index_yaml["module_aliases"].items() if v == module_name
                 ]
 
+            module_display_name = (
+                module_aliases[-1] if len(module_aliases) > 0 else module_name
+            )
+
             new_json_schema["properties"]["type"] = {
                 "description": "The name of this module",
                 "enum": [module_name] + module_aliases,
-                "default": module_aliases[-1] if len(module_aliases) > 0 else module_name,
+                "default": module_display_name,
                 "type": "string",
             }
 
@@ -202,6 +206,7 @@ def _check_module_schemas(write: bool = False) -> None:
                 else CONFIG_TYPE_SERVICE,
                 "clouds": json_schema["opta_metadata"]["clouds"],
                 "name": module_name,
+                "display_name": module_display_name,
             }
 
             if write:

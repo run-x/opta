@@ -41,6 +41,7 @@
     "clouds": [
       "azure"
     ],
-    "name": "azure-k8s-base"
+    "name": "azure-k8s-base",
+    "display_name": "k8s-base"
   }
 }

@@ -55,6 +55,7 @@
     "clouds": [
       "aws"
     ],
-    "name": "aws-nodegroup"
+    "name": "aws-nodegroup",
+    "display_name": "aws-nodegroup"
   }
 }

@@ -55,6 +55,7 @@
     "clouds": [
       "gcp"
     ],
-    "name": "gcp-nodepool"
+    "name": "gcp-nodepool",
+    "display_name": "gcp-nodepool"
   }
 }

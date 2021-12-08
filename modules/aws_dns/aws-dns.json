@@ -34,7 +34,8 @@
     "clouds": [
       "aws"
     ],
-    "name": "aws-dns"
+    "name": "aws-dns",
+    "display_name": "dns"
   },
   "required": [
     "domain",

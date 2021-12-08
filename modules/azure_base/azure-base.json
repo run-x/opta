@@ -36,6 +36,7 @@
     "clouds": [
       "azure"
     ],
-    "name": "azure-base"
+    "name": "azure-base",
+    "display_name": "base"
   }
 }

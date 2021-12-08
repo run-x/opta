@@ -33,7 +33,8 @@
     "clouds": [
       "aws"
     ],
-    "name": "aws-documentdb"
+    "name": "aws-documentdb",
+    "display_name": "aws-documentdb"
   },
   "required": [
     "type"

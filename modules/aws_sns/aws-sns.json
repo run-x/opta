@@ -39,6 +39,7 @@
     "clouds": [
       "aws"
     ],
-    "name": "aws-sns"
+    "name": "aws-sns",
+    "display_name": "aws-sns"
   }
 }

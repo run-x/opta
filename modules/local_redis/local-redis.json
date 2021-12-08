@@ -21,6 +21,7 @@
     "clouds": [
       "local"
     ],
-    "name": "local-redis"
+    "name": "local-redis",
+    "display_name": "redis"
   }
 }

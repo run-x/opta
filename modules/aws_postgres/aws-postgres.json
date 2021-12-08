@@ -42,6 +42,7 @@
     "clouds": [
       "aws"
     ],
-    "name": "aws-postgres"
+    "name": "aws-postgres",
+    "display_name": "postgres"
   }
 }

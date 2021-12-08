@@ -69,6 +69,7 @@
       "azure",
       "gcp"
     ],
-    "name": "mongodb-atlas"
+    "name": "mongodb-atlas",
+    "display_name": "mongodb-atlas"
   }
 }

@@ -9,7 +9,8 @@
       "azure",
       "gcp"
     ],
-    "name": "runx"
+    "name": "runx",
+    "display_name": "runx"
   },
   "properties": {
     "type": {

@@ -30,7 +30,8 @@
     "clouds": [
       "aws"
     ],
-    "name": "aws-iam-user"
+    "name": "aws-iam-user",
+    "display_name": "aws-iam-user"
   },
   "required": [
     "type"

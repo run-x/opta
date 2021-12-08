@@ -21,6 +21,7 @@
     "clouds": [
       "local"
     ],
-    "name": "local-postgres"
+    "name": "local-postgres",
+    "display_name": "postgres"
   }
 }

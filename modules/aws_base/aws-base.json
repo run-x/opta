@@ -51,7 +51,8 @@
     "clouds": [
       "aws"
     ],
-    "name": "aws-base"
+    "name": "aws-base",
+    "display_name": "base"
   },
   "required": [
     "type"

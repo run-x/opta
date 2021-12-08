@@ -76,7 +76,8 @@
     "clouds": [
       "aws"
     ],
-    "name": "aws-dynamodb"
+    "name": "aws-dynamodb",
+    "display_name": "aws-dynamodb"
   },
   "required": [
     "hash_key",

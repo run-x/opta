@@ -36,6 +36,7 @@
     "clouds": [
       "gcp"
     ],
-    "name": "gcp-postgres"
+    "name": "gcp-postgres",
+    "display_name": "postgres"
   }
 }

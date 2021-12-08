@@ -104,6 +104,7 @@
     "clouds": [
       "aws"
     ],
-    "name": "aws-redis"
+    "name": "aws-redis",
+    "display_name": "redis"
   }
 }

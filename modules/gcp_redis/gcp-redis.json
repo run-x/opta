@@ -36,6 +36,7 @@
     "clouds": [
       "gcp"
     ],
-    "name": "gcp-redis"
+    "name": "gcp-redis",
+    "display_name": "redis"
   }
 }

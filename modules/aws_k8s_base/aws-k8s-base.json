@@ -66,7 +66,8 @@
     "clouds": [
       "aws"
     ],
-    "name": "aws-k8s-base"
+    "name": "aws-k8s-base",
+    "display_name": "k8s-base"
   },
   "required": [
     "type"

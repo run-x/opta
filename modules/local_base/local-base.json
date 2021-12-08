@@ -21,6 +21,7 @@
     "clouds": [
       "local"
     ],
-    "name": "local-base"
+    "name": "local-base",
+    "display_name": "base"
   }
 }

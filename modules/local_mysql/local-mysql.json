@@ -21,6 +21,7 @@
     "clouds": [
       "local"
     ],
-    "name": "local-mysql"
+    "name": "local-mysql",
+    "display_name": "mysql"
   }
 }

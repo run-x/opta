@@ -79,6 +79,7 @@
     "clouds": [
       "aws"
     ],
-    "name": "cloudfront-distribution"
+    "name": "cloudfront-distribution",
+    "display_name": "cloudfront-distribution"
   }
 }

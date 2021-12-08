@@ -40,6 +40,7 @@
     "clouds": [
       "gcp"
     ],
-    "name": "gcp-dns"
+    "name": "gcp-dns",
+    "display_name": "dns"
   }
 }

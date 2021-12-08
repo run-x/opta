@@ -73,7 +73,8 @@
     "clouds": [
       "aws"
     ],
-    "name": "aws-eks"
+    "name": "aws-eks",
+    "display_name": "k8s-cluster"
   },
   "required": [
     "type"

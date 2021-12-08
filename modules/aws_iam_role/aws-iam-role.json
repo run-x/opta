@@ -60,7 +60,8 @@
     "clouds": [
       "aws"
     ],
-    "name": "aws-iam-role"
+    "name": "aws-iam-role",
+    "display_name": "aws-iam-role"
   },
   "required": [
     "type"
