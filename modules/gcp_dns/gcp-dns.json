@@ -5,8 +5,7 @@
   "properties": {
     "domain": {
       "type": "string",
-      "description": "The domain you want (you will also get the subdomains for your use)",
-      "default": null
+      "description": "The domain you want (you will also get the subdomains for your use)"
     },
     "delegated": {
       "type": "boolean",

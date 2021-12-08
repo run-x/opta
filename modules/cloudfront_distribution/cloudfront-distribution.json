@@ -20,13 +20,11 @@
     },
     "status_404_page_file": {
       "type": "string",
-      "description": "The name of the existing s3 object in your bucket which will serve as the 404 page.",
-      "default": null
+      "description": "The name of the existing s3 object in your bucket which will serve as the 404 page."
     },
     "status_500_page_file": {
       "type": "string",
-      "description": "The name of the existing s3 object in your bucket which will serve as the 500 page.",
-      "default": null
+      "description": "The name of the existing s3 object in your bucket which will serve as the 500 page."
     },
     "bucket_name": {
       "type": "string",
@@ -35,8 +33,7 @@
     },
     "acm_cert_arn": {
       "type": "string",
-      "description": "The ACM certificate arn you wish to use to handle ssl (needed if you want https for your site)",
-      "default": null
+      "description": "The ACM certificate arn you wish to use to handle ssl (needed if you want https for your site)"
     },
     "domains": {
       "type": "array",
@@ -64,15 +61,21 @@
     },
     "type": {
       "description": "The name of this module",
-      "enum": ["cloudfront-distribution"],
+      "enum": [
+        "cloudfront-distribution"
+      ],
       "default": "cloudfront-distribution",
       "type": "string"
     }
   },
-  "required": ["type"],
+  "required": [
+    "type"
+  ],
   "opta_metadata": {
     "module_type": "service",
-    "clouds": ["aws"],
+    "clouds": [
+      "aws"
+    ],
     "name": "cloudfront-distribution",
     "display_name": "cloudfront-distribution",
     "tags": []

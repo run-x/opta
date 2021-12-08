@@ -5,8 +5,7 @@
   "properties": {
     "bucket_name": {
       "type": "string",
-      "description": "The name of the bucket to create.",
-      "default": null
+      "description": "The name of the bucket to create."
     },
     "block_public": {
       "type": "boolean",

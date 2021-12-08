@@ -5,8 +5,7 @@
   "properties": {
     "bucket_name": {
       "type": "string",
-      "description": "The name of the bucket to create.",
-      "default": null
+      "description": "The name of the bucket to create."
     },
     "same_region_replication": {
       "type": "boolean",
@@ -20,8 +19,7 @@
     },
     "files": {
       "type": "string",
-      "description": "The path (can be relative to the opta yaml) to a directory holding files which you wish to upload to the s3 bucket.\nThe files will have the same names and any subdirectories will similarly be included and uploaded as subdir/path/filename.\n",
-      "default": null
+      "description": "The path (can be relative to the opta yaml) to a directory holding files which you wish to upload to the s3 bucket.\nThe files will have the same names and any subdirectories will similarly be included and uploaded as subdir/path/filename.\n"
     },
     "bucket_policy": {
       "anyOf": [
@@ -34,8 +32,7 @@
           "description": "The bucket policy as an object."
         }
       ],
-      "description": "A custom s3 policy json/yaml to add.",
-      "default": null
+      "description": "A custom s3 policy json/yaml to add."
     },
     "cors_rule": {
       "type": "object",
@@ -74,8 +71,7 @@
           "description": "The max age for the CORS policy.",
           "minimum": 0
         }
-      },
-      "default": null
+      }
     },
     "type": {
       "description": "The name of this module",

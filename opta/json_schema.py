@@ -191,13 +191,15 @@ def _check_module_schemas(write: bool = False) -> None:
                     new_input_property_dict = new_json_schema["properties"][input_name]
 
                     new_input_property_dict["description"] = i["description"]
-                    if "default" in i:
+                    if "default" in i and i["default"] is not None:
                         new_input_property_dict["default"] = i["default"]
+                    if "default" in new_input_property_dict and i["default"] is None:
+                        del new_input_property_dict["default"]
 
             new_json_schema["required"] = [
                 i["name"]
                 for i in module_inputs
-                if i["user_facing"] and "required=True" in i["validator"]
+                if i["user_facing"] and "required=False" not in i["validator"]
             ] + ["type"]
 
             tags = []

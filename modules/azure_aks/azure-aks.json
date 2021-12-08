@@ -121,6 +121,7 @@
     }
   },
   "required": [
+    "admin_group_object_ids",
     "type"
   ],
   "opta_metadata": {

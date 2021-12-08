@@ -5,8 +5,7 @@
   "properties": {
     "api_key": {
       "type": "string",
-      "description": "Datadog API key. If you don't provide this in the yaml, Opta will prompt you for it and store it in secrets.",
-      "default": null
+      "description": "Datadog API key. If you don't provide this in the yaml, Opta will prompt you for it and store it in secrets."
     },
     "timeout": {
       "type": "number",

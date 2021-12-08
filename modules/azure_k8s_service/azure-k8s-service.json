@@ -8,8 +8,7 @@
     },
     "image": {
       "type": "string",
-      "description": "Set to AUTO to create a private repo for your own images. Otherwises attempts to pull image from public dockerhub",
-      "default": null
+      "description": "Set to AUTO to create a private repo for your own images. Otherwises attempts to pull image from public dockerhub"
     },
     "min_containers": {
       "type": "integer",
@@ -52,13 +51,11 @@
     },
     "healthcheck_path": {
       "type": "string",
-      "description": "See the See the [liveness/readiness]({{< relref \"#livenessreadiness-probe\" >}}) section. Default `null` (i.e., no user-specified healthchecks)",
-      "default": null
+      "description": "See the See the [liveness/readiness]({{< relref \"#livenessreadiness-probe\" >}}) section. Default `null` (i.e., no user-specified healthchecks)"
     },
     "liveness_probe_path": {
       "type": "string",
-      "description": "Use if liveness probe != readiness probe",
-      "default": null
+      "description": "Use if liveness probe != readiness probe"
     },
     "initial_liveness_delay": {
       "type": "integer",
@@ -72,13 +69,11 @@
     },
     "readiness_probe_path": {
       "type": "string",
-      "description": "Use if liveness probe != readiness probe",
-      "default": null
+      "description": "Use if liveness probe != readiness probe"
     },
     "consistent_hash": {
       "description": "Use [consistent hashing](https://www.nginx.com/resources/wiki/modules/consistent_hash/)",
-      "type": "string",
-      "default": null
+      "type": "string"
     },
     "sticky_session": {
       "description": "Use [sticky sessions](https://stackoverflow.com/questions/10494431/sticky-and-non-sticky-sessions) via cookies for your service (first request will send you a cookie called opta_cookie which you should add on future requests).",

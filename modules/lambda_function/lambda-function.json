@@ -31,8 +31,7 @@
     },
     "filename": {
       "description": "The filename for your zip file containing your lambda code",
-      "type": "string",
-      "default": null
+      "type": "string"
     },
     "env_vars": {
       "description": "A map of key values to add to the container as environment variables (key is name, value is value).\n```yaml\nenv_vars:\n FLAG: \"true\"\n```\n",

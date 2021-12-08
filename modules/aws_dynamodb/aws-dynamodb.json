@@ -31,8 +31,7 @@
     },
     "range_key": {
       "description": "The range key for your table",
-      "type": "string",
-      "default": null
+      "type": "string"
     },
     "attributes": {
       "description": "The list of attributes (name and type) for this dynamodb table",
