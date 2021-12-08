@@ -39,7 +39,7 @@
       "default": "",
       "required": false
     },
-    "a"type": "array"{
+    "acm_cert_arn": {
       "type": "string",
       "description": "The ACM certificate arn you wish to use to handle ssl (needed if you want https for your site)",
       "default": null,
@@ -51,7 +51,7 @@
       "items": {
         "oneOf": [
           {
-      "type": "array""string"
+            "type": "string"
           }
         ]
       },
@@ -73,19 +73,13 @@
     },
     "type": {
       "description": "The name of this module",
-      "enum": [
-        "cloudfront-distribution"
-      ]
+      "enum": ["cloudfront-distribution"]
     }
   },
-  "required": [
-    "type"
-  ],
+  "required": ["type"],
   "opta_metadata": {
     "module_type": "service",
-    "clouds": [
-      "aws"
-    ],
+    "clouds": ["aws"],
     "name": "cloudfront-distribution"
   }
 }
