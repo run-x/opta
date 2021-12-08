@@ -57,6 +57,7 @@
         "aws-k8s-base",
         "k8s-base"
       ],
+      "default": "k8s-base",
       "type": "string"
     }
   },

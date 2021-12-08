@@ -51,6 +51,7 @@
       "enum": [
         "aws-iam-role"
       ],
+      "default": "aws-iam-role",
       "type": "string"
     }
   },

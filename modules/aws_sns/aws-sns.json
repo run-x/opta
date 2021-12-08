@@ -27,6 +27,7 @@
       "enum": [
         "aws-sns"
       ],
+      "default": "aws-sns",
       "type": "string"
     }
   },

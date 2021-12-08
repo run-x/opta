@@ -30,6 +30,7 @@
         "aws-postgres",
         "postgres"
       ],
+      "default": "postgres",
       "type": "string"
     }
   },

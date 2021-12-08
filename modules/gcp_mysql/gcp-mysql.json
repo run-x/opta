@@ -24,6 +24,7 @@
         "gcp-mysql",
         "mysql"
       ],
+      "default": "mysql",
       "type": "string"
     }
   },

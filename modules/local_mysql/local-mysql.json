@@ -9,6 +9,7 @@
         "local-mysql",
         "mysql"
       ],
+      "default": "mysql",
       "type": "string"
     }
   },

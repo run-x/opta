@@ -150,6 +150,7 @@ def _check_module_schemas(write: bool = False) -> None:
             new_json_schema["properties"]["type"] = {
                 "description": "The name of this module",
                 "enum": [module_name] + module_aliases,
+                "default": module_aliases[-1] if len(module_aliases) > 0 else module_name,
                 "type": "string",
             }
 

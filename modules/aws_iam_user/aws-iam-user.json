@@ -21,6 +21,7 @@
       "enum": [
         "aws-iam-user"
       ],
+      "default": "aws-iam-user",
       "type": "string"
     }
   },

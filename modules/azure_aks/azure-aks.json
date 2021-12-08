@@ -116,6 +116,7 @@
         "azure-aks",
         "k8s-cluster"
       ],
+      "default": "k8s-cluster",
       "type": "string"
     }
   },

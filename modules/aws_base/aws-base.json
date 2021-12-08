@@ -42,6 +42,7 @@
         "aws-base",
         "base"
       ],
+      "default": "base",
       "type": "string"
     }
   },

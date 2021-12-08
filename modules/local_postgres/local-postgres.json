@@ -9,6 +9,7 @@
         "local-postgres",
         "postgres"
       ],
+      "default": "postgres",
       "type": "string"
     }
   },

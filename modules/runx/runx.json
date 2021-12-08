@@ -17,6 +17,7 @@
       "enum": [
         "runx"
       ],
+      "default": "runx",
       "type": "string"
     }
   },

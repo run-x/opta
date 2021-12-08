@@ -28,6 +28,7 @@
       "enum": [
         "external-ssl-cert"
       ],
+      "default": "external-ssl-cert",
       "type": "string"
     }
   },

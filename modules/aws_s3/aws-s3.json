@@ -82,6 +82,7 @@
       "enum": [
         "aws-s3"
       ],
+      "default": "aws-s3",
       "type": "string"
     }
   },

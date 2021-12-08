@@ -24,6 +24,7 @@
         "azure-base",
         "base"
       ],
+      "default": "base",
       "type": "string"
     }
   },

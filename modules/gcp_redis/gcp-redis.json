@@ -24,6 +24,7 @@
         "gcp-redis",
         "redis"
       ],
+      "default": "redis",
       "type": "string"
     }
   },

@@ -43,6 +43,7 @@
       "enum": [
         "aws-nodegroup"
       ],
+      "default": "aws-nodegroup",
       "type": "string"
     }
   },

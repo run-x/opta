@@ -29,6 +29,7 @@
         "gcp-base",
         "base"
       ],
+      "default": "base",
       "type": "string"
     }
   },

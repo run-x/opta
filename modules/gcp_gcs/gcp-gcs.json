@@ -18,6 +18,7 @@
       "enum": [
         "gcp-gcs"
       ],
+      "default": "gcp-gcs",
       "type": "string"
     }
   },

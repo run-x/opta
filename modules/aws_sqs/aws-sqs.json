@@ -42,6 +42,7 @@
       "enum": [
         "aws-sqs"
       ],
+      "default": "aws-sqs",
       "type": "string"
     }
   },

@@ -25,6 +25,7 @@
         "aws-dns",
         "dns"
       ],
+      "default": "dns",
       "type": "string"
     }
   },

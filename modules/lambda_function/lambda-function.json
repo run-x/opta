@@ -8,6 +8,7 @@
       "enum": [
         "lambda-function"
       ],
+      "default": "lambda-function",
       "type": "string"
     },
     "extra_iam_policies": {

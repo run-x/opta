@@ -169,6 +169,7 @@
         "local-k8s-service",
         "k8s-service"
       ],
+      "default": "k8s-service",
       "type": "string"
     }
   },

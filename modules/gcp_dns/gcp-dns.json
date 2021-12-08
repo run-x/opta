@@ -27,6 +27,7 @@
         "gcp-dns",
         "dns"
       ],
+      "default": "dns",
       "type": "string"
     }
   },

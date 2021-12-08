@@ -9,6 +9,7 @@
         "local-mongodb",
         "mongodb"
       ],
+      "default": "mongodb",
       "type": "string"
     }
   },

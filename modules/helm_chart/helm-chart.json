@@ -76,6 +76,7 @@
       "enum": [
         "helm-chart"
       ],
+      "default": "helm-chart",
       "type": "string"
     }
   },

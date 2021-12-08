@@ -24,6 +24,7 @@
       "enum": [
         "aws-documentdb"
       ],
+      "default": "aws-documentdb",
       "type": "string"
     }
   },

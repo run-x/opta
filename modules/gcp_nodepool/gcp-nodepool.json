@@ -43,6 +43,7 @@
       "enum": [
         "gcp-nodepool"
       ],
+      "default": "gcp-nodepool",
       "type": "string"
     }
   },

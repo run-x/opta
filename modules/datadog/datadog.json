@@ -23,6 +23,7 @@
       "enum": [
         "datadog"
       ],
+      "default": "datadog",
       "type": "string"
     }
   },
