@@ -4,7 +4,7 @@
   "oneOf": [
     {
       "type": "array",
-      "item": {
+      "items": {
         "object": {
           "type": "object",
           "properties": {
