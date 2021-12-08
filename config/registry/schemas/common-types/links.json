@@ -1,6 +1,6 @@
 {
   "$id": "https://app.runx.dev/common-types/links",
-  "type": "list",
+  "type": "array",
   "description": "The list of links to add permissions for to this role.",
   "items": {
     "oneOf": [

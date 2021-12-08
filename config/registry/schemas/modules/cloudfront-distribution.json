@@ -39,7 +39,7 @@
       "default": null
     },
     "domains": {
-      "type": "list",
+      "type": "array",
       "description": "The domains which you want your cloudfront distribution to support.",
       "items": {
         "oneOf": [
@@ -51,7 +51,7 @@
       "default": []
     },
     "links": {
-      "type": "list",
+      "type": "array",
       "description": "The linked s3 buckets to attach to your cloudfront distribution (currently only supports one).",
       "items": {
         "oneOf": [
@@ -64,18 +64,12 @@
     },
     "type": {
       "description": "The name of this module",
-      "enum": [
-        "cloudfront-distribution"
-      ]
+      "enum": ["cloudfront-distribution"]
     }
   },
-  "required": [
-    "type"
-  ],
+  "required": ["type"],
   "opta_metadata": {
     "module_type": "service",
-    "clouds": [
-      "aws"
-    ]
+    "clouds": ["aws"]
   }
 }

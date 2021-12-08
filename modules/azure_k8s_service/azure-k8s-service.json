@@ -138,7 +138,7 @@
       "default": []
     },
     "persistent_storage": {
-      "type": "list",
+      "type": "array",
       "description": "A list persistent storages to add to each instance of your service (need to give a `size` which is the size in GB\nfor the storage volume to be, and `path` which is the path in the filesystem of each instance to place it under)\n",
       "items": {
         "type": "object",
@@ -149,10 +149,7 @@
           "path": {
             "type": "string"
           },
-          "required": [
-            "size",
-            "path"
-          ]
+          "required": ["size", "path"]
         }
       },
       "default": []
@@ -164,20 +161,12 @@
     },
     "type": {
       "description": "The name of this module",
-      "enum": [
-        "azure-k8s-service",
-        "k8s-service"
-      ]
+      "enum": ["azure-k8s-service", "k8s-service"]
     }
   },
   "opta_metadata": {
     "module_type": "service",
-    "clouds": [
-      "azure"
-    ]
+    "clouds": ["azure"]
   },
-  "required": [
-    "image",
-    "type"
-  ]
+  "required": ["image", "type"]
 }
