@@ -14,9 +14,9 @@
           "value": {
             "type": "string",
             "description": "The value of the environment variable"
-          },
-          "required": ["name"]
-        }
+          }
+        },
+        "required": ["name"]
       }
     },
     {

@@ -167,9 +167,9 @@
           },
           "path": {
             "type": "string"
-          },
-          "required": ["size", "path"]
-        }
+          }
+        },
+        "required": ["size", "path"]
       },
       "default": []
     },
