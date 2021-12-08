@@ -69,7 +69,7 @@ def _local_configure_kubectl(layer: "Layer") -> None:
         ["kubectl", "config", "use-context", "kind-opta-local-cluster"],
         check=True,
         capture_output=True,
-    ).stdout.decode("utf-8")
+    ).stdout
 
 
 def _gcp_configure_kubectl(layer: "Layer") -> None:
@@ -90,7 +90,7 @@ def _gcp_configure_kubectl(layer: "Layer") -> None:
 
         out: str = nice_run(
             ["gcloud", "config", "get-value", "project"], check=True, capture_output=True,
-        ).stdout.decode("utf-8")
+        ).stdout
     except Exception as err:
         raise UserErrors(
             fmt_msg(
