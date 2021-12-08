@@ -5,19 +5,17 @@
     {
       "type": "array",
       "items": {
-        "object": {
-          "type": "object",
-          "properties": {
-            "name": {
-              "type": "string",
-              "description": "The name of the environment variable"
-            },
-            "value": {
-              "type": "string",
-              "description": "The value of the environment variable"
-            },
-            "required": ["name"]
-          }
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the environment variable"
+          },
+          "value": {
+            "type": "string",
+            "description": "The value of the environment variable"
+          },
+          "required": ["name"]
         }
       }
     },
