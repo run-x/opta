@@ -820,7 +820,7 @@ jobs:
           at: ./
       - install-opta-dependencies
       - gcp-cli/install
-      - gcp-cli/setup
+      - gcp-cli/initialize
       - run:
           name: "Load Opta Example images"
           command: |
@@ -868,7 +868,7 @@ jobs:
           at: ./
       - install-opta-dependencies
       - gcp-cli/install
-      - gcp-cli/setup
+      - gcp-cli/initialize
       - run:
           name: "Destroy Monitoring Service"
           command: |
