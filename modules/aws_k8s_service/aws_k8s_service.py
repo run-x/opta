@@ -75,11 +75,26 @@ class AwsK8sServiceProcessor(
                 )
             module_type = module.aliased_type or module.type
             if module_type == "aws-postgres":
-                self.handle_rds_link(module, link_permissions)
+                LinkerHelper.handle_link(
+                    module=self.module,
+                    linked_module=module,
+                    link_permissions=link_permissions,
+                    required_vars=["db_user", "db_name", "db_password", "db_host"]
+                )
             elif module_type == "aws-redis":
-                self.handle_redis_link(module, link_permissions)
+                LinkerHelper.handle_link(
+                    module=self.module,
+                    linked_module=module,
+                    link_permissions=link_permissions,
+                    required_vars=["cache_host", "cache_auth_token"]
+                )
             elif module_type == "aws-documentdb":
-                self.handle_docdb_link(module, link_permissions)
+                LinkerHelper.handle_link(
+                    module=self.module,
+                    linked_module=module,
+                    link_permissions=link_permissions,
+                    required_vars=["db_user", "db_host", "db_password"]
+                )
             elif module_type == "aws-s3":
                 self.handle_s3_link(module, link_permissions)
             elif module_type == "aws-sqs":
@@ -129,101 +144,4 @@ class AwsK8sServiceProcessor(
         ]
         super(AwsK8sServiceProcessor, self).process(module_idx)
 
-    # TODO: consolidated repeated credential link code
-    def handle_rds_link(
-        self, linked_module: "Module", link_permissions: List[Any]
-    ) -> None:
-        required_db_vars = ["db_user", "db_name", "db_password", "db_host"]
-        renamed_vars = {}
-        if len(link_permissions) > 0:
-            renamed_vars = link_permissions.pop()
-            if not isinstance(renamed_vars, dict) or set(renamed_vars.keys()) != set(
-                required_db_vars
-            ):
-                raise UserErrors(
-                    f"To rename db variables you must provide aliases for these fields: {required_db_vars}"
-                )
-            if not all(map(lambda x: isinstance(x, str), renamed_vars.values())):
-                raise UserErrors("DB variable rename must be only to another string")
-
-        for key in required_db_vars:
-            self.module.data["link_secrets"].append(
-                {
-                    "name": renamed_vars.get(key, f"{linked_module.name}_{key}"),
-                    "value": f"${{{{module.{linked_module.name}.{key}}}}}",
-                }
-            )
-        if link_permissions:
-            raise Exception(
-                "We're not supporting IAM permissions for rds right now. "
-                "Your k8s service will have the db user, name, password, "
-                "and host as envars (pls see docs) and these IAM "
-                "permissions are for manipulating the db itself, which "
-                "I don't think is what you're looking for."
-            )
-
-    def handle_redis_link(
-        self, linked_module: "Module", link_permissions: List[Any]
-    ) -> None:
-        required_redis_vars = ["cache_host", "cache_auth_token"]
-        renamed_vars = {}
-
-        if len(link_permissions) > 0:
-            renamed_vars = link_permissions.pop()
-            if not isinstance(renamed_vars, dict) or set(renamed_vars.keys()) != set(
-                required_redis_vars
-            ):
-                raise UserErrors(
-                    f"To rename redis variables you must provide aliases for these fields: {required_redis_vars}"
-                )
-            if not all(map(lambda x: isinstance(x, str), renamed_vars.values())):
-                raise UserErrors("Redis variable rename must be only to another string")
-
-        for key in required_redis_vars:
-            self.module.data["link_secrets"].append(
-                {
-                    "name": renamed_vars.get(key, f"{linked_module.name}_{key}"),
-                    "value": f"${{{{module.{linked_module.name}.{key}}}}}",
-                }
-            )
-        if link_permissions:
-            raise Exception(
-                "We're not supporting IAM permissions for redis right now. "
-                "Your k8s service will have the cache's host and auth token "
-                "as envars (pls see docs) and these IAM permissions "
-                "are for manipulating the redis cluster itself, which "
-                "I don't think is what you're looking for."
-            )
-
-    def handle_docdb_link(
-        self, linked_module: "Module", link_permissions: List[Any]
-    ) -> None:
-        required_docdb_vars = ["db_user", "db_host", "db_password"]
-        renamed_vars = {}
-
-        if len(link_permissions) > 0:
-            renamed_vars = link_permissions.pop()
-            if not isinstance(renamed_vars, dict) or set(renamed_vars.keys()) != set(
-                required_docdb_vars
-            ):
-                raise UserErrors(
-                    f"To rename docdb variables you must provide aliases for these fields: {required_docdb_vars}"
-                )
-            if not all(map(lambda x: isinstance(x, str), renamed_vars.values())):
-                raise UserErrors("Docdb variable rename must be only to another string")
-
-        for key in required_docdb_vars:
-            self.module.data["link_secrets"].append(
-                {
-                    "name": renamed_vars.get(key, f"{linked_module.name}_{key}"),
-                    "value": f"${{{{module.{linked_module.name}.{key}}}}}",
-                }
-            )
-        if link_permissions:
-            raise Exception(
-                "We're not supporting IAM permissions for docdb right now. "
-                "Your k8s service will have the db's user, password and "
-                "host as envars (pls see docs) and these IAM permissions "
-                "are for manipulating the docdb cluster itself, which "
-                "I don't think is what you're looking for."
-            )
+  

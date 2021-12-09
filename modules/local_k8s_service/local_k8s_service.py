@@ -69,13 +69,33 @@ class LocalK8sServiceProcessor(LocalK8sModuleProcessor, K8sServiceModuleProcesso
                 )
             module_type = module.aliased_type or module.type
             if module_type == "local-postgres":
-                self.handle_pg_link(module, link_permissions)
+                LinkerHelper.handle_link(
+                    module=self.module,
+                    linked_module=module,
+                    link_permissions=link_permissions,
+                    required_vars=["db_user", "db_name", "db_password", "db_host"]
+                )
             elif module_type == "local-redis":
-                self.handle_redis_link(module, link_permissions)
+                LinkerHelper.handle_link(
+                    module=self.module,
+                    linked_module=module,
+                    link_permissions=link_permissions,
+                    required_vars=["cache_host"]
+                )
             elif module_type == "local-mongodb":
-                self.handle_mongodb_link(module, link_permissions)
+                LinkerHelper.handle_link(
+                    module=self.module,
+                    linked_module=module,
+                    link_permissions=link_permissions,
+                    required_vars=["db_user", "db_name", "db_password", "db_host"]
+                )
             elif module_type == "local-mysql":
-                self.handle_mysql_link(module, link_permissions)
+                LinkerHelper.handle_link(
+                    module=self.module,
+                    linked_module=module,
+                    link_permissions=link_permissions,
+                    required_vars=["db_user", "db_name", "db_password", "db_host"]
+                )
             elif module_type == "mongodb-atlas":
                 LinkerHelper.handle_link(
                     module=self.module,
@@ -103,138 +123,3 @@ class LocalK8sServiceProcessor(LocalK8sModuleProcessor, K8sServiceModuleProcesso
             if obj["name"] not in seen
         ]
         super(LocalK8sServiceProcessor, self).process(module_idx)
-
-    # TODO: consolidated repeated credential link code
-    def handle_pg_link(
-        self, linked_module: "Module", link_permissions: List[Any]
-    ) -> None:
-        required_db_vars = ["db_user", "db_name", "db_password", "db_host"]
-        renamed_vars = {}
-        if len(link_permissions) > 0:
-            renamed_vars = link_permissions.pop()
-            if not isinstance(renamed_vars, dict) or set(renamed_vars.keys()) != set(
-                required_db_vars
-            ):
-                raise UserErrors(
-                    f"To rename db variables you must provide aliases for these fields: {required_db_vars}"
-                )
-            if not all(map(lambda x: isinstance(x, str), renamed_vars.values())):
-                raise UserErrors("DB variable rename must be only to another string")
-
-        for key in required_db_vars:
-            self.module.data["link_secrets"].append(
-                {
-                    "name": renamed_vars.get(key, f"{linked_module.name}_{key}"),
-                    "value": f"${{{{module.{linked_module.name}.{key}}}}}",
-                }
-            )
-        if link_permissions:
-            raise Exception(
-                "We're not supporting IAM permissions for rds right now. "
-                "Your k8s service will have the db user, name, password, "
-                "and host as envars (pls see docs) and these IAM "
-                "permissions are for manipulating the db itself, which "
-                "I don't think is what you're looking for."
-            )
-
-    def handle_mysql_link(
-        self, linked_module: "Module", link_permissions: List[Any]
-    ) -> None:
-        required_db_vars = ["db_user", "db_name", "db_password", "db_host"]
-        renamed_vars = {}
-        if len(link_permissions) > 0:
-            renamed_vars = link_permissions.pop()
-            if not isinstance(renamed_vars, dict) or set(renamed_vars.keys()) != set(
-                required_db_vars
-            ):
-                raise UserErrors(
-                    f"To rename db variables you must provide aliases for these fields: {required_db_vars}"
-                )
-            if not all(map(lambda x: isinstance(x, str), renamed_vars.values())):
-                raise UserErrors("DB variable rename must be only to another string")
-
-        for key in required_db_vars:
-            self.module.data["link_secrets"].append(
-                {
-                    "name": renamed_vars.get(key, f"{linked_module.name}_{key}"),
-                    "value": f"${{{{module.{linked_module.name}.{key}}}}}",
-                }
-            )
-        if link_permissions:
-            raise Exception(
-                "We're not supporting IAM permissions for rds right now. "
-                "Your k8s service will have the db user, name, password, "
-                "and host as envars (pls see docs) and these IAM "
-                "permissions are for manipulating the db itself, which "
-                "I don't think is what you're looking for."
-            )
-
-    def handle_mongodb_link(
-        self, linked_module: "Module", link_permissions: List[Any]
-    ) -> None:
-        required_db_vars = ["db_user", "db_name", "db_password", "db_host"]
-        renamed_vars = {}
-        if len(link_permissions) > 0:
-            renamed_vars = link_permissions.pop()
-            if not isinstance(renamed_vars, dict) or set(renamed_vars.keys()) != set(
-                required_db_vars
-            ):
-                raise UserErrors(
-                    f"To rename db variables you must provide aliases for these fields: {required_db_vars}"
-                )
-            if not all(map(lambda x: isinstance(x, str), renamed_vars.values())):
-                raise UserErrors("DB variable rename must be only to another string")
-
-        for key in required_db_vars:
-            self.module.data["link_secrets"].append(
-                {
-                    "name": renamed_vars.get(key, f"{linked_module.name}_{key}"),
-                    "value": f"${{{{module.{linked_module.name}.{key}}}}}",
-                }
-            )
-        if link_permissions:
-            raise Exception(
-                "We're not supporting IAM permissions for rds right now. "
-                "Your k8s service will have the db user, name, password, "
-                "and host as envars (pls see docs) and these IAM "
-                "permissions are for manipulating the db itself, which "
-                "I don't think is what you're looking for."
-            )
-
-    def handle_redis_link(
-        self, linked_module: "Module", link_permissions: List[Any]
-    ) -> None:
-        required_redis_vars = ["cache_host"]
-        renamed_vars = {}
-
-        if len(link_permissions) > 0:
-            renamed_vars = link_permissions.pop()
-            if not isinstance(renamed_vars, dict) or set(renamed_vars.keys()) != set(
-                required_redis_vars
-            ):
-                raise UserErrors(
-                    f"To rename redis variables you must provide aliases for these fields: {required_redis_vars}"
-                )
-            if not all(map(lambda x: isinstance(x, str), renamed_vars.values())):
-                raise UserErrors("Redis variable rename must be only to another string")
-
-        for key in required_redis_vars:
-            self.module.data["link_secrets"].append(
-                {
-                    "name": renamed_vars.get(key, f"{linked_module.name}_{key}"),
-                    "value": f"${{{{module.{linked_module.name}.{key}}}}}",
-                }
-            )
-        if link_permissions:
-            raise Exception(
-                "We're not supporting IAM permissions for redis right now. "
-                "Your k8s service will have the cache's host and auth token "
-                "as envars (pls see docs) and these IAM permissions "
-                "are for manipulating the redis cluster itself, which "
-                "I don't think is what you're looking for."
-            )
-
-    # def _process_ports(self, data: Dict[Any, Any]) -> None:
-    #     # Disable the mulitple ports processing
-    #     # TODO(patrick): remove once https://github.com/run-x/opta/pull/434 is merged
-    #     pass
