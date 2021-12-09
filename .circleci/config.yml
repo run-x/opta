@@ -822,6 +822,9 @@ jobs:
       - gcp-cli/install
       - gcp-cli/initialize
       - run:
+          name: "Setting up GCP Credentials"
+          command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+      - run:
           name: "Load Opta Example images"
           command: |
             docker load -i todo-api
@@ -869,6 +872,9 @@ jobs:
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
+      - run:
+          name: "Setting up GCP Credentials"
+          command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
       - run:
           name: "Destroy Monitoring Service"
           command: |
