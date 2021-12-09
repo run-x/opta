@@ -1,8 +1,12 @@
 name: todofrontend-ci
 environments:
   - name: awsenv-ci
+    path: "../create-and-destroy-aws/environment.yml"
+  - name: awsenv-ci1
     path: "provider-aws.yml"
   - name: gcpenv-ci
+    path: "../create-and-destroy-gcp/environment.yml"
+  - name: gcpenv-ci1
     path: "provider-gcp.yml"
 modules:
   - name: todofrontend
