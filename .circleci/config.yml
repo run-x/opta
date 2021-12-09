@@ -22,7 +22,7 @@ parameters:
   run-create-destroy-local:
     type: boolean
     default: false
-  run-service-mesh-e2e-aws:
+  run-service-mesh-e2e:
     type: boolean
     default: false
 
@@ -810,6 +810,87 @@ jobs:
             --config ./examples/ci-tests/create-and-destroy-gcp/environment.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
+  gcp-opta-example-create-svcs:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - aws-cli/install
+      - aws-cli/setup
+      - run:
+          name: "Load Opta Example images"
+          command: |
+            docker load -i todo-api
+            docker load -i todo-frontend
+      - run:
+          name: "Deploy Todo-Api Service"
+          command: |
+            ./dist/opta/opta deploy \
+            --image todo-api:v1 \
+            --config ./examples/ci-tests/todo-list/api-service.yml \
+            --env gcpenv-ci \
+            --auto-approve
+      - run:
+          name: "Deploy Todo-Frontend Service"
+          command: |
+            ./dist/opta/opta deploy \
+            --image todo-frontend:v1 \
+            --config ./examples/ci-tests/todo-list/frontend-service.yml \
+            --env gcpenv-ci \
+            --auto-approve
+      - run:
+          name: "Deploy Monitoring Service"
+          command: |
+            ./dist/opta/opta apply \
+            --config ./examples/ci-tests/todo-list/monitoring-service.yml \
+            --env gcpenv-ci \
+            --auto-approve
+      - run:
+          name: "Ping Tests"
+          command: |
+            DIRTY_HOST_NAME="{`./dist/opta/opta output -c ./examples/ci-tests/create-and-destroy-gcp/environment.yml | grep load_balancer_raw_ip`\"\":\"\"}"
+            export HOST_NAME=`echo $DIRTY_HOST_NAME | jq -r '.load_balancer_raw_ip'`
+            curl $HOST_NAME/frontend --fail
+            curl $HOST_NAME/djangoapi/ht/ --fail
+            curl $HOST_NAME/grafana --fail
+
+  gcp-opta-example-destroy-svcs:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - aws-cli/install
+      - aws-cli/setup
+      - run:
+          name: "Destroy Monitoring Service"
+          command: |
+            yes | ./dist/opta/opta destroy \
+            --config ./examples/ci-tests/todo-list/monitoring-service.yml \
+            --env gcpenv-ci \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+      - run:
+          name: "Destroy Todo-Frontend Service"
+          command: |
+            yes | ./dist/opta/opta destroy \
+            --config ./examples/ci-tests/todo-list/frontend-service.yml \
+            --env gcpenv-ci \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+      - run:
+          name: "Destroy Todo-Api Service"
+          command: |
+            yes | ./dist/opta/opta destroy \
+            --config ./examples/ci-tests/todo-list/api-service.yml \
+            --env gcpenv-ci \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+
   local-opta-example-create-svcs:
     executor: ubuntu-machine
     environment:
@@ -1024,21 +1105,31 @@ workflows:
           requires:
             - local-opta-example-create-svcs
 
-  run-service-mesh-e2e-aws:
-    when: << pipeline.parameters.run-service-mesh-e2e-aws >>
+  run-service-mesh-e2e:
+    when: << pipeline.parameters.run-service-mesh-e2e >>
     jobs:
       - build-opta-binary
       - build-opta-example-images
       - aws-create-env:
           requires:
             - build-opta-binary
+      - gcp-create-env:
+          requires:
+            - build-opta-binary
       - aws-opta-example-create-svcs:
           requires:
             - aws-create-env
             - build-opta-example-images
+      - gcp-opta-example-create-svcs:
+          requires:
+            - gcp-create-env
+            - build-opta-example-images
       - aws-opta-example-destroy-svcs:
           requires:
             - aws-opta-example-create-svcs
+      - gcp-opta-example-destroy-svcs:
+          requires:
+            - gcp-opta-example-create-svcs
 
   nightly:
     triggers:
