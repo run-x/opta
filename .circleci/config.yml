@@ -1126,16 +1126,22 @@ workflows:
           requires:
             - aws-create-env
             - build-opta-example-images
+      - aws-opta-example-destroy-svcs:
+          requires:
+            - aws-opta-example-create-svcs
+      - aws-destroy-env:
+          requires:
+            - aws-opta-example-destroy-svcs
       - gcp-opta-example-create-svcs:
           requires:
             - gcp-create-env
             - build-opta-example-images
-      - aws-opta-example-destroy-svcs:
-          requires:
-            - aws-opta-example-create-svcs
       - gcp-opta-example-destroy-svcs:
           requires:
             - gcp-opta-example-create-svcs
+      - gcp-destroy-env:
+          requires:
+            - gcp-opta-example-destroy-svcs
 
   nightly:
     triggers:
