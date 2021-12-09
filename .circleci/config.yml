@@ -1029,14 +1029,14 @@ workflows:
     jobs:
       - build-opta-binary
       - build-opta-example-images
-      - aws-create-env
+      - aws-create-env:
           requires:
             - build-opta-binary
-      - aws-opta-example-create-svcs
+      - aws-opta-example-create-svcs:
           requires:
             - aws-create-env
             - build-opta-example-images
-      - aws-opta-example-destroy-svcs
+      - aws-opta-example-destroy-svcs:
           requires:
             - aws-opta-example-create-svcs
 
