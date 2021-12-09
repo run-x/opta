@@ -22,6 +22,9 @@ parameters:
   run-create-destroy-local:
     type: boolean
     default: false
+  run-service-mesh-e2e-aws:
+    type: boolean
+    default: false
 
 
 orbs:
@@ -470,6 +473,86 @@ jobs:
             --config ./examples/ci-tests/create-and-destroy-aws/service-pg.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
+  aws-opta-example-create-svcs:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - aws-cli/install
+      - aws-cli/setup
+      - run:
+          name: "Load Opta Example images"
+          command: |
+            docker load -i todo-api
+            docker load -i todo-frontend
+      - run:
+          name: "Deploy Todo-Api Service"
+          command: |
+            ./dist/opta/opta deploy \
+            --image todo-api:v1 \
+            --config ./examples/ci-tests/todo-list/api-service.yml \
+            --env awsenv-ci \
+            --auto-approve
+      - run:
+          name: "Deploy Todo-Frontend Service"
+          command: |
+            ./dist/opta/opta deploy \
+            --image todo-frontend:v1 \
+            --config ./examples/ci-tests/todo-list/frontend-service.yml \
+            --env awsenv-ci \
+            --auto-approve
+      - run:
+          name: "Deploy Monitoring Service"
+          command: |
+            ./dist/opta/opta apply \
+            --config ./examples/ci-tests/todo-list/monitoring-service.yml \
+            --env awsenv-ci \
+            --auto-approve
+      - run:
+          name: "Ping Tests"
+          command: |
+            DIRTY_HOST_NAME="{`./dist/opta/opta output -c ./examples/ci-tests/create-and-destroy-aws/environment.yml | grep load_balancer_raw_dns`}"
+            export HOST_NAME=`echo $DIRTY_HOST_NAME | jq -r '.load_balancer_raw_dns'`
+            curl $HOST_NAME/frontend --fail
+            curl $HOST_NAME/djangoapi/ht/ --fail
+            curl $HOST_NAME/grafana --fail
+
+  aws-opta-example-destroy-svcs:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - aws-cli/install
+      - aws-cli/setup
+      - run:
+          name: "Destroy Monitoring Service"
+          command: |
+            yes | ./dist/opta/opta destroy \
+            --config ./examples/ci-tests/todo-list/monitoring-service.yml \
+            --env awsenv-ci \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+      - run:
+          name: "Destroy Todo-Frontend Service"
+          command: |
+            yes | ./dist/opta/opta destroy \
+            --config ./examples/ci-tests/todo-list/frontend-service.yml \
+            --env awsenv-ci \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+      - run:
+          name: "Destroy Todo-Api Service"
+          command: |
+            yes | ./dist/opta/opta destroy \
+            --config ./examples/ci-tests/todo-list/api-service.yml \
+            --env awsenv-ci \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-destroy-env:
     executor: ubuntu-machine
@@ -940,6 +1023,22 @@ workflows:
       - local-opta-example-destroy-svcs:
           requires:
             - local-opta-example-create-svcs
+
+  run-service-mesh-e2e-aws:
+    when: << pipeline.parameters.run-service-mesh-e2e-aws >>
+    jobs:
+      - build-opta-binary
+      - build-opta-example-images
+      - aws-create-env
+        requires:
+          - build-opta-binary
+      - aws-opta-example-create-svcs
+        requires:
+          - aws-create-env
+          - build-opta-example-images
+      - aws-opta-example-destroy-svcs
+        requires:
+          - aws-opta-example-create-svcs
 
   nightly:
     triggers:
