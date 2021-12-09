@@ -819,8 +819,8 @@ jobs:
       - attach_workspace:
           at: ./
       - install-opta-dependencies
-      - aws-cli/install
-      - aws-cli/setup
+      - gcp-cli/install
+      - gcp-cli/setup
       - run:
           name: "Load Opta Example images"
           command: |
@@ -867,8 +867,8 @@ jobs:
       - attach_workspace:
           at: ./
       - install-opta-dependencies
-      - aws-cli/install
-      - aws-cli/setup
+      - gcp-cli/install
+      - gcp-cli/setup
       - run:
           name: "Destroy Monitoring Service"
           command: |
