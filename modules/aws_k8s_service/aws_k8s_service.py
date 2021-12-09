@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 from modules.base import AWSIamAssembler, AWSK8sModuleProcessor, K8sServiceModuleProcessor
 from modules.linker_helper import LinkerHelper
@@ -79,21 +79,21 @@ class AwsK8sServiceProcessor(
                     module=self.module,
                     linked_module=module,
                     link_permissions=link_permissions,
-                    required_vars=["db_user", "db_name", "db_password", "db_host"]
+                    required_vars=["db_user", "db_name", "db_password", "db_host"],
                 )
             elif module_type == "aws-redis":
                 LinkerHelper.handle_link(
                     module=self.module,
                     linked_module=module,
                     link_permissions=link_permissions,
-                    required_vars=["cache_host", "cache_auth_token"]
+                    required_vars=["cache_host", "cache_auth_token"],
                 )
             elif module_type == "aws-documentdb":
                 LinkerHelper.handle_link(
                     module=self.module,
                     linked_module=module,
                     link_permissions=link_permissions,
-                    required_vars=["db_user", "db_host", "db_password"]
+                    required_vars=["db_user", "db_host", "db_password"],
                 )
             elif module_type == "aws-s3":
                 self.handle_s3_link(module, link_permissions)
@@ -143,5 +143,3 @@ class AwsK8sServiceProcessor(
             if obj["name"] not in seen
         ]
         super(AwsK8sServiceProcessor, self).process(module_idx)
-
-  

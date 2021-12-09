@@ -52,4 +52,3 @@ class TestLocalK8sServiceProcessor:
         assert app_module.data["manual_secrets"] == [
             "BALONEY",
         ]
-

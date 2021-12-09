@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict, List, Union
+from typing import TYPE_CHECKING, Dict, List, Union
 
 from modules.base import K8sServiceModuleProcessor, LocalK8sModuleProcessor
 from modules.linker_helper import LinkerHelper
@@ -73,28 +73,28 @@ class LocalK8sServiceProcessor(LocalK8sModuleProcessor, K8sServiceModuleProcesso
                     module=self.module,
                     linked_module=module,
                     link_permissions=link_permissions,
-                    required_vars=["db_user", "db_name", "db_password", "db_host"]
+                    required_vars=["db_user", "db_name", "db_password", "db_host"],
                 )
             elif module_type == "local-redis":
                 LinkerHelper.handle_link(
                     module=self.module,
                     linked_module=module,
                     link_permissions=link_permissions,
-                    required_vars=["cache_host"]
+                    required_vars=["cache_host"],
                 )
             elif module_type == "local-mongodb":
                 LinkerHelper.handle_link(
                     module=self.module,
                     linked_module=module,
                     link_permissions=link_permissions,
-                    required_vars=["db_user", "db_name", "db_password", "db_host"]
+                    required_vars=["db_user", "db_name", "db_password", "db_host"],
                 )
             elif module_type == "local-mysql":
                 LinkerHelper.handle_link(
                     module=self.module,
                     linked_module=module,
                     link_permissions=link_permissions,
-                    required_vars=["db_user", "db_name", "db_password", "db_host"]
+                    required_vars=["db_user", "db_name", "db_password", "db_host"],
                 )
             elif module_type == "mongodb-atlas":
                 LinkerHelper.handle_link(

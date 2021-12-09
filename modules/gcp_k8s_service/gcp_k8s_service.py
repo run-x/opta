@@ -1,6 +1,7 @@
-from typing import TYPE_CHECKING, Any, Dict, List, Union
-from modules.linker_helper import LinkerHelper
+from typing import TYPE_CHECKING, Dict, List, Union
+
 from modules.base import GcpK8sModuleProcessor, K8sServiceModuleProcessor
+from modules.linker_helper import LinkerHelper
 from opta.core.kubernetes import create_namespace_if_not_exists, get_manual_secrets
 from opta.exceptions import UserErrors
 
@@ -66,14 +67,14 @@ class GcpK8sServiceProcessor(GcpK8sModuleProcessor, K8sServiceModuleProcessor):
                     module=self.module,
                     linked_module=module,
                     link_permissions=link_permissions,
-                    required_vars=["db_user", "db_name", "db_password", "db_host"]
+                    required_vars=["db_user", "db_name", "db_password", "db_host"],
                 )
             elif module_type == "gcp-redis":
                 LinkerHelper.handle_link(
                     module=self.module,
                     linked_module=module,
                     link_permissions=link_permissions,
-                    required_vars=["cache_host", "cache_auth_token"]
+                    required_vars=["cache_host", "cache_auth_token"],
                 )
             elif module_type == "gcp-gcs":
                 self.handle_gcs_link(module, link_permissions)
