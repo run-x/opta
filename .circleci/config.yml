@@ -389,6 +389,42 @@ jobs:
             --config ./examples/ci-tests/create-and-destroy-aws/websocket-service.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
+  aws-test-websocket-stable-version:
+    executor: python-docker
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/
+      - install-opta-dependencies
+      - aws-cli/install
+      - aws-cli/setup
+      - install-python-dependencies
+      - run:
+          name: "Apply Websocket Service with Stable Opta"
+          command: |
+            $HOME/.opta/opta apply \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-aws/websocket-service.yml \
+            --auto-approve
+      - run:
+          name: "Test Websocket"
+          command: |
+            sleep 20
+            source $(pipenv --venv)/bin/activate
+            DIRTY_HOST_NAME="{`$HOME/.opta/opta output output --env awsenv-ci --config ./examples/ci-tests/create-and-destroy-aws/websocket-service.yml | grep load_balancer_raw_dns`\"\":\"\"}"
+            export HOST_NAME=`echo $DIRTY_HOST_NAME | jq -r '.load_balancer_raw_dns'`
+            python ./examples/ci-tests/create-and-destroy-aws/websocket-validate.py
+            exit $?
+      - run:
+          name: "Destroy Websocket Service with Opta"
+          command: |
+            yes | $HOME/.opta/opta destroy \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-aws/websocket-service.yml \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+
   aws-test-additional-nodegroup:
     executor: ubuntu-machine
     environment:
@@ -1299,6 +1335,9 @@ workflows:
       - aws-create-env-stable-version:
           requires:
             - check-version
+      - aws-test-websocket-stable-version:
+          requires:
+            - aws-create-env-stable-version
 
   nightly:
     triggers:
