@@ -266,6 +266,25 @@ jobs:
             --auto-approve \
             --refresh
 
+  aws-create-env-stable-version:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/
+      - install-opta-dependencies
+      - aws-cli/install
+      - aws-cli/setup
+      - run:
+          name: "Deploy opta environment"
+          command: |
+            $HOME/.opta/opta apply \
+            --config ./examples/ci-tests/create-and-destroy-aws/environment.yml \
+            --auto-approve \
+            --refresh
+
   aws-test-cloudfront:
     executor: python-docker
     environment:
@@ -1277,6 +1296,9 @@ workflows:
       - check-version:
           requires:
             - download-opta
+      - aws-create-env-stable-version:
+          requires:
+            - check-version
 
   nightly:
     triggers:
