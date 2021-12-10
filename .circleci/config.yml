@@ -169,7 +169,7 @@ jobs:
           command: |
             $HOME/.opta/opta version
       - persist_to_workspace:
-          root: $HOME
+          root: ~/
           paths:
             - .opta
 
@@ -179,7 +179,7 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - attach_workspace:
-          at: $HOME
+          at: ~/
       - run:
           name: "Check Opta Version"
           command: |
