@@ -1261,7 +1261,7 @@ workflows:
             - gcp-opta-example-destroy-svcs
 
   run-release-vs-stable:
-    when: << pipeline.parameteres.run-release-vs-stable >>
+    when: << pipeline.parameters.run-release-vs-stable >>
     jobs:
       - download-opta
 
