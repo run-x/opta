@@ -1356,9 +1356,12 @@ workflows:
       - aws-test-websocket-stable-version:
           requires:
             - aws-create-env-stable-version
-      - aws-destroy-env-stable-version:
+      - aws-test-websocket:
           requires:
             - aws-test-websocket-stable-version
+      - aws-destroy-env:
+          requires:
+            aws-test-websocket
 
   nightly:
     triggers:
