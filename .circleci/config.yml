@@ -28,6 +28,9 @@ parameters:
   test-aws-lambda:
     type: boolean
     default: false
+  run-release-vs-stable:
+    type: boolean
+    default: false
 
 
 orbs:
@@ -151,6 +154,26 @@ jobs:
       - run:
           name: "Run terraform format"
           command: "terraform fmt -recursive -check ./config/tf_modules"
+
+  download-opta:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - run:
+          name: "Download Latest Opta Binary"
+          command: /bin/bash -c "$(curl -fsSL https://docs.opta.dev/install.sh)"
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - .opta
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - run:
+          name: "Check Opta Version"
+          command: |
+            .opta/opta version
 
   build-opta-binary:
     executor: ubuntu-machine
@@ -1236,6 +1259,11 @@ workflows:
       - gcp-destroy-env:
           requires:
             - gcp-opta-example-destroy-svcs
+
+  run-release-vs-stable:
+    when: << pipeline.parameteres.run-release-vs-stable >>
+    jobs:
+      - download-opta
 
   nightly:
     triggers:
