@@ -732,7 +732,7 @@ jobs:
             --config ./examples/ci-tests/create-and-destroy-aws/environment.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
-  aws-destroy-env:
+  aws-destroy-env-stable-version:
     executor: ubuntu-machine
     environment:
       OPTA_DISABLE_REPORTING: "true"
@@ -1356,6 +1356,9 @@ workflows:
       - aws-test-websocket-stable-version:
           requires:
             - aws-create-env-stable-version
+      - aws-destroy-env-stable-version:
+          requires:
+            - aws-test-websocket-stable-version
 
   nightly:
     triggers:
