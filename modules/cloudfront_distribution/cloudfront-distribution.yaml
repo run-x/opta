@@ -1,6 +1,5 @@
 halt: false
 environment_module: false
-terraform_module: aws-cloudfront-distribution
 inputs:
   - name: env_name
     user_facing: false
