@@ -163,17 +163,21 @@ jobs:
       - run:
           name: "Download Latest Opta Binary"
           command: /bin/bash -c "$(curl -fsSL https://docs.opta.dev/install.sh)"
-      - persist_to_workspace:
-          root: ./
-          paths:
-            - .opta
-      - attach_workspace:
-          at: ./
       - install-opta-dependencies
       - run:
           name: "Check Opta Version"
           command: |
-            .opta/opta version
+            `pwd`/.opta/opta version
+
+  check-version:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - run:
+          name: "Check Opta Version"
+          command: |
+            `pwd`/.opta/opta version
 
   build-opta-binary:
     executor: ubuntu-machine
@@ -1264,6 +1268,9 @@ workflows:
     when: << pipeline.parameters.run-release-vs-stable >>
     jobs:
       - download-opta
+      - check-version:
+          requires:
+            - download-opta
 
   nightly:
     triggers:
