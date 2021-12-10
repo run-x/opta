@@ -1,5 +1,6 @@
 locals {
   s3_origin_id = "optaDefaultOriginId"
+  lb_origin_id = "optaDefaultLbOriginId"
 }
 
 variable "env_name" {
@@ -52,4 +53,8 @@ variable "domains" {
 
 variable "links" {
   default = []
+}
+
+variable "load_balancer" {
+  type = string
 }

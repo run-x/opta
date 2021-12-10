@@ -17,6 +17,10 @@ inputs:
     user_facing: false
     description: Name of the access log bucket
     default: null
+  - name: load_balancer
+    user_facing: false
+    description: Load Balancer URL
+    default: null
   - name: bucket_name
     user_facing: true
     validator: str(required=False)
