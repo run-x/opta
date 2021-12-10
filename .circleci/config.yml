@@ -1347,22 +1347,30 @@ workflows:
   run-release-vs-stable:
     when: << pipeline.parameters.run-release-vs-stable >>
     jobs:
+      - build-opta-binary
       - download-opta
       - check-version:
           requires:
             - download-opta
       - aws-create-env-stable-version:
           requires:
+            - download-opta
             - check-version
+      - aws-create-env:
+          requires:
+            - build-opta-binary
+            - aws-create-env-stable-version
       - aws-test-websocket-stable-version:
           requires:
             - aws-create-env-stable-version
+            - aws-create-env
       - aws-test-websocket:
           requires:
             - aws-test-websocket-stable-version
       - aws-destroy-env:
           requires:
             - aws-test-websocket
+            - build-opta-binary
 
   nightly:
     triggers:
