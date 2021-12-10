@@ -413,7 +413,7 @@ jobs:
           command: |
             sleep 20
             source $(pipenv --venv)/bin/activate
-            DIRTY_HOST_NAME="{`$HOME/.opta/opta output output --env awsenv-ci --config ./examples/ci-tests/create-and-destroy-aws/websocket-service.yml | grep load_balancer_raw_dns`\"\":\"\"}"
+            DIRTY_HOST_NAME="{`$HOME/.opta/opta output --env awsenv-ci --config ./examples/ci-tests/create-and-destroy-aws/websocket-service.yml | grep load_balancer_raw_dns`\"\":\"\"}"
             export HOST_NAME=`echo $DIRTY_HOST_NAME | jq -r '.load_balancer_raw_dns'`
             python ./examples/ci-tests/create-and-destroy-aws/websocket-validate.py
             exit $?
@@ -729,6 +729,24 @@ jobs:
           name: "Destroy environment"
           command: |
             yes | ./dist/opta/opta destroy \
+            --config ./examples/ci-tests/create-and-destroy-aws/environment.yml \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+
+  aws-destroy-env:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/
+      - install-opta-dependencies
+      - aws-cli/install
+      - aws-cli/setup
+      - run:
+          name: "Destroy environment"
+          command: |
+            yes | $HOME/.opta/opta destroy \
             --config ./examples/ci-tests/create-and-destroy-aws/environment.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
