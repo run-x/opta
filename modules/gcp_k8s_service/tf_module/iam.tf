@@ -1,6 +1,13 @@
+resource "random_string" "suffix" {
+  length  = 4
+  upper   = false
+  special = false
+}
+
 resource "google_service_account" "k8s_service" {
-  account_id   = "${local.env_short}-${local.layer_short}-${local.module_short}"
-  display_name = "${local.env_short}-${local.layer_short}-${local.module_short}"
+  account_id   = "${local.layer_short}-${local.module_short}-${random_string.suffix.result}"
+  display_name = "${local.layer_short}-${local.module_short}-${random_string.suffix.result}"
+  lifecycle { ignore_changes = [account_id, display_name] }
 }
 
 resource "google_service_account_iam_binding" "trust_k8s_workload_idu" {
