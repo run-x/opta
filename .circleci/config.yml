@@ -167,7 +167,7 @@ jobs:
       - run:
           name: "Check Opta Version"
           command: |
-            `pwd`/.opta/opta version
+            $HOME/.opta/opta version
 
   check-version:
     executor: ubuntu-machine
@@ -177,7 +177,7 @@ jobs:
       - run:
           name: "Check Opta Version"
           command: |
-            `pwd`/.opta/opta version
+            $HOME/.opta/opta version
 
   build-opta-binary:
     executor: ubuntu-machine
