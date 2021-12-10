@@ -168,12 +168,18 @@ jobs:
           name: "Check Opta Version"
           command: |
             $HOME/.opta/opta version
+      - persist_to_workspace:
+          root: $HOME
+          paths:
+            - .opta
 
   check-version:
     executor: ubuntu-machine
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
+      - attach_workspace:
+          at: $HOME
       - run:
           name: "Check Opta Version"
           command: |
