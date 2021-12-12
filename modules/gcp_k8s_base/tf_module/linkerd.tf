@@ -61,27 +61,36 @@ resource "helm_release" "linkerd" {
   repository = "https://helm.linkerd.io/stable"
   version    = "2.10.2"
 
-  set {
-    name  = "identityTrustAnchorsPEM"
-    value = tls_self_signed_cert.trustanchor_cert.cert_pem
-  }
-
-  set {
-    name  = "identity.issuer.crtExpiry"
-    value = tls_locally_signed_cert.issuer_cert.validity_end_time
-  }
-
-  set {
-    name  = "identity.issuer.tls.crtPEM"
-    value = tls_locally_signed_cert.issuer_cert.cert_pem
-  }
-
-  set {
-    name  = "identity.issuer.tls.keyPEM"
-    value = tls_private_key.issuer_key.private_key_pem
-  }
-
   values = var.linkerd_high_availability ? [
-    file("${path.module}/values-ha.yaml") # Adding the high-availability default values.
-  ] : []
+    file("${path.module}/values-ha.yaml"), # Adding the high-availability default values.
+    yamlencode({
+      podAnnotations: {
+        "cluster-autoscaler.kubernetes.io/safe-to-evict": "true"
+      }
+      identityTrustAnchorsPEM: tls_self_signed_cert.trustanchor_cert.cert_pem
+      identity: {
+        issuer: {
+          crtExpiry: tls_locally_signed_cert.issuer_cert.validity_end_time
+          tls: {
+            crtPEM: tls_locally_signed_cert.issuer_cert.cert_pem
+            keyPEM: tls_private_key.issuer_key.private_key_pem
+          }
+        }
+      }
+    })
+  ] : [yamlencode({
+    podAnnotations: {
+      "cluster-autoscaler.kubernetes.io/safe-to-evict": "true"
+    }
+    identityTrustAnchorsPEM: tls_self_signed_cert.trustanchor_cert.cert_pem
+    identity: {
+      issuer: {
+        crtExpiry: tls_locally_signed_cert.issuer_cert.validity_end_time
+        tls: {
+          crtPEM: tls_locally_signed_cert.issuer_cert.cert_pem
+          keyPEM: tls_private_key.issuer_key.private_key_pem
+        }
+      }
+    }
+  })]
 }

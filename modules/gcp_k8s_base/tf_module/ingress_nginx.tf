@@ -17,6 +17,7 @@ resource "helm_release" "ingress-nginx" {
         config : local.config
         podAnnotations : {
           "linkerd.io/inject" : "enabled"
+          "cluster-autoscaler.kubernetes.io/safe-to-evict": "true"
         }
         resources : {
           requests : {

@@ -21,6 +21,7 @@ spec:
         tags.datadoghq.com/service: {{ include "k8s-service.serviceName" . }}-{{ include "k8s-service.namespaceName" . }}
         tags.datadoghq.com/version: {{ .Values.version | quote }}
       annotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
         config.linkerd.io/skip-outbound-ports: "8126,5432,3306"
         linkerd-version: "2.10.2"
         ad.datadoghq.com/linkerd-proxy.check_names: '["linkerd"]'
