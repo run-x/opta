@@ -7,6 +7,11 @@
       "$ref": "/common-types/cidr-block",
       "default": "10.0.0.0/19"
     },
+    "vpc_log_retention": {
+      "type": "integer",
+      "description": "The retention period (days) for the flow logs of your vpc.",
+      "default": 90
+    },
     "private_ipv4_cidr_blocks": {
       "type": "array",
       "description": "These are the cidr blocks to use for the private subnets, one for each AZ.",

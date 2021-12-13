@@ -26,6 +26,11 @@ inputs:
     user_facing: false
     description: Opta vpc_id id
     default: None
+  - name: eks_log_retention
+    user_facing: true
+    validator: int(required=False)
+    description: The retention period (days) for the eks control plane logs.
+    default: 7
   - name: max_nodes
     user_facing: true
     validator: any(str(), int(), required=False)

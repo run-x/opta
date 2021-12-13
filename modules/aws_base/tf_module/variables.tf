@@ -17,6 +17,11 @@ variable "module_name" {
   type        = string
 }
 
+variable "vpc_log_retention" {
+  type = number
+  default = 90
+}
+
 variable "total_ipv4_cidr_block" {
   description = "Cidr block to reserve for whole vpc"
   type        = string
