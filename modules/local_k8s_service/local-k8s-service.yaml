@@ -1,6 +1,5 @@
 halt: false
 environment_module: false
-terraform_module: local-k8s-service
 inputs:
   - name: env_name
     user_facing: false
