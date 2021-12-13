@@ -43,7 +43,7 @@ class TestAwsIamUserProcessor:
                 "Sid": "AllowManageOwnPasswords",
                 "Effect": "Allow",
                 "Action": ["iam:ChangePassword", "iam:GetUser"],
-                "Resource": "arn:aws:iam::*:user/${aws:username}",
+                "Resource": "arn:aws:iam::*:user/$${{aws:username}}",
             },
             {
                 "Sid": "AllowManageOwnAccessKeys",
@@ -54,7 +54,7 @@ class TestAwsIamUserProcessor:
                     "iam:ListAccessKeys",
                     "iam:UpdateAccessKey",
                 ],
-                "Resource": "arn:aws:iam::*:user/${aws:username}",
+                "Resource": "arn:aws:iam::*:user/$${{aws:username}}",
             },
             {
                 "Sid": "PolicySimulatorAPI",
