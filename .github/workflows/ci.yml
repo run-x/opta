@@ -5,9 +5,9 @@ name: CI
 
 on:
   push:
-    branches: [main, dev]
+    branches: [main, dev, feature/module-api]
   pull_request:
-    branches: [main, dev]
+    branches: [main, dev, feature/module-api]
 
 jobs:
   no-pdb:
