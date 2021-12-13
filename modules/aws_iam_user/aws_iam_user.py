@@ -32,7 +32,7 @@ class AwsIamUserProcessor(ModuleProcessor, AWSIamAssembler):
                 "Sid": "AllowManageOwnPasswords",
                 "Effect": "Allow",
                 "Action": ["iam:ChangePassword", "iam:GetUser"],
-                "Resource": "arn:aws:iam::*:user/${aws:username}",
+                "Resource": "arn:aws:iam::*:user/$${{aws:username}}",
             },
             {
                 "Sid": "AllowManageOwnAccessKeys",
@@ -43,7 +43,7 @@ class AwsIamUserProcessor(ModuleProcessor, AWSIamAssembler):
                     "iam:ListAccessKeys",
                     "iam:UpdateAccessKey",
                 ],
-                "Resource": "arn:aws:iam::*:user/${aws:username}",
+                "Resource": "arn:aws:iam::*:user/$${{aws:username}}",
             },
             {
                 "Sid": "PolicySimulatorAPI",
