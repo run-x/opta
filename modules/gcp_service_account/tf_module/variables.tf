@@ -3,9 +3,8 @@ data "google_client_config" "current" {}
 
 
 locals {
-  env_short    = substr(replace(var.env_name, "-", ""), 0, 9)
-  layer_short  = substr(replace(var.layer_name, "-", ""), 0, 9)
-  module_short = substr(replace(var.module_name, "-", ""), 0, 9)
+  layer_short  = substr(replace(var.layer_name, "-", ""), 0, 12)
+  module_short = substr(replace(var.module_name, "-", ""), 0, 12)
   get_buckets  = toset(concat(var.read_buckets, var.write_buckets))
 }
 
