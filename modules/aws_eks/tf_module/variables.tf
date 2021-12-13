@@ -66,7 +66,7 @@ variable "spot_instances" {
 }
 
 variable "eks_log_retention" {
-  type = number
+  type    = number
   default = 7
 }
 

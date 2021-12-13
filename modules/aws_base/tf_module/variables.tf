@@ -18,7 +18,7 @@ variable "module_name" {
 }
 
 variable "vpc_log_retention" {
-  type = number
+  type    = number
   default = 90
 }
 
