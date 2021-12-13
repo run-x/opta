@@ -18,6 +18,11 @@
       "description": "The size of disk to give the nodes' ec2s in GB.",
       "default": 20
     },
+    "eks_log_retention": {
+      "type": "integer",
+      "description": "The retention period (days) for the eks control plane logs.",
+      "default": 7
+    },
     "node_instance_type": {
       "$ref": "/common-types/ec2-instance-type",
       "default": "t3.medium",

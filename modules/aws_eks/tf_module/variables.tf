@@ -65,6 +65,11 @@ variable "spot_instances" {
   default = false
 }
 
+variable "eks_log_retention" {
+  type    = number
+  default = 7
+}
+
 variable "control_plane_security_groups" {
   description = "List of security groups to give control plane access to"
   type        = list(string)

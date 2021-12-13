@@ -74,7 +74,7 @@ resource "aws_security_group_rule" "control_plane_access" {
 resource "aws_cloudwatch_log_group" "cluster_logs" {
   name              = "/aws/eks/opta-${var.layer_name}/cluster"
   kms_key_id        = data.aws_kms_key.env_key.arn
-  retention_in_days = 7
+  retention_in_days = var.eks_log_retention
   tags = {
     terraform = "true"
   }

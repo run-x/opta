@@ -19,6 +19,11 @@ inputs:
     validator: any(required=False)
     description: This is the total cidr block for the VPC.
     default: "10.0.0.0/16"
+  - name: vpc_log_retention
+    user_facing: true
+    validator: int(required=False)
+    description: The retention period (days) for the flow logs of your vpc.
+    default: 90
   - name: private_ipv4_cidr_blocks
     user_facing: true
     validator: any(required=False)
