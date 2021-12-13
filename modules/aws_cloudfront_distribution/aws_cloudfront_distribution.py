@@ -67,9 +67,11 @@ class CloudfrontDistributionProcessor(ModuleProcessor):
         self.module.data[
             "origin_access_identity_path"
         ] = f"${{{{{module_source}.cloudfront_read_path}}}}"
+        self.module.data["s3_load_balancer_enabled"] = True
 
     def handle_k8s_base_link(self, linked_module: "Module") -> None:
         module_source = f"module.{linked_module.name}"
         self.module.data[
             "load_balancer"
         ] = f"${{{{{module_source}.load_balancer_raw_dns}}}}"
+        self.module.data["eks_load_balancer_enabled"] = True

@@ -17,10 +17,18 @@ inputs:
     user_facing: false
     description: Name of the access log bucket
     default: null
+  - name: s3_load_balancer_enabled
+    user_facing: false
+    description: Create S3 Cloudfront if set to true
+    default: false
   - name: load_balancer
     user_facing: false
     description: Load Balancer URL
     default: null
+  - name: eks_load_balancer_enabled
+    user_facing: false
+    description: Create LB Cloudfront if set to true
+    default: false
   - name: bucket_name
     user_facing: true
     validator: str(required=False)

@@ -58,3 +58,13 @@ variable "links" {
 variable "load_balancer" {
   type = string
 }
+
+variable "eks_load_balancer_enabled" {
+  type = bool
+  default = false
+}
+
+variable "s3_load_balancer_enabled" {
+  type = bool
+  default = false
+}

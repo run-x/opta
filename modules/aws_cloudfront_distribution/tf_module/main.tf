@@ -8,8 +8,13 @@ data "aws_s3_bucket" "logging_bucket" {
   bucket = var.s3_log_bucket_name
 }
 
+locals {
+  lb_distribution_count = var.eks_load_balancer_enabled == true ? 1 : 0
+  s3_distribution_count = var.s3_load_balancer_enabled == true ? 1 : 0
+}
+
 resource "aws_cloudfront_distribution" "lb_distribution" {
-  count = var.load_balancer == null ? 0 : 1
+  count = local.lb_distribution_count
   origin {
     domain_name = var.load_balancer
     origin_id   = local.lb_origin_id
@@ -62,7 +67,7 @@ resource "aws_cloudfront_distribution" "lb_distribution" {
 }
 
 resource "aws_cloudfront_distribution" "s3_distribution" {
-  count = var.bucket_name == "" ? 0 : 1
+  count = local.s3_distribution_count
   origin {
     domain_name = data.aws_s3_bucket.current_bucket[0].bucket_regional_domain_name
     origin_id   = local.s3_origin_id
