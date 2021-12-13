@@ -53,6 +53,7 @@ resource "helm_release" "autoscaler" {
   repository = "https://kubernetes.github.io/autoscaler"
   values = [
     yamlencode({
+      extraArgs : { "skip-nodes-with-local-storage" : false }
       autoDiscovery : {
         clusterName : var.eks_cluster_name
       },
