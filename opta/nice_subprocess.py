@@ -26,7 +26,7 @@ nice_logger.propagate = False
 def log_to_datadog(msg: str, severity: str) -> None:
     msg = ansi_scrub(msg)
     if hasattr(sys, "_called_from_test") or VERSION == DEV_VERSION or not VERSION:
-        if os.environ.get("ENABLE_DATADOG_TO_CONSOLE_IN_DEV", ""):
+        if os.environ.get("OPTA_DEBUG", "") == "DATADOG_LOCAL":
             print("Would have logged this string to DD:\n")
             print(">>>>>>>>>>>>>>>>>>>>Datadog log start")
             print(msg)
