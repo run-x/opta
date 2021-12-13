@@ -26,11 +26,11 @@ nice_logger.propagate = False
 def log_to_datadog(msg: str, severity: str) -> None:
     msg = ansi_scrub(msg)
     if hasattr(sys, "_called_from_test") or VERSION == DEV_VERSION or not VERSION:
-        print("Not logging to Datadog as this appears to be a dev/test version of opta")
-        print("Would have logged this string to DD:\n")
-        print(">>>>>>>>>>>>>>>>>>>>Datadog log start")
-        print(msg)
-        print("<<<<<<<<<<<<<<<<<<<<Datadog log end")
+        if os.environ.get("OPTA_DEBUG", "") == "DATADOG_LOCAL":
+            print("Would have logged this string to DD:\n")
+            print(">>>>>>>>>>>>>>>>>>>>Datadog log start")
+            print(msg)
+            print("<<<<<<<<<<<<<<<<<<<<Datadog log end")
         dd_handler.setLevel(logging.CRITICAL)
 
     if severity == "ERROR":
