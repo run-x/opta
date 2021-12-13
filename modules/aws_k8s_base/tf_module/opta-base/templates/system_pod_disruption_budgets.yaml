@@ -1,0 +1,27 @@
+# https://stackoverflow.com/questions/63751840/google-kubernetes-cluster-not-autoscaling-down
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    k8s-app: kube-dns
+  name: kube-dns-opta
+  namespace: kube-system
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      k8s-app: kube-dns
+---
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    k8s-app: kube-dns-autoscaler
+  name: kube-dns-autoscaler-opta
+  namespace: kube-system
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      k8s-app: kube-dns-autoscaler
+---
