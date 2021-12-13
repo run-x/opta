@@ -64,33 +64,33 @@ resource "helm_release" "linkerd" {
   values = var.linkerd_high_availability ? [
     file("${path.module}/values-ha.yaml"), # Adding the high-availability default values.
     yamlencode({
-      podAnnotations: {
-        "cluster-autoscaler.kubernetes.io/safe-to-evict": "true"
+      podAnnotations : {
+        "cluster-autoscaler.kubernetes.io/safe-to-evict" : "true"
       }
-      identityTrustAnchorsPEM: tls_self_signed_cert.trustanchor_cert.cert_pem
-      identity: {
-        issuer: {
-          crtExpiry: tls_locally_signed_cert.issuer_cert.validity_end_time
-          tls: {
-            crtPEM: tls_locally_signed_cert.issuer_cert.cert_pem
-            keyPEM: tls_private_key.issuer_key.private_key_pem
+      identityTrustAnchorsPEM : tls_self_signed_cert.trustanchor_cert.cert_pem
+      identity : {
+        issuer : {
+          crtExpiry : tls_locally_signed_cert.issuer_cert.validity_end_time
+          tls : {
+            crtPEM : tls_locally_signed_cert.issuer_cert.cert_pem
+            keyPEM : tls_private_key.issuer_key.private_key_pem
           }
         }
       }
     })
-  ] : [yamlencode({
-    podAnnotations: {
-      "cluster-autoscaler.kubernetes.io/safe-to-evict": "true"
-    }
-    identityTrustAnchorsPEM: tls_self_signed_cert.trustanchor_cert.cert_pem
-    identity: {
-      issuer: {
-        crtExpiry: tls_locally_signed_cert.issuer_cert.validity_end_time
-        tls: {
-          crtPEM: tls_locally_signed_cert.issuer_cert.cert_pem
-          keyPEM: tls_private_key.issuer_key.private_key_pem
+    ] : [yamlencode({
+      podAnnotations : {
+        "cluster-autoscaler.kubernetes.io/safe-to-evict" : "true"
+      }
+      identityTrustAnchorsPEM : tls_self_signed_cert.trustanchor_cert.cert_pem
+      identity : {
+        issuer : {
+          crtExpiry : tls_locally_signed_cert.issuer_cert.validity_end_time
+          tls : {
+            crtPEM : tls_locally_signed_cert.issuer_cert.cert_pem
+            keyPEM : tls_private_key.issuer_key.private_key_pem
+          }
         }
       }
-    }
   })]
 }
