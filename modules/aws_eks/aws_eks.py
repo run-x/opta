@@ -30,6 +30,44 @@ class AwsEksProcessor(ModuleProcessor):
         region = providers["provider"]["aws"]["region"]
         self.cleanup_cloudwatch_log_group(region)
         self.cleanup_dangling_enis(region)
+        self.cleanup_security_groups(region)
+
+    def cleanup_security_groups(self, region: str) -> None:
+        logger.debug("Seeking dangling security groups EKS forgot to destroy.")
+        client: EC2Client = boto3.client("ec2", config=Config(region_name=region))
+        vpcs = client.describe_vpcs(
+            Filters=[
+                {"Name": "tag:layer", "Values": [self.layer.name]},
+                {"Name": "tag:opta", "Values": ["true"]},
+            ]
+        )["Vpcs"]
+        if len(vpcs) == 0:
+            logger.debug(f"Opta vpc for layer {self.layer.name} not found")
+            return
+        elif len(vpcs) > 1:
+            logger.debug(
+                f"Weird, found multiple vpcs for layer {self.layer.name}: {[x['VpcId'] for x in vpcs]}"
+            )
+            return
+        vpc = vpcs[0]
+        vpc_id = vpc["VpcId"]
+        eks_security_groups = client.describe_security_groups(
+            Filters=[
+                {
+                    "Name": f"tag:kubernetes.io/cluster/opta-{self.layer.name}",
+                    "Values": ["owned"],
+                },
+                {"Name": "vpc-id", "Values": [vpc_id]},
+            ],
+        )["SecurityGroups"]
+        if len(eks_security_groups) == 0:
+            logger.debug("No dangling security groups found")
+            return
+        for eks_security_group in eks_security_groups:
+            logger.debug(
+                f"Deleting dangling security group {eks_security_group['GroupId']}"
+            )
+            client.delete_security_group(GroupId=eks_security_group["GroupId"])
 
     def cleanup_cloudwatch_log_group(self, region: str) -> None:
         logger.debug(
