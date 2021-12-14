@@ -230,6 +230,39 @@ jobs:
             --auto-approve \
             --refresh
 
+  aws-test-cloudfront:
+    executor: python-docker
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - aws-cli/install
+      - aws-cli/setup
+      - install-python-dependencies
+      - run:
+          name: "Apply Cloudfront Service with Opta"
+          command: |
+            OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-aws/service-cloudfront.yml \
+            --auto-approve
+      - run:
+          name: "Test Cloudfront curl"
+          command: |
+            sleep 20
+            export HOST=`./dist/opta/opta output --env awsenv-ci --config ./examples/ci-tests/create-and-destroy-aws/service-cloudfront.yml | jq -r '.cloudfront_domain'`
+            curl --fail https://${HOST}
+      - run:
+          name: "Destroy Cloudfront Service with Opta"
+          command: |
+            yes | ./dist/opta/opta destroy \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-aws/service-cloudfront.yml \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+
   aws-test-websocket:
     executor: python-docker
     environment:
@@ -997,6 +1030,9 @@ workflows:
       - aws-create-env:
           requires:
             - build-opta-binary
+      - aws-test-cloudfront:
+          requires:
+            - aws-create-env
       - aws-test-websocket:
           requires:
             -  aws-create-env
@@ -1021,6 +1057,7 @@ workflows:
       - aws-destroy-env:
           requires:
             - aws-test-websocket
+            - aws-test-cloudfront
             - aws-test-additional-nodegroup
             - aws-test-service-pg
             - aws-test-service-s3

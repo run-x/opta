@@ -1,0 +1,13 @@
+name: testing-cloufront
+environments:
+  - name: awsenv-ci
+    path: "environment.yml"
+    variables: {}
+modules:
+  - type: aws-s3
+    name: testmodule
+    bucket_name: "opta-cloudfront-create-destroy-test-1"
+    files: "./cf-files"
+  - type: cloudfront-distribution
+    links:
+      - testmodule
