@@ -21,7 +21,7 @@ inputs:
   - name: expose_via_domain
     user_facing: true
     validator: bool(required=False)
-    description: The arns of additional IAM policies to be attached to this role.
+    description: Set to true to expose the lambda as a public url in a new AWS API Gateway (V2)
     default: false
   - name: runtime
     user_facing: true
@@ -33,6 +33,11 @@ inputs:
     validator: str(required=True)
     description: The filename for your zip file containing your lambda code
     default: null
+  - name: handler
+    user_facing: true
+    validator: str(required=False)
+    description: Lambda function handler is the method in your function code that processes events.
+    default: "index.handler"
   - name: env_vars
     user_facing: true
     validator: map(str(), str(), required=False)
