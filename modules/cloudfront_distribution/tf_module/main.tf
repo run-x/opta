@@ -1,5 +1,5 @@
 data "aws_s3_bucket" "current_bucket" {
-  count = var.bucket_name == "" ? 0 : 1
+  count  = var.bucket_name == "" ? 0 : 1
   bucket = var.bucket_name
 }
 
@@ -19,15 +19,15 @@ resource "aws_cloudfront_distribution" "lb_distribution" {
     domain_name = var.load_balancer
     origin_id   = local.lb_origin_id
     custom_origin_config {
-      http_port = 80
-      https_port = 443
+      http_port              = 80
+      https_port             = 443
       origin_protocol_policy = "http-only"
-      origin_ssl_protocols = ["TLSv1.2", "TLSv1.1", "TLSv1"]
+      origin_ssl_protocols   = ["TLSv1.2", "TLSv1.1", "TLSv1"]
     }
   }
 
-  comment = "Opta managed cloudfront distribution ${var.layer_name}-${var.module_name}"
-  enabled = true
+  comment         = "Opta managed cloudfront distribution ${var.layer_name}-${var.module_name}"
+  enabled         = true
   is_ipv6_enabled = true
 
   dynamic "logging_config" {
@@ -40,9 +40,9 @@ resource "aws_cloudfront_distribution" "lb_distribution" {
   }
 
   default_cache_behavior {
-    allowed_methods  = ["GET", "HEAD", "OPTIONS"]
-    cached_methods   = ["GET", "HEAD", "OPTIONS"]
-    target_origin_id = local.lb_origin_id
+    allowed_methods        = ["GET", "HEAD", "OPTIONS"]
+    cached_methods         = ["GET", "HEAD", "OPTIONS"]
+    target_origin_id       = local.lb_origin_id
     viewer_protocol_policy = "redirect-to-https"
 
     forwarded_values {
