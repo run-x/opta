@@ -60,11 +60,11 @@ variable "load_balancer" {
 }
 
 variable "eks_load_balancer_enabled" {
-  type = bool
+  type    = bool
   default = false
 }
 
 variable "s3_load_balancer_enabled" {
-  type = bool
+  type    = bool
   default = false
 }
