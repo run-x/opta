@@ -1,5 +1,5 @@
 data "aws_s3_bucket" "current_bucket" {
-  count  = var.bucket_name == "" ? 0 : 1
+  count  = local.s3_distribution_count
   bucket = var.bucket_name
 }
 
