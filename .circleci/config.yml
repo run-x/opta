@@ -250,7 +250,7 @@ jobs:
             --config ./examples/ci-tests/create-and-destroy-aws/service-cloudfront.yml \
             --auto-approve
       - run:
-          name: "Test Websocket"
+          name: "Test Cloudfront curl"
           command: |
             sleep 20
             export HOST=`./dist/opta/opta output --env awsenv-ci --config ./examples/ci-tests/create-and-destroy-aws/service-cloudfront.yml | jq -r '.cloudfront_domain'`
