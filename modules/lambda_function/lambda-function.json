@@ -17,7 +17,7 @@
       "default": []
     },
     "expose_via_domain": {
-      "description": "The arns of additional IAM policies to be attached to this role.",
+      "description": "Set to true to expose the lambda as a public url in a new AWS API Gateway (V2)",
       "enum": [
         "lambda-function"
       ],
@@ -36,6 +36,13 @@
         "lambda-function"
       ],
       "default": null
+    },
+    "handler": {
+      "description": "Lambda function handler is the method in your function code that processes events.",
+      "enum": [
+        "lambda-function"
+      ],
+      "default": "index.handler"
     },
     "env_vars": {
       "description": "A map of key values to add to the container as environment variables (key is name, value is value).\n```yaml\nenv_vars:\n FLAG: \"true\"\n```\n",
