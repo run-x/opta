@@ -32,38 +32,8 @@ from google.auth import default
 from google.auth.exceptions import DefaultCredentialsError
 from google.oauth2 import service_account
 
-from modules.aws_dns.aws_dns import AwsDnsProcessor
-from modules.aws_documentdb.aws_documentdb import AwsDocumentDbProcessor
-from modules.aws_dynamodb.aws_dynamodb import AwsDynamodbProcessor
-from modules.aws_eks.aws_eks import AwsEksProcessor
-from modules.aws_email import AwsEmailProcessor
-from modules.aws_iam_role.aws_iam_role import AwsIamRoleProcessor
-from modules.aws_iam_user.aws_iam_user import AwsIamUserProcessor
-from modules.aws_k8s_base.aws_k8s_base import AwsK8sBaseProcessor
-from modules.aws_k8s_service.aws_k8s_service import AwsK8sServiceProcessor
-from modules.aws_s3.aws_s3 import AwsS3Processor
-from modules.aws_sns.aws_sns import AwsSnsProcessor
-from modules.aws_sqs.aws_sqs import AwsSqsProcessor
-from modules.azure_base.azure_base import AzureBaseProcessor
-from modules.azure_k8s_base.azure_k8s_base import AzureK8sBaseProcessor
-from modules.azure_k8s_service.azure_k8s_service import AzureK8sServiceProcessor
 from modules.base import ModuleProcessor
-from modules.cloudfront_distribution.aws_cloudfront_distribution import (
-    AwsCloudfrontDstributionProcessor,
-)
-from modules.custom_terraform.custom_terraform import CustomTerraformProcessor
-from modules.datadog.datadog import DatadogProcessor
-from modules.external_ssl_cert.external_ssl_cert import ExternalSSLCert
-from modules.gcp_dns.gcp_dns import GCPDnsProcessor
-from modules.gcp_gke.gcp_gke import GcpGkeProcessor
-from modules.gcp_k8s_base.gcp_k8s_base import GcpK8sBaseProcessor
-from modules.gcp_k8s_service.gcp_k8s_service import GcpK8sServiceProcessor
-from modules.gcp_service_account.gcp_service_account import GcpServiceAccountProcessor
-from modules.helm_chart.helm_chart import HelmChartProcessor
-from modules.lambda_function.lambda_function import LambdaFunctionProcessor
-from modules.local_k8s_service.local_k8s_service import LocalK8sServiceProcessor
-from modules.mongodb_atlas.mongodb_atlas import MongodbAtlasProcessor
-from modules.runx.runx import RunxProcessor
+from opta.utils.module_map import get_processor_class 
 from opta.constants import MODULE_DEPENDENCY, REGISTRY, VERSION
 from opta.core.aws import AWS
 from opta.core.gcp import GCP
@@ -90,38 +60,6 @@ class StructuredConfig(TypedDict):
 
 
 class Layer:
-    PROCESSOR_DICT: Dict[str, Type[ModuleProcessor]] = {
-        "aws-k8s-service": AwsK8sServiceProcessor,
-        "aws-k8s-base": AwsK8sBaseProcessor,
-        "datadog": DatadogProcessor,
-        "gcp-k8s-base": GcpK8sBaseProcessor,
-        "gcp-k8s-service": GcpK8sServiceProcessor,
-        "gcp-gke": GcpGkeProcessor,
-        "aws-dns": AwsDnsProcessor,
-        "aws-documentdb": AwsDocumentDbProcessor,
-        "runx": RunxProcessor,
-        "helm-chart": HelmChartProcessor,
-        "aws-iam-role": AwsIamRoleProcessor,
-        "aws-iam-user": AwsIamUserProcessor,
-        "aws-eks": AwsEksProcessor,
-        "aws-ses": AwsEmailProcessor,
-        "aws-sqs": AwsSqsProcessor,
-        "aws-sns": AwsSnsProcessor,
-        "azure-base": AzureBaseProcessor,
-        "azure-k8s-base": AzureK8sBaseProcessor,
-        "azure-k8s-service": AzureK8sServiceProcessor,
-        "local-k8s-service": LocalK8sServiceProcessor,
-        "external-ssl-cert": ExternalSSLCert,
-        "aws-s3": AwsS3Processor,
-        "gcp-dns": GCPDnsProcessor,
-        "gcp-service-account": GcpServiceAccountProcessor,
-        "custom-terraform": CustomTerraformProcessor,
-        "aws-dynamodb": AwsDynamodbProcessor,
-        "mongodb-atlas": MongodbAtlasProcessor,
-        "cloudfront-distribution": AwsCloudfrontDstributionProcessor,
-        "lambda-function": LambdaFunctionProcessor,
-    }
-
     def __init__(
         self,
         name: str,
@@ -463,7 +401,7 @@ class Layer:
 
     def processor_for(self, module: Module) -> ModuleProcessor:
         module_type = module.aliased_type or module.type
-        processor_class = self.PROCESSOR_DICT.get(module_type, ModuleProcessor)
+        processor_class = get_processor_class(module_type)
         return processor_class(module, self)
 
     def metadata_hydration(self) -> Dict[Any, Any]:
