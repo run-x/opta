@@ -280,7 +280,7 @@ jobs:
       - run:
           name: "Deploy opta environment"
           command: |
-            $HOME/.opta/opta apply \
+            yes | $HOME/.opta/opta apply \
             --config ./examples/ci-tests/create-and-destroy-aws/environment.yml \
             --auto-approve \
             --refresh
