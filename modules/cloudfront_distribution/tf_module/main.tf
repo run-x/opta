@@ -30,6 +30,8 @@ resource "aws_cloudfront_distribution" "distribution" {
     }
   }
 
+  default_root_object = var.s3_load_balancer_enabled == true ? var.default_page_file : null
+
   restrictions {
     geo_restriction {
       restriction_type = "none"
@@ -68,40 +70,18 @@ resource "aws_cloudfront_distribution" "distribution" {
     }
   }
 
-  dynamic "default_cache_behavior" {
-    for_each = var.eks_load_balancer_enabled == true ? [1] : []
-    content {
-      allowed_methods        = var.allowed_methods
-      cached_methods         = var.cached_methods
-      target_origin_id       = local.lb_origin_id
-      viewer_protocol_policy = "redirect-to-https"
+  default_cache_behavior {
+    allowed_methods        = var.allowed_methods
+    cached_methods         = var.cached_methods
+    target_origin_id       = var.eks_load_balancer_enabled == true ? local.lb_origin_id : local.s3_origin_id
+    viewer_protocol_policy = "redirect-to-https"
 
-      forwarded_values {
-        query_string = true
-        headers      = ["Origin", "Access-Control-Request-Headers", "Access-Control-Request-Method"]
+    forwarded_values {
+      query_string = true
+      headers      = ["Origin", "Access-Control-Request-Headers", "Access-Control-Request-Method"]
 
-        cookies {
-          forward = "none"
-        }
-      }
-    }
-  }
-
-  dynamic "default_cache_behavior" {
-    for_each = var.s3_load_balancer_enabled == true ? [1] : []
-    content {
-      allowed_methods        = var.allowed_methods
-      cached_methods         = var.cached_methods
-      target_origin_id       = local.s3_origin_id
-      viewer_protocol_policy = "redirect-to-https"
-
-      forwarded_values {
-        query_string = true
-        headers      = ["Origin", "Access-Control-Request-Headers", "Access-Control-Request-Method"]
-
-        cookies {
-          forward = "none"
-        }
+      cookies {
+        forward = "none"
       }
     }
   }
