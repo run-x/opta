@@ -1,0 +1,11 @@
+name: testing-lambda
+environments:
+  - name: awsenv-ci
+    path: "environment.yml"
+    variables: {}
+modules:
+  - type: lambda-function
+    expose_via_domain: true
+    filename: ./lambda-code/lambda.zip
+    runtime: "python3.9"
+    handler: "lambda.lambda_handler"
