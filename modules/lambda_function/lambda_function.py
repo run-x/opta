@@ -34,10 +34,9 @@ class LambdaFunctionProcessor(ModuleProcessor):
             self.module.data["vpc_id"] = f"${{{{{module_source}.vpc_id}}}}"
         file_path: str = self.module.data.get("filename")
         if not file_path.startswith("/"):
-            self.module.data["filename"] = os.path.join(
-                os.path.dirname(self.layer.path), file_path
-            )
+            file_path = os.path.join(os.path.dirname(self.layer.path), file_path)
         file_size = os.path.getsize(file_path) if file_path is not None else 0
+        self.module.data["filename"] = file_path
 
         if file_size >= 50000000:
             raise UserErrors(
