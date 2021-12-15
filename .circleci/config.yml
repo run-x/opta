@@ -283,7 +283,7 @@ jobs:
             yes | $HOME/.opta/opta apply \
             --config ./examples/ci-tests/create-and-destroy-aws/environment.yml \
             --auto-approve \
-            --refresh
+            --refresh || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-test-cloudfront:
     executor: python-docker
