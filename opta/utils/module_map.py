@@ -39,10 +39,14 @@ PROCESSOR_DICT: Dict[str, str] = {
 # the opta module file being named module-some-name
 def generate_pymodule_path(module_type: str) -> str:
     base_name = "_".join(module_type.split("-"))
-    return ".".join(["module", base_name, base_name])
+    return ".".join(["modules", base_name, base_name])
 
 
 def get_processor_class(module_type: str) -> ModuleProcessor:
-    pymodule_path = generate_pymodule_path(module_type)
-    pymodule = importlib.import_module(pymodule_path)
-    return pymodule[PROCESSOR_DICT[module_type]]
+    try:
+        pymodule_path = generate_pymodule_path(module_type)
+        pymodule = importlib.import_module(pymodule_path)
+    except ModuleNotFoundError:
+        return ModuleProcessor
+
+    return pymodule.__dict__[PROCESSOR_DICT[module_type]]

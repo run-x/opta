@@ -2,7 +2,7 @@ import glob
 import os
 import shutil
 from typing import Any, Dict, List
-
+import json
 from ruamel.yaml import YAML
 
 yaml = YAML(
@@ -50,7 +50,7 @@ def make_registry_dict() -> Dict[Any, Any]:
             alt_cloudname = cloud
         cloud_dict["modules"] = {**_make_module_registry_dict(module_path, alt_cloudname)}
         registry_dict[cloud] = cloud_dict
-
+    open("/tmp/registry.json","w").write(json.dumps(registry_dict))
     return registry_dict
 
 
