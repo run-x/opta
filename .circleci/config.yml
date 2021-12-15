@@ -290,6 +290,7 @@ jobs:
           command: |
             sleep 20
             export LAMBDA_NAME=`./dist/opta/opta output --env awsenv-ci --config ./examples/ci-tests/create-and-destroy-aws/service-lambda.yml | jq -r '.function_name'`
+            export AWS_DEFAULT_REGION="us-east-2"
             aws lambda invoke --function-name $LAMBDA_NAME  ./examples/ci-tests/create-and-destroy-aws/service-lambda.txt
             export RESPONSE=`cat ./examples/ci-tests/create-and-destroy-aws/service-lambda.txt`
 
