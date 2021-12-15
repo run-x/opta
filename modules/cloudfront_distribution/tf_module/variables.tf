@@ -70,11 +70,11 @@ variable "s3_load_balancer_enabled" {
 }
 
 variable "allowed_methods" {
-  type = list(string)
+  type    = list(string)
   default = ["GET", "HEAD", "OPTIONS"]
 }
 
 variable "cached_methods" {
-  type = list(string)
+  type    = list(string)
   default = ["GET", "HEAD", "OPTIONS"]
 }

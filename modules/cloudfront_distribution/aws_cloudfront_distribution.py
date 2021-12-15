@@ -50,7 +50,7 @@ class CloudfrontDistributionProcessor(ModuleProcessor):
             )
 
         if len(links) > 1:
-            raise UserErrors(f"Cloudfront Distribution can't have more than one links.")
+            raise UserErrors("Cloudfront Distribution can't have more than one links.")
 
         for module_name in links:
             module = self.layer.get_module(module_name, module_idx)
