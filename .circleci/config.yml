@@ -25,6 +25,9 @@ parameters:
   run-service-mesh-e2e:
     type: boolean
     default: false
+  test-aws-lambda:
+    type: boolean
+    default: false
 
 
 orbs:
@@ -261,6 +264,42 @@ jobs:
             yes | ./dist/opta/opta destroy \
             --env awsenv-ci \
             --config ./examples/ci-tests/create-and-destroy-aws/service-cloudfront.yml \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+
+  aws-test-lambda-function:
+    executor: python-docker
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - aws-cli/install
+      - aws-cli/setup
+      - install-python-dependencies
+      - run:
+          name: "Apply Cloudfront Service with Opta"
+          command: |
+            OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-aws/service-lambda.yml \
+            --auto-approve
+      - run:
+          name: "Test Lambda Invocation"
+          command: |
+            sleep 20
+            export LAMBDA_NAME=`./dist/opta/opta output --env awsenv-ci --config ./examples/ci-tests/create-and-destroy-aws/service-lambda.yml | jq -r '.function_name'`
+            export AWS_DEFAULT_REGION="us-east-2"
+            aws lambda invoke --function-name $LAMBDA_NAME  ./examples/ci-tests/create-and-destroy-aws/service-lambda.txt
+            export RESPONSE=`cat ./examples/ci-tests/create-and-destroy-aws/service-lambda.txt`
+
+      - run:
+          name: "Destroy Cloudfront Service with Opta"
+          command: |
+            yes | ./dist/opta/opta destroy \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-aws/service-lambda.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-test-websocket:
@@ -1033,6 +1072,9 @@ workflows:
       - aws-test-cloudfront:
           requires:
             - aws-create-env
+      - aws-test-lambda-function:
+          requires:
+            - aws-create-env
       - aws-test-websocket:
           requires:
             -  aws-create-env
@@ -1058,6 +1100,7 @@ workflows:
           requires:
             - aws-test-websocket
             - aws-test-cloudfront
+            - aws-test-lambda-function
             - aws-test-additional-nodegroup
             - aws-test-service-pg
             - aws-test-service-s3
@@ -1147,6 +1190,20 @@ workflows:
       - local-opta-example-destroy-svcs:
           requires:
             - local-opta-example-create-svcs
+
+  run-aws-lambda:
+    when: << pipeline.parameters.test-aws-lambda >>
+    jobs:
+      - build-opta-binary
+      - aws-create-env:
+          requires:
+            - build-opta-binary
+      - aws-test-lambda-function:
+          requires:
+            - aws-create-env
+      - aws-destroy-env:
+          requires:
+            - aws-test-lambda-function
 
   run-service-mesh-e2e:
     when: << pipeline.parameters.run-service-mesh-e2e >>
