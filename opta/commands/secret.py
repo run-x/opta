@@ -63,6 +63,7 @@ def view(secret: str, env: Optional[str], config: str) -> None:
 )
 def list_command(env: Optional[str], config: str) -> None:
     """List the secrets setup for the given k8s service module"""
+    config = check_opta_file_exists(config)
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(amplitude_client.LIST_SECRETS_EVENT)
     gen_all(layer)
@@ -86,7 +87,7 @@ def list_command(env: Optional[str], config: str) -> None:
 def update(secret: str, value: str, env: Optional[str], config: str) -> None:
     """Update a given secret of a k8s service with a new value"""
 
-    check_opta_file_exists(config)
+    config = check_opta_file_exists(config)
     layer = Layer.load_from_yaml(config, env)
     gen_all(layer)
 
