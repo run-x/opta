@@ -49,6 +49,9 @@ class CloudfrontDistributionProcessor(ModuleProcessor):
                 "origin_access_identity_path for your bucket."
             )
 
+        if len(links) > 1:
+            raise UserErrors(f"Cloudfront Distribution can't have more than one links.")
+
         for module_name in links:
             module = self.layer.get_module(module_name, module_idx)
             if module is None:

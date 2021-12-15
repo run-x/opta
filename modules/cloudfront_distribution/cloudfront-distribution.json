@@ -62,6 +62,30 @@
       },
       "default": []
     },
+    "allowed_methods": {
+      "type": "list",
+      "description": "HTTP methods CloudFront processes and forwards to your Amazon S3 bucket or your custom origin.",
+      "items": {
+        "oneOf": [
+          {
+            "type": "string"
+          }
+        ]
+      },
+      "default": []
+    },
+    "cached_methods": {
+      "type": "list",
+      "description": "CloudFront caches the response to requests using the specified HTTP methods.",
+      "items": {
+        "oneOf": [
+          {
+            "type": "string"
+          }
+        ]
+      },
+      "default": []
+    },
     "type": {
       "description": "The name of this module",
       "enum": [
