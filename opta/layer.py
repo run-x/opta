@@ -67,6 +67,7 @@ PROCESSOR_DICT: Dict[str, str] = {
     "lambda-function": "LambdaFunctionProcessor",
 }
 
+
 # Relies on the python file being module_some_name.py, and then
 # the opta module file being named module-some-name
 def generate_pymodule_path(module_type: str) -> str:

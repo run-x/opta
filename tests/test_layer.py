@@ -1,13 +1,10 @@
 # type: ignore
 
 import os
-import sys
 from types import SimpleNamespace
 
 import pytest
 from pytest_mock import MockFixture
-from pytest_mock import MockFixture as mocker
-from pytest_mock.plugin import MockerFixture
 
 from modules.base import ModuleProcessor
 from opta.exceptions import UserErrors
