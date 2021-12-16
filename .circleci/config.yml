@@ -997,6 +997,8 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
+          at: ~/
+      - attach_workspace:
           at: ./
       - install-opta-dependencies
       - gcp-cli/install
