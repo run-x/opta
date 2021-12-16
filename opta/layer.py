@@ -1,6 +1,7 @@
 from __future__ import annotations
-import importlib
+
 import hashlib
+import importlib
 import os
 import re
 import shutil
@@ -18,10 +19,8 @@ from typing import (
     Optional,
     Set,
     Tuple,
-    Type,
     TypedDict,
 )
-
 
 import boto3
 import click
@@ -32,8 +31,9 @@ from botocore.exceptions import ClientError, NoCredentialsError
 from google.auth import default
 from google.auth.exceptions import DefaultCredentialsError
 from google.oauth2 import service_account
-from modules.runx.runx import RunxProcessor
+
 from modules.base import ModuleProcessor
+from modules.runx.runx import RunxProcessor
 from opta.constants import MODULE_DEPENDENCY, REGISTRY, VERSION
 from opta.core.aws import AWS
 from opta.core.gcp import GCP
@@ -44,7 +44,6 @@ from opta.module import Module
 from opta.plugins.derived_providers import DerivedProviders
 from opta.utils import deep_merge, hydrate, logger, yaml
 from opta.utils.dependencies import validate_installed_path_executables
-
 
 PROCESSOR_DICT: Dict[str, str] = {
     "aws-k8s-service": "AwsK8sServiceProcessor",
@@ -78,7 +77,7 @@ PROCESSOR_DICT: Dict[str, str] = {
     "lambda-function": "LambdaFunctionProcessor",
 }
 
-# Relies on the python file being module_some_name.py, and then 
+# Relies on the python file being module_some_name.py, and then
 # the opta module file being named module-some-name
 def generate_pymodule_path(module_type: str) -> str:
     base_name = "_".join(module_type.split("-"))
