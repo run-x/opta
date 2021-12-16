@@ -408,7 +408,7 @@ jobs:
             yes | $HOME/.opta/opta apply \
             --env awsenv-ci \
             --config ./examples/ci-tests/create-and-destroy-aws/websocket-service.yml \
-            --auto-approve
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
       - run:
           name: "Test Websocket"
           command: |
