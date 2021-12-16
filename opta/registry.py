@@ -51,7 +51,7 @@ def make_registry_dict() -> Dict[Any, Any]:
             alt_cloudname = cloud
         cloud_dict["modules"] = {**_make_module_registry_dict(module_path, alt_cloudname)}
         registry_dict[cloud] = cloud_dict
-    open("/tmp/registry.json", "w").write(json.dumps(registry_dict))
+    open("/tmp/registry.json", "w").write(json.dumps(registry_dict))  # nosec
     return registry_dict
 
 

@@ -10,17 +10,7 @@ from datetime import datetime
 from os import path
 from pathlib import Path
 from types import SimpleNamespace
-from typing import (
-    Any,
-    Dict,
-    FrozenSet,
-    Iterable,
-    List,
-    Optional,
-    Set,
-    Tuple,
-    TypedDict,
-)
+from typing import Any, Dict, FrozenSet, Iterable, List, Optional, Set, Tuple, TypedDict
 
 import boto3
 import click
