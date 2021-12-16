@@ -773,6 +773,28 @@ jobs:
             --auto-approve \
             --refresh
 
+  gcp-create-env-stable-version:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/
+      - install-opta-dependencies
+      - gcp-cli/install
+      - gcp-cli/initialize
+      - run:
+          name: "Setting up gcp envar"
+          command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+      - run:
+          name: "Deploy opta environment"
+          command: |
+            yes | $HOME/.opta/opta apply \
+            --config ./examples/ci-tests/create-and-destroy-gcp/environment.yml \
+            --auto-approve \
+            --refresh || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+
   gcp-test-additional-nodegroup:
     executor: ubuntu-machine
     environment:
@@ -964,6 +986,74 @@ jobs:
           name: "Destroy test-service-pg"
           command: |
             yes | ./dist/opta/opta destroy \
+            --env gcpenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+
+  gcp-test-service-pg-latest-version:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - gcp-cli/install
+      - gcp-cli/initialize
+      - run:
+          name: "Setting up gcp envar"
+          command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+      - run:
+          name: "Load test-service image"
+          command: docker load -i test-service-image
+      - run:
+          name: "Set secret"
+          command: |
+            yes | $HOME/.opta/opta secret update \
+            --env gcpenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
+            FAKE_SECRET foo
+      - run:
+          name: "Deploy test-service-pg"
+          command: |
+            yes | $HOME/.opta/opta deploy \
+            --image app:latest \
+            --env gcpenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
+            --tag $CIRCLE_SHA1 \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+      - run:
+          name: "Deploy test-service with Additional PG"
+          command: |
+            yes | $HOME/.opta/opta deploy \
+            --image app:latest \
+            --env gcpenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-gcp/service-additional-pg.yml \
+            --tag $CIRCLE_SHA1 \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+      - run:
+          name: "Deploy test-service remove Additional PG"
+          command: |
+            yes | $HOME/.opta/opta deploy \
+            --image app:latest \
+            --env gcpenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
+            --tag $CIRCLE_SHA1 \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+      - run:
+          name: "View secret and check value"
+          command: |
+            secret_value=$($HOME/.opta/opta secret view \
+            --env gcpenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
+            FAKE_SECRET | tail -1)
+            echo "This was the found secret value: ${secret_value}"
+            [[ "$secret_value" =~ .*"foo".* ]] || exit 1
+      - run:
+          name: "Destroy test-service-pg"
+          command: |
+            yes | $HOME/.opta/opta destroy \
             --env gcpenv-ci \
             --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
@@ -1371,6 +1461,24 @@ workflows:
           requires:
             - aws-test-websocket
             - build-opta-binary
+      - gcp-create-env-stable-version:
+          requires:
+            - download-opta
+            - check-version
+      - gcp-create-env:
+          requires:
+            - build-opta-binary
+            - gcp-create-env-stable-version
+      - gcp-test-service-pg-latest-version:
+          requires:
+            - gcp-create-env-stable-version
+            - gcp-create-env
+      - gcp-test-service-pg:
+          requires:
+            - gcp-test-service-pg-latest-version
+      - gcp-destroy-env:
+          requires:
+            - gcp-test-service-pg
 
   nightly:
     triggers:
