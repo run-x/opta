@@ -7,7 +7,9 @@ weight: 1
 description: Set up a cloudfront distribution
 ---
 
-This module sets up a cloudfront distribution for you, tailored towards serving static websites/files from an Opta s3 
+This module sets up a cloudfront distribution for you.
+
+1. It can be tailored towards serving static websites/files from an Opta s3 
 bucket (currently just for a single S3, but will expand for more complex usage in the future). Now, hosting your 
 static site with opta can be as simple as:
 
@@ -33,6 +35,27 @@ modules:
 ```
 
 Once you Opta apply, run `opta output` to get the value of your `cloudfront_domain`. `index.html` is automatically served at this domain.
+2. It can be tailored to serve as a CDN for the Load Balancer for the Cluster.
+```yaml
+name: testing-cloufront
+org_name: runx
+providers:
+  aws:
+    region: us-east-1
+    account_id: XXXXXXXXXX
+modules:
+  - type: base
+  - type: k8s-cluster
+  - type: k8s-base
+    name: testbase
+  - type: cloudfront-distribution
+#    Uncomment the following and fill in to support your domain with ssl
+#    acm_cert_arn: "arn:aws:acm:us-east-1:XXXXXXXXXX:certificate/cert-id"
+#    domains:
+#      - "your.domain.com"
+    links:
+      - testbase
+```
 
 ### Non-opta S3 bucket handling
 If you wish to link to a bucket created outside of opta, then you can manually set the `bucket_name` and 

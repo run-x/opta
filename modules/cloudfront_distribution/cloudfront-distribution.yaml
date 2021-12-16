@@ -82,7 +82,7 @@ inputs:
   - name: cached_methods
     user_facing: true
     validator: list(str(), required=False)
-    description: CloudFront caches the response to requests using the specified HTTP methods.
+    description: CloudFront caches the response to the specified HTTP method requests.
     default: ["GET", "HEAD", "OPTIONS"]
 extra_validators: { }
 outputs:

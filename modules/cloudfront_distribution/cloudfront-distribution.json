@@ -80,7 +80,7 @@
     },
     "cached_methods": {
       "type": "list",
-      "description": "CloudFront caches the response to requests using the specified HTTP methods.",
+      "description": "CloudFront caches the response to the specified HTTP method requests.",
       "items": {
         "oneOf": [
           {
