@@ -1438,7 +1438,7 @@ workflows:
     when: << pipeline.parameters.run-release-vs-stable >>
     jobs:
       - build-opta-binary
-      - build-opta-example-images
+      - build-test-service-image
       - download-opta
       - check-version:
           requires:
@@ -1474,7 +1474,7 @@ workflows:
           requires:
             - gcp-create-env-stable-version
             - gcp-create-env
-            - build-opta-example-images
+            - build-test-service-image
       - gcp-test-service-pg:
           requires:
             - gcp-test-service-pg-latest-version
