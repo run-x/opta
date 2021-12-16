@@ -3,8 +3,9 @@ import pytest
 from pytest_mock import MockFixture as mocker
 from opta.layer import Layer
 def get_processor_class(module_type: str) -> ModuleProcessor:
-        mocked_datadog_processor = mocker.patch("opta.layer.DatadogProcessor")
+    try:
         mock_dict = {}
+        mocked_datadog_processor = mocker.patch("opta.layer.DatadogProcessor")
         mock_dict["datadog"] = mocked_datadog_processor
         mocked_k8s_base_processor = mocker.patch("opta.layer.AwsK8sBaseProcessor")
         mock_dict["aws-k8s-base"] = mocked_k8s_base_processor
@@ -21,5 +22,7 @@ def get_processor_class(module_type: str) -> ModuleProcessor:
         )
 
         mock_dict["aws-documentdb"] = mocked_aws_documentdb_processor
+    except ModuleNotFoundError:
+        return mocker.patch("opta.layer.ModuleProcessor")
 
         return mock_dict[module_type]

@@ -5,11 +5,16 @@ from types import SimpleNamespace
 
 import pytest
 from pytest_mock import MockFixture
+from pytest_mock.plugin import MockerFixture
 
 from opta.exceptions import UserErrors
-from opta.layer import Layer
+
 import sys
-sys.modules['opta.utils.module_map'] = __import__('tests.mock_module_map')
+from opta.layer import Layer
+from modules.base import ModuleProcessor
+import pytest
+from pytest_mock import MockFixture as mocker
+from opta.layer import Layer
 
 class TestLayer:
     def test_infinite_loop_prevention(self):
@@ -125,7 +130,35 @@ class TestLayer:
             "total_resources": 9,
         }
 
-    def test_parent(self, mocker: MockFixture):
+    def test_parent(self, mocker: MockFixture, monkeypatch):
+        mocked_datadog_processor = mocker.patch("modules.datadog.datadog.DatadogProcessor")
+        mocked_k8s_base_processor = mocker.patch("modules.aws_k8s_base.aws_k8s_base.AwsK8sBaseProcessor")
+        mocked_eks_processor = mocker.patch("modules.aws_eks.aws_eks.AwsEksProcessor")
+        mocked_dns_processor = mocker.patch("modules.aws_dns.aws_dns.AwsDnsProcessor")
+        mocked_runx_processor = mocker.patch("modules.runx.runx.RunxProcessor")
+        mocked_aws_email_processor = mocker.patch("modules.aws_email.AwsEmailProcessor")
+        mocked_aws_documentdb_processor = mocker.patch(
+                    "modules.aws_documentdb.aws_documentdb.AwsDocumentDbProcessor"
+                )
+        mocked_base_processor = mocker.patch("opta.layer.ModuleProcessor")
+        
+        def mock_get_processor_class(module_type: str) -> ModuleProcessor:
+            
+            mock_dict = {}
+            mock_dict["datadog"] = mocked_datadog_processor
+            mock_dict["aws-k8s-base"] = mocked_k8s_base_processor
+            mock_dict["aws-eks"] = mocked_eks_processor
+            mock_dict["aws-dns"] = mocked_dns_processor
+            mock_dict["runx"] = mocked_runx_processor
+            mock_dict["aws-ses"] = mocked_aws_email_processor
+            mock_dict["aws-documentdb"] = mocked_aws_documentdb_processor
+        
+            if module_type in mock_dict:
+                return mock_dict[module_type]
+            else:
+                return mocked_base_processor
+
+        monkeypatch.setattr('opta.layer.get_processor_class', mock_get_processor_class)
         layer = Layer.load_from_yaml(
             os.path.join(
                 os.getcwd(), "tests", "fixtures", "dummy_data", "dummy_config_parent.yaml"
@@ -144,7 +177,8 @@ class TestLayer:
         # layer.PROCESSOR_DICT["runx"] = mocked_runx_processor
         # mocked_aws_email_processor = mocker.patch("opta.layer.AwsEmailProcessor")
         # layer.PROCESSOR_DICT["aws-ses"] = mocked_aws_email_processor
-        mocked_base_processor = mocker.patch("opta.layer.ModuleProcessor")
+    
+        
 
         assert layer.name == "dummy-parent"
         assert layer.parent is None
@@ -209,7 +243,35 @@ class TestLayer:
             ]
         )
 
-    def test_child(self, mocker: MockFixture):
+    def test_child(self, mocker: MockFixture, monkeypatch):
+        mocked_datadog_processor = mocker.patch("modules.datadog.datadog.DatadogProcessor")
+        mocked_k8s_base_processor = mocker.patch("modules.aws_k8s_base.aws_k8s_base.AwsK8sBaseProcessor")
+        mocked_eks_processor = mocker.patch("modules.aws_eks.aws_eks.AwsEksProcessor")
+        mocked_dns_processor = mocker.patch("modules.aws_dns.aws_dns.AwsDnsProcessor")
+        mocked_runx_processor = mocker.patch("modules.runx.runx.RunxProcessor")
+        mocked_aws_email_processor = mocker.patch("modules.aws_email.AwsEmailProcessor")
+        mocked_aws_documentdb_processor = mocker.patch(
+                    "modules.aws_documentdb.aws_documentdb.AwsDocumentDbProcessor"
+                )
+        mocked_base_processor = mocker.patch("opta.layer.ModuleProcessor")
+
+        
+        def mock_get_processor_class(module_type: str) -> ModuleProcessor:
+            mock_dict = {}
+            mock_dict["datadog"] = mocked_datadog_processor
+            mock_dict["aws-k8s-base"] = mocked_k8s_base_processor
+            mock_dict["aws-eks"] = mocked_eks_processor
+            mock_dict["aws-dns"] = mocked_dns_processor
+            mock_dict["runx"] = mocked_runx_processor
+            mock_dict["aws-ses"] = mocked_aws_email_processor
+            mock_dict["aws-documentdb"] = mocked_aws_documentdb_processor
+        
+            if module_type in mock_dict:
+                return mock_dict[module_type]
+            else:
+                return mocked_base_processor
+
+        monkeypatch.setattr('opta.layer.get_processor_class', mock_get_processor_class)
         layer = Layer.load_from_yaml(
             os.path.join(
                 os.getcwd(), "tests", "fixtures", "dummy_data", "dummy_config1.yaml"
@@ -233,8 +295,6 @@ class TestLayer:
         # )
 
         # layer.PROCESSOR_DICT["aws-documentdb"] = mocked_aws_documentdb_processor
-
-        mocked_base_processor = mocker.patch("opta.layer.ModuleProcessor")
 
         assert layer.name == "dummy-config-1"
         assert layer.parent is not None
