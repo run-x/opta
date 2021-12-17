@@ -1015,7 +1015,7 @@ jobs:
             yes | $HOME/.opta/opta secret update \
             --env gcpenv-ci \
             --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
-            FAKE_SECRET foo
+            FAKE_SECRET foo || if [[ $? -eq 141 ]]; then true; else exit $?; fi
       - run:
           name: "Deploy test-service-pg"
           command: |
