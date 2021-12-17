@@ -2,8 +2,10 @@
 
 import os
 from types import SimpleNamespace
+
 import pytest
 from pytest_mock import MockFixture
+
 from modules.base import ModuleProcessor
 from opta.exceptions import UserErrors
 from opta.layer import Layer
@@ -133,7 +135,9 @@ class TestLayer:
         mocked_eks_processor = mocker.patch("modules.aws_eks.aws_eks.AwsEksProcessor")
         mocked_dns_processor = mocker.patch("modules.aws_dns.aws_dns.AwsDnsProcessor")
         mocked_runx_processor = mocker.patch("modules.runx.runx.RunxProcessor")
-        mocked_aws_email_processor = mocker.patch("modules.aws_email.AwsEmailProcessor")
+        mocked_aws_email_processor = mocker.patch(
+            "modules.aws_ses.aws_ses.AwsEmailProcessor"
+        )
         mocked_aws_documentdb_processor = mocker.patch(
             "modules.aws_documentdb.aws_documentdb.AwsDocumentDbProcessor"
         )
@@ -240,7 +244,9 @@ class TestLayer:
         mocked_k8s_service_processor = mocker.patch(
             "modules.aws_k8s_service.aws_k8s_service.AwsK8sServiceProcessor"
         )
-        mocked_aws_email_processor = mocker.patch("modules.aws_email.AwsEmailProcessor")
+        mocked_aws_email_processor = mocker.patch(
+            "modules.aws_ses.aws_ses.AwsEmailProcessor"
+        )
         mocked_aws_documentdb_processor = mocker.patch(
             "modules.aws_documentdb.aws_documentdb.AwsDocumentDbProcessor"
         )
@@ -370,14 +376,12 @@ class TestLayer:
                 mocker.call().post_hook(13, None),
             ]
         )
+
     def test_check_module_dirs_exist(self):
-        from opta.layer import PROCESSOR_DICT
-        from opta.layer import get_processor_class
+        from opta.layer import PROCESSOR_DICT, get_processor_class
+
         base_dir = os.getcwd()
         for opta_module, processor in PROCESSOR_DICT.items():
             module_class = get_processor_class(opta_module)
-            assert(module_class.__name__ == processor)
-        print("done")            
-
-
-
+            assert module_class.__name__ == processor
+        print("done")

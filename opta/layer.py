@@ -63,7 +63,7 @@ PROCESSOR_DICT: Dict[str, str] = {
     "custom-terraform": "CustomTerraformProcessor",
     "aws-dynamodb": "AwsDynamodbProcessor",
     "mongodb-atlas": "MongodbAtlasProcessor",
-    "cloudfront-distribution": "AwsCloudfrontDstributionProcessor",
+    "cloudfront-distribution": "CloudfrontDistributionProcessor",
     "lambda-function": "LambdaFunctionProcessor",
 }
 

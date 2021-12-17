@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from opta.module import Module
 
 
-class AwsCloudfrontDstributionProcessor(ModuleProcessor):
+class CloudfrontDistributionProcessor(ModuleProcessor):
     def __init__(self, module: "Module", layer: "Layer"):
         if (module.aliased_type or module.type) != "cloudfront-distribution":
             raise Exception(
@@ -59,4 +59,4 @@ class AwsCloudfrontDstributionProcessor(ModuleProcessor):
                 "origin_access_identity_path"
             ] = f"${{{{{module_source}.cloudfront_read_path}}}}"
 
-        super(AwsCloudfrontDstributionProcessor, self).process(module_idx)
+        super(CloudfrontDistributionProcessor, self).process(module_idx)
