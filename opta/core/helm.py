@@ -59,7 +59,7 @@ class Helm:
         except Exception as e:
             raise e
 
-        helm_list = json.loads(helm_list_process.stdout.decode("UTF-8"))
+        helm_list = json.loads(helm_list_process.stdout)
 
         if kwargs.get("release"):
             helm_list = [
