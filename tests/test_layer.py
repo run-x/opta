@@ -383,4 +383,3 @@ class TestLayer:
         for opta_module, processor in PROCESSOR_DICT.items():
             module_class = get_processor_class(opta_module)
             assert module_class.__name__ == processor
-        print("done")
