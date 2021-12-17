@@ -380,7 +380,6 @@ class TestLayer:
     def test_check_module_dirs_exist(self):
         from opta.layer import PROCESSOR_DICT, get_processor_class
 
-        base_dir = os.getcwd()
         for opta_module, processor in PROCESSOR_DICT.items():
             module_class = get_processor_class(opta_module)
             assert module_class.__name__ == processor
