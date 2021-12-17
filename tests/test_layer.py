@@ -2,10 +2,8 @@
 
 import os
 from types import SimpleNamespace
-
 import pytest
 from pytest_mock import MockFixture
-
 from modules.base import ModuleProcessor
 from opta.exceptions import UserErrors
 from opta.layer import Layer
@@ -372,3 +370,14 @@ class TestLayer:
                 mocker.call().post_hook(13, None),
             ]
         )
+    def test_check_module_dirs_exist(self):
+        from opta.layer import PROCESSOR_DICT
+        from opta.layer import get_processor_class
+        base_dir = os.getcwd()
+        for opta_module, processor in PROCESSOR_DICT.items():
+            module_class = get_processor_class(opta_module)
+            assert(module_class.__name__ == processor)
+        print("done")            
+
+
+
