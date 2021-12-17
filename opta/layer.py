@@ -72,6 +72,7 @@ from opta.crash_reporter import CURRENT_CRASH_REPORTER
 from opta.exceptions import UserErrors
 from opta.module import Module
 from opta.plugins.derived_providers import DerivedProviders
+from opta.preprocessor import preprocess_layer
 from opta.utils import deep_merge, hydrate, logger, yaml
 from opta.utils.dependencies import validate_installed_path_executables
 
@@ -222,6 +223,8 @@ class Layer:
             conf = yaml.load(config_string)
         else:
             raise UserErrors(f"File {config} not found")
+
+        preprocess_layer(conf)
 
         conf["original_spec"] = config_string
         conf["path"] = config_path
