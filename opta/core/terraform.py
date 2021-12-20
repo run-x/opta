@@ -28,7 +28,8 @@ from googleapiclient.errors import HttpError
 from oauth2client.client import GoogleCredentials
 from packaging import version
 
-from opta.constants import MAX_TERRAFORM_VERSION, MIN_TERRAFORM_VERSION
+# from opta.constants import MAX_TERRAFORM_VERSION, MIN_TERRAFORM_VERSION
+from opta.constants import MIN_TERRAFORM_VERSION
 from opta.core.aws import AWS
 from opta.core.azure import Azure
 from opta.core.cloud_client import CloudClient
@@ -117,10 +118,10 @@ class Terraform:
                 f"Invalid terraform version {current_version} -- must be at least {MIN_TERRAFORM_VERSION}"
             )
 
-        if current_parsed >= version.parse(MAX_TERRAFORM_VERSION):
-            raise UserErrors(
-                f"Invalid terraform version {current_version} -- must be less than {MAX_TERRAFORM_VERSION}"
-            )
+        # if current_parsed >= version.parse(MAX_TERRAFORM_VERSION):
+        #     raise UserErrors(
+        #         f"Invalid terraform version {current_version} -- must be less than {MAX_TERRAFORM_VERSION}"
+        #     )
 
     @classmethod
     def apply(
