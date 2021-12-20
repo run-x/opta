@@ -49,14 +49,32 @@ class CloudfrontDistributionProcessor(ModuleProcessor):
                 "origin_access_identity_path for your bucket."
             )
 
+        if len(links) > 1:
+            raise UserErrors("Cloudfront Distribution can't have more than one links.")
+
         for module_name in links:
-            linked_module = self.layer.get_module(module_name, module_idx)
-            if linked_module is None:
+            module = self.layer.get_module(module_name, module_idx)
+            if module is None:
                 raise UserErrors(f"Could not find module {module_name}")
-            module_source = f"module.{linked_module.name}"
-            self.module.data["bucket_name"] = f"${{{{{module_source}.bucket_id}}}}"
-            self.module.data[
-                "origin_access_identity_path"
-            ] = f"${{{{{module_source}.cloudfront_read_path}}}}"
+            module_type = module.aliased_type or module.type
+            if module_type == "aws-s3":
+                self.handle_s3_link(module)
+            elif module_type == "aws-k8s-base":
+                self.handle_k8s_base_link(module)
 
         super(CloudfrontDistributionProcessor, self).process(module_idx)
+
+    def handle_s3_link(self, linked_module: "Module") -> None:
+        module_source = f"module.{linked_module.name}"
+        self.module.data["bucket_name"] = f"${{{{{module_source}.bucket_id}}}}"
+        self.module.data[
+            "origin_access_identity_path"
+        ] = f"${{{{{module_source}.cloudfront_read_path}}}}"
+        self.module.data["s3_load_balancer_enabled"] = True
+
+    def handle_k8s_base_link(self, linked_module: "Module") -> None:
+        module_source = f"module.{linked_module.name}"
+        self.module.data[
+            "load_balancer"
+        ] = f"${{{{{module_source}.load_balancer_raw_dns}}}}"
+        self.module.data["eks_load_balancer_enabled"] = True
