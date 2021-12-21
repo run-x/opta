@@ -213,7 +213,7 @@ def alternate_yaml_extension(config_path: str) -> Tuple[str, bool]:
         return pre + ".yml", True
     elif ext.lower() == ".yml":
         return pre + ".yaml", True
-    return pre + ext, False
+    return config_path, False
 
 
 def check_opta_file_exists(config_path: str) -> str:
