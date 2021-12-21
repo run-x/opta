@@ -219,7 +219,7 @@ def test_no_tag_override(mocker: MockFixture) -> None:
     result = runner.invoke(cli, ["push", "local_image:local_tag"])
 
     assert result.exit_code == 0
-    layer_object_mock.load_from_yaml.assert_called_once_with("opta.yml", None)
+    layer_object_mock.load_from_yaml.assert_called_once_with("opta.yaml", None)
     gen_mock.assert_called_once_with(layer_mock)
 
     nice_run_mock.assert_has_calls(
@@ -277,7 +277,7 @@ def test_with_tag_override(mocker: MockFixture) -> None:
     )
 
     assert result.exit_code == 0
-    layer_object_mock.load_from_yaml.assert_called_once_with("opta.yml", None)
+    layer_object_mock.load_from_yaml.assert_called_once_with("opta.yaml", None)
     gen_mock.assert_called_once_with(layer_mock)
 
     nice_run_mock.assert_has_calls(
@@ -339,7 +339,7 @@ def test_bad_image_name(mocker: MockFixture) -> None:
     result = runner.invoke(cli, ["push", "local_image", "--tag", "tag-override"])
 
     assert result.exit_code == 1
-    layer_object_mock.load_from_yaml.assert_called_once_with("opta.yml", None)
+    layer_object_mock.load_from_yaml.assert_called_once_with("opta.yaml", None)
     gen_mock.assert_called_once_with(layer_mock)
     assert (
         str(result.exception)

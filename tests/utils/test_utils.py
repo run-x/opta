@@ -3,7 +3,7 @@ import pytest
 from pytest_mock import MockFixture
 
 from opta.exceptions import UserErrors
-from opta.utils import check_opta_file_exists, exp_backoff
+from opta.utils import alternate_yaml_extension, check_opta_file_exists, exp_backoff
 
 
 def test_exp_backoff(mocker: MockFixture) -> None:
@@ -117,3 +117,11 @@ def test_check_opta_file_exists_file_does_not_exists_invalid_user_input(
         show_default=False,
     )
     mock_system_exit.assert_not_called()
+
+
+def test_alternate_yaml_extension() -> None:
+    assert alternate_yaml_extension("opta.yaml") == ("opta.yml", True)
+    assert alternate_yaml_extension("opta.yml") == ("opta.yaml", True)
+    assert alternate_yaml_extension("opta.YML") == ("opta.yaml", True)
+    assert alternate_yaml_extension("path/opta.yml") == ("path/opta.yaml", True)
+    assert alternate_yaml_extension("path/config") == ("path/config", False)

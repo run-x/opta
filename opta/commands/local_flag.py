@@ -17,7 +17,7 @@ def _handle_local_flag(config: str, test: bool = False) -> str:
     dir_path = os.path.join(Path.home(), ".opta", "local")
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
-    with open(os.path.join(dir_path, "localopta.yml"), "w") as fw:
+    with open(os.path.join(dir_path, "localopta.yaml"), "w") as fw:
         yaml.safe_dump(
             {
                 "name": "localopta",
@@ -32,7 +32,7 @@ def _handle_local_flag(config: str, test: bool = False) -> str:
         y = yaml.round_trip_load(fr, preserve_quotes=True)
     if "environments" not in y:  # This is an environment opta file, so do nothing
         return config
-    y["environments"] = [{"name": "localopta", "path": dir_path + "/localopta.yml"}]
+    y["environments"] = [{"name": "localopta", "path": dir_path + "/localopta.yaml"}]
     p = Path(config)
     config = os.path.join(p.parent, "opta-local-" + p.name)
     with open(config, "w") as fw:

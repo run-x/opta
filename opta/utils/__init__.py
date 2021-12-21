@@ -202,8 +202,30 @@ def exp_backoff(num_tries: int = 3) -> Generator:
         seconds *= seconds
 
 
+# Return the alternate extension for a yaml file
+# orginal file -> alternate file, changed
+# opta.yaml -> opta.yml, True
+# opta.yml -> opta.yaml, True
+# test.txt -> test.txt, False
+def alternate_yaml_extension(config_path: str) -> Tuple[str, bool]:
+    pre, ext = os.path.splitext(config_path)
+    if ext.lower() == ".yaml":
+        return pre + ".yml", True
+    elif ext.lower() == ".yml":
+        return pre + ".yaml", True
+    return config_path, False
+
+
 def check_opta_file_exists(config_path: str) -> str:
     if not os.path.exists(config_path):
+        # try alternate y(a)ml extension
+        alternate_yaml, changed = alternate_yaml_extension(config_path)
+        if changed and os.path.exists(alternate_yaml):
+            logger.warning(
+                "Could not find file %s, but loaded %s.", config_path, alternate_yaml,
+            )
+            return alternate_yaml
+
         logger.info(
             fmt_msg(
                 f"""

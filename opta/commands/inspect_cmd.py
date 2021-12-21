@@ -14,7 +14,7 @@ from opta.utils import check_opta_file_exists, column_print, deep_merge, json
 
 @click.command(hidden=True)
 @click.option(
-    "-c", "--config", default="opta.yml", help="Opta config file", show_default=True
+    "-c", "--config", default="opta.yaml", help="Opta config file", show_default=True
 )
 @click.option(
     "-e", "--env", default=None, help="The env to use when loading the config file"
