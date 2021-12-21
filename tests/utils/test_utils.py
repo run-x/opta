@@ -119,7 +119,7 @@ def test_check_opta_file_exists_file_does_not_exists_invalid_user_input(
     mock_system_exit.assert_not_called()
 
 
-def test_alternate_yaml_extension():
+def test_alternate_yaml_extension() -> None:
     assert alternate_yaml_extension("opta.yaml") == ("opta.yml", True)
     assert alternate_yaml_extension("opta.yml") == ("opta.yaml", True)
     assert alternate_yaml_extension("opta.YML") == ("opta.yaml", True)
