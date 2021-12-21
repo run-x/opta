@@ -23,7 +23,7 @@ inputs:
     user_facing: true
     validator: str(required=False)
     description: The version of the database to use.
-    default: "5.7"
+    default: "5.7.mysql_aurora.2.04.2"
   - name: multi_az
     user_facing: true
     validator: bool(required=False)
@@ -34,11 +34,6 @@ inputs:
     validator: bool(required=False)
     description: Add deletion protection to stop accidental db deletions
     default: false
-  - name: allocated_storage
-    user_facing: true
-    validator: int(required=False)
-    description: The storage allocated for My SQL in initial stage (in GB).
-    default: 10
 outputs:
   - name: db_user
     export: false

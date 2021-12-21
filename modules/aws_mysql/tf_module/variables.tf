@@ -15,7 +15,7 @@ variable "module_name" {
 
 variable "engine_version" {
   type    = string
-  default = "5.7"
+  default = "5.7.mysql_aurora.2.04.2"
 }
 
 variable "instance_class" {
@@ -31,9 +31,4 @@ variable "safety" {
 variable "multi_az" {
   type    = bool
   default = false
-}
-
-variable "allocated_storage" {
-  type    = number
-  default = 10
 }
