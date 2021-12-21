@@ -24,19 +24,24 @@ nice_logger.propagate = False
 
 
 def log_to_datadog(msg: str, severity: str) -> None:
-    msg = ansi_scrub(msg)
-    if hasattr(sys, "_called_from_test") or VERSION == DEV_VERSION or not VERSION:
-        if os.environ.get("OPTA_DEBUG", "") == "DATADOG_LOCAL":
-            print("Would have logged this string to DD:\n")
-            print(">>>>>>>>>>>>>>>>>>>>Datadog log start")
-            print(msg)
-            print("<<<<<<<<<<<<<<<<<<<<Datadog log end")
-        dd_handler.setLevel(logging.CRITICAL)
+    try:
+        msg = ansi_scrub(msg)
+        if hasattr(sys, "_called_from_test") or VERSION == DEV_VERSION or not VERSION:
+            if os.environ.get("OPTA_DEBUG", "") == "DATADOG_LOCAL":
+                print("Would have logged this string to DD:\n")
+                print(">>>>>>>>>>>>>>>>>>>>Datadog log start")
+                print(msg)
+                print("<<<<<<<<<<<<<<<<<<<<Datadog log end")
+            dd_handler.setLevel(logging.CRITICAL)
 
-    if severity == "ERROR":
-        nice_logger.error(msg)
-    else:
-        nice_logger.info(msg)
+        if severity == "ERROR":
+            nice_logger.error(msg)
+        else:
+            nice_logger.info(msg)
+    except:  # noqa: E722
+        # Logging error to datadog SaaS, happens,
+        # not the end of world, silently fail
+        pass
 
 
 def signal_all_child_processes(sig: int = signal.SIGINT) -> None:
