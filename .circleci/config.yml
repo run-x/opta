@@ -28,6 +28,9 @@ parameters:
   test-aws-lambda:
     type: boolean
     default: false
+  run-release-vs-stable:
+    type: boolean
+    default: false
 
 
 orbs:
@@ -152,6 +155,36 @@ jobs:
           name: "Run terraform format"
           command: "terraform fmt -recursive -check ./config/tf_modules"
 
+  download-opta:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - run:
+          name: "Download Latest Opta Binary"
+          command: /bin/bash -c "$(curl -fsSL https://docs.opta.dev/install.sh)"
+      - install-opta-dependencies
+      - run:
+          name: "Check Opta Version"
+          command: |
+            $HOME/.opta/opta version
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - .opta
+
+  check-version:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: "Check Opta Version"
+          command: |
+            $HOME/.opta/opta version
+
   build-opta-binary:
     executor: ubuntu-machine
     environment:
@@ -232,6 +265,25 @@ jobs:
             --config ./examples/ci-tests/create-and-destroy-aws/environment.yml \
             --auto-approve \
             --refresh
+
+  aws-create-env-stable-version:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/
+      - install-opta-dependencies
+      - aws-cli/install
+      - aws-cli/setup
+      - run:
+          name: "Deploy opta environment"
+          command: |
+            yes | $HOME/.opta/opta apply \
+            --config ./examples/ci-tests/create-and-destroy-aws/environment.yml \
+            --auto-approve \
+            --refresh || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-test-cloudfront:
     executor: python-docker
@@ -326,13 +378,50 @@ jobs:
           command: |
             sleep 20
             source $(pipenv --venv)/bin/activate
-            export HOST=`./dist/opta/opta output --env awsenv-ci --config ./examples/ci-tests/create-and-destroy-aws/websocket-service.yml | jq -r '.load_balancer_raw_dns'`
+            DIRTY_HOST_NAME="{`./dist/opta/opta output --config ./examples/ci-tests/create-and-destroy-aws/environment.yml | grep load_balancer_raw_dns`\"\":\"\"}"
+            export HOST=`echo $DIRTY_HOST_NAME | jq -r '.load_balancer_raw_dns'`
             python ./examples/ci-tests/create-and-destroy-aws/websocket-validate.py
             exit $?
       - run:
           name: "Destroy Websocket Service with Opta"
           command: |
             yes | ./dist/opta/opta destroy \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-aws/websocket-service.yml \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+
+  aws-test-websocket-stable-version:
+    executor: python-docker
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/
+      - install-opta-dependencies
+      - aws-cli/install
+      - aws-cli/setup
+      - install-python-dependencies
+      - run:
+          name: "Apply Websocket Service with Stable Opta"
+          command: |
+            yes | $HOME/.opta/opta apply \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-aws/websocket-service.yml \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+      - run:
+          name: "Test Websocket"
+          command: |
+            sleep 20
+            source $(pipenv --venv)/bin/activate
+            DIRTY_HOST_NAME="{`$HOME/.opta/opta output --config ./examples/ci-tests/create-and-destroy-aws/environment.yml | grep load_balancer_raw_dns`\"\":\"\"}"
+            export HOST=`echo $DIRTY_HOST_NAME | jq -r '.load_balancer_raw_dns'`
+            python ./examples/ci-tests/create-and-destroy-aws/websocket-validate.py
+            exit $?
+      - run:
+          name: "Destroy Websocket Service with Opta"
+          command: |
+            yes | $HOME/.opta/opta destroy \
             --env awsenv-ci \
             --config ./examples/ci-tests/create-and-destroy-aws/websocket-service.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
@@ -644,6 +733,24 @@ jobs:
             --config ./examples/ci-tests/create-and-destroy-aws/environment.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
+  aws-destroy-env-stable-version:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/
+      - install-opta-dependencies
+      - aws-cli/install
+      - aws-cli/setup
+      - run:
+          name: "Destroy environment"
+          command: |
+            yes | $HOME/.opta/opta destroy \
+            --config ./examples/ci-tests/create-and-destroy-aws/environment.yml \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+
   gcp-create-env:
     executor: ubuntu-machine
     environment:
@@ -665,6 +772,28 @@ jobs:
             --config ./examples/ci-tests/create-and-destroy-gcp/environment.yml \
             --auto-approve \
             --refresh
+
+  gcp-create-env-stable-version:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/
+      - install-opta-dependencies
+      - gcp-cli/install
+      - gcp-cli/initialize
+      - run:
+          name: "Setting up gcp envar"
+          command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+      - run:
+          name: "Deploy opta environment"
+          command: |
+            yes | $HOME/.opta/opta apply \
+            --config ./examples/ci-tests/create-and-destroy-gcp/environment.yml \
+            --auto-approve \
+            --refresh || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   gcp-test-additional-nodegroup:
     executor: ubuntu-machine
@@ -857,6 +986,76 @@ jobs:
           name: "Destroy test-service-pg"
           command: |
             yes | ./dist/opta/opta destroy \
+            --env gcpenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+
+  gcp-test-service-pg-latest-version:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - gcp-cli/install
+      - gcp-cli/initialize
+      - run:
+          name: "Setting up gcp envar"
+          command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+      - run:
+          name: "Load test-service image"
+          command: docker load -i test-service-image
+      - run:
+          name: "Set secret"
+          command: |
+            yes | $HOME/.opta/opta secret update \
+            --env gcpenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
+            FAKE_SECRET foo || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+      - run:
+          name: "Deploy test-service-pg"
+          command: |
+            yes | $HOME/.opta/opta deploy \
+            --image app:latest \
+            --env gcpenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
+            --tag $CIRCLE_SHA1 \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+      - run:
+          name: "Deploy test-service with Additional PG"
+          command: |
+            yes | $HOME/.opta/opta deploy \
+            --image app:latest \
+            --env gcpenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-gcp/service-additional-pg.yml \
+            --tag $CIRCLE_SHA1 \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+      - run:
+          name: "Deploy test-service remove Additional PG"
+          command: |
+            yes | $HOME/.opta/opta deploy \
+            --image app:latest \
+            --env gcpenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
+            --tag $CIRCLE_SHA1 \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+      - run:
+          name: "View secret and check value"
+          command: |
+            secret_value=$($HOME/.opta/opta secret view \
+            --env gcpenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
+            FAKE_SECRET | tail -1)
+            echo "This was the found secret value: ${secret_value}"
+            [[ "$secret_value" =~ .*"foo".* ]] || exit 1
+      - run:
+          name: "Destroy test-service-pg"
+          command: |
+            yes | $HOME/.opta/opta destroy \
             --env gcpenv-ci \
             --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
@@ -1236,6 +1435,54 @@ workflows:
       - gcp-destroy-env:
           requires:
             - gcp-opta-example-destroy-svcs
+
+  run-release-vs-stable:
+    when: << pipeline.parameters.run-release-vs-stable >>
+    jobs:
+      - build-opta-binary
+      - build-test-service-image
+      - download-opta
+      - check-version:
+          requires:
+            - download-opta
+      - aws-create-env-stable-version:
+          requires:
+            - download-opta
+            - check-version
+      - aws-create-env:
+          requires:
+            - build-opta-binary
+            - aws-create-env-stable-version
+      - aws-test-websocket-stable-version:
+          requires:
+            - aws-create-env-stable-version
+            - aws-create-env
+      - aws-test-websocket:
+          requires:
+            - aws-test-websocket-stable-version
+      - aws-destroy-env:
+          requires:
+            - aws-test-websocket
+            - build-opta-binary
+      - gcp-create-env-stable-version:
+          requires:
+            - download-opta
+            - check-version
+      - gcp-create-env:
+          requires:
+            - build-opta-binary
+            - gcp-create-env-stable-version
+      - gcp-test-service-pg-latest-version:
+          requires:
+            - gcp-create-env-stable-version
+            - gcp-create-env
+            - build-test-service-image
+      - gcp-test-service-pg:
+          requires:
+            - gcp-test-service-pg-latest-version
+      - gcp-destroy-env:
+          requires:
+            - gcp-test-service-pg
 
   nightly:
     triggers:
