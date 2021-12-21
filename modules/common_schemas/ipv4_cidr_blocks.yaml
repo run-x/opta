@@ -1,0 +1,3 @@
+$id: https://app.runx.dev/common_schemas/ipv4_cidr-blocks
+description: IPv4 CIDR blocks
+type: object

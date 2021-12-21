@@ -1,0 +1,104 @@
+$id: https://app.runx.dev/modules/aws-base
+description: Sets up VPCs, a default KMS key, and the db/cache subnets for your environment
+type: object
+name: new_aws_base
+clouds:
+  - aws
+input_schema:
+  $id: https://app.runx.dev/modules/aws_base/input_schema
+  description: Inputs for your environment
+  type: object
+  required:
+    - env_name
+    - layer_name
+    - module_name
+    - total_ipv4_cidr_block
+    - vpc_log_retention
+    - private_ipv4_cidr_blocks
+    - private_ipv4_cidr_blocks
+    - public_ipv4_cidr_blocks
+  properties:
+    env_name:
+      type: string
+      description: Opta Environment name
+      default: None
+    layer_name:
+      type: string
+      description: Opta Layer name
+      default: None
+    module_name:
+      type: string
+      description: Opta Module name
+      default: None
+    total_ipv4_cidr_block:
+      type: string
+      description: This is the total cidr block for the VPC.
+      default: "10.0.0.0/16"    
+    vpc_log_retention:
+      type: integer
+      description: The retention period (days) for the flow logs of your vpc.
+      default: 90
+    private_ipv4_cidr_blocks:
+      $ref: https://app.runx.dev/modules/common_schemas/ipv4_cidr_blocks
+      description: These are the cidr blocks to use for the private subnets, one for each AZ.
+      default: [
+          "10.0.128.0/21",
+          "10.0.136.0/21",
+          "10.0.144.0/21"
+      ]
+    public_ipv4_cidr_blocks:
+      $ref: https://app.runx.dev/modules/common_schema/ipv4_cidr_blocks
+      description: These are the cidr blocks to use for the public subnets, one for each AZ.
+      default: [
+          "10.0.0.0/21",
+          "10.0.8.0/21",
+          "10.0.16.0/21"
+      ]
+input_user_facing:
+  - total_ipv4_cidr_block
+  - private_ipv4_cidr_blocks
+  - public_ipv4_cidr_blocks
+
+output_schema:
+  $id: https://app.runx.dev/modules/output_schema.aws-base
+  description: Outputs for your environment
+  type: object
+  required:
+    - kms_account_key_arn
+    - kms_account_key_id
+    - vpc_id
+    - private_subnet_ids
+    - public_subnets_ids
+    - s3_log_bucket_name
+    - public_nat_ips
+  properties:
+  kms_account_key_arn:
+    export: true
+    description: The [ARN](https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html) of the default [KMS](https://aws.amazon.com/kms/) key (this is what handles encryption for redis, documentdb, eks, etc…)
+  kms_account_key_id:
+    export: true
+    description: The [ID](https://docs.aws.amazon.com/kms/latest/developerguide/find-cmk-id-arn.html) of the default KMS key (sometimes things need the ID, sometimes the ARN, so we’re giving both)
+  vpc_id:
+    export: true
+    description: The ID of the [VPC](https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html) we created for this environment
+  private_subnet_ids:
+    export: true
+    description: The IDs of the private [subnets](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html) we setup for your environment
+  public_subnets_ids:
+    export: true
+    description: The IDs of the public [subnets](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html) we setup for your environment
+  s3_log_bucket_name:
+    export: true
+    description: The name of the default logging bucket provisioned by opta
+  public_nat_ips:
+    export: true
+    description: Public static IP of nat gateway(s)
+
+# TODO:
+# output_providers: { }
+# output_data:
+#   aws_caller_identity:
+#     provider: { }
+#   aws_region:
+#     provider: { }
+
