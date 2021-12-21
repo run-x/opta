@@ -210,10 +210,10 @@ def exp_backoff(num_tries: int = 3) -> Generator:
 def alternate_yaml_extension(config_path: str) -> Tuple[str, bool]:
     pre, ext = os.path.splitext(config_path)
     if ext.lower() == ".yaml":
-        return pre+".yml", True
+        return pre + ".yml", True
     elif ext.lower() == ".yml":
-        return pre+".yaml", True
-    return pre+ext, False
+        return pre + ".yaml", True
+    return pre + ext, False
 
 
 def check_opta_file_exists(config_path: str) -> str:
@@ -222,9 +222,7 @@ def check_opta_file_exists(config_path: str) -> str:
         alternate_yaml, changed = alternate_yaml_extension(config_path)
         if changed and os.path.exists(alternate_yaml):
             logger.warning(
-                "Could not find file %s, but loaded %s.",
-                config_path,
-                alternate_yaml,
+                "Could not find file %s, but loaded %s.", config_path, alternate_yaml,
             )
             return alternate_yaml
 
