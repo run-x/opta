@@ -38,7 +38,7 @@ def log_to_datadog(msg: str, severity: str) -> None:
             nice_logger.error(msg)
         else:
             nice_logger.info(msg)
-    except:  # noqa: E722
+    except:  # nosec   # noqa: E722
         # Logging error to datadog SaaS, happens,
         # not the end of world, silently fail
         pass
