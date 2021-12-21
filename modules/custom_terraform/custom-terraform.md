@@ -25,10 +25,10 @@ service-- it can be in the environment too). For our example, let's say that the
 └── dummy-service
     ├── blah
     │   └── main.tf
-    └── opta.yml
+    └── opta.yaml
 ```
 
-The new service is written in `dummy-service/opta.yml` and looks like this:
+The new service is written in `dummy-service/opta.yaml` and looks like this:
 
 ```yaml
 environments:

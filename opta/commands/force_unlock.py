@@ -12,7 +12,7 @@ from opta.utils import check_opta_file_exists
 
 
 @click.command()
-@click.option("-c", "--config", default="opta.yml", help="Opta config file.")
+@click.option("-c", "--config", default="opta.yaml", help="Opta config file.")
 @click.option(
     "-e", "--env", default=None, help="The env to use when loading the config file."
 )

@@ -35,7 +35,7 @@ from opta.utils import check_opta_file_exists, fmt_msg, logger
 
 @click.command()
 @click.option(
-    "-c", "--config", default="opta.yml", help="Opta config file", show_default=True
+    "-c", "--config", default="opta.yaml", help="Opta config file", show_default=True
 )
 @click.option(
     "-e",
@@ -133,7 +133,7 @@ def _apply(
         if adjusted_config != config:  # Only do this for service opta files
             config = adjusted_config  # Config for service
             localopta_envfile = os.path.join(
-                Path.home(), ".opta", "local", "localopta.yml"
+                Path.home(), ".opta", "local", "localopta.yaml"
             )
             _apply(
                 config=localopta_envfile,

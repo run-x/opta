@@ -1,6 +1,6 @@
 # Description
 
-This `opta.yml` sets up airflow on AWS or GCP.
+This `opta.yaml` sets up airflow on AWS or GCP.
 
 It uses the airflow helm chart and uses underlying cloud resources for data storage:
 - RDS and Elasticcache for AWS

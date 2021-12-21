@@ -62,7 +62,7 @@ def test_configure_kubectl(mocker: MockFixture) -> None:
 
     runner = CliRunner()
     result = runner.invoke(configure_kubectl, [])
-    mocked_layer_class.load_from_yaml.assert_called_with("opta.yml", None)
+    mocked_layer_class.load_from_yaml.assert_called_with("opta.yaml", None)
     mock_sts_client.assert_called()
     mocked_ensure_installed.assert_has_calls([mocker.call("kubectl"), mocker.call("aws")])
     assert result.exit_code == 0

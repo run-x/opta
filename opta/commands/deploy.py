@@ -20,7 +20,7 @@ from opta.utils import check_opta_file_exists, fmt_msg, logger
 @click.option(
     "-i", "--image", required=True, help="Your local image in the for myimage:tag"
 )
-@click.option("-c", "--config", default="opta.yml", help="Opta config file.")
+@click.option("-c", "--config", default="opta.yaml", help="Opta config file.")
 @click.option(
     "-e", "--env", default=None, help="The env to use when loading the config file."
 )
@@ -93,7 +93,7 @@ def deploy(
         if adjusted_config != config:  # Only do this for service opta files
             config = adjusted_config
             localopta_envfile = os.path.join(
-                Path.home(), ".opta", "local", "localopta.yml"
+                Path.home(), ".opta", "local", "localopta.yaml"
             )
             _apply(
                 config=localopta_envfile,
