@@ -134,24 +134,7 @@
       "default": false
     },
     "persistent_storage": {
-      "type": "array",
-      "description": "A list persistent storages to add to each instance of your service (need to give a `size` which is the size in GB\nfor the storage volume to be, and `path` which is the path in the filesystem of each instance to place it under)\n",
-      "items": {
-        "type": "object",
-        "properties": {
-          "size": {
-            "type": "integer"
-          },
-          "path": {
-            "type": "string"
-          },
-          "required": [
-            "size",
-            "path"
-          ]
-        }
-      },
-      "default": []
+      "$ref": "/common-types/persistent-storage"
     },
     "ingress_extra_annotations": {
       "type": "object",
@@ -160,23 +143,15 @@
     },
     "type": {
       "description": "The name of this module",
-      "enum": [
-        "local-k8s-service",
-        "k8s-service"
-      ],
+      "enum": ["local-k8s-service", "k8s-service"],
       "default": "k8s-service",
       "type": "string"
     }
   },
-  "required": [
-    "image",
-    "type"
-  ],
+  "required": ["image", "type"],
   "opta_metadata": {
     "module_type": "service",
-    "clouds": [
-      "local"
-    ],
+    "clouds": ["local"],
     "name": "local-k8s-service",
     "display_name": "k8s-service",
     "tags": []
