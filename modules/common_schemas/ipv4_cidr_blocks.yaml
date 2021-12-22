@@ -1,3 +1,10 @@
 $id: https://app.runx.dev/common_schemas/ipv4_cidr-blocks
 description: IPv4 CIDR blocks
 type: object
+properties: 
+  ipv4_cidr_blocks:
+    type: array
+    items:
+      type: string
+  required: 
+    - ipv4_cidr_blocks
