@@ -43,14 +43,14 @@
     },
     "autoscaling_target_cpu_percentage": {
       "type": "integer",
-      "description": "See the [autoscaling]({{< relref \"#autoscaling\" >}}) section.",
+      "description": "See the [autoscaling](https://docs.opta.dev/reference/aws/service_modules/aws-k8s-service/#autoscaling) section.",
       "default": 80,
       "minimum": 0,
       "maximum": 100
     },
     "autoscaling_target_mem_percentage": {
       "type": "integer",
-      "description": "See the [autoscaling]({{< relref \"#autoscaling\" >}}) section.",
+      "description": "See the [autoscaling](https://docs.opta.dev/reference/aws/service_modules/aws-k8s-service/#autoscaling) section.",
       "default": 80,
       "minimum": 0,
       "maximum": 100
@@ -70,7 +70,7 @@
     },
     "healthcheck_path": {
       "type": "string",
-      "description": "See the See the [liveness/readiness]({{< relref \"#livenessreadiness-probe\" >}}) section. Default `null` (i.e., no user-specified healthchecks)"
+      "description": "See the See the [liveness/readiness](https://docs.opta.dev/reference/aws/service_modules/aws-k8s-service/#healthcheck-probe) section. Default `null` (i.e., no user-specified healthchecks)"
     },
     "liveness_probe_path": {
       "type": "string",
@@ -105,7 +105,7 @@
       "default": 86400
     },
     "resource_request": {
-      "description": "See the [container resources]({{< relref \"#container-resources\" >}}) section. Default\n```yaml\ncpu: 100 # in millicores\nmemory: 128 # in megabytes\n```\nCPU is given in millicores, and Memory is in megabytes.\n",
+      "description": "See the [container resources](https://docs.opta.dev/reference/aws/service_modules/aws-k8s-service/#container-resources) section. Default\n```yaml\ncpu: 100 # in millicores\nmemory: 128 # in megabytes\n```\nCPU is given in millicores, and Memory is in megabytes.\n",
       "type": "object",
       "properties": {
         "cpu": {

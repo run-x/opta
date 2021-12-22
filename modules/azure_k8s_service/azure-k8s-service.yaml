@@ -33,7 +33,7 @@ inputs: # (what users see)
   - name: manual_secrets
     user_facing: false
     description: "Manually set secrets"
-    default: [ ]
+    default: []
   - name: image
     user_facing: true
     validator: str(required=True)
@@ -66,12 +66,12 @@ inputs: # (what users see)
   - name: autoscaling_target_cpu_percentage
     user_facing: true
     validator: any(str(), int(), required=False)
-    description: See the [autoscaling]({{< relref "#autoscaling" >}}) section.
+    description: See the [autoscaling](https://docs.opta.dev/reference/azurerm/service_modules/azure-k8s-service/#autoscaling) section.
     default: 80
   - name: autoscaling_target_mem_percentage
     user_facing: true
     validator: any(str(), int(), required=False)
-    description: See the [autoscaling]({{< relref "#autoscaling" >}}) section.
+    description: See the [autoscaling](https://docs.opta.dev/reference/azurerm/service_modules/azure-k8s-service/#autoscaling) section.
     default: 80
   - name: secrets
     user_facing: true
@@ -87,11 +87,11 @@ inputs: # (what users see)
       env_vars:
        FLAG: "true"
       ```
-    default: [ ]
+    default: []
   - name: healthcheck_path
     user_facing: true
     validator: str(required=False)
-    description: See the See the [liveness/readiness]({{< relref "#livenessreadiness-probe" >}}) section. Default `null` (i.e., no user-specified healthchecks)
+    description: See the See the [liveness/readiness](https://docs.opta.dev/reference/azurerm/service_modules/azure-k8s-service/#healthcheck-probe) section. Default `null` (i.e., no user-specified healthchecks)
     default: null
   - name: liveness_probe_path
     user_facing: true
@@ -132,15 +132,15 @@ inputs: # (what users see)
     user_facing: true
     validator: any(required=False)
     description: |
-      See the [container resources]({{< relref "#container-resources" >}}) section. Default
+      See the [container resources](https://docs.opta.dev/reference/azurerm/service_modules/azure-k8s-service/#container-resources) section. Default
       ```yaml
       cpu: 100 # in millicores
       memory: 128 # in megabytes
       ```
       CPU is given in millicores, and Memory is in megabytes.
     default:
-      cpu : 100
-      memory : 128
+      cpu: 100
+      memory: 128
   - name: public_uri
     user_facing: true
     validator: any(str(), list(), required=False)
@@ -191,7 +191,7 @@ outputs:
   - name: docker_repo_url
     export: true
     description: Url to the docker repository created for images to be deployed in this env
-output_providers: { }
-output_data: { }
+output_providers: {}
+output_data: {}
 clouds:
   - azure
