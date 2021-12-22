@@ -216,7 +216,9 @@ def alternate_yaml_extension(config_path: str) -> Tuple[str, bool]:
     return config_path, False
 
 
-def check_opta_file_exists(config_path: str) -> str:
+# Return the existing opta file, if not found it checks the alternate y(a)ml extension
+# If still not found, it prompts the user or raise a UserErrors
+def check_opta_file_exists(config_path: str, prompt: bool = True) -> str:
     if not os.path.exists(config_path):
         # try alternate y(a)ml extension
         alternate_yaml, changed = alternate_yaml_extension(config_path)
@@ -234,12 +236,15 @@ def check_opta_file_exists(config_path: str) -> str:
         """
             )
         )
-        prompt_config_path = click.prompt(
-            "Enter a Configuration Path (Empty String will exit)",
-            default="",
-            type=click.STRING,
-            show_default=False,
-        )
+        if prompt:
+            prompt_config_path = click.prompt(
+                "Enter a Configuration Path (Empty String will exit)",
+                default="",
+                type=click.STRING,
+                show_default=False,
+            )
+        else:
+            raise UserErrors("Could not find file {}".format(config_path))
 
         if not prompt_config_path:
             logger.info("Exiting...")
