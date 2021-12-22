@@ -1,19 +1,55 @@
+import logging
+import os
 import signal
-from subprocess import (  # nosec
-    PIPE,
-    CalledProcessError,
-    CompletedProcess,
-    Popen,
-    TimeoutExpired,
-)
+import sys
+import tempfile
+from asyncio import TimeoutError
+from subprocess import CalledProcessError, CompletedProcess  # nosec
+from traceback import format_exc
 from typing import Optional, Union
 
-try:
-    import _winapi  # noqa
+import psutil
 
-    _mswindows = True
-except ModuleNotFoundError:
-    _mswindows = False
+from opta.constants import DEV_VERSION, VERSION
+from opta.datadog_logging import DatadogLogHandler
+from opta.utils import ansi_scrub
+from opta.utils.runtee import run  # type: ignore
+
+# Datadog logging setup for nice subprocess
+dd_handler = DatadogLogHandler()
+nice_logger = logging.getLogger(__name__)
+nice_logger.setLevel(logging.DEBUG)
+nice_logger.addHandler(dd_handler)
+nice_logger.propagate = False
+
+
+def log_to_datadog(msg: str, severity: str) -> None:
+    try:
+        msg = ansi_scrub(msg)
+        if hasattr(sys, "_called_from_test") or VERSION == DEV_VERSION or not VERSION:
+            if os.environ.get("OPTA_DEBUG", "") == "DATADOG_LOCAL":
+                print("Would have logged this string to DD:\n")
+                print(">>>>>>>>>>>>>>>>>>>>Datadog log start")
+                print(msg)
+                print("<<<<<<<<<<<<<<<<<<<<Datadog log end")
+            dd_handler.setLevel(logging.CRITICAL)
+
+        if severity == "ERROR":
+            nice_logger.error(msg)
+        else:
+            nice_logger.info(msg)
+    except:  # nosec   # noqa: E722
+        # Logging error to datadog SaaS, happens,
+        # not the end of world, silently fail
+        pass
+
+
+def signal_all_child_processes(sig: int = signal.SIGINT) -> None:
+    current_process = psutil.Process()
+    children = current_process.children(recursive=True)
+    for child in children:
+        print(child.pid)
+        os.kill(child.pid, sig)
 
 
 def nice_run(  # type: ignore # nosec
@@ -22,79 +58,67 @@ def nice_run(  # type: ignore # nosec
     capture_output: bool = False,
     timeout: Optional[float] = None,
     exit_timeout: Optional[float] = None,
+    tee: bool = True,
     check: bool = False,
     **kwargs,
 ) -> CompletedProcess:
-    """Run command with arguments and return a CompletedProcess instance.
 
-    The returned instance will have attributes args, returncode, stdout and
-    stderr. By default, stdout and stderr are not captured, and those attributes
-    will be None. Pass stdout=PIPE and/or stderr=PIPE in order to capture them.
+    try:
+        listargs = list(popenargs)
+        listargs[0].insert(0, "exec")
+        popenargs = tuple(listargs)
+        log_to_datadog(
+            "Calling subprocess with these arguments:\n" + " ".join(*popenargs), "INFO"
+        )
 
-    If check is True and the exit code was non-zero, it raises a
-    CalledProcessError. The CalledProcessError object will have the return code
-    in the returncode attribute, and output & stderr attributes if those streams
-    were captured.
-
-    If timeout is given, and the process takes too long, a TimeoutExpired
-    exception will be raised.
-
-    There is an optional argument "input", allowing you to
-    pass bytes or a string to the subprocess's stdin.  If you use this argument
-    you may not also use the Popen constructor's "stdin" argument, as
-    it will be used internally.
-
-    By default, all communication is in bytes, and therefore any "input" should
-    be bytes, and the stdout and stderr will be bytes. If in text mode, any
-    "input" should be a string, and stdout and stderr will be strings decoded
-    according to locale encoding, or by "encoding" if set. Text mode is
-    triggered by setting any of text, encoding, errors or universal_newlines.
-
-    The other arguments are the same as for the Popen constructor.
-    """
-    if input is not None:
-        if kwargs.get("stdin") is not None:
-            raise ValueError("stdin and input arguments may not both be used.")
-        kwargs["stdin"] = PIPE
-
-    if capture_output:
-        if kwargs.get("stdout") is not None or kwargs.get("stderr") is not None:
-            raise ValueError(
-                "stdout and stderr arguments may not be used " "with capture_output."
-            )
-        kwargs["stdout"] = PIPE
-        kwargs["stderr"] = PIPE
-
-    with Popen(*popenargs, **kwargs) as process:
-        try:
-            stdout, stderr = process.communicate(input, timeout=timeout)
-        except TimeoutExpired as exc:
-            process.send_signal(signal.SIGINT)
-            # Wait again, now that the child has received SIGINT, too.
-            process.wait(timeout=exit_timeout)
-            process.kill()
-            if _mswindows:
-                # Windows accumulates the output in a single blocking
-                # read() call run on child threads, with the timeout
-                # being done in a join() on those threads.  communicate()
-                # _after_ kill() is required to collect that and add it
-                # to the exception.
-                exc.stdout, exc.stderr = process.communicate()
+        with tempfile.TemporaryFile() as f:
+            if input:
+                f.write(input)  # type: ignore
+                f.seek(0)
+                result = run(
+                    *popenargs,
+                    input=f,
+                    timeout=timeout,
+                    check=check,
+                    tee=tee,
+                    capture_output=capture_output,
+                    **kwargs,
+                )
             else:
-                # POSIX _communicate already populated the output so
-                # far into the TimeoutExpired exception.
-                process.wait()
-            raise
-        except KeyboardInterrupt:
-            print("Received keyboard interrupt")
-            # Wait again, now that the child has received SIGINT, too.
-            process.wait(timeout=exit_timeout)
-            raise
-        except Exception:  # Including KeyboardInterrupt, communicate handled that.
-            process.kill()
-            # We don't call process.wait() as .__exit__ does that for us.
-            raise
-        retcode = process.poll()
-        if check and retcode:
-            raise CalledProcessError(retcode, process.args, output=stdout, stderr=stderr)
-    return CompletedProcess(process.args, retcode or 0, stdout, stderr)
+                result = run(
+                    *popenargs,
+                    timeout=timeout,
+                    check=check,
+                    tee=tee,
+                    capture_output=capture_output,
+                    **kwargs,
+                )
+
+    except TimeoutError as exc:
+        print("Timeout while running command")
+        signal_all_child_processes()
+        log_to_datadog("SUBPROCESS TIMEOUT EXCEPTION\n{}".format(format_exc()), "ERROR")
+        raise exc
+
+    except KeyboardInterrupt:
+        print("Received keyboard interrupt")
+        log_to_datadog(
+            "SUBPROCESS KEYBOARDINTERRUPT EXCEPTION\n{}".format(format_exc()), "ERROR"
+        )
+        raise
+    except CalledProcessError as e:
+        log_to_datadog(
+            "SUBPROCESS CALLEDPROCESSERROR\n STDOUT:\n{}\nSTDERR:\n{}\n".format(
+                e.stdout, e.stderr
+            ),
+            "ERROR",
+        )
+        raise e
+    except Exception as e:  # Including KeyboardInterrupt, communicate handled that.
+        log_to_datadog("SUBPROCESS OTHER EXCEPTION\n{}".format(format_exc()), "ERROR")
+        raise e
+
+    log_to_datadog(
+        "SUBPROCESS NORMAL RUN\nSTDOUT:\n{}\n".format(result.stdout), "INFO",
+    )
+    return result

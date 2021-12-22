@@ -15,7 +15,7 @@ need to get created. Opta yamls reference these under the `modules` field.
 name: myapp
 environments:
   - name: staging
-    path: "../env/opta.yml"
+    path: "../env/opta.yaml"
 modules:
   - name: app # This is an instance of the k8-service module type called app
     type: k8s-service
@@ -50,7 +50,7 @@ is how specific data is passed into the modules.
 ### Names
 
 All modules have a name field, which is used to create the name of the cloud resources in conjunction with the layer
-name (root name of opta.yml). A user can specify this with the `name` field, but it defaults to the module type (without
+name (root name of opta.yaml). A user can specify this with the `name` field, but it defaults to the module type (without
 the hyphens) if not given.
 
 ### Types
@@ -71,7 +71,7 @@ strings representing resource permissions.
 name: myapp
 environments:
   - name: staging
-    path: "../env/opta.yml"
+    path: "../env/opta.yaml"
 modules:
   - name: app
     type: k8s-service # This is an instance of the k8-service module type called app

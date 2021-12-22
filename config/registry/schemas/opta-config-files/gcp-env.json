@@ -16,6 +16,9 @@
       "items": {
         "oneOf": [
           {
+            "$ref": "https://app.runx.dev/modules/custom-terraform"
+          },
+          {
             "$ref": "https://app.runx.dev/modules/datadog"
           },
           {

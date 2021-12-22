@@ -5,9 +5,7 @@
   "properties": {
     "type": {
       "description": "The name of this module",
-      "enum": [
-        "lambda-function"
-      ],
+      "enum": ["lambda-function"],
       "default": "lambda-function",
       "type": "string"
     },
@@ -33,6 +31,11 @@
       "description": "The filename for your zip file containing your lambda code",
       "type": "string"
     },
+    "handler": {
+      "description": "Lambda function handler is the method in your function code that processes events.",
+      "enum": ["lambda-function"],
+      "default": "index.handler"
+    },
     "env_vars": {
       "description": "A map of key values to add to the container as environment variables (key is name, value is value).\n```yaml\nenv_vars:\n FLAG: \"true\"\n```\n",
       "type": "object",
@@ -40,21 +43,13 @@
     },
     "vpc_id": {
       "description": "The name of this module",
-      "enum": [
-        "lambda-function"
-      ]
+      "enum": ["lambda-function"]
     }
   },
-  "required": [
-    "runtime",
-    "filename",
-    "type"
-  ],
+  "required": ["runtime", "filename", "type"],
   "opta_metadata": {
     "module_type": "service",
-    "clouds": [
-      "aws"
-    ],
+    "clouds": ["aws"],
     "name": "lambda-function",
     "display_name": "lambda-function",
     "tags": []

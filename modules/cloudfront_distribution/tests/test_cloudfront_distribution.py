@@ -2,13 +2,13 @@ import os
 
 from pytest_mock import MockFixture
 
-from modules.cloudfront_distribution.aws_cloudfront_distribution import (
-    AwsCloudfrontDstributionProcessor,
+from modules.cloudfront_distribution.cloudfront_distribution import (
+    CloudfrontDistributionProcessor,
 )
 from opta.layer import Layer
 
 
-class TestAwsCloudfrontDstributionProcessor:
+class TestCloudfrontDstributionProcessor:
     def test_all_good(self, mocker: MockFixture) -> None:
         layer = Layer.load_from_yaml(
             os.path.join(
@@ -19,7 +19,7 @@ class TestAwsCloudfrontDstributionProcessor:
         idx = len(layer.modules)
         cloudfront_module = layer.get_module("cloudfront", idx)
         assert cloudfront_module is not None
-        AwsCloudfrontDstributionProcessor(cloudfront_module, layer).process(idx)
+        CloudfrontDistributionProcessor(cloudfront_module, layer).process(idx)
         assert cloudfront_module.data["bucket_name"] == "${{module.bucket1.bucket_id}}"
         assert (
             cloudfront_module.data["origin_access_identity_path"]

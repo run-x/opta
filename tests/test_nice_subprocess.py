@@ -1,6 +1,7 @@
 # type: ignore
 import os
-from subprocess import TimeoutExpired
+from asyncio import TimeoutError
+from time import sleep
 
 import pytest
 
@@ -20,19 +21,19 @@ class TestNiceRun:
             ["echo", "Hello world!"], check=True, capture_output=True
         )
         assert completed_process.returncode == 0
-        assert completed_process.stdout.decode("ascii") == "Hello world!\n"
+        assert completed_process.stdout == "Hello world!\n"
 
     def test_timeout(self):
-        with pytest.raises(TimeoutExpired):
+        with pytest.raises(TimeoutError):
             nice_run(["sleep", "5"], check=True, capture_output=True, timeout=1)
 
     def test_graceful_timeout_exit(self):
         if os.path.exists(GRACEFUL_TERMINATION_FILE):
             os.remove(GRACEFUL_TERMINATION_FILE)
 
-        with pytest.raises(TimeoutExpired):
+        with pytest.raises(TimeoutError):
             nice_run(["python", SIGNAL_HANDLER_SCRIPT], timeout=3)
-
+        sleep(5)
         assert os.path.exists(GRACEFUL_TERMINATION_FILE)
 
         # clean up

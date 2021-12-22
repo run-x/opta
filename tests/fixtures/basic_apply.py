@@ -19,7 +19,7 @@ BASIC_APPLY = (
                 }
             },
             "required_providers": {
-                "aws": {"source": "hashicorp/aws", "version": "3.58.0"},
+                "aws": {"source": "hashicorp/aws", "version": "3.70.0"},
                 "helm": {"source": "hashicorp/helm", "version": "2.4.1"},
             },
         },
@@ -36,6 +36,7 @@ BASIC_APPLY = (
                 ],
                 "public_ipv4_cidr_blocks": ["10.0.0.0/21", "10.0.8.0/21", "10.0.16.0/21"],
                 "total_ipv4_cidr_block": "10.0.0.0/16",
+                "vpc_log_retention": 90,
             }
         },
         "output": {

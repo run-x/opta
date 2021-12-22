@@ -145,7 +145,7 @@ def is_service_config(config: str) -> bool:
 
 @click.command(hidden=True)
 @click.argument("image")
-@click.option("-c", "--config", default="opta.yml", help="Opta config file.")
+@click.option("-c", "--config", default="opta.yaml", help="Opta config file.")
 @click.option(
     "-e", "--env", default=None, help="The env to use when loading the config file."
 )

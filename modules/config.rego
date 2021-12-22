@@ -23,12 +23,12 @@ waivers[waiver] {
 } {
   waiver := {
     "rule_id": "FG_R00010",
-    "resource_id": "aws_cloudfront_distribution.s3_distribution"
+    "resource_id": "aws_cloudfront_distribution.distribution"
   }
 } {
   waiver := {
     "rule_id": "FG_R00067",
-    "resource_id": "aws_cloudfront_distribution.s3_distribution"
+    "resource_id": "aws_cloudfront_distribution.distribution"
   }
 } {
   waiver := {

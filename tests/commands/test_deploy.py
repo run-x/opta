@@ -41,11 +41,11 @@ def test_deploy_basic(mocker: MockFixture) -> None:
     mocked_layer.validate_required_path_dependencies.assert_called_once()
     mock_tf_download_state.assert_called_once_with(mocked_layer)
     mock_push.assert_called_once_with(
-        image="local_image:local_tag", config="opta.yml", env=None, tag=None
+        image="local_image:local_tag", config="opta.yaml", env=None, tag=None
     )
     mock_terraform_outputs.assert_called_once_with(mocked_layer)
     mock_apply.assert_called_once_with(
-        config="opta.yml",
+        config="opta.yaml",
         env=None,
         refresh=False,
         image_tag=None,
@@ -89,11 +89,11 @@ def test_deploy_auto_approve(mocker: MockFixture) -> None:
     assert result.exit_code == 0
     mock_tf_download_state.assert_called_once_with(mocked_layer)
     mock_push.assert_called_once_with(
-        image="local_image:local_tag", config="opta.yml", env=None, tag=None
+        image="local_image:local_tag", config="opta.yaml", env=None, tag=None
     )
     mock_terraform_outputs.assert_called_once_with(mocked_layer)
     mock_apply.assert_called_once_with(
-        config="opta.yml",
+        config="opta.yaml",
         env=None,
         refresh=False,
         image_tag=None,
@@ -137,7 +137,7 @@ def test_deploy_all_flags(mocker: MockFixture) -> None:
             "--image",
             "local_image:local_tag",
             "--config",
-            "app/opta.yml",
+            "app/opta.yaml",
             "--env",
             "staging",
             "--tag",
@@ -148,11 +148,11 @@ def test_deploy_all_flags(mocker: MockFixture) -> None:
     assert result.exit_code == 0
     mock_tf_download_state.assert_called_once_with(mocked_layer)
     mock_push.assert_called_once_with(
-        image="local_image:local_tag", config="app/opta.yml", env="staging", tag="latest"
+        image="local_image:local_tag", config="app/opta.yaml", env="staging", tag="latest"
     )
     mock_terraform_outputs.assert_called_once_with(mocked_layer)
     mock_apply.assert_called_once_with(
-        config="app/opta.yml",
+        config="app/opta.yaml",
         env="staging",
         refresh=False,
         image_tag=None,
@@ -194,7 +194,7 @@ def test_deploy_ecr_apply(mocker: MockFixture) -> None:
             "--image",
             "local_image:local_tag",
             "--config",
-            "app/opta.yml",
+            "app/opta.yaml",
             "--env",
             "staging",
             "--tag",
@@ -205,13 +205,13 @@ def test_deploy_ecr_apply(mocker: MockFixture) -> None:
     assert result.exit_code == 0
     mock_tf_download_state.assert_called_once_with(mocked_layer)
     mock_push.assert_called_once_with(
-        image="local_image:local_tag", config="app/opta.yml", env="staging", tag="latest"
+        image="local_image:local_tag", config="app/opta.yaml", env="staging", tag="latest"
     )
     mock_terraform_outputs.assert_called_once_with(mocked_layer)
     mock_apply.assert_has_calls(
         [
             mocker.call(
-                config="app/opta.yml",
+                config="app/opta.yaml",
                 env="staging",
                 refresh=False,
                 image_tag=None,
@@ -222,7 +222,7 @@ def test_deploy_ecr_apply(mocker: MockFixture) -> None:
                 local=False,
             ),
             mocker.call(
-                config="app/opta.yml",
+                config="app/opta.yaml",
                 env="staging",
                 refresh=False,
                 image_tag=None,

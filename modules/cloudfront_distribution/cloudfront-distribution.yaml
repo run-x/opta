@@ -1,6 +1,5 @@
 halt: false
 environment_module: false
-terraform_module: aws-cloudfront-distribution
 inputs:
   - name: env_name
     user_facing: false
@@ -18,6 +17,18 @@ inputs:
     user_facing: false
     description: Name of the access log bucket
     default: null
+  - name: s3_load_balancer_enabled
+    user_facing: false
+    description: Create S3 Cloudfront if set to true
+    default: false
+  - name: load_balancer
+    user_facing: false
+    description: Load Balancer URL
+    default: null
+  - name: eks_load_balancer_enabled
+    user_facing: false
+    description: Create LB Cloudfront if set to true
+    default: false
   - name: bucket_name
     user_facing: true
     validator: str(required=False)
@@ -63,6 +74,16 @@ inputs:
     validator: list(str(), required=False)
     description: The linked s3 buckets to attach to your cloudfront distribution (currently only supports one).
     default: []
+  - name: allowed_methods
+    user_facing: true
+    validator: list(str(), required=False)
+    description: HTTP methods CloudFront processes and forwards to your Amazon S3 bucket or your custom origin.
+    default: ["GET", "HEAD", "OPTIONS"]
+  - name: cached_methods
+    user_facing: true
+    validator: list(str(), required=False)
+    description: CloudFront caches the response to the specified HTTP method requests.
+    default: ["GET", "HEAD", "OPTIONS"]
 extra_validators: { }
 outputs:
   - name: cloudfront_domain

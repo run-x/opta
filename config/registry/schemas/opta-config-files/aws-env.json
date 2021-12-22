@@ -59,6 +59,9 @@
             "$ref": "https://app.runx.dev/modules/aws-ses"
           },
           {
+            "$ref": "https://app.runx.dev/modules/custom-terraform"
+          },
+          {
             "$ref": "https://app.runx.dev/modules/datadog"
           },
           {

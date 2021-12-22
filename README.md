@@ -66,6 +66,7 @@ To use Opta, you first need to create some simple yaml configuration files that 
 
 # What you get with Opta
 * Production ready [Architecture](https://docs.opta.dev/architecture/aws/)
+* **SOC2** compliant infrastructure
 * Continuous Deployment for containerized workloads
 * Hardened network and security configurations
 * Support for multiple environments (like Dev/QA/Staging/Prod)

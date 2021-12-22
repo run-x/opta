@@ -59,7 +59,7 @@ jobs:
       - name: Apply Environment with Latest Opta
         run: |
           OPTA_DISABLE_REPORTING=true /home/runner/.opta/opta apply \
-          --config runx-infra/opta-ci/opta.yml \
+          --config runx-infra/opta-ci/opta.yaml \
           --auto-approve \
           --refresh
 
@@ -67,7 +67,7 @@ jobs:
         run: |
           OPTA_DISABLE_REPORTING=true /home/runner/.opta/opta secret update \
           --env ci \
-          --config test-service/opta.yml \
+          --config test-service/opta.yaml \
           FAKE_SECRET foo
 
       - name: Deploy test-service with Latest Opta
@@ -75,7 +75,7 @@ jobs:
           OPTA_DISABLE_REPORTING=true /home/runner/.opta/opta deploy \
           --image app:latest \
           --env ci \
-          --config test-service/opta.yml \
+          --config test-service/opta.yaml \
           --tag ${{ github.sha }} \
           --auto-approve
 
@@ -83,7 +83,7 @@ jobs:
         run: |
           secret_value=$(OPTA_DISABLE_REPORTING=true /home/runner/.opta/opta secret view \
           --env ci \
-          --config test-service/opta.yml \
+          --config test-service/opta.yaml \
           FAKE_SECRET | tail -1)
           echo "This was the found secret value: ${secret_value}"
           [[ "$secret_value" =~ .*"foo".* ]] || exit 1
@@ -92,8 +92,8 @@ jobs:
         env:
           OPTA_DISABLE_REPORTING: true
         run: |
-          export PARENT_DOMAIN=`/home/runner/.opta/opta output --env ci --config test-service/opta.yml | jq -r '."parent.domain"'`
-          export HOST=`/home/runner/.opta/opta output --env ci --config test-service/opta.yml | jq -r '.load_balancer_raw_dns'`
+          export PARENT_DOMAIN=`/home/runner/.opta/opta output --env ci --config test-service/opta.yaml | jq -r '."parent.domain"'`
+          export HOST=`/home/runner/.opta/opta output --env ci --config test-service/opta.yaml | jq -r '.load_balancer_raw_dns'`
           curl -X POST -L --header "Host: test-service.${PARENT_DOMAIN}" --fail ${HOST}/stateful
 
       - name: Set up Python 3.8
@@ -116,7 +116,7 @@ jobs:
       - name: Deploy Environment with Release Opta
         run: |
           OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
-          --config runx-infra/opta-ci/opta.yml \
+          --config runx-infra/opta-ci/opta.yaml \
           --auto-approve \
           --refresh
 
@@ -124,7 +124,7 @@ jobs:
         run: |
           OPTA_DISABLE_REPORTING=true ./dist/opta/opta secret update \
           --env ci \
-          --config test-service/opta.yml \
+          --config test-service/opta.yaml \
           FAKE_SECRET foo
 
       - name: Deploy test-service with Release Opta
@@ -132,14 +132,14 @@ jobs:
           OPTA_DISABLE_REPORTING=true ./dist/opta/opta deploy \
           --image app:latest \
           --env ci \
-          --config test-service/opta.yml \
+          --config test-service/opta.yaml \
           --tag ${{ github.sha }} \
           --auto-approve
       - name: View secret and check value with Release Opta
         run: |
           secret_value=$(OPTA_DISABLE_REPORTING=true ./dist/opta/opta secret view \
           --env ci \
-          --config test-service/opta.yml \
+          --config test-service/opta.yaml \
           FAKE_SECRET | tail -1)
           echo "This was the found secret value: ${secret_value}"
           [[ "$secret_value" =~ .*"foo".* ]] || exit 1
@@ -148,8 +148,8 @@ jobs:
         run: |
           yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
           --env ci \
-          --config test-service/opta.yml \
+          --config test-service/opta.yaml \
           --auto-approve
           yes | OPTA_DISABLE_REPORTING=true ./dist/opta/opta destroy \
-          --config runx-infra/opta-ci/opta.yml \
+          --config runx-infra/opta-ci/opta.yaml \
           --auto-approve

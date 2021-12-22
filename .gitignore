@@ -22,3 +22,4 @@ Reference
 .mypy_cache
 .pytest_cache
 opta_crash_report.zip
+*.pem

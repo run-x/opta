@@ -11,10 +11,14 @@ resource "helm_release" "ingress-nginx" {
   values = [
     yamlencode({
       controller : {
+        podLabels : {
+          "opta-ingress-healthcheck" : "yes"
+        }
         extraArgs : var.private_key == "" ? {} : { default-ssl-certificate : "ingress-nginx/secret-tls" }
         config : local.config
         podAnnotations : {
           "linkerd.io/inject" : "enabled"
+          "cluster-autoscaler.kubernetes.io/safe-to-evict" : "true"
         }
         resources : {
           requests : {
@@ -64,9 +68,13 @@ resource "helm_release" "ingress-nginx" {
           enableHttps : var.cert_arn == "" && var.private_key == "" ? false : true
           targetPorts : local.target_ports
           annotations : {
+            "service.beta.kubernetes.io/aws-load-balancer-scheme" : "internet-facing"
+            "service.beta.kubernetes.io/aws-load-balancer-type" : "external"
+            "service.beta.kubernetes.io/aws-load-balancer-nlb-target-type" : "instance"
+            "service.beta.kubernetes.io/aws-load-balancer-healthcheck-protocol" : "HTTP"
+            "service.beta.kubernetes.io/aws-load-balancer-healthcheck-path" : "/healthz"
             "service.beta.kubernetes.io/aws-load-balancer-backend-protocol" : "ssl"
-            "service.beta.kubernetes.io/aws-load-balancer-proxy-protocol" : "*"
-            "service.beta.kubernetes.io/aws-load-balancer-type" : "nlb"
+            "service.beta.kubernetes.io/aws-load-balancer-name" : "opta-${var.layer_name}-lb"
             "service.beta.kubernetes.io/aws-load-balancer-access-log-enabled" : true
             "service.beta.kubernetes.io/aws-load-balancer-access-log-s3-bucket-name" : var.s3_log_bucket_name
             "service.beta.kubernetes.io/aws-load-balancer-access-log-s3-bucket-prefix" : "opta-k8s-cluster"
@@ -74,6 +82,7 @@ resource "helm_release" "ingress-nginx" {
             "service.beta.kubernetes.io/aws-load-balancer-ssl-negotiation-policy" : "ELBSecurityPolicy-TLS-1-2-2017-01"
             "service.beta.kubernetes.io/aws-load-balancer-ssl-cert" : var.cert_arn
             "external-dns.alpha.kubernetes.io/hostname" : var.domain == "" ? "" : join(",", [var.domain, "*.${var.domain}"])
+            "service.beta.kubernetes.io/aws-load-balancer-alpn-policy" : "HTTP2Preferred"
           }
         }
       },
@@ -82,6 +91,12 @@ resource "helm_release" "ingress-nginx" {
   ]
   depends_on = [
     helm_release.linkerd,
-    helm_release.opta_base
+    helm_release.opta_base,
+    helm_release.load_balancer
   ]
+}
+
+data "aws_lb" "ingress-nginx" {
+  name       = "opta-${var.layer_name}-lb"
+  depends_on = [helm_release.ingress-nginx]
 }

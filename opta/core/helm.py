@@ -33,7 +33,7 @@ class Helm:
             raise UserErrors(
                 f"Helm was unable to rollback the release: {release}.\n"
                 "Following error was raised by Helm:\n"
-                f"{e.stderr.decode('UTF-8')}"
+                f"{e.stderr}"
             )
         except Exception as e:
             raise e
@@ -55,11 +55,11 @@ class Helm:
                 check=True,
             )
         except CalledProcessError as e:
-            raise UserErrors(f"Error: {e.stderr.decode('UTF-8')}")
+            raise UserErrors(f"Error: {e.stderr}")
         except Exception as e:
             raise e
 
-        helm_list = json.loads(helm_list_process.stdout.decode("UTF-8"))
+        helm_list = json.loads(helm_list_process.stdout)
 
         if kwargs.get("release"):
             helm_list = [

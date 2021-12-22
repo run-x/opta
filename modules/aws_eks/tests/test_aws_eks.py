@@ -8,6 +8,39 @@ from opta.layer import Layer
 
 
 class TestAwsEksModuleProcessor:
+    def test_cleanup_security_groups(self, mocker: MockFixture):
+        layer = Layer.load_from_yaml(
+            os.path.join(
+                os.getcwd(), "tests", "fixtures", "dummy_data", "dummy_config_parent.yaml"
+            ),
+            None,
+        )
+        aws_eks_module = layer.get_module("awseks", 8)
+        mocked_ec2_client = mocker.Mock()
+        mocked_boto3 = mocker.patch("modules.aws_eks.aws_eks.boto3")
+        mocked_boto3.client.return_value = mocked_ec2_client
+        mocked_ec2_client.describe_vpcs.return_value = {"Vpcs": [{"VpcId": "abc"}]}
+        mocked_ec2_client.describe_security_groups.return_value = {
+            "SecurityGroups": [{"GroupId": "efg"}]
+        }
+        AwsEksProcessor(aws_eks_module, layer).cleanup_security_groups("us-east-1")
+        mocked_ec2_client.describe_vpcs.assert_called_once_with(
+            Filters=[
+                {"Name": "tag:layer", "Values": [layer.name]},
+                {"Name": "tag:opta", "Values": ["true"]},
+            ]
+        )
+        mocked_ec2_client.describe_security_groups.assert_called_once_with(
+            Filters=[
+                {
+                    "Name": f"tag:kubernetes.io/cluster/opta-{layer.name}",
+                    "Values": ["owned"],
+                },
+                {"Name": "vpc-id", "Values": ["abc"]},
+            ],
+        )
+        mocked_ec2_client.delete_security_group.assert_called_once_with(GroupId="efg")
+
     def test_post_hook(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(
             os.path.join(

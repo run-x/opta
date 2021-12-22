@@ -1,6 +1,7 @@
-from typing import TYPE_CHECKING, Any, Dict, List, Union
+from typing import TYPE_CHECKING, Dict, List, Union
 
 from modules.base import GcpK8sModuleProcessor, K8sServiceModuleProcessor
+from modules.linker_helper import LinkerHelper
 from opta.core.kubernetes import create_namespace_if_not_exists, get_manual_secrets
 from opta.exceptions import UserErrors
 
@@ -62,9 +63,19 @@ class GcpK8sServiceProcessor(GcpK8sModuleProcessor, K8sServiceModuleProcessor):
                 )
             module_type = module.aliased_type or module.type
             if module_type == "gcp-postgres" or module_type == "gcp-mysql":
-                self.handle_rds_link(module, link_permissions)
+                LinkerHelper.handle_link(
+                    module=self.module,
+                    linked_module=module,
+                    link_permissions=link_permissions,
+                    required_vars=["db_user", "db_name", "db_password", "db_host"],
+                )
             elif module_type == "gcp-redis":
-                self.handle_redis_link(module, link_permissions)
+                LinkerHelper.handle_link(
+                    module=self.module,
+                    linked_module=module,
+                    link_permissions=link_permissions,
+                    required_vars=["cache_host", "cache_auth_token"],
+                )
             elif module_type == "gcp-gcs":
                 self.handle_gcs_link(module, link_permissions)
             else:
@@ -90,72 +101,6 @@ class GcpK8sServiceProcessor(GcpK8sModuleProcessor, K8sServiceModuleProcessor):
             if obj["name"] not in seen
         ]
         super(GcpK8sServiceProcessor, self).process(module_idx)
-
-    # TODO: consolidated repeated credential link code
-    def handle_rds_link(
-        self, linked_module: "Module", link_permissions: List[Any]
-    ) -> None:
-        required_db_vars = ["db_user", "db_name", "db_password", "db_host"]
-        renamed_vars = {}
-        if len(link_permissions) > 0:
-            renamed_vars = link_permissions.pop()
-            if not isinstance(renamed_vars, dict) or set(renamed_vars.keys()) != set(
-                required_db_vars
-            ):
-                raise UserErrors(
-                    f"To rename db variables you must provide aliases for these fields: {required_db_vars}"
-                )
-            if not all(map(lambda x: isinstance(x, str), renamed_vars.values())):
-                raise UserErrors("DB variable rename must be only to another string")
-
-        for key in required_db_vars:
-            self.module.data["link_secrets"].append(
-                {
-                    "name": renamed_vars.get(key, f"{linked_module.name}_{key}"),
-                    "value": f"${{{{module.{linked_module.name}.{key}}}}}",
-                }
-            )
-        if link_permissions:
-            raise Exception(
-                "We're not supporting IAM permissions for rds right now. "
-                "Your k8s service will have the db user, name, password, "
-                "and host as envars (pls see docs) and these IAM "
-                "permissions are for manipulating the db itself, which "
-                "I don't think is what you're looking for."
-            )
-
-    def handle_redis_link(
-        self, linked_module: "Module", link_permissions: List[Any]
-    ) -> None:
-        required_redis_vars = ["cache_host", "cache_auth_token"]
-        renamed_vars = {}
-
-        if len(link_permissions) > 0:
-            renamed_vars = link_permissions.pop()
-            if not isinstance(renamed_vars, dict) or set(renamed_vars.keys()) != set(
-                required_redis_vars
-            ):
-                raise UserErrors(
-                    f"To rename redis variables you must provide aliases for these fields: {required_redis_vars}"
-                )
-            if not all(map(lambda x: isinstance(x, str), renamed_vars.values())):
-                raise UserErrors("Redis variable rename must be only to another string")
-
-        for key in required_redis_vars:
-            self.module.data["link_secrets"].append(
-                {
-                    "name": renamed_vars.get(key, f"{linked_module.name}_{key}"),
-                    "value": f"${{{{module.{linked_module.name}.{key}}}}}",
-                }
-            )
-        if link_permissions:
-            raise Exception(
-                "We're not supporting IAM permissions for redis right now. "
-                "Your k8s service will have the cache's host and auth token "
-                "as envars (pls see docs) and these IAM permissions "
-                "are for manipulating the redis cluster itself, which "
-                "I don't think is what you're looking for."
-            )
 
     def handle_gcs_link(
         self, linked_module: "Module", link_permissions: List[str]

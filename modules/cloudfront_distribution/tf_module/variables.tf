@@ -1,5 +1,6 @@
 locals {
   s3_origin_id = "optaDefaultOriginId"
+  lb_origin_id = "optaDefaultLbOriginId"
 }
 
 variable "env_name" {
@@ -52,4 +53,28 @@ variable "domains" {
 
 variable "links" {
   default = []
+}
+
+variable "load_balancer" {
+  type = string
+}
+
+variable "eks_load_balancer_enabled" {
+  type    = bool
+  default = false
+}
+
+variable "s3_load_balancer_enabled" {
+  type    = bool
+  default = false
+}
+
+variable "allowed_methods" {
+  type    = list(string)
+  default = ["GET", "HEAD", "OPTIONS"]
+}
+
+variable "cached_methods" {
+  type    = list(string)
+  default = ["GET", "HEAD", "OPTIONS"]
 }

@@ -15,9 +15,11 @@ class CustomTerraformProcessor(ModuleProcessor):
     def process(self, module_idx: int) -> None:
         current_desc = self.module.desc
         self.module.module_dir_path = os.path.join(
-            os.path.dirname(self.layer.path), self.module.data["path_to_module"]
+            os.path.abspath(os.path.dirname(self.layer.path)),
+            self.module.data["path_to_module"].strip("./"),
         )
-        current_desc["variables"] = {
-            x: "optional" for x in self.module.data.get("terraform_inputs", {}).keys()
-        }
+        current_desc["inputs"] = [
+            {"name": x, "user_facing": True}
+            for x in self.module.data.get("terraform_inputs", {}).keys()
+        ]
         self.module.data.update(self.module.data.get("terraform_inputs", {}))

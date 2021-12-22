@@ -1,7 +1,6 @@
 halt: false
 environment_module: true
 is_unique: true
-terraform_module: k8s-base
 inputs:
   - name: env_name
     user_facing: false
@@ -86,7 +85,10 @@ inputs:
     validator: list(int(min=1, max=65535), required=False)
     description: Which additional TCP ports should have TLS enabled
     default: []
-outputs: []
+outputs:
+  - name: load_balancer_raw_dns
+    export: true
+    description: The dns of the network load balancer provisioned to handle ingress to your environment
 output_providers: {}
 output_data: {}
 clouds:
