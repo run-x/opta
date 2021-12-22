@@ -6,7 +6,8 @@
       "type": "object",
       "properties": {
         "http": {
-          "type": "integer"
+          "type": "integer",
+          "default": 80
         }
       },
       "required": ["http"]
@@ -15,7 +16,8 @@
       "type": "object",
       "properties": {
         "tcp": {
-          "type": "integer"
+          "type": "integer",
+          "default": 8010
         }
       },
       "required": ["tcp"]
