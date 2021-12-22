@@ -4,9 +4,14 @@
   "$id": "http://localhost:7800/modules/aws_base/new_aws_base.json",
   "required": [
     "input_schema",
-    "output_schema"
+    "output_schema",
+    "clouds"
   ],
   "properties": {
+    "clouds": {
+      "$ref": "http://localhost:7800/modules/common_schemas/clouds.json"
+    },
+
     "input_schema": {
       "$ref": "input_schema.aws_base.json"
     },
