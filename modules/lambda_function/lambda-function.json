@@ -5,17 +5,15 @@
   "properties": {
     "type": {
       "description": "The name of this module",
-      "enum": ["lambda-function"],
-      "default": "lambda-function",
-      "type": "string"
+      "enum": ["lambda-function"]
     },
     "extra_iam_policies": {
-      "description": "The arns of additional IAM policies to be attached to this role.",
       "type": "array",
       "items": {
         "type": "string"
       },
-      "default": []
+      "default": [],
+      "description": "The arns of additional IAM policies to be attached to this role."
     },
     "expose_via_domain": {
       "description": "The arns of additional IAM policies to be attached to this role.",
@@ -29,12 +27,8 @@
     },
     "filename": {
       "description": "The filename for your zip file containing your lambda code",
-      "type": "string"
-    },
-    "handler": {
-      "description": "Lambda function handler is the method in your function code that processes events.",
-      "enum": ["lambda-function"],
-      "default": "index.handler"
+      "type": "string",
+      "default": null
     },
     "env_vars": {
       "description": "A map of key values to add to the container as environment variables (key is name, value is value).\n```yaml\nenv_vars:\n FLAG: \"true\"\n```\n",
@@ -43,15 +37,12 @@
     },
     "vpc_id": {
       "description": "The name of this module",
-      "enum": ["lambda-function"]
+      "type": "string"
     }
   },
   "required": ["runtime", "filename", "type"],
   "opta_metadata": {
     "module_type": "service",
-    "clouds": ["aws"],
-    "name": "lambda-function",
-    "display_name": "lambda-function",
-    "tags": []
+    "clouds": ["aws"]
   }
 }
