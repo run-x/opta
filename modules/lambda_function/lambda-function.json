@@ -5,7 +5,11 @@
   "properties": {
     "type": {
       "description": "The name of this module",
-      "enum": ["lambda-function"]
+      "enum": [
+        "lambda-function"
+      ],
+      "default": "lambda-function",
+      "type": "string"
     },
     "extra_iam_policies": {
       "type": "array",
@@ -16,7 +20,7 @@
       "description": "The arns of additional IAM policies to be attached to this role."
     },
     "expose_via_domain": {
-      "description": "The arns of additional IAM policies to be attached to this role.",
+      "description": "Set to true to expose the lambda as a public url in a new AWS API Gateway (V2)",
       "type": "boolean",
       "default": false
     },
@@ -27,8 +31,7 @@
     },
     "filename": {
       "description": "The filename for your zip file containing your lambda code",
-      "type": "string",
-      "default": null
+      "type": "string"
     },
     "env_vars": {
       "description": "A map of key values to add to the container as environment variables (key is name, value is value).\n```yaml\nenv_vars:\n FLAG: \"true\"\n```\n",
@@ -38,11 +41,25 @@
     "vpc_id": {
       "description": "The name of this module",
       "type": "string"
+    },
+    "handler": {
+      "description": "Lambda function handler is the method in your function code that processes events.",
+      "type": "string",
+      "default": "index.handler"
     }
   },
-  "required": ["runtime", "filename", "type"],
+  "required": [
+    "runtime",
+    "filename",
+    "type"
+  ],
   "opta_metadata": {
     "module_type": "service",
-    "clouds": ["aws"]
+    "clouds": [
+      "aws"
+    ],
+    "name": "lambda-function",
+    "display_name": "lambda-function",
+    "tags": []
   }
 }
