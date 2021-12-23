@@ -4,7 +4,24 @@ from PyInstaller.utils.hooks import collect_data_files
 
 block_cipher = None
 
-
+himps = [
+"mypy",
+"mypy-boto3-acm",
+"mypy-boto3-autoscaling",
+"mypy-boto3-cloudformation",
+"mypy-boto3-dynamodb",
+"mypy-boto3-ec2",
+"mypy-boto3-elbv2",
+"mypy-boto3-lambda",
+"mypy-boto3-logs",
+"mypy-boto3-rds",
+"mypy-boto3-route53",
+"mypy-boto3-s3",
+"mypy-boto3-sesv2",
+"mypy-boto3-sqs",
+"mypy-boto3-ssm",
+"mypy-extensions",
+]
 a = Analysis(['opta/cli.py'],
              pathex=[],
              binaries=[],
@@ -13,7 +30,7 @@ a = Analysis(['opta/cli.py'],
                ('./modules', 'modules'),
                ('roots.pem', 'grpc/_cython/_credentials/'),
              ] + collect_data_files('hcl2'),
-             hiddenimports=[],
+             hiddenimports=himps,
              hookspath=[],
              runtime_hooks=[],
              excludes=[],

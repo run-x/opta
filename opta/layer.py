@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+from traceback import format_exc
 import hashlib
 import importlib
 import os
@@ -80,6 +80,8 @@ def get_processor_class(module_type: str) -> ModuleProcessor:
         pymodule_path = generate_pymodule_path(module_type)
         pymodule = importlib.import_module(pymodule_path)
     except ModuleNotFoundError:
+        print ("While getting processor class for {} ".format(module_type))
+        print(format_exc())
         return ModuleProcessor
 
     return pymodule.__dict__[PROCESSOR_DICT[module_type]]
