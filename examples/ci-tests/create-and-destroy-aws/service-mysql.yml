@@ -1,0 +1,23 @@
+environments:
+    - name: awsenv-ci
+      path: "environment.yml"
+      variables: {}
+name: ci-mysql
+modules:
+  - type: aws-mysql
+    name: mysql
+    safety: false
+  - type: k8s-service
+    port:
+      http: 5000
+    image: AUTO
+    healthcheck_path: "/healthcheck_mysql"
+    env_vars:
+      - name: TEST_POSTGRES
+        value: "0"
+    links:
+      - mysql:
+        - db_user: MYUSER
+          db_host: MYHOST
+          db_name: MYDB
+          db_password: MYPASS

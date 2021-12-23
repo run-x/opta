@@ -81,6 +81,13 @@ class AwsK8sServiceProcessor(
                     link_permissions=link_permissions,
                     required_vars=["db_user", "db_name", "db_password", "db_host"],
                 )
+            elif module_type == "aws-mysql":
+                LinkerHelper.handle_link(
+                    module=self.module,
+                    linked_module=module,
+                    link_permissions=link_permissions,
+                    required_vars=["db_user", "db_name", "db_password", "db_host"],
+                )
             elif module_type == "aws-redis":
                 LinkerHelper.handle_link(
                     module=self.module,
