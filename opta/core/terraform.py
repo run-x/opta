@@ -60,7 +60,7 @@ class Terraform:
             nice_run(
                 ["terraform", "init", *tf_flags],
                 check=True,
-                use_new_nice_run=True,
+                use_asyncio_nice_run=True,
                 **kwargs,
             )
         except CalledProcessError:
@@ -145,7 +145,7 @@ class Terraform:
             nice_run(
                 ["terraform", "apply", "-compact-warnings", *tf_flags],
                 check=True,
-                use_new_nice_run=True,
+                use_asyncio_nice_run=True,
                 **kwargs,
             )
         except CalledProcessError:
@@ -159,7 +159,7 @@ class Terraform:
         nice_run(
             ["terraform", "import", tf_resource_address, aws_resource_id],
             check=True,
-            use_new_nice_run=True,
+            use_asyncio_nice_run=True,
             **kwargs,
         )
 
@@ -169,7 +169,7 @@ class Terraform:
         nice_run(
             ["terraform", "refresh", *tf_flags],
             check=True,
-            use_new_nice_run=True,
+            use_asyncio_nice_run=True,
             **kwargs,
         )
 
@@ -205,7 +205,7 @@ class Terraform:
                 nice_run(
                     ["terraform", "destroy", *resource_targets, *tf_flags],
                     check=True,
-                    use_new_nice_run=True,
+                    use_asyncio_nice_run=True,
                     **kwargs,
                 )
             except CalledProcessError:
@@ -234,7 +234,7 @@ class Terraform:
                         *tf_flags,
                     ],
                     check=True,
-                    use_new_nice_run=True,
+                    use_asyncio_nice_run=True,
                     **kwargs,
                 )
                 layer.post_delete(idx)
@@ -275,7 +275,7 @@ class Terraform:
         kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
         nice_run(
             ["terraform", "state", "rm", resource_address],
-            use_new_nice_run=True,
+            use_asyncio_nice_run=True,
             **kwargs,
         )
 
@@ -355,7 +355,7 @@ class Terraform:
                 ["terraform", "plan", "-compact-warnings", *tf_flags],
                 check=True,
                 tee=False,
-                use_new_nice_run=True,
+                use_asyncio_nice_run=True,
                 **kwargs,
             )
         except CalledProcessError:
@@ -371,13 +371,13 @@ class Terraform:
                     check=True,
                     capture_output=True,
                     tee=False,
-                    use_new_nice_run=True,
+                    use_asyncio_nice_run=True,
                 ).stdout
                 return out
             nice_run(
                 ["terraform", "show", *tf_flags],
                 check=True,
-                use_new_nice_run=True,
+                use_asyncio_nice_run=True,
                 **kwargs,
             )
         except CalledProcessError:
@@ -954,7 +954,7 @@ class Terraform:
 
         nice_run(
             ["terraform", "force-unlock", *tf_flags, lock_id],
-            use_new_nice_run=True,
+            use_asyncio_nice_run=True,
             check=True,
         )
 

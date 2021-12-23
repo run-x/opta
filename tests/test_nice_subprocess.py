@@ -21,7 +21,7 @@ class TestNiceRun:
             ["echo", "Hello world!"],
             check=True,
             capture_output=True,
-            use_new_nice_run=True,
+            use_asyncio_nice_run=True,
         )
         assert completed_process.returncode == 0
         assert completed_process.stdout == "Hello world!\n"
@@ -32,7 +32,7 @@ class TestNiceRun:
                 ["sleep", "5"],
                 check=True,
                 capture_output=True,
-                use_new_nice_run=True,
+                use_asyncio_nice_run=True,
                 timeout=1,
             )
 
@@ -41,7 +41,9 @@ class TestNiceRun:
             os.remove(GRACEFUL_TERMINATION_FILE)
 
         with pytest.raises(TimeoutError):
-            nice_run(["python", SIGNAL_HANDLER_SCRIPT], timeout=3, use_new_nice_run=True)
+            nice_run(
+                ["python", SIGNAL_HANDLER_SCRIPT], timeout=3, use_asyncio_nice_run=True
+            )
         sleep(5)
         assert os.path.exists(GRACEFUL_TERMINATION_FILE)
 

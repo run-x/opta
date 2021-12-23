@@ -719,7 +719,7 @@ class TestTerraform:
         mock_force_unlock_nice_run.assert_called_once_with(
             ["terraform", "force-unlock", *tf_flags, mock_get_aws_lock_id.return_value],
             check=True,
-            use_new_nice_run=True,
+            use_asyncio_nice_run=True,
         )
 
     def test_force_unlock_gcp(self, mocker: MockFixture) -> None:
@@ -747,7 +747,7 @@ class TestTerraform:
         mock_force_unlock_nice_run.assert_called_once_with(
             ["terraform", "force-unlock", mock_get_gcp_lock_id.return_value],
             check=True,
-            use_new_nice_run=True,
+            use_asyncio_nice_run=True,
         )
 
     def test_force_unlock_azure(self, mocker: MockFixture) -> None:
@@ -785,7 +785,7 @@ class TestTerraform:
         mock_force_unlock_nice_run.assert_called_once_with(
             ["terraform", "force-unlock", mock_get_azure_lock_id.return_value],
             check=True,
-            use_new_nice_run=True,
+            use_asyncio_nice_run=True,
         )
 
     def test_force_unlock_no_lock_id(self, mocker: MockFixture) -> None:

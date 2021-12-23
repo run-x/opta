@@ -74,11 +74,13 @@ def nice_run(  # type: ignore # nosec
     exit_timeout: Optional[float] = None,
     tee: bool = True,
     check: bool = False,
-    use_new_nice_run=False,
+    use_asyncio_nice_run=False,
     **kwargs,
 ) -> CompletedProcess:
 
-    if use_new_nice_run is False:
+    if (
+        use_asyncio_nice_run is False
+    ):  # Just use the original blocking Popen, this doesn't log subprocess output to datadog
         if input is not None:
             if kwargs.get("stdin") is not None:
                 raise ValueError("stdin and input arguments may not both be used.")
