@@ -197,7 +197,7 @@ def _apply(
 
     existing_config: Optional[StructuredConfig] = cloud_client.get_remote_config()
     old_semver_string = (
-        "0.0.1"
+        ""
         if existing_config is None
         else existing_config.get("opta_version", "0.0.1").strip("v")
     )
