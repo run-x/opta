@@ -50,6 +50,9 @@ def mocked_layer(mocker: MockFixture) -> Any:
     mocked_layer_class.load_from_yaml.return_value = mocked_layer
     mocked_layer.parent = None
     mocked_layer.original_spec = ""
+    mocked_module = mocker.Mock()
+    mocked_module.aliased_type = "dummy"
+    mocked_layer.modules = [mocked_module]
 
     return mocked_layer
 
@@ -200,12 +203,12 @@ def test_fail_on_2_azs(mocker: MockFixture, mocked_layer: Any) -> None:
 
 
 def test_verify_semver_all_good(mocker: MockFixture, mocked_layer: Any) -> None:
-    _verify_semver("0.1.0", "0.2.0")
+    _verify_semver("0.1.0", "0.2.0", mocked_layer)
 
 
 def test_verify_semver_older_version(mocker: MockFixture, mocked_layer: Any) -> None:
     with pytest.raises(UserErrors):
-        _verify_semver("0.2.0", "0.1.0")
+        _verify_semver("0.2.0", "0.1.0", mocked_layer)
 
 
 def test_verify_semver_upgrade_warning(mocker: MockFixture, mocked_layer: Any) -> None:
@@ -214,9 +217,10 @@ def test_verify_semver_upgrade_warning(mocker: MockFixture, mocked_layer: Any) -
     mocked_confirm = mocker.Mock()
     mocked_click.confirm = mocked_confirm
     with patch(
-        "opta.commands.apply.UPGRADE_WARNINGS", {"0.2.0": "blah", "0.3.0": "baloney"}
+        "opta.commands.apply.UPGRADE_WARNINGS",
+        {("0.2.0", "aws", "dummy"): "blah", ("0.3.0", "aws", "dummy"): "baloney"},
     ):
-        _verify_semver("0.1.0", "0.3.0")
+        _verify_semver("0.1.0", "0.3.0", mocked_layer)
     mocked_logger.info.assert_has_calls(
         [mocker.call(mocker.ANY), mocker.call(mocker.ANY)]
     )

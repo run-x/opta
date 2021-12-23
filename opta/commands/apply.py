@@ -199,10 +199,10 @@ def _apply(
     old_semver_string = (
         ""
         if existing_config is None
-        else existing_config.get("opta_version", "0.0.1").strip("v")
+        else existing_config.get("opta_version", "").strip("v")
     )
     current_semver_string = VERSION.strip("v")
-    _verify_semver(old_semver_string, current_semver_string)
+    _verify_semver(old_semver_string, current_semver_string, layer)
 
     try:
         existing_modules: Set[str] = set()
@@ -329,7 +329,9 @@ def _apply(
         )
 
 
-def _verify_semver(old_semver_string: str, current_semver_string: str) -> None:
+def _verify_semver(
+    old_semver_string: str, current_semver_string: str, layer: "Layer"
+) -> None:
     if old_semver_string in [DEV_VERSION, ""] or current_semver_string in [
         DEV_VERSION,
         "",
@@ -344,9 +346,17 @@ def _verify_semver(old_semver_string: str, current_semver_string: str) -> None:
             "Please update to the latest version and try again!"
         )
 
+    present_modules = [k.aliased_type or k.type for k in layer.modules]
+
     current_upgrade_warnings = sorted(
-        [(k, v) for k, v in UPGRADE_WARNINGS.items() if current_semver >= k > old_semver],
-        key=lambda x: semver.VersionInfo.parse(x[0]),
+        [
+            (k, v)
+            for k, v in UPGRADE_WARNINGS.items()
+            if current_semver >= k[0] > old_semver
+            and k[1] == layer.cloud
+            and k[2] in present_modules
+        ],
+        key=lambda x: semver.VersionInfo.parse(x[0][0]),
     )
     for current_upgrade_warning in current_upgrade_warnings:
         logger.info(

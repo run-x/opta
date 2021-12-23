@@ -1,6 +1,6 @@
 import os
 import time
-from typing import Dict
+from typing import Dict, Tuple
 
 from ruamel.yaml import YAML
 
@@ -30,8 +30,12 @@ SESSION_ID = int(time.time() * 1000)
 # caused by opta version upgrade. The key is the first version that the warning is for. So if you have a
 # warning for versions 0.1.0, 0.2.0, 0.4.0, and 0.5.0, and the user used to have version 0.2.0, but now has version
 # 0.5.0, then they will see warnings for 0.4.0, and 0.5.0
-UPGRADE_WARNINGS: Dict[str, str] = {
-    "0.21.0": "If you are applying to an AWS environment, this upgrade will cause a 5 min downtime for "
+UPGRADE_WARNINGS: Dict[Tuple[str, str, str], str] = {
+    (
+        "0.21.0",
+        "aws",
+        "aws-dns",
+    ): "If you are applying to an AWS environment, this upgrade will cause a 5 min downtime for "
     "any public traffic, as this will replace the network load balancer with a new, superior-managed one"
     "(old one will stick around, but should be manually deleted). Opta-internal references, like "
     "those for the opta managed dns, will be switched to new load balancer automatically, but this may cause "
