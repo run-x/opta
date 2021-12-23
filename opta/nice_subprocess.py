@@ -78,7 +78,7 @@ def nice_run(  # type: ignore # nosec
     **kwargs,
 ) -> CompletedProcess:
 
-    if use_new_nice_run == False:
+    if use_new_nice_run is False:
         if input is not None:
             if kwargs.get("stdin") is not None:
                 raise ValueError("stdin and input arguments may not both be used.")

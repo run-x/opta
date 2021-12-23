@@ -18,14 +18,23 @@ SIGNAL_HANDLER_SCRIPT = os.path.join(
 class TestNiceRun:
     def test_echo(self):
         completed_process = nice_run(
-            ["echo", "Hello world!"], check=True, capture_output=True, use_new_nice_run=True
+            ["echo", "Hello world!"],
+            check=True,
+            capture_output=True,
+            use_new_nice_run=True,
         )
         assert completed_process.returncode == 0
         assert completed_process.stdout == "Hello world!\n"
 
     def test_timeout(self):
         with pytest.raises(TimeoutError):
-            nice_run(["sleep", "5"], check=True, capture_output=True, use_new_nice_run=True, timeout=1)
+            nice_run(
+                ["sleep", "5"],
+                check=True,
+                capture_output=True,
+                use_new_nice_run=True,
+                timeout=1,
+            )
 
     def test_graceful_timeout_exit(self):
         if os.path.exists(GRACEFUL_TERMINATION_FILE):
