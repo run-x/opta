@@ -1,10 +1,10 @@
 # This opta environment is used by the test-ci job in the runxc repo.
-name: awsenv-ci-sachin
+name: awsenv-ci
 org_name: runx
 providers:
   aws:
     region: us-east-2
-    account_id: 652824372180
+    account_id: 693658092572
 modules:
   - type: base
   - type: dns
@@ -15,4 +15,4 @@ modules:
     spot_instances: true
   - type: k8s-base
     admin_arns:
-      - "arn:aws:iam::652824372180:user/github-actions"
+      - "arn:aws:iam::693658092572:user/github-actions"
