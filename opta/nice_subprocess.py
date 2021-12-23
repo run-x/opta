@@ -4,11 +4,25 @@ import signal
 import sys
 import tempfile
 from asyncio import TimeoutError
-from subprocess import CalledProcessError, CompletedProcess  # nosec
+from subprocess import (  # nosec
+    PIPE,
+    CalledProcessError,
+    CompletedProcess,
+    Popen,
+    TimeoutExpired,
+)
 from traceback import format_exc
 from typing import Optional, Union
 
 import psutil
+
+try:
+    import _winapi  # noqa
+
+    _mswindows = True
+except ModuleNotFoundError:
+    _mswindows = False
+
 
 from opta.constants import DEV_VERSION, VERSION
 from opta.datadog_logging import DatadogLogHandler
@@ -60,65 +74,119 @@ def nice_run(  # type: ignore # nosec
     exit_timeout: Optional[float] = None,
     tee: bool = True,
     check: bool = False,
+    use_new_nice_run=False,
     **kwargs,
 ) -> CompletedProcess:
 
-    try:
-        listargs = list(popenargs)
-        listargs[0].insert(0, "exec")
-        popenargs = tuple(listargs)
-        log_to_datadog(
-            "Calling subprocess with these arguments:\n" + " ".join(*popenargs), "INFO"
-        )
+    if use_new_nice_run == False:
+        if input is not None:
+            if kwargs.get("stdin") is not None:
+                raise ValueError("stdin and input arguments may not both be used.")
+            kwargs["stdin"] = PIPE
 
-        with tempfile.TemporaryFile() as f:
-            if input:
-                f.write(input)  # type: ignore
-                f.seek(0)
-                result = run(
-                    *popenargs,
-                    input=f,
-                    timeout=timeout,
-                    check=check,
-                    tee=tee,
-                    capture_output=capture_output,
-                    **kwargs,
+        if capture_output:
+            if kwargs.get("stdout") is not None or kwargs.get("stderr") is not None:
+                raise ValueError(
+                    "stdout and stderr arguments may not be used " "with capture_output."
                 )
-            else:
-                result = run(
-                    *popenargs,
-                    timeout=timeout,
-                    check=check,
-                    tee=tee,
-                    capture_output=capture_output,
-                    **kwargs,
+            kwargs["stdout"] = PIPE
+            kwargs["stderr"] = PIPE
+
+        with Popen(*popenargs, **kwargs) as process:
+            try:
+                stdout, stderr = process.communicate(input, timeout=timeout)
+            except TimeoutExpired as exc:
+                process.send_signal(signal.SIGINT)
+                # Wait again, now that the child has received SIGINT, too.
+                process.wait(timeout=exit_timeout)
+                process.kill()
+                if _mswindows:
+                    # Windows accumulates the output in a single blocking
+                    # read() call run on child threads, with the timeout
+                    # being done in a join() on those threads.  communicate()
+                    # _after_ kill() is required to collect that and add it
+                    # to the exception.
+                    exc.stdout, exc.stderr = process.communicate()
+                else:
+                    # POSIX _communicate already populated the output so
+                    # far into the TimeoutExpired exception.
+                    process.wait()
+                raise
+            except KeyboardInterrupt:
+                print("Received keyboard interrupt")
+                # Wait again, now that the child has received SIGINT, too.
+                process.wait(timeout=exit_timeout)
+                raise
+            except Exception:  # Including KeyboardInterrupt, communicate handled that.
+                process.kill()
+                # We don't call process.wait() as .__exit__ does that for us.
+                raise
+            retcode = process.poll()
+            if check and retcode:
+                raise CalledProcessError(
+                    retcode, process.args, output=stdout, stderr=stderr
                 )
+        return CompletedProcess(process.args, retcode or 0, stdout, stderr)
+    else:
+        try:
+            listargs = list(popenargs)
+            listargs[0].insert(0, "exec")
+            popenargs = tuple(listargs)
+            log_to_datadog(
+                "Calling subprocess with these arguments:\n" + " ".join(*popenargs),
+                "INFO",
+            )
 
-    except TimeoutError as exc:
-        print("Timeout while running command")
-        signal_all_child_processes()
-        log_to_datadog("SUBPROCESS TIMEOUT EXCEPTION\n{}".format(format_exc()), "ERROR")
-        raise exc
+            with tempfile.TemporaryFile() as f:
+                if input:
+                    f.write(input)  # type: ignore
+                    f.seek(0)
+                    result = run(
+                        *popenargs,
+                        input=f,
+                        timeout=timeout,
+                        check=check,
+                        tee=tee,
+                        capture_output=capture_output,
+                        **kwargs,
+                    )
+                else:
+                    result = run(
+                        *popenargs,
+                        timeout=timeout,
+                        check=check,
+                        tee=tee,
+                        capture_output=capture_output,
+                        **kwargs,
+                    )
 
-    except KeyboardInterrupt:
-        print("Received keyboard interrupt")
+        except TimeoutError as exc:
+            print("Timeout while running command")
+            signal_all_child_processes()
+            log_to_datadog(
+                "SUBPROCESS TIMEOUT EXCEPTION\n{}".format(format_exc()), "ERROR"
+            )
+            raise exc
+
+        except KeyboardInterrupt:
+            print("Received keyboard interrupt")
+            log_to_datadog(
+                "SUBPROCESS KEYBOARDINTERRUPT EXCEPTION\n{}".format(format_exc()), "ERROR"
+            )
+            raise
+        except CalledProcessError as e:
+            log_to_datadog(
+                "SUBPROCESS CALLEDPROCESSERROR\n STDOUT:\n{}\nSTDERR:\n{}\n".format(
+                    e.stdout, e.stderr
+                ),
+                "ERROR",
+            )
+            raise e
+        except Exception as e:  # Including KeyboardInterrupt, communicate handled that.
+            log_to_datadog("SUBPROCESS OTHER EXCEPTION\n{}".format(format_exc()), "ERROR")
+            raise e
+
         log_to_datadog(
-            "SUBPROCESS KEYBOARDINTERRUPT EXCEPTION\n{}".format(format_exc()), "ERROR"
+            "SUBPROCESS NORMAL RUN\nSTDOUT:\n{}\n".format(result.stdout), "INFO",
         )
-        raise
-    except CalledProcessError as e:
-        log_to_datadog(
-            "SUBPROCESS CALLEDPROCESSERROR\n STDOUT:\n{}\nSTDERR:\n{}\n".format(
-                e.stdout, e.stderr
-            ),
-            "ERROR",
-        )
-        raise e
-    except Exception as e:  # Including KeyboardInterrupt, communicate handled that.
-        log_to_datadog("SUBPROCESS OTHER EXCEPTION\n{}".format(format_exc()), "ERROR")
-        raise e
-
-    log_to_datadog(
-        "SUBPROCESS NORMAL RUN\nSTDOUT:\n{}\n".format(result.stdout), "INFO",
-    )
-    return result
+        return result
