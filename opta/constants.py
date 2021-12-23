@@ -34,7 +34,7 @@ UPGRADE_WARNINGS: Dict[Tuple[str, str, str], str] = {
     (
         "0.21.0",
         "aws",
-        "aws-dns",
+        "aws-k8s-base",
     ): "If you are applying to an AWS environment, this upgrade will cause a 5 min downtime for "
     "any public traffic, as this will replace the network load balancer with a new, superior-managed one"
     "(old one will stick around, but should be manually deleted). Opta-internal references, like "
