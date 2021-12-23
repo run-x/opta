@@ -1,0 +1,9 @@
+environments:
+  - name: staging
+    path: "git@github.com:run-x/runx-infra.git//staging/opta-gcp.yml?ref=main"
+    variables: {}
+name: app
+modules:
+  - type: k8s-service
+    name: app
+    image: AUTO
