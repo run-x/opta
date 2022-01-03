@@ -69,7 +69,7 @@ def _local_configure_kubectl(layer: "Layer") -> None:
         ["kubectl", "config", "use-context", "kind-opta-local-cluster"],
         check=True,
         capture_output=True,
-    ).stdout.decode('utf-8')
+    ).stdout.decode("utf-8")
 
 
 def _gcp_configure_kubectl(layer: "Layer") -> None:
