@@ -17,6 +17,28 @@
     },
     "output_schema": {
       "$ref": "output_schema.aws_base.json"
+    },
+    "is_unique": {
+      "type": "boolean",
+      "description": "",
+      "default": true
+    },
+    "halt": {
+      "type": "boolean",
+      "description": "",
+      "default": true
+    },
+    "environment_module": {
+      "type": "boolean",
+      "description": "",
+      "default": true
     }
   }
+  //   "output_providers": { },
+  //   "output_data":
+  // aws_caller_identity:
+  //   provider: { }
+  // aws_region:
+  //   provider: { }
+  // }
 }
