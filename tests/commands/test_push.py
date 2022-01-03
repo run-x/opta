@@ -101,7 +101,7 @@ def test_get_acr_auth_info(mocker: MockFixture) -> None:
     mocked_nice_run = mocker.patch(
         "opta.commands.push.nice_run", return_value=mocked_nice_run_output
     )
-    mocked_nice_run_output.stdout = "dummy_token".encode("utf-8")
+    mocked_nice_run_output.stdout = "dummy_token"
 
     assert get_acr_auth_info(mocked_layer) == (
         "00000000-0000-0000-0000-000000000000",

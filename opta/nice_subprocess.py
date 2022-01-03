@@ -128,6 +128,10 @@ def nice_run(  # type: ignore # nosec
                 raise CalledProcessError(
                     retcode, process.args, output=stdout, stderr=stderr
                 )
+        if type(stdout) is bytes:
+            stdout = stdout.decode("utf-8")
+        if type(stderr) is bytes:
+            stderr = stderr.decode("utf-8")
         return CompletedProcess(process.args, retcode or 0, stdout, stderr)
     else:
         try:

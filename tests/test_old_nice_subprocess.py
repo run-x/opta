@@ -20,7 +20,7 @@ class TestNiceRun:
             ["echo", "Hello world!"], check=True, capture_output=True
         )
         assert completed_process.returncode == 0
-        assert completed_process.stdout.decode("ascii") == "Hello world!\n"
+        assert completed_process.stdout == "Hello world!\n"
 
     def test_timeout(self):
         with pytest.raises(TimeoutExpired):
