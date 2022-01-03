@@ -21,6 +21,8 @@ modules:
         value: "0"
       - name: TEST_POSTGRES
         value: "0"
+      - name: TEST_MYSQL
+        value: "0"
     links:
       - docdb
   - name: docdb
