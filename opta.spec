@@ -16,38 +16,6 @@ def generate_module_import_array():
 block_cipher = None
 
 himps = generate_module_import_array()
-# himps = [
-# "modules.aws_k8s_service.aws_k8s_service",
-# "modules.aws_k8s_base.aws_k8s_base",
-# "modules.datadog.datadog",
-# "modules.gcp_k8s_base.gcp_k8s_base",
-# "modules.gcp_k8s_service.gcp_k8s_service",
-# "modules.gcp_gke.gcp_gke",
-# "modules.aws_dns.aws_dns",
-# "modules.aws_documentdb.aws_documentdb",
-# "modules.runx.runx",
-# "modules.helm_chart.helm_chart",
-# "modules.aws_iam_role.aws_iam_role",
-# "modules.aws_iam_user.aws_iam_user",
-# "modules.aws_eks.aws_eks",
-# "modules.aws_ses.aws_ses",
-# "modules.aws_sqs.aws_sqs",
-# "modules.aws_sns.aws_sns",
-# "modules.azure_base.azure_base",
-# "modules.azure_k8s_base.azure_k8s_base",
-# "modules.azure_k8s_service.azure_k8s_service",
-# "modules.local_k8s_service.local_k8s_service",
-# "modules.external_ssl_cert.external_ssl_cert",
-# "modules.aws_s3.aws_s3",
-# "modules.gcp_dns.gcp_dns",
-# "modules.gcp_service_account.gcp_service_account",
-# "modules.custom_terraform.custom_terraform",
-# "modules.aws_dynamodb.aws_dynamodb",
-# "modules.mongodb_atlas.mongodb_atlas",
-# "modules.cloudfront_distribution.cloudfront_distribution",
-# "modules.lambda_function.lambda_function"
-# ]
-print(himps)
 
 a = Analysis(['opta/cli.py'],
              pathex=[],
