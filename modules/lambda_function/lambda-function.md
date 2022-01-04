@@ -105,7 +105,7 @@ additional setup, but it is encouraged to treat it as a service so that it can b
 ```yaml
 environments:
   - name: aws-example
-    path: "../aws-env.yml"
+    path: "../aws-env.yaml"
 name: testing-lambda
 modules:
   - type: lambda-function
