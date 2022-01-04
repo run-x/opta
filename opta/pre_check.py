@@ -29,7 +29,11 @@ def symlink_check() -> None:
 
 def is_symlinked_path() -> Tuple[bool, str]:
     pwd_path = nice_run(
-        ["pwd"], capture_output=True, shell=True, tee=False  # nosec
+        ["pwd"],
+        capture_output=True,
+        shell=True,  # nosec
+        tee=False,
+        use_asyncio_nice_run=True,  # nosec
     ).stdout.strip()  # nosec
     cwd_path = os.getcwd()
 

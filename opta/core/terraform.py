@@ -57,7 +57,12 @@ class Terraform:
             kwargs["stderr"] = PIPE
             kwargs["stdout"] = DEVNULL
         try:
-            nice_run(["terraform", "init", *tf_flags], check=True, **kwargs)
+            nice_run(
+                ["terraform", "init", *tf_flags],
+                check=True,
+                use_asyncio_nice_run=True,
+                **kwargs,
+            )
         except CalledProcessError:
             raise
 
@@ -140,6 +145,7 @@ class Terraform:
             nice_run(
                 ["terraform", "apply", "-compact-warnings", *tf_flags],
                 check=True,
+                use_asyncio_nice_run=True,
                 **kwargs,
             )
         except CalledProcessError:
@@ -153,13 +159,19 @@ class Terraform:
         nice_run(
             ["terraform", "import", tf_resource_address, aws_resource_id],
             check=True,
+            use_asyncio_nice_run=True,
             **kwargs,
         )
 
     @classmethod
     def refresh(cls, layer: "Layer", *tf_flags: str) -> None:
         kwargs = cls.insert_extra_env(layer)
-        nice_run(["terraform", "refresh", *tf_flags], check=True, **kwargs)
+        nice_run(
+            ["terraform", "refresh", *tf_flags],
+            check=True,
+            use_asyncio_nice_run=True,
+            **kwargs,
+        )
 
     @classmethod
     def destroy_resources(
@@ -193,6 +205,7 @@ class Terraform:
                 nice_run(
                     ["terraform", "destroy", *resource_targets, *tf_flags],
                     check=True,
+                    use_asyncio_nice_run=True,
                     **kwargs,
                 )
             except CalledProcessError:
@@ -221,6 +234,7 @@ class Terraform:
                         *tf_flags,
                     ],
                     check=True,
+                    use_asyncio_nice_run=True,
                     **kwargs,
                 )
                 layer.post_delete(idx)
@@ -259,7 +273,11 @@ class Terraform:
     @classmethod
     def remove_from_state(cls, resource_address: str) -> None:
         kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
-        nice_run(["terraform", "state", "rm", resource_address], **kwargs)
+        nice_run(
+            ["terraform", "state", "rm", resource_address],
+            use_asyncio_nice_run=True,
+            **kwargs,
+        )
 
     @classmethod
     def verify_storage(cls, layer: "Layer") -> bool:
@@ -337,6 +355,7 @@ class Terraform:
                 ["terraform", "plan", "-compact-warnings", *tf_flags],
                 check=True,
                 tee=False,
+                use_asyncio_nice_run=True,
                 **kwargs,
             )
         except CalledProcessError:
@@ -352,9 +371,15 @@ class Terraform:
                     check=True,
                     capture_output=True,
                     tee=False,
+                    use_asyncio_nice_run=True,
                 ).stdout
                 return out
-            nice_run(["terraform", "show", *tf_flags], check=True, **kwargs)
+            nice_run(
+                ["terraform", "show", *tf_flags],
+                check=True,
+                use_asyncio_nice_run=True,
+                **kwargs,
+            )
         except CalledProcessError:
             raise
 
@@ -927,7 +952,11 @@ class Terraform:
             print("Terraform Lock Id could not be found.")
             return
 
-        nice_run(["terraform", "force-unlock", *tf_flags, lock_id], check=True)
+        nice_run(
+            ["terraform", "force-unlock", *tf_flags, lock_id],
+            use_asyncio_nice_run=True,
+            check=True,
+        )
 
     @classmethod
     def tf_lock_details(cls, layer: "Layer") -> Tuple[bool, str]:

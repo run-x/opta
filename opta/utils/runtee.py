@@ -115,6 +115,10 @@ async def _stream_subprocess(args: str, **kwargs: Any) -> CompletedProcess:
                 stdout = os.linesep.join(out) + os.linesep
             if err:
                 stderr = os.linesep.join(err) + os.linesep
+            if type(stdout) is bytes:
+                stdout = stdout.decode("utf-8")
+            if type(stderr) is bytes:
+                stderr = stdout.decode("utf-8")
 
             return CompletedProcess(
                 args=args, returncode=await process.wait(), stdout=stdout, stderr=stderr,
