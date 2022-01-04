@@ -202,5 +202,5 @@ class PlanDisplayer:
                 )
             )
         logger.info(
-            "For more details, please rerun the command with the —detailed-plan flag."
+            "For more details, please rerun the command with the --detailed-plan flag."
         )
