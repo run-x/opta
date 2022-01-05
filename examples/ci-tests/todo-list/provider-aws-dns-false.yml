@@ -6,5 +6,8 @@ providers:
     account_id: 693658092572
 modules:
   - type: base
+   - type: dns
+     domain: testing.optaci.com
+     delegated: false
   - type: k8s-cluster
   - type: k8s-base

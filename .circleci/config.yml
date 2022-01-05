@@ -31,6 +31,9 @@ parameters:
   run-release-vs-stable:
     type: boolean
     default: false
+  test-aws-dns:
+    type: boolean
+    default: false
 
 
 orbs:
@@ -263,6 +266,59 @@ jobs:
           command: |
             ./dist/opta/opta apply \
             --config ./examples/ci-tests/create-and-destroy-aws/environment.yml \
+            --auto-approve \
+            --refresh
+
+  aws-create-env-dns-false:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - aws-cli/install
+      - aws-cli/setup
+      - run:
+          name: "Deploy opta environment with DNS Delegated False"
+          command: |
+            ./dist/opta/opta apply \
+            --config ./examples/ci-tests/todo-list/provider-aws-dns-false.yml \
+            --auto-approve \
+            --refresh
+
+  aws-create-env-set-ns:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - aws-cli/install
+      - aws-cli/setup
+      - run:
+          name: "Run the Script for Setting NS"
+          command: ./examples/ci-tests/todo-list/set-ns.sh ./examples/ci-tests/todo-list/provider-aws-dns-false.yml
+
+  aws-create-env-dns-true:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - aws-cli/install
+      - aws-cli/setup
+      - run:
+          name: "Deploy opta environment with DNS Delegated False"
+          command: |
+            ./dist/opta/opta apply \
+            --config ./examples/ci-tests/todo-list/provider-aws-dns-true.yml \
             --auto-approve \
             --refresh
 
@@ -731,6 +787,24 @@ jobs:
           command: |
             yes | ./dist/opta/opta destroy \
             --config ./examples/ci-tests/create-and-destroy-aws/environment.yml \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+
+  aws-destroy-env-dns-true:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - aws-cli/install
+      - aws-cli/setup
+      - run:
+          name: "Destroy environment with DNS Delegated True"
+          command: |
+            yes | ./dist/opta/opta destroy \
+            --config ./examples/ci-tests/todo-list/provider-aws-dns-true.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-destroy-env-stable-version:
@@ -1484,6 +1558,22 @@ workflows:
           requires:
             - gcp-test-service-pg
 
+  run-aws-dns:
+    when: << pipeline.parameters.test-aws-dns >>
+    jobs:
+      - build-opta-binary
+      - aws-create-env-dns-false:
+          requires:
+            - build-opta-binary
+      - aws-create-env-set-ns:
+          requires:
+            - aws-create-env-dns-false
+      - aws-create-env-dns-true:
+          requires:
+            - aws-create-env-set-ns
+      - aws-destroy-env-dns-true:
+          requires:
+            - aws-create-env-dns-true
   nightly:
     triggers:
       - schedule:
