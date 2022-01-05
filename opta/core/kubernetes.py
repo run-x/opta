@@ -1,7 +1,7 @@
 import base64
 import datetime
 import time
-from subprocess import DEVNULL
+from subprocess import DEVNULL  # nosec
 from threading import Thread
 from typing import TYPE_CHECKING, Dict, FrozenSet, List, Optional, Set, Tuple
 
