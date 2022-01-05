@@ -303,6 +303,13 @@ jobs:
           name: "Run the Script for Setting NS"
           command: ./examples/ci-tests/todo-list/set-ns.sh ./examples/ci-tests/todo-list/provider-aws-dns-false.yml
 
+  aws-dns-test:
+    executor: ubuntu-machine
+    steps:
+      - run:
+          name: "Curl Test for testing.optaci.com"
+          command: curl --fail https://testing.optaci.com
+
   aws-create-env-dns-true:
     executor: ubuntu-machine
     environment:
