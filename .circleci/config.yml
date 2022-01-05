@@ -1583,7 +1583,7 @@ workflows:
             - aws-create-env-dns-true
       - aws-destroy-env-dns-true:
           requires:
-            - aws-create-env-dns-true
+            - aws-dns-test
   nightly:
     triggers:
       - schedule:
