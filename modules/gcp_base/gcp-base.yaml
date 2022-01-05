@@ -38,9 +38,6 @@ outputs:
   - name: kms_account_key_id
     export: true
     description: The id of the [KMS](https://cloud.google.com/security-key-management) key (this is what handles encryption for redis, gke, etc...)
-  - name: kms_account_key_self_link
-    export: true
-    description: The self link of the default KMS key (sometimes things need the ID, sometimes the ARN, so we're giving both)
   - name: vpc_id
     export: true
     description: The ID of the [VPC](https://cloud.google.com/vpc/docs/vpc) we created for this environment

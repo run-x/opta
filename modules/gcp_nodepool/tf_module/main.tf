@@ -16,26 +16,31 @@ resource "random_string" "node_pool_id" {
 resource "google_service_account" "gke_node" {
   account_id   = "opta-${var.layer_name}-${random_string.node_pool_hash.result}"
   display_name = "opta-${var.layer_name}-default-node-pool"
+  project      = data.google_client_config.current.project
 }
 
 resource "google_project_iam_member" "gke_node_log_writer" {
-  role   = "roles/logging.logWriter"
-  member = "serviceAccount:${google_service_account.gke_node.email}"
+  role    = "roles/logging.logWriter"
+  member  = "serviceAccount:${google_service_account.gke_node.email}"
+  project = data.google_client_config.current.project
 }
 
 resource "google_project_iam_member" "gke_node_metric_writer" {
-  role   = "roles/monitoring.metricWriter"
-  member = "serviceAccount:${google_service_account.gke_node.email}"
+  role    = "roles/monitoring.metricWriter"
+  member  = "serviceAccount:${google_service_account.gke_node.email}"
+  project = data.google_client_config.current.project
 }
 
 resource "google_project_iam_member" "gke_node_monitoring_viewer" {
-  role   = "roles/monitoring.viewer"
-  member = "serviceAccount:${google_service_account.gke_node.email}"
+  role    = "roles/monitoring.viewer"
+  member  = "serviceAccount:${google_service_account.gke_node.email}"
+  project = data.google_client_config.current.project
 }
 
 resource "google_project_iam_member" "gke_node_stackdriver_writer" {
-  role   = "roles/stackdriver.resourceMetadata.writer"
-  member = "serviceAccount:${google_service_account.gke_node.email}"
+  role    = "roles/stackdriver.resourceMetadata.writer"
+  member  = "serviceAccount:${google_service_account.gke_node.email}"
+  project = data.google_client_config.current.project
 }
 
 resource "google_storage_bucket_iam_member" "viewer" {
@@ -78,7 +83,7 @@ resource "google_container_node_pool" "node_pool" {
     }
 
     workload_metadata_config {
-      node_metadata = "GKE_METADATA_SERVER"
+      mode = "GKE_METADATA"
     }
 
     labels = {

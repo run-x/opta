@@ -12,23 +12,27 @@ resource "google_service_account" "gke_node" {
 }
 
 resource "google_project_iam_member" "gke_node_log_writer" {
-  role   = "roles/logging.logWriter"
-  member = "serviceAccount:${google_service_account.gke_node.email}"
+  role    = "roles/logging.logWriter"
+  member  = "serviceAccount:${google_service_account.gke_node.email}"
+  project = data.google_client_config.current.project
 }
 
 resource "google_project_iam_member" "gke_node_metric_writer" {
-  role   = "roles/monitoring.metricWriter"
-  member = "serviceAccount:${google_service_account.gke_node.email}"
+  role    = "roles/monitoring.metricWriter"
+  member  = "serviceAccount:${google_service_account.gke_node.email}"
+  project = data.google_client_config.current.project
 }
 
 resource "google_project_iam_member" "gke_node_monitoring_viewer" {
-  role   = "roles/monitoring.viewer"
-  member = "serviceAccount:${google_service_account.gke_node.email}"
+  role    = "roles/monitoring.viewer"
+  member  = "serviceAccount:${google_service_account.gke_node.email}"
+  project = data.google_client_config.current.project
 }
 
 resource "google_project_iam_member" "gke_node_stackdriver_writer" {
-  role   = "roles/stackdriver.resourceMetadata.writer"
-  member = "serviceAccount:${google_service_account.gke_node.email}"
+  role    = "roles/stackdriver.resourceMetadata.writer"
+  member  = "serviceAccount:${google_service_account.gke_node.email}"
+  project = data.google_client_config.current.project
 }
 
 resource "google_storage_bucket_iam_member" "viewer" {

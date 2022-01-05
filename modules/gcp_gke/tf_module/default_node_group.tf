@@ -29,7 +29,7 @@ resource "google_container_node_pool" "default" {
     }
 
     workload_metadata_config {
-      node_metadata = "GKE_METADATA_SERVER"
+      mode = "GKE_METADATA"
     }
     labels = {
       node_pool_name = "opta-${var.layer_name}-default"
