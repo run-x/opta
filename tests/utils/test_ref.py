@@ -1,4 +1,9 @@
-from opta.utils.ref import _INTERPOLATION_REGEX, _PART_REGEX, InterpolatedReference, Reference
+from opta.utils.ref import (
+    _INTERPOLATION_REGEX,
+    _PART_REGEX,
+    InterpolatedReference,
+    Reference,
+)
 
 
 class TestRef:

@@ -12,6 +12,7 @@ class VersionProcessor:
     """
     Processes a layer YAML for specific versions.
     """
+
     def __init__(
         self,
         *,
@@ -53,6 +54,7 @@ class ModuleHandler:
     A `Handler` that handles each module in the YAML separately.
     It can either be used by subclassing and overriding the `run` method, or passing the `handler` parameter in the constructor.
     """
+
     def __init__(self, handler: Optional[Handler] = None):
         """
         `handler` is the Handler that is called for each module this `ModuleHandler` processes.
@@ -66,9 +68,9 @@ class ModuleHandler:
             child = self.__class__
             if parent.run == child.run and parent.__call__ == child.__call__:
                 # No handler passed, and subclass hasn't overridden the `run` or __call__ methods.
-                raise RuntimeError("Must pass a handler if not using a child class that overrides run or __call__")
-
-
+                raise RuntimeError(
+                    "Must pass a handler if not using a child class that overrides run or __call__"
+                )
 
     def __call__(self, data: dict) -> None:
         """
