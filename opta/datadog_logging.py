@@ -1,7 +1,7 @@
 import os
 import platform
 import time
-from logging import NOTSET, Handler, LogRecord
+from logging import NOTSET, Handler, LogRecord, getLogger
 from typing import Any, Dict, List
 
 from getmac import get_mac_address
@@ -13,6 +13,7 @@ from opta.utils import json
 
 CLIENT_TOKEN = "pub40d867605951d2a30fb8020e193ee7e5"  # nosec
 DEFAULT_CACHE_SIZE = 10
+logger = getLogger("opta")
 
 
 class DatadogLogHandler(Handler):
@@ -64,17 +65,24 @@ class DatadogLogHandler(Handler):
                 self.cache = []
                 return
 
-            response = post(
-                url=f"https://browser-http-intake.logs.datadoghq.com/v1/input/{CLIENT_TOKEN}",
-                params=parameters,
-                headers=headers,
-                data="\n".join(map(lambda x: json.dumps(x), self.cache)).encode("utf-8"),
-                timeout=5,
-            )
-            if response.status_code != codes.ok:
-                return
-            else:
-                self.cache = []
+            try:
+                response = post(
+                    url=f"https://browser-http-intake.logs.datadoghq.com/v1/input/{CLIENT_TOKEN}",
+                    params=parameters,
+                    headers=headers,
+                    data="\n".join(map(lambda x: json.dumps(x), self.cache)).encode(
+                        "utf-8"
+                    ),
+                    timeout=5,
+                )
+                if response.status_code != codes.ok:
+                    return
+                else:
+                    self.cache = []
+            except Exception as err:
+                logger.debug(
+                    f"Unexpected error when connecting to datadog: {err=}, {type(err)=}"
+                )
 
     def close(self) -> None:
         self.acquire()
