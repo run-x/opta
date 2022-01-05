@@ -308,7 +308,7 @@ jobs:
     steps:
       - run:
           name: "Curl Test for testing.optaci.com"
-          command: curl --fail http://testing.optaci.com || if [[ $? -ne 6 ]]; then true; else exit $?; fi
+          command: curl --fail http://testing.optaci.com || if [[ $? -eq 22 ]]; then true; else exit $?; fi
 
   aws-create-env-dns-true:
     executor: ubuntu-machine
