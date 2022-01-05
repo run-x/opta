@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import functools
 import re
 from collections import abc
@@ -76,7 +78,7 @@ class Reference(Sequence):
     def __hash__(self) -> int:
         return hash(str(self))
 
-    def __add__(self: TRef, other: Union["Reference", Iterable[PathElement]]) -> TRef:
+    def __add__(self: TRef, other: Union[Reference, Iterable[PathElement]]) -> TRef:
         # TODO: In python 3.10, replace this with isinstance(other, PathElement)
         def ispathelement(x: Any) -> bool:
             return isinstance(x, str) or isinstance(x, int)
@@ -93,7 +95,7 @@ class Reference(Sequence):
 
         return cls(*self._path, *parts)
 
-    def join(self: TRef, other: "Reference") -> TRef:
+    def join(self: TRef, other: Reference) -> TRef:
         return self.child(*other._path)
 
     @property
@@ -101,7 +103,7 @@ class Reference(Sequence):
         return self._path
 
     @classmethod
-    def parse(cls, raw: str) -> "Reference":
+    def parse(cls, raw: str) -> Reference:
         # TODO: Parse array subscript syntax
         parts = raw.split(".")
 
@@ -138,7 +140,7 @@ class InterpolatedReference(Reference):
         return super().__str__()
 
     @classmethod
-    def parse(cls, raw: str) -> "InterpolatedReference":
+    def parse(cls, raw: str) -> InterpolatedReference:
         match = _INTERPOLATION_REGEX.fullmatch(raw)
         if not match:
             raise ReferenceParseError("`raw` not an interpolated string")
@@ -146,19 +148,19 @@ class InterpolatedReference(Reference):
         return cls.parse_dotted(match[1])
 
     @classmethod
-    def parse_dotted(cls, raw: str) -> "InterpolatedReference":
+    def parse_dotted(cls, raw: str) -> InterpolatedReference:
         parsed = super().parse(raw)
 
         # Ideally, we would just return `parsed`, but the type system makes that difficult
         return cls(*parsed.path)
 
     @classmethod
-    def to_yaml(cls, representer: Any, node: "InterpolatedReference") -> Any:
+    def to_yaml(cls, representer: Any, node: InterpolatedReference) -> Any:
         # TODO: Do we need to be able to dump this class to YAML?
         return representer.represent_scalar(cls.yaml_tag, node._inner_str())
 
     @classmethod
-    def from_yaml(cls, _: Any, node: Any) -> "InterpolatedReference":
+    def from_yaml(cls, _: Any, node: Any) -> InterpolatedReference:
         # TODO: Should we actually have a way to parse this from yaml?
         return cls.parse_dotted(node.value)
 
