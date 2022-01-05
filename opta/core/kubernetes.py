@@ -1,6 +1,7 @@
 import base64
 import datetime
 import time
+from subprocess import DEVNULL  # nosec
 from threading import Thread
 from typing import TYPE_CHECKING, Dict, FrozenSet, List, Optional, Set, Tuple
 
@@ -134,7 +135,9 @@ def _gcp_configure_kubectl(layer: "Layer") -> None:
             "get-credentials",
             cluster_name,
             f"--region={env_gcp_region}",
-        ]
+        ],
+        stdout=DEVNULL,
+        check=True,
     )
 
 
@@ -164,6 +167,7 @@ def _azure_configure_kubectl(layer: "Layer") -> None:
             "--admin",
             "--overwrite-existing",
         ],
+        stdout=DEVNULL,
         check=True,
     )
 
@@ -225,7 +229,9 @@ def _aws_configure_kubectl(layer: "Layer") -> None:
             cluster_name,
             "--region",
             env_aws_region,
-        ]
+        ],
+        stdout=DEVNULL,
+        check=True,
     )
 
 
