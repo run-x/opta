@@ -23,6 +23,8 @@ modules:
         value: "0"
       - name: TEST_POSTGRES
         value: "0"
+      - name: TEST_DOCDB
+        value: "0"
     links:
       - mysql:
         - db_user: MYUSER
