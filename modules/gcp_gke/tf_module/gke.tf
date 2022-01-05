@@ -13,7 +13,7 @@ resource "google_container_cluster" "primary" {
   subnetwork            = var.private_subnet_self_link
   enable_shielded_nodes = true
   workload_identity_config {
-    identity_namespace = "${data.google_client_config.current.project}.svc.id.goog"
+    workload_pool = "${data.google_client_config.current.project}.svc.id.goog"
   }
 
   private_cluster_config {
