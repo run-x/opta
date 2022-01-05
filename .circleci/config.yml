@@ -34,7 +34,12 @@ parameters:
   test-aws-dns:
     type: boolean
     default: false
-
+  run-destroy-aws-dns-false:
+    type: boolean
+    default: false
+  run-destroy-aws-dns-true:
+    type: boolean
+    default: false
 
 orbs:
   terraform: circleci/terraform@3.0.0
@@ -794,6 +799,24 @@ jobs:
           command: |
             yes | ./dist/opta/opta destroy \
             --config ./examples/ci-tests/create-and-destroy-aws/environment.yml \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+
+  aws-destroy-env-dns-false:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - aws-cli/install
+      - aws-cli/setup
+      - run:
+          name: "Destroy environment with DNS Delegated True"
+          command: |
+            yes | ./dist/opta/opta destroy \
+            --config ./examples/ci-tests/todo-list/provider-aws-dns-false.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-destroy-env-dns-true:
@@ -1584,6 +1607,23 @@ workflows:
       - aws-destroy-env-dns-true:
           requires:
             - aws-dns-test
+
+  run-destroy-aws-dns-false:
+    when: << pipeline.parameters.run-destroy-aws-dns-false >>
+    jobs:
+      - build-opta-binary
+      - aws-destroy-env-dns-false:
+          requires:
+            - build-opta-binary
+
+  run-destroy-aws-dns-true:
+    when: << pipeline.parameters.run-destroy-aws-dns-true >>
+    jobs:
+      - build-opta-binary
+      - aws-destroy-env-dns-true:
+          requires:
+            - build-opta-binary
+
   nightly:
     triggers:
       - schedule:
