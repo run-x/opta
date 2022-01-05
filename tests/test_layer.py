@@ -81,7 +81,6 @@ class TestLayer:
             "layer_name": "gcp-dummy-config",
             "parent": SimpleNamespace(
                 kms_account_key_id="${data.terraform_remote_state.parent.outputs.kms_account_key_id}",
-                kms_account_key_self_link="${data.terraform_remote_state.parent.outputs.kms_account_key_self_link}",
                 vpc_id="${data.terraform_remote_state.parent.outputs.vpc_id}",
                 vpc_self_link="${data.terraform_remote_state.parent.outputs.vpc_self_link}",
                 private_subnet_id="${data.terraform_remote_state.parent.outputs.private_subnet_id}",
