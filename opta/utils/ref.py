@@ -181,7 +181,7 @@ class ComplexInterpolatedReference:
         return "".join(str_components)
 
     @classmethod
-    def _splitter(cls, rawstring):
+    def _splitter(cls, rawstring: str) -> Any:
         if not rawstring:
             return []  # special case - empty string
         interpolatedcomponents = re.findall(r'(\${[a-z][a-z0-9_\.]*[a-z0-9]?}):?',rawstring)
@@ -203,7 +203,7 @@ class ComplexInterpolatedReference:
             
 
     @classmethod
-    def parse(cls, raw: str) -> InterpolatedReference:
+    def parse(cls, raw: str) -> ComplexInterpolatedReference:
         components = cls._splitter(raw)
         parts = []
         for component in components:
