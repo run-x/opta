@@ -12,6 +12,7 @@ _INTERPOLATION_REGEX = re.compile(
     r"\$\{(" + _PART_REGEX.pattern + r"(?:\." + _PART_REGEX.pattern + r")*)\}",
     re.IGNORECASE,
 )
+_LITERAL_REGEX = re.compile(r"[a-z_][a-z0-9_].+",re.IGNORECASE)
 
 PathElement = Union[str, int]
 TRef = TypeVar("TRef", bound="Reference")
@@ -164,5 +165,62 @@ class InterpolatedReference(Reference):
         # TODO: Should we actually have a way to parse this from yaml?
         return cls.parse_dotted(node.value)
 
-
 register_yaml_class(InterpolatedReference)
+
+class ComplexInterpolatedReference:
+    def __init__(self, parts, skip_validation: bool = False) -> None:
+        self._parts = parts
+        
+    def __str__(self) -> str:
+        str_components = []
+        for part in self._parts:
+            if type(part) is InterpolatedReference:
+                str_components.append(str(part))
+            else:
+                str_components.append(part)
+        return "".join(str_components)
+
+    @classmethod
+    def _splitter(cls, rawstring):
+        if not rawstring:
+            return []  # special case - empty string
+        interpolatedcomponents = re.findall(r'(\${[a-z][a-z0-9_\.]*[a-z0-9]?}):?',rawstring)
+        if not interpolatedcomponents:
+            return [rawstring] # special case - no interpolated components     
+        remainingstring = rawstring
+        components = []
+        parts = []
+        for ic in interpolatedcomponents:
+            parts = remainingstring.split(ic,1)
+            if parts[0]:
+                components.append(parts[0])
+            components.append(ic)
+            if parts[1]:
+                remainingstring = parts[1]
+        if (len(parts) == 2) and (parts[1]):
+            components.append(parts[1])
+        return components
+            
+
+    @classmethod
+    def parse(cls, raw: str) -> InterpolatedReference:
+        components = cls._splitter(raw)
+        parts = []
+        for component in components:
+            if component.startswith("$"):
+                match = _INTERPOLATION_REGEX.fullmatch(component)
+                if not match:
+                    raise ReferenceParseError("`component` not a valid interpolated sub-string in `raw`")
+                else:
+                    parts.append(InterpolatedReference.parse_dotted(match[1]))
+            else:
+                match = _LITERAL_REGEX.fullmatch(component)
+                if not match:
+                    raise ReferenceParseError("`component` not a valid sub-string in `raw`")
+                else:
+                    parts.append(component)
+        return cls(parts)
+
+
+
+
