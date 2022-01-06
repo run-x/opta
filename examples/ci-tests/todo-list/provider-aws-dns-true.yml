@@ -1,0 +1,13 @@
+name: awsenv-ci1
+org_name: runx
+providers:
+  aws:
+    region: us-east-2
+    account_id: 693658092572
+modules:
+  - type: base
+  - type: dns
+    domain: testing.optaci.com
+    delegated: true
+  - type: k8s-cluster
+  - type: k8s-base
