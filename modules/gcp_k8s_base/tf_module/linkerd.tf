@@ -42,7 +42,7 @@ resource "tls_locally_signed_cert" "issuer_cert" {
   ca_key_algorithm      = tls_private_key.trustanchor_key.algorithm
   ca_private_key_pem    = tls_private_key.trustanchor_key.private_key_pem
   ca_cert_pem           = tls_self_signed_cert.trustanchor_cert.cert_pem
-  validity_period_hours = 8760
+  validity_period_hours = 87600
   is_ca_certificate     = true
 
   allowed_uses = [
