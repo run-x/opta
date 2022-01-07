@@ -134,3 +134,25 @@ resource "google_compute_instance" "default" {
 
 Once you opta apply the service you should see your new compute instance up and running in the GCP console and be able
 to ssh into it.
+
+## Using Outputs from your Custom Terraform Module
+Currently you can use outputs of your custom terraform module in the same yaml, like so:
+```yaml
+environments:
+  - name: gcp-example
+    path: "../gcp-env.yaml"
+name: baloney
+modules:
+  - type: custom-terraform
+    name: hi1
+    path_to_module: "./blah1" # <-- This module has an output called output1
+  - type: custom-terraform
+    name: hi2
+    path_to_module: "./blah2"
+    terraform_inputs:
+      input1: "${{module.hi1.output1}}" # <-- HERE. Note the ${{}} wrapping
+```
+
+These outputs, however, currently can not be used in other yamls (e.g. if you put custom terraform in an environment 
+yaml its outputs can't be used in the services), and will not show up in the `opta output` command. Work on supporting 
+this is ongoing.
