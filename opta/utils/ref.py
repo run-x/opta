@@ -3,7 +3,17 @@ from __future__ import annotations
 import functools
 import re
 from collections import abc
-from typing import Any, Iterable, Iterator, Sequence, Tuple, TypeVar, Union, overload
+from typing import (
+    Any,
+    Iterable,
+    Iterator,
+    List,
+    Sequence,
+    Tuple,
+    TypeVar,
+    Union,
+    overload,
+)
 
 from opta.utils.yaml import register_yaml_class
 
@@ -12,7 +22,11 @@ _INTERPOLATION_REGEX = re.compile(
     r"\$\{(" + _PART_REGEX.pattern + r"(?:\." + _PART_REGEX.pattern + r")*)\}",
     re.IGNORECASE,
 )
-_LITERAL_REGEX = re.compile(r"[a-z_][a-z0-9_].+",re.IGNORECASE)
+_SIMPLE_INTERPOLATION_REGEX = re.compile(r"\$\{.*?\}")
+_COMPLEX_SPLIT_REGEX = re.compile(
+    r"(" + _SIMPLE_INTERPOLATION_REGEX.pattern + ")", re.IGNORECASE
+)
+
 
 PathElement = Union[str, int]
 TRef = TypeVar("TRef", bound="Reference")
@@ -165,62 +179,39 @@ class InterpolatedReference(Reference):
         # TODO: Should we actually have a way to parse this from yaml?
         return cls.parse_dotted(node.value)
 
+
 register_yaml_class(InterpolatedReference)
 
+ComplexPart = Union[str, InterpolatedReference]
+
+
 class ComplexInterpolatedReference:
-    def __init__(self, parts, skip_validation: bool = False) -> None:
-        self._parts = parts
-        
+    def __init__(self, parts: List[ComplexPart]) -> None:
+        self._parts: List[ComplexPart] = parts
+
     def __str__(self) -> str:
-        str_components = []
-        for part in self._parts:
-            if type(part) is InterpolatedReference:
-                str_components.append(str(part))
-            else:
-                str_components.append(part)
-        return "".join(str_components)
+        return "".join(str(part) for part in self._parts)
 
     @classmethod
-    def _splitter(cls, rawstring: str) -> Any:
-        if not rawstring:
-            return []  # special case - empty string
-        interpolatedcomponents = re.findall(r'(\${[a-z][a-z0-9_\.]*[a-z0-9]?}):?',rawstring)
-        if not interpolatedcomponents:
-            return [rawstring] # special case - no interpolated components     
-        remainingstring = rawstring
-        components = []
-        parts = []
-        for ic in interpolatedcomponents:
-            parts = remainingstring.split(ic,1)
-            if parts[0]:
-                components.append(parts[0])
-            components.append(ic)
-            if parts[1]:
-                remainingstring = parts[1]
-        if (len(parts) == 2) and (parts[1]):
-            components.append(parts[1])
-        return components
-            
+    def _splitter(cls, raw: str) -> List[str]:
+        split = _COMPLEX_SPLIT_REGEX.split(raw)
+
+        return [part for part in split if part]  # Filter out the empty strings
 
     @classmethod
     def parse(cls, raw: str) -> ComplexInterpolatedReference:
         components = cls._splitter(raw)
-        parts = []
+        parts: List[ComplexPart] = []
         for component in components:
-            if component.startswith("$"):
-                match = _INTERPOLATION_REGEX.fullmatch(component)
-                if not match:
-                    raise ReferenceParseError("`component` not a valid interpolated sub-string in `raw`")
-                else:
-                    parts.append(InterpolatedReference.parse_dotted(match[1]))
+            part: ComplexPart
+            # Just check to see if it looks like the user tried to use interpolation.
+            # We are loose on the syntax check at first here so expanding supported expressions doesn't cause backwards compatibility issues
+            match = _SIMPLE_INTERPOLATION_REGEX.fullmatch(component)
+            if match:
+                part = InterpolatedReference.parse(component)
             else:
-                match = _LITERAL_REGEX.fullmatch(component)
-                if not match:
-                    raise ReferenceParseError("`component` not a valid sub-string in `raw`")
-                else:
-                    parts.append(component)
+                part = component
+
+            parts.append(part)
+
         return cls(parts)
-
-
-
-
