@@ -4,9 +4,13 @@
 {{ $namespace_name := include "k8s-service.namespaceName" $ }}
 {{ $ingress_name_old_convention := "" }}
 {{ $ingress_name_new_convention := "" }}
+{{ $domain_pathPrefix := "" }}
+{{ $domain_pathPrefix_sha256 := "" }}
 {{- range $index, $val := .Values.uriComponents }}
 {{ $ingress_name_old_convention = print $ingress_base_name "-" $index }}
-{{ $ingress_name_new_convention = print $ingress_base_name "-" $val.domain "-" $val.pathPrefixName }}
+{{ $domain_pathPrefix = print $val.domain "-" $val.pathPrefixName }}
+{{ $domain_pathPrefix_sha256 = trunc 8 (sha256sum $domain_pathPrefix) }}
+{{ $ingress_name_new_convention = print $ingress_base_name "-" $domain_pathPrefix_sha256 }}
 {{ $old_ingress_convention = (lookup "networking.k8s.io/v1beta1" "Ingress" $namespace_name $ingress_name_old_convention) }}
 
 apiVersion: networking.k8s.io/v1beta1
