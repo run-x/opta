@@ -1,9 +1,20 @@
 {{- if .Values.httpPort }}
+{{ $old_ingress_convention := false }}
+{{ $ingress_base_name := include "k8s-service.fullname" $ }}
+{{ $namespace_name := include "k8s-service.namespaceName" $ }}
+{{ $ingress_name_old_convention := "" }}
 {{- range $index, $val := .Values.uriComponents }}
+{{ $ingress_name_old_convention = print $ingress_base_name "-" $index }}
+{{ $old_ingress_convention = (lookup "networking.k8s.io/v1beta1" "Ingress" $namespace_name $ingress_name_old_convention) }}
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
+  {{- if $old_ingress_convention }}
   name:  {{ include "k8s-service.fullname" $ }}-{{ $index }}
+  {{- end }}
+  {{- if not $old_ingress_convention }}
+  name: { { include "k8s-service.fullname" $ } }-{{ $val.domain }}-{{ $val.pathPrefixName }}
+  {{- end }}
   namespace: {{ include "k8s-service.namespaceName" $ }}
   labels:
     {{- include "k8s-service.labels" $ | nindent 4 }}

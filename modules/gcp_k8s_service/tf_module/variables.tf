@@ -7,7 +7,8 @@ locals {
     // We probably don't need the trim anymore but leaving this here for
     // potentional backwards compatibility
     domain : trim(split("/", s)[0], "."),
-    pathPrefix : (length(split("/", s)) > 1 ? "/${join("/", slice(split("/", s), 1, length(split("/", s))))}" : "/")
+    pathPrefix : (length(split("/", s)) > 1 ? "/${join("/", slice(split("/", s), 1, length(split("/", s))))}" : "/"),
+    pathPrefixName : replace((length(split("/", s)) > 1 ? "/${join("/", slice(split("/", s), 1, length(split("/", s))))}" : "/"), "/", "")
   }]
   layer_short     = substr(var.layer_name, 0, 12)
   module_short    = substr(var.module_name, 0, 12)
