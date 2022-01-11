@@ -1,6 +1,5 @@
 import os
 import time
-from colored import attr, fg
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -8,6 +7,7 @@ import boto3
 import click
 from azure.storage.blob import ContainerClient
 from botocore.config import Config
+from colored import attr, fg
 from google.cloud import storage  # type: ignore
 from google.cloud.exceptions import NotFound
 
