@@ -952,11 +952,24 @@ class Terraform:
             print("Terraform Lock Id could not be found.")
             return
 
-        nice_run(
-            ["terraform", "force-unlock", *tf_flags, lock_id],
-            use_asyncio_nice_run=True,
-            check=True,
-        )
+        try:
+            nice_run(
+                ["terraform", "force-unlock", *tf_flags, lock_id],
+                use_asyncio_nice_run=True,
+                check=True,
+            )
+        except Exception as e:
+            logger.info("An exception occured while removing the Terraform Lock. Trying to Remove the lock forcefully.")
+            cls.force_delete_terraform_lock(layer, e)
+
+    @classmethod
+    def force_delete_terraform_lock(cls, layer: "Layer", exception: Exception) -> None:
+        if layer.cloud == 'aws':
+            AWS(layer).force_delete_terraform_lock_id()
+        elif layer.cloud == 'google':
+            GCP(layer).force_delete_terraform_lock_id()
+        else:
+            raise exception
 
     @classmethod
     def tf_lock_details(cls, layer: "Layer") -> Tuple[bool, str]:
@@ -1057,3 +1070,7 @@ def fetch_terraform_state_resources(layer: "Layer") -> dict:
         resources_dict[address]["name"] = resource.get("name", "")
 
     return resources_dict
+
+
+# 09190a7d-d4e5-a4e5-b22f-a94f36e93f11
+# 09190a7d-d4e5-a4e5-b22f-a94f36e93f11

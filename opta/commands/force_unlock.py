@@ -32,19 +32,19 @@ def force_unlock(config: str, env: Optional[str]) -> None:
     layer.modules = [x for x in layer.modules if x.name in modules]
     gen_all(layer)
 
-    if Terraform.download_state(layer):
-        tf_lock_exists, _ = Terraform.tf_lock_details(layer)
-        if tf_lock_exists:
-            Terraform.init(layer=layer)
-            click.confirm(
-                "This will remove the lock on the remote state."
-                "\nPlease make sure that no other instance of opta command is running on this file."
-                "\nDo you still want to proceed?",
-                abort=True,
-            )
-            tf_flags.append("-force")
-            Terraform.force_unlock(layer, *tf_flags)
+    tf_lock_exists, _ = Terraform.tf_lock_details(layer)
+    if tf_lock_exists:
+        Terraform.init(layer=layer)
+        click.confirm(
+            "This will remove the lock on the remote state."
+            "\nPlease make sure that no other instance of opta command is running on this file."
+            "\nDo you still want to proceed?",
+            abort=True,
+        )
+        tf_flags.append("-force")
+        Terraform.force_unlock(layer, *tf_flags)
 
+    if Terraform.download_state(layer):
         if layer.parent is not None or "k8scluster" in modules:
             configure_kubectl(layer)
             pending_upgrade_release_list = Helm.get_helm_list(status="pending-upgrade")

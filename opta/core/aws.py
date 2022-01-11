@@ -153,6 +153,16 @@ class AWS(CloudClient):
         except Exception:
             return ""
 
+    def force_delete_terraform_lock_id(self) -> None:
+        bucket = self.layer.state_storage()
+        providers = self.layer.gen_providers(0)
+        dynamodb_table = providers["terraform"]["backend"]["s3"]["dynamodb_table"]
+
+        self.__get_dynamodb(dynamodb_table).delete_item(
+            TableName=dynamodb_table,
+            Key={"LockID": {"S": f"{bucket}/{self.layer.name}"}},
+        )
+
     @staticmethod
     def get_all_versions(bucket: str, filename: str, region: str) -> List[str]:
         s3 = boto3.client("s3", config=Config(region_name=region))
