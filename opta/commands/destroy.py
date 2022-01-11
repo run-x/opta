@@ -1,4 +1,6 @@
 import os
+import time
+from colored import attr, fg
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -88,16 +90,13 @@ def destroy(
 
     tf_flags: List[str] = []
     if auto_approve:
-        # Note that for ci, you can just do "yes | opta destroy --auto-approve"
-        click.confirm(
-            fmt_msg(
-                f"""
-                Are you REALLY sure you want to run destroy with auto-approve?
-                ~Please make sure *{layer.name}* is the correct opta config.
-                """
-            ),
-            abort=True,
+        logger.info(
+            f"{fg('red')}{attr('bold')}Opta will now destroy the {attr('underlined')}{layer.name}{attr(0)}"
+            f"{fg('red')}{attr('bold')} layer.{attr(0)}\n"
+            f"{fg('red')}{attr('bold')}Sleeping for {attr('underlined')}2 secs{attr(0)}"
+            f"{fg('red')}{attr('bold')}, if user wants to abort.{attr(0)}"
         )
+        time.sleep(2)
         tf_flags.append("-auto-approve")
     modules = Terraform.get_existing_modules(layer)
     layer.modules = [x for x in layer.modules if x.name in modules]

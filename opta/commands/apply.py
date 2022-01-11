@@ -208,7 +208,7 @@ def _apply(
         existing_modules: Set[str] = set()
         first_loop = True
         for module_idx, current_modules, total_block_count in gen(
-            layer, existing_config, image_tag, image_digest, test, True
+            layer, existing_config, image_tag, image_digest, test, True, auto_approve
         ):
             if first_loop:
                 # This is set during the first iteration, since the tf file must exist.
