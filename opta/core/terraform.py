@@ -959,14 +959,16 @@ class Terraform:
                 check=True,
             )
         except Exception as e:
-            logger.info("An exception occured while removing the Terraform Lock. Trying to Remove the lock forcefully.")
+            logger.info(
+                "An exception occured while removing the Terraform Lock. Trying to Remove the lock forcefully."
+            )
             cls.force_delete_terraform_lock(layer, e)
 
     @classmethod
     def force_delete_terraform_lock(cls, layer: "Layer", exception: Exception) -> None:
-        if layer.cloud == 'aws':
+        if layer.cloud == "aws":
             AWS(layer).force_delete_terraform_lock_id()
-        elif layer.cloud == 'google':
+        elif layer.cloud == "google":
             GCP(layer).force_delete_terraform_lock_id()
         else:
             raise exception
@@ -1070,7 +1072,3 @@ def fetch_terraform_state_resources(layer: "Layer") -> dict:
         resources_dict[address]["name"] = resource.get("name", "")
 
     return resources_dict
-
-
-# 09190a7d-d4e5-a4e5-b22f-a94f36e93f11
-# 09190a7d-d4e5-a4e5-b22f-a94f36e93f11

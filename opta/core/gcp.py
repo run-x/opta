@@ -160,4 +160,4 @@ class GCP(CloudClient):
         credentials, project_id = self.get_credentials()
         gcs_client = storage.Client(project=project_id, credentials=credentials)
         bucket_object = gcs_client.get_bucket(bucket)
-        tf_lock_blob = bucket_object.delete_blob(tf_lock_path)
+        bucket_object.delete_blob(tf_lock_path)
