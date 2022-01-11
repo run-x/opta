@@ -1,0 +1,12 @@
+environments:
+  - name: staging
+    path: "../dummy_data/dummy_config_parent.yaml"
+name: app
+modules:
+  - type: k8s-service
+    name: app
+    image: AUTO
+    persistent_storage:
+      - path: "/my-pv"
+        size: 1 # 1 GB
+
