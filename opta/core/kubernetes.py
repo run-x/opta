@@ -439,7 +439,7 @@ def delete_persistent_volume_claims(
 
     claims = list_persistent_volume_claims(namespace=namespace, opta_managed=opta_managed)
     if not claims:
-        logger.info(
+        logger.debug(
             f"No persistent volume claim (opta_managed: {opta_managed}) found in namespace '{namespace}', skipping persistent volume cleanup"
         )
         return
