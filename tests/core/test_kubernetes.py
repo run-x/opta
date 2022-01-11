@@ -400,6 +400,7 @@ class TestKubernetes:
     def test_list_persistent_volume_claims(self, mocker: MockFixture) -> None:
         mocked_core_v1_api = mocker.Mock(spec=CoreV1Api)
         mocker.patch("opta.core.kubernetes.CoreV1Api", return_value=mocked_core_v1_api)
+        mocker.patch("opta.core.kubernetes.load_kube_config")
         mocked_claim_opta = mocker.Mock(spec=V1PersistentVolumeClaim)
         mocked_claim_opta.metadata = mocker.Mock()
         mocked_claim_opta.metadata.name = "opta-claim-0"
@@ -436,6 +437,7 @@ class TestKubernetes:
     def test_delete_persistent_volume_claims(self, mocker: MockFixture) -> None:
         mocked_core_v1_api = mocker.Mock(spec=CoreV1Api)
         mocker.patch("opta.core.kubernetes.CoreV1Api", return_value=mocked_core_v1_api)
+        mocker.patch("opta.core.kubernetes.load_kube_config")
         mocked_claim_opta1 = mocker.Mock(spec=V1PersistentVolumeClaim)
         mocked_claim_opta1.metadata = mocker.Mock()
         mocked_claim_opta1.metadata.name = "opta-claim-1"
