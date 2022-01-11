@@ -7,7 +7,6 @@ import re
 import shutil
 import tempfile
 from datetime import datetime
-from os import path
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Dict, FrozenSet, Iterable, List, Optional, Set, Tuple, TypedDict
@@ -32,7 +31,7 @@ from opta.crash_reporter import CURRENT_CRASH_REPORTER
 from opta.exceptions import UserErrors
 from opta.module import Module
 from opta.plugins.derived_providers import DerivedProviders
-from opta.utils import deep_merge, hydrate, logger, yaml
+from opta.utils import check_opta_file_exists, deep_merge, hydrate, logger, yaml
 from opta.utils.dependencies import validate_installed_path_executables
 
 PROCESSOR_DICT: Dict[str, str] = {
@@ -188,17 +187,16 @@ class Layer:
 
             git.Repo.clone_from(git_url, t, branch=branch, depth=1)
             config_path = os.path.join(t, file_path)
-            with open(config_path) as f:
-                config_string = f.read()
-            conf = yaml.load(config_string)
-        elif path.exists(config):
-            config_path = config
-            logger.debug(f"Loaded the following configfile:\n{open(config_path).read()}")
-            with open(config_path) as f:
-                config_string = f.read()
-            conf = yaml.load(config_string)
         else:
-            raise UserErrors(f"File {config} not found")
+            config_path = config
+
+        # this will make sure that the file exist and support alternate y(a)ml extension
+        config_path = check_opta_file_exists(config_path, prompt=False)
+
+        with open(config_path) as f:
+            config_string = f.read()
+        logger.debug(f"Loaded the following configfile:\n{config_string}")
+        conf = yaml.load(config_string)
 
         conf["original_spec"] = config_string
         conf["path"] = config_path

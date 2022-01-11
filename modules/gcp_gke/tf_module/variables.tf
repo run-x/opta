@@ -34,7 +34,7 @@ data "google_kms_key_ring" "key_ring" {
 }
 
 data "google_kms_crypto_key" "kms" {
-  key_ring = data.google_kms_key_ring.key_ring.self_link
+  key_ring = data.google_kms_key_ring.key_ring.id
   name     = "opta-${var.env_name}-${data.google_secret_manager_secret_version.kms_suffix.secret_data}"
 }
 

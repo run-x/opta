@@ -12,7 +12,8 @@ data "azurerm_container_registry" "opta" {
 locals {
   uri_components = [for s in var.public_uri : {
     domain : split("/", s)[0],
-    pathPrefix : (length(split("/", s)) > 1 ? "/${join("/", slice(split("/", s), 1, length(split("/", s))))}" : "/")
+    pathPrefix : (length(split("/", s)) > 1 ? "/${join("/", slice(split("/", s), 1, length(split("/", s))))}" : "/"),
+    pathPrefixName : replace((length(split("/", s)) > 1 ? "/${join("/", slice(split("/", s), 1, length(split("/", s))))}" : "/"), "/", "")
   }]
   uppercase_image = upper(var.image)
 }

@@ -31,6 +31,9 @@
             "$ref": "https://app.runx.dev/modules/aws-k8s-service"
           },
           {
+            "$ref": "https://app.runx.dev/modules/aws-mysql"
+          },
+          {
             "$ref": "https://app.runx.dev/modules/aws-postgres"
           },
           {

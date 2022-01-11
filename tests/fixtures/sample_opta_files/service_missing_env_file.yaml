@@ -1,0 +1,9 @@
+environments:
+  - name: staging
+    path: "opta-not-found.yml"
+name: app
+modules:
+  - type: k8s-service
+    name: app
+    image: AUTO
+

@@ -81,7 +81,6 @@ class TestLayer:
             "layer_name": "gcp-dummy-config",
             "parent": SimpleNamespace(
                 kms_account_key_id="${data.terraform_remote_state.parent.outputs.kms_account_key_id}",
-                kms_account_key_self_link="${data.terraform_remote_state.parent.outputs.kms_account_key_self_link}",
                 vpc_id="${data.terraform_remote_state.parent.outputs.vpc_id}",
                 vpc_self_link="${data.terraform_remote_state.parent.outputs.vpc_self_link}",
                 private_subnet_id="${data.terraform_remote_state.parent.outputs.private_subnet_id}",
@@ -383,3 +382,64 @@ class TestLayer:
         for opta_module, processor in PROCESSOR_DICT.items():
             module_class = get_processor_class(opta_module)
             assert module_class.__name__ == processor
+
+    def test_service_missing_env_file(self):
+        with pytest.raises(UserErrors) as exception:
+            Layer.load_from_yaml(
+                os.path.join(
+                    os.path.dirname(os.path.dirname(__file__)),
+                    "tests",
+                    "fixtures",
+                    "sample_opta_files",
+                    "service_missing_env_file.yaml",
+                ),
+                None,
+            )
+        assert "Could not find file" in str(exception.value)
+        assert "opta-not-found.yml" in str(exception.value)
+
+    def test_service_env_alternate_ext(self):
+        # reference an env file using .yml but the file on the disk is .yaml
+        layer = Layer.load_from_yaml(
+            os.path.join(
+                os.path.dirname(os.path.dirname(__file__)),
+                "tests",
+                "fixtures",
+                "sample_opta_files",
+                "service_env_alternate_ext.yaml",
+            ),
+            None,
+        )
+        assert layer.name == "app"
+        assert layer.parent.name == "dummy-parent"
+
+    def test_service_github_repo_env(self, mocker: MockFixture):
+        mocker.patch("git.Repo.clone_from")
+        git_repo_mocked = mocker.patch("git.Repo.clone_from")
+        service_github_repo_env = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)),
+            "tests",
+            "fixtures",
+            "sample_opta_files",
+            "service_github_repo_env.yaml",
+        )
+        # use local file for parent instead of cloning a github repo
+        dummy_config_parent = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)),
+            "tests",
+            "fixtures",
+            "dummy_data",
+            "dummy_config_parent.yaml",
+        )
+        mocker.patch(
+            "opta.layer.check_opta_file_exists",
+            side_effect=[service_github_repo_env, dummy_config_parent],
+        )
+
+        layer = Layer.load_from_yaml(service_github_repo_env, None,)
+        git_repo_mocked.assert_called_once_with(
+            "git@github.com:run-x/runx-infra.git", mocker.ANY, branch="main", depth=1
+        )
+
+        assert layer.name == "app"
+        assert layer.parent.name == "dummy-parent"

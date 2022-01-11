@@ -1,5 +1,5 @@
 import datetime
-from subprocess import CompletedProcess
+from subprocess import DEVNULL, CompletedProcess
 
 import pytz
 from kubernetes.client import ApiException, CoreV1Api, V1Event, V1EventList, V1Pod
@@ -69,6 +69,7 @@ class TestKubernetes:
                         "--admin",
                         "--overwrite-existing",
                     ],
+                    stdout=DEVNULL,
                     check=True,
                 ),
             ]
@@ -125,7 +126,9 @@ class TestKubernetes:
                         "mocked_cluster_name",
                         "--region",
                         "us-east-1",
-                    ]
+                    ],
+                    stdout=DEVNULL,
+                    check=True,
                 ),
             ]
         )

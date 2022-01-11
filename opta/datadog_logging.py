@@ -1,7 +1,7 @@
 import os
 import platform
 import time
-from logging import NOTSET, Handler, LogRecord
+from logging import NOTSET, Handler, LogRecord, getLogger
 from typing import Any, Dict, List
 
 from getmac import get_mac_address
@@ -13,9 +13,16 @@ from opta.utils import json
 
 CLIENT_TOKEN = "pub40d867605951d2a30fb8020e193ee7e5"  # nosec
 DEFAULT_CACHE_SIZE = 10
+logger = getLogger("opta")
 
 
 class DatadogLogHandler(Handler):
+    """
+    NOTE: Kinda obsolete because an official version came out: https://datadog-api-client.readthedocs.io/en/latest/v2/HTTPLogItem/
+    But we're getting all that we want from it for now and has proven really robust/some of our oldest (yet constantly used) code.
+    Go ahead and switch to the official package if there's like a new feature which we need. Otherwise why fix what's not broken?
+    """
+
     def __init__(self, level: int = NOTSET, cache_size: int = DEFAULT_CACHE_SIZE):
         self.cache: List[Dict[str, Any]] = []
         self.cache_size = cache_size
@@ -40,10 +47,11 @@ class DatadogLogHandler(Handler):
             self.flush()
 
     def flush(self) -> None:
+        env = "dev" if VERSION in ["", DEV_VERSION] else "production"
         if self.cache:
             parameters = {
-                "opta_version": VERSION,
                 "ddsource": "cli",
+                "ddtags": f"env:{env},version:{VERSION or 'dev'}",
                 "user_id": self.user_id,
                 "device_id": self.device_id,
                 "os_name": self.os_name,
@@ -64,17 +72,24 @@ class DatadogLogHandler(Handler):
                 self.cache = []
                 return
 
-            response = post(
-                url=f"https://browser-http-intake.logs.datadoghq.com/v1/input/{CLIENT_TOKEN}",
-                params=parameters,
-                headers=headers,
-                data="\n".join(map(lambda x: json.dumps(x), self.cache)).encode("utf-8"),
-                timeout=5,
-            )
-            if response.status_code != codes.ok:
-                return
-            else:
-                self.cache = []
+            try:
+                response = post(
+                    url=f"https://browser-http-intake.logs.datadoghq.com/v1/input/{CLIENT_TOKEN}",
+                    params=parameters,
+                    headers=headers,
+                    data="\n".join(map(lambda x: json.dumps(x), self.cache)).encode(
+                        "utf-8"
+                    ),
+                    timeout=5,
+                )
+                if response.status_code != codes.ok:
+                    return
+                else:
+                    self.cache = []
+            except Exception as err:
+                logger.debug(
+                    f"Unexpected error when connecting to datadog: {err=}, {type(err)=}"
+                )
 
     def close(self) -> None:
         self.acquire()

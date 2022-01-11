@@ -30,6 +30,7 @@ service_validator:
       vars: map(required=False)
 module_aliases:
   postgres: aws-postgres
+  mysql: aws-mysql
   redis: aws-redis
   k8s-service: aws-k8s-service
   base: aws-base

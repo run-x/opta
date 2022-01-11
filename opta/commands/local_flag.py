@@ -21,7 +21,7 @@ def _handle_local_flag(config: str, test: bool = False) -> str:
         yaml.safe_dump(
             {
                 "name": "localopta",
-                "org_name": "opta",
+                "org_name": "local",
                 "providers": {"local": {}},
                 "modules": [{"type": "local-base"}],
             },

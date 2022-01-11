@@ -1,6 +1,7 @@
 import base64
 import datetime
 import time
+from subprocess import DEVNULL  # nosec
 from threading import Thread
 from typing import TYPE_CHECKING, Dict, FrozenSet, List, Optional, Set, Tuple
 
@@ -134,7 +135,9 @@ def _gcp_configure_kubectl(layer: "Layer") -> None:
             "get-credentials",
             cluster_name,
             f"--region={env_gcp_region}",
-        ]
+        ],
+        stdout=DEVNULL,
+        check=True,
     )
 
 
@@ -164,6 +167,7 @@ def _azure_configure_kubectl(layer: "Layer") -> None:
             "--admin",
             "--overwrite-existing",
         ],
+        stdout=DEVNULL,
         check=True,
     )
 
@@ -225,7 +229,9 @@ def _aws_configure_kubectl(layer: "Layer") -> None:
             cluster_name,
             "--region",
             env_aws_region,
-        ]
+        ],
+        stdout=DEVNULL,
+        check=True,
     )
 
 
@@ -481,6 +487,13 @@ def tail_pod_log(
                 return
 
 
+def do_not_show_event(event: V1Event) -> bool:
+    return (
+        "unable to get metrics" in event.message
+        or "did not receive metrics" in event.message
+    )
+
+
 def tail_namespace_events(
     layer: "Layer",
     earliest_event_start_time: Optional[datetime.datetime] = None,
@@ -504,6 +517,8 @@ def tail_namespace_events(
     old_events = sorted(old_events, key=lambda x: (x.last_timestamp or x.event_time))
     event: V1Event
     for event in old_events:
+        if do_not_show_event(event):
+            continue
         earliest_event_start_time = event.last_timestamp or event.event_time
         print(
             f"{fg(color_idx)}{event.last_timestamp or event.event_time} Namespace {layer.name} event: {event.message}{attr(0)}"
@@ -528,6 +543,8 @@ def tail_namespace_events(
                         and involved_object.kind == "Pod"
                         and involved_object.name in deleted_pods
                     ):
+                        continue
+                    if do_not_show_event(event):
                         continue
                     print(
                         f"{fg(color_idx)}{event.last_timestamp or event.event_time} Namespace {layer.name} event: {event.message}{attr(0)}"
