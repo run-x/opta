@@ -41,10 +41,11 @@ class DatadogLogHandler(Handler):
             self.flush()
 
     def flush(self) -> None:
+        env = "dev" if VERSION in ["", DEV_VERSION] else "production"
         if self.cache:
             parameters = {
-                "opta_version": VERSION,
                 "ddsource": "cli",
+                "ddtags": f"env:{env},version:{VERSION or 'dev'}",
                 "user_id": self.user_id,
                 "device_id": self.device_id,
                 "os_name": self.os_name,
