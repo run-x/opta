@@ -252,6 +252,15 @@ class K8sServiceModuleProcessor(ModuleProcessor):
             key = "module_local_k8s_service"
         return {key: math.ceil((min_containers + max_containers) / 2)}
 
+    def post_delete(self, module_idx: int) -> None:
+        # Helm doesn't delete PVC https://github.com/helm/helm/issues/5156
+        if self.module.data.get("persistent_storage", False):
+            kubernetes.delete_persistent_volume_claims(
+                namespace=self.layer.name, opta_managed=True, async_req=True
+            )
+
+        super(K8sServiceModuleProcessor, self).post_delete(module_idx)
+
     def _extra_ports_controller(self) -> None:
         reconcile_nginx_extra_ports()
 

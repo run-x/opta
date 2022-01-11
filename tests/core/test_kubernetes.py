@@ -2,13 +2,23 @@ import datetime
 from subprocess import DEVNULL, CompletedProcess
 
 import pytz
-from kubernetes.client import ApiException, CoreV1Api, V1Event, V1EventList, V1Pod
+from kubernetes.client import (
+    ApiException,
+    CoreV1Api,
+    V1Event,
+    V1EventList,
+    V1PersistentVolumeClaim,
+    V1PersistentVolumeClaimList,
+    V1Pod,
+)
 from kubernetes.watch import Watch
 from pytest_mock import MockFixture
 
 from opta.core.kubernetes import (
     configure_kubectl,
+    delete_persistent_volume_claims,
     get_required_path_executables,
+    list_persistent_volume_claims,
     tail_module_log,
     tail_namespace_events,
     tail_pod_log,
@@ -386,3 +396,86 @@ class TestKubernetes:
                 mocker.call(16),
             ]
         )
+
+    def test_list_persistent_volume_claims(self, mocker: MockFixture) -> None:
+        mocked_core_v1_api = mocker.Mock(spec=CoreV1Api)
+        mocker.patch("opta.core.kubernetes.CoreV1Api", return_value=mocked_core_v1_api)
+        mocker.patch("opta.core.kubernetes.load_kube_config")
+        mocked_claim_opta = mocker.Mock(spec=V1PersistentVolumeClaim)
+        mocked_claim_opta.metadata = mocker.Mock()
+        mocked_claim_opta.metadata.name = "opta-claim-0"
+
+        mocked_claim_non_opta = mocker.Mock(spec=V1PersistentVolumeClaim)
+        mocked_claim_non_opta.metadata = mocker.Mock()
+        mocked_claim_non_opta.metadata.name = "my-org-claim-0"
+
+        mocked_claim_list = mocker.Mock(spec=V1PersistentVolumeClaimList)
+        mocked_claim_list.items = [mocked_claim_opta, mocked_claim_non_opta]
+
+        mocked_core_v1_api.list_persistent_volume_claim_for_all_namespaces.return_value = (
+            mocked_claim_list
+        )
+        mocked_core_v1_api.list_namespaced_persistent_volume_claim.return_value = (
+            mocked_claim_list
+        )
+
+        # call with no parameter, expect all_namespaces method called
+        results = list_persistent_volume_claims()
+        mocked_core_v1_api.list_persistent_volume_claim_for_all_namespaces.assert_called_once_with()
+        assert len(results) == 2
+
+        # call with namespace, expect namespaced method called
+        results = list_persistent_volume_claims(namespace="hello")
+        mocked_core_v1_api.list_namespaced_persistent_volume_claim.assert_called_once_with(
+            "hello"
+        )
+
+        # check opta_managed filtering works
+        results = list_persistent_volume_claims(opta_managed=True)
+        assert len(results) == 1
+
+    def test_delete_persistent_volume_claims(self, mocker: MockFixture) -> None:
+        mocked_core_v1_api = mocker.Mock(spec=CoreV1Api)
+        mocker.patch("opta.core.kubernetes.CoreV1Api", return_value=mocked_core_v1_api)
+        mocker.patch("opta.core.kubernetes.load_kube_config")
+        mocked_claim_opta1 = mocker.Mock(spec=V1PersistentVolumeClaim)
+        mocked_claim_opta1.metadata = mocker.Mock()
+        mocked_claim_opta1.metadata.name = "opta-claim-1"
+
+        mocked_claim_opta2 = mocker.Mock(spec=V1PersistentVolumeClaim)
+        mocked_claim_opta2.metadata = mocker.Mock()
+        mocked_claim_opta2.metadata.name = "opta-claim-2"
+
+        mocked_list_persistent_volume_claims = mocker.patch(
+            "opta.core.kubernetes.list_persistent_volume_claims",
+            return_value=[mocked_claim_opta1, mocked_claim_opta2],
+        )
+
+        # call with no parameter, expect list PVC method called and 2 delete PVC calls
+        namespace = "hello"
+        delete_persistent_volume_claims(
+            namespace=namespace, opta_managed=True, async_req=True
+        )
+        mocked_list_persistent_volume_claims.assert_called_once_with(
+            namespace="hello", opta_managed=True
+        )
+
+        mocked_core_v1_api.delete_collection_namespaced_persistent_volume_claim.assert_has_calls(
+            [
+                mocker.call(
+                    namespace="hello",
+                    field_selector="metadata.name=opta-claim-1",
+                    async_req=True,
+                    body=mocker.ANY,
+                ),
+                mocker.call(
+                    namespace="hello",
+                    field_selector="metadata.name=opta-claim-2",
+                    async_req=True,
+                    body=mocker.ANY,
+                ),
+            ]
+        )
+
+        # pv are automatically deleted by k8s after deleting the claim, not by opta
+        mocked_core_v1_api.assert_not_called()

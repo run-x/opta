@@ -13,12 +13,14 @@ from kubernetes.client import (
     AppsV1Api,
     CoreV1Api,
     V1ConfigMap,
+    V1DeleteOptions,
     V1Deployment,
     V1DeploymentList,
     V1Event,
     V1Namespace,
     V1ObjectMeta,
     V1ObjectReference,
+    V1PersistentVolumeClaim,
     V1Pod,
     V1Secret,
     V1SecretList,
@@ -358,6 +360,99 @@ def list_namespaces() -> None:
     except ApiException as e:
         if e.reason == "Unauthorized" or e.status == 401:
             raise UserErrors("User does not have access to Kubernetes Cluster.")
+
+
+def list_persistent_volume_claims(
+    *, namespace: Optional[str] = None, opta_managed: bool = False
+) -> List[V1PersistentVolumeClaim]:
+    """list_persistent_volume_claims
+
+    list objects of kind PersistentVolumeClaim
+
+    :param str namespace: namespace to search in. If not set, search all namespaces
+    :param bool opta_managed: filter to only returned objects managed by opta
+    """
+    load_kube_config()
+    v1 = CoreV1Api()
+
+    if namespace:
+        claims = v1.list_namespaced_persistent_volume_claim(namespace)
+    else:
+        claims = v1.list_persistent_volume_claim_for_all_namespaces()
+
+    # Filter out any claims that are not managed by opta
+    claim_items = claims.items
+    if opta_managed:
+        claim_items = [
+            claim for claim in claim_items if claim.metadata.name.startswith("opta-")
+        ]
+
+    return claim_items
+
+
+def delete_persistent_volume_claim(
+    namespace: str, name: str, async_req: bool = False
+) -> None:
+    """delete_persistent_volume_claim
+
+    delete a PersistentVolumeClaim
+
+    This method makes a synchronous HTTP request by default. To make an
+    asynchronous HTTP request, please pass async_req=True
+
+    :param str namespace: namespace where the PersistentVolumeClaim is located
+    :param str name: name of the PersistentVolumeClaim (required)
+    :param bool async_req: execute request asynchronously
+    """
+    load_kube_config()
+    v1 = CoreV1Api()
+
+    try:
+        options = V1DeleteOptions(grace_period_seconds=5)
+        v1.delete_collection_namespaced_persistent_volume_claim(
+            namespace=namespace,
+            field_selector=f"metadata.name={name}",
+            async_req=async_req,
+            body=options,
+        )
+    except ApiException as e:
+        if e.status == 404:
+            # not found = nothing to delete
+            return None
+        raise e
+
+
+def delete_persistent_volume_claims(
+    namespace: str, opta_managed: bool = True, async_req: bool = True
+) -> None:
+    """delete_persistent_volume_claims
+
+    Delete Persistent Volume Claims for a given namespace
+
+    This method makes a synchronous HTTP request by default. To make an
+    asynchronous HTTP request, please pass async_req=True
+
+    :param str namespace: namespace to search for the Persistent Volume Claims
+    :param bool opta_managed: filter to only delete objects managed by opta
+    :param bool async_req: execute request asynchronously
+    """
+
+    claims = list_persistent_volume_claims(namespace=namespace, opta_managed=opta_managed)
+    if not claims:
+        logger.debug(
+            f"No persistent volume claim (opta_managed: {opta_managed}) found in namespace '{namespace}', skipping persistent volume cleanup"
+        )
+        return
+
+    logger.info(f"Deleting persistent volumes in namespace '{namespace}'")
+
+    # delete the PVCs
+    # Note: when deleting the PVC, the PV are automatically deleted
+    for claim in claims:
+        logger.info(f"Deleting persistent volume claim '{claim.metadata.name}'")
+        delete_persistent_volume_claim(
+            namespace, claim.metadata.name, async_req=async_req
+        )
 
 
 def list_services(*, namespace: Optional[str] = None) -> List[V1Service]:
