@@ -29,7 +29,9 @@
       "enum": [
         "aws-mysql",
         "mysql"
-      ]
+      ],
+      "default": "mysql",
+      "type": "string"
     }
   },
   "required": [
@@ -39,6 +41,11 @@
     "module_type": "service",
     "clouds": [
       "aws"
+    ],
+    "name": "aws-mysql",
+    "display_name": "mysql",
+    "tags": [
+      "datastore"
     ]
   }
 }
