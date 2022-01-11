@@ -17,6 +17,12 @@ logger = getLogger("opta")
 
 
 class DatadogLogHandler(Handler):
+    """
+    NOTE: Kinda obsolete because an official version came out: https://datadog-api-client.readthedocs.io/en/latest/v2/HTTPLogItem/
+    But we're getting all that we want from it for now and has proven really robust/some of our oldest (yet constantly used) code.
+    Go ahead and switch to the official package if there's like a new feature which we need. Otherwise why fix what's not broken?
+    """
+
     def __init__(self, level: int = NOTSET, cache_size: int = DEFAULT_CACHE_SIZE):
         self.cache: List[Dict[str, Any]] = []
         self.cache_size = cache_size
