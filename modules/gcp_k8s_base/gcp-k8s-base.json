@@ -28,7 +28,9 @@
       "enum": [
         "gcp-k8s-base",
         "k8s-base"
-      ]
+      ],
+      "default": "k8s-base",
+      "type": "string"
     }
   },
   "required": [
@@ -38,6 +40,9 @@
     "module_type": "env",
     "clouds": [
       "gcp"
-    ]
+    ],
+    "name": "gcp-k8s-base",
+    "display_name": "k8s-base",
+    "tags": []
   }
 }

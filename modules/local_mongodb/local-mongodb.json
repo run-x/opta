@@ -8,7 +8,9 @@
       "enum": [
         "local-mongodb",
         "mongodb"
-      ]
+      ],
+      "default": "mongodb",
+      "type": "string"
     }
   },
   "required": [
@@ -18,6 +20,9 @@
     "module_type": "service",
     "clouds": [
       "local"
-    ]
+    ],
+    "name": "local-mongodb",
+    "display_name": "mongodb",
+    "tags": []
   }
 }

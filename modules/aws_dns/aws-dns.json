@@ -5,8 +5,7 @@
   "properties": {
     "domain": {
       "type": "string",
-      "description": "The domain you want (you will also get the subdomains for your use)",
-      "default": null
+      "description": "The domain you want (you will also get the subdomains for your use)"
     },
     "delegated": {
       "type": "boolean",
@@ -24,14 +23,19 @@
       "enum": [
         "aws-dns",
         "dns"
-      ]
+      ],
+      "default": "dns",
+      "type": "string"
     }
   },
   "opta_metadata": {
     "module_type": "env",
     "clouds": [
       "aws"
-    ]
+    ],
+    "name": "aws-dns",
+    "display_name": "dns",
+    "tags": []
   },
   "required": [
     "domain",

@@ -23,7 +23,9 @@
       "enum": [
         "azure-base",
         "base"
-      ]
+      ],
+      "default": "base",
+      "type": "string"
     }
   },
   "required": [
@@ -33,6 +35,9 @@
     "module_type": "env",
     "clouds": [
       "azure"
-    ]
+    ],
+    "name": "azure-base",
+    "display_name": "base",
+    "tags": []
   }
 }

@@ -23,7 +23,9 @@
       "enum": [
         "gcp-mysql",
         "mysql"
-      ]
+      ],
+      "default": "mysql",
+      "type": "string"
     }
   },
   "required": [
@@ -33,6 +35,11 @@
     "module_type": "service",
     "clouds": [
       "gcp"
+    ],
+    "name": "gcp-mysql",
+    "display_name": "mysql",
+    "tags": [
+      "datastore"
     ]
   }
 }

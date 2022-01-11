@@ -12,7 +12,9 @@
       "description": "The name of this module",
       "enum": [
         "aws-ses"
-      ]
+      ],
+      "default": "aws-ses",
+      "type": "string"
     }
   },
   "required": [
@@ -22,6 +24,9 @@
     "module_type": "env",
     "clouds": [
       "aws"
-    ]
+    ],
+    "name": "aws-ses",
+    "display_name": "aws-ses",
+    "tags": []
   }
 }

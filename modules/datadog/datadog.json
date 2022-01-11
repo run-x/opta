@@ -5,8 +5,7 @@
   "properties": {
     "api_key": {
       "type": "string",
-      "description": "Datadog API key. If you don't provide this in the yaml, Opta will prompt you for it and store it in secrets.",
-      "default": null
+      "description": "Datadog API key. If you don't provide this in the yaml, Opta will prompt you for it and store it in secrets."
     },
     "timeout": {
       "type": "number",
@@ -22,7 +21,9 @@
       "description": "The name of this module",
       "enum": [
         "datadog"
-      ]
+      ],
+      "default": "datadog",
+      "type": "string"
     }
   },
   "opta_metadata": {
@@ -31,7 +32,10 @@
       "aws",
       "azure",
       "gcp"
-    ]
+    ],
+    "name": "datadog",
+    "display_name": "datadog",
+    "tags": []
   },
   "required": [
     "type"

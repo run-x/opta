@@ -3,7 +3,7 @@
   "description": "Deploys a kubernetes app",
   "properties": {
     "probe_port": {
-      "type": "str",
+      "type": "string",
       "description": "The name of the port to use for readiness and liveness probes. Defaults to the first port listed."
     },
     "additional_iam_policies": {
@@ -22,13 +22,12 @@
       }
     },
     "port": {
-      "ref": "/common-types/port-deprecated",
+      "$ref": "/common-types/port-deprecated",
       "description": "Specifies what port your app was made to be listened to. Currently it must be a map of the form\n`http: [PORT_NUMBER_HERE]` or `websocket: [PORT_NUMBER_HERE]`. Use `http` if you just have a vanilla http server\nand `websocket` for websockets.\n"
     },
     "image": {
       "type": "string",
-      "description": "Set to AUTO to create a private repo for your own images. Otherwises attempts to pull image from public dockerhub",
-      "default": null
+      "description": "Set to AUTO to create a private repo for your own images. Otherwises attempts to pull image from public dockerhub"
     },
     "min_containers": {
       "type": "integer",
@@ -44,14 +43,14 @@
     },
     "autoscaling_target_cpu_percentage": {
       "type": "integer",
-      "description": "See the [autoscaling]({{< relref \"#autoscaling\" >}}) section.",
+      "description": "See the [autoscaling](https://docs.opta.dev/reference/aws/service_modules/aws-k8s-service/#autoscaling) section.",
       "default": 80,
       "minimum": 0,
       "maximum": 100
     },
     "autoscaling_target_mem_percentage": {
       "type": "integer",
-      "description": "See the [autoscaling]({{< relref \"#autoscaling\" >}}) section.",
+      "description": "See the [autoscaling](https://docs.opta.dev/reference/aws/service_modules/aws-k8s-service/#autoscaling) section.",
       "default": 80,
       "minimum": 0,
       "maximum": 100
@@ -71,18 +70,15 @@
     },
     "healthcheck_path": {
       "type": "string",
-      "description": "See the See the [liveness/readiness]({{< relref \"#livenessreadiness-probe\" >}}) section. Default `null` (i.e., no user-specified healthchecks)",
-      "default": null
+      "description": "See the See the [liveness/readiness](https://docs.opta.dev/reference/aws/service_modules/aws-k8s-service/#healthcheck-probe) section. Default `null` (i.e., no user-specified healthchecks)"
     },
     "liveness_probe_path": {
       "type": "string",
-      "description": "Use if liveness probe != readiness probe",
-      "default": null
+      "description": "Use if liveness probe != readiness probe"
     },
     "readiness_probe_path": {
       "type": "string",
-      "description": "Use if liveness probe != readiness probe",
-      "default": null
+      "description": "Use if liveness probe != readiness probe"
     },
     "initial_liveness_delay": {
       "type": "integer",
@@ -96,8 +92,7 @@
     },
     "consistent_hash": {
       "description": "Use [consistent hashing](https://www.nginx.com/resources/wiki/modules/consistent_hash/)",
-      "type": "string",
-      "default": null
+      "type": "string"
     },
     "sticky_session": {
       "description": "Use [sticky sessions](https://stackoverflow.com/questions/10494431/sticky-and-non-sticky-sessions) via cookies for your service (first request will send you a cookie called opta_cookie which you should add on future requests).",
@@ -110,7 +105,7 @@
       "default": 86400
     },
     "resource_request": {
-      "description": "See the [container resources]({{< relref \"#container-resources\" >}}) section. Default\n```yaml\ncpu: 100 # in millicores\nmemory: 128 # in megabytes\n```\nCPU is given in millicores, and Memory is in megabytes.\n",
+      "description": "See the [container resources](https://docs.opta.dev/reference/aws/service_modules/aws-k8s-service/#container-resources) section. Default\n```yaml\ncpu: 100 # in millicores\nmemory: 128 # in megabytes\n```\nCPU is given in millicores, and Memory is in megabytes.\n",
       "type": "object",
       "properties": {
         "cpu": {
@@ -157,23 +152,8 @@
       "default": []
     },
     "persistent_storage": {
-      "type": "list",
+      "$ref": "/common-types/persistent-storage",
       "description": "A list persistent storages to add to each instance of your service (need to give a `size` which is the size in GB\nfor the storage volume to be, and `path` which is the path in the filesystem of each instance to place it under)\n",
-      "items": {
-        "type": "object",
-        "properties": {
-          "size": {
-            "type": "integer"
-          },
-          "path": {
-            "type": "string"
-          },
-          "required": [
-            "size",
-            "path"
-          ]
-        }
-      },
       "default": []
     },
     "ingress_extra_annotations": {
@@ -186,17 +166,23 @@
       "enum": [
         "aws-k8s-service",
         "k8s-service"
-      ]
+      ],
+      "default": "k8s-service",
+      "type": "string"
     }
   },
   "opta_metadata": {
     "module_type": "service",
     "clouds": [
       "aws"
-    ]
+    ],
+    "name": "aws-k8s-service",
+    "display_name": "k8s-service",
+    "tags": []
   },
   "required": [
     "image",
     "type"
-  ]
+  ],
+  "type": "object"
 }

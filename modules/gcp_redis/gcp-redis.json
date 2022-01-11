@@ -23,7 +23,9 @@
       "enum": [
         "gcp-redis",
         "redis"
-      ]
+      ],
+      "default": "redis",
+      "type": "string"
     }
   },
   "required": [
@@ -33,6 +35,11 @@
     "module_type": "service",
     "clouds": [
       "gcp"
+    ],
+    "name": "gcp-redis",
+    "display_name": "redis",
+    "tags": [
+      "datastore"
     ]
   }
 }

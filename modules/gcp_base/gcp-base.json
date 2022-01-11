@@ -28,7 +28,9 @@
       "enum": [
         "gcp-base",
         "base"
-      ]
+      ],
+      "default": "base",
+      "type": "string"
     }
   },
   "required": [
@@ -38,6 +40,9 @@
     "module_type": "env",
     "clouds": [
       "gcp"
-    ]
+    ],
+    "name": "gcp-base",
+    "display_name": "base",
+    "tags": []
   }
 }

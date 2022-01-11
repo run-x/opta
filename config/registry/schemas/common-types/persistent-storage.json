@@ -1,0 +1,18 @@
+{
+  "$id": "https://app.runx.dev/common-types/persistent-storage",
+  "type": "array",
+  "description": "A list persistent storages to add to each instance of your service (need to give a `size` which is the size in GB\nfor the storage volume to be, and `path` which is the path in the filesystem of each instance to place it under)\n",
+  "items": {
+    "type": "object",
+    "properties": {
+      "size": {
+        "type": "integer"
+      },
+      "path": {
+        "type": "string"
+      }
+    },
+    "required": ["size", "path"]
+  },
+  "default": []
+}

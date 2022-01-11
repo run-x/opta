@@ -8,7 +8,9 @@
       "enum": [
         "local-base",
         "base"
-      ]
+      ],
+      "default": "base",
+      "type": "string"
     }
   },
   "required": [
@@ -18,6 +20,9 @@
     "module_type": "env",
     "clouds": [
       "local"
-    ]
+    ],
+    "name": "local-base",
+    "display_name": "base",
+    "tags": []
   }
 }

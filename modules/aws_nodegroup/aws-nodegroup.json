@@ -42,7 +42,9 @@
       "description": "The name of this module",
       "enum": [
         "aws-nodegroup"
-      ]
+      ],
+      "default": "aws-nodegroup",
+      "type": "string"
     }
   },
   "required": [
@@ -52,6 +54,9 @@
     "module_type": "env",
     "clouds": [
       "aws"
-    ]
+    ],
+    "name": "aws-nodegroup",
+    "display_name": "aws-nodegroup",
+    "tags": []
   }
 }

@@ -56,14 +56,19 @@
       "enum": [
         "aws-k8s-base",
         "k8s-base"
-      ]
+      ],
+      "default": "k8s-base",
+      "type": "string"
     }
   },
   "opta_metadata": {
     "module_type": "env",
     "clouds": [
       "aws"
-    ]
+    ],
+    "name": "aws-k8s-base",
+    "display_name": "k8s-base",
+    "tags": []
   },
   "required": [
     "type"

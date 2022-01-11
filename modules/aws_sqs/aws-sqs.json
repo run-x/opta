@@ -41,7 +41,9 @@
       "description": "The name of this module",
       "enum": [
         "aws-sqs"
-      ]
+      ],
+      "default": "aws-sqs",
+      "type": "string"
     }
   },
   "required": [
@@ -51,6 +53,9 @@
     "module_type": "service",
     "clouds": [
       "aws"
-    ]
+    ],
+    "name": "aws-sqs",
+    "display_name": "aws-sqs",
+    "tags": []
   }
 }

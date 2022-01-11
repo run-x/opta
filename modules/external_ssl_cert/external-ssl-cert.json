@@ -10,24 +10,23 @@
     },
     "private_key_file": {
       "type": "string",
-      "description": "The private key pem file for the ssl certificate.",
-      "default": null
+      "description": "The private key pem file for the ssl certificate."
     },
     "certificate_body_file": {
       "type": "string",
-      "description": "The body of the ssl certificate in the form of a pem file. This file should just have the final certificate and not other certificates on the chain",
-      "default": null
+      "description": "The body of the ssl certificate in the form of a pem file. This file should just have the final certificate and not other certificates on the chain"
     },
     "certificate_chain_file": {
       "type": "string",
-      "description": "The file containing the chain certificate for the current ssl certificate.",
-      "default": null
+      "description": "The file containing the chain certificate for the current ssl certificate."
     },
     "type": {
       "description": "The name of this module",
       "enum": [
         "external-ssl-cert"
-      ]
+      ],
+      "default": "external-ssl-cert",
+      "type": "string"
     }
   },
   "required": [
@@ -43,6 +42,9 @@
       "aws",
       "azure",
       "gcp"
-    ]
+    ],
+    "name": "external-ssl-cert",
+    "display_name": "external-ssl-cert",
+    "tags": []
   }
 }

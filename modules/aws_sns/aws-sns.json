@@ -26,7 +26,9 @@
       "description": "The name of this module",
       "enum": [
         "aws-sns"
-      ]
+      ],
+      "default": "aws-sns",
+      "type": "string"
     }
   },
   "required": [
@@ -36,6 +38,9 @@
     "module_type": "service",
     "clouds": [
       "aws"
-    ]
+    ],
+    "name": "aws-sns",
+    "display_name": "aws-sns",
+    "tags": []
   }
 }

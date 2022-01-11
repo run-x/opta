@@ -50,14 +50,19 @@
       "description": "The name of this module",
       "enum": [
         "aws-iam-role"
-      ]
+      ],
+      "default": "aws-iam-role",
+      "type": "string"
     }
   },
   "opta_metadata": {
     "module_type": "service",
     "clouds": [
       "aws"
-    ]
+    ],
+    "name": "aws-iam-role",
+    "display_name": "aws-iam-role",
+    "tags": []
   },
   "required": [
     "type"

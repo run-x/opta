@@ -23,7 +23,9 @@
       "enum": [
         "gcp-postgres",
         "postgres"
-      ]
+      ],
+      "default": "postgres",
+      "type": "string"
     }
   },
   "required": [
@@ -33,6 +35,11 @@
     "module_type": "service",
     "clouds": [
       "gcp"
+    ],
+    "name": "gcp-postgres",
+    "display_name": "postgres",
+    "tags": [
+      "datastore"
     ]
   }
 }

@@ -17,6 +17,7 @@
     },
     "billing_mode": {
       "description": "The billing mode for you dynamodb table",
+      "type": "string",
       "enum": [
         "PROVISIONED",
         "PAY_PER_REQUEST"
@@ -30,8 +31,7 @@
     },
     "range_key": {
       "description": "The range key for your table",
-      "type": "string",
-      "default": null
+      "type": "string"
     },
     "attributes": {
       "description": "The list of attributes (name and type) for this dynamodb table",
@@ -65,14 +65,19 @@
       "description": "The name of this module",
       "enum": [
         "aws-dynamodb"
-      ]
+      ],
+      "default": "aws-dynamodb",
+      "type": "string"
     }
   },
   "opta_metadata": {
     "module_type": "service",
     "clouds": [
       "aws"
-    ]
+    ],
+    "name": "aws-dynamodb",
+    "display_name": "aws-dynamodb",
+    "tags": []
   },
   "required": [
     "hash_key",

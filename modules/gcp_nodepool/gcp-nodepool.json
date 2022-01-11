@@ -5,12 +5,12 @@
   "properties": {
     "max_nodes": {
       "type": "integer",
-      "description": "The maximum number of nodes to be set by the autoscaler in for the default nodegroup.",
+      "description": "The maximum number of nodes to be set by the autoscaler in for the current nodegroup PER AVAILABILITY ZONE (there's almost always 3).",
       "default": 5
     },
     "min_nodes": {
       "type": "integer",
-      "description": "The minimum number of nodes to be set by the autoscaler in for the default nodegroup.",
+      "description": "The minimum number of nodes to be set by the autoscaler in for the current nodegroup PER AVAILABILITY ZONE (there's almost always 3).",
       "default": 1
     },
     "node_disk_size": {
@@ -30,6 +30,7 @@
         "REGULAR",
         "STABLE"
       ],
+      "type": "string",
       "default": "REGULAR"
     },
     "preemptible": {
@@ -41,7 +42,9 @@
       "description": "The name of this module",
       "enum": [
         "gcp-nodepool"
-      ]
+      ],
+      "default": "gcp-nodepool",
+      "type": "string"
     }
   },
   "required": [
@@ -51,6 +54,9 @@
     "module_type": "env",
     "clouds": [
       "gcp"
-    ]
+    ],
+    "name": "gcp-nodepool",
+    "display_name": "gcp-nodepool",
+    "tags": []
   }
 }

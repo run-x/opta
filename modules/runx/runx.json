@@ -8,14 +8,19 @@
       "aws",
       "azure",
       "gcp"
-    ]
+    ],
+    "name": "runx",
+    "display_name": "runx",
+    "tags": []
   },
   "properties": {
     "type": {
       "description": "The name of this module",
       "enum": [
         "runx"
-      ]
+      ],
+      "default": "runx",
+      "type": "string"
     }
   },
   "required": [

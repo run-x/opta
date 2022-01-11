@@ -51,7 +51,9 @@
       "description": "The name of this module",
       "enum": [
         "mongodb-atlas"
-      ]
+      ],
+      "default": "mongodb-atlas",
+      "type": "string"
     }
   },
   "required": [
@@ -66,6 +68,9 @@
       "aws",
       "azure",
       "gcp"
-    ]
+    ],
+    "name": "mongodb-atlas",
+    "display_name": "mongodb-atlas",
+    "tags": []
   }
 }

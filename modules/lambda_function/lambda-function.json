@@ -7,55 +7,45 @@
       "description": "The name of this module",
       "enum": [
         "lambda-function"
-      ]
+      ],
+      "default": "lambda-function",
+      "type": "string"
     },
     "extra_iam_policies": {
-      "description": "The arns of additional IAM policies to be attached to this role.",
-      "enum": [
-        "lambda-function"
-      ],
-      "default": []
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "The arns of additional IAM policies to be attached to this role."
     },
     "expose_via_domain": {
       "description": "Set to true to expose the lambda as a public url in a new AWS API Gateway (V2)",
-      "enum": [
-        "lambda-function"
-      ],
+      "type": "boolean",
       "default": false
     },
     "runtime": {
       "description": "The AWS lambda runtime to use for this lambda (see https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html)",
-      "enum": [
-        "lambda-function"
-      ],
+      "type": "string",
       "default": "nodejs14.x"
     },
     "filename": {
       "description": "The filename for your zip file containing your lambda code",
-      "enum": [
-        "lambda-function"
-      ],
-      "default": null
-    },
-    "handler": {
-      "description": "Lambda function handler is the method in your function code that processes events.",
-      "enum": [
-        "lambda-function"
-      ],
-      "default": "index.handler"
+      "type": "string"
     },
     "env_vars": {
       "description": "A map of key values to add to the container as environment variables (key is name, value is value).\n```yaml\nenv_vars:\n FLAG: \"true\"\n```\n",
-      "enum": [
-        "lambda-function"
-      ],
+      "type": "object",
       "default": {}
     },
     "vpc_id": {
       "description": "The name of this module",
-      "enum": [
-        "lambda-function"
-      ]
+      "type": "string"
+    },
+    "handler": {
+      "description": "Lambda function handler is the method in your function code that processes events.",
+      "type": "string",
+      "default": "index.handler"
     }
   },
   "required": [
@@ -67,6 +57,9 @@
     "module_type": "service",
     "clouds": [
       "aws"
-    ]
+    ],
+    "name": "lambda-function",
+    "display_name": "lambda-function",
+    "tags": []
   }
 }

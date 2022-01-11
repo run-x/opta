@@ -5,13 +5,11 @@
   "properties": {
     "chart": {
       "type": "string",
-      "description": "Name of the helm chart.\nNote that you don't need to use `<repo_name>/<chart_name>` - as repo is specified separately. Just do `<chart_name>`.\nIf you're using a local chart, then this will be the path to the chart.\n",
-      "default": null
+      "description": "Name of the helm chart.\nNote that you don't need to use `<repo_name>/<chart_name>` - as repo is specified separately. Just do `<chart_name>`.\nIf you're using a local chart, then this will be the path to the chart.\n"
     },
     "repository": {
       "type": "string",
-      "description": "The helm repository to use (null means local chart)",
-      "default": null
+      "description": "The helm repository to use (null means local chart)"
     },
     "namespace": {
       "type": "string",
@@ -35,8 +33,7 @@
     },
     "chart_version": {
       "type": "string",
-      "description": "User side of the version of the helm chart to install. Note-- this IS required for remote charts (in a repository and not from local filesystem).",
-      "default": null
+      "description": "User side of the version of the helm chart to install. Note-- this IS required for remote charts (in a repository and not from local filesystem)."
     },
     "values_files": {
       "type": "array",
@@ -53,8 +50,7 @@
     },
     "values_file": {
       "type": "string",
-      "description": "Path to a values file.",
-      "default": null
+      "description": "Path to a values file."
     },
     "timeout": {
       "type": "number",
@@ -75,7 +71,9 @@
       "description": "The name of this module",
       "enum": [
         "helm-chart"
-      ]
+      ],
+      "default": "helm-chart",
+      "type": "string"
     }
   },
   "required": [
@@ -88,6 +86,9 @@
       "aws",
       "azure",
       "gcp"
-    ]
+    ],
+    "name": "helm-chart",
+    "display_name": "helm-chart",
+    "tags": []
   }
 }

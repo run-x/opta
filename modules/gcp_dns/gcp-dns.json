@@ -5,8 +5,7 @@
   "properties": {
     "domain": {
       "type": "string",
-      "description": "The domain you want (you will also get the subdomains for your use)",
-      "default": null
+      "description": "The domain you want (you will also get the subdomains for your use)"
     },
     "delegated": {
       "type": "boolean",
@@ -26,7 +25,9 @@
       "enum": [
         "gcp-dns",
         "dns"
-      ]
+      ],
+      "default": "dns",
+      "type": "string"
     }
   },
   "required": [
@@ -37,6 +38,9 @@
     "module_type": "env",
     "clouds": [
       "gcp"
-    ]
+    ],
+    "name": "gcp-dns",
+    "display_name": "dns",
+    "tags": []
   }
 }

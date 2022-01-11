@@ -68,14 +68,19 @@
       "enum": [
         "aws-eks",
         "k8s-cluster"
-      ]
+      ],
+      "default": "k8s-cluster",
+      "type": "string"
     }
   },
   "opta_metadata": {
     "module_type": "env",
     "clouds": [
       "aws"
-    ]
+    ],
+    "name": "aws-eks",
+    "display_name": "k8s-cluster",
+    "tags": []
   },
   "required": [
     "type"

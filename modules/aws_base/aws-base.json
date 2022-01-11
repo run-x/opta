@@ -46,14 +46,19 @@
       "enum": [
         "aws-base",
         "base"
-      ]
+      ],
+      "default": "base",
+      "type": "string"
     }
   },
   "opta_metadata": {
     "module_type": "env",
     "clouds": [
       "aws"
-    ]
+    ],
+    "name": "aws-base",
+    "display_name": "base",
+    "tags": []
   },
   "required": [
     "type"

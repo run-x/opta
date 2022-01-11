@@ -8,7 +8,9 @@
       "enum": [
         "local-redis",
         "redis"
-      ]
+      ],
+      "default": "redis",
+      "type": "string"
     }
   },
   "required": [
@@ -18,6 +20,11 @@
     "module_type": "service",
     "clouds": [
       "local"
+    ],
+    "name": "local-redis",
+    "display_name": "redis",
+    "tags": [
+      "datastore"
     ]
   }
 }

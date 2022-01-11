@@ -116,11 +116,13 @@ def _check_opta_config_schemas(write: bool = False) -> None:
 
 
 def _check_module_schemas(write: bool = False) -> None:
-    for cloud in CLOUD_FOLDER_NAMES + ["common"]:
+    for cloud in ["aws", "azurerm", "google", "local"]:
         if cloud != "common":
             index_yaml = yaml.load(open(join(registry_path, cloud, "index.yaml")))
 
-        module_info = _get_all_module_info(modules_path, cloud)
+        module_info = _get_all_module_info(
+            modules_path, CLOUD_NAME_TO_JSON_SCHEMA_NAME[cloud]
+        )
 
         for yaml_path, module_name in module_info:
             module_registry_dict = yaml.load(open(yaml_path))
@@ -128,6 +130,7 @@ def _check_module_schemas(write: bool = False) -> None:
 
             new_json_schema = deepcopy(json_schema)
             new_json_schema["$id"] = f"https://app.runx.dev/modules/{module_name}"
+            new_json_schema["type"] = "object"
             REQUIRED_FIELDS = ["description", "properties"]
             if any(p not in json_schema for p in REQUIRED_FIELDS):
                 missing_fields = [
@@ -144,9 +147,15 @@ def _check_module_schemas(write: bool = False) -> None:
                     k for k, v in index_yaml["module_aliases"].items() if v == module_name
                 ]
 
+            module_display_name = (
+                module_aliases[-1] if len(module_aliases) > 0 else module_name
+            )
+
             new_json_schema["properties"]["type"] = {
                 "description": "The name of this module",
                 "enum": [module_name] + module_aliases,
+                "default": module_display_name,
+                "type": "string",
             }
 
             module_inputs = module_registry_dict["inputs"]
@@ -157,23 +166,55 @@ def _check_module_schemas(write: bool = False) -> None:
                         raise Exception(
                             f"property {input_name} is missing from json schema for module {module_name}"
                         )
+
+                    type_definition_fields = ["type", "$ref", "oneOf", "anyOf"]
+                    if all(
+                        t not in json_schema["properties"][input_name]
+                        for t in type_definition_fields
+                    ):
+                        raise Exception(
+                            f"property *{input_name}* in json schema for module *{module_name}* is missing a type definition field. It should have one of the following fields: type, $ref, oneOf, anyOf"
+                        )
+
+                    if (
+                        "default" in json_schema["properties"][input_name]
+                        and "enum" in json_schema["properties"][input_name]
+                    ):
+                        if (
+                            json_schema["properties"][input_name]["default"]
+                            not in json_schema["properties"][input_name]["enum"]
+                        ):
+                            raise Exception(
+                                f"property *{input_name}* in json schema for module *{module_name}* has a default value that is not in the enum list"
+                            )
+
                     new_input_property_dict = new_json_schema["properties"][input_name]
 
                     new_input_property_dict["description"] = i["description"]
-                    if "default" in i:
+                    if "default" in i and i["default"] is not None:
                         new_input_property_dict["default"] = i["default"]
+                    if "default" in new_input_property_dict and i["default"] is None:
+                        del new_input_property_dict["default"]
 
             new_json_schema["required"] = [
                 i["name"]
                 for i in module_inputs
-                if i["user_facing"] and "required=True" in i["validator"]
+                if i["user_facing"] and "required=False" not in i["validator"]
             ] + ["type"]
+
+            tags = []
+            datastores = ["redis", "postgres", "documentdb", "mysql"]
+            if any(d in module_name for d in datastores):
+                tags.append("datastore")
 
             new_json_schema["opta_metadata"] = {
                 "module_type": CONFIG_TYPE_ENV
                 if module_registry_dict["environment_module"]
                 else CONFIG_TYPE_SERVICE,
                 "clouds": json_schema["opta_metadata"]["clouds"],
+                "name": module_name,
+                "display_name": module_display_name,
+                "tags": tags,
             }
 
             if write:

@@ -20,14 +20,19 @@
       "description": "The name of this module",
       "enum": [
         "aws-iam-user"
-      ]
+      ],
+      "default": "aws-iam-user",
+      "type": "string"
     }
   },
   "opta_metadata": {
     "module_type": "service",
     "clouds": [
       "aws"
-    ]
+    ],
+    "name": "aws-iam-user",
+    "display_name": "aws-iam-user",
+    "tags": []
   },
   "required": [
     "type"

@@ -67,6 +67,7 @@
         "cache.c1.xlarge",
         "cache.t1.micro"
       ],
+      "type": "string",
       "default": "cache.m4.large",
       "description": "This is the redis instance type used for the [instances](https://aws.amazon.com/elasticache/pricing/)."
     },
@@ -90,7 +91,9 @@
       "enum": [
         "aws-redis",
         "redis"
-      ]
+      ],
+      "default": "redis",
+      "type": "string"
     }
   },
   "required": [
@@ -100,6 +103,11 @@
     "module_type": "service",
     "clouds": [
       "aws"
+    ],
+    "name": "aws-redis",
+    "display_name": "redis",
+    "tags": [
+      "datastore"
     ]
   }
 }
