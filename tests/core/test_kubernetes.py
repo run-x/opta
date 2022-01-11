@@ -449,7 +449,7 @@ class TestKubernetes:
             return_value=[mocked_claim_opta1, mocked_claim_opta2],
         )
 
-        # call with no parameter, expect delete VPC namespaced method called for one PVC only
+        # call with no parameter, expect list PVC method called and 2 delete PVC calls
         namespace = "hello"
         delete_persistent_volume_claims(
             namespace=namespace, opta_managed=True, async_req=True
