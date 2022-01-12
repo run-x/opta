@@ -155,7 +155,7 @@ def _apply(
         tf_lock_exists, _ = Terraform.tf_lock_details(layer)
         if tf_lock_exists:
             raise UserErrors(USER_ERROR_TF_LOCK)
-    _verify_parent_layer(layer)
+    _verify_parent_layer(layer, auto_approve)
 
     event_properties: Dict = layer.get_event_properties()
     amplitude_client.send_event(
@@ -202,7 +202,7 @@ def _apply(
         else existing_config.get("opta_version", "").strip("v")
     )
     current_semver_string = VERSION.strip("v")
-    _verify_semver(old_semver_string, current_semver_string, layer)
+    _verify_semver(old_semver_string, current_semver_string, layer, auto_approve)
 
     try:
         existing_modules: Set[str] = set()
@@ -330,7 +330,10 @@ def _apply(
 
 
 def _verify_semver(
-    old_semver_string: str, current_semver_string: str, layer: "Layer"
+    old_semver_string: str,
+    current_semver_string: str,
+    layer: "Layer",
+    auto_approve: bool = False,
 ) -> None:
     if old_semver_string in [DEV_VERSION, ""] or current_semver_string in [
         DEV_VERSION,
@@ -363,7 +366,7 @@ def _verify_semver(
             f"{fg('magenta')}WARNING{attr(0)}: Detecting an opta upgrade to or past version {current_upgrade_warning[0]}. "
             f"Got the following warning: {current_upgrade_warning[1]}"
         )
-    if len(current_upgrade_warnings) > 0:
+    if not auto_approve and len(current_upgrade_warnings) > 0:
         click.confirm(
             "Are you ok with the aforementioned warnings and done all precautionary steps you wish to do?",
             abort=True,
@@ -382,7 +385,7 @@ def _fetch_availability_zones(aws_region: str) -> List[str]:
 
 
 # Verify whether the parent layer exists or not
-def _verify_parent_layer(layer: Layer) -> None:
+def _verify_parent_layer(layer: Layer, auto_approve: bool = False) -> None:
     if layer.parent is None:
         return
     try:
@@ -395,12 +398,13 @@ def _verify_parent_layer(layer: Layer) -> None:
                 "Please fix these issues and try again!"
             )
     except MissingState as e:
-        click.confirm(
-            f"Failed to get the Environment state {e.args[0]} "
-            "Usually, this means that the Environment mentioned in configuration file does not exist. \n"
-            f"Would you like to create your environment using {layer.parent.path}?",
-            abort=True,
-        )
+        if not auto_approve:
+            click.confirm(
+                f"Failed to get the Environment state {e.args[0]} "
+                "Usually, this means that the Environment mentioned in configuration file does not exist. \n"
+                f"Would you like to create your environment using {layer.parent.path}?",
+                abort=True,
+            )
         _apply(
             layer.parent.path,
             env=None,
