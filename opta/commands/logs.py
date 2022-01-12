@@ -1,11 +1,10 @@
 from typing import Optional
 
 import click
-from kubernetes.config import load_kube_config
 
 from opta.amplitude import amplitude_client
 from opta.core.generator import gen_all
-from opta.core.kubernetes import configure_kubectl, tail_module_log
+from opta.core.kubernetes import configure_kubectl, load_opta_kube_config, tail_module_log
 from opta.exceptions import UserErrors
 from opta.layer import Layer
 from opta.utils import check_opta_file_exists
@@ -39,7 +38,7 @@ def logs(env: Optional[str], config: str, seconds: Optional[int]) -> None:
     layer.verify_cloud_credentials()
     gen_all(layer)
     configure_kubectl(layer)
-    load_kube_config()
+    load_opta_kube_config()
     if layer.cloud == "aws":
         modules = layer.get_module_by_type("k8s-service")
     elif layer.cloud == "google":

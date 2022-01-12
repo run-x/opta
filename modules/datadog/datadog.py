@@ -25,7 +25,7 @@ class DatadogProcessor(ModuleProcessor):
 
     def process(self, module_idx: int) -> None:
         configure_kubectl(self.layer)
-        load_kube_config()
+        load_opta_kube_config()
         v1 = CoreV1Api()
         # Update the secrets
         namespaces = v1.list_namespace(field_selector=f"metadata.name={self.layer.name}")
