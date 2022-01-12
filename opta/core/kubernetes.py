@@ -1,8 +1,8 @@
 import base64
 import datetime
 import time
-from os import makedirs
-from os.path import exists, expanduser
+from os import makedirs, remove
+from os.path import exists, expanduser, getmtime
 from shutil import which
 from subprocess import DEVNULL  # nosec
 from threading import Thread
@@ -53,6 +53,7 @@ if TYPE_CHECKING:
 GENERATED_KUBE_CONFIG: Optional[str] = None
 HOME = expanduser("~")
 GENERATED_KUBE_CONFIG_DIR = f"{HOME}/.opta/kubeconfigs"
+ONE_WEEK_UNIX = 604800
 
 
 def get_required_path_executables(cloud: str) -> FrozenSet[str]:
@@ -154,8 +155,11 @@ def _gcp_configure_kubectl(layer: "Layer") -> None:
     )
     global GENERATED_KUBE_CONFIG
     if exists(config_file_name):
-        GENERATED_KUBE_CONFIG = config_file_name
-        return
+        if getmtime(config_file_name) > time.time() - ONE_WEEK_UNIX:
+            GENERATED_KUBE_CONFIG = config_file_name
+            return
+        else:
+            remove(config_file_name)
 
     gcp = GCP(layer=layer)
     credentials = gcp.get_credentials()[0]
@@ -254,8 +258,11 @@ def _aws_configure_kubectl(layer: "Layer") -> None:
     )
     global GENERATED_KUBE_CONFIG
     if exists(config_file_name):
-        GENERATED_KUBE_CONFIG = config_file_name
-        return
+        if getmtime(config_file_name) > time.time() - ONE_WEEK_UNIX:
+            GENERATED_KUBE_CONFIG = config_file_name
+            return
+        else:
+            remove(config_file_name)
 
     region, account_id = _aws_get_cluster_env(layer.root())
 
