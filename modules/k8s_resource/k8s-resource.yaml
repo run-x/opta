@@ -1,0 +1,41 @@
+halt: false
+environment_module: false
+metric_count: 1
+inputs:
+  - name: env_name
+    user_facing: false
+    description: Opta Environment name
+    default: None
+  - name: layer_name
+    user_facing: false
+    description: Opta Layer name
+    default: None
+  - name: module_name
+    user_facing: false
+    description: Opta Module name
+    default: None
+  - name: file_path
+    user_facing: true
+    validator: str(required=True)
+    description: The Kubernetes manifest file in yaml format
+    default: null
+  - name: kubeconfig
+    user_facing: false
+    validator: str(required=False)
+    description: Kubernetes config path
+    default: null
+  - name: kubecontext
+    user_facing: false
+    validator: str(required=False)
+    description: Kubernetes context to use
+    default: null
+
+
+outputs: { }
+output_providers: { }
+output_data: { }
+clouds:
+  - azure
+  - aws
+  - gcp
+  - local
