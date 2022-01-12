@@ -54,3 +54,19 @@ class TestAWS:
             ],
             Key={"LockID": {"S": f"{aws_layer.state_storage()}/{aws_layer.name}"}},
         )
+
+    def test_force_delete_terraform_lock_id(
+        self, mocker: MockFixture, aws_layer: Mock
+    ) -> None:
+        mock_dynamodb_client_instance = mocker.Mock(spec=DynamoDBClient)
+        mocker.patch(
+            "opta.core.aws.boto3.client", return_value=mock_dynamodb_client_instance
+        )
+        mock_aws = AWS(aws_layer)
+        mock_aws.force_delete_terraform_lock_id()
+        mock_dynamodb_client_instance.delete_item.assert_called_once_with(
+            TableName=aws_layer.gen_providers(0)["terraform"]["backend"]["s3"][
+                "dynamodb_table"
+            ],
+            Key={"LockID": {"S": f"{aws_layer.state_storage()}/{aws_layer.name}"}},
+        )

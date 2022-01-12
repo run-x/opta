@@ -51,3 +51,23 @@ class TestGcp:
         mock_gcs_tf_lock_blob.generation = 1234567890
 
         assert GCP(gcp_layer).get_terraform_lock_id() == "1234567890"
+
+    def test_force_delete_terraform_lock_id(
+        self, mocker: MockFixture, gcp_layer: Layer
+    ) -> None:
+        mocker.patch(
+            "opta.core.gcp.default",
+            return_value=(mocker.Mock(spec=Credentials), "dummy_project_id"),
+        )
+
+        mock_gcs_client_instance = mocker.Mock(spec=Client)
+        mock_gcs_bucket_instance = mocker.Mock(spec=Bucket)
+        mocker.patch(
+            "opta.core.gcp.storage.Client", return_value=mock_gcs_client_instance
+        )
+        mock_gcs_client_instance.get_bucket.return_value = mock_gcs_bucket_instance
+        GCP(gcp_layer).force_delete_terraform_lock_id()
+
+        mock_gcs_bucket_instance.delete_blob.assert_called_once_with(
+            f"{gcp_layer.name}/default.tflock"
+        )
