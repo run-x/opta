@@ -90,13 +90,14 @@ def destroy(
 
     tf_flags: List[str] = []
     if auto_approve:
+        sleep_time = 2
         logger.info(
-            f"{fg('red')}{attr('bold')}Opta will now destroy the {attr('underlined')}{layer.name}{attr(0)}"
-            f"{fg('red')}{attr('bold')} layer.{attr(0)}\n"
-            f"{fg('red')}{attr('bold')}Sleeping for {attr('underlined')}2 secs{attr(0)}"
-            f"{fg('red')}{attr('bold')}, if user wants to abort.{attr(0)}"
+            f"{fg('green')}{attr('bold')}Opta will now destroy the {attr('underlined')}{layer.name}{attr(0)}"
+            f"{fg('green')}{attr('bold')} layer.{attr(0)}\n"
+            f"{fg('green')}{attr('bold')}Sleeping for {attr('underlined')}{sleep_time} secs{attr(0)}"
+            f"{fg('green')}{attr('bold')}, press Ctrl+C to Abort.{attr(0)}"
         )
-        time.sleep(2)
+        time.sleep(sleep_time)
         tf_flags.append("-auto-approve")
     modules = Terraform.get_existing_modules(layer)
     layer.modules = [x for x in layer.modules if x.name in modules]
