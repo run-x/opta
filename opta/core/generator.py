@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Generator, List, Optional, Tuple
 
 import click
-from colored import attr, fg
+from colored import attr
 
 from opta import gen_tf
 from opta.constants import TF_FILE_PATH
@@ -71,10 +71,10 @@ def gen(
                             image_digest = current_image_info["digest"]
                     else:
                         logger.info(
-                            f"{fg('green')}{attr('bold')}Using the existing deployment {attr('underlined')}"
+                            f"{attr('bold')}Using the existing deployment {attr('underlined')}"
                             f"(tag={current_image_info['tag']}, digest={current_image_info['digest']}).{attr(0)}\n"
-                            f"{fg('green')}{attr('bold')}If you wish to deploy another image, please use "
-                            f"{fg('green')}{attr('bold')}{attr('underlined')} opta deploy command.{attr(0)}"
+                            f"{attr('bold')}If you wish to deploy another image, please use "
+                            f"{attr('bold')}{attr('underlined')} opta deploy command.{attr(0)}"
                         )
                         image_tag = current_image_info["tag"]
                         image_digest = current_image_info["digest"]

@@ -7,7 +7,7 @@ import boto3
 import click
 from azure.storage.blob import ContainerClient
 from botocore.config import Config
-from colored import attr, fg
+from colored import attr
 from google.cloud import storage  # type: ignore
 from google.cloud.exceptions import NotFound
 
@@ -92,10 +92,10 @@ def destroy(
     if auto_approve:
         sleep_time = 2
         logger.info(
-            f"{fg('green')}{attr('bold')}Opta will now destroy the {attr('underlined')}{layer.name}{attr(0)}"
-            f"{fg('green')}{attr('bold')} layer.{attr(0)}\n"
-            f"{fg('green')}{attr('bold')}Sleeping for {attr('underlined')}{sleep_time} secs{attr(0)}"
-            f"{fg('green')}{attr('bold')}, press Ctrl+C to Abort.{attr(0)}"
+            f"{attr('bold')}Opta will now destroy the {attr('underlined')}{layer.name}{attr(0)}"
+            f"{attr('bold')} layer.{attr(0)}\n"
+            f"{attr('bold')}Sleeping for {attr('underlined')}{sleep_time} secs{attr(0)}"
+            f"{attr('bold')}, press Ctrl+C to Abort.{attr(0)}"
         )
         time.sleep(sleep_time)
         tf_flags.append("-auto-approve")
