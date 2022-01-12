@@ -3,7 +3,17 @@ from __future__ import annotations
 import functools
 import re
 from collections import abc
-from typing import Any, Iterable, Iterator, Sequence, Tuple, TypeVar, Union, overload
+from typing import (
+    Any,
+    Iterable,
+    Iterator,
+    List,
+    Sequence,
+    Tuple,
+    TypeVar,
+    Union,
+    overload,
+)
 
 from opta.utils.yaml import register_yaml_class
 
@@ -12,6 +22,11 @@ _INTERPOLATION_REGEX = re.compile(
     r"\$\{(" + _PART_REGEX.pattern + r"(?:\." + _PART_REGEX.pattern + r")*)\}",
     re.IGNORECASE,
 )
+_SIMPLE_INTERPOLATION_REGEX = re.compile(r"\$\{.*?\}")
+_COMPLEX_SPLIT_REGEX = re.compile(
+    r"(" + _SIMPLE_INTERPOLATION_REGEX.pattern + ")", re.IGNORECASE
+)
+
 
 PathElement = Union[str, int]
 TRef = TypeVar("TRef", bound="Reference")
@@ -166,3 +181,37 @@ class InterpolatedReference(Reference):
 
 
 register_yaml_class(InterpolatedReference)
+
+ComplexPart = Union[str, InterpolatedReference]
+
+
+class ComplexInterpolatedReference:
+    def __init__(self, parts: List[ComplexPart]) -> None:
+        self._parts: List[ComplexPart] = parts
+
+    def __str__(self) -> str:
+        return "".join(str(part) for part in self._parts)
+
+    @classmethod
+    def _splitter(cls, raw: str) -> List[str]:
+        split = _COMPLEX_SPLIT_REGEX.split(raw)
+
+        return [part for part in split if part]  # Filter out the empty strings
+
+    @classmethod
+    def parse(cls, raw: str) -> ComplexInterpolatedReference:
+        components = cls._splitter(raw)
+        parts: List[ComplexPart] = []
+        for component in components:
+            part: ComplexPart
+            # Just check to see if it looks like the user tried to use interpolation.
+            # We are loose on the syntax check at first here so expanding supported expressions doesn't cause backwards compatibility issues
+            match = _SIMPLE_INTERPOLATION_REGEX.fullmatch(component)
+            if match:
+                part = InterpolatedReference.parse(component)
+            else:
+                part = component
+
+            parts.append(part)
+
+        return cls(parts)
