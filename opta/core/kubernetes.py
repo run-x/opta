@@ -89,6 +89,7 @@ def _local_configure_kubectl(layer: "Layer") -> None:
         check=True,
         capture_output=True,
     ).stdout
+    return ("~/.kube/config", "kind-opta-local-cluster")
 
 
 def load_opta_config_to_default(layer: "Layer") -> None:
