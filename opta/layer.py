@@ -32,7 +32,7 @@ from opta.exceptions import UserErrors
 from opta.module import Module
 from opta.plugins.derived_providers import DerivedProviders
 from opta.utils import check_opta_file_exists, deep_merge, hydrate, logger, yaml
-from opta.utils.dependencies import validate_installed_path_executables
+from opta.utils.dependencies import ensure_installed, validate_installed_path_executables
 
 PROCESSOR_DICT: Dict[str, str] = {
     "aws-k8s-service": "AwsK8sServiceProcessor",
@@ -612,54 +612,64 @@ class Layer:
 
     def verify_cloud_credentials(self) -> None:
         if self.cloud == "aws":
-            try:
-                aws_caller_identity = boto3.client("sts").get_caller_identity()
-                configured_aws_account_id = aws_caller_identity["Account"]
-                required_aws_account_id = self.root().providers["aws"]["account_id"]
-                if required_aws_account_id != configured_aws_account_id:
-                    raise UserErrors(
-                        "\nSystem configured AWS Credentials are different from the ones being used in the "
-                        f"Configuration. \nSystem is configured with credentials for account "
-                        f"{configured_aws_account_id} but the config requires the credentials for "
-                        f"{required_aws_account_id}."
-                    )
-            except NoCredentialsError:
-                raise UserErrors(
-                    "Unable to locate credentials.\n"
-                    "Visit `https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html` "
-                    "for more information."
-                )
-            except ClientError as e:
-                raise UserErrors(
-                    "The AWS Credentials are not configured properly.\n"
-                    f" - Code: {e.response['Error']['Code']} Error Message: {e.response['Error']['Message']}"
-                    "Visit `https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html` "
-                    "for more information."
-                )
+            self._verify_aws_cloud_credentials()
         if self.cloud == "google":
-            try:
-                _, configured_project_id = default()
-                required_project_id = self.root().providers["google"]["project"]
-                if required_project_id != configured_project_id:
-                    raise UserErrors(
-                        "\nSystem configured GCP Credentials are different from the ones being used in the "
-                        "Configuration. \nSystem is configured with credentials for account "
-                        f"{configured_project_id} but the config requires the credentials for "
-                        f"{required_project_id}."
-                    )
-            except DefaultCredentialsError:
-                raise UserErrors(
-                    "Google Cloud credentials are not configured properly.\n"
-                    "Visit `https://googleapis.dev/python/google-api-core/latest/auth.html#overview` "
-                    "for more information."
-                )
+            self._verify_gcp_cloud_credentials()
         if self.cloud == "azurerm":
-            try:
-                DefaultAzureCredential()
-            except ClientAuthenticationError as e:
+            self._verify_azure_cloud_credentials()
+
+    def _verify_azure_cloud_credentials(self) -> None:
+        try:
+            DefaultAzureCredential()
+        except ClientAuthenticationError as e:
+            raise UserErrors(
+                "Azure Cloud are not configured properly.\n" f" Error: {e.message}"
+            )
+
+    def _verify_gcp_cloud_credentials(self) -> None:
+        try:
+            _, configured_project_id = default()
+            required_project_id = self.root().providers["google"]["project"]
+            if required_project_id != configured_project_id:
                 raise UserErrors(
-                    "Azure Cloud are not configured properly.\n" f" Error: {e.message}"
+                    "\nSystem configured GCP Credentials are different from the ones being used in the "
+                    "Configuration. \nSystem is configured with credentials for account "
+                    f"{configured_project_id} but the config requires the credentials for "
+                    f"{required_project_id}."
                 )
+        except DefaultCredentialsError:
+            raise UserErrors(
+                "Google Cloud credentials are not configured properly.\n"
+                "Visit `https://googleapis.dev/python/google-api-core/latest/auth.html#overview` "
+                "for more information."
+            )
+
+    def _verify_aws_cloud_credentials(self) -> None:
+        ensure_installed("aws")
+        try:
+            aws_caller_identity = boto3.client("sts").get_caller_identity()
+            configured_aws_account_id = aws_caller_identity["Account"]
+            required_aws_account_id = self.root().providers["aws"]["account_id"]
+            if required_aws_account_id != configured_aws_account_id:
+                raise UserErrors(
+                    "\nSystem configured AWS Credentials are different from the ones being used in the "
+                    f"Configuration. \nSystem is configured with credentials for account "
+                    f"{configured_aws_account_id} but the config requires the credentials for "
+                    f"{required_aws_account_id}."
+                )
+        except NoCredentialsError:
+            raise UserErrors(
+                "Unable to locate credentials.\n"
+                "Visit `https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html` "
+                "for more information."
+            )
+        except ClientError as e:
+            raise UserErrors(
+                "The AWS Credentials are not configured properly.\n"
+                f" - Code: {e.response['Error']['Code']} Error Message: {e.response['Error']['Message']}"
+                "Visit `https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html` "
+                "for more information."
+            )
 
 
 def _validate_providers(providers: dict) -> None:

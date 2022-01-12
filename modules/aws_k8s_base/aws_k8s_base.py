@@ -2,13 +2,12 @@ from typing import TYPE_CHECKING, Optional
 
 import mypy_boto3_elbv2.type_defs
 from kubernetes.client import CoreV1Api, V1ConfigMap
-from kubernetes.config import load_kube_config
 from mypy_boto3_elbv2 import ElasticLoadBalancingv2Client
 from ruamel.yaml.compat import StringIO
 
 from modules.base import AWSK8sModuleProcessor, K8sBaseModuleProcessor
 from opta.core.aws import AWS
-from opta.core.kubernetes import configure_kubectl, list_namespaces
+from opta.core.kubernetes import configure_kubectl, list_namespaces, load_opta_kube_config
 from opta.core.terraform import Terraform
 from opta.exceptions import UserErrors
 from opta.utils import yaml
@@ -84,7 +83,7 @@ class AwsK8sBaseProcessor(AWSK8sModuleProcessor, K8sBaseModuleProcessor):
             return
         Terraform.download_state(self.layer)
         configure_kubectl(self.layer)
-        load_kube_config()
+        load_opta_kube_config()
         v1 = CoreV1Api()
         aws_auth_config_map: V1ConfigMap = v1.read_namespaced_config_map(
             "aws-auth", "kube-system"

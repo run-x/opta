@@ -17,7 +17,7 @@ def test_shell(mocker: MockFixture) -> None:
     mocked_layer_class.load_from_yaml.return_value = mocked_layer
     layer_gen_all = mocker.patch("opta.commands.shell.gen_all")
     configure_kubectl = mocker.patch("opta.commands.shell.configure_kubectl")
-    load_kube_config = mocker.patch("opta.commands.shell.load_kube_config")
+    load_kube_config = mocker.patch("opta.commands.shell.load_opta_kube_config")
 
     mocked_core_v1_api_class = mocker.patch("opta.commands.shell.CoreV1Api")
     mocked_core_v1_api = mocker.Mock(spec=CoreV1Api)
@@ -68,7 +68,7 @@ def test_shell_with_sh(mocker: MockFixture) -> None:
     mocked_layer_class.load_from_yaml.return_value = mocked_layer
     layer_gen_all = mocker.patch("opta.commands.shell.gen_all")
     configure_kubectl = mocker.patch("opta.commands.shell.configure_kubectl")
-    load_kube_config = mocker.patch("opta.commands.shell.load_kube_config")
+    load_kube_config = mocker.patch("opta.commands.shell.load_opta_kube_config")
 
     mocked_core_v1_api_class = mocker.patch("opta.commands.shell.CoreV1Api")
     mocked_core_v1_api = mocker.Mock(spec=CoreV1Api)

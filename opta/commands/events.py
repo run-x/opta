@@ -3,11 +3,14 @@ from typing import Optional
 
 import click
 import pytz
-from kubernetes.config import load_kube_config
 
 from opta.amplitude import amplitude_client
 from opta.core.generator import gen_all
-from opta.core.kubernetes import configure_kubectl, tail_namespace_events
+from opta.core.kubernetes import (
+    configure_kubectl,
+    load_opta_kube_config,
+    tail_namespace_events,
+)
 from opta.layer import Layer
 
 
@@ -43,5 +46,5 @@ def events(env: Optional[str], config: str, seconds: Optional[int]) -> None:
     layer.verify_cloud_credentials()
     gen_all(layer)
     configure_kubectl(layer)
-    load_kube_config()
+    load_opta_kube_config()
     tail_namespace_events(layer, start_time)
