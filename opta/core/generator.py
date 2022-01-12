@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, Generator, List, Optional, Tuple
 
 import click
+from colored import attr
 
 from opta import gen_tf
 from opta.constants import TF_FILE_PATH
@@ -28,6 +29,7 @@ def gen(
     image_digest: Optional[str] = None,
     test: bool = False,
     check_image: bool = False,
+    auto_approve: bool = False,
 ) -> Generator[Tuple[int, List["Module"], int], None, None]:
     """Generate TF file based on opta config file"""
     logger.debug("Loading infra blocks")
@@ -59,11 +61,21 @@ def gen(
                     and service_module.data.get("image", "").upper() == "AUTO"
                     and not test
                 ):
-                    if click.confirm(
-                        f"WARNING There is an existing deployment (tag={current_image_info['tag']}, "
-                        f"digest={current_image_info['digest']}) and the pods will be killed as you "
-                        f"did not specify an image tag. Would you like to keep the existing deployment alive? (y/n)",
-                    ):
+                    if not auto_approve:
+                        if click.confirm(
+                            f"WARNING There is an existing deployment (tag={current_image_info['tag']}, "
+                            f"digest={current_image_info['digest']}) and the pods will be killed as you "
+                            f"did not specify an image tag. Would you like to keep the existing deployment alive?",
+                        ):
+                            image_tag = current_image_info["tag"]
+                            image_digest = current_image_info["digest"]
+                    else:
+                        logger.info(
+                            f"{attr('bold')}Using the existing deployment {attr('underlined')}"
+                            f"(tag={current_image_info['tag']}, digest={current_image_info['digest']}).{attr(0)}\n"
+                            f"{attr('bold')}If you wish to deploy another image, please use "
+                            f"{attr('bold')}{attr('underlined')} opta deploy command.{attr(0)}"
+                        )
                         image_tag = current_image_info["tag"]
                         image_digest = current_image_info["digest"]
         layer.variables["image_tag"] = image_tag

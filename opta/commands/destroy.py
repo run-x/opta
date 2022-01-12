@@ -1,4 +1,5 @@
 import os
+import time
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -6,6 +7,7 @@ import boto3
 import click
 from azure.storage.blob import ContainerClient
 from botocore.config import Config
+from colored import attr
 from google.cloud import storage  # type: ignore
 from google.cloud.exceptions import NotFound
 
@@ -19,7 +21,7 @@ from opta.error_constants import USER_ERROR_TF_LOCK
 from opta.exceptions import UserErrors
 from opta.layer import Layer
 from opta.pre_check import pre_check
-from opta.utils import check_opta_file_exists, fmt_msg, logger
+from opta.utils import check_opta_file_exists, logger
 
 
 @click.command()
@@ -88,16 +90,14 @@ def destroy(
 
     tf_flags: List[str] = []
     if auto_approve:
-        # Note that for ci, you can just do "yes | opta destroy --auto-approve"
-        click.confirm(
-            fmt_msg(
-                f"""
-                Are you REALLY sure you want to run destroy with auto-approve?
-                ~Please make sure *{layer.name}* is the correct opta config.
-                """
-            ),
-            abort=True,
+        sleep_time = 2
+        logger.info(
+            f"{attr('bold')}Opta will now destroy the {attr('underlined')}{layer.name}{attr(0)}"
+            f"{attr('bold')} layer.{attr(0)}\n"
+            f"{attr('bold')}Sleeping for {attr('underlined')}{sleep_time} secs{attr(0)}"
+            f"{attr('bold')}, press Ctrl+C to Abort.{attr(0)}"
         )
+        time.sleep(sleep_time)
         tf_flags.append("-auto-approve")
     modules = Terraform.get_existing_modules(layer)
     layer.modules = [x for x in layer.modules if x.name in modules]
