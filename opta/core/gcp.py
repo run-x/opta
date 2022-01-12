@@ -155,6 +155,9 @@ class GCP(CloudClient):
             return ""
 
     def force_delete_terraform_lock_id(self) -> None:
+        logger.info(
+            "Trying to Remove the lock forcefully. Will try deleting TF Lock File."
+        )
         bucket = self.layer.state_storage()
         tf_lock_path = f"{self.layer.name}/default.tflock"
         credentials, project_id = self.get_credentials()

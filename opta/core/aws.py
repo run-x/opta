@@ -154,6 +154,9 @@ class AWS(CloudClient):
             return ""
 
     def force_delete_terraform_lock_id(self) -> None:
+        logger.info(
+            "Trying to Remove the lock forcefully. Will try deleting Dynamo DB Entry."
+        )
         bucket = self.layer.state_storage()
         providers = self.layer.gen_providers(0)
         dynamodb_table = providers["terraform"]["backend"]["s3"]["dynamodb_table"]
