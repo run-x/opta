@@ -25,7 +25,7 @@ class TestAwsK8sBaseProcessor:
 
         mocker.patch("modules.aws_k8s_base.aws_k8s_base.Terraform")
         mocker.patch("modules.aws_k8s_base.aws_k8s_base.configure_kubectl")
-        mocker.patch("modules.aws_k8s_base.aws_k8s_base.load_kube_config")
+        mocker.patch("modules.aws_k8s_base.aws_k8s_base.load_opta_kube_config")
 
         mocked_core_v1_api = mocker.Mock()
         mocker.patch(

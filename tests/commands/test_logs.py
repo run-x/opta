@@ -19,7 +19,7 @@ def test_logs(mocker: MockFixture) -> None:
     mocked_layer_class.load_from_yaml.return_value = mocked_layer
     layer_gen_all = mocker.patch("opta.commands.logs.gen_all")
     configure_kubectl = mocker.patch("opta.commands.logs.configure_kubectl")
-    load_kube_config = mocker.patch("opta.commands.logs.load_kube_config")
+    load_kube_config = mocker.patch("opta.commands.logs.load_opta_kube_config")
 
     mocked_module = mocker.Mock(spec=Module)
     mocked_module.type = "k8s-service"

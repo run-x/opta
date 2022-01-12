@@ -1,5 +1,5 @@
 import datetime
-from subprocess import DEVNULL, CompletedProcess
+from subprocess import DEVNULL
 
 import pytz
 from kubernetes.client import (
@@ -15,6 +15,7 @@ from kubernetes.watch import Watch
 from pytest_mock import MockFixture
 
 from opta.core.kubernetes import (
+    GENERATED_KUBE_CONFIG_DIR,
     configure_kubectl,
     delete_persistent_volume_claims,
     get_required_path_executables,
@@ -85,26 +86,18 @@ class TestKubernetes:
             ]
         )
 
-    def test_configure_kubectl(self, mocker: MockFixture) -> None:
+    def test_aws_configure_kubectl(self, mocker: MockFixture) -> None:
         mocked_ensure_installed = mocker.patch("opta.core.kubernetes.ensure_installed")
-        mocked_nice_run = mocker.patch(
-            "opta.core.kubernetes.nice_run",
-            side_effect=[
-                CompletedProcess(None, 0, "blah".encode("utf-8")),  # type: ignore
-            ],
-        )
-        mock_aws_client_instance = mocker.Mock()
-        mock_aws_get_caller_identity = {
-            "UserId": "mocked_user_id:jd@runx.dev",
-            "Account": "111111111111",
-            "Arn": "mocked_arn",
+        mocked_exist = mocker.patch("opta.core.kubernetes.exists")
+        mocked_exist.return_value = False
+        mock_eks_client = mocker.Mock()
+        mocker.patch("opta.core.kubernetes.boto3.client", return_value=mock_eks_client)
+        mock_eks_client.describe_cluster.return_value = {
+            "cluster": {
+                "certificateAuthority": {"data": "ca-data"},
+                "endpoint": "eks-endpoint",
+            }
         }
-        mock_sts_client = mocker.patch(
-            "opta.core.kubernetes.boto3.client", return_value=mock_aws_client_instance
-        )
-        mock_aws_client_instance.get_caller_identity.return_value = (
-            mock_aws_get_caller_identity
-        )
 
         layer = mocker.Mock(spec=Layer)
         layer.parent = None
@@ -116,32 +109,36 @@ class TestKubernetes:
             "opta.core.kubernetes.get_terraform_outputs",
             return_value={"k8s_cluster_name": "mocked_cluster_name"},
         )
-
+        mocked_file = mocker.patch(
+            "opta.core.kubernetes.open", mocker.mock_open(read_data="")
+        )
         configure_kubectl(layer)
-
-        mock_sts_client.assert_called_once_with("sts")
+        config_file_name = f"{GENERATED_KUBE_CONFIG_DIR}/kubeconfig-{layer.root().name}-{layer.cloud}.yaml"
+        mocked_file.assert_called_once_with(config_file_name, "w")
+        mocked_file().write.assert_called_once_with(
+            "apiVersion: v1\n"
+            "clusters:\n"
+            "- cluster: {certificate-authority-data: ca-data, server: eks-endpoint}\n"
+            "  name: 111111111111_us-east-1_mocked_cluster_name\n"
+            "contexts:\n"
+            "- context: {cluster: 111111111111_us-east-1_mocked_cluster_name, user: "
+            "111111111111_us-east-1_mocked_cluster_name}\n"
+            "  name: 111111111111_us-east-1_mocked_cluster_name\n"
+            "current-context: 111111111111_us-east-1_mocked_cluster_name\n"
+            "kind: Config\n"
+            "preferences: {}\n"
+            "users:\n"
+            "- name: 111111111111_us-east-1_mocked_cluster_name\n"
+            "  user:\n"
+            "    exec:\n"
+            "      apiVersion: client.authentication.k8s.io/v1alpha1\n"
+            "      args: [--region, us-east-1, eks, get-token, --cluster-name, "
+            "mocked_cluster_name]\n"
+            "      command: aws\n"
+            "      env: null\n"
+        )
         mocked_terraform_output.assert_called_once_with(layer)
-        mocked_ensure_installed.assert_has_calls(
-            [mocker.call("kubectl"), mocker.call("aws")]
-        )
-        mocked_nice_run.assert_has_calls(
-            [
-                # TODO: nsarupri -> change the AWS to Boto
-                mocker.call(
-                    [
-                        "aws",
-                        "eks",
-                        "update-kubeconfig",
-                        "--name",
-                        "mocked_cluster_name",
-                        "--region",
-                        "us-east-1",
-                    ],
-                    stdout=DEVNULL,
-                    check=True,
-                ),
-            ]
-        )
+        mocked_ensure_installed.assert_called_once_with("kubectl")
 
     def test_get_required_path_executables(self) -> None:
         assert len(get_required_path_executables("local")) == 1
@@ -191,7 +188,7 @@ class TestKubernetes:
         tail_module_log(layer, "mocked_module_name", since_seconds=3, start_color_idx=2)
         mocked_watch_call.assert_called_once_with()
         mocked_core_v1_api_call.assert_called_once_with()
-        mocked_load_kube_config.assert_called_once_with()
+        mocked_load_kube_config.assert_called_once_with(config_file=mocker.ANY)
         thread_1.start.assert_called_once_with()
         thread_2.start.assert_called_once_with()
         mocked_thread.assert_has_calls(
@@ -249,7 +246,7 @@ class TestKubernetes:
         tail_module_log(layer, "mocked_module_name", since_seconds=3, start_color_idx=2)
         mocked_watch_call.assert_called_once_with()
         mocked_core_v1_api_call.assert_called_once_with()
-        mocked_load_kube_config.assert_called_once_with()
+        mocked_load_kube_config.assert_called_once_with(config_file=mocker.ANY)
         thread_1.start.assert_called_once_with()
         """
         IMPORTANT:
