@@ -16,13 +16,7 @@ from opta.utils import check_opta_file_exists
 @click.option(
     "-e", "--env", default=None, help="The env to use when loading the config file."
 )
-@click.option(
-    "--auto-approve",
-    is_flag=True,
-    default=False,
-    help="Automatically approve terraform plan.",
-)
-def force_unlock(config: str, env: Optional[str], auto_approve: bool) -> None:
+def force_unlock(config: str, env: Optional[str]) -> None:
     """Force Unlocks a stuck lock on the current workspace
 
     Examples:
@@ -42,26 +36,24 @@ def force_unlock(config: str, env: Optional[str], auto_approve: bool) -> None:
         tf_lock_exists, _ = Terraform.tf_lock_details(layer)
         if tf_lock_exists:
             Terraform.init(layer=layer)
-            if not auto_approve:
-                click.confirm(
-                    "This will remove the lock on the remote state."
-                    "\nPlease make sure that no other instance of opta command is running on this file."
-                    "\nDo you still want to proceed?",
-                    abort=True,
-                )
+            click.confirm(
+                "This will remove the lock on the remote state."
+                "\nPlease make sure that no other instance of opta command is running on this file."
+                "\nDo you still want to proceed?",
+                abort=True,
+            )
             tf_flags.append("-force")
             Terraform.force_unlock(layer, *tf_flags)
 
         if layer.parent is not None or "k8scluster" in modules:
             configure_kubectl(layer)
             pending_upgrade_release_list = Helm.get_helm_list(status="pending-upgrade")
-            if not auto_approve:
-                click.confirm(
-                    "Do you also wish to Rollback the Helm releases in Pending-Upgrade State?"
-                    "\nPlease make sure that no other instance of opta command is running on this file."
-                    "\nDo you still want to proceed?",
-                    abort=True,
-                )
+            click.confirm(
+                "Do you also wish to Rollback the Helm releases in Pending-Upgrade State?"
+                "\nPlease make sure that no other instance of opta command is running on this file."
+                "\nDo you still want to proceed?",
+                abort=True,
+            )
 
             for release in pending_upgrade_release_list:
                 Helm.rollback_helm(
