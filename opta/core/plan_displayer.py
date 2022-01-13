@@ -121,7 +121,7 @@ class PlanDisplayer:
             Terraform.show(*["-no-color", "-json", TF_PLAN_PATH], capture_output=True)  # type: ignore
         )
         CURRENT_CRASH_REPORTER.tf_plan_text = (
-            CURRENT_CRASH_REPORTER.tf_plan_text or ansi_scrub(plan_dict)
+            CURRENT_CRASH_REPORTER.tf_plan_text or json.dumps(plan_dict)
         )
         plan_risk = LOW_RISK
         module_changes: dict = {}
