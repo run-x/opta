@@ -64,3 +64,5 @@ MODULE_DEPENDENCY = {
     "azure-kys-base": {"azure-aks"},
     "gcp-k8s-base": {"gcp-gke"},
 }
+
+REDS = [1, 9, 124, 160, 196]
