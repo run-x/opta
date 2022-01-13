@@ -8,7 +8,6 @@ from ruamel.yaml.compat import StringIO
 from modules.base import AWSK8sModuleProcessor, K8sBaseModuleProcessor
 from opta.core.aws import AWS
 from opta.core.kubernetes import configure_kubectl, list_namespaces, load_opta_kube_config
-from opta.core.terraform import Terraform
 from opta.exceptions import UserErrors
 from opta.utils import yaml
 
