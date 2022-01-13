@@ -610,7 +610,7 @@ def tail_module_log(
     module_name: str,
     since_seconds: Optional[int] = None,
     earliest_pod_start_time: Optional[datetime.datetime] = None,
-    start_color_idx: int = 15,
+    start_color_idx: int = 15,  # White Color
 ) -> None:
     current_pods_monitored: Set[str] = set()
     load_opta_kube_config()
@@ -695,7 +695,7 @@ def do_not_show_event(event: V1Event) -> bool:
 def tail_namespace_events(
     layer: "Layer",
     earliest_event_start_time: Optional[datetime.datetime] = None,
-    color_idx: int = 15,
+    color_idx: int = 15,  # White Color
 ) -> None:
     load_opta_kube_config()
     v1 = CoreV1Api()
