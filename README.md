@@ -42,7 +42,7 @@ and go your own way!
 
 ### Who is it for?
 Opta is designed for folks who are not Infrastructure or Devops experts but still want to build amazing,
-scalable, secure Infra in the cloud. Opta is used by small and big companies both. Many companies depend on it for 
+scalable, secure Infra in the cloud. Opta is used by both small and big companies. Many companies depend on it for 
 their production workloads - it's battle tested :)
 
 If you'd like to try it out or have any questions - feel free to join our [Slack](https://slack.opta.dev/)!
