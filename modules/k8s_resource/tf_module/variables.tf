@@ -1,6 +1,6 @@
 variable "file_path" {
-    type = string
-    default = "k8test.yaml"
+  type    = string
+  default = "k8test.yaml"
 }
 
 variable "env_name" {
@@ -20,12 +20,12 @@ variable "module_name" {
 
 
 variable "kubeconfig" {
-    description = "Kubernetes config path"
-    type = string
+  description = "Kubernetes config path"
+  type        = string
 }
 variable "kubecontext" {
-    description = "Kubernetes context"
-    type = string
+  description = "Kubernetes context"
+  type        = string
 }
 
 
