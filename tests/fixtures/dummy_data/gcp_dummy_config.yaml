@@ -4,6 +4,9 @@ environments:
     variables: {}
 name: gcp-dummy-config
 modules:
+  - name: k8sresource
+    type: k8s-resource
+    file_path: k8test.yaml
   - name: database
     type: gcp-postgres
   - name: redis
