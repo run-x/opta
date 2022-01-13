@@ -23,7 +23,6 @@ class TestAwsK8sBaseProcessor:
             "arn:aws:iam::445935066876:user/silly-user",
         ]
 
-        mocker.patch("modules.aws_k8s_base.aws_k8s_base.Terraform")
         mocker.patch("modules.aws_k8s_base.aws_k8s_base.configure_kubectl")
         mocker.patch("modules.aws_k8s_base.aws_k8s_base.load_opta_kube_config")
 
