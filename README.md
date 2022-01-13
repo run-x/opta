@@ -34,20 +34,22 @@ Supercharge DevOps on any cloud</p>
   </p>
 
 # What is Opta?
-Opta is a new kind of Infrastructure-As-Code framework where you work with high-level constructs
-instead of getting lost in low level cloud configuration. Imagine just being able to say that you want
-an autoscaling docker container that talks to a RDS database - instead of figuring out the details of VPC,
-IAM, Kubernetes, Elastic Load Balancing etc -- that's what Opta does!
+Opta is an Infrastructure-As-Code framework where you work with high-level constructs
+instead of getting lost in low level cloud configuration. Opta gives you a vast library of modules that you
+can connect together to build your ideal Infrastructure stack. Best of all, Opta uses Terraform under the 
+hood - so you're never locked in. You can always write custom Terraform or even take the Opta generated Terraform
+and go your own way!
 
 ### Who is it for?
 Opta is designed for folks who are not Infrastructure or Devops experts but still want to build amazing,
-scalable, secure Infra in the cloud. Majority of Opta's users are early stage startups who use it for their 
-dev/staging/production environments.
+scalable, secure Infra in the cloud. Opta is used by both small and big companies. Many companies depend on it for 
+their production workloads - it's battle tested :)
 
 If you'd like to try it out or have any questions - feel free to join our [Slack](https://slack.opta.dev/)!
 
+
 <p align="center">
-  <a href="https://www.youtube.com/watch?v=nja_EfpGexE"><img src="https://img.youtube.com/vi/nja_EfpGexE/0.jpg"></a>
+  <a href="https://www.youtube.com/watch?v=nja_EfpGexE"><img width="480" src="https://user-images.githubusercontent.com/855699/149367998-9f00a9f4-abaa-4abf-949c-5b470e7d410c.png"></a>
   </br>
   <span><i>Demo Video</i></span>
   
