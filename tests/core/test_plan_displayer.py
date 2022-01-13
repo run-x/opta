@@ -17,4 +17,4 @@ class TestPlanDisplayer:
             plan_dict = yaml.load(f)
         mocked_terraform = mocker.patch("opta.core.plan_displayer.Terraform")
         mocked_terraform.show.side_effect = ["bare show", json.dumps(plan_dict)]
-        PlanDisplayer.display()
+        PlanDisplayer.display(detailed_plan=True)
