@@ -12,11 +12,13 @@ from opta.core.generator import gen_all
 from opta.core.terraform import get_terraform_outputs
 from opta.exceptions import UserErrors
 from opta.layer import Layer
+from opta.meister import time as meister_time
 from opta.nice_subprocess import nice_run
 from opta.utils import check_opta_file_exists, fmt_msg, yaml
 from opta.utils.dependencies import ensure_installed
 
 
+@meister_time
 def get_push_tag(local_image: str, tag_override: Optional[str]) -> str:
     if ":" not in local_image:
         raise Exception(
@@ -26,6 +28,7 @@ def get_push_tag(local_image: str, tag_override: Optional[str]) -> str:
     return tag_override or local_image_tag
 
 
+@meister_time
 def get_image_digest(registry_url: str, image_tag: str) -> str:
     docker_client = from_env()
     current_image = docker_client.images.get(f"{registry_url}:{image_tag}")
@@ -42,6 +45,7 @@ def get_image_digest(registry_url: str, image_tag: str) -> str:
     )
 
 
+@meister_time
 def get_registry_url(layer: Layer) -> str:
     outputs = get_terraform_outputs(layer)
     if "docker_repo_url" not in outputs:
@@ -52,6 +56,7 @@ def get_registry_url(layer: Layer) -> str:
     return outputs["docker_repo_url"]
 
 
+@meister_time
 def get_ecr_auth_info(layer: Layer) -> Tuple[str, str]:
     providers = layer.gen_providers(0)
     account_id = providers["provider"]["aws"]["allowed_account_ids"][0]
@@ -73,6 +78,7 @@ def get_ecr_auth_info(layer: Layer) -> Tuple[str, str]:
     return username, password
 
 
+@meister_time
 def get_gcr_auth_info(layer: Layer) -> Tuple[str, str]:
     if GCP.using_service_account():
         service_account_key = GCP.get_service_account_raw_credentials()
@@ -82,6 +88,7 @@ def get_gcr_auth_info(layer: Layer) -> Tuple[str, str]:
     return "oauth2accesstoken", credentials.token
 
 
+@meister_time
 def get_acr_auth_info(layer: Layer) -> Tuple[str, str]:
     acr_name = get_terraform_outputs(layer.root()).get("acr_name")
     if acr_name is None:
@@ -105,6 +112,7 @@ def get_acr_auth_info(layer: Layer) -> Tuple[str, str]:
     return "00000000-0000-0000-0000-000000000000", token
 
 
+@meister_time
 def push_to_docker(
     username: str,
     password: str,
@@ -124,6 +132,7 @@ def push_to_docker(
     return get_image_digest(registry_url, image_tag), image_tag
 
 
+@meister_time
 def push_to_docker_local(
     local_image: str, registry_url: str, image_tag_override: Optional[str],
 ) -> Tuple[str, str]:
@@ -173,6 +182,7 @@ def push(image: str, config: str, env: Optional[str], tag: Optional[str]) -> Non
     _push(image, config, env, tag)
 
 
+@meister_time
 def _push(
     image: str, config: str, env: Optional[str], tag: Optional[str]
 ) -> Tuple[str, str]:

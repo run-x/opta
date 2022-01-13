@@ -10,6 +10,7 @@ from opta.core.kubernetes import (
     current_image_digest_tag,
     get_cluster_name,
 )
+from opta.meister import time as meister_time
 from opta.utils import deep_merge, logger
 
 if TYPE_CHECKING:
@@ -17,11 +18,13 @@ if TYPE_CHECKING:
     from opta.module import Module
 
 
+@meister_time
 def gen_all(layer: "Layer", existing_config: Optional["StructuredConfig"] = None) -> None:
     # Just run the generator till the end
     list(gen(layer, existing_config))
 
 
+@meister_time
 def gen(
     layer: "Layer",
     existing_config: Optional["StructuredConfig"] = None,
@@ -89,6 +92,7 @@ def gen(
 
 
 # Generate a tags override file in every module, that adds opta tags to every resource.
+@meister_time
 def gen_opta_resource_tags(layer: "Layer") -> None:
     if "aws" in layer.providers:
         for module in layer.modules:

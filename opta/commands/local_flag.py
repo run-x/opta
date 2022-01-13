@@ -4,9 +4,11 @@ from shutil import rmtree
 
 from ruamel import yaml
 
+from opta.meister import time as meister_time
 from opta.utils import logger
 
 
+@meister_time
 def _handle_local_flag(config: str, test: bool = False) -> str:
     if test:
         return config
@@ -41,6 +43,7 @@ def _handle_local_flag(config: str, test: bool = False) -> str:
     return config
 
 
+@meister_time
 def _clean_tf_folder() -> None:
     if os.path.isdir(os.getcwd() + "/.terraform"):
         rmtree(os.getcwd() + "/.terraform")

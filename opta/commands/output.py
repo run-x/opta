@@ -6,6 +6,7 @@ from opta.amplitude import amplitude_client
 from opta.core.generator import gen_all
 from opta.core.terraform import get_terraform_outputs
 from opta.layer import Layer
+from opta.meister import time as meister_time
 from opta.utils import check_opta_file_exists, json
 
 
@@ -16,7 +17,6 @@ from opta.utils import check_opta_file_exists, json
 )
 def output(config: str, env: Optional[str],) -> None:
     """Print TF outputs"""
-
     config = check_opta_file_exists(config)
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(
@@ -35,6 +35,7 @@ def output(config: str, env: Optional[str],) -> None:
     print(outputs_formatted)
 
 
+@meister_time
 def _load_extra_aws_outputs(current_outputs: dict) -> dict:
     if "parent.load_balancer_raw_dns" in current_outputs:
         current_outputs["load_balancer_raw_dns"] = current_outputs[
@@ -44,6 +45,7 @@ def _load_extra_aws_outputs(current_outputs: dict) -> dict:
     return current_outputs
 
 
+@meister_time
 def _load_extra_gcp_outputs(current_outputs: dict) -> dict:
     if "parent.load_balancer_raw_ip" in current_outputs:
         current_outputs["load_balancer_raw_ip"] = current_outputs[

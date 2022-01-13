@@ -20,6 +20,7 @@ from opta.core.terraform import Terraform
 from opta.error_constants import USER_ERROR_TF_LOCK
 from opta.exceptions import UserErrors
 from opta.layer import Layer
+from opta.meister import time as meister_time
 from opta.pre_check import pre_check
 from opta.utils import check_opta_file_exists, logger
 
@@ -108,6 +109,7 @@ def destroy(
 
 
 # Fetch all the children layers of the current layer.
+@meister_time
 def _fetch_children_layers(layer: "Layer") -> List[str]:
     # Only environment layers have children (service) layers.
     # If the current layer has a parent, it is *not* an environment layer.
@@ -130,6 +132,7 @@ def _fetch_children_layers(layer: "Layer") -> List[str]:
 
 
 # Get the names for all services for this environment based on the bucket file paths
+@meister_time
 def _azure_get_configs(layer: "Layer") -> List[str]:
     providers = layer.gen_providers(0)
 
@@ -151,6 +154,7 @@ def _azure_get_configs(layer: "Layer") -> List[str]:
     return configs
 
 
+@meister_time
 def _aws_get_configs(layer: "Layer") -> List[str]:
     # Opta configs for every layer are saved in the opta_config/ directory
     # in the state bucket.
@@ -168,6 +172,7 @@ def _aws_get_configs(layer: "Layer") -> List[str]:
     return configs
 
 
+@meister_time
 def _gcp_get_configs(layer: "Layer") -> List[str]:
     bucket_name = layer.state_storage()
     gcs_config_dir = "opta_config/"
@@ -189,6 +194,7 @@ def _gcp_get_configs(layer: "Layer") -> List[str]:
     return configs
 
 
+@meister_time
 def _local_get_configs(layer: "Layer") -> List[str]:
     local_config_dir = os.path.join(
         os.path.join(str(Path.home()), ".opta", "local", "opta_config")

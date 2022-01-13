@@ -35,6 +35,7 @@ from opta.core.cloud_client import CloudClient
 from opta.core.gcp import GCP
 from opta.core.local import Local
 from opta.exceptions import MissingState, UserErrors
+from opta.meister import time as meister_time
 from opta.nice_subprocess import nice_run
 from opta.utils import deep_merge, fmt_msg, json, logger
 from opta.utils.dependencies import ensure_installed
@@ -51,6 +52,7 @@ class Terraform:
     downloaded_state: Dict[str, Dict[Any, Any]] = {}
 
     @classmethod
+    @meister_time
     def init(cls, quiet: Optional[bool] = False, *tf_flags: str, layer: "Layer") -> None:
         kwargs = cls.insert_extra_env(layer)
         if quiet:
@@ -68,6 +70,7 @@ class Terraform:
 
     # Get outputs of the current terraform state
     @classmethod
+    @meister_time
     def get_outputs(cls, layer: "Layer") -> dict:
         state = cls.get_state(layer)
         outputs = state.get("outputs", {})
@@ -77,6 +80,7 @@ class Terraform:
         return cleaned_outputs
 
     @classmethod
+    @meister_time
     def get_version(cls) -> str:
         try:
             out = nice_run(
@@ -92,6 +96,7 @@ class Terraform:
 
     # Get the full terraform state.
     @classmethod
+    @meister_time
     def get_state(cls, layer: "Layer") -> dict:
         if layer.name in cls.downloaded_state:
             return cls.downloaded_state[layer.name]
@@ -100,6 +105,7 @@ class Terraform:
         raise MissingState(f"Unable to download state for layer {layer.name}")
 
     @classmethod
+    @meister_time
     def insert_extra_env(cls, layer: "Layer") -> dict:
         kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
         if layer and layer.cloud == "local":
@@ -112,6 +118,7 @@ class Terraform:
         return kwargs
 
     @classmethod
+    @meister_time
     def validate_version(cls) -> None:
         ensure_installed("terraform")
 
@@ -128,6 +135,7 @@ class Terraform:
             )
 
     @classmethod
+    @meister_time
     def apply(
         cls,
         layer: "Layer",
@@ -152,6 +160,7 @@ class Terraform:
             raise
 
     @classmethod
+    @meister_time
     def import_resource(
         cls, tf_resource_address: str, aws_resource_id: str, layer: "Layer"
     ) -> None:
@@ -164,6 +173,7 @@ class Terraform:
         )
 
     @classmethod
+    @meister_time
     def refresh(cls, layer: "Layer", *tf_flags: str) -> None:
         kwargs = cls.insert_extra_env(layer)
         nice_run(
@@ -174,6 +184,7 @@ class Terraform:
         )
 
     @classmethod
+    @meister_time
     def destroy_resources(
         cls, layer: "Layer", target_resources: List[str], *tf_flags: str
     ) -> None:
@@ -212,6 +223,7 @@ class Terraform:
                 raise
 
     @classmethod
+    @meister_time
     def destroy_all(cls, layer: "Layer", *tf_flags: str) -> None:
 
         # Refreshing the state is necessary to update terraform outputs.
@@ -271,6 +283,7 @@ class Terraform:
 
     # Remove a resource from the terraform state, but does not destroy it.
     @classmethod
+    @meister_time
     def remove_from_state(cls, resource_address: str) -> None:
         kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
         nice_run(
@@ -280,6 +293,7 @@ class Terraform:
         )
 
     @classmethod
+    @meister_time
     def verify_storage(cls, layer: "Layer") -> bool:
         if layer.cloud == "aws":
             return cls._aws_verify_storage(layer)
@@ -293,10 +307,12 @@ class Terraform:
             raise Exception(f"Can not verify state storage for cloud {layer.cloud}")
 
     @classmethod
+    @meister_time
     def _local_verify_storage(cls, layer: "Layer") -> bool:
         return True
 
     @classmethod
+    @meister_time
     def _azure_verify_storage(cls, layer: "Layer") -> bool:
         credentials = Azure.get_credentials()
         providers = layer.gen_providers(0)
@@ -320,6 +336,7 @@ class Terraform:
             return False
 
     @classmethod
+    @meister_time
     def _gcp_verify_storage(cls, layer: "Layer") -> bool:
         credentials, project_id = GCP.get_credentials()
         bucket = layer.state_storage()
@@ -331,6 +348,7 @@ class Terraform:
         return True
 
     @classmethod
+    @meister_time
     def _aws_verify_storage(cls, layer: "Layer") -> bool:
         bucket = layer.state_storage()
         region = layer.root().providers["aws"]["region"]
@@ -344,6 +362,7 @@ class Terraform:
         return True
 
     @classmethod
+    @meister_time
     def plan(cls, *tf_flags: str, quiet: Optional[bool] = False, layer: "Layer",) -> None:
         cls.init(quiet, layer=layer)
         kwargs = cls.insert_extra_env(layer)
@@ -362,6 +381,7 @@ class Terraform:
             raise
 
     @classmethod
+    @meister_time
     def show(cls, *tf_flags: str, capture_output: bool = False) -> Optional[str]:
         kwargs: Dict[str, Any] = {"env": {**os.environ.copy(), **EXTRA_ENV}}
         try:
@@ -386,11 +406,13 @@ class Terraform:
         return None
 
     @classmethod
+    @meister_time
     def get_existing_modules(cls, layer: "Layer") -> Set[str]:
         existing_resources = cls.get_existing_module_resources(layer)
         return set(map(lambda r: r.split(".")[1], existing_resources))
 
     @classmethod
+    @meister_time
     def get_existing_module_resources(cls, layer: "Layer") -> List[str]:
         try:
             state = cls.get_state(layer)
@@ -420,6 +442,7 @@ class Terraform:
         return module_resources
 
     @classmethod
+    @meister_time
     def download_state(cls, layer: "Layer") -> bool:
         if not cls.verify_storage(layer):
             logger.debug(
@@ -517,6 +540,7 @@ class Terraform:
         return False
 
     @classmethod
+    @meister_time
     def _aws_delete_state_storage(cls, layer: "Layer") -> None:
         providers = layer.gen_providers(0)
         if "s3" not in providers.get("terraform", {}).get("backend", {}):
@@ -534,6 +558,7 @@ class Terraform:
         logger.info("Successfully deleted AWS state storage")
 
     @classmethod
+    @meister_time
     def _gcp_delete_state_storage(cls, layer: "Layer") -> None:
         providers = layer.gen_providers(0)
         if "gcs" not in providers.get("terraform", {}).get("backend", {}):
@@ -549,6 +574,7 @@ class Terraform:
             logger.warn("State bucket was already deleted")
 
     @classmethod
+    @meister_time
     def _local_delete_state_storage(cls, layer: "Layer") -> None:
         providers = layer.gen_providers(0)
         if "local" not in providers.get("terraform", {}).get("backend", {}):
@@ -559,6 +585,7 @@ class Terraform:
             logger.warn("Local state delete did not work?")
 
     @classmethod
+    @meister_time
     def _create_local_state_storage(cls, providers: dict) -> None:
         if not os.path.exists(cls.get_local_opta_dir()):
             try:
@@ -571,6 +598,7 @@ class Terraform:
                     )
 
     @classmethod
+    @meister_time
     def _create_azure_state_storage(cls, providers: dict) -> None:
         resource_group_name = providers["terraform"]["backend"]["azurerm"][
             "resource_group_name"
@@ -704,6 +732,7 @@ class Terraform:
             logger.debug(f"Provisioned container {container.name}")
 
     @classmethod
+    @meister_time
     def _create_gcp_state_storage(cls, providers: dict) -> None:
         bucket_name = providers["terraform"]["backend"]["gcs"]["bucket"]
         region = providers["provider"]["google"]["region"]
@@ -797,6 +826,7 @@ class Terraform:
             )
 
     @classmethod
+    @meister_time
     def _create_aws_state_storage(cls, providers: dict) -> None:
         bucket_name = providers["terraform"]["backend"]["s3"]["bucket"]
         dynamodb_table = providers["terraform"]["backend"]["s3"]["dynamodb_table"]
@@ -926,6 +956,7 @@ class Terraform:
             logger.debug("Load balancing service linked role present")
 
     @classmethod
+    @meister_time
     def create_state_storage(cls, layer: "Layer") -> None:
         """
         Idempotently create remote storage for tf state
@@ -941,10 +972,12 @@ class Terraform:
             cls._create_local_state_storage(providers)
 
     @classmethod
+    @meister_time
     def get_local_opta_dir(cls) -> str:
         return os.path.join(str(Path.home()), ".opta", "local")
 
     @classmethod
+    @meister_time
     def force_unlock(cls, layer: "Layer", *tf_flags: str) -> None:
         tf_lock_exists, lock_id = cls.tf_lock_details(layer)
 
@@ -972,6 +1005,7 @@ class Terraform:
             raise exception
 
     @classmethod
+    @meister_time
     def tf_lock_details(cls, layer: "Layer") -> Tuple[bool, str]:
         providers = layer.gen_providers(0, clean=False)
         lock_id: str = ""
@@ -985,21 +1019,25 @@ class Terraform:
         return "" != lock_id, lock_id
 
     @classmethod
+    @meister_time
     def _get_aws_lock_id(cls, layer: "Layer") -> str:
         aws = AWS(layer)
         return aws.get_terraform_lock_id()
 
     @classmethod
+    @meister_time
     def _get_gcp_lock_id(cls, layer: "Layer") -> str:
         gcp = GCP(layer)
         return gcp.get_terraform_lock_id()
 
     @classmethod
+    @meister_time
     def _get_azure_lock_id(cls, layer: "Layer") -> str:
         azure = Azure(layer)
         return azure.get_terraform_lock_id()
 
 
+@meister_time
 def get_terraform_outputs(layer: "Layer") -> dict:
     """Fetch terraform outputs from existing TF file"""
     current_outputs = Terraform.get_outputs(layer)
@@ -1007,6 +1045,7 @@ def get_terraform_outputs(layer: "Layer") -> dict:
     return deep_merge(current_outputs, parent_outputs)
 
 
+@meister_time
 def _fetch_parent_outputs(layer: "Layer") -> dict:
     # Fetch the terraform state
     state = Terraform.get_state(layer)
@@ -1036,6 +1075,7 @@ def _fetch_parent_outputs(layer: "Layer") -> dict:
     return parent_state_outputs
 
 
+@meister_time
 def fetch_terraform_state_resources(layer: "Layer") -> dict:
     Terraform.download_state(layer)
     state = Terraform.get_state(layer)

@@ -58,7 +58,7 @@ def mocked_layer(mocker: MockFixture) -> Any:
 
 
 def test_apply(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None:
-    mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
+    mocked_os_path_exists = mocker.patch("opta.utils.exists")
     mocked_os_path_exists.return_value = True
     mocker.patch(
         "opta.commands.apply.Terraform.tf_lock_details",
@@ -121,7 +121,7 @@ def test_apply(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None
 
 
 def test_auto_approve(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None:
-    mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
+    mocked_os_path_exists = mocker.patch("opta.utils.exists")
     mocked_os_path_exists.return_value = True
     mocker.patch(
         "opta.commands.apply.Terraform.tf_lock_details",
@@ -180,7 +180,7 @@ def test_auto_approve(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) 
 
 
 def test_fail_on_2_azs(mocker: MockFixture, mocked_layer: Any) -> None:
-    mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
+    mocked_os_path_exists = mocker.patch("opta.utils.exists")
     mocked_os_path_exists.return_value = True
     mock_tf_download_state = mocker.patch(
         "opta.commands.apply.Terraform.download_state", return_value=True

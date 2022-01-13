@@ -18,7 +18,7 @@ def test_force_unlock_env(mocker: MockFixture) -> None:
     mocked_click_confirm = mocker.patch(
         "opta.commands.apply.click.confirm", return_value="y"
     )
-    mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
+    mocked_os_path_exists = mocker.patch("opta.utils.exists")
     mocked_os_path_exists.return_value = True
     mocked_layer = mocker.Mock(spec=Layer)
     mocked_layer.parent = None
@@ -93,7 +93,7 @@ def test_force_unlock_env_no_cluster(mocker: MockFixture) -> None:
     mocked_click_confirm = mocker.patch(
         "opta.commands.apply.click.confirm", return_value="y"
     )
-    mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
+    mocked_os_path_exists = mocker.patch("opta.utils.exists")
     mocked_os_path_exists.return_value = True
     mocked_layer = mocker.Mock(spec=Layer)
     mocked_layer.parent = None
@@ -157,7 +157,7 @@ def test_force_unlock_env_no_rollback(mocker: MockFixture) -> None:
     mocked_click_confirm = mocker.patch(
         "opta.commands.apply.click.confirm", return_value="y"
     )
-    mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
+    mocked_os_path_exists = mocker.patch("opta.utils.exists")
     mocked_os_path_exists.return_value = True
     mocked_layer = mocker.Mock(spec=Layer)
     mocked_layer.parent = None

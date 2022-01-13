@@ -2,6 +2,7 @@ from subprocess import CalledProcessError  # nosec
 from typing import FrozenSet, List
 
 from opta.exceptions import UserErrors
+from opta.meister import time as meister_time
 from opta.nice_subprocess import nice_run
 from opta.utils import json
 from opta.utils.dependencies import ensure_installed
@@ -9,14 +10,17 @@ from opta.utils.dependencies import ensure_installed
 
 class Helm:
     @staticmethod
+    @meister_time
     def get_required_path_executables() -> FrozenSet[str]:
         return frozenset({"helm"})
 
     @staticmethod
+    @meister_time
     def validate_helm_installed() -> None:
         ensure_installed("helm")
 
     @classmethod
+    @meister_time
     def rollback_helm(cls, release: str, namespace: str, revision: str = "") -> None:
         cls.validate_helm_installed()
         try:
@@ -39,6 +43,7 @@ class Helm:
             raise e
 
     @classmethod
+    @meister_time
     def get_helm_list(cls, **kwargs) -> List:  # type: ignore # nosec
         cls.validate_helm_installed()
         namespaces: List[str] = []

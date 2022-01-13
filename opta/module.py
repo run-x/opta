@@ -6,6 +6,7 @@ import hcl2
 
 from opta.constants import REGISTRY
 from opta.exceptions import UserErrors
+from opta.meister import time as meister_time
 from opta.resource import Resource
 from opta.utils import deep_merge, json
 
@@ -43,6 +44,7 @@ class Module:
         )
         self.used_defaults: List["StructuredDefault"] = []
 
+    @meister_time
     def outputs(self) -> Iterable[str]:
         ret = []
         for output in self.desc["outputs"]:
@@ -52,10 +54,12 @@ class Module:
         return ret
 
     @staticmethod
+    @meister_time
     def valid_name(name: str) -> bool:
         pattern = "^[A-Za-z0-9]*$"
         return bool(re.match(pattern, name))
 
+    @meister_time
     def resolve_default_input(
         self,
         input: Dict[str, Any],
@@ -82,6 +86,7 @@ class Module:
             existing_default["force_update_default_counter"],
         )
 
+    @meister_time
     def gen_tf(
         self,
         depends_on: Optional[List[str]] = None,
@@ -143,6 +148,7 @@ class Module:
         return module_blk
 
     # Generate an override file in the module, that adds extra tags to every resource.
+    @meister_time
     def gen_tags_override(self) -> None:
         override_config: Any = {"resource": []}
 
@@ -171,6 +177,7 @@ class Module:
         with open(f"{self.module_dir_path}/{TAGS_OVERRIDE_FILE}", "w") as f:
             json.dump(override_config, f, ensure_ascii=False, indent=2)
 
+    @meister_time
     def translate_location(self, loc: str) -> str:
         if loc == "":
             return ""
@@ -190,6 +197,7 @@ class Module:
         return relative_path
 
     # Get the list of resources created by the current module.
+    @meister_time
     def get_terraform_resources(self) -> List[Resource]:
         if self.module_dir_path == "":
             return []
@@ -207,6 +215,7 @@ class Module:
         return terraform_resources
 
     # Read all terraform files in the module and return its contents as a single dict.
+    @meister_time
     def _read_tf_module_config(self) -> dict:
         tf_module_config = {}
 

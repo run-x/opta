@@ -14,7 +14,7 @@ from tests.fixtures.basic_apply import BASIC_APPLY
 
 class TestGenerator:
     def test_gen(self, mocker: MockFixture) -> None:
-        mocker.patch("opta.layer.os.path.exists")
+        mocker.patch("opta.utils.exists")
         mocker.patch("opta.layer.validate_yaml")
 
         test_gen_file_path = "pytest_main.tf.json"
@@ -52,7 +52,7 @@ class TestGenerator:
         )
 
         mocker.patch("opta.layer.open")
-        mocker.patch("opta.layer.os.path.exists")
+        mocker.patch("opta.utils.exists")
         mocker.patch("opta.layer.validate_yaml")
 
         opta_config, gen_tf_file = BASIC_APPLY

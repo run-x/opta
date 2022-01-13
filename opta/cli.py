@@ -8,6 +8,7 @@ from click_didyoumean import DYMGroup
 from colored import attr, fg
 
 import opta.sentry  # noqa: F401 This leads to initialization of sentry sdk
+from opta import meister
 from opta.cleanup_files import cleanup_files
 from opta.commands.apply import apply
 from opta.commands.deploy import deploy
@@ -24,6 +25,7 @@ from opta.commands.secret import secret
 from opta.commands.shell import shell
 from opta.commands.validate import validate
 from opta.commands.version import version
+from opta.constants import DEV_VERSION, VERSION
 from opta.crash_reporter import CURRENT_CRASH_REPORTER
 from opta.exceptions import UserErrors
 from opta.one_time import one_time
@@ -61,6 +63,7 @@ if __name__ == "__main__":
         # after the command.
         # However, we should still clean them up before the next command, or
         # else it may interfere with it.
+        meister.REPORT_ENABLED = VERSION in [DEV_VERSION, ""]
         one_time()
         cleanup_files()
         cli()
