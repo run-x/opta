@@ -112,13 +112,16 @@ class PlanDisplayer:
 
     @staticmethod
     def display(detailed_plan: bool = False) -> None:
-        regular_plan = Terraform.show(TF_PLAN_PATH, capture_output=True)
-        CURRENT_CRASH_REPORTER.tf_plan_text = ansi_scrub(regular_plan or "")
         if detailed_plan:
+            regular_plan = Terraform.show(TF_PLAN_PATH, capture_output=True)
+            CURRENT_CRASH_REPORTER.tf_plan_text = ansi_scrub(regular_plan or "")
             print(regular_plan)
             return
         plan_dict = json.loads(
             Terraform.show(*["-no-color", "-json", TF_PLAN_PATH], capture_output=True)  # type: ignore
+        )
+        CURRENT_CRASH_REPORTER.tf_plan_text = (
+            CURRENT_CRASH_REPORTER.tf_plan_text or ansi_scrub(plan_dict)
         )
         plan_risk = LOW_RISK
         module_changes: dict = {}
