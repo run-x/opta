@@ -39,7 +39,7 @@ from kubernetes.config.kube_config import (
 from kubernetes.watch import Watch
 from mypy_boto3_eks import EKSClient
 
-from opta.constants import yaml
+from opta.constants import REDS, yaml
 from opta.core.gcp import GCP
 from opta.core.terraform import get_terraform_outputs
 from opta.exceptions import UserErrors
@@ -610,7 +610,7 @@ def tail_module_log(
     module_name: str,
     since_seconds: Optional[int] = None,
     earliest_pod_start_time: Optional[datetime.datetime] = None,
-    start_color_idx: int = 1,
+    start_color_idx: int = 15,  # White Color
 ) -> None:
     current_pods_monitored: Set[str] = set()
     load_opta_kube_config()
@@ -625,6 +625,9 @@ def tail_module_log(
     ):
         pod: V1Pod = event["object"]
         color_idx = count % (256 - start_color_idx) + start_color_idx
+        if color_idx in REDS:
+            count += 1
+            color_idx = count % (256 - start_color_idx) + start_color_idx
         if (
             earliest_pod_start_time is not None
             and pod.metadata.creation_timestamp < earliest_pod_start_time
@@ -692,7 +695,7 @@ def do_not_show_event(event: V1Event) -> bool:
 def tail_namespace_events(
     layer: "Layer",
     earliest_event_start_time: Optional[datetime.datetime] = None,
-    color_idx: int = 1,
+    color_idx: int = 15,  # White Color
 ) -> None:
     load_opta_kube_config()
     v1 = CoreV1Api()
