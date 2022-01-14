@@ -134,6 +134,19 @@ class TestSecretManager:
             amplitude_client.UPDATE_SECRET_EVENT
         )
 
+        # test updating a secret that is not listed in the config file - should work
+        result = runner.invoke(
+            update,
+            [
+                "unlistedsecret",
+                "newvalue",
+            ],
+        )
+        assert result.exit_code == 0
+        mocked_update_manual_secrets.assert_called_with(
+            "dummy_layer", {"unlistedsecret": "newvalue"}
+        )
+
     def test_bulk_update(self, mocker: MockFixture, mocked_layer: Any) -> None:
         env_file = os.path.join(
             os.getcwd(), "tests", "fixtures", "dummy_data", "dummy_secrets.env"
