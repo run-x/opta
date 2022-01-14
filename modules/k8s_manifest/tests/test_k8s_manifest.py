@@ -1,6 +1,5 @@
 import os
 
-
 from modules.k8s_manifest.k8s_manifest import K8smanifestProcessor
 from opta.layer import Layer
 
