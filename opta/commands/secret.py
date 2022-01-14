@@ -78,7 +78,14 @@ def view(secret: str, env: Optional[str], config: str) -> None:
     "-c", "--config", default="opta.yaml", help="Opta config file", show_default=True
 )
 def list_command(env: Optional[str], config: str) -> None:
-    """List the secrets setup for the given k8s service module
+    """List the secrets (names and values) for the given k8s service module
+
+    It expects a file in the dotenv file format.
+    Each line is in VAR=VAL format.
+
+
+    The output is in the dotenv file format. Each line is in
+  VAR=VAL format.
 
     Examples:
 
@@ -92,8 +99,8 @@ def list_command(env: Optional[str], config: str) -> None:
     configure_kubectl(layer)
     create_namespace_if_not_exists(layer.name)
     secrets = get_secrets(layer.name)
-    for key in secrets:
-        print(key)
+    for key, value in secrets.items():
+        print(f"{key}={value}")
 
 
 @secret.command()
@@ -134,9 +141,9 @@ def update(secret: str, value: str, env: Optional[str], config: str) -> None:
     "-e", "--env", default=None, help="The env to use when loading the config file"
 )
 def bulk_update(env_file: str, env: Optional[str], config: str) -> None:
-    """Bulk update a list of secrets for a k8s service using environment variables from a file
+    """Bulk update a list of secrets for a k8s service using a dotenv file as in input.
 
-    Each line in the .env file is in VAR=VAL format.
+    Each line of the file should be in VAR=VAL format.
 
     Examples:
 

@@ -87,7 +87,7 @@ class TestSecretManager:
             amplitude_client.LIST_SECRETS_EVENT
         )
         mocked_print.assert_has_calls(
-            [mocker.call("dummysecret"), mocker.call("b"), mocker.call("c")]
+            [mocker.call("dummysecret=1"), mocker.call("b=2"), mocker.call("c=3")]
         )
 
     def test_update(self, mocker: MockFixture, mocked_layer: Any) -> None:
