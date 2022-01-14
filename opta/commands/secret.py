@@ -9,7 +9,7 @@ from opta.core.kubernetes import (
     configure_kubectl,
     create_namespace_if_not_exists,
 )
-from opta.core.secrets import get_secrets, update_manual_secrets
+from opta.core.secrets import bulk_update_manual_secrets, get_secrets, update_manual_secrets
 from opta.exceptions import UserErrors
 from opta.layer import Layer
 from opta.utils import check_opta_file_exists
@@ -24,6 +24,8 @@ def secret() -> None:
     opta secret list -c my-service.yaml
 
     opta secret update -c my-service.yaml "MY_SECRET_1" "value"
+
+    opta secret bulk-update -c my-service.yaml secrets.env
 
     opta secret view -c my-service.yaml "MY_SECRET_1"
     """
@@ -118,5 +120,36 @@ def update(secret: str, value: str, env: Optional[str], config: str) -> None:
     create_namespace_if_not_exists(layer.name)
     amplitude_client.send_event(amplitude_client.UPDATE_SECRET_EVENT)
     update_manual_secrets(layer.name, {secret: str(value)})
+
+    print("Success")
+
+
+@secret.command()
+@click.argument("env-file")
+@click.option(
+    "-c", "--config", default="opta.yaml", help="Opta config file", show_default=True
+)
+@click.option(
+    "-e", "--env", default=None, help="The env to use when loading the config file"
+)
+def bulk_update(env_file: str, env: Optional[str], config: str) -> None:
+    """Bulk update a list of secrets for a k8s service using environment variables from a file
+
+    Each line in the .env file is in VAR=VAL format.
+
+    Examples:
+
+    opta secret bulk-update -c my-service.yaml secrets.env
+    """
+
+    config = check_opta_file_exists(config)
+    layer = Layer.load_from_yaml(config, env)
+    gen_all(layer)
+
+    configure_kubectl(layer)
+    create_namespace_if_not_exists(layer.name)
+    # TODO restore amplitude when PR is ready
+    # amplitude_client.send_event(amplitude_client.UPDATE_BULK_SECRET_EVENT)
+    bulk_update_manual_secrets(layer.name, env_file)
 
     print("Success")

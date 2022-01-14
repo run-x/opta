@@ -15,6 +15,7 @@ from opta.utils import logger, safe_run
 
 class AmplitudeClient:
     UPDATE_SECRET_EVENT = "UPDATE_SECRET"  # nosec
+    UPDATE_BULK_SECRET_EVENT = "UPDATE_BULK_SECRET"  # nosec
     VIEW_SECRET_EVENT = "VIEW_SECRET"  # nosec
     LIST_SECRETS_EVENT = "LIST_SECRETS"
     START_GEN_EVENT = "START_GEN"
