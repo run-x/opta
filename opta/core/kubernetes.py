@@ -390,6 +390,7 @@ def create_namespace_if_not_exists(layer_name: str) -> None:
 
 
 def create_secret_if_not_exists(namespace: str, secret_name: str) -> None:
+    """create the secret in the namespace if it doesn't exist"""
     load_opta_kube_config()
     v1 = CoreV1Api()
     secrets: V1SecretList = v1.list_namespaced_secret(
@@ -402,6 +403,7 @@ def create_secret_if_not_exists(namespace: str, secret_name: str) -> None:
 
 
 def get_namespaced_secrets(namespace: str, secret_name: str) -> dict:
+    """read the specified Secret"""
     load_opta_kube_config()
     v1 = CoreV1Api()
     try:
@@ -420,6 +422,11 @@ def get_namespaced_secrets(namespace: str, secret_name: str) -> dict:
 
 
 def update_secrets(namespace: str, secret_name: str, new_values: dict) -> None:
+    """
+    append the new values to the existing data for this secret.
+
+    create the secret if it doesn't exist yet.
+    """
     load_opta_kube_config()
     v1 = CoreV1Api()
     create_secret_if_not_exists(namespace, secret_name)
