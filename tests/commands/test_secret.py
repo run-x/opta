@@ -135,7 +135,7 @@ class TestSecretManager:
         )
 
         # test updating a secret that is not listed in the config file - should work
-        result = runner.invoke(update, ["unlistedsecret", "newvalue",],)
+        result = runner.invoke(update, ["unlistedsecret", "newvalue"])
         assert result.exit_code == 0
         mocked_update_manual_secrets.assert_called_with(
             "dummy_layer", {"unlistedsecret": "newvalue"}

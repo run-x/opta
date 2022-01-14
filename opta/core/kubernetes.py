@@ -44,7 +44,7 @@ from opta.core.gcp import GCP
 from opta.core.terraform import get_terraform_outputs
 from opta.exceptions import UserErrors
 from opta.nice_subprocess import nice_run
-from opta.utils import deep_merge, logger
+from opta.utils import logger
 from opta.utils.dependencies import ensure_installed
 
 if TYPE_CHECKING:
