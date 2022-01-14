@@ -1,6 +1,5 @@
 variable "file_path" {
-  type    = string
-  default = "k8test.yaml"
+  type = string
 }
 
 variable "env_name" {

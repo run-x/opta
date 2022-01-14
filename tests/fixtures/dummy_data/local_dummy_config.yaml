@@ -4,8 +4,8 @@ environments:
     variables: {}
 name: local-dummy-config
 modules:
-  - name: k8sresource
-    type: k8s-resource
+  - name: k8smanifest
+    type: k8s-manifest
     file_path: k8test.yaml
   - name: database
     type: postgres

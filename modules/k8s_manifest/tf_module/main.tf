@@ -6,8 +6,8 @@ provider "kubernetes" {
 resource "kubernetes_manifest" "manifest" {
   manifest = yamldecode(file(var.file_path))
   timeouts {
-    update = "2m"
+    update = "5m"
     create = "5m"
-    delete = "2m"
+    delete = "5m"
   }
 }
