@@ -79,3 +79,4 @@ To use Opta, you first need to create some simple yaml configuration files that 
 
 # Development
 [Dev guide](https://github.com/run-x/opta/blob/main/development.md)
+
