@@ -12,6 +12,7 @@ from googleapiclient import discovery
 
 from opta.core.cloud_client import CloudClient
 from opta.exceptions import UserErrors
+from opta.meister import time as meister_time
 from opta.utils import fmt_msg, json, logger
 
 if TYPE_CHECKING:
@@ -28,6 +29,7 @@ class GCP(CloudClient):
         super().__init__(layer)
 
     @classmethod
+    @meister_time
     def get_credentials(cls) -> Tuple[Credentials, str]:
         if cls.project_id is None or cls.credentials is None:
             try:
@@ -48,11 +50,13 @@ class GCP(CloudClient):
         return cls.credentials, cls.project_id  # type: ignore
 
     @classmethod
+    @meister_time
     def using_service_account(cls) -> bool:
         credentials = cls.credentials or cls.get_credentials()[0]
         return type(credentials) == service_account.Credentials
 
     @classmethod
+    @meister_time
     def get_service_account_key_path(cls) -> str:
         if not cls.using_service_account:
             raise Exception(
@@ -73,12 +77,14 @@ class GCP(CloudClient):
         return service_account_key_file_path
 
     @classmethod
+    @meister_time
     def get_service_account_raw_credentials(cls) -> str:
         service_account_key_file_path = cls.get_service_account_key_path()
         with open(service_account_key_file_path, "r") as f:
             service_account_key = f.read()
         return service_account_key
 
+    @meister_time
     def get_remote_config(self) -> Optional["StructuredConfig"]:
         bucket = self.layer.state_storage()
         config_path = f"opta_config/{self.layer.name}"
@@ -95,6 +101,7 @@ class GCP(CloudClient):
             return None
 
     # Upload the current opta config to the state bucket, under opta_config/.
+    @meister_time
     def upload_opta_config(self) -> None:
         bucket = self.layer.state_storage()
         config_path = f"opta_config/{self.layer.name}"
@@ -105,6 +112,7 @@ class GCP(CloudClient):
         blob.upload_from_string(json.dumps(self.layer.structured_config()))
         logger.debug("Uploaded opta config to gcs")
 
+    @meister_time
     def delete_opta_config(self) -> None:
         bucket = self.layer.state_storage()
         config_path = f"opta_config/{self.layer.name}"
@@ -117,6 +125,7 @@ class GCP(CloudClient):
             logger.warn(f"Did not find opta config {config_path} to delete")
         logger.info("Deleted opta config from gcs")
 
+    @meister_time
     def delete_remote_state(self) -> None:
         bucket = self.layer.state_storage()
         tfstate_path = f"{self.layer.name}/default.tfstate"
@@ -129,6 +138,7 @@ class GCP(CloudClient):
             logger.warn(f"Did not find opta tf state {tfstate_path} to delete")
         logger.info(f"Deleted opta tf state for {self.layer.name}")
 
+    @meister_time
     def get_current_zones(self, max_number: int = 3) -> List[str]:
         credentials, project_id = self.get_credentials()
         service = discovery.build(
@@ -141,6 +151,7 @@ class GCP(CloudClient):
         response: Dict = request.execute()
         return sorted([x["name"] for x in response.get("items", [])])[:max_number]
 
+    @meister_time
     def get_terraform_lock_id(self) -> str:
         bucket = self.layer.state_storage()
         tf_lock_path = f"{self.layer.name}/default.tflock"

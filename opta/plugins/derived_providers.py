@@ -1,5 +1,6 @@
 from typing import Any, Dict, Optional
 
+from opta.meister import time as meister_time
 from opta.utils import deep_merge, hydrate
 
 
@@ -8,6 +9,7 @@ class DerivedProviders:
         self.layer = layer
         self.is_parent = is_parent
 
+    @meister_time
     def gen_tf(
         self, base_hydration: dict, module_idx: Optional[int] = None
     ) -> Dict[Any, Any]:

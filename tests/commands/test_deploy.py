@@ -12,7 +12,7 @@ def mock_is_service_config(module_mocker: MockFixture) -> None:
 
 
 def test_deploy_basic(mocker: MockFixture) -> None:
-    mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
+    mocked_os_path_exists = mocker.patch("opta.utils.exists")
     mocked_os_path_exists.return_value = True
     mock_tf_download_state = mocker.patch(
         "opta.commands.deploy.Terraform.download_state", return_value=True
@@ -59,7 +59,7 @@ def test_deploy_basic(mocker: MockFixture) -> None:
 
 
 def test_deploy_auto_approve(mocker: MockFixture) -> None:
-    mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
+    mocked_os_path_exists = mocker.patch("opta.utils.exists")
     mocked_os_path_exists.return_value = True
     mock_tf_download_state = mocker.patch(
         "opta.commands.deploy.Terraform.download_state", return_value=True
@@ -107,7 +107,7 @@ def test_deploy_auto_approve(mocker: MockFixture) -> None:
 
 
 def test_deploy_all_flags(mocker: MockFixture) -> None:
-    mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
+    mocked_os_path_exists = mocker.patch("opta.utils.exists")
     mocked_os_path_exists.return_value = True
     mock_tf_download_state = mocker.patch(
         "opta.commands.deploy.Terraform.download_state", return_value=True
@@ -165,7 +165,7 @@ def test_deploy_all_flags(mocker: MockFixture) -> None:
 
 
 def test_deploy_ecr_apply(mocker: MockFixture) -> None:
-    mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
+    mocked_os_path_exists = mocker.patch("opta.utils.exists")
     mocked_os_path_exists.return_value = True
     mock_tf_download_state = mocker.patch(
         "opta.commands.deploy.Terraform.download_state", return_value=True

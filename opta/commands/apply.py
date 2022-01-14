@@ -29,6 +29,7 @@ from opta.core.terraform import Terraform, get_terraform_outputs
 from opta.error_constants import USER_ERROR_TF_LOCK
 from opta.exceptions import MissingState, UserErrors
 from opta.layer import Layer, StructuredConfig
+from opta.meister import time as meister_time
 from opta.pre_check import pre_check
 from opta.utils import check_opta_file_exists, fmt_msg, logger
 
@@ -329,6 +330,7 @@ def _apply(
         )
 
 
+@meister_time
 def _verify_semver(
     old_semver_string: str,
     current_semver_string: str,
@@ -374,6 +376,7 @@ def _verify_semver(
 
 
 # Fetch the AZs of a region with boto3
+@meister_time
 def _fetch_availability_zones(aws_region: str) -> List[str]:
     client = boto3.client("ec2", config=Config(region_name=aws_region))
     azs: List[str] = []
@@ -385,6 +388,7 @@ def _fetch_availability_zones(aws_region: str) -> List[str]:
 
 
 # Verify whether the parent layer exists or not
+@meister_time
 def _verify_parent_layer(layer: Layer, auto_approve: bool = False) -> None:
     if layer.parent is None:
         return

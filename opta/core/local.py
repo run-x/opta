@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
 from opta.core.cloud_client import CloudClient
+from opta.meister import time as meister_time
 from opta.utils import json, logger
 
 if TYPE_CHECKING:
@@ -23,6 +24,7 @@ class Local(CloudClient):
 
         super().__init__(layer)
 
+    @meister_time
     def get_remote_config(self) -> Optional["StructuredConfig"]:
         try:
             return json.load(open(self.config_file_path, "r"))
@@ -32,6 +34,7 @@ class Local(CloudClient):
             )
             return None
 
+    @meister_time
     def upload_opta_config(self) -> None:
 
         with open(self.config_file_path, "w") as f:
@@ -39,6 +42,7 @@ class Local(CloudClient):
 
         logger.debug("Uploaded opta config to local")
 
+    @meister_time
     def delete_opta_config(self) -> None:
 
         if os.path.isfile(self.config_file_path):
@@ -47,6 +51,7 @@ class Local(CloudClient):
         else:
             logger.warn(f"Did not find opta config {self.config_file_path} to delete")
 
+    @meister_time
     def delete_remote_state(self) -> None:
 
         if os.path.isfile(self.tf_file):
@@ -58,5 +63,6 @@ class Local(CloudClient):
         else:
             logger.warn(f"Did not find opta tf state {self.tf_file} to delete")
 
+    @meister_time
     def get_terraform_lock_id(self) -> str:
         return ""

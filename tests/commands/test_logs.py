@@ -8,7 +8,7 @@ from opta.module import Module
 
 def test_logs(mocker: MockFixture) -> None:
     # Opta file check
-    mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
+    mocked_os_path_exists = mocker.patch("opta.utils.exists")
     mocked_os_path_exists.return_value = True
 
     mocked_layer_class = mocker.patch("opta.commands.logs.Layer")

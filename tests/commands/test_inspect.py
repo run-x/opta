@@ -36,7 +36,7 @@ TERRAFORM_STATE = {
 
 def test_inspect(mocker: MockFixture) -> None:
     # Opta file check
-    mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
+    mocked_os_path_exists = mocker.patch("opta.utils.exists")
     mocked_os_path_exists.return_value = True
 
     # Mock tf file generation

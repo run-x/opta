@@ -7,7 +7,7 @@ from opta.layer import Layer
 
 
 def test_shell(mocker: MockFixture) -> None:
-    mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
+    mocked_os_path_exists = mocker.patch("opta.utils.exists")
     mocked_os_path_exists.return_value = True
 
     mocked_layer_class = mocker.patch("opta.commands.shell.Layer")
@@ -58,7 +58,7 @@ def test_shell(mocker: MockFixture) -> None:
 
 
 def test_shell_with_sh(mocker: MockFixture) -> None:
-    mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
+    mocked_os_path_exists = mocker.patch("opta.utils.exists")
     mocked_os_path_exists.return_value = True
 
     mocked_layer_class = mocker.patch("opta.commands.shell.Layer")
@@ -109,7 +109,7 @@ def test_shell_with_sh(mocker: MockFixture) -> None:
 
 
 def test_shell_with_invalid_shell(mocker: MockFixture) -> None:
-    mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
+    mocked_os_path_exists = mocker.patch("opta.utils.exists")
     mocked_os_path_exists.return_value = True
 
     mocked_layer_class = mocker.patch("opta.commands.shell.Layer")

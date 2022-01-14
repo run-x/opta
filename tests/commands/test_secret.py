@@ -23,7 +23,7 @@ class TestSecretManager:
 
     def test_view(self, mocker: MockFixture, mocked_layer: Any) -> None:  # noqa
         # Opta file check
-        mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
+        mocked_os_path_exists = mocker.patch("opta.utils.exists")
         mocked_os_path_exists.return_value = os.path.join(
             os.getcwd(), "tests", "fixtures", "dummy_data", "dummy_config1.yaml"
         )
@@ -56,7 +56,7 @@ class TestSecretManager:
         )
 
     def test_list_secrets(self, mocker: MockFixture, mocked_layer: Any) -> None:
-        mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
+        mocked_os_path_exists = mocker.patch("opta.utils.exists")
         mocked_os_path_exists.return_value = os.path.join(
             os.getcwd(), "tests", "fixtures", "dummy_data", "dummy_config1.yaml"
         )
@@ -92,7 +92,7 @@ class TestSecretManager:
 
     def test_update(self, mocker: MockFixture, mocked_layer: Any) -> None:
         # Opta file check
-        mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
+        mocked_os_path_exists = mocker.patch("opta.utils.exists")
         mocked_os_path_exists.return_value = os.path.join(
             os.getcwd(), "tests", "fixtures", "dummy_data", "dummy_config1.yaml"
         )

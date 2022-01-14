@@ -6,6 +6,7 @@ from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient, ContainerClient, StorageStreamDownloader
 
 from opta.core.cloud_client import CloudClient
+from opta.meister import time as meister_time
 from opta.utils import json, logger
 
 if TYPE_CHECKING:
@@ -19,6 +20,7 @@ class Azure(CloudClient):
     def get_credentials(cls) -> Any:
         return DefaultAzureCredential()
 
+    @meister_time
     def get_remote_config(self) -> Optional["StructuredConfig"]:
         providers = self.layer.gen_providers(0)
         credentials = self.get_credentials()
@@ -47,6 +49,7 @@ class Azure(CloudClient):
             return None
 
     # Upload the current opta config to the state bucket, under opta_config/.
+    @meister_time
     def upload_opta_config(self) -> None:
         providers = self.layer.gen_providers(0)
         credentials = self.get_credentials()
@@ -68,6 +71,7 @@ class Azure(CloudClient):
             overwrite=True,
         )
 
+    @meister_time
     def delete_opta_config(self) -> None:
         providers = self.layer.gen_providers(0)
         credentials = self.get_credentials()
@@ -88,6 +92,7 @@ class Azure(CloudClient):
         except ResourceNotFoundError:
             logger.info("Remote opta config was already deleted")
 
+    @meister_time
     def delete_remote_state(self) -> None:
         providers = self.layer.gen_providers(0)
         credentials = self.get_credentials()
@@ -108,6 +113,7 @@ class Azure(CloudClient):
         except ResourceNotFoundError:
             logger.info("Remote opta state was already deleted")
 
+    @meister_time
     def get_terraform_lock_id(self) -> str:
         providers = self.layer.gen_providers(0)
         credentials = self.get_credentials()

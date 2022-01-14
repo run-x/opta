@@ -7,6 +7,7 @@ from mypy_boto3_dynamodb import DynamoDBClient
 
 from opta.core.cloud_client import CloudClient
 from opta.exceptions import UserErrors
+from opta.meister import time as meister_time
 from opta.utils import fmt_msg, json, logger
 
 if TYPE_CHECKING:
@@ -28,6 +29,7 @@ class AWS(CloudClient):
         self.region = layer.root().providers["aws"]["region"]
         super().__init__(layer)
 
+    @meister_time
     def __get_dynamodb(self, dynamodb_table: str) -> DynamoDBClient:
         dynamodb_client: DynamoDBClient = boto3.client(
             "dynamodb", config=Config(region_name=self.region)
@@ -51,6 +53,7 @@ class AWS(CloudClient):
     # {
     #    "terraform.address" : "aws resource arn"
     # }
+    @meister_time
     def get_opta_resources(self) -> dict:
         client = boto3.client(
             "resourcegroupstaggingapi", config=Config(region_name=self.region)
@@ -74,6 +77,7 @@ class AWS(CloudClient):
 
         return resources_map
 
+    @meister_time
     def get_remote_config(self) -> Optional["StructuredConfig"]:
         bucket = self.layer.state_storage()
         config_path = f"opta_config/{self.layer.name}"
@@ -89,6 +93,7 @@ class AWS(CloudClient):
             return None
 
     # Upload the current opta config to the state bucket, under opta_config/.
+    @meister_time
     def upload_opta_config(self) -> None:
         bucket = self.layer.state_storage()
         config_path = f"opta_config/{self.layer.name}"
@@ -101,6 +106,7 @@ class AWS(CloudClient):
         )
         logger.debug("Uploaded opta config to s3")
 
+    @meister_time
     def delete_opta_config(self) -> None:
         bucket = self.layer.state_storage()
         config_path = f"opta_config/{self.layer.name}"
@@ -116,6 +122,7 @@ class AWS(CloudClient):
 
         logger.info("Deleted opta config from s3")
 
+    @meister_time
     def delete_remote_state(self) -> None:
         bucket = self.layer.state_storage()
         providers = self.layer.gen_providers(0)
@@ -138,6 +145,7 @@ class AWS(CloudClient):
             s3_client.delete_object(Bucket=bucket, Key=self.layer.name, VersionId=version)
         logger.info(f"Deleted opta tf state for {self.layer.name}")
 
+    @meister_time
     def get_terraform_lock_id(self) -> str:
         bucket = self.layer.state_storage()
         providers = self.layer.gen_providers(0)
@@ -167,6 +175,7 @@ class AWS(CloudClient):
         )
 
     @staticmethod
+    @meister_time
     def get_all_versions(bucket: str, filename: str, region: str) -> List[str]:
         s3 = boto3.client("s3", config=Config(region_name=region))
         results = []
@@ -177,6 +186,7 @@ class AWS(CloudClient):
         return results
 
     @staticmethod
+    @meister_time
     def prepare_read_buckets_iam_statements(bucket_names: List[str]) -> dict:
         return {
             "Sid": "ReadBuckets",
@@ -187,6 +197,7 @@ class AWS(CloudClient):
         }
 
     @staticmethod
+    @meister_time
     def prepare_write_buckets_iam_statements(bucket_names: List[str]) -> dict:
         return {
             "Sid": "WriteBuckets",
@@ -202,6 +213,7 @@ class AWS(CloudClient):
         }
 
     @staticmethod
+    @meister_time
     def prepare_publish_queues_iam_statements(queue_arns: List[str]) -> dict:
         return {
             "Sid": "PublishQueues",
@@ -218,6 +230,7 @@ class AWS(CloudClient):
         }
 
     @staticmethod
+    @meister_time
     def prepare_subscribe_queues_iam_statements(queue_arns: List[str]) -> dict:
         return {
             "Sid": "SubscribeQueues",
@@ -227,6 +240,7 @@ class AWS(CloudClient):
         }
 
     @staticmethod
+    @meister_time
     def prepare_publish_sns_iam_statements(topic_arns: List[str]) -> dict:
         return {
             "Sid": "PublishSns",
@@ -236,6 +250,7 @@ class AWS(CloudClient):
         }
 
     @staticmethod
+    @meister_time
     def prepare_kms_write_keys_statements(kms_arns: List[str]) -> dict:
         return {
             "Sid": "KMSWrite",
@@ -245,6 +260,7 @@ class AWS(CloudClient):
         }
 
     @staticmethod
+    @meister_time
     def prepare_kms_read_keys_statements(kms_arns: List[str]) -> dict:
         return {
             "Sid": "KMSRead",
@@ -254,6 +270,7 @@ class AWS(CloudClient):
         }
 
     @staticmethod
+    @meister_time
     def prepare_dynamodb_write_tables_statements(dynamodb_table_arns: List[str]) -> dict:
         return {
             "Sid": "DynamodbWrite",
@@ -284,6 +301,7 @@ class AWS(CloudClient):
         }
 
     @staticmethod
+    @meister_time
     def prepare_dynamodb_read_tables_statements(dynamodb_table_arns: List[str]) -> dict:
         return {
             "Sid": "DynamodbRead",
@@ -307,6 +325,7 @@ class AWS(CloudClient):
         }
 
     @staticmethod
+    @meister_time
     def delete_bucket(bucket_name: str, region: str) -> None:
         # Before a bucket can be deleted, all of the objects inside must be removed.
         bucket = boto3.resource("s3").Bucket(bucket_name)
@@ -322,6 +341,7 @@ class AWS(CloudClient):
         print(f"Bucket ({bucket_name}) successfully deleted.")
 
     @staticmethod
+    @meister_time
     def delete_dynamodb_table(table_name: str, region: str) -> None:
         client = boto3.client("dynamodb", config=Config(region_name=region))
 
@@ -344,6 +364,7 @@ class AWS(CloudClient):
         raise Exception("Failed to delete after 20 retries, quitting.")
 
     @staticmethod
+    @meister_time
     def parse_arn(arn: str) -> AwsArn:
         # http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html
         elements = arn.split(":", 5)
@@ -367,6 +388,7 @@ class AWS(CloudClient):
 # 1). arn:partition:service:region:account-id:resource-id
 # 2). arn:partition:service:region:account-id:resource-type/resource-id
 # 3). arn:partition:service:region:account-id:resource-type:resource-id
+@meister_time
 def get_aws_resource_id(resource_arn: str) -> str:
     arn_parts = resource_arn.split(":")
 

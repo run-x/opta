@@ -4,6 +4,7 @@ import re
 import sys
 from logging import Formatter, Logger, LogRecord
 from logging.handlers import QueueHandler, QueueListener
+from os.path import exists
 from queue import Queue
 from shutil import which
 from textwrap import dedent
@@ -16,6 +17,7 @@ from ruamel.yaml import YAML
 from opta.constants import DEV_VERSION, VERSION
 from opta.datadog_logging import DatadogLogHandler
 from opta.exceptions import UserErrors
+from opta.meister import time as meister_time
 from opta.special_formatter import PartialFormatter
 
 yaml = YAML(typ="safe")
@@ -48,11 +50,13 @@ class LogFormatMultiplexer(Formatter):
         ).format(record)
 
 
+@meister_time
 def ansi_scrub(text: str) -> str:
     ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
     return ansi_escape.sub("", text)
 
 
+@meister_time
 def initialize_logger() -> Tuple[Logger, QueueListener, DatadogLogHandler]:
     logger = logging.getLogger("opta")
     logger.setLevel(logging.DEBUG)
@@ -92,6 +96,7 @@ class RawString(str):
     pass
 
 
+@meister_time
 def deep_merge(dict1: Dict[Any, Any], dict2: Dict[Any, Any]) -> Dict[Any, Any]:
     dict2 = dict2.copy()
     for key, value in dict1.items():
@@ -106,6 +111,7 @@ def deep_merge(dict1: Dict[Any, Any], dict2: Dict[Any, Any]) -> Dict[Any, Any]:
     return dict2
 
 
+@meister_time
 def hydrate(target: Any, hydration: Dict[Any, Any]) -> Dict[Any, Any]:
     if isinstance(target, dict):
         target = target.copy()
@@ -121,11 +127,13 @@ def hydrate(target: Any, hydration: Dict[Any, Any]) -> Dict[Any, Any]:
     return target
 
 
+@meister_time
 def is_tool(name: str) -> bool:
     """Check whether `name` is on PATH and marked as executable."""
     return which(name) is not None
 
 
+@meister_time
 def safe_run(func):  # type: ignore
     def func_wrapper(*args, **kwargs):  # type: ignore
         try:
@@ -140,6 +148,7 @@ def safe_run(func):  # type: ignore
     return func_wrapper
 
 
+@meister_time
 def fmt_msg(message: str) -> str:
     """Format triple quote python strings"""
     # TODO: Replace with better message formatting
@@ -151,6 +160,7 @@ def fmt_msg(message: str) -> str:
 
 # TODO: Support max-width.
 # The data should be a 2D array of the shape rows x columns.
+@meister_time
 def column_print(data: List[Any]) -> None:
     # Determine the width of each column (the length of the longest word + 1)
     longest_char_len_by_column = [0] * len(data[0])
@@ -175,6 +185,7 @@ def column_print(data: List[Any]) -> None:
 # Get all substrings separated by the delimiter.
 # Ex: "foo.bar.baz", delimiter = "."
 # -> ['foo', 'foo.bar', 'foo.bar.baz', 'bar.baz', 'bar', 'bar.baz', 'baz']
+@meister_time
 def all_substrings(string: str, delimiter: str = "") -> List[str]:
     all_substrings = []
     words = string.split(delimiter) if len(delimiter) else list(string)
@@ -193,6 +204,7 @@ def all_substrings(string: str, delimiter: str = "") -> List[str]:
 
 # Exponential backoff for some external requests that may not work 100% on the
 # first try.
+@meister_time
 def exp_backoff(num_tries: int = 3) -> Generator:
     seconds = 2
 
@@ -207,6 +219,7 @@ def exp_backoff(num_tries: int = 3) -> Generator:
 # opta.yaml -> opta.yml, True
 # opta.yml -> opta.yaml, True
 # test.txt -> test.txt, False
+@meister_time
 def alternate_yaml_extension(config_path: str) -> Tuple[str, bool]:
     pre, ext = os.path.splitext(config_path)
     if ext.lower() == ".yaml":
@@ -218,11 +231,12 @@ def alternate_yaml_extension(config_path: str) -> Tuple[str, bool]:
 
 # Return the existing opta file, if not found it checks the alternate y(a)ml extension
 # If still not found, it prompts the user or raise a UserErrors
+@meister_time
 def check_opta_file_exists(config_path: str, prompt: bool = True) -> str:
-    if not os.path.exists(config_path):
+    if not exists(config_path):
         # try alternate y(a)ml extension
         alternate_yaml, changed = alternate_yaml_extension(config_path)
-        if changed and os.path.exists(alternate_yaml):
+        if changed and exists(alternate_yaml):
             logger.warning(
                 "Could not find file %s, but loaded %s.", config_path, alternate_yaml,
             )
@@ -249,7 +263,7 @@ def check_opta_file_exists(config_path: str, prompt: bool = True) -> str:
         if not prompt_config_path:
             logger.info("Exiting...")
             sys.exit(0)
-        elif not os.path.exists(prompt_config_path):
+        elif not exists(prompt_config_path):
             raise UserErrors("Invalid Configuration Path provided.")
 
         config_path = prompt_config_path

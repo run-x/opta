@@ -28,7 +28,7 @@ def mock_is_service_config(module_mocker: MockFixture) -> None:
 
 def test_is_env_config(mocker: MockFixture) -> None:
     # Opta file check
-    mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
+    mocked_os_path_exists = mocker.patch("opta.utils.exists")
     mocked_os_path_exists.return_value = True
 
     mocker.patch("opta.commands.push.is_service_config", return_value=False)
@@ -184,7 +184,7 @@ def test_no_tag(mocker: MockFixture) -> None:
 
 def test_no_docker(mocker: MockFixture) -> None:
     mocker.patch(
-        "opta.utils.os.path.exists", return_value=True
+        "opta.utils.exists", return_value=True
     )  # Make check_opta_file_exists succeed
     mocker.patch("opta.commands.push.ensure_installed", side_effect=UserErrors("foobar"))
 
@@ -195,7 +195,7 @@ def test_no_docker(mocker: MockFixture) -> None:
 
 def test_no_tag_override(mocker: MockFixture) -> None:
     # Opta file check
-    mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
+    mocked_os_path_exists = mocker.patch("opta.utils.exists")
     mocked_os_path_exists.return_value = True
 
     nice_run_mock = mocker.patch("opta.commands.push.nice_run")
@@ -251,7 +251,7 @@ def test_no_tag_override(mocker: MockFixture) -> None:
 
 def test_with_tag_override(mocker: MockFixture) -> None:
     # Opta file check
-    mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
+    mocked_os_path_exists = mocker.patch("opta.utils.exists")
     mocked_os_path_exists.return_value = True
 
     nice_run_mock = mocker.patch("opta.commands.push.nice_run")
@@ -317,7 +317,7 @@ def test_with_tag_override(mocker: MockFixture) -> None:
 
 def test_bad_image_name(mocker: MockFixture) -> None:
     # Opta file check
-    mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
+    mocked_os_path_exists = mocker.patch("opta.utils.exists")
     mocked_os_path_exists.return_value = True
 
     gen_mock = mocker.patch("opta.commands.push.gen_all")

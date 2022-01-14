@@ -29,6 +29,7 @@ from opta.core.gcp import GCP
 from opta.core.validator import validate_yaml
 from opta.crash_reporter import CURRENT_CRASH_REPORTER
 from opta.exceptions import UserErrors
+from opta.meister import time as meister_time
 from opta.module import Module
 from opta.plugins.derived_providers import DerivedProviders
 from opta.utils import check_opta_file_exists, deep_merge, hydrate, logger, yaml
@@ -154,6 +155,7 @@ class Layer:
                 )
 
     @classmethod
+    @meister_time
     def load_from_yaml(
         cls,
         config: str,
@@ -222,6 +224,7 @@ class Layer:
         }
 
     @classmethod
+    @meister_time
     def load_from_dict(
         cls, conf: Dict[Any, Any], env: Optional[str], is_parent: bool = False
     ) -> Layer:
@@ -301,6 +304,7 @@ class Layer:
         )
 
     @classmethod
+    @meister_time
     def validate_layer(cls, layer: "Layer") -> None:
         # Check for Uniqueness of Modules
         unique_modules: Set[str] = set()
@@ -328,15 +332,18 @@ class Layer:
             previous_modules.add(module.aliased_type or module.type)
 
     @staticmethod
+    @meister_time
     def valid_name(name: str) -> bool:
         pattern = "^[A-Za-z0-9-]*$"
         return bool(re.match(pattern, name))
 
+    @meister_time
     def get_env(self) -> str:
         if self.parent is not None:
             return self.parent.get_env()
         return self.name
 
+    @meister_time
     def get_module(
         self, module_name: str, module_idx: Optional[int] = None
     ) -> Optional[Module]:
@@ -346,6 +353,7 @@ class Layer:
                 return module
         return None
 
+    @meister_time
     def get_required_path_dependencies(self) -> FrozenSet[str]:
         deps: Set[str] = set()
         for module in self.modules:
@@ -354,10 +362,12 @@ class Layer:
 
         return frozenset(deps)
 
+    @meister_time
     def validate_required_path_dependencies(self) -> None:
         deps = self.get_required_path_dependencies()
         validate_installed_path_executables(deps)
 
+    @meister_time
     def get_module_by_type(
         self, module_type: str, module_idx: Optional[int] = None
     ) -> list[Module]:
@@ -368,6 +378,7 @@ class Layer:
                 modules.append(module)
         return modules
 
+    @meister_time
     def outputs(self, module_idx: Optional[int] = None) -> Iterable[str]:
         ret: List[str] = []
         module_idx = len(self.modules) - 1 if module_idx is None else module_idx
@@ -375,6 +386,7 @@ class Layer:
             ret += module.outputs()
         return ret
 
+    @meister_time
     def gen_tf(
         self, module_idx: int, existing_config: Optional[StructuredConfig] = None
     ) -> Dict[Any, Any]:
@@ -413,6 +425,7 @@ class Layer:
 
         return hydrate(ret, self.metadata_hydration())
 
+    @meister_time
     def pre_hook(self, module_idx: int) -> None:
         for module in self.modules[0 : module_idx + 1]:
             self.processor_for(module).pre_hook(module_idx)
@@ -422,6 +435,7 @@ class Layer:
                 module_idx
             )
 
+    @meister_time
     def post_hook(self, module_idx: int, exception: Optional[Exception]) -> None:
         for module in self.modules[0 : module_idx + 1]:
             self.processor_for(module).post_hook(module_idx, exception)
@@ -431,16 +445,19 @@ class Layer:
                 module_idx, exception
             )
 
+    @meister_time
     def post_delete(self, module_idx: int) -> None:
         module = self.modules[module_idx]
         logger.debug(f"Running post delete for module {module.name}")
         self.processor_for(module).post_delete(module_idx)
 
+    @meister_time
     def processor_for(self, module: Module) -> ModuleProcessor:
         module_type = module.aliased_type or module.type
         processor_class = get_processor_class(module_type)
         return processor_class(module, self)
 
+    @meister_time
     def metadata_hydration(self) -> Dict[Any, Any]:
         parent_name = self.parent.name if self.parent is not None else "nil"
         parent = None
@@ -469,6 +486,7 @@ class Layer:
             **provider_hydration,
         }
 
+    @meister_time
     def get_event_properties(self) -> Dict[str, Any]:
         current_keys: Dict[str, Any] = {}
         for module in self.modules:
@@ -481,6 +499,7 @@ class Layer:
         current_keys["parent_name"] = self.parent.name if self.parent is not None else ""
         return current_keys
 
+    @meister_time
     def state_storage(self) -> str:
         if self.parent is not None:
             return self.parent.state_storage()
@@ -494,6 +513,7 @@ class Layer:
         else:
             return f"opta-tf-state-{self.org_name}-{self.name}"
 
+    @meister_time
     def gen_providers(self, module_idx: int, clean: bool = True) -> Dict[Any, Any]:
         ret: Dict[Any, Any] = {"provider": {}}
         region: Optional[str] = None
@@ -581,6 +601,7 @@ class Layer:
         return ret
 
     # Special logic for mapping the opta config to the provider block
+    @meister_time
     def handle_special_providers(
         self, provider_name: str, provider_data: dict, clean: bool
     ) -> dict:
@@ -603,6 +624,7 @@ class Layer:
         return new_provider_data
 
     # Get the root-most layer
+    @meister_time
     def root(self) -> "Layer":
         layer = self
         while layer.parent is not None:
@@ -610,6 +632,7 @@ class Layer:
 
         return layer
 
+    @meister_time
     def verify_cloud_credentials(self) -> None:
         if self.cloud == "aws":
             self._verify_aws_cloud_credentials()

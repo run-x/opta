@@ -8,6 +8,7 @@ from yamale.validators import DefaultValidators, Validator
 
 from opta.constants import REGISTRY, yaml
 from opta.exceptions import UserErrors
+from opta.meister import time as meister_time
 
 
 class Module(Validator):
@@ -18,6 +19,7 @@ class Module(Validator):
     cloud: Optional[str] = None
 
     # Yamale expects this function to return an array of errors
+    @meister_time
     def validate(self, value: Any) -> List[str]:
         if not isinstance(value, Mapping):
             return ["module is not a Map"]
@@ -71,6 +73,7 @@ class Opta(Validator):
             return False
         return "org_name" in value or "name" in value
 
+    @meister_time
     def validate(self, value: Any) -> List[str]:
         if not isinstance(value, Mapping):
             return ["opta.yaml files should be a map"]
@@ -189,6 +192,7 @@ def _print_errors(errors: List[str]) -> None:
     print(attr("reset"), end="")
 
 
+@meister_time
 def validate_yaml(
     config_file_path: str, cloud: str, json_schema: bool = False
 ) -> Literal[True]:

@@ -43,6 +43,7 @@ from opta.constants import REDS, yaml
 from opta.core.gcp import GCP
 from opta.core.terraform import get_terraform_outputs
 from opta.exceptions import UserErrors
+from opta.meister import time as meister_time
 from opta.nice_subprocess import nice_run
 from opta.utils import deep_merge, logger
 from opta.utils.dependencies import ensure_installed
@@ -66,6 +67,7 @@ def get_required_path_executables(cloud: str) -> FrozenSet[str]:
     return frozenset({"kubectl"}) | exec_map.get(cloud, set())
 
 
+@meister_time
 def configure_kubectl(layer: "Layer") -> None:
     """Configure the kubectl CLI tool for the given layer"""
     # Make sure the user has the prerequisite CLI tools installed
@@ -91,6 +93,7 @@ def _local_configure_kubectl(layer: "Layer") -> None:
     ).stdout
 
 
+@meister_time
 def load_opta_config_to_default(layer: "Layer") -> None:
     config_file_name = (
         f"{GENERATED_KUBE_CONFIG_DIR}/kubeconfig-{layer.root().name}-{layer.cloud}.yaml"
@@ -375,6 +378,7 @@ def current_image_digest_tag(layer: "Layer") -> dict:
     return image_info
 
 
+@meister_time
 def create_namespace_if_not_exists(layer_name: str) -> None:
     load_opta_kube_config()
     v1 = CoreV1Api()
@@ -389,6 +393,7 @@ def create_namespace_if_not_exists(layer_name: str) -> None:
         )
 
 
+@meister_time
 def create_manual_secrets_if_not_exists(layer_name: str) -> None:
     load_opta_kube_config()
     v1 = CoreV1Api()
@@ -401,6 +406,7 @@ def create_manual_secrets_if_not_exists(layer_name: str) -> None:
         )
 
 
+@meister_time
 def get_manual_secrets(layer_name: str) -> dict:
     load_opta_kube_config()
     v1 = CoreV1Api()
@@ -419,6 +425,7 @@ def get_manual_secrets(layer_name: str) -> dict:
     )
 
 
+@meister_time
 def update_manual_secrets(layer_name: str, new_values: dict) -> None:
     load_opta_kube_config()
     v1 = CoreV1Api()
@@ -434,6 +441,7 @@ def update_manual_secrets(layer_name: str, new_values: dict) -> None:
     v1.replace_namespaced_secret("manual-secrets", layer_name, current_secret_object)
 
 
+@meister_time
 def get_linked_secrets(layer_name: str) -> dict:
     load_opta_kube_config()
     v1 = CoreV1Api()
@@ -452,6 +460,7 @@ def get_linked_secrets(layer_name: str) -> dict:
     )
 
 
+@meister_time
 def list_namespaces() -> None:
     load_opta_kube_config()
     v1 = CoreV1Api()
@@ -568,6 +577,7 @@ def list_services(*, namespace: Optional[str] = None) -> List[V1Service]:
     return services.items
 
 
+@meister_time
 def get_config_map(namespace: str, name: str) -> V1ConfigMap:
     load_opta_kube_config()
     v1 = CoreV1Api()
@@ -582,6 +592,7 @@ def get_config_map(namespace: str, name: str) -> V1ConfigMap:
     return cm
 
 
+@meister_time
 def update_config_map_data(namespace: str, name: str, data: Dict[str, str]) -> None:
     load_opta_kube_config()
     v1 = CoreV1Api()
@@ -601,6 +612,7 @@ def update_config_map_data(namespace: str, name: str, data: Dict[str, str]) -> N
     v1.patch_namespaced_config_map(name, namespace, manifest)
 
 
+@meister_time
 def get_secrets(layer_name: str) -> dict:
     return deep_merge(get_manual_secrets(layer_name), get_linked_secrets(layer_name))
 
