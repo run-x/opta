@@ -6,7 +6,7 @@ from pytest import fixture
 from pytest_mock import MockFixture
 
 from opta.amplitude import AmplitudeClient, amplitude_client
-from opta.commands.secret import list_command, update, view
+from opta.commands.secret import bulk_update, list_command, update, view
 from opta.layer import Layer
 
 
@@ -132,4 +132,37 @@ class TestSecretManager:
         mocked_layer.assert_called_once_with("dummyconfig", "dummyenv")
         mocked_amplitude_client.send_event.assert_called_once_with(
             amplitude_client.UPDATE_SECRET_EVENT
+        )
+
+    def test_bulk_update(self, mocker: MockFixture, mocked_layer: Any) -> None:
+        env_file = os.path.join(
+            os.getcwd(), "tests", "fixtures", "dummy_data", "dummy_secrets.env"
+        )
+        mocker.patch("opta.utils.os.path.exists")
+        mocker.patch("opta.commands.secret.gen_all")
+        mocker.patch("opta.commands.secret.configure_kubectl")
+        mocked_create_namespace_if_not_exists = mocker.patch(
+            "opta.commands.secret.create_namespace_if_not_exists"
+        )
+        mocked_update_secrets = mocker.patch("opta.core.secrets.update_secrets")
+        mocked_amplitude_event = mocker.patch(
+            "opta.commands.secret.amplitude_client.send_event"
+        )
+
+        runner = CliRunner()
+        result = runner.invoke(
+            bulk_update, [env_file, "--env", "dummyenv", "--config", "dummyconfig"],
+        )
+        assert result.exit_code == 0
+        mocked_create_namespace_if_not_exists.assert_called_once_with("dummy_layer")
+        # check each secret from the env file was updated
+        mocked_update_secrets.assert_called_once_with(
+            "dummy_layer",
+            "manual-secrets",
+            {"FROM_FILE_SECRET1": "val1", "FROM_FILE_SECRET2": "1"},
+        )
+
+        mocked_layer.assert_called_once_with("dummyconfig", "dummyenv")
+        mocked_amplitude_event.assert_called_once_with(
+            amplitude_client.UPDATE_BULK_SECRET_EVENT
         )

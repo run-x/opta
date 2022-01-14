@@ -5,11 +5,12 @@ from click_didyoumean import DYMGroup
 
 from opta.amplitude import amplitude_client
 from opta.core.generator import gen_all
-from opta.core.kubernetes import (
-    configure_kubectl,
-    create_namespace_if_not_exists,
+from opta.core.kubernetes import configure_kubectl, create_namespace_if_not_exists
+from opta.core.secrets import (
+    bulk_update_manual_secrets,
+    get_secrets,
+    update_manual_secrets,
 )
-from opta.core.secrets import bulk_update_manual_secrets, get_secrets, update_manual_secrets
 from opta.exceptions import UserErrors
 from opta.layer import Layer
 from opta.utils import check_opta_file_exists
@@ -44,7 +45,7 @@ def view(secret: str, env: Optional[str], config: str) -> None:
     """View a given secret of a k8s service
 
     Examples:
-    
+
     opta secret view -c my-service.yaml "MY_SECRET_1"
     """
 
@@ -80,7 +81,7 @@ def list_command(env: Optional[str], config: str) -> None:
     """List the secrets setup for the given k8s service module
 
     Examples:
-    
+
     opta secret list -c my-service.yaml
     """
     config = check_opta_file_exists(config)
@@ -148,8 +149,8 @@ def bulk_update(env_file: str, env: Optional[str], config: str) -> None:
 
     configure_kubectl(layer)
     create_namespace_if_not_exists(layer.name)
-    # TODO restore amplitude when PR is ready
-    # amplitude_client.send_event(amplitude_client.UPDATE_BULK_SECRET_EVENT)
+    amplitude_client.send_event(amplitude_client.UPDATE_BULK_SECRET_EVENT)
+
     bulk_update_manual_secrets(layer.name, env_file)
 
     print("Success")
