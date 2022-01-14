@@ -34,6 +34,7 @@ class AmplitudeClient:
     FINISH_GEN_EVENT = "FINISH_GEN"
     VALID_EVENTS = [
         UPDATE_SECRET_EVENT,
+        UPDATE_BULK_SECRET_EVENT,
         VIEW_SECRET_EVENT,
         START_GEN_EVENT,
         APPLY_EVENT,
