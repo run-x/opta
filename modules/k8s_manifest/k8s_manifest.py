@@ -11,17 +11,17 @@ import yaml
 from opta.core.kubernetes import GENERATED_KUBE_CONFIG_DIR
 
 
-class K8sresourceProcessor(ModuleProcessor):
+class K8smanifestProcessor(ModuleProcessor):
     def __init__(self, module: "Module", layer: "Layer"):
-        if module.data["type"] != "k8s-resource":
+        if module.data["type"] != "k8s-manifest":
             raise Exception(
-                f"The module {module.name} was expected to be of type k8s-resource"
+                f"The module {module.name} was expected to be of type k8s-manifest"
             )
         (
             module.data["kubeconfig"],
             module.data["kubecontext"],
         ) = self.get_k8s_config_context(layer)
-        super(K8sresourceProcessor, self).__init__(module, layer)
+        super(K8smanifestProcessor, self).__init__(module, layer)
 
     def get_k8s_config_context(self, layer: "Layer") -> Tuple[str, str]:
         if layer.cloud == "local":
