@@ -56,10 +56,5 @@ class TestAzureK8sServiceProcessor:
         mocked_create_namespace_if_not_exists = mocker.patch(
             "modules.azure_k8s_service.azure_k8s_service.create_namespace_if_not_exists"
         )
-        mocked_get_manual_secrets = mocker.patch(
-            "modules.azure_k8s_service.azure_k8s_service.get_manual_secrets"
-        )
-        mocked_get_manual_secrets.return_value = {"BALONEY": "blah"}
         AzureK8sServiceProcessor(app_module, layer).pre_hook(idx)
         mocked_create_namespace_if_not_exists.assert_called_once_with(layer.name)
-        mocked_get_manual_secrets.assert_called_once_with(layer.name)
