@@ -8,9 +8,8 @@ from opta.core.generator import gen_all
 from opta.core.kubernetes import (
     configure_kubectl,
     create_namespace_if_not_exists,
-    get_secrets,
-    update_manual_secrets,
 )
+from opta.core.secrets import get_secrets, update_manual_secrets
 from opta.exceptions import UserErrors
 from opta.layer import Layer
 from opta.utils import check_opta_file_exists

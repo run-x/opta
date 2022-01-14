@@ -1,13 +1,24 @@
 
 
-# from opta.core.kubernetes import get_manual_secrets
+import os
+from opta.core.kubernetes import get_namespaced_secrets, update_secrets
+from opta.exceptions import UserErrors
+from opta.utils import deep_merge
 
 
-# def configure_kubectl(layer: str) -> None:
-#     manual_secrets = get_manual_secrets(self.layer.name)
-#     for secret_name in self.module.data.get("secrets", []):
-#         if secret_name not in manual_secrets:
-#             raise UserErrors(
-#                 f"Secret {secret_name} has not been set via opta secret update! Please do so before applying the "
-#                 f"K8s service w/ a new secret."
-#             )
+MANUAL_SECRET_NAME = "manual-secrets"
+LINKED_SECRET_NAME = "secret"
+
+
+def get_secrets(layer_name: str) -> dict:
+    return deep_merge(get_manual_secrets(layer_name), get_linked_secrets(layer_name))
+
+
+def get_manual_secrets(layer_name: str) -> dict:
+    return get_namespaced_secrets(layer_name, MANUAL_SECRET_NAME)
+
+
+def get_linked_secrets(layer_name: str) -> dict:
+    return get_namespaced_secrets(layer_name, LINKED_SECRET_NAME)
+
+
