@@ -1,11 +1,10 @@
-
-
 import os
+
+from dotenv import dotenv_values
+
 from opta.core.kubernetes import get_namespaced_secrets, update_secrets
 from opta.exceptions import UserErrors
 from opta.utils import deep_merge
-from dotenv import dotenv_values
-
 
 MANUAL_SECRET_NAME = "manual-secrets"
 LINKED_SECRET_NAME = "secret"
@@ -44,8 +43,6 @@ def bulk_update_manual_secrets(layer_name: str, env_file: str) -> None:
     :raises UserErrors: if env_file is not found
     """
     if not os.path.exists(env_file):
-        raise UserErrors(
-            f"Could not find file {env_file}"
-        )
+        raise UserErrors(f"Could not find file {env_file}")
     new_values = dotenv_values(env_file)
     update_manual_secrets(layer_name, new_values)

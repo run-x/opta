@@ -430,9 +430,7 @@ def update_secrets(namespace: str, secret_name: str, new_values: dict) -> None:
     load_opta_kube_config()
     v1 = CoreV1Api()
     create_secret_if_not_exists(namespace, secret_name)
-    current_secret_object: V1Secret = v1.read_namespaced_secret(
-        secret_name, namespace
-    )
+    current_secret_object: V1Secret = v1.read_namespaced_secret(secret_name, namespace)
     current_secret_object.data = current_secret_object.data or {}
     for k, v in new_values.items():
         current_secret_object.data[k] = base64.b64encode(v.encode("utf-8")).decode(
