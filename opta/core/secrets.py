@@ -6,8 +6,8 @@ from opta.core.kubernetes import get_namespaced_secrets, update_secrets
 from opta.exceptions import UserErrors
 from opta.utils import deep_merge
 
-MANUAL_SECRET_NAME = "manual-secrets"
-LINKED_SECRET_NAME = "secret"
+MANUAL_SECRET_NAME = "manual-secrets"  # nosec
+LINKED_SECRET_NAME = "secret"  # nosec
 
 
 def get_secrets(layer_name: str) -> dict:
