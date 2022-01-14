@@ -35,6 +35,7 @@ def test_destroy_env_with_children(mocker: MockFixture) -> None:
     )
 
     mocked_gen_all = mocker.patch("opta.commands.destroy.gen_all")
+    mocker.patch("opta.commands.destroy.Layer.verify_cloud_credentials")
 
     runner = CliRunner()
     result = runner.invoke(destroy, ["--config", FAKE_ENV_CONFIG])
