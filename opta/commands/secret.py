@@ -22,11 +22,11 @@ def secret() -> None:
 
     Examples:
 
-    opta secret list -c my_service.yaml
+    opta secret list -c my-service.yaml
 
-    opta secret update -c my_service.yaml "MY_SECRET_1" "value"
+    opta secret update -c my-service.yaml "MY_SECRET_1" "value"
 
-    opta secret view -c my_service.yaml "MY_SECRET_1"
+    opta secret view -c my-service.yaml "MY_SECRET_1"
     """
     pass
 
@@ -40,7 +40,12 @@ def secret() -> None:
     "-c", "--config", default="opta.yaml", help="Opta config file", show_default=True
 )
 def view(secret: str, env: Optional[str], config: str) -> None:
-    """View a given secret of a k8s service"""
+    """View a given secret of a k8s service
+
+    Examples:
+    
+    opta secret view -c my-service.yaml "MY_SECRET_1"
+    """
 
     config = check_opta_file_exists(config)
     layer = Layer.load_from_yaml(config, env)
@@ -71,7 +76,12 @@ def view(secret: str, env: Optional[str], config: str) -> None:
     "-c", "--config", default="opta.yaml", help="Opta config file", show_default=True
 )
 def list_command(env: Optional[str], config: str) -> None:
-    """List the secrets setup for the given k8s service module"""
+    """List the secrets setup for the given k8s service module
+
+    Examples:
+    
+    opta secret list -c my-service.yaml
+    """
     config = check_opta_file_exists(config)
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(amplitude_client.LIST_SECRETS_EVENT)
@@ -94,7 +104,12 @@ def list_command(env: Optional[str], config: str) -> None:
     "-c", "--config", default="opta.yaml", help="Opta config file", show_default=True
 )
 def update(secret: str, value: str, env: Optional[str], config: str) -> None:
-    """Update a given secret of a k8s service with a new value"""
+    """Update a given secret of a k8s service with a new value
+
+    Examples:
+
+    opta secret update -c my-service.yaml "MY_SECRET_1" "value"
+    """
 
     config = check_opta_file_exists(config)
     layer = Layer.load_from_yaml(config, env)
