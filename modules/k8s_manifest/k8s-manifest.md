@@ -1,6 +1,6 @@
 ---
-title: "kubernetes-resource"
-linkTitle: "kubernetes-resource"
+title: "kubernetes-manifest"
+linkTitle: "kubernetes-manifest"
 date: 2022-01-11
 draft: false
 weight: 1
