@@ -20,7 +20,7 @@
     "protocol": {
       "enum": ["grcp", "websocket"],
       "description": "Protocol to use for the port. Defaults to TCP"
-    },
-    "required": ["name", "type", "port"]
-  }
+    }
+  },
+  "required": ["name", "type", "port"]
 }
