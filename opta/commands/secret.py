@@ -5,9 +5,9 @@ from click_didyoumean import DYMGroup
 
 from opta.amplitude import amplitude_client
 from opta.core.generator import gen_all
-from opta.core.kubernetes import (
-    configure_kubectl,
-    create_namespace_if_not_exists,
+from opta.core.kubernetes import configure_kubectl, create_namespace_if_not_exists
+from opta.core.secrets import (
+    bulk_update_manual_secrets,
     get_secrets,
     update_manual_secrets,
 )
@@ -18,7 +18,18 @@ from opta.utils import check_opta_file_exists
 
 @click.group(cls=DYMGroup)
 def secret() -> None:
-    """Commands for manipulating secrets for a k8s service"""
+    """Commands for manipulating secrets for a k8s service
+
+    Examples:
+
+    opta secret list -c my-service.yaml
+
+    opta secret update -c my-service.yaml "MY_SECRET_1" "value"
+
+    opta secret bulk-update -c my-service.yaml secrets.env
+
+    opta secret view -c my-service.yaml "MY_SECRET_1"
+    """
     pass
 
 
@@ -31,7 +42,12 @@ def secret() -> None:
     "-c", "--config", default="opta.yaml", help="Opta config file", show_default=True
 )
 def view(secret: str, env: Optional[str], config: str) -> None:
-    """View a given secret of a k8s service"""
+    """View a given secret of a k8s service
+
+    Examples:
+
+    opta secret view -c my-service.yaml "MY_SECRET_1"
+    """
 
     config = check_opta_file_exists(config)
     layer = Layer.load_from_yaml(config, env)
@@ -62,7 +78,19 @@ def view(secret: str, env: Optional[str], config: str) -> None:
     "-c", "--config", default="opta.yaml", help="Opta config file", show_default=True
 )
 def list_command(env: Optional[str], config: str) -> None:
-    """List the secrets setup for the given k8s service module"""
+    """List the secrets (names and values) for the given k8s service module
+
+    It expects a file in the dotenv file format.
+    Each line is in VAR=VAL format.
+
+
+    The output is in the dotenv file format. Each line is in
+  VAR=VAL format.
+
+    Examples:
+
+    opta secret list -c my-service.yaml
+    """
     config = check_opta_file_exists(config)
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(amplitude_client.LIST_SECRETS_EVENT)
@@ -71,8 +99,8 @@ def list_command(env: Optional[str], config: str) -> None:
     configure_kubectl(layer)
     create_namespace_if_not_exists(layer.name)
     secrets = get_secrets(layer.name)
-    for key in secrets:
-        print(key)
+    for key, value in secrets.items():
+        print(f"{key}={value}")
 
 
 @secret.command()
@@ -85,7 +113,12 @@ def list_command(env: Optional[str], config: str) -> None:
     "-c", "--config", default="opta.yaml", help="Opta config file", show_default=True
 )
 def update(secret: str, value: str, env: Optional[str], config: str) -> None:
-    """Update a given secret of a k8s service with a new value"""
+    """Update a given secret of a k8s service with a new value
+
+    Examples:
+
+    opta secret update -c my-service.yaml "MY_SECRET_1" "value"
+    """
 
     config = check_opta_file_exists(config)
     layer = Layer.load_from_yaml(config, env)
@@ -95,5 +128,36 @@ def update(secret: str, value: str, env: Optional[str], config: str) -> None:
     create_namespace_if_not_exists(layer.name)
     amplitude_client.send_event(amplitude_client.UPDATE_SECRET_EVENT)
     update_manual_secrets(layer.name, {secret: str(value)})
+
+    print("Success")
+
+
+@secret.command()
+@click.argument("env-file")
+@click.option(
+    "-c", "--config", default="opta.yaml", help="Opta config file", show_default=True
+)
+@click.option(
+    "-e", "--env", default=None, help="The env to use when loading the config file"
+)
+def bulk_update(env_file: str, env: Optional[str], config: str) -> None:
+    """Bulk update a list of secrets for a k8s service using a dotenv file as in input.
+
+    Each line of the file should be in VAR=VAL format.
+
+    Examples:
+
+    opta secret bulk-update -c my-service.yaml secrets.env
+    """
+
+    config = check_opta_file_exists(config)
+    layer = Layer.load_from_yaml(config, env)
+    gen_all(layer)
+
+    configure_kubectl(layer)
+    create_namespace_if_not_exists(layer.name)
+    amplitude_client.send_event(amplitude_client.UPDATE_BULK_SECRET_EVENT)
+
+    bulk_update_manual_secrets(layer.name, env_file)
 
     print("Success")

@@ -44,7 +44,7 @@ from opta.core.gcp import GCP
 from opta.core.terraform import get_terraform_outputs
 from opta.exceptions import UserErrors
 from opta.nice_subprocess import nice_run
-from opta.utils import deep_merge, logger
+from opta.utils import logger
 from opta.utils.dependencies import ensure_installed
 
 if TYPE_CHECKING:
@@ -389,23 +389,25 @@ def create_namespace_if_not_exists(layer_name: str) -> None:
         )
 
 
-def create_manual_secrets_if_not_exists(layer_name: str) -> None:
+def create_secret_if_not_exists(namespace: str, secret_name: str) -> None:
+    """create the secret in the namespace if it doesn't exist"""
     load_opta_kube_config()
     v1 = CoreV1Api()
-    manual_secrets: V1SecretList = v1.list_namespaced_secret(
-        layer_name, field_selector="metadata.name=manual-secrets"
+    secrets: V1SecretList = v1.list_namespaced_secret(
+        namespace, field_selector=f"metadata.name={secret_name}"
     )
-    if len(manual_secrets.items) == 0:
+    if len(secrets.items) == 0:
         v1.create_namespaced_secret(
-            layer_name, body=V1Secret(metadata=V1ObjectMeta(name="manual-secrets"))
+            namespace, body=V1Secret(metadata=V1ObjectMeta(name=secret_name))
         )
 
 
-def get_manual_secrets(layer_name: str) -> dict:
+def get_namespaced_secrets(namespace: str, secret_name: str) -> dict:
+    """read the specified Secret"""
     load_opta_kube_config()
     v1 = CoreV1Api()
     try:
-        api_response = v1.read_namespaced_secret("manual-secrets", layer_name)
+        api_response = v1.read_namespaced_secret(secret_name, namespace)
     except ApiException as e:
         if e.status == 404:
             return {}
@@ -419,37 +421,22 @@ def get_manual_secrets(layer_name: str) -> dict:
     )
 
 
-def update_manual_secrets(layer_name: str, new_values: dict) -> None:
+def update_secrets(namespace: str, secret_name: str, new_values: dict) -> None:
+    """
+    append the new values to the existing data for this secret.
+
+    create the secret if it doesn't exist yet.
+    """
     load_opta_kube_config()
     v1 = CoreV1Api()
-    create_manual_secrets_if_not_exists(layer_name)
-    current_secret_object: V1Secret = v1.read_namespaced_secret(
-        "manual-secrets", layer_name
-    )
+    create_secret_if_not_exists(namespace, secret_name)
+    current_secret_object: V1Secret = v1.read_namespaced_secret(secret_name, namespace)
     current_secret_object.data = current_secret_object.data or {}
     for k, v in new_values.items():
         current_secret_object.data[k] = base64.b64encode(v.encode("utf-8")).decode(
             "utf-8"
         )
-    v1.replace_namespaced_secret("manual-secrets", layer_name, current_secret_object)
-
-
-def get_linked_secrets(layer_name: str) -> dict:
-    load_opta_kube_config()
-    v1 = CoreV1Api()
-    try:
-        api_response = v1.read_namespaced_secret("secret", layer_name)
-    except ApiException as e:
-        if e.status == 404:
-            return {}
-        raise e
-    return (
-        {}
-        if api_response.data is None
-        else {
-            k: base64.b64decode(v).decode("utf-8") for k, v in api_response.data.items()
-        }
-    )
+    v1.replace_namespaced_secret(secret_name, namespace, current_secret_object)
 
 
 def list_namespaces() -> None:
@@ -599,10 +586,6 @@ def update_config_map_data(namespace: str, name: str, data: Dict[str, str]) -> N
     ]
 
     v1.patch_namespaced_config_map(name, namespace, manifest)
-
-
-def get_secrets(layer_name: str) -> dict:
-    return deep_merge(get_manual_secrets(layer_name), get_linked_secrets(layer_name))
 
 
 def tail_module_log(

@@ -66,6 +66,7 @@ spec:
                 secretKeyRef:
                   name: secret
                   key: {{ $val.name | quote }}
+                  optional: true
             {{ end }}
             {{ range $val := .Values.manualSecrets }}
             - name: {{ $val | quote }}
@@ -73,6 +74,7 @@ spec:
                 secretKeyRef:
                   name: manual-secrets
                   key: {{ $val | quote }}
+                  optional: true
             {{ end }}
           {{/* No probes for grpc at the moment */}}
           {{ if not (hasKey .Values.port "grpc") }}

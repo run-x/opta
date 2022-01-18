@@ -2,11 +2,7 @@ from typing import TYPE_CHECKING, Dict, List, Union
 
 from modules.base import K8sServiceModuleProcessor, LocalK8sModuleProcessor
 from modules.linker_helper import LinkerHelper
-from opta.core.kubernetes import (
-    create_namespace_if_not_exists,
-    get_manual_secrets,
-    list_namespaces,
-)
+from opta.core.kubernetes import create_namespace_if_not_exists, list_namespaces
 from opta.exceptions import UserErrors
 
 if TYPE_CHECKING:
@@ -25,13 +21,6 @@ class LocalK8sServiceProcessor(LocalK8sModuleProcessor, K8sServiceModuleProcesso
     def pre_hook(self, module_idx: int) -> None:
         list_namespaces()
         create_namespace_if_not_exists(self.layer.name)
-        manual_secrets = get_manual_secrets(self.layer.name)
-        for secret_name in self.module.data.get("secrets", []):
-            if secret_name not in manual_secrets:
-                raise UserErrors(
-                    f"Secret {secret_name} has not been set via opta secret update! Please do so before applying the "
-                    f"K8s service w/ a new secret."
-                )
         super(LocalK8sServiceProcessor, self).pre_hook(module_idx)
 
     def process(self, module_idx: int) -> None:
