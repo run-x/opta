@@ -65,7 +65,5 @@ outputs:
 output_providers: { }
 output_data: { }
 clouds:
-  - azure
   - aws
-  - gcp
   - local
