@@ -54,9 +54,11 @@ class TestAzure:
     def test_get_credentials(self, mocker: MockFixture) -> None:
         mocked_default_creds = mocker.patch("opta.core.azure.DefaultAzureCredential")
         Azure.get_credentials()
+        Azure.credentials = None
         mocked_default_creds.assert_called_once_with()
 
     def test_get_remote_config(self, mocker: MockFixture, azure_layer: Mock) -> None:
+        Azure.credentials = None
         mocked_creds = mocker.Mock()
         mocked_default_creds = mocker.patch(
             "opta.core.azure.DefaultAzureCredential", return_value=mocked_creds
@@ -94,6 +96,7 @@ class TestAzure:
         )
 
     def test_upload_opta_config(self, mocker: MockFixture, azure_layer: Mock) -> None:
+        Azure.credentials = None
         mocked_creds = mocker.Mock()
         mocked_default_creds = mocker.patch(
             "opta.core.azure.DefaultAzureCredential", return_value=mocked_creds
@@ -120,6 +123,7 @@ class TestAzure:
         )
 
     def test_delete_opta_config(self, mocker: MockFixture, azure_layer: Mock) -> None:
+        Azure.credentials = None
         mocked_creds = mocker.Mock()
         mocked_default_creds = mocker.patch(
             "opta.core.azure.DefaultAzureCredential", return_value=mocked_creds
@@ -145,6 +149,7 @@ class TestAzure:
         )
 
     def test_delete_remote_state(self, mocker: MockFixture, azure_layer: Mock) -> None:
+        Azure.credentials = None
         mocked_creds = mocker.Mock()
         mocked_default_creds = mocker.patch(
             "opta.core.azure.DefaultAzureCredential", return_value=mocked_creds
