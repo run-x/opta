@@ -31,9 +31,7 @@
     },
     "cloud_provider": {
       "enum": [
-        "AWS",
-        "AZURE",
-        "GCP"
+        "AWS"
       ],
       "default": "AWS"
     },
@@ -65,9 +63,7 @@
   "opta_metadata": {
     "module_type": "service",
     "clouds": [
-      "aws",
-      "azure",
-      "gcp"
+      "aws"
     ],
     "name": "mongodb-atlas",
     "display_name": "mongodb-atlas",
