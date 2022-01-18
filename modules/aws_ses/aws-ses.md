@@ -4,7 +4,7 @@ linkTitle: "aws-ses"
 date: 2021-07-21
 draft: false
 weight: 1
-description: Sets up AWS SES for sending domains via your root domain
+description: Sets up AWS SES for sending emails via your root domain
 ---
 
 ### Notes

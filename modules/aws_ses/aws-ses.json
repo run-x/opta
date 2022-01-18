@@ -1,6 +1,6 @@
 {
   "$id": "https://app.runx.dev/modules/aws-ses",
-  "description": "Sets up AWS SES for sending domains via your root domain",
+  "description": "Sets up AWS SES for sending emails via your root domain",
   "type": "object",
   "properties": {
     "mail_from_prefix": {
