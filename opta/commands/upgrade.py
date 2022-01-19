@@ -33,7 +33,7 @@ def _cleanup_installation_file() -> None:
 @click.command()
 def upgrade() -> None:
     """
-    Upgrade Opta to the Latest version available
+    Upgrade Opta to the latest version available
     """
     try:
         upgrade_present = check_version_upgrade(is_upgrade_call=True)
@@ -44,8 +44,8 @@ def upgrade() -> None:
     except Exception:
         logger.error(
             f"{fg('red')}"
-            "\nUnable to Install Latest Version of Opta."
-            "\nPlease follow the Instructions on https://docs.opta.dev/installation"
+            "\nUnable to install latest version of Opta."
+            "\nPlease follow the instructions on https://docs.opta.dev/installation"
             f"{attr(0)}"
         )
     finally:
