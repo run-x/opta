@@ -1,4 +1,3 @@
-from re import L
 from typing import TYPE_CHECKING, Tuple
 
 from modules.base import ModuleProcessor
