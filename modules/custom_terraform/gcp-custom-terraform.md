@@ -10,7 +10,7 @@ description: Allows user to bring in their own custom terraform module
 This module allows a user to bring in their own custom terraform code into the opta ecosystem, to use in tandem with
 their other opta modules, and even reference them. All a user needs to do is specify the 
 [path](https://www.terraform.io/language/modules/sources#module-sources)
-to your module with the `path_to_module` input, and the desired inputs to your module (if any) via the 
+to your module with the `source` input, and the desired inputs to your module (if any) via the 
 `terraform_inputs` input.
 
 ## Example/Demo
@@ -35,24 +35,24 @@ The new service is written in `dummy-service/opta.yaml` and looks like this:
 environments:
   - name: gcp-example
     path: "../gcp-env.yaml"
-name: baloney
+name: customtf
 modules:
   - type: custom-terraform
     name: vm1
-    path_to_module: "./blah"
+    source: "./blah"
     terraform_inputs:
       hello: "world"
       subnet_self_link: "{parent.private_subnet_self_link}"
 # You can call it multiple times if you like
 #  - type: custom-terraform
 #    name: vm2
-#    path_to_module: "./blah"
+#    source: "./blah"
 #    terraform_inputs:
 #      hello: "world2"
 #      subnet_self_link: "{parent.private_subnet_self_link}"
 ```
 
-You can see that the path to your module is specified by `path_to_module` (you can use relative or absolute paths),
+You can see that the path to your module is specified by `source` (you can use relative or absolute paths),
 as are the expected inputs `hello` and `subnet_self_link`. Note that you can use opta interpolation to use variables or
 the outputs of the parent environment or other modules as input.
 
@@ -136,31 +136,38 @@ resource "google_compute_instance" "default" {
 Once you opta apply the service you should see your new compute instance up and running in the GCP console and be able
 to ssh into it.
 
-## Different options for path_to_module
-The `path_to_module` input uses terraform's [module source](https://www.terraform.io/language/modules/sources#module-sources)
+## Different options for source
+The `source` input uses terraform's [module source](https://www.terraform.io/language/modules/sources#module-sources)
 logic behind the scenes and so follows the same format/limitations. Thus, you can use this for locally available modules,
 or modules available remotely, like so:
 
 ```yaml
 environments:
-  - name: aws-example
-    path: "../aws-env.yaml"
-name: baloney
+  - name: gcp-example
+    path: "../gcp-env.yaml"
+name: customtf
 modules:
   - type: custom-terraform
-    name: iampolicy
-    path_to_module: "terraform-aws-modules/s3-bucket/aws" # See https://registry.terraform.io/modules/terraform-aws-modules/s3-bucket/aws/latest
-    version: "2.13.0" # version needs to be specified for remote modules
+    name: buckets
+    source: "terraform-google-modules/cloud-storage/google" # See https://registry.terraform.io/modules/terraform-google-modules/cloud-storage/google/latest
+    version: "~> 3.1" # version needs to be specified for remote modules
     terraform_inputs:
-      bucket: "dummy-bucket-{aws.account_id}"
-      acl: "private"
-      versioning: 
-        enabled: true
+      project_id: "<PROJECT ID>"
+      names: ["first", "second"]
+      prefix: "my-unique-prefix"
+      set_admin_roles: true
+      admins: ["group:foo-admins@example.com"]
+      versioning: {
+          first: true
+        }
+      bucket_admins: {
+        second: "user:spam@example.com,eggs@example.com"
+      }
 ```
 
 **WARNING** Be very, very, careful about what remote modules you are using, as they leave you wide open to supply chain
-attacks, depending on the security and character of the owner of said module. It's highly advised to use either official
-modules or modules under your company's control.
+attacks, depending on the security and character of the owner of said module. It's highly advised to use either 
+[official modules](https://registry.terraform.io/browse/modules ) or modules under your company's control.
 
 ## Using Outputs from your Custom Terraform Module
 Currently you can use outputs of your custom terraform module in the same yaml, like so:
@@ -168,14 +175,14 @@ Currently you can use outputs of your custom terraform module in the same yaml, 
 environments:
   - name: gcp-example
     path: "../gcp-env.yaml"
-name: baloney
+name: customtf
 modules:
   - type: custom-terraform
     name: hi1
-    path_to_module: "./blah1" # <-- This module has an output called output1
+    source: "./blah1" # <-- This module has an output called output1
   - type: custom-terraform
     name: hi2
-    path_to_module: "./blah2"
+    source: "./blah2"
     terraform_inputs:
       input1: "${{module.hi1.output1}}" # <-- HERE. Note the ${{}} wrapping
 ```

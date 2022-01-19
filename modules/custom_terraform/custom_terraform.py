@@ -15,18 +15,22 @@ class CustomTerraformProcessor(ModuleProcessor):
 
     def process(self, module_idx: int) -> None:
         current_desc = self.module.desc
-        path_to_module: str = self.module.data["path_to_module"]
+        source: str = self.module.data.get("source") or self.module.data.get(
+            "path_to_module"
+        )
+        if source is None:
+            raise UserErrors("Need to specify source (formerly path_to_module)")
         path_to_layer: str = os.path.abspath(os.path.dirname(self.layer.path))
         module_version: str = self.module.data.get("version", None) or ""
-        if path_to_module.startswith("./"):
-            path_to_module = path_to_module.strip("./")
-            self.module.module_dir_path = os.path.join(path_to_layer, path_to_module)
-        elif path_to_module.startswith("../"):
-            self.module.module_dir_path = os.path.join(path_to_layer, path_to_module)
+        if source.startswith("./"):
+            source = source.strip("./")
+            self.module.module_dir_path = os.path.join(path_to_layer, source)
+        elif source.startswith("../"):
+            self.module.module_dir_path = os.path.join(path_to_layer, source)
         else:
             # If this is the case, then this refers to a remote module as per
             # https://www.terraform.io/language/modules/sources
-            self.module.module_dir_path = path_to_module
+            self.module.module_dir_path = source
             if module_version == "":
                 raise UserErrors(
                     "module_version must be given to custom terraform for non-local modules"

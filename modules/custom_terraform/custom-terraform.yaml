@@ -2,15 +2,20 @@ halt: false
 environment_module: true
 is_unique: false
 inputs:
+  - name: source
+    user_facing: true
+    validator: str(required=False)
+    description: The path to your terraform module
+    default: null
   - name: path_to_module
     user_facing: true
-    validator: str(required=True)
-    description: The path to your terraform module
+    validator: str(required=False)
+    description: Deprecated, use source
     default: null
   - name: version
     user_facing: true
     validator: str(required=False)
-    description: The version of the remote module to use
+    description: The version of the remote module to use. For more info, check out https://www.terraform.io/language/modules/syntax#version
     default: null
   - name: terraform_inputs
     user_facing: true
