@@ -57,7 +57,7 @@ def check_version_upgrade(is_upgrade_call: bool = False) -> bool:
                     )
                 return True
             else:
-                logger.info("User on the Latest Version.")
+                logger.info("User on the latest version.")
         except Exception as e:
             logger.debug(f"Semver check failed with error {e}")
     return False

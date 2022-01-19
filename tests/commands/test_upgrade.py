@@ -2,7 +2,6 @@ from click.testing import CliRunner
 from pytest_mock import MockFixture
 
 from opta.cli import cli
-
 from opta.commands.upgrade import TEMP_INSTALLATION_FILENAME
 
 
@@ -28,4 +27,3 @@ def test_upgrade(mocker: MockFixture) -> None:
     mock_nice_run.assert_called_once_with([f"./{TEMP_INSTALLATION_FILENAME}"], input=b"y")
     mock_upgrade_successful.assert_called_once()
     mock_cleanup_installation_file.assert_called_once()
-
