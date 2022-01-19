@@ -121,10 +121,7 @@ async def _stream_subprocess(args: str, **kwargs: Any) -> CompletedProcess:
                 stderr = stdout.decode("utf-8")
 
             return CompletedProcess(
-                args=args,
-                returncode=await process.wait(),
-                stdout=stdout,
-                stderr=stderr,
+                args=args, returncode=await process.wait(), stdout=stdout, stderr=stderr,
             )
 
         except TimeoutError as e:

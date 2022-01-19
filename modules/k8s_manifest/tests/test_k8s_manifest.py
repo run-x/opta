@@ -15,5 +15,5 @@ class TestK8smanifestProcessor:
         idx = len(layer.modules)
         k8smanifest_module = layer.get_module("k8smanifest", idx)
         K8smanifestProcessor(k8smanifest_module, layer)
-        assert k8smanifest_module.data["kubeconfig"] == "~/.kube/config"
-        assert k8smanifest_module.data["kubecontext"] == "kind-opta-local-cluster"
+        assert k8smanifest_module.data["kubeconfig"] == "~/.kube/config"  # type: ignore
+        assert k8smanifest_module.data["kubecontext"] == "kind-opta-local-cluster"  # type: ignore

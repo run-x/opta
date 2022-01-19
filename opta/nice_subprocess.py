@@ -193,7 +193,6 @@ def nice_run(  # type: ignore # nosec
             raise e
 
         log_to_datadog(
-            "SUBPROCESS NORMAL RUN\nSTDOUT:\n{}\n".format(result.stdout),
-            "INFO",
+            "SUBPROCESS NORMAL RUN\nSTDOUT:\n{}\n".format(result.stdout), "INFO",
         )
         return result
