@@ -24,12 +24,19 @@ from opta.utils import check_opta_file_exists
     "-t",
     "--type",
     default=SHELLS_ALLOWED[0],
-    help="Shell to Use",
+    help=f"Shell to use, one of {SHELLS_ALLOWED}, ",
     show_default=True,
     type=click.Choice(SHELLS_ALLOWED),
 )
 def shell(env: Optional[str], config: str, type: str) -> None:
-    """Get a bash shell into one of the pods in your service"""
+    """
+    Get a shell into one of the pods in a service
+
+    Examples:
+
+    opta shell -c my-service.yaml
+
+    """
 
     config = check_opta_file_exists(config)
     # Configure kubectl

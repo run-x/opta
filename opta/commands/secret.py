@@ -18,7 +18,7 @@ from opta.utils import check_opta_file_exists
 
 @click.group(cls=DYMGroup)
 def secret() -> None:
-    """Commands for manipulating secrets for a k8s service
+    """Manage secrets for a service
 
     Examples:
 
@@ -29,6 +29,8 @@ def secret() -> None:
     opta secret bulk-update -c my-service.yaml secrets.env
 
     opta secret view -c my-service.yaml "MY_SECRET_1"
+
+    Documentation: https://docs.opta.dev/tutorials/secrets/
     """
     pass
 

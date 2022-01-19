@@ -39,7 +39,7 @@ from opta.utils import check_opta_file_exists, logger
     "--local",
     is_flag=True,
     default=False,
-    help="""Run the service locally on a local Kubernetes cluster for development and testing,  irrespective of the environment specified inside the opta service yaml file""",
+    help="""Use the local Kubernetes cluster for development and testing, irrespective of the environment specified inside the opta service yaml file""",
     hidden=False,
 )
 def destroy(
@@ -51,7 +51,9 @@ def destroy(
 
     Examples:
 
-    opta destroy -c my_config.yaml --auto-approve
+    opta destroy -c my-service.yaml --auto-approve
+
+    opta destroy -c my-env.yaml --auto-approve
     """
 
     pre_check()

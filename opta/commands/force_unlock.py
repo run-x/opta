@@ -17,11 +17,16 @@ from opta.utils import check_opta_file_exists
     "-e", "--env", default=None, help="The env to use when loading the config file."
 )
 def force_unlock(config: str, env: Optional[str]) -> None:
-    """Force Unlocks a stuck lock on the current workspace
+    """Release a stuck lock on the current workspace
+
+    Manually unlock the state for the defined configuration.
+
+    This will not modify your infrastructure. This command removes the lock on the
+    state for the current workspace.
 
     Examples:
 
-    opta force-unlock -c my_config.yaml -e prod.yaml
+    opta force-unlock -c my-config.yaml -e prod
     """
     tf_flags: List[str] = []
     config = check_opta_file_exists(config)

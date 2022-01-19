@@ -93,13 +93,16 @@ def apply(
     auto_approve: bool,
     detailed_plan: bool,
 ) -> None:
-    """Initialize your environment or service to match the config file
+    """Create or update infrastructure
+
+    Apply changes to match the Opta configuration
+    files in the current directory.
 
     Examples:
 
-    opta apply -c my_config.yaml --auto-approve
+    opta apply --auto-approve
 
-    opta apply -c my_config.yaml --image-tag=v1
+    opta apply -c my-config.yaml --image-tag=v1
     """
     config = check_opta_file_exists(config)
     _apply(

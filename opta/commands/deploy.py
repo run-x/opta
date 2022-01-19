@@ -58,17 +58,23 @@ def deploy(
     detailed_plan: bool,
     local: Optional[bool],
 ) -> None:
-    """Push your new image to the cloud and deploy it in your environment
+    """Deploy a local image to Kubernetes
 
-    You can build your container image locally and then pass it with the -i flag
+    1. Push the image to the private container registry (ECR, GCR, ACR)
+
+    2. Update the kubernetes deployment to use the new container image.
+
+    3. Create new pods to use the new container image - automatically done by kubernetes.
 
     Examples:
 
-    opta deploy -c my_config.yaml -i my_container:latest --auto-approve
+    opta deploy -c my-service.yaml -i my-image:latest --auto-approve
 
-    opta deploy -c my_config.yaml -i my_container:latest -e prod
+    opta deploy -c my-service.yaml -i my-image:latest -e prod
 
-    opta deploy -c my_config.yaml -i my_container:latest --local
+    opta deploy -c my-service.yaml -i my-image:latest --local
+
+    Documentation: https://docs.opta.dev/tutorials/custom_image/
 
     """
 

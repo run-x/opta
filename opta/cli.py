@@ -14,7 +14,6 @@ from opta.commands.deploy import deploy
 from opta.commands.destroy import destroy
 from opta.commands.events import events
 from opta.commands.force_unlock import force_unlock
-from opta.commands.init import init
 from opta.commands.inspect_cmd import inspect
 from opta.commands.kubectl import configure_kubectl
 from opta.commands.logs import logs
@@ -23,6 +22,7 @@ from opta.commands.push import push
 from opta.commands.secret import secret
 from opta.commands.shell import shell
 from opta.commands.upgrade import upgrade
+from opta.commands.ui import ui
 from opta.commands.validate import validate
 from opta.commands.version import version
 from opta.crash_reporter import CURRENT_CRASH_REPORTER
@@ -34,7 +34,12 @@ from opta.utils import dd_handler, dd_listener, logger
 
 @click.group(cls=DYMGroup, context_settings=dict(help_option_names=["-h", "--help"]))
 def cli() -> None:
-    """Welcome to opta, runx's cli!"""
+    """Welcome to opta, runx's cli! Supercharge DevOps on any cloud
+
+    Github: https://github.com/run-x/opta
+
+    Documentation: https://docs.opta.dev/
+    """
     pass
 
 
@@ -43,7 +48,7 @@ cli.add_command(apply)
 cli.add_command(deploy)
 cli.add_command(destroy)
 cli.add_command(configure_kubectl)
-cli.add_command(init)
+cli.add_command(ui)
 cli.add_command(inspect)
 cli.add_command(logs)
 cli.add_command(output)
