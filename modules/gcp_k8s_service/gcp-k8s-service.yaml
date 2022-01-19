@@ -80,7 +80,7 @@ inputs:
   - name: secrets
     user_facing: true
     validator: list(str(), required=False)
-    description: Optional. A list of secrets to add as environment variables for your container. All secrets must be set following the [secrets instructions](/tutorials/secrets) prior to deploying the app.
+    description: Optional. A list of secrets to add as environment variables for your container. All secrets must be set following the [secrets instructions](/tutorials/secrets).
     default: []
   - name: env_vars
     user_facing: true
