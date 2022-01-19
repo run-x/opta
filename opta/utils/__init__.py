@@ -224,9 +224,7 @@ def check_opta_file_exists(config_path: str, prompt: bool = True) -> str:
         alternate_yaml, changed = alternate_yaml_extension(config_path)
         if changed and os.path.exists(alternate_yaml):
             logger.warning(
-                "Could not find file %s, but loaded %s.",
-                config_path,
-                alternate_yaml,
+                "Could not find file %s, but loaded %s.", config_path, alternate_yaml,
             )
             return alternate_yaml
 

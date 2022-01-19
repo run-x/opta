@@ -75,10 +75,7 @@ def test_get_ecr_auth_info(mocker: MockFixture) -> None:
     mocked_ecr_client.get_authorization_token = mock_get_authorization_token
     patched_boto_client = mocker.patch("opta.commands.push.boto3.client")
     patched_boto_client.return_value = mocked_ecr_client
-    assert get_ecr_auth_info(mocked_layer) == (
-        "username",
-        "password",
-    )
+    assert get_ecr_auth_info(mocked_layer) == ("username", "password",)
 
 
 def test_get_gcr_auth_info(mocker: MockFixture) -> None:
@@ -90,10 +87,7 @@ def test_get_gcr_auth_info(mocker: MockFixture) -> None:
         "opta.commands.push.GCP.get_credentials",
         return_value=tuple([mocked_credentials, "oauth2accesstoken"]),
     )
-    assert get_gcr_auth_info(mocked_layer) == (
-        "oauth2accesstoken",
-        "blah",
-    )
+    assert get_gcr_auth_info(mocked_layer) == ("oauth2accesstoken", "blah",)
     patched_gcp.assert_called_once_with()
 
 
@@ -170,8 +164,7 @@ def test_valid_input(mocker: MockFixture) -> None:
                 check=True,
             ),
             mocker.call(
-                ["docker", "push", f"{REGISTRY_URL}:image_tag_override"],
-                check=True,
+                ["docker", "push", f"{REGISTRY_URL}:image_tag_override"], check=True,
             ),
         ]
     )

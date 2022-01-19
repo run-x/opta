@@ -79,8 +79,7 @@ def _check_opta_config_schemas(write: bool = False) -> None:
             cloudjs = CLOUD_NAME_TO_JSON_SCHEMA_NAME[cloud]
             all_modules = _get_all_modules(cloudjs)
             json_schema_file_path = join(
-                opta_config_schemas_path,
-                f"{cloudjs}-{config_type}.json",
+                opta_config_schemas_path, f"{cloudjs}-{config_type}.json",
             )
 
             json_schema_file = open(json_schema_file_path)

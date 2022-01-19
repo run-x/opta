@@ -8,7 +8,4 @@ def apply(d: dict, v: str) -> dict:
     return d
 
 
-orgNameVariable = TemplateVariable(
-    prompt="Org name",
-    applier=apply,
-)
+orgNameVariable = TemplateVariable(prompt="Org name", applier=apply,)
