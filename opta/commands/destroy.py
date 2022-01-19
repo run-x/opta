@@ -90,7 +90,7 @@ def destroy(
 
     tf_flags: List[str] = []
     if auto_approve:
-        sleep_time = 2
+        sleep_time = 5
         logger.info(
             f"{attr('bold')}Opta will now destroy the {attr('underlined')}{layer.name}{attr(0)}"
             f"{attr('bold')} layer.{attr(0)}\n"
