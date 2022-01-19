@@ -156,7 +156,11 @@ class StatusPane(OptaPane):
             x += 2
             for i in range(0, len(title), max_x - 4):
                 self.screen.addnstr(
-                    y, x, title[i : max_x - 2], max_x - 2, curses.A_BOLD,
+                    y,
+                    x,
+                    title[i : max_x - 2],
+                    max_x - 2,
+                    curses.A_BOLD,
                 )
                 y += 1
             x = 1
@@ -305,7 +309,11 @@ class PlanningPane(OptaPane):
         self.screen.addnstr(y, x, cur_str, max_x - 2)
         x += len(cur_str)
         self.screen.addnstr(
-            y, x, self.release_tag, max_x - 2, curses.A_BOLD | curses.color_pair(6),
+            y,
+            x,
+            self.release_tag,
+            max_x - 2,
+            curses.A_BOLD | curses.color_pair(6),
         )
         x = 1
         y += 1
@@ -314,7 +322,11 @@ class PlanningPane(OptaPane):
         self.screen.addnstr(y, x, cur_str, max_x - 2)
         x += len(cur_str)
         self.screen.addnstr(
-            y, x, self.release_title, max_x - 2, curses.A_BOLD | curses.color_pair(6),
+            y,
+            x,
+            self.release_title,
+            max_x - 2,
+            curses.A_BOLD | curses.color_pair(6),
         )
         x = 1
         y += 1
@@ -491,7 +503,11 @@ class CommitInfoPane(OptaPane):
         self.screen.addnstr(y, x, cur_str, max_x - 2)
         x += len(cur_str)
         self.screen.addnstr(
-            y, x, message_blocks[0], max_x - 2, curses.A_BOLD | curses.color_pair(6),
+            y,
+            x,
+            message_blocks[0],
+            max_x - 2,
+            curses.A_BOLD | curses.color_pair(6),
         )
         x = 1
         y += 1
@@ -557,7 +573,11 @@ class CommitInfoPane(OptaPane):
         for block in message_blocks[1:]:
             for i in range(0, len(block), max_x - 2):
                 self.screen.addnstr(
-                    y, x, block[i : max_x - 2], max_x - 2, curses.A_BOLD,
+                    y,
+                    x,
+                    block[i : max_x - 2],
+                    max_x - 2,
+                    curses.A_BOLD,
                 )
                 y += 1
 
@@ -570,7 +590,11 @@ class CommitInfoPane(OptaPane):
             for block in body.split("\n"):
                 for i in range(0, len(block), max_x - 2):
                     self.screen.addnstr(
-                        y, x, block[i : max_x - 2], max_x - 2, curses.A_BOLD,
+                        y,
+                        x,
+                        block[i : max_x - 2],
+                        max_x - 2,
+                        curses.A_BOLD,
                     )
                     y += 1
 
@@ -624,7 +648,11 @@ class FinalizeDraftPane(OptaPane):
         self.screen.addnstr(y, x, cur_str, max_x - 2)
         x += len(cur_str)
         self.screen.addnstr(
-            y, x, self.release_tag, max_x - 2, curses.A_BOLD | curses.color_pair(6),
+            y,
+            x,
+            self.release_tag,
+            max_x - 2,
+            curses.A_BOLD | curses.color_pair(6),
         )
         x = 1
         y += 1
@@ -633,7 +661,11 @@ class FinalizeDraftPane(OptaPane):
         self.screen.addnstr(y, x, cur_str, max_x - 2)
         x += len(cur_str)
         self.screen.addnstr(
-            y, x, self.release_title, max_x - 2, curses.A_BOLD | curses.color_pair(6),
+            y,
+            x,
+            self.release_title,
+            max_x - 2,
+            curses.A_BOLD | curses.color_pair(6),
         )
         x = 1
         y += 2
@@ -672,7 +704,11 @@ class FinalizeDraftPane(OptaPane):
         for block in release_body.split("\n"):
             for i in range(0, len(block), max_x - 2):
                 self.screen.addnstr(
-                    y, x, block[i : max_x - 2], max_x - 2, curses.A_BOLD,
+                    y,
+                    x,
+                    block[i : max_x - 2],
+                    max_x - 2,
+                    curses.A_BOLD,
                 )
                 y += 1
             if len(block) == 0:

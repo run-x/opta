@@ -59,7 +59,9 @@ def get_ecr_auth_info(layer: Layer) -> Tuple[str, str]:
 
     try:
         ecr = boto3.client("ecr", config=Config(region_name=region))
-        response = ecr.get_authorization_token(registryIds=[str(account_id)],)
+        response = ecr.get_authorization_token(
+            registryIds=[str(account_id)],
+        )
     except Exception:
         raise Exception(
             f"Error getting authorization token for accountId {account_id} in region {region}"
@@ -125,7 +127,9 @@ def push_to_docker(
 
 
 def push_to_docker_local(
-    local_image: str, registry_url: str, image_tag_override: Optional[str],
+    local_image: str,
+    registry_url: str,
+    image_tag_override: Optional[str],
 ) -> Tuple[str, str]:
     image_tag = get_push_tag(local_image, image_tag_override)
     remote_image_name = f"{registry_url}:{image_tag}"

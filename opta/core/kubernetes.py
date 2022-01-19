@@ -709,7 +709,8 @@ def tail_namespace_events(
     while True:
         try:
             for stream_obj in watch.stream(
-                v1.list_namespaced_event, namespace=layer.name,
+                v1.list_namespaced_event,
+                namespace=layer.name,
             ):
                 event = stream_obj["object"]
                 if (

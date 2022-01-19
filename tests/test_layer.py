@@ -17,7 +17,8 @@ class TestLayer:
         with pytest.raises(UserErrors):
             Layer.load_from_yaml(
                 os.path.join(
-                    os.path.dirname(os.path.dirname(__file__)), "infinite_loop.yaml",
+                    os.path.dirname(os.path.dirname(__file__)),
+                    "infinite_loop.yaml",
                 ),
                 None,
             )
@@ -437,7 +438,10 @@ class TestLayer:
             side_effect=[service_github_repo_env, dummy_config_parent],
         )
 
-        layer = Layer.load_from_yaml(service_github_repo_env, None,)
+        layer = Layer.load_from_yaml(
+            service_github_repo_env,
+            None,
+        )
         git_repo_mocked.assert_called_once_with(
             "git@github.com:run-x/runx-infra.git", mocker.ANY, branch="main", depth=1
         )
