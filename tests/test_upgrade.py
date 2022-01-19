@@ -5,7 +5,6 @@ from pytest_mock import MockFixture
 
 from opta.upgrade import (
     LATEST_VERSION_FILE_URL,
-    UPGRADE_INSTRUCTIONS_URL,
     _get_latest_version,
     check_version_upgrade,
 )
