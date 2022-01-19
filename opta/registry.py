@@ -102,8 +102,12 @@ def _make_module_docs(vanilla_text: str, module_dict: Dict[Any, Any]) -> str:
 
 
 def _get_all_module_info(directory: str, cloud: str) -> list:
+    """
+    Return a list of tuples: (module_name, yaml_path, md_path)
+    """
     rtn_list = []
     all_yaml_files = glob.glob(directory + "/**/*.yaml", recursive=True)
+    all_md_files = glob.glob(directory + "/**/*.md", recursive=True)
     for a_yaml_path in all_yaml_files:
         try:
             module_dict = yaml.load(open(a_yaml_path))
@@ -116,7 +120,23 @@ def _get_all_module_info(directory: str, cloud: str) -> list:
         if cloud not in module_dict["clouds"]:
             continue
         module_name = os.path.basename(a_yaml_path).split(".yaml")[0]
-        rtn_list.append((a_yaml_path, module_name))
+
+        # try loading cloud specific .md first
+        module_md_files = [
+            f for f in all_md_files if os.path.basename(f) == f"{cloud}-{module_name}.md"
+        ]
+        if not module_md_files:
+            # expect a generic module .md
+            module_md_files = [
+                f for f in all_md_files if os.path.basename(f) == f"{module_name}.md"
+            ]
+        if not module_md_files:
+            raise Exception(
+                f"Can't find .md file for module {module_name}, cloud {cloud}"
+            )
+        a_md_path = module_md_files[0]
+
+        rtn_list.append((module_name, a_yaml_path, a_md_path))
     return rtn_list
 
 
@@ -125,16 +145,14 @@ def _make_module_registry_dict(directory: str, cloud: str = "") -> Dict[Any, Any
         raise Exception(f"Non-existing directory given as input: {directory}")
     modules_dict = {}
     cloud_yamls_module_names = _get_all_module_info(directory, cloud)
-    for a_yaml_path, module_name in cloud_yamls_module_names:
+    for module_name, a_yaml_path, a_md_path in cloud_yamls_module_names:
         try:
             module_dict = yaml.load(open(a_yaml_path))
             if not module_dict:
                 continue
         except:  # nosec # noqa
             continue
-        with open(
-            os.path.join(os.path.dirname(a_yaml_path), f"{module_name}.md"), "r"
-        ) as f:
+        with open(a_md_path, "r") as f:
             module_dict["text"] = _make_module_docs(f.read(), module_dict)
         for input in module_dict["inputs"]:
             input["required"] = (
