@@ -61,6 +61,7 @@ docker = "5.0.0"
 tabulate = "0.8.9"
 types-tabulate = "0.8.2"
 psutil = "5.8.0"
+jsonschema = "==4.2.1"
 
 [requires]
 python_version = "3.8"

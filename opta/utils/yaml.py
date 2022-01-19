@@ -19,7 +19,7 @@ def register_yaml_class(cls: Type) -> None:
     _yaml_classes.add(cls)
 
 
-def yaml_load(f: IO) -> Any:
+def load(f: IO) -> Any:
     y = YAML()
 
     return y.load(f)

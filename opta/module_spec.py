@@ -1,9 +1,9 @@
 import os
-from typing import Any, Dict, Iterable, List, TypeVar
+from typing import Any, Dict, Iterable, List, Optional, TypeVar
 
-from opta.link_spec import InputLinkSpec, LinkSpec, OutputLinkSpec
+from opta.link_spec import InputLinkSpec, LinkConnectionSpec, LinkSpec, OutputLinkSpec
 from opta.utils import schema
-from opta.utils.yaml import yaml_load
+from opta.utils import yaml
 
 SPEC_NAME = "module.yaml"
 
@@ -16,8 +16,10 @@ class ModuleSpec:
     clouds: List[str]
     input_schema: Schema
     input_links: List[InputLinkSpec]
+    input_terraform_connections: List[LinkConnectionSpec]
     output_schema: Schema
     output_links: List[OutputLinkSpec]
+    dir: Optional[str]
 
     def input_link_spec_for(self, type_or_alias: str) -> InputLinkSpec:
         return self._link_spec_for("Input", self.input_links, type_or_alias)
@@ -38,8 +40,9 @@ class ModuleSpec:
             raise KeyError(f"{type_name} link type/alias {type} not found.") from None
 
     @classmethod
-    def from_raw(cls, raw: Dict[str, Any]) -> "ModuleSpec":
+    def from_dict(cls, dir: str, raw: Dict[str, Any]) -> "ModuleSpec":
         spec = cls()
+        spec.dir = dir
         spec.name = raw["name"]
         spec.clouds = raw["clouds"]
 
@@ -47,32 +50,36 @@ class ModuleSpec:
         spec.output_schema = raw.get("output_schema", {})
 
         spec.input_links = [
-            InputLinkSpec.from_raw(raw_link) for raw_link in raw.get("input_links", [])
+            InputLinkSpec.from_dict(raw_link) for raw_link in raw.get("input_links", [])
         ]
         spec.output_links = [
-            OutputLinkSpec.from_raw(raw_link) for raw_link in raw.get("output_links", [])
+            OutputLinkSpec.from_dict(raw_link) for raw_link in raw.get("output_links", [])
+        ]
+
+        spec.input_terraform_connections = [
+            LinkConnectionSpec.from_dict(raw_conn) for raw_conn in raw.get("input_terraform_connections")
         ]
 
         return spec
 
-    @classmethod
-    def load(cls, module_path: str) -> "ModuleSpec":
-        spec_path = os.path.join(module_path, SPEC_NAME)
-        with open(spec_path, "r") as f:
-            spec_raw = yaml_load(f)
+    # @classmethod
+    # def load(cls, module_path: str) -> "ModuleSpec":
+    #     spec_path = os.path.join(module_path, SPEC_NAME)
+    #     with open(spec_path, "r") as f:
+    #         spec_raw = yaml.load(f)
 
-        schema.apply_default_schema(spec_raw)
-        schema.validate(spec_raw, schema.module_schema())
+    #     schema.apply_default_schema(spec_raw)
+    #     schema.validate(spec_raw, schema.module_schema())
 
-        return cls.from_raw(spec_raw)
+    #     return cls.from_dict(spec_raw)
 
-    @classmethod
-    def load_all(cls, base_path: str) -> List["ModuleSpec"]:
-        modules: List["ModuleSpec"] = []
-        for child in os.scandir(base_path):
-            if not child.is_dir():
-                continue
+    # @classmethod
+    # def load_all(cls, base_path: str) -> List["ModuleSpec"]:
+    #     modules: List["ModuleSpec"] = []
+    #     for child in os.scandir(base_path):
+    #         if not child.is_dir():
+    #             continue
 
-            modules.append(cls.load(child.path))
+    #         modules.append(cls.load(child.path))
 
-        return modules
+    #     return modules

@@ -13,17 +13,27 @@ class LinkConnectionSpec:
     target: Reference
 
     @classmethod
-    def from_raw(cls, raw: Dict[str, str]) -> "LinkConnectionSpec":
+    def from_dict(cls, raw: Dict[str, str]) -> "LinkConnectionSpec":
+        if "both" in raw:
+            if len(raw) > 1:
+                raise ValueError("Unexpected `both` key in connection")
+
+            source = raw["both"]
+            target = raw["both"]
+        else:
+            source = raw["source"]
+            target = raw["target"]
+
         c = cls(
-            source=Reference.parse(raw["source"]),
-            target=Reference.parse(raw["target"]),
+            source=Reference.parse(source),
+            target=Reference.parse(target),
         )
 
         return c
 
     @classmethod
-    def from_raw_all(cls, raw_all: List[Dict[str, str]]) -> List["LinkConnectionSpec"]:
-        return [cls.from_raw(raw) for raw in raw_all]
+    def from_dict_all(cls, raw_all: List[Dict[str, str]]) -> List["LinkConnectionSpec"]:
+        return [cls.from_dict(raw) for raw in raw_all]
 
 
 class LinkSpec:
@@ -44,12 +54,12 @@ class LinkSpec:
             self._alias = None
 
     @classmethod
-    def from_raw(cls: Type[T], raw: Dict[str, Any]) -> T:
+    def from_dict(cls: Type[T], raw: Dict[str, Any]) -> T:
         link = cls(raw["type"])
         link._alias = raw.get("alias")
 
         if "connections" in raw:
-            link.connections = LinkConnectionSpec.from_raw_all(raw["connections"])
+            link.connections = LinkConnectionSpec.from_dict_all(raw["connections"])
 
         return link
 
@@ -61,8 +71,8 @@ class OutputLinkSpec(LinkSpec):
         self.connect_all_from: Optional[Reference] = None
 
     @classmethod
-    def from_raw(cls, raw: Dict[str, Any]) -> "OutputLinkSpec":
-        link = super(OutputLinkSpec, cls).from_raw(raw)
+    def from_dict(cls, raw: Dict[str, Any]) -> "OutputLinkSpec":
+        link = super(OutputLinkSpec, cls).from_dict(raw)
 
         if "connect_all_from" in raw:
             link.connect_all_from = Reference.parse(raw["connect_all_from"])
@@ -81,8 +91,8 @@ class InputLinkSpec(LinkSpec):
         self.params_schema: Optional[Dict[str, Any]] = None
 
     @classmethod
-    def from_raw(cls, raw: Dict[str, Any]) -> "InputLinkSpec":
-        link = super(InputLinkSpec, cls).from_raw(raw)
+    def from_dict(cls, raw: Dict[str, Any]) -> "InputLinkSpec":
+        link = super(InputLinkSpec, cls).from_dict(raw)
 
         link.automatic = raw.get("automatic", link.automatic)
 
@@ -94,7 +104,7 @@ class InputLinkSpec(LinkSpec):
 
         # TODO: param_connections and param_schema mutually inclusive. Raise error if only one set
         if "params_connections" in raw:
-            link.params_connections = LinkConnectionSpec.from_raw_all(
+            link.params_connections = LinkConnectionSpec.from_dict_all(
                 raw["params_connections"]
             )
 
