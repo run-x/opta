@@ -26,7 +26,7 @@ When linked to a k8s-service, it adds connection credentials to your container's
 - `{module_name}_db_name`
 - `{module_name}_db_host`
 
-In the [modules reference](/reference) example, the _{module_name}_ would be replaced with `rds`
+In the [modules reference](/reference) example, the _{module_name}_ would be replaced with `rds`.
 
 The permission list can optionally have one entry which should be a map for renaming the default environment variable
 names to a user-defined value:
@@ -41,3 +41,10 @@ links:
 ```
 
 If present, this map must have renames for all 4 fields.
+
+These values are passed securely into your environment by using a kubernetes secret created by opta within you
+k8s-service's isolated k8s namespace.  These secrets are then passed as environment variables directly into your container.
+Take note that since opta's AWS/EKS clusters always have the disk encryption enabled, your secret never touches an
+unencrypted disk. Furthermore, because of k8's RBAC, no other opta-managed k8s service can access this instance of the
+creds as a k8s secret without manual override of the RBAC, nor can any other entities/users unless given "read secret"
+permission on this namespace.
