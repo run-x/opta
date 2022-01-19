@@ -8,8 +8,9 @@ description: Allows user to bring in their own custom terraform module
 ---
 
 This module allows a user to bring in their own custom terraform code into the opta ecosystem, to use in tandem with
-their other opta modules, and even reference them. All a user needs to do is specify the path (absolute or relative to 
-the opta yaml) to your module with the `path_to_module` input, and the desired inputs to your module (if any) via the 
+their other opta modules, and even reference them. All a user needs to do is specify the 
+[path](https://www.terraform.io/language/modules/sources#module-sources)
+to your module with the `path_to_module` input, and the desired inputs to your module (if any) via the 
 `terraform_inputs` input.
 
 ## Example/Demo
@@ -24,7 +25,7 @@ service-- it can be in the environment too). For our example, let's say that the
 ├── gcp-env.yaml
 └── dummy-service
     ├── blah
-    │   └── main.tf
+    │    └── main.tf
     └── opta.yaml
 ```
 
@@ -134,6 +135,32 @@ resource "google_compute_instance" "default" {
 
 Once you opta apply the service you should see your new compute instance up and running in the GCP console and be able
 to ssh into it.
+
+## Different options for path_to_module
+The `path_to_module` input uses terraform's [module source](https://www.terraform.io/language/modules/sources#module-sources)
+logic behind the scenes and so follows the same format/limitations. Thus, you can use this for locally available modules,
+or modules available remotely, like so:
+
+```yaml
+environments:
+  - name: aws-example
+    path: "../aws-env.yaml"
+name: baloney
+modules:
+  - type: custom-terraform
+    name: iampolicy
+    path_to_module: "terraform-aws-modules/s3-bucket/aws" # See https://registry.terraform.io/modules/terraform-aws-modules/s3-bucket/aws/latest
+    version: "2.13.0" # version needs to be specified for remote modules
+    terraform_inputs:
+      bucket: "dummy-bucket-{aws.account_id}"
+      acl: "private"
+      versioning: 
+        enabled: true
+```
+
+**WARNING** Be very, very, careful about what remote modules you are using, as they leave you wide open to supply chain
+attacks, depending on the security and character of the owner of said module. It's highly advised to use either official
+modules or modules under your company's control.
 
 ## Using Outputs from your Custom Terraform Module
 Currently you can use outputs of your custom terraform module in the same yaml, like so:

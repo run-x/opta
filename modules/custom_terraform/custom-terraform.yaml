@@ -7,6 +7,11 @@ inputs:
     validator: str(required=True)
     description: The path to your terraform module
     default: null
+  - name: version
+    user_facing: true
+    validator: str(required=False)
+    description: The version of the remote module to use
+    default: null
   - name: terraform_inputs
     user_facing: true
     validator: map(str(), any(), required=False)

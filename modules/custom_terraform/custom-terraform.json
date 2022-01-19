@@ -12,6 +12,10 @@
       "description": "The variables which you wish to pass into your custom module.",
       "default": {}
     },
+    "version": {
+      "type": "string",
+      "description": "The version of the remote module to use"
+    },
     "type": {
       "description": "The name of this module",
       "enum": [
