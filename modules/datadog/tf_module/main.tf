@@ -17,7 +17,7 @@ resource "helm_release" "datadog" {
   repository = "https://helm.datadoghq.com"
   chart      = "datadog"
   name       = "${var.layer_name}-${var.module_name}"
-
+  version    = "2.28.13"
   values = [
     yamlencode({
       datadog : {
@@ -40,7 +40,7 @@ resource "helm_release" "datadog" {
         clusterName : var.layer_name
 
         apm : {
-          enabled : true
+          portEnabled : true
         }
         podLabelsAsTags : {
           app : "kube_app"
