@@ -90,11 +90,13 @@ def _local_configure_kubectl(layer: "Layer") -> None:
         capture_output=True,
     ).stdout
 
-def get_config_file_name(layer) -> str:
+
+def get_config_file_name(layer: "Layer") -> str:
     config_file_name = (
         f"{GENERATED_KUBE_CONFIG_DIR}/kubeconfig-{layer.root().name}-{layer.cloud}.yaml"
     )
     return config_file_name
+
 
 def load_opta_config_to_default(layer: "Layer") -> None:
     config_file_name = get_config_file_name(layer)
