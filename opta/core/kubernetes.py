@@ -90,11 +90,14 @@ def _local_configure_kubectl(layer: "Layer") -> None:
         capture_output=True,
     ).stdout
 
-
-def load_opta_config_to_default(layer: "Layer") -> None:
+def get_config_file_name(layer) -> str:
     config_file_name = (
         f"{GENERATED_KUBE_CONFIG_DIR}/kubeconfig-{layer.root().name}-{layer.cloud}.yaml"
     )
+    return config_file_name
+
+def load_opta_config_to_default(layer: "Layer") -> None:
+    config_file_name = get_config_file_name(layer)
     if not exists(config_file_name):
         logger.debug(
             f"Can not find opta managed kube config, {config_file_name}, to load to user default"
@@ -150,9 +153,7 @@ def load_opta_config_to_default(layer: "Layer") -> None:
 
 def _gcp_configure_kubectl(layer: "Layer") -> None:
     ensure_installed("gcloud")
-    config_file_name = (
-        f"{GENERATED_KUBE_CONFIG_DIR}/kubeconfig-{layer.root().name}-{layer.cloud}.yaml"
-    )
+    config_file_name = get_config_file_name(layer)
     global GENERATED_KUBE_CONFIG
     if exists(config_file_name):
         if getmtime(config_file_name) > time.time() - ONE_WEEK_UNIX:
@@ -253,9 +254,7 @@ def _azure_configure_kubectl(layer: "Layer") -> None:
 
 
 def _aws_configure_kubectl(layer: "Layer") -> None:
-    config_file_name = (
-        f"{GENERATED_KUBE_CONFIG_DIR}/kubeconfig-{layer.root().name}-{layer.cloud}.yaml"
-    )
+    config_file_name = get_config_file_name(layer)
     global GENERATED_KUBE_CONFIG
     if exists(config_file_name):
         if getmtime(config_file_name) > time.time() - ONE_WEEK_UNIX:

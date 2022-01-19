@@ -1,3 +1,4 @@
+from re import L
 from typing import TYPE_CHECKING, Tuple
 
 from modules.base import ModuleProcessor
@@ -8,7 +9,7 @@ if TYPE_CHECKING:
 
 import yaml
 
-from opta.core.kubernetes import GENERATED_KUBE_CONFIG_DIR
+from opta.core.kubernetes import get_config_file_name
 
 
 class K8smanifestProcessor(ModuleProcessor):
@@ -27,7 +28,7 @@ class K8smanifestProcessor(ModuleProcessor):
         if layer.cloud == "local":
             return "~/.kube/config", "kind-opta-local-cluster"
         else:
-            config_file_name = f"{GENERATED_KUBE_CONFIG_DIR}/kubeconfig-{layer.root().name}-{layer.cloud}.yaml"
+            config_file_name = get_config_file_name(layer)
         with open(config_file_name, "r") as stream:
             context = (yaml.safe_load(stream))["current-context"]
         return config_file_name, context
