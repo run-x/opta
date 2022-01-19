@@ -1,5 +1,7 @@
 import base64
-from typing import TYPE_CHECKING, Any, Optional
+from contextlib import redirect_stderr
+from io import StringIO
+from typing import TYPE_CHECKING, Optional
 
 from azure.core.exceptions import ResourceNotFoundError
 from azure.identity import DefaultAzureCredential
@@ -14,10 +16,20 @@ if TYPE_CHECKING:
 
 class Azure(CloudClient):
     project_id: Optional[str] = None
+    credentials: Optional[DefaultAzureCredential] = None
 
     @classmethod
-    def get_credentials(cls) -> Any:
-        return DefaultAzureCredential()
+    def get_credentials(cls) -> DefaultAzureCredential:
+        if cls.credentials is None:
+            cls.credentials = DefaultAzureCredential()
+            f = StringIO()
+            try:
+                with redirect_stderr(f):
+                    cls.credentials.get_token("https://storage.azure.com/")
+            except Exception as e:
+                logger.error(f.getvalue())
+                raise e
+        return cls.credentials
 
     def get_remote_config(self) -> Optional["StructuredConfig"]:
         providers = self.layer.gen_providers(0)

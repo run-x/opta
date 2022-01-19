@@ -1,3 +1,4 @@
+from typing import Generator
 from unittest.mock import Mock
 
 from azure.identity import DefaultAzureCredential
@@ -50,6 +51,12 @@ def azure_layer() -> Mock:
     return layer
 
 
+@fixture(autouse=True)
+def reset_azure_creds() -> Generator:
+    Azure.credentials = None
+    yield
+
+
 class TestAzure:
     def test_get_credentials(self, mocker: MockFixture) -> None:
         mocked_default_creds = mocker.patch("opta.core.azure.DefaultAzureCredential")
@@ -94,6 +101,7 @@ class TestAzure:
         )
 
     def test_upload_opta_config(self, mocker: MockFixture, azure_layer: Mock) -> None:
+        Azure.credentials = None
         mocked_creds = mocker.Mock()
         mocked_default_creds = mocker.patch(
             "opta.core.azure.DefaultAzureCredential", return_value=mocked_creds
@@ -120,6 +128,7 @@ class TestAzure:
         )
 
     def test_delete_opta_config(self, mocker: MockFixture, azure_layer: Mock) -> None:
+        Azure.credentials = None
         mocked_creds = mocker.Mock()
         mocked_default_creds = mocker.patch(
             "opta.core.azure.DefaultAzureCredential", return_value=mocked_creds
@@ -145,6 +154,7 @@ class TestAzure:
         )
 
     def test_delete_remote_state(self, mocker: MockFixture, azure_layer: Mock) -> None:
+        Azure.credentials = None
         mocked_creds = mocker.Mock()
         mocked_default_creds = mocker.patch(
             "opta.core.azure.DefaultAzureCredential", return_value=mocked_creds
