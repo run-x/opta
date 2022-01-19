@@ -336,7 +336,9 @@ class Terraform:
         region = layer.root().providers["aws"]["region"]
         s3 = boto3.client("s3", config=Config(region_name=region))
         try:
-            s3.get_bucket_encryption(Bucket=bucket,)
+            s3.get_bucket_encryption(
+                Bucket=bucket,
+            )
         except ClientError as e:
             if e.response["Error"]["Code"] == "NoSuchBucket":
                 return False
@@ -344,7 +346,12 @@ class Terraform:
         return True
 
     @classmethod
-    def plan(cls, *tf_flags: str, quiet: Optional[bool] = False, layer: "Layer",) -> None:
+    def plan(
+        cls,
+        *tf_flags: str,
+        quiet: Optional[bool] = False,
+        layer: "Layer",
+    ) -> None:
         cls.init(quiet, layer=layer)
         kwargs = cls.insert_extra_env(layer)
         if quiet:
@@ -495,7 +502,9 @@ class Terraform:
         elif layer.cloud == "local":
             try:
                 tf_file = os.path.join(
-                    cls.get_local_opta_dir(), "tfstate", f"{layer.name}",
+                    cls.get_local_opta_dir(),
+                    "tfstate",
+                    f"{layer.name}",
                 )
                 if os.path.exists(tf_file):
                     copyfile(tf_file, state_file)
@@ -781,7 +790,10 @@ class Terraform:
             )
             time.sleep(120)
         service = discovery.build(
-            "cloudresourcemanager", "v1", credentials=credentials, static_discovery=False,
+            "cloudresourcemanager",
+            "v1",
+            credentials=credentials,
+            static_discovery=False,
         )
         request = service.projects().get(projectId=project_id)
         response = request.execute()
@@ -805,7 +817,9 @@ class Terraform:
         dynamodb = boto3.client("dynamodb", config=Config(region_name=region))
         iam = boto3.client("iam", config=Config(region_name=region))
         try:
-            s3.get_bucket_encryption(Bucket=bucket_name,)
+            s3.get_bucket_encryption(
+                Bucket=bucket_name,
+            )
         except ClientError as e:
             if e.response["Error"]["Code"] == "AuthFailure":
                 raise UserErrors(
@@ -829,7 +843,9 @@ class Terraform:
                 )
             logger.debug("S3 bucket for terraform state not found, creating a new one")
             if region == "us-east-1":
-                s3.create_bucket(Bucket=bucket_name,)
+                s3.create_bucket(
+                    Bucket=bucket_name,
+                )
             else:
                 s3.create_bucket(
                     Bucket=bucket_name,
@@ -858,7 +874,8 @@ class Terraform:
                 },
             )
             s3.put_bucket_versioning(
-                Bucket=bucket_name, VersioningConfiguration={"Status": "Enabled"},
+                Bucket=bucket_name,
+                VersioningConfiguration={"Status": "Enabled"},
             )
             s3.put_bucket_lifecycle(
                 Bucket=bucket_name,
@@ -903,7 +920,9 @@ class Terraform:
             )
         # Create the service linked roles
         try:
-            iam.create_service_linked_role(AWSServiceName="autoscaling.amazonaws.com",)
+            iam.create_service_linked_role(
+                AWSServiceName="autoscaling.amazonaws.com",
+            )
         except ClientError as e:
             if e.response["Error"]["Code"] != "InvalidInput":
                 raise UserErrors(
