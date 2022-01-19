@@ -51,7 +51,6 @@ def check_version_upgrade(is_upgrade_call: bool = False) -> bool:
                     "New version available.\n"
                     f"You have {VERSION} installed. Latest version is {latest_version}."
                 )
-                print(f"Upgrade Call: {is_upgrade_call}")
                 if not is_upgrade_call:
                     print(
                         f"Upgrade instructions are available at {UPGRADE_INSTRUCTIONS_URL}  or simply use the `opta upgrade` command"

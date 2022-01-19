@@ -67,7 +67,6 @@ class TestCheckVersionUpgrade:
         warning_message: str = mocked_logger_warning.call_args.args[0]
         assert warning_message.find(TEST_OLD_VERSION) > -1
         assert warning_message.find(TEST_LATEST_VERSION) > -1
-        assert warning_message.find(UPGRADE_INSTRUCTIONS_URL) > -1
 
     def test_handles_get_latest_version_exceptions(self, mocker: MockFixture) -> None:
         mocker.patch("opta.upgrade._should_check_for_version_upgrade", return_value=True)
