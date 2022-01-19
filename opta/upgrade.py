@@ -1,9 +1,11 @@
+import os
 import random
+from pathlib import Path
 
 import requests
 import semver
 
-from opta.constants import DEV_VERSION, VERSION
+from opta.constants import DEV_VERSION, VERSION, successfull_upgrade
 from opta.utils import logger
 
 LATEST_VERSION_FILE_URL = "https://dev-runx-opta-binaries.s3.amazonaws.com/latest"
@@ -25,28 +27,38 @@ def _get_latest_version() -> str:
     return resp.text.strip().strip("v")
 
 
-def check_version_upgrade() -> None:
+def check_version_upgrade(is_upgrade_call: bool = False) -> bool:
     """Logs a warning if newer version of opta is available.
 
     The version check is not always performed when this function is called.
     It is performed non-deterministically with a probability of UPGRADE_CHECK_PROBABILITY
     in order to not spam the user.
     """
-    if not _should_check_for_version_upgrade():
-        return
-    logger.debug("Checking for version upgrades...")
-    try:
-        latest_version = _get_latest_version()
-    except Exception as e:
-        logger.debug(e, exc_info=True)
-        logger.debug("Unable to find latest version.")
-        return
-    try:
-        if semver.VersionInfo.parse(VERSION.strip("v")).compare(latest_version) < 0:
-            logger.warning(
-                "New version available.\n"
-                f"You have {VERSION} installed. Latest version is {latest_version}.\n"
-                f"Upgrade instructions are available at {UPGRADE_INSTRUCTIONS_URL}."
-            )
-    except Exception as e:
-        logger.debug(f"Semver check failed with error {e}")
+    if Path(successfull_upgrade).is_file():
+        os.remove(successfull_upgrade)
+        return False
+    if is_upgrade_call or _should_check_for_version_upgrade():
+        logger.info("Checking for version upgrades...")
+        try:
+            latest_version = _get_latest_version()
+        except Exception as e:
+            logger.debug(e, exc_info=True)
+            logger.debug("Unable to find latest version.")
+            return False
+        try:
+            if semver.VersionInfo.parse(VERSION.strip("v")).compare(latest_version) < 0:
+                logger.warning(
+                    "New version available.\n"
+                    f"You have {VERSION} installed. Latest version is {latest_version}."
+                )
+                print(f"Upgrade Call: {is_upgrade_call}")
+                if not is_upgrade_call:
+                    print(
+                        f"Upgrade instructions are available at {UPGRADE_INSTRUCTIONS_URL}  or simply use the `opta upgrade` command"
+                    )
+                return True
+            else:
+                logger.info("User on the Latest Version.")
+        except Exception as e:
+            logger.debug(f"Semver check failed with error {e}")
+    return False

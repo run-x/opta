@@ -66,3 +66,8 @@ MODULE_DEPENDENCY = {
 }
 
 REDS = [1, 9, 124, 160, 196]
+
+OPTA_INSTALL_URL = "https://docs.opta.dev/install.sh"
+successfull_upgrade = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)), ".successfull_upgrade"
+)
