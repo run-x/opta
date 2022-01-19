@@ -4,6 +4,7 @@ import click
 import requests
 from colored import attr, fg
 
+from opta.nice_subprocess import nice_run
 from opta.constants import OPTA_INSTALL_URL, successfull_upgrade
 from opta.nice_subprocess import nice_run
 from opta.upgrade import check_version_upgrade
@@ -39,7 +40,7 @@ def upgrade() -> None:
         upgrade_present = check_version_upgrade(is_upgrade_call=True)
         if upgrade_present:
             _make_installation_file()
-            os.system(f"yes 2>/dev/null | ./{TEMP_INSTALLATION_FILENAME}")
+            nice_run([f"./{TEMP_INSTALLATION_FILENAME}"], input=b"y")
             _upgrade_successfull()
     except Exception:
         logger.error(
