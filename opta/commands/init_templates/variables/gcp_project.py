@@ -8,4 +8,7 @@ def apply(d: dict, v: str) -> dict:
     return d
 
 
-gcpProjectVariable = TemplateVariable(prompt="GCP project", applier=apply,)
+gcpProjectVariable = TemplateVariable(
+    prompt="GCP project",
+    applier=apply,
+)

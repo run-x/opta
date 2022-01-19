@@ -186,7 +186,8 @@ def test_fail_on_2_azs(mocker: MockFixture, mocked_layer: Any) -> None:
         "opta.commands.apply.Terraform.download_state", return_value=True
     )
     mocker.patch(
-        "opta.commands.apply.Terraform.tf_lock_details", return_value=(False, ""),
+        "opta.commands.apply.Terraform.tf_lock_details",
+        return_value=(False, ""),
     )
 
     # Opta needs a region with at least 3 AZs, fewer should fail.

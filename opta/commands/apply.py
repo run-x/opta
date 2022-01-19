@@ -159,7 +159,8 @@ def _apply(
 
     event_properties: Dict = layer.get_event_properties()
     amplitude_client.send_event(
-        amplitude_client.START_GEN_EVENT, event_properties=event_properties,
+        amplitude_client.START_GEN_EVENT,
+        event_properties=event_properties,
     )
 
     # We need a region with at least 3 AZs for leader election during failover.
@@ -240,7 +241,8 @@ def _apply(
                 current_properties = event_properties.copy()
                 current_properties["module_idx"] = module_idx
                 amplitude_client.send_event(
-                    amplitude_client.APPLY_EVENT, event_properties=current_properties,
+                    amplitude_client.APPLY_EVENT,
+                    event_properties=current_properties,
                 )
                 logger.info("Planning your changes (might take a minute)")
 
@@ -325,7 +327,8 @@ def _apply(
         event_properties["success"] = True
     finally:
         amplitude_client.send_event(
-            amplitude_client.FINISH_GEN_EVENT, event_properties=event_properties,
+            amplitude_client.FINISH_GEN_EVENT,
+            event_properties=event_properties,
         )
 
 
