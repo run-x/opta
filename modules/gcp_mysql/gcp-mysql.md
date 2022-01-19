@@ -39,7 +39,7 @@ links:
 
 If present, this map must have renames for all 4 fields.
 
-These values are passed securely into your environment by using a kubernetes secret created by opta within you
+These values are passed securely into your environment by using a kubernetes secret created by opta within your
 k8s-service's isolated k8s namespace.  These secrets are then passed as environment variables directly into your container.
 Take note that since opta's AWS/EKS clusters always have the disk encryption enabled, your secret never touches an
 unencrypted disk. Furthermore, because of k8's RBAC, no other opta-managed k8s service can access this instance of the
