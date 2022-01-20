@@ -3,14 +3,22 @@
   "description": "To bring in your own custom terraform module",
   "type": "object",
   "properties": {
+    "source": {
+      "type": "string",
+      "description": "The source of your terraform module. For more info, check out https://www.terraform.io/language/modules/sources#module-sources"
+    },
     "path_to_module": {
       "type": "string",
-      "description": "The path to your terraform module"
+      "description": "Deprecated, use source"
     },
     "terraform_inputs": {
       "type": "object",
       "description": "The variables which you wish to pass into your custom module.",
       "default": {}
+    },
+    "version": {
+      "type": "string",
+      "description": "The version of the remote module to use. For more info, check out https://www.terraform.io/language/modules/syntax#version"
     },
     "type": {
       "description": "The name of this module",
@@ -32,7 +40,6 @@
     "tags": []
   },
   "required": [
-    "path_to_module",
     "type"
   ]
 }

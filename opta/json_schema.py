@@ -68,7 +68,7 @@ def _get_module_json(module_name: str, directory: str) -> dict:
 def _get_all_modules(cloud: str) -> List[dict]:
     module_info = _get_all_module_info(modules_path, cloud)
     rtn_array = []
-    for yaml_path, module_name in module_info:
+    for module_name, yaml_path, _ in module_info:
         rtn_array.append(_get_module_json(module_name, dirname(yaml_path)))
     return rtn_array
 
@@ -125,7 +125,7 @@ def _check_module_schemas(write: bool = False) -> None:
             modules_path, CLOUD_NAME_TO_JSON_SCHEMA_NAME[cloud]
         )
 
-        for yaml_path, module_name in module_info:
+        for module_name, yaml_path, _ in module_info:
             module_registry_dict = yaml.load(open(yaml_path))
             json_schema = _get_module_json(module_name, dirname(yaml_path))
 
