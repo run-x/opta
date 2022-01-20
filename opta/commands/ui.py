@@ -8,7 +8,7 @@ UI_URL = "https://app.runx.dev/yaml-generator"
 @click.command()
 def ui() -> None:
     """
-    Opens the interactive UI
+    Open the interactive UI
     """
     print(
         f"""
