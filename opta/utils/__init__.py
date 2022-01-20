@@ -114,7 +114,7 @@ def hydrate(
         for k, v in target.items():
             target[k], _ = hydrate(v, hydration)
     elif isinstance(target, list):
-        target = [hydrate(x, hydration) for x in target]
+        target = [hydrate(x, hydration)[0] for x in target]
     elif isinstance(target, RawString):  # TODO: No, just no
         target = str(target)  # https://www.youtube.com/watch?v=31g0YE61PLQ
     elif isinstance(target, str):
