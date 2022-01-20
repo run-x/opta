@@ -98,9 +98,7 @@ class AwsDnsProcessor(DNSModuleProcessor):
                     )
                     self.module.data["cert_chain_included"] = True
                 elif cert_chain_ssm_path in parameter_names:
-                    ssm_client.delete_parameter(
-                        Name=cert_chain_ssm_path,
-                    )
+                    ssm_client.delete_parameter(Name=cert_chain_ssm_path,)
                 ssm_client.put_parameter(
                     Name=private_key_ssm_path,
                     Value=private_key_str,

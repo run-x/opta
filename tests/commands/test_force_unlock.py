@@ -187,8 +187,7 @@ def test_force_unlock_env_no_rollback(mocker: MockFixture) -> None:
     mocker.patch("opta.commands.force_unlock.Terraform.force_unlock")
     mocker.patch("opta.commands.force_unlock.configure_kubectl")
     mocked_helm_list = mocker.patch(
-        "opta.commands.force_unlock.Helm.get_helm_list",
-        return_value=[],
+        "opta.commands.force_unlock.Helm.get_helm_list", return_value=[],
     )
     mocked_rollback_helm = mocker.patch("opta.commands.force_unlock.Helm.rollback_helm")
 

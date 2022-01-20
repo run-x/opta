@@ -145,13 +145,7 @@ class Layer:
         self.variables = variables or {}
         self.modules: List[Module] = []
         for module_data in modules_data:
-            self.modules.append(
-                Module(
-                    self,
-                    module_data,
-                    self.parent,
-                )
-            )
+            self.modules.append(Module(self, module_data, self.parent,))
         module_names: set = set()
         for module in self.modules:
             if module.name in module_names:
