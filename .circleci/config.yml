@@ -273,6 +273,14 @@ jobs:
             --config ./examples/ci-tests/create-and-destroy-aws/environment.yml \
             --auto-approve \
             --refresh
+      - run:
+          name: "Update KUBECONFIG"
+          command: echo 'export KUBECONFIG="$HOME/kube_config.yaml"' >> $BASH_ENV
+      - run:
+          name: "Configure Kubectl"
+          command: |
+            ./dist/opta/opta configure-kubectl \
+            --config ./examples/ci-tests/create-and-destroy-aws/environment.yml
 
   aws-create-env-dns-false:
     executor: ubuntu-machine
@@ -876,6 +884,14 @@ jobs:
             --config ./examples/ci-tests/create-and-destroy-gcp/environment.yml \
             --auto-approve \
             --refresh
+      - run:
+          name: "Update KUBECONFIG"
+          command: echo 'export KUBECONFIG="$HOME/kube_config.yaml"' >> $BASH_ENV
+      - run:
+          name: "Configure Kubectl"
+          command: |
+            ./dist/opta/opta configure-kubectl \
+            --config ./examples/ci-tests/create-and-destroy-gcp/environment.yml
 
   gcp-create-env-stable-version:
     executor: ubuntu-machine
