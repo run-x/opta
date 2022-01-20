@@ -64,6 +64,7 @@ PROCESSOR_DICT: Dict[str, str] = {
     "mongodb-atlas": "MongodbAtlasProcessor",
     "cloudfront-distribution": "CloudfrontDistributionProcessor",
     "lambda-function": "LambdaFunctionProcessor",
+    "k8s-manifest": "K8smanifestProcessor",
 }
 
 

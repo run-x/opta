@@ -80,16 +80,16 @@ def view(secret: str, env: Optional[str], config: str) -> None:
 def list_command(env: Optional[str], config: str) -> None:
     """List the secrets (names and values) for the given k8s service module
 
-    It expects a file in the dotenv file format.
-    Each line is in VAR=VAL format.
+      It expects a file in the dotenv file format.
+      Each line is in VAR=VAL format.
 
 
-    The output is in the dotenv file format. Each line is in
-  VAR=VAL format.
+      The output is in the dotenv file format. Each line is in
+    VAR=VAL format.
 
-    Examples:
+      Examples:
 
-    opta secret list -c my-service.yaml
+      opta secret list -c my-service.yaml
     """
     config = check_opta_file_exists(config)
     layer = Layer.load_from_yaml(config, env)

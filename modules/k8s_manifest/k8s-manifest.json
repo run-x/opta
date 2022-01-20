@@ -1,0 +1,35 @@
+{
+  "$id": "https://app.runx.dev/modules/k8s-manifest",
+  "description": "Kubernetes Manifest",
+  "type": "object",
+  "properties": {
+    "file_path": {
+      "type": "string",
+      "description": "The Kubernetes manifest file in yaml format"
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "k8s-manifest"
+      ],
+      "default": "k8s-manifest",
+      "type": "string"
+    }
+  },
+  "opta_metadata": {
+    "module_type": "service",
+    "clouds": [
+      "local",
+      "aws",
+      "gcp",
+      "azure"
+    ],
+    "name": "k8s-manifest",
+    "display_name": "k8s-manifest",
+    "tags": []
+  },
+  "required": [
+    "file_path",
+    "type"
+  ]
+}

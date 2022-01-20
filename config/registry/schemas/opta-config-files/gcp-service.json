@@ -35,6 +35,9 @@
           },
           {
             "$ref": "https://app.runx.dev/modules/helm-chart"
+          },
+          {
+            "$ref": "https://app.runx.dev/modules/k8s-manifest"
           }
         ]
       }
