@@ -115,16 +115,18 @@ class Terraform:
     def validate_version(cls) -> None:
         ensure_installed("terraform")
 
+        pre_req_link = "Check https://docs.opta.dev/installation/#prerequisites"
+
         current_version = Terraform.get_version()
         current_parsed = version.parse(current_version)
         if current_parsed < version.parse(MIN_TERRAFORM_VERSION):
             raise UserErrors(
-                f"Invalid terraform version {current_version} -- must be at least {MIN_TERRAFORM_VERSION}"
+                f"Invalid terraform version {current_version} -- must be at least {MIN_TERRAFORM_VERSION}. {pre_req_link}"
             )
 
         if current_parsed >= version.parse(MAX_TERRAFORM_VERSION):
             raise UserErrors(
-                f"Invalid terraform version {current_version} -- must be less than {MAX_TERRAFORM_VERSION}"
+                f"Invalid terraform version {current_version} -- must be less than {MAX_TERRAFORM_VERSION}. {pre_req_link}"
             )
 
     @classmethod

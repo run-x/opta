@@ -26,7 +26,14 @@ from opta.utils import check_opta_file_exists
     type=int,
 )
 def logs(env: Optional[str], config: str, seconds: Optional[int]) -> None:
-    """Get stream of logs from your service"""
+    """
+    Get stream of logs for a service
+
+    Examples:
+
+    opta logs -c my-service.yaml
+
+    """
 
     config = check_opta_file_exists(config)
     # Configure kubectl
