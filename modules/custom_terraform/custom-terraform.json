@@ -5,7 +5,7 @@
   "properties": {
     "source": {
       "type": "string",
-      "description": "The path to your terraform module"
+      "description": "The source of your terraform module. For more info, check out https://www.terraform.io/language/modules/sources#module-sources"
     },
     "path_to_module": {
       "type": "string",
