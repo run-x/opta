@@ -411,9 +411,7 @@ class Layer:
             if module.desc.get("halt"):
                 previous_module_reference = [f"module.{module.name}"]
 
-        generated_tf, formatter = hydrate(ret, self.metadata_hydration())
-        formatter.is_valid()
-        return generated_tf
+        return hydrate(ret, self.metadata_hydration())
 
     def pre_hook(self, module_idx: int) -> None:
         for module in self.modules[0 : module_idx + 1]:
@@ -537,31 +535,30 @@ class Layer:
             new_v = self.handle_special_providers(k, v, clean)
             ret["provider"][k] = new_v
             if k in REGISTRY:
-                ret["terraform"], formatter = hydrate(
+                ret["terraform"] = hydrate(
                     {x: REGISTRY[k][x] for x in ["required_providers", "backend"]},
                     deep_merge(hydration, {"provider": new_v}),
                 )
 
-                formatter.is_valid()
-
                 if self.parent is not None:
                     # Add remote state
                     backend, config = list(REGISTRY[k]["backend"].items())[0]
-                    terraform_config, formatter = hydrate(
-                        config,
-                        {
-                            "layer_name": self.parent.name,
-                            "env": self.get_env(),
-                            "state_storage": self.state_storage(),
-                            "provider": self.parent.providers.get(k, {}),
-                            "region": region,
-                            "k8s_access_token": k8s_access_token,
-                        },
-                    )
-                    formatter.is_valid()
                     ret["data"] = {
                         "terraform_remote_state": {
-                            "parent": {"backend": backend, "config": terraform_config}
+                            "parent": {
+                                "backend": backend,
+                                "config": hydrate(
+                                    config,
+                                    {
+                                        "layer_name": self.parent.name,
+                                        "env": self.get_env(),
+                                        "state_storage": self.state_storage(),
+                                        "provider": self.parent.providers.get(k, {}),
+                                        "region": region,
+                                        "k8s_access_token": k8s_access_token,
+                                    },
+                                ),
+                            }
                         }
                     }
 

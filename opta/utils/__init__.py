@@ -106,21 +106,19 @@ def deep_merge(dict1: Dict[Any, Any], dict2: Dict[Any, Any]) -> Dict[Any, Any]:
     return dict2
 
 
-def hydrate(
-    target: Any, hydration: Dict[Any, Any]
-) -> Tuple[Dict[Any, Any], PartialFormatter]:
+def hydrate(target: Any, hydration: Dict[Any, Any]) -> Dict[Any, Any]:
     if isinstance(target, dict):
         target = target.copy()
         for k, v in target.items():
-            target[k], _ = hydrate(v, hydration)
+            target[k] = hydrate(v, hydration)
     elif isinstance(target, list):
-        target = [hydrate(x, hydration)[0] for x in target]
+        target = [hydrate(x, hydration) for x in target]
     elif isinstance(target, RawString):  # TODO: No, just no
         target = str(target)  # https://www.youtube.com/watch?v=31g0YE61PLQ
     elif isinstance(target, str):
         target = fmt.format(target, **hydration)
 
-    return target, fmt
+    return target
 
 
 def is_tool(name: str) -> bool:

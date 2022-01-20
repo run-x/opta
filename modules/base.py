@@ -225,15 +225,13 @@ class K8sServiceModuleProcessor(ModuleProcessor):
             "min_containers": self.module.data.get("min_containers", 1),
             "max_containers": self.module.data.get("max_containers", 3),
         }
-        min_max_container_data, formatter = hydrate(
+        min_max_container_data = hydrate(
             min_max_container_data,
             {
                 "vars": SimpleNamespace(**self.layer.variables),
                 "variables": SimpleNamespace(**self.layer.variables),
             },
         )
-
-        formatter.is_valid()
 
         try:
             min_containers = int(min_max_container_data["min_containers"])
