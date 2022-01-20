@@ -72,13 +72,14 @@ successfull_upgrade = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), ".successfull_upgrade"
 )
 
+
 class OptaUpgrade:
     successful = False
 
     @classmethod
-    def success(cls):
+    def success(cls) -> None:
         cls.successful = True
 
     @classmethod
-    def unset(cls):
+    def unset(cls) -> None:
         cls.successful = False
