@@ -4,7 +4,7 @@ import click
 import requests
 from colored import attr, fg
 
-from opta.constants import OPTA_INSTALL_URL, successfull_upgrade
+from opta.constants import OPTA_INSTALL_URL, OptaUpgrade
 from opta.nice_subprocess import nice_run
 from opta.upgrade import check_version_upgrade
 from opta.utils import logger
@@ -22,7 +22,7 @@ def _make_installation_file() -> None:
 
 
 def _upgrade_successful() -> None:
-    open(successfull_upgrade, "w").close()
+    OptaUpgrade.success()
 
 
 def _cleanup_installation_file() -> None:

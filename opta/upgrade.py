@@ -1,11 +1,9 @@
-import os
 import random
-from pathlib import Path
 
 import requests
 import semver
 
-from opta.constants import DEV_VERSION, VERSION, successfull_upgrade
+from opta.constants import DEV_VERSION, VERSION, OptaUpgrade
 from opta.utils import logger
 
 LATEST_VERSION_FILE_URL = "https://dev-runx-opta-binaries.s3.amazonaws.com/latest"
@@ -34,9 +32,9 @@ def check_version_upgrade(is_upgrade_call: bool = False) -> bool:
     It is performed non-deterministically with a probability of UPGRADE_CHECK_PROBABILITY
     in order to not spam the user.
     """
-    if Path(successfull_upgrade).is_file():
-        os.remove(successfull_upgrade)
-        return False
+    if OptaUpgrade.successful:
+        OptaUpgrade.unset()
+        return True
     if is_upgrade_call or _should_check_for_version_upgrade():
         logger.info("Checking for version upgrades...")
         try:
