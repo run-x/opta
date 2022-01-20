@@ -275,7 +275,7 @@ jobs:
             --refresh
       - run:
           name: "Update KUBECONFIG"
-          command: export KUBECONFIG="$HOME/kube_config.yaml"
+          command: echo 'export KUBECONFIG="$HOME/kube_config.yaml"' >> $BASH_ENV
       - run:
           name: "Configure Kubectl"
           command: |
@@ -886,7 +886,7 @@ jobs:
             --refresh
       - run:
           name: "Update KUBECONFIG"
-          command: export KUBECONFIG="$HOME/kube_config.yaml"
+          command: echo 'export KUBECONFIG="$HOME/kube_config.yaml"' >> $BASH_ENV
       - run:
           name: "Configure Kubectl"
           command: |
