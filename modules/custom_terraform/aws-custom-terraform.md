@@ -8,11 +8,12 @@ description: Allows user to bring in their own custom terraform module
 ---
 
 This module allows a user to bring in their own custom terraform code into the opta ecosystem, to use in tandem with
-their other opta modules, and even reference them. 
+their other opta modules, and even reference them. All a user needs to do is specify the
+[source](https://www.terraform.io/language/modules/sources#module-sources)
+to your module with the `source` input, and the desired inputs to your module (if any) via the
+`terraform_inputs` input.
 
-All a user needs to do is define a `custom-terraform` module.
-
-## Example/Demo
+## Use local terraform files
 
 Let's create a AWS EC2 instance using terraform.
 
@@ -39,7 +40,7 @@ modules:
   - type: custom-terraform
     name: customtf
     # where the terraform files are located
-    path_to_module: "./my-terraform"
+    source: "./my-terraform"
     terraform_inputs:
       # some input variables for terraform
       instance_name: "hello-world"
@@ -138,6 +139,32 @@ When done, you can destroy the custom terraform resource:
 opta destroy -c custom-tf.yaml
 ```
 
+## Use a remote terraform module
+The `source` input uses terraform's [module source](https://www.terraform.io/language/modules/sources#module-sources)
+logic behind the scenes and so follows the same format/limitations. Thus, you can use this for locally available modules,
+or modules available remotely, like so:
+
+```yaml
+environments:
+  - name: staging
+    path: "../opta.yaml"
+name: customtf
+modules:
+  - type: custom-terraform
+    name: bucket
+    source: "terraform-aws-modules/s3-bucket/aws" # See https://registry.terraform.io/modules/terraform-aws-modules/s3-bucket/aws/latest
+    version: "2.13.0" # version needs to be specified for remote registry modules
+    terraform_inputs:
+      bucket: "dummy-bucket-{aws.account_id}"
+      acl: "private"
+      versioning: 
+        enabled: true
+```
+
+**WARNING** Be very, very, careful about what remote modules you are using, as they leave you wide open to supply chain
+attacks, depending on the security and character of the owner of said module. It's highly advised to use either
+[official modules](https://registry.terraform.io/browse/modules) or modules under your company's control.
+
 ## Using Outputs from your Custom Terraform Module
 Currently you can use outputs of your custom terraform module in the same yaml, like so:
 ```yaml
@@ -148,10 +175,10 @@ name: customtf
 modules:
   - type: custom-terraform
     name: tf1
-    path_to_module: "./my-terraform-1" # <-- This module has an output called output1
+    source: "./my-terraform-1" # <-- This module has an output called output1
   - type: custom-terraform
     name: tf2
-    path_to_module: "./my-terraform-2"
+    source: "./my-terraform-2"
     terraform_inputs:
       input1: "${{module.tf1.output1}}" # <-- HERE. Note the ${{}} wrapping
 ```
