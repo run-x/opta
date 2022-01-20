@@ -28,9 +28,11 @@ class DerivedProviders:
                     },
                     base_hydration,
                 )
-                ret = deep_merge(
-                    hydrate({"provider": m.desc["output_providers"]}, hydration), ret
+                hydrated_provider, formatter = hydrate(
+                    {"provider": m.desc["output_providers"]}, hydration
                 )
+                formatter.is_valid()
+                ret = deep_merge(hydrated_provider, ret)
             if m.desc["output_data"] != {}:
                 hydration = deep_merge(
                     {
@@ -42,5 +44,9 @@ class DerivedProviders:
                     },
                     base_hydration,
                 )
-                ret = deep_merge(hydrate({"data": m.desc["output_data"]}, hydration), ret)
+                output_hydration, formatter = hydrate(
+                    {"data": m.desc["output_data"]}, hydration
+                )
+                formatter.is_valid()
+                ret = deep_merge(output_hydration, ret)
         return ret
