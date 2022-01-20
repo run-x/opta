@@ -41,7 +41,7 @@ def check_version_upgrade(is_upgrade_call: bool = False) -> bool:
             latest_version = _get_latest_version()
         except Exception as e:
             logger.debug(e, exc_info=True)
-            logger.debug("Unable to find latest version.")
+            logger.info("Unable to find latest version.")
             return False
         try:
             if semver.VersionInfo.parse(VERSION.strip("v")).compare(latest_version) < 0:
@@ -57,5 +57,5 @@ def check_version_upgrade(is_upgrade_call: bool = False) -> bool:
             else:
                 logger.info("User on the latest version.")
         except Exception as e:
-            logger.debug(f"Semver check failed with error {e}")
+            logger.info(f"Semver check failed with error {e}")
     return False
