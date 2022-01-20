@@ -33,3 +33,15 @@ links:
 ```
 
 If present, this map must have renames for all 2 fields.
+
+These values are passed securely into your environment by using a kubernetes secret created by opta within your
+k8s-service's isolated k8s namespace.  These secrets are then passed as environment variables directly into your container.
+Take note that since opta's AWS/EKS clusters always have the disk encryption enabled, your secret never touches an
+unencrypted disk. Furthermore, because of k8's RBAC, no other opta-managed k8s service can access this instance of the
+creds as a k8s secret without manual override of the RBAC, nor can any other entities/users unless given "read secret"
+permission on this namespace.
+
+To those with the permissions, you can view it via the following command (MANIFEST_NAME is the `name` field in your yaml):
+
+`kubectl get secrets -n MANIFEST_NAME secret -o yaml`
+
