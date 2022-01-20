@@ -17,7 +17,7 @@ resource "helm_release" "datadog" {
   repository = "https://helm.datadoghq.com"
   chart      = "datadog"
   name       = "${var.layer_name}-${var.module_name}"
-  version    = "2.28.13"
+  version    = "2.10.3"
   values = [
     yamlencode({
       datadog : {
