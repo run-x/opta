@@ -22,6 +22,7 @@ from opta.commands.output import output
 from opta.commands.push import push
 from opta.commands.secret import secret
 from opta.commands.shell import shell
+from opta.commands.upgrade import upgrade
 from opta.commands.validate import validate
 from opta.commands.version import version
 from opta.crash_reporter import CURRENT_CRASH_REPORTER
@@ -53,6 +54,7 @@ cli.add_command(validate)
 cli.add_command(version)
 cli.add_command(events)
 cli.add_command(force_unlock)
+cli.add_command(upgrade)
 
 
 if __name__ == "__main__":
