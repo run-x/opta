@@ -561,7 +561,7 @@ class Layer:
                     formatter.is_valid()
                     ret["data"] = {
                         "terraform_remote_state": {
-                            "parent": {"backend": backend, "config": terraform_config,}
+                            "parent": {"backend": backend, "config": terraform_config}
                         }
                     }
 
