@@ -885,7 +885,7 @@ jobs:
           name: "Configure Kubectl"
           command: |
             ./dist/opta/opta configure-kubectl \
-            --config ./examples/ci-tests/create-and-destroy-aws/environment.yml || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+            --config ./examples/ci-tests/create-and-destroy-gcp/environment.yml || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   gcp-create-env-stable-version:
     executor: ubuntu-machine
