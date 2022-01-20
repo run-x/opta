@@ -106,7 +106,9 @@ def deep_merge(dict1: Dict[Any, Any], dict2: Dict[Any, Any]) -> Dict[Any, Any]:
     return dict2
 
 
-def hydrate(target: Any, hydration: Dict[Any, Any]) -> Tuple[Dict[Any, Any], PartialFormatter]:
+def hydrate(
+    target: Any, hydration: Dict[Any, Any]
+) -> Tuple[Dict[Any, Any], PartialFormatter]:
     if isinstance(target, dict):
         target = target.copy()
         for k, v in target.items():
