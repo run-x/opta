@@ -5,7 +5,7 @@ inputs:
   - name: source
     user_facing: true
     validator: str(required=False)
-    description: The path to your terraform module
+    description: The source of your terraform module. For more info, check out https://www.terraform.io/language/modules/sources#module-sources
     default: null
   - name: path_to_module
     user_facing: true

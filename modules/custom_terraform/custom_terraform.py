@@ -31,10 +31,6 @@ class CustomTerraformProcessor(ModuleProcessor):
             # If this is the case, then this refers to a remote module as per
             # https://www.terraform.io/language/modules/sources
             self.module.module_dir_path = source
-            if module_version == "":
-                raise UserErrors(
-                    "module_version must be given to custom terraform for non-local modules"
-                )
         current_desc["inputs"] = [
             {"name": x, "user_facing": True}
             for x in self.module.data.get("terraform_inputs", {}).keys()
