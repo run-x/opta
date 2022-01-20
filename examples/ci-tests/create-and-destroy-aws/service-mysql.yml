@@ -11,9 +11,19 @@ modules:
     port:
       http: 5000
     image: AUTO
-    healthcheck_path: "/healthcheck_mysql"
+    healthcheck_path: "/healthcheck"
     env_vars:
+      - name: APPENV
+        value: "{env}"
+      - name: CLOUD_PROVIDER
+        value: aws
+      - name: TEST_S3
+        value: "0"
+      - name: TEST_REDIS
+        value: "0"
       - name: TEST_POSTGRES
+        value: "0"
+      - name: TEST_DOCDB
         value: "0"
     links:
       - mysql:

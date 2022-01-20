@@ -22,6 +22,8 @@ modules:
         value: "0"
       - name: TEST_DOCDB
         value: "0"
+      - name: TEST_MYSQL
+        value: "0"
     links:
       - bucket
   - name: bucket
