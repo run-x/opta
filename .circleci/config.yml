@@ -274,6 +274,9 @@ jobs:
             --auto-approve \
             --refresh
       - run:
+          name: "Update KUBECONFIG"
+          command: export KUBECONFIG="$HOME/kube_config.yaml"
+      - run:
           name: "Configure Kubectl"
           command: |
             ./dist/opta/opta configure-kubectl \
@@ -881,6 +884,9 @@ jobs:
             --config ./examples/ci-tests/create-and-destroy-gcp/environment.yml \
             --auto-approve \
             --refresh
+      - run:
+          name: "Update KUBECONFIG"
+          command: export KUBECONFIG="$HOME/kube_config.yaml"
       - run:
           name: "Configure Kubectl"
           command: |
