@@ -8,14 +8,10 @@ import pytest
 from opta.nice_subprocess import nice_run
 
 GRACEFUL_TERMINATION_FILE = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)),
-    "tests",
-    "signal_gracefully_terminated",
+    os.path.dirname(os.path.dirname(__file__)), "tests", "signal_gracefully_terminated",
 )
 SIGNAL_HANDLER_SCRIPT = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)),
-    "tests",
-    "signal_handler.py",
+    os.path.dirname(os.path.dirname(__file__)), "tests", "signal_handler.py",
 )
 
 

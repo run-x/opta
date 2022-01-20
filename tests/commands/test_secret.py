@@ -44,8 +44,7 @@ class TestSecretManager:
 
         runner = CliRunner()
         result = runner.invoke(
-            view,
-            ["dummysecret", "--env", "dummyenv", "--config", "dummyconfig"],
+            view, ["dummysecret", "--env", "dummyenv", "--config", "dummyconfig"],
         )
         assert result.exit_code == 0
         mocked_create_namespace_if_not_exists.assert_called_once_with("dummy_layer")
@@ -78,8 +77,7 @@ class TestSecretManager:
 
         runner = CliRunner()
         result = runner.invoke(
-            list_command,
-            ["--env", "dummyenv", "--config", "dummyconfig"],
+            list_command, ["--env", "dummyenv", "--config", "dummyconfig"],
         )
         assert result.exit_code == 0
         mocked_create_namespace_if_not_exists.assert_called_once_with("dummy_layer")
@@ -160,8 +158,7 @@ class TestSecretManager:
 
         runner = CliRunner()
         result = runner.invoke(
-            bulk_update,
-            [env_file, "--env", "dummyenv", "--config", "dummyconfig"],
+            bulk_update, [env_file, "--env", "dummyenv", "--config", "dummyconfig"],
         )
         assert result.exit_code == 0
         mocked_create_namespace_if_not_exists.assert_called_once_with("dummy_layer")

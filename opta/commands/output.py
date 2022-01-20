@@ -14,10 +14,7 @@ from opta.utils import check_opta_file_exists, json
 @click.option(
     "-e", "--env", default=None, help="The env to use when loading the config file"
 )
-def output(
-    config: str,
-    env: Optional[str],
-) -> None:
+def output(config: str, env: Optional[str],) -> None:
     """Print TF outputs"""
 
     config = check_opta_file_exists(config)
