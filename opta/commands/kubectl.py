@@ -8,7 +8,7 @@ from opta.core.kubernetes import set_kube_config as configure
 from opta.layer import Layer
 from opta.utils import check_opta_file_exists
 
-
+from opta.commands.apply import _local_setup
 @click.command()
 @click.option(
     "-c", "--config", default="opta.yaml", help="Opta config file", show_default=True
@@ -16,7 +16,14 @@ from opta.utils import check_opta_file_exists
 @click.option(
     "-e", "--env", default=None, help="The env to use when loading the config file"
 )
-def configure_kubectl(config: str, env: Optional[str]) -> None:
+@click.option(
+    "--local",
+    is_flag=True,
+    default=False,
+    help="""Use the local Kubernetes cluster for development and testing, irrespective of the environment specified inside the opta service yaml file""",
+    hidden=False,
+)
+def configure_kubectl(config: str, env: Optional[str], local: Optional[bool]) -> None:
     """
     Configure kubectl so you can connect to the cluster
 
@@ -27,6 +34,8 @@ def configure_kubectl(config: str, env: Optional[str]) -> None:
     """
 
     config = check_opta_file_exists(config)
+    if local:
+        config = _local_setup(config)
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(
         amplitude_client.CONFIGURE_KUBECTL_EVENT,
