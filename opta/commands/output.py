@@ -7,17 +7,26 @@ from opta.core.generator import gen_all
 from opta.core.terraform import get_terraform_outputs
 from opta.layer import Layer
 from opta.utils import check_opta_file_exists, json
-
+from opta.commands.apply import _local_setup
 
 @click.command(hidden=True)
 @click.option("-c", "--config", default="opta.yaml", help="Opta config file")
 @click.option(
     "-e", "--env", default=None, help="The env to use when loading the config file"
 )
-def output(config: str, env: Optional[str],) -> None:
+@click.option(
+    "--local",
+    is_flag=True,
+    default=False,
+    help="""Use the local Kubernetes cluster for development and testing, irrespective of the environment specified inside the opta service yaml file""",
+    hidden=False,
+)
+def output(config: str, env: Optional[str], local: Optional[bool]) -> None:
     """Print TF outputs"""
 
     config = check_opta_file_exists(config)
+    if local:
+        config = _local_setup(config)
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(
         amplitude_client.VIEW_OUTPUT_EVENT,

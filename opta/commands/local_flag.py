@@ -12,7 +12,9 @@ def _handle_local_flag(config: str, test: bool = False) -> Tuple[str,str]:
     with open(config, "r") as fr:
         y = yaml.round_trip_load(fr, preserve_quotes=True)
         if "org_name" in y:
-            org_name = y["org_name"] or "local"
+            org_name = y["org_name"]
+        else:
+            org_name = "localorg"
 
     if "opta-local-" in config:
         return config
