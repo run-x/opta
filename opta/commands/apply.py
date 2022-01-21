@@ -403,7 +403,7 @@ def _verify_parent_layer(layer: Layer, auto_approve: bool = False) -> None:
 
 
 def _local_setup(
-    config: str, image_tag: str = None, refresh_local_env: bool = False
+    config: str, image_tag: Optional[str], refresh_local_env: bool = False
 ) -> str:
     adjusted_config, localopta_envfile = _handle_local_flag(config, False)
     if adjusted_config != config:  # Only do this for service opta files
