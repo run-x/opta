@@ -1,8 +1,7 @@
 import os
 import time
-from typing import Dict, Set, Tuple
+from typing import Dict, Tuple
 
-from colored import attr, fg
 from ruamel.yaml import YAML
 
 from opta.registry import make_registry_dict
@@ -84,24 +83,3 @@ class OptaUpgrade:
     @classmethod
     def unset(cls) -> None:
         cls.successful = False
-
-
-class InterpolationErrors:
-    bad_field_names: Set[str] = set()
-
-    @classmethod
-    def add(cls, field_name: str) -> None:
-        cls.bad_field_names.add(field_name)
-
-    @classmethod
-    def unset(cls) -> None:
-        cls.bad_field_names.clear()
-
-    @classmethod
-    def warn(cls) -> str:
-        log = "Following field names could not be interpolated:"
-        for bad_field_name in cls.bad_field_names:
-            log += f"\n  * {fg('red')}{bad_field_name}{attr(0)}"
-        if len(cls.bad_field_names) > 0:
-            return log
-        return ""

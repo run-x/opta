@@ -16,13 +16,7 @@ from colored import attr, fg
 from opta.amplitude import amplitude_client
 from opta.cleanup_files import cleanup_files
 from opta.commands.local_flag import _clean_tf_folder, _handle_local_flag
-from opta.constants import (
-    DEV_VERSION,
-    TF_PLAN_PATH,
-    UPGRADE_WARNINGS,
-    VERSION,
-    InterpolationErrors,
-)
+from opta.constants import DEV_VERSION, TF_PLAN_PATH, UPGRADE_WARNINGS, VERSION
 from opta.core.aws import AWS
 from opta.core.azure import Azure
 from opta.core.cloud_client import CloudClient
@@ -37,6 +31,7 @@ from opta.exceptions import MissingState, UserErrors
 from opta.layer import Layer, StructuredConfig
 from opta.pre_check import pre_check
 from opta.utils import check_opta_file_exists, fmt_msg, logger
+from opta.utils.globals import Interpolation
 
 
 @click.command()
@@ -216,7 +211,7 @@ def _apply(
         for module_idx, current_modules, total_block_count in gen(
             layer, existing_config, image_tag, image_digest, test, True, auto_approve
         ):
-            _warn_interpolation_errors()
+            Interpolation.validate()
             if first_loop:
                 # This is set during the first iteration, since the tf file must exist.
                 existing_modules = Terraform.get_existing_modules(layer)
@@ -422,8 +417,3 @@ def _verify_parent_layer(layer: Layer, auto_approve: bool = False) -> None:
             auto_approve=False,
         )
         cleanup_files()
-
-
-def _warn_interpolation_errors() -> None:
-    if InterpolationErrors.warn():
-        logger.warning(InterpolationErrors.warn())
