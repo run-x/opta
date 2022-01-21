@@ -8,6 +8,11 @@
       "description": "Deploy the nginx ingress in a high-availability configuration.",
       "default": false
     },
+    "cert_arn": {
+      "type": "boolean",
+      "description": "The arn of the ACM certificate to use for SSL. By default uses the one created by the DNS module if the module is found and delegation enabled.",
+      "default": ""
+    },
     "linkerd_high_availability": {
       "type": "boolean",
       "description": "Deploy the linkerd service mesh in a high-availability configuration for its control plane.",
