@@ -1,6 +1,4 @@
 import datetime
-import os
-from pathlib import Path
 from subprocess import CalledProcessError  # nosec
 from threading import Thread
 from typing import Dict, List, Optional, Set
@@ -83,6 +81,8 @@ from opta.utils import check_opta_file_exists, fmt_msg, logger
     default=False,
     help="Show full terraform plan in detail, not the opta provided summary",
 )
+
+
 def apply(
     config: str,
     env: Optional[str],
@@ -131,24 +131,9 @@ def _apply(
 ) -> None:
     pre_check()
     _clean_tf_folder()
-    if local:
-        adjusted_config = _handle_local_flag(config, test)
-        if adjusted_config != config:  # Only do this for service opta files
-            config = adjusted_config  # Config for service
-            localopta_envfile = os.path.join(
-                Path.home(), ".opta", "local", "localopta.yaml"
-            )
-            _apply(
-                config=localopta_envfile,
-                auto_approve=True,
-                local=False,
-                env="",
-                refresh=True,
-                image_tag=image_tag,
-                test=test,
-                detailed_plan=True,
-            )
-            _clean_tf_folder()
+    if local and not test:
+        config = _local_setup(config, image_tag)
+
 
     layer = Layer.load_from_yaml(config, env)
     layer.verify_cloud_credentials()
@@ -418,3 +403,21 @@ def _verify_parent_layer(layer: Layer, auto_approve: bool = False) -> None:
             auto_approve=False,
         )
         cleanup_files()
+        
+def _local_setup(config: str, image_tag: str=None) -> str:
+    adjusted_config, localopta_envfile = _handle_local_flag(config, False)
+    if adjusted_config != config:  # Only do this for service opta files
+        config = adjusted_config  # Config for service
+        _apply(
+            config=localopta_envfile,
+            image_tag = image_tag,
+            auto_approve=True,
+            local=False,
+            env="",
+            refresh=True,
+            test=False,
+            detailed_plan=True,
+        )
+        _clean_tf_folder()
+    return config
+    

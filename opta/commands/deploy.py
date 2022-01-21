@@ -1,12 +1,9 @@
-import os
-from pathlib import Path
 from typing import Optional
 
 import click
-
+from opta.commands.apply import _local_setup
 from opta.amplitude import amplitude_client
 from opta.commands.apply import _apply
-from opta.commands.local_flag import _clean_tf_folder, _handle_local_flag
 from opta.commands.push import _push, is_service_config
 from opta.core.terraform import Terraform
 from opta.error_constants import USER_ERROR_TF_LOCK
@@ -95,23 +92,7 @@ def deploy(
         )
 
     if local:
-        adjusted_config = _handle_local_flag(config, False)
-        if adjusted_config != config:  # Only do this for service opta files
-            config = adjusted_config
-            localopta_envfile = os.path.join(
-                Path.home(), ".opta", "local", "localopta.yaml"
-            )
-            _apply(
-                config=localopta_envfile,
-                auto_approve=True,
-                local=False,
-                env="",
-                refresh=True,
-                image_tag="",
-                test=False,
-                detailed_plan=True,
-            )
-            _clean_tf_folder()
+        config = _local_setup(config)
 
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(
