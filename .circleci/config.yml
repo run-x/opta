@@ -645,6 +645,37 @@ jobs:
             --config ./examples/ci-tests/create-and-destroy-aws/service-docdb.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
+  aws-test-service-mysql:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - aws-cli/install
+      - aws-cli/setup
+      - run:
+          name: "Load test-service image"
+          command: docker load -i test-service-image
+      - run:
+          name: "Deploy test-service-mysql"
+          command: |
+            ./dist/opta/opta deploy \
+            --image app:latest \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-aws/service-mysql.yml \
+            --tag $CIRCLE_SHA1 \
+            --auto-approve
+      - run:
+          name: "Destroy test-service-mysql"
+          command: |
+            yes | ./dist/opta/opta destroy \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-aws/service-msql.yml \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+
   aws-test-service-pg:
     executor: ubuntu-machine
     environment:
@@ -1006,6 +1037,40 @@ jobs:
             yes | ./dist/opta/opta destroy \
             --env gcpenv-ci \
             --config ./examples/ci-tests/create-and-destroy-gcp/service-redis.yml \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+
+  gcp-test-service-mysql:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - gcp-cli/install
+      - gcp-cli/initialize
+      - run:
+          name: "Setting up gcp envar"
+          command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+      - run:
+          name: "Load test-service image"
+          command: docker load -i test-service-image
+      - run:
+          name: "Deploy test-service-mysql"
+          command: |
+            ./dist/opta/opta deploy \
+            --image app:latest \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-gcp/service-mysql.yaml \
+            --tag $CIRCLE_SHA1 \
+            --auto-approve
+      - run:
+          name: "Destroy test-service-mysql"
+          command: |
+            yes | ./dist/opta/opta destroy \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-gcp/service-msql.yaml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   gcp-test-service-gcs:
@@ -1415,6 +1480,9 @@ workflows:
       - aws-test-service-helm:
           requires:
             - aws-create-env
+      - aws-test-service-mysql:
+          requires:
+            - aws-create-env
       - aws-destroy-env:
           requires:
             - aws-test-websocket
@@ -1426,6 +1494,7 @@ workflows:
             - aws-test-service-docdb
             - aws-test-service-redis
             - aws-test-service-helm
+            - aws-test-service-mysql
       - gcp-create-env:
           requires:
             - build-opta-binary
@@ -1444,6 +1513,9 @@ workflows:
       - gcp-test-service-gcs:
           requires:
             - gcp-create-env
+      - gcp-test-service-mysql:
+          requires:
+            - gcp-create-env
       - gcp-destroy-env:
           requires:
             - gcp-test-additional-nodegroup
@@ -1451,6 +1523,7 @@ workflows:
             - gcp-test-service-redis
             - gcp-test-service-helm
             - gcp-test-service-gcs
+            - gcp-test-service-mysql
       - local-opta-example-create-svcs:
           requires:
             - build-opta-binary
