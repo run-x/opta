@@ -92,7 +92,7 @@ def deploy(
         )
 
     if local:
-        config = _local_setup(config)
+        config = _local_setup(config, refresh_local_env=True)
 
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(

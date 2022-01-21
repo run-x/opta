@@ -18,8 +18,7 @@ def _handle_local_flag(config: str, test: bool = False) -> Tuple[str,str]:
 
     if "opta-local-" in config:
         return config
-    logger.info("Checking local Opta Kubernetes environment, will install if needed.")
-
+    
     env_yaml_path = os.path.join(Path.home(), ".opta", "local", org_name)
     if not os.path.exists(env_yaml_path):
         os.makedirs(os.path.abspath(env_yaml_path))

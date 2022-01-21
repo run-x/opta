@@ -132,7 +132,7 @@ def _apply(
     pre_check()
     _clean_tf_folder()
     if local and not test:
-        config = _local_setup(config, image_tag)
+        config = _local_setup(config, image_tag, refresh_local_env=True)
 
 
     layer = Layer.load_from_yaml(config, env)
@@ -404,20 +404,21 @@ def _verify_parent_layer(layer: Layer, auto_approve: bool = False) -> None:
         )
         cleanup_files()
         
-def _local_setup(config: str, image_tag: str=None) -> str:
+def _local_setup(config: str, image_tag: str=None, refresh_local_env: bool=False) -> str:
     adjusted_config, localopta_envfile = _handle_local_flag(config, False)
     if adjusted_config != config:  # Only do this for service opta files
         config = adjusted_config  # Config for service
-        _apply(
-            config=localopta_envfile,
-            image_tag = image_tag,
-            auto_approve=True,
-            local=False,
-            env="",
-            refresh=True,
-            test=False,
-            detailed_plan=True,
-        )
-        _clean_tf_folder()
+        if refresh_local_env:
+            _apply(
+                config=localopta_envfile,
+                image_tag = image_tag,
+                auto_approve=True,
+                local=False,
+                env="",
+                refresh=True,
+                test=False,
+                detailed_plan=True,
+            )
+            _clean_tf_folder()
     return config
     
