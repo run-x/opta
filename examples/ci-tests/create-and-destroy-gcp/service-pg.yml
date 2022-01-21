@@ -22,6 +22,8 @@ modules:
         value: "0"
       - name: TEST_REDIS
         value: "0"
+      - name: TEST_MYSQL
+        value: "0"
     secrets:
       - FAKE_SECRET
     links:
