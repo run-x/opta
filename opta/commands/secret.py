@@ -4,6 +4,7 @@ import click
 from click_didyoumean import DYMGroup
 from opta.commands.apply import _local_setup
 from opta.amplitude import amplitude_client
+from opta.commands.apply import _local_setup
 from opta.core.generator import gen_all
 from opta.core.kubernetes import (
     create_namespace_if_not_exists,

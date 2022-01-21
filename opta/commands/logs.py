@@ -1,8 +1,9 @@
 from typing import Optional
-from opta.commands.apply import _local_setup
+
 import click
 
 from opta.amplitude import amplitude_client
+from opta.commands.apply import _local_setup
 from opta.core.generator import gen_all
 from opta.core.kubernetes import load_opta_kube_config, set_kube_config, tail_module_log
 from opta.exceptions import UserErrors
@@ -32,7 +33,9 @@ from opta.utils import check_opta_file_exists
     show_default=False,
     type=int,
 )
-def logs(env: Optional[str], config: str, seconds: Optional[int], local: Optional[bool]) -> None:
+def logs(
+    env: Optional[str], config: str, seconds: Optional[int], local: Optional[bool]
+) -> None:
     """
     Get stream of logs for a service
 

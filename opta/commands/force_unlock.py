@@ -3,13 +3,14 @@ from typing import List, Optional
 import click
 
 from opta.amplitude import amplitude_client
+from opta.commands.apply import _local_setup
 from opta.core.generator import gen_all
 from opta.core.helm import Helm
 from opta.core.kubernetes import set_kube_config
 from opta.core.terraform import Terraform
 from opta.layer import Layer
 from opta.utils import check_opta_file_exists
-from opta.commands.apply import _local_setup
+
 
 @click.command()
 @click.option("-c", "--config", default="opta.yaml", help="Opta config file.")

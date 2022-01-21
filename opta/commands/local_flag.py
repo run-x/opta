@@ -1,25 +1,25 @@
 import os
 from pathlib import Path
 from shutil import rmtree
+from typing import Tuple
 
 from ruamel import yaml
-from typing import Tuple
-from opta.utils import logger
 
-def _handle_local_flag(config: str, test: bool = False) -> Tuple[str,str]:
-    if test:
-        return config
+
+def _handle_local_flag(config: str, test: bool = False) -> Tuple[str, str]:
+
     with open(config, "r") as fr:
         y = yaml.round_trip_load(fr, preserve_quotes=True)
         if "org_name" in y:
             org_name = y["org_name"]
         else:
             org_name = "localorg"
-
-    if "opta-local-" in config:
-        return config
-    
     env_yaml_path = os.path.join(Path.home(), ".opta", "local", org_name)
+    if test:
+        return config, env_yaml_path + "/localopta.yaml"
+    if "opta-local-" in config:
+        return config, env_yaml_path + "/localopta.yaml"
+
     if not os.path.exists(env_yaml_path):
         os.makedirs(os.path.abspath(env_yaml_path))
     with open(env_yaml_path + "/localopta.yaml", "w") as fw:

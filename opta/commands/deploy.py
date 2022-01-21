@@ -1,9 +1,9 @@
 from typing import Optional
 
 import click
-from opta.commands.apply import _local_setup
+
 from opta.amplitude import amplitude_client
-from opta.commands.apply import _apply
+from opta.commands.apply import _apply, _local_setup
 from opta.commands.push import _push, is_service_config
 from opta.core.terraform import Terraform
 from opta.error_constants import USER_ERROR_TF_LOCK
@@ -78,6 +78,8 @@ def deploy(
     pre_check()
 
     config = check_opta_file_exists(config)
+    if local:
+        config = _local_setup(config, refresh_local_env=True)
     if not is_service_config(config):
         raise UserErrors(
             fmt_msg(
@@ -90,9 +92,6 @@ def deploy(
             """
             )
         )
-
-    if local:
-        config = _local_setup(config, refresh_local_env=True)
 
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(

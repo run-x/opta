@@ -1,5 +1,6 @@
 import os
 import unittest
+from pathlib import Path
 
 import yaml
 
@@ -9,11 +10,14 @@ from opta.commands.local_flag import _handle_local_flag
 class Local_Flag_Tests(unittest.TestCase):
     def setUp(self) -> None:
         self.serviceconfig = "/tmp/test_local_flag.yaml"
+        self.derivedconfig = os.path.join(
+            Path.home(), ".opta", "local", "whatever", "opta-local-test_local_flag.yaml"
+        )
         with open(self.serviceconfig, "w") as fw:
             yaml.dump(
                 {
                     "name": "helloworld",
-                    "environments": [{"name": "somethingelse"}],
+                    "org_name": "whatever",
                     "modules": [
                         {
                             "name": "firstapp",
@@ -35,13 +39,13 @@ class Local_Flag_Tests(unittest.TestCase):
     def tearDown(self) -> None:
         if os.path.isfile(self.serviceconfig):
             os.remove(self.serviceconfig)
-        if os.path.isfile("/tmp/opta-local-test_local_flag.yaml"):
-            os.remove("/tmp/opta-local-test_local_flag.yaml")
+        if os.path.isfile(self.derivedconfig):
+            os.remove(self.derivedconfig)
         return super().tearDown()
 
     def test_handle_local_flag(self) -> None:
         _handle_local_flag(self.serviceconfig)
-        with open("/tmp/opta-local-test_local_flag.yaml", "r") as fr:
+        with open(self.derivedconfig, "r") as fr:
             y = yaml.safe_load(fr)
             assert "environments" in y
             assert y["environments"][0]["name"] == "localopta"

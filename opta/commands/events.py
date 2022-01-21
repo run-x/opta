@@ -1,10 +1,11 @@
 import datetime
 from typing import Optional
-from opta.commands.apply import _local_setup
+
 import click
 import pytz
 
 from opta.amplitude import amplitude_client
+from opta.commands.apply import _local_setup
 from opta.core.generator import gen_all
 from opta.core.kubernetes import (
     load_opta_kube_config,
@@ -12,6 +13,7 @@ from opta.core.kubernetes import (
     tail_namespace_events,
 )
 from opta.layer import Layer
+
 
 @click.option(
     "--local",
@@ -35,7 +37,9 @@ from opta.layer import Layer
     show_default=False,
     type=int,
 )
-def events(env: Optional[str], config: str, seconds: Optional[int],local: Optional[bool]) -> None:
+def events(
+    env: Optional[str], config: str, seconds: Optional[int], local: Optional[bool]
+) -> None:
     """Get stream of logs from your service"""
     if local:
         config = _local_setup(config)

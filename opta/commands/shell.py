@@ -4,6 +4,7 @@ import click
 from kubernetes.client import CoreV1Api
 
 from opta.amplitude import amplitude_client
+from opta.commands.apply import _local_setup
 from opta.constants import SHELLS_ALLOWED
 from opta.core.generator import gen_all
 from opta.core.kubernetes import load_opta_kube_config, set_kube_config
@@ -11,7 +12,6 @@ from opta.exceptions import UserErrors
 from opta.layer import Layer
 from opta.nice_subprocess import nice_run
 from opta.utils import check_opta_file_exists
-from opta.commands.apply import _local_setup
 
 
 @click.command()

@@ -81,8 +81,6 @@ from opta.utils import check_opta_file_exists, fmt_msg, logger
     default=False,
     help="Show full terraform plan in detail, not the opta provided summary",
 )
-
-
 def apply(
     config: str,
     env: Optional[str],
@@ -133,7 +131,6 @@ def _apply(
     _clean_tf_folder()
     if local and not test:
         config = _local_setup(config, image_tag, refresh_local_env=True)
-
 
     layer = Layer.load_from_yaml(config, env)
     layer.verify_cloud_credentials()
@@ -403,15 +400,18 @@ def _verify_parent_layer(layer: Layer, auto_approve: bool = False) -> None:
             auto_approve=False,
         )
         cleanup_files()
-        
-def _local_setup(config: str, image_tag: str=None, refresh_local_env: bool=False) -> str:
+
+
+def _local_setup(
+    config: str, image_tag: str = None, refresh_local_env: bool = False
+) -> str:
     adjusted_config, localopta_envfile = _handle_local_flag(config, False)
     if adjusted_config != config:  # Only do this for service opta files
         config = adjusted_config  # Config for service
         if refresh_local_env:
             _apply(
                 config=localopta_envfile,
-                image_tag = image_tag,
+                image_tag=image_tag,
                 auto_approve=True,
                 local=False,
                 env="",
@@ -421,4 +421,3 @@ def _local_setup(config: str, image_tag: str=None, refresh_local_env: bool=False
             )
             _clean_tf_folder()
     return config
-    
