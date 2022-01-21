@@ -1,6 +1,6 @@
 import datetime
 from typing import Optional
-
+from opta.commands.apply import _local_setup
 import click
 import pytz
 
@@ -13,7 +13,13 @@ from opta.core.kubernetes import (
 )
 from opta.layer import Layer
 
-
+@click.option(
+    "--local",
+    is_flag=True,
+    default=False,
+    help="""Use the local Kubernetes cluster for development and testing, irrespective of the environment specified inside the opta service yaml file""",
+    hidden=False,
+)
 @click.command(hidden=True)
 @click.option(
     "-e", "--env", default=None, help="The env to use when loading the config file"
@@ -29,9 +35,10 @@ from opta.layer import Layer
     show_default=False,
     type=int,
 )
-def events(env: Optional[str], config: str, seconds: Optional[int]) -> None:
+def events(env: Optional[str], config: str, seconds: Optional[int],local: Optional[bool]) -> None:
     """Get stream of logs from your service"""
-
+    if local:
+        config = _local_setup(config)
     # Configure kubectl
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(
