@@ -3,10 +3,10 @@ from pathlib import Path
 from shutil import rmtree
 
 from ruamel import yaml
-
+from typing import Tuple
 from opta.utils import logger
 
-def _handle_local_flag(config: str, test: bool = False) -> str:
+def _handle_local_flag(config: str, test: bool = False) -> Tuple[str,str]:
     if test:
         return config
     with open(config, "r") as fr:

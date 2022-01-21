@@ -10,7 +10,6 @@ from botocore.config import Config
 from colored import attr
 from google.cloud import storage  # type: ignore
 from google.cloud.exceptions import NotFound
-
 from opta.amplitude import amplitude_client
 from opta.commands.local_flag import _clean_tf_folder, _handle_local_flag
 from opta.constants import TF_PLAN_PATH
@@ -72,7 +71,7 @@ def destroy(
 
     config = check_opta_file_exists(config)
     if local:
-        config = _handle_local_flag(config, False)
+        config, _ = _handle_local_flag(config, False)
         _clean_tf_folder()
     layer = Layer.load_from_yaml(config, env)
     event_properties: Dict = layer.get_event_properties()
