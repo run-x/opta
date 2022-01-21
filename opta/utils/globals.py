@@ -11,7 +11,7 @@ class Interpolation:
     @classmethod
     def validate(cls) -> None:
         if len(cls.bad_field_names) > 0:
-            error = f"Following field names could not be interpolated:"
+            error = "Following field names could not be interpolated:"
             for bad_field_name in cls.bad_field_names:
                 error += f"\n  * {bad_field_name}"
 
@@ -24,3 +24,15 @@ class Interpolation:
     @classmethod
     def unset(cls) -> None:
         cls.bad_field_names.clear()
+
+
+class OptaUpgrade:
+    successful = False
+
+    @classmethod
+    def success(cls) -> None:
+        cls.successful = True
+
+    @classmethod
+    def unset(cls) -> None:
+        cls.successful = False

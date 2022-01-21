@@ -3,8 +3,9 @@ import random
 import requests
 import semver
 
-from opta.constants import DEV_VERSION, VERSION, OptaUpgrade
+from opta.constants import DEV_VERSION, VERSION
 from opta.utils import logger
+from opta.utils.globals import OptaUpgrade
 
 LATEST_VERSION_FILE_URL = "https://dev-runx-opta-binaries.s3.amazonaws.com/latest"
 UPGRADE_CHECK_PROBABILITY = 0.2
