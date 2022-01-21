@@ -10,7 +10,7 @@ from opta.layer import Layer
 from opta.pre_check import pre_check
 from opta.resource import Resource
 from opta.utils import check_opta_file_exists, column_print, deep_merge, json
-
+from opta.commands.apply import _local_setup
 
 @click.command(hidden=True)
 @click.option(
@@ -19,12 +19,21 @@ from opta.utils import check_opta_file_exists, column_print, deep_merge, json
 @click.option(
     "-e", "--env", default=None, help="The env to use when loading the config file"
 )
-def inspect(config: str, env: Optional[str]) -> None:
+@click.option(
+    "--local",
+    is_flag=True,
+    default=False,
+    help="""Use the local Kubernetes cluster for development and testing, irrespective of the environment specified inside the opta service yaml file""",
+    hidden=False,
+)
+def inspect(config: str, env: Optional[str], local: Optional[bool]) -> None:
     """Displays important resources and AWS/Datadog links to them"""
 
     pre_check()
 
     config = check_opta_file_exists(config)
+    if local:
+        config = _local_setup(config)
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(
         amplitude_client.INSPECT_EVENT,
