@@ -673,7 +673,7 @@ jobs:
           command: |
             yes | ./dist/opta/opta destroy \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-aws/service-msql.yml \
+            --config ./examples/ci-tests/create-and-destroy-aws/service-mysql.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-test-service-pg:
@@ -1061,7 +1061,7 @@ jobs:
           command: |
             ./dist/opta/opta deploy \
             --image app:latest \
-            --env awsenv-ci \
+            --env gcpenv-ci \
             --config ./examples/ci-tests/create-and-destroy-gcp/service-mysql.yaml \
             --tag $CIRCLE_SHA1 \
             --auto-approve
@@ -1069,8 +1069,8 @@ jobs:
           name: "Destroy test-service-mysql"
           command: |
             yes | ./dist/opta/opta destroy \
-            --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-gcp/service-msql.yaml \
+            --env gcpenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-gcp/service-mysql.yaml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   gcp-test-service-gcs:
