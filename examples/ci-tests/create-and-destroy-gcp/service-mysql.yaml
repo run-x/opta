@@ -21,6 +21,8 @@ modules:
         value: "0"
       - name: TEST_POSTGRES
         value: "0"
+      - name: TEST_GCS
+        value: "0"
     links:
       - mysql:
         - db_user: MYUSER
