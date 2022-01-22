@@ -35,8 +35,9 @@ inputs:
     description: Domain to setup the ingress with
     default: ""
   - name: cert_arn
-    user_facing: false
-    description: Cert arn
+    user_facing: true
+    validator: str(required=False)
+    description: "The arn of the ACM certificate to use for SSL. By default uses the one created by the DNS module if the module is found and delegation enabled."
     default: ""
   - name: private_key
     user_facing: false
