@@ -1,6 +1,6 @@
 environments:
   - name: awsenv-ci
-    path: "/home/ubuntu/yaml/aws.yml"
+    path: "environment.yml"
     variables: {}
 name: ci-docdb
 modules:
@@ -27,4 +27,3 @@ modules:
       - docdb
   - name: docdb
     type: aws-documentdb
-    deletion_protection: true
