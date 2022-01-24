@@ -79,7 +79,7 @@ def deploy(
 
     config = check_opta_file_exists(config)
     if local:
-        config = _local_setup(config, image_tag = tag, refresh_local_env=True)
+        config = _local_setup(config, image_tag=tag, refresh_local_env=True)
     if not is_service_config(config):
         raise UserErrors(
             fmt_msg(
