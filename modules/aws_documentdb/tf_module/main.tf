@@ -41,6 +41,7 @@ resource "aws_docdb_cluster" "cluster" {
   backup_retention_period = 5
   apply_immediately       = true
   skip_final_snapshot     = true
+  deletion_protection     = var.deletion_protection
   lifecycle {
     ignore_changes = [cluster_identifier]
   }

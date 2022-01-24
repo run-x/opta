@@ -29,6 +29,11 @@ inputs:
     validator: int(required=False)
     description: This is to specify the count of instances for Document DB Cluster. Note -> These would be Multi-AZ.
     default: 1
+  - name: deletion_protection
+    user_facing: true
+    validator: bool(required=False)
+    description: A value that indicates whether the DB cluster has deletion protection enabled. The database can't be deleted when deletion protection is enabled. By default, deletion protection is disabled.
+    default: false
 outputs:
   - name: db_host
     export: true

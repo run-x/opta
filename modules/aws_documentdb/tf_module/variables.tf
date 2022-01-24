@@ -28,3 +28,8 @@ variable "instance_count" {
   default     = 1
   description = "Number of Instances for aws_docdb_cluster_instance"
 }
+variable "deletion_protection" {
+  type        = bool
+  default     = false
+  description = "A value that indicates whether the DB cluster has deletion protection enabled. The database can't be deleted when deletion protection is enabled."
+}
