@@ -690,7 +690,7 @@ jobs:
           command: |
             sleep 30
             pkill -SIGQUIT opta
-            cat logs.log | grep "\"GET /healthcheck_none HTTP/1.2\" 200"
+            cat logs.log | grep "\"GET /healthcheck HTTP/1.1\" 200"
             exit $?
       - run:
           name: "Deploy test-service with Additional PG"
