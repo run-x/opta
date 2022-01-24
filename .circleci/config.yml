@@ -40,6 +40,9 @@ parameters:
   run-destroy-aws-dns-true:
     type: boolean
     default: false
+  new:
+    type: boolean
+    default: false
 
 orbs:
   terraform: circleci/terraform@3.0.0
@@ -675,6 +678,20 @@ jobs:
             --config ./examples/ci-tests/create-and-destroy-aws/service-pg.yml \
             --tag $CIRCLE_SHA1 \
             --auto-approve
+      - run:
+          name: "Opta logs"
+          command: |
+            ./dist/opta/opta logs \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-aws/service-pg.yml >> logs.log
+          background: true
+      - run:
+          name: "Check opta logs"
+          command: |
+            sleep 30
+            pkill -SIGQUIT opta
+            cat logs.log | grep "\"GET /healthcheck_none HTTP/1.2\" 200"
+            exit $?
       - run:
           name: "Deploy test-service with Additional PG"
           command: |
@@ -1469,6 +1486,24 @@ workflows:
       - terraform-formatter
       - regula-lint
       - pytest
+
+  test-new-automation:
+    when: << pipeline.parameters.new >>
+    jobs:
+      - build-test-service-image
+      - build-opta-example-images
+      - build-opta-binary:
+          requires:
+            - build-test-service-image
+      - aws-create-env:
+          requires:
+            - build-opta-binary
+      - aws-test-service-pg:
+          requires:
+            - aws-create-env
+      - aws-destroy-env:
+          requires:
+            - aws-test-service-pg
 
   run-destroy-gcp-env:
     when: << pipeline.parameters.run-destroy-gcp-env >>
