@@ -40,9 +40,6 @@ parameters:
   run-destroy-aws-dns-true:
     type: boolean
     default: false
-  new:
-    type: boolean
-    default: false
 
 orbs:
   terraform: circleci/terraform@3.0.0
@@ -1486,24 +1483,6 @@ workflows:
       - terraform-formatter
       - regula-lint
       - pytest
-
-  test-new-automation:
-    when: << pipeline.parameters.new >>
-    jobs:
-      - build-test-service-image
-      - build-opta-example-images
-      - build-opta-binary:
-          requires:
-            - build-test-service-image
-      - aws-create-env:
-          requires:
-            - build-opta-binary
-      - aws-test-service-pg:
-          requires:
-            - aws-create-env
-      - aws-destroy-env:
-          requires:
-            - aws-test-service-pg
 
   run-destroy-gcp-env:
     when: << pipeline.parameters.run-destroy-gcp-env >>
