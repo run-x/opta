@@ -232,6 +232,26 @@ jobs:
           paths:
             - test-service-image
 
+  build-test-service-image-mysql:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - run:
+          name: "Git clone the test service"
+          command: "git clone -b feat/nilesh/runx-1011-aws-mysql-test git@github.com:run-x/test-service.git"
+      - run:
+          name: "Build test-service image"
+          command: docker build -t app:mysql -f test-service/Dockerfile test-service/
+      - run:
+          name: "Save test service"
+          command: docker save -o test-service-image-mysql app:mysql
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - test-service-image-mysql
+
   build-opta-example-images:
     executor: ubuntu-machine
     steps:
@@ -658,12 +678,12 @@ jobs:
       - aws-cli/setup
       - run:
           name: "Load test-service image"
-          command: docker load -i test-service-image
+          command: docker load -i test-service-image-mysql
       - run:
           name: "Deploy test-service-mysql"
           command: |
             ./dist/opta/opta deploy \
-            --image app:latest \
+            --image app:mysql \
             --env awsenv-ci \
             --config ./examples/ci-tests/create-and-destroy-aws/service-mysql.yml \
             --tag $CIRCLE_SHA1 \
@@ -1447,9 +1467,11 @@ workflows:
     jobs: &fullsuite
       - build-test-service-image
       - build-opta-example-images
+      - build-test-service-image-mysql
       - build-opta-binary:
           requires:
             - build-test-service-image
+            - build-test-service-image-mysql
       - aws-create-env:
           requires:
             - build-opta-binary
