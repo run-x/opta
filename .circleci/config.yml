@@ -220,10 +220,7 @@ jobs:
       - checkout
       - run:
           name: "Git clone the test service"
-          command: "git clone -b feat/nilesh/runx-1011-aws-mysql-test git@github.com:run-x/test-service.git"
-      # - run:
-      #     name: "Git checkout MySQL PR"
-      #     command: "git checkout feat/nilesh/runx-1011-aws-mysql-test"
+          command: "git clone git@github.com:run-x/test-service.git"
       - run:
           name: "Build test-service image"
           command: docker build -t app:latest -f test-service/Dockerfile test-service/
