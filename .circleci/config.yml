@@ -733,7 +733,7 @@ jobs:
             secret_value=$(./dist/opta/opta secret view \
             --env awsenv-ci \
             --config ./examples/ci-tests/create-and-destroy-aws/service-pg.yml \
-            FAKE_SECRET | tail -1)
+            FAKE_SECRET | grep foo)
             echo "This was the found secret value: ${secret_value}"
             [[ "$secret_value" =~ .*"foo".* ]] || exit 1
       - run:
@@ -1167,7 +1167,7 @@ jobs:
             secret_value=$(./dist/opta/opta secret view \
             --env gcpenv-ci \
             --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
-            FAKE_SECRET | tail -1)
+            FAKE_SECRET | grep foo)
             echo "This was the found secret value: ${secret_value}"
             [[ "$secret_value" =~ .*"foo".* ]] || exit 1
       - run:
@@ -1237,7 +1237,7 @@ jobs:
             secret_value=$($HOME/.opta/opta secret view \
             --env gcpenv-ci \
             --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
-            FAKE_SECRET | tail -1)
+            FAKE_SECRET | grep foo)
             echo "This was the found secret value: ${secret_value}"
             [[ "$secret_value" =~ .*"foo".* ]] || exit 1
       - run:
