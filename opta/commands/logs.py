@@ -55,8 +55,6 @@ def logs(env: Optional[str], config: str, seconds: Optional[int]) -> None:
     if len(modules) == 0:
         raise UserErrors("No module of type k8s-service in the yaml file")
     elif len(modules) > 1:
-        raise UserErrors(
-            "Don't put more than one k8s-service module file per opta file"
-        )
+        raise UserErrors("Don't put more than one k8s-service module file per opta file")
     module_name = modules[0].name
     tail_module_log(layer, module_name, seconds)
