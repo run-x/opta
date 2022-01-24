@@ -676,6 +676,20 @@ jobs:
             --tag $CIRCLE_SHA1 \
             --auto-approve
       - run:
+          name: "Opta logs"
+          command: |
+            ./dist/opta/opta logs \
+            --env awsenv-ci \
+            --config ./examples/ci-tests/create-and-destroy-aws/service-pg.yml >> logs.log
+          background: true
+      - run:
+          name: "Check opta logs"
+          command: |
+            sleep 30
+            pkill -SIGQUIT opta
+            cat logs.log | grep "\"GET /healthcheck HTTP/1.1\" 200"
+            exit $?
+      - run:
           name: "Deploy test-service with Additional PG"
           command: |
             ./dist/opta/opta deploy \
