@@ -6,10 +6,6 @@ input_schema: {
     "description": "Sets up VPCs, a default KMS key, and the db/cache subnets for your environment",
     "type": "object",
     "properties": {
-      "private_ipv4_cidr_block": {
-        "$ref": "/common-types/cidr-block",
-        "default": "10.0.0.0/19"
-      },
       "vpc_log_retention": {
         "type": "integer",
         "description": "The retention period (days) for the flow logs of your vpc.",
@@ -69,7 +65,7 @@ input_terraform_connections:
     target: layer_name
   - source: meta.module
     target: module_name
-  - both: private_ipv4_cidr_block
-  - both: vpc_log_retention
   - both: private_ipv4_cidr_blocks
+  - both: vpc_log_retention
+  - both: public_ipv4_cidr_blocks
   - both: total_ipv4_cidr_block

@@ -41,9 +41,11 @@ class AWSProvider(CloudProvider):
             "allowed_account_ids": config.account_ids,
         })
 
+
+        # TODO: Upgraded from v3.58.0 to v3.73.0 to fix bug when creating routes (fixed in v3.70.0)
         file.add_required_provider("aws", {
             "source": "hashicorp/aws",
-            "version": "3.58.0",
+            "version": "3.73.0",
         })
 
         file.add_data("aws_caller_identity", "provider", {})

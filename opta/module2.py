@@ -13,6 +13,8 @@ class Module:
     input: Dict[str, Any]
     processor: Optional[ModuleProcessor]
 
+    # TODO: Handle aliases on `type` (e.g. `base` instead of `aws-base`)
+
     def __init__(self) -> None:
         self.links = []
         self.input = {}

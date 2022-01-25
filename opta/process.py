@@ -1,13 +1,13 @@
 from dataclasses import dataclass
 import os
 from typing import Any, Dict
+
+import click
+
 from opta.constants import TF_FILE_PATH, TF_PLAN_PATH
-
-
 from opta.core.cloud_provider import AWSProvider
 from opta.core.plan_displayer import PlanDisplayer
 from opta.core.terraform2 import Terraform, TerraformFile
-
 from opta.exceptions import UserErrors
 from opta.generator import TerraformGenerator
 from opta.layer2 import Layer
@@ -24,6 +24,7 @@ from opta.utils import json
 
 @dataclass
 class ApplyOptions:
+    auto_approve: bool
     config_path: str
     detailed_plan: bool = False
 
@@ -130,16 +131,23 @@ def apply(options: ApplyOptions):
             for id in step
         ]
 
-        tf.plan(lock=False, targets=targets, out=TF_PLAN_PATH, quiet=True)
+        tf.plan(lock=False, targets=targets, out=TF_PLAN_PATH, quiet=False)
         PlanDisplayer.display(detailed_plan=options.detailed_plan)
+
+        if not options.auto_approve:
+            click.confirm(
+                "The above are the planned changes for your opta run. Do you approve?",
+                abort=True,
+            )
 
         for module in modules:
             # TODO: Pass in plan details
             module.processor.pre_terraform_apply()
 
-        # TODO: Run terraform apply
+        tf.apply(auto_approve=options.auto_approve, plan=TF_PLAN_PATH, quiet=False)
 
         for module in modules:
+            # TODO: Pass in plan details (and terraform run results?)
             module.processor.post_terraform_apply()
 
 def write_tf(config: TerraformFile) -> None:

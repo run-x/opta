@@ -21,6 +21,18 @@ class Terraform:
         self._init_done: bool = False
 
 
+    def apply(self, *, auto_approve: bool = False, plan: str, quiet: bool = False) -> None:
+        self.init()
+
+        flags = self._render_flags({
+            "auto-approve": auto_approve,
+            "compact-warnings": True,
+        })
+
+        flags.append(plan)
+
+        self._run("apply", flags, quiet=quiet)
+
     def download_state(self, layer: Layer) -> bool:
         # TODO: Return a `State` object that tracks state
         # TODO: Support non-local storage
@@ -52,6 +64,7 @@ class Terraform:
             return
 
         self._run("init", quiet=quiet)
+        self._init_done = True
 
     def plan(self, *, lock: bool = True, input: bool = False, out: Optional[str] = None, targets: Optional[List[str]] = None, quiet: bool = False):
         self.init()
@@ -73,15 +86,20 @@ class Terraform:
 
             rendered.extend(self._render_flag(key, value))
 
+        return rendered
 
     def _render_flag(self, key: str, value: Any) -> List[str]:
         if isinstance(value, list):
             return [
-                self._render_flag(key, subvalue)
+                flag
                 for subvalue in value
+                for flag in self._render_flag(key, subvalue)
             ]
         elif isinstance(value, bool):
-            return [f"-{key}={str(value).lower()}"]
+            if value:
+                return [f"-{key}"]
+
+            return [f"-{key}=false"]
         elif isinstance(value, str):
             return [f"-{key}={value}"]
 

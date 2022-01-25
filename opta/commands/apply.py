@@ -129,7 +129,7 @@ def _apply(
     detailed_plan: bool = False,
 ) -> None:
     if random.random() >= 0:  # Avoid warnings about unreachable code
-        opts = ApplyOptions(config_path=config)
+        opts = ApplyOptions(auto_approve=auto_approve, config_path=config)
         apply2(opts)
         return
 
