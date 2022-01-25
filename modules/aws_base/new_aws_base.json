@@ -1,0 +1,44 @@
+{
+  "description": "Sets up VPCs, a default KMS key, and the db/cache subnets for your environment",
+  "type": "object",
+  "$id": "http://localhost:7800/modules/aws_base/new_aws_base.json",
+  "required": [
+    "input_schema",
+    "output_schema",
+    "clouds"
+  ],
+  "properties": {
+    "clouds": {
+      "$ref": "http://localhost:7800/modules/common_schemas/clouds.json"
+    },
+
+    "input_schema": {
+      "$ref": "input_schema.aws_base.json"
+    },
+    "output_schema": {
+      "$ref": "output_schema.aws_base.json"
+    },
+    "is_unique": {
+      "type": "boolean",
+      "description": "",
+      "default": true
+    },
+    "halt": {
+      "type": "boolean",
+      "description": "",
+      "default": true
+    },
+    "environment_module": {
+      "type": "boolean",
+      "description": "",
+      "default": true
+    }
+  }
+  //   "output_providers": { },
+  //   "output_data":
+  // aws_caller_identity:
+  //   provider: { }
+  // aws_region:
+  //   provider: { }
+  // }
+}

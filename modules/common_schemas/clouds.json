@@ -1,0 +1,11 @@
+{
+    "$id": "http://localhost:7800/modules/common_schemas/clouds.json",
+    "description": "Clouds in which this module is applicable",
+    "type": "array",
+    "minItems": 0,
+    "items": {
+      "type": "string"
+    }
+  }
+  
+  

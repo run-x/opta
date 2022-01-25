@@ -1,0 +1,13 @@
+{
+  "$id": "http://localhost:7800/modules/common_schemas/ipv4_cidr_blocks.json",
+  "description": "IPv4 CIDR blocks",
+  "type": "array",
+  "minItems": 1,
+  "items": {
+    "type": "string"
+  }
+}
+
+
+
+
