@@ -18,6 +18,7 @@ resource "helm_release" "ingress-nginx" {
         config : local.config
         podAnnotations : {
           "linkerd.io/inject" : "enabled"
+          "config.linkerd.io/skip-inbound-ports": "80,443"
           "cluster-autoscaler.kubernetes.io/safe-to-evict" : "true"
         }
         resources : {
