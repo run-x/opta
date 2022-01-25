@@ -26,6 +26,19 @@ class Visitor:
     def root(self) -> Iterable:
         return self._root
 
+    def __contains__(self, path: Any) -> bool:
+        if not isinstance(path, Reference):
+            raise TypeError(f"path must be of type {Reference.__qualname__}")
+
+        current: Any = self.root
+        for part in path:
+            if part not in current:
+                return False
+
+            current = current[part]
+
+        return True
+
     def __iter__(self) -> Iterator[Tuple[Reference, Any]]:
         iter = _VisitorIterator(self)
         iter.depth_first = self.depth_first

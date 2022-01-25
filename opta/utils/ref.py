@@ -141,7 +141,7 @@ class Reference(Sequence):
                 raise TypeError(f"unsupported part type {type(part).__name__}")
 
 
-class InterpolatedReference(Reference):
+class SimpleInterpolatedReference(Reference):
     """
     A reference that was created using an interpoliation string. Can be serialized to/from YAML
     """
@@ -155,7 +155,7 @@ class InterpolatedReference(Reference):
         return super().__str__()
 
     @classmethod
-    def parse(cls, raw: str) -> InterpolatedReference:
+    def parse(cls, raw: str) -> SimpleInterpolatedReference:
         match = _INTERPOLATION_REGEX.fullmatch(raw)
         if not match:
             raise ReferenceParseError("`raw` not an interpolated string")
@@ -163,26 +163,26 @@ class InterpolatedReference(Reference):
         return cls.parse_dotted(match[1])
 
     @classmethod
-    def parse_dotted(cls, raw: str) -> InterpolatedReference:
+    def parse_dotted(cls, raw: str) -> SimpleInterpolatedReference:
         parsed = super().parse(raw)
 
         # Ideally, we would just return `parsed`, but the type system makes that difficult
         return cls(*parsed.path)
 
     @classmethod
-    def to_yaml(cls, representer: Any, node: InterpolatedReference) -> Any:
+    def to_yaml(cls, representer: Any, node: SimpleInterpolatedReference) -> Any:
         # TODO: Do we need to be able to dump this class to YAML?
         return representer.represent_scalar(cls.yaml_tag, node._inner_str())
 
     @classmethod
-    def from_yaml(cls, _: Any, node: Any) -> InterpolatedReference:
+    def from_yaml(cls, _: Any, node: Any) -> SimpleInterpolatedReference:
         # TODO: Should we actually have a way to parse this from yaml?
         return cls.parse_dotted(node.value)
 
 
-register_yaml_class(InterpolatedReference)
+register_yaml_class(SimpleInterpolatedReference)
 
-ComplexPart = Union[str, InterpolatedReference]
+ComplexPart = Union[str, SimpleInterpolatedReference]
 
 
 class ComplexInterpolatedReference:
@@ -191,6 +191,15 @@ class ComplexInterpolatedReference:
 
     def __str__(self) -> str:
         return "".join(str(part) for part in self._parts)
+
+    def simplify(self) -> Union[str, InterpolatedReference]:
+        if len(self._parts) > 1:
+            return self
+
+        if not self._parts:
+            return ""
+
+        return self._parts[0]
 
     @classmethod
     def _splitter(cls, raw: str) -> List[str]:
@@ -208,10 +217,19 @@ class ComplexInterpolatedReference:
             # We are loose on the syntax check at first here so expanding supported expressions doesn't cause backwards compatibility issues
             match = _SIMPLE_INTERPOLATION_REGEX.fullmatch(component)
             if match:
-                part = InterpolatedReference.parse(component)
+                part = SimpleInterpolatedReference.parse(component)
             else:
                 part = component
 
             parts.append(part)
 
         return cls(parts)
+
+InterpolatedReference = Union[SimpleInterpolatedReference, ComplexInterpolatedReference]
+
+def parse_ref_string(input: str) -> Union[str, InterpolatedReference]:
+    complex = ComplexInterpolatedReference.parse(input)
+    return complex.simplify()
+
+def is_interpolated_reference(value: Any) -> bool:
+    return isinstance(value, SimpleInterpolatedReference) or isinstance(value, ComplexInterpolatedReference)

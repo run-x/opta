@@ -30,7 +30,7 @@ def preprocess_layer(data: dict) -> None:
                 f"YAML preprocessor for version {version} must not regress the YAML version"
             )
 
-        if new_version not in processors:
+        if new_version < CURRENT_VERSION and new_version not in processors:
             raise RuntimeError(
                 f"YAML preprocessor for version {version} must not return an unsupported YAML version"
             )

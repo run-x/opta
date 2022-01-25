@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import copy
+from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
 from opta.link import Link
@@ -8,11 +11,15 @@ class Module:
     type: str
     links: List[Link]
     input: Dict[str, Any]
+    processor: Optional[ModuleProcessor]
+
+    # TODO: Handle aliases on `type` (e.g. `base` instead of `aws-base`)
 
     def __init__(self) -> None:
         self.links = []
         self.input = {}
         self._alias: Optional[str] = None
+        self.processor = None
 
     def __repr__(self) -> str:
         args = {
@@ -41,15 +48,19 @@ class Module:
         else:
             self._alias = None
 
+    @property
+    def proxy(self) -> ModuleProxy:
+        return ModuleProxy(self)
+
     @classmethod
-    def from_raw(cls, raw: Dict[str, Any]) -> "Module":
+    def from_dict(cls, raw: Dict[str, Any]) -> Module:
         module = cls()
         module.type = raw["type"]
 
         if "alias" in raw:
             module.alias = raw["alias"]
 
-        module.links = [Link.from_raw(raw_link) for raw_link in raw.get("links", [])]
+        module.links = [Link.from_dict(raw_link) for raw_link in raw.get("links", [])]
 
         input = copy.deepcopy(raw)
         input.pop("type", ...)
@@ -59,14 +70,14 @@ class Module:
 
         return module
 
-    def to_raw(self) -> Dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         raw: Dict[str, Any] = {
             "type": self.type,
             "alias": self.alias,
         }
 
         if self.links:
-            raw["links"] = [link.to_raw() for link in self.links]
+            raw["links"] = [link.to_dict() for link in self.links]
 
         if self.input:
             raw["input"] = self.input
@@ -80,4 +91,47 @@ class Module:
             raise KeyError(f"Link to module {module_alias} not found") from None
 
 
+class ModuleProxy:
+    def __init__(self, source: Module) -> None:
+        self.__source = source
+        self.__input: Optional[Dict[str, Any]] = None
+
+    @property
+    def type(self):
+        return self.__source.type
+
+    @property
+    def alias(self):
+        return self.__source.alias
+
+    @property
+    def input(self):
+        if self.__input is None:
+            self.__input = copy.deepcopy(self.__source.input)
+
+        return self.__input
+
+
+class ModuleProcessor:
+    def __init__(self, module: ModuleProxy) -> None:
+        self.module = module
+
+    def pre_terraform_plan(self, vars: Dict[str, Any]) -> None:
+        """
+        Can modify terraform values
+        """
+        pass
+
+    def pre_terraform_apply(self) -> None:
+        """
+        Can inspect the terraform plan
+        """
+        pass
+
+    def post_terraform_apply(self) -> None:
+        pass
+
+
+
 Module2 = Module
+ModuleProcessor2 = ModuleProcessor

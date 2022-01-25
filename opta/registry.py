@@ -109,6 +109,10 @@ def _get_all_module_info(directory: str, cloud: str) -> list:
     all_yaml_files = glob.glob(directory + "/**/*.yaml", recursive=True)
     all_md_files = glob.glob(directory + "/**/*.md", recursive=True)
     for a_yaml_path in all_yaml_files:
+        if a_yaml_path.endswith('/module.yaml'):
+            # Workaround, skip over new module API specs
+            continue
+
         try:
             module_dict = yaml.load(open(a_yaml_path))
             if not module_dict:

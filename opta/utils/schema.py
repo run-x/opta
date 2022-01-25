@@ -5,7 +5,7 @@ from typing import Any, Final
 
 import jsonschema
 
-from opta.utils.yaml import yaml_load
+from opta.utils import yaml
 
 _ROOT_PATH: Final[Path] = Path(__file__).parent.parent.parent
 
@@ -32,7 +32,7 @@ def module_schema() -> Any:
     schema_path = _ROOT_PATH.joinpath("schemas", "module.yaml")
 
     with open(schema_path, "r") as f:
-        return yaml_load(f)
+        return yaml.load(f)
 
 
 # Monkeypatch RefResolver so it never makes remote calls

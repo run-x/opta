@@ -1,6 +1,7 @@
 import datetime
 import os
 from pathlib import Path
+import random
 from subprocess import CalledProcessError  # nosec
 from threading import Thread
 from typing import Dict, List, Optional, Set
@@ -30,6 +31,7 @@ from opta.error_constants import USER_ERROR_TF_LOCK
 from opta.exceptions import MissingState, UserErrors
 from opta.layer import Layer, StructuredConfig
 from opta.pre_check import pre_check
+from opta.process import apply as apply2, ApplyOptions
 from opta.utils import check_opta_file_exists, fmt_msg, logger
 
 
@@ -129,6 +131,11 @@ def _apply(
     stdout_logs: bool = True,
     detailed_plan: bool = False,
 ) -> None:
+    if random.random() >= 0:  # Avoid warnings about unreachable code
+        opts = ApplyOptions(auto_approve=auto_approve, config_path=config)
+        apply2(opts)
+        return
+
     pre_check()
     _clean_tf_folder()
     if local:
