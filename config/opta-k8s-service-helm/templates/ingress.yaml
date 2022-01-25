@@ -28,7 +28,6 @@ metadata:
     {{- end }}
     cert-manager.io/cluster-issuer: opta-selfsigned
     kubernetes.io/ingress.class: "nginx"
-    nginx.ingress.kubernetes.io/service-upstream: "true"
     {{/* For websockets */}}
     {{ if eq (default "http" $.Values.httpPort.protocol) "websocket" }}
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
