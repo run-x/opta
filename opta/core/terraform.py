@@ -943,6 +943,38 @@ class Terraform:
             cls._create_local_state_storage(providers)
 
     @classmethod
+    def delete_state_storage(cls, layer: "Layer") -> None:
+        """
+        Idempotently remove remote storage for tf state
+        """
+        # After the layer is completely deleted, remove the opta config from the state bucket.
+        if layer.cloud == "aws":
+            cloud_client: CloudClient = AWS(layer)
+        elif layer.cloud == "google":
+            cloud_client = GCP(layer)
+        elif layer.cloud == "azurerm":
+            cloud_client = Azure(layer)
+        elif layer.cloud == "local":
+            cloud_client = Local(layer)
+        else:
+            raise Exception(
+                f"Can not handle opta config deletion for cloud {layer.cloud}"
+            )
+        cloud_client.delete_opta_config()
+        cloud_client.delete_remote_state()
+
+        # If this is the env layer, delete the state bucket & dynamo table as well.
+        if layer.name == layer.root().name:
+
+            logger.info(f"Deleting the state storage for {layer.name}...")
+            if layer.cloud == "aws":
+                cls._aws_delete_state_storage(layer)
+            elif layer.cloud == "google":
+                cls._gcp_delete_state_storage(layer)
+            elif layer.cloud == "local":
+                cls._local_delete_state_storage(layer)
+
+    @classmethod
     def get_local_opta_dir(cls) -> str:
         return os.path.join(str(Path.home()), ".opta", "local")
 
