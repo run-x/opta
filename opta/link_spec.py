@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Type, TypeVar
 
-from opta.utils.ref import Reference
 from opta.utils import schema
+from opta.utils.ref import Reference
 
 T = TypeVar("T", bound="LinkSpec")
 
@@ -24,10 +24,7 @@ class LinkConnectionSpec:
             source = raw["source"]
             target = raw["target"]
 
-        c = cls(
-            source=Reference.parse(source),
-            target=Reference.parse(target),
-        )
+        c = cls(source=Reference.parse(source), target=Reference.parse(target),)
 
         return c
 

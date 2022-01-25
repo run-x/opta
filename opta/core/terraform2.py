@@ -1,33 +1,28 @@
-from multiprocessing.sharedctypes import Value
 import os
 from shutil import copyfile
 from subprocess import DEVNULL, PIPE
-from typing import Any, Dict, Iterable, List, Optional
-from opta.exceptions import UserErrors
+from typing import Any, Dict, List, Optional
 
-from opta.layer2 import Layer
 from opta.core.terraform import Terraform as LegacyTerraform
+from opta.exceptions import UserErrors
+from opta.layer2 import Layer
 from opta.nice_subprocess import nice_run
-from opta.utils import fmt_msg, json, logger
+from opta.utils import json
+
 
 class Terraform:
-    # def __init__(self, cloud: CloudProvider):
-    #     self.cloud = cloud
-
-
-
     def __init__(self) -> None:
         self.downloaded_state: Dict[str, dict] = {}
         self._init_done: bool = False
 
-
-    def apply(self, *, auto_approve: bool = False, plan: str, quiet: bool = False) -> None:
+    def apply(
+        self, *, auto_approve: bool = False, plan: str, quiet: bool = False
+    ) -> None:
         self.init()
 
-        flags = self._render_flags({
-            "auto-approve": auto_approve,
-            "compact-warnings": True,
-        })
+        flags = self._render_flags(
+            {"auto-approve": auto_approve, "compact-warnings": True}
+        )
 
         flags.append(plan)
 
@@ -66,15 +61,20 @@ class Terraform:
         self._run("init", quiet=quiet)
         self._init_done = True
 
-    def plan(self, *, lock: bool = True, input: bool = False, out: Optional[str] = None, targets: Optional[List[str]] = None, quiet: bool = False):
+    def plan(
+        self,
+        *,
+        lock: bool = True,
+        input: bool = False,
+        out: Optional[str] = None,
+        targets: Optional[List[str]] = None,
+        quiet: bool = False,
+    ) -> None:
         self.init()
 
-        flags = self._render_flags({
-            "lock": lock,
-            "input": input,
-            "target": targets,
-            "out": out,
-        })
+        flags = self._render_flags(
+            {"lock": lock, "input": input, "target": targets, "out": out}
+        )
 
         self._run("plan", flags, quiet=quiet)
 
@@ -91,9 +91,7 @@ class Terraform:
     def _render_flag(self, key: str, value: Any) -> List[str]:
         if isinstance(value, list):
             return [
-                flag
-                for subvalue in value
-                for flag in self._render_flag(key, subvalue)
+                flag for subvalue in value for flag in self._render_flag(key, subvalue)
             ]
         elif isinstance(value, bool):
             if value:
@@ -105,9 +103,10 @@ class Terraform:
 
         raise ValueError(f"Unable to add `{key}` to command line")
 
-
-    def _run(self, cmd: str, flags: List[str] = None, quiet: bool = False) -> None:
-        kwargs = {}
+    def _run(
+        self, cmd: str, flags: Optional[List[str]] = None, quiet: bool = False
+    ) -> None:
+        kwargs: dict = {}
         if quiet:
             kwargs["stderr"] = PIPE
             kwargs["stdout"] = DEVNULL
@@ -116,40 +115,17 @@ class Terraform:
             flags = []
 
         nice_run(
-            [
-                "terraform",
-                cmd,
-                *flags,
-            ],
-            check=True,
-            **kwargs,
+            ["terraform", cmd, *flags], check=True, **kwargs,
         )
 
 
-    # def state_for_layer(self, layer: Layer) -> Optional["State"]:
-    #     if not self.cloud.verify_storage(layer):
-    #         logger.debug(
-    #             fmt_msg(
-    #                 """
-    #                 We store state in S3/GCP buckets/Azure Storage. Since the state bucket was not found,
-    #                 ~this probably means that you either haven't created your opta resources yet,
-    #                 ~or you previously successfully destroyed your opta resources.
-    #                 """
-    #             )
-    #         )
-    #         return False
-
-
-# class State:
-#     pass
-
 class TerraformFile:
-    def __init__(self):
+    def __init__(self) -> None:
         self.providers: Dict[str, dict] = {}
         self.data: Dict[str, Dict[str, dict]] = {}
         self.required_providers: Dict[str, dict] = {}
         self.backend_id: Optional[str] = None
-        self.backend: dict = None
+        self.backend: dict = {}
         self.modules: Dict[str, dict] = {}
         self.outputs: Dict[str, str] = {}
 
@@ -192,18 +168,19 @@ class TerraformFile:
         self.required_providers[id] = data
 
     def __to_json__(self) -> dict:
-        out = {}
+        out: Dict[str, Any] = {}
 
         if self.data:
             out["data"] = self.data
 
-
         if self.required_providers:
-            out.setdefault("terraform", {})["required_providers"] = self.required_providers
+            out.setdefault("terraform", {})[
+                "required_providers"
+            ] = self.required_providers
 
         if self.backend_id:
             out.setdefault("terraform", {})["backend"] = {
-                self.backend: self.backend,
+                self.backend_id: self.backend,
             }
 
         if self.providers:
@@ -213,9 +190,6 @@ class TerraformFile:
             out["module"] = self.modules
 
         if self.outputs:
-            out["output"] = {
-                id: {"value": value}
-                for id, value in self.outputs.items()
-            }
+            out["output"] = {id: {"value": value} for id, value in self.outputs.items()}
 
         return out

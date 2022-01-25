@@ -1,7 +1,7 @@
 import datetime
 import os
-from pathlib import Path
 import random
+from pathlib import Path
 from subprocess import CalledProcessError  # nosec
 from threading import Thread
 from typing import Dict, List, Optional, Set
@@ -31,7 +31,8 @@ from opta.error_constants import USER_ERROR_TF_LOCK
 from opta.exceptions import MissingState, UserErrors
 from opta.layer import Layer, StructuredConfig
 from opta.pre_check import pre_check
-from opta.process import apply as apply2, ApplyOptions
+from opta.process import ApplyOptions
+from opta.process import apply as apply2
 from opta.utils import check_opta_file_exists, fmt_msg, logger
 
 

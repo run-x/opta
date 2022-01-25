@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import os
-
 from typing import List, Optional
+
 from opta.exceptions import UserErrors
 from opta.layer2 import Layer
 from opta.module_spec import SPEC_NAME, ModuleSpec
 from opta.preprocessor import preprocess_layer
 from opta.utils import schema, yaml
+
 
 class LayerLoader:
     def from_path(self, path: str) -> Layer:
@@ -31,6 +32,7 @@ class LayerLoader:
 
         return layer
 
+
 class ModuleSpecLoader:
     def load(self, module_path: str) -> ModuleSpec:
         spec_path = os.path.join(module_path, SPEC_NAME)
@@ -46,7 +48,7 @@ class ModuleSpecLoader:
 
     def load_all(self, base_path: Optional[str] = None) -> List["ModuleSpec"]:
         if not base_path:
-            base_path = os.path.join(os.path.dirname(__file__), '..', 'modules')
+            base_path = os.path.join(os.path.dirname(__file__), "..", "modules")
 
         modules: List["ModuleSpec"] = []
         for child in os.scandir(base_path):

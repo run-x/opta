@@ -1,9 +1,6 @@
-import os
 from typing import Any, Dict, Iterable, List, Optional, TypeVar
 
 from opta.link_spec import InputLinkSpec, LinkConnectionSpec, LinkSpec, OutputLinkSpec
-from opta.utils import schema
-from opta.utils import yaml
 
 SPEC_NAME = "module.yaml"
 
@@ -57,29 +54,8 @@ class ModuleSpec:
         ]
 
         spec.input_terraform_connections = [
-            LinkConnectionSpec.from_dict(raw_conn) for raw_conn in raw.get("input_terraform_connections")
+            LinkConnectionSpec.from_dict(raw_conn)
+            for raw_conn in raw.get("input_terraform_connections", [])
         ]
 
         return spec
-
-    # @classmethod
-    # def load(cls, module_path: str) -> "ModuleSpec":
-    #     spec_path = os.path.join(module_path, SPEC_NAME)
-    #     with open(spec_path, "r") as f:
-    #         spec_raw = yaml.load(f)
-
-    #     schema.apply_default_schema(spec_raw)
-    #     schema.validate(spec_raw, schema.module_schema())
-
-    #     return cls.from_dict(spec_raw)
-
-    # @classmethod
-    # def load_all(cls, base_path: str) -> List["ModuleSpec"]:
-    #     modules: List["ModuleSpec"] = []
-    #     for child in os.scandir(base_path):
-    #         if not child.is_dir():
-    #             continue
-
-    #         modules.append(cls.load(child.path))
-
-    #     return modules

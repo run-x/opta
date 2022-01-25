@@ -146,6 +146,8 @@ class SimpleInterpolatedReference(Reference):
     A reference that was created using an interpoliation string. Can be serialized to/from YAML
     """
 
+    # TODO: Convert this to composing a Reference instead of inheriting Reference
+
     yaml_tag = "!ref"
 
     def __str__(self) -> str:
@@ -153,6 +155,13 @@ class SimpleInterpolatedReference(Reference):
 
     def _inner_str(self) -> str:
         return super().__str__()
+
+    @property
+    def ref(self) -> Reference:
+        """
+        Returns the base Reference object.
+        """
+        return Reference(*self.path)
 
     @classmethod
     def parse(cls, raw: str) -> SimpleInterpolatedReference:
@@ -201,6 +210,14 @@ class ComplexInterpolatedReference:
 
         return self._parts[0]
 
+    @property
+    def refs(self) -> Iterable[Reference]:
+        return [
+            part.ref
+            for part in self._parts
+            if isinstance(part, SimpleInterpolatedReference)
+        ]
+
     @classmethod
     def _splitter(cls, raw: str) -> List[str]:
         split = _COMPLEX_SPLIT_REGEX.split(raw)
@@ -225,11 +242,26 @@ class ComplexInterpolatedReference:
 
         return cls(parts)
 
+
 InterpolatedReference = Union[SimpleInterpolatedReference, ComplexInterpolatedReference]
+
 
 def parse_ref_string(input: str) -> Union[str, InterpolatedReference]:
     complex = ComplexInterpolatedReference.parse(input)
     return complex.simplify()
 
+
 def is_interpolated_reference(value: Any) -> bool:
-    return isinstance(value, SimpleInterpolatedReference) or isinstance(value, ComplexInterpolatedReference)
+    return isinstance(value, SimpleInterpolatedReference) or isinstance(
+        value, ComplexInterpolatedReference
+    )
+
+
+def get_all_references(input: Union[str, InterpolatedReference]) -> Iterable[Reference]:
+    if isinstance(input, str):
+        return []
+
+    if isinstance(input, SimpleInterpolatedReference):
+        return [input]
+
+    return input.refs

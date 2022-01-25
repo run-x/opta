@@ -1,21 +1,31 @@
-
 from collections.abc import MutableSequence
 from dataclasses import dataclass, field
-from typing import Any, Dict, FrozenSet, Iterable, List, Optional, Set
+from typing import Any, Dict, FrozenSet, Iterable, List, Set
 
 from opta.layer2 import Layer
 from opta.link import Link
+from opta.link_spec import InputLinkSpec, OutputLinkSpec
 from opta.module2 import Module
 from opta.module_spec import ModuleSpec
-from opta.utils.ref import Reference, InterpolatedReference, ReferenceParseError, parse_ref_string
+from opta.utils.ref import (
+    InterpolatedReference,
+    Reference,
+    SimpleInterpolatedReference,
+    get_all_references,
+    parse_ref_string,
+)
 from opta.utils.visit import Visitor, fill_missing_list_or_dict
 
 _ModuleMap = Dict[str, Module]
 
+
 @dataclass
 class LinkResult:
-    execution_order: Optional[List[FrozenSet[str]]] = None
-    interpolations: Dict[Reference, InterpolatedReference] = field(default_factory=list)
+    execution_order: List[FrozenSet[str]] = field(default_factory=list)
+    interpolations: Dict[str, Dict[Reference, InterpolatedReference]] = field(
+        default_factory=dict
+    )
+
 
 class Linker:
     def __init__(self, module_specs: Iterable[ModuleSpec]):
@@ -65,18 +75,19 @@ class Linker:
                 continue
 
             referenced_modules: Set[str] = set()
-            for path, ref in interpolations.items():
-                if ref[0] != "module":
-                    # TODO: Handle different reference paths (e.g. to other layers)
-                    continue
+            for path, refs in interpolations.items():
+                for ref in get_all_references(refs):
+                    if ref[0] != "module":
+                        # TODO: Handle different reference paths (e.g. to other layers)
+                        continue
 
-                module_alias = str(ref[1])
-                if module_alias not in modules:
-                    raise ValueError(
-                        f"Found reference to non-existant module {module_alias} at {path}"
-                    )
+                    module_alias = str(ref[1])
+                    if module_alias not in modules:
+                        raise ValueError(
+                            f"Found reference to non-existant module {module_alias} at {path}"
+                        )
 
-                referenced_modules.add(module_alias)
+                    referenced_modules.add(module_alias)
 
             for module_name in referenced_modules:
                 try:
@@ -102,7 +113,6 @@ class Linker:
                 type = output_link_spec.type
                 link_providers.setdefault(type, []).append(alias)
 
-
         # TODO: Don't link a type if that type, or the linked module, was already linked manually by the user
         # TODO: Also don't link automatically if all fields that would be filled by the link are already filled
 
@@ -111,7 +121,10 @@ class Linker:
             self._pass_automatic_links_for_module(modules, module, link_providers)
 
     def _pass_automatic_links_for_module(
-        self, all_modules: _ModuleMap, module: Module, link_providers: Dict[str, List[str]]
+        self,
+        all_modules: _ModuleMap,
+        module: Module,
+        link_providers: Dict[str, List[str]],
     ) -> None:
         """
         Resolves automatic links for a single module.
@@ -203,7 +216,9 @@ class Linker:
         for module in modules.values():
             self._pass_connect_inputs_for_module(modules, module)
 
-    def _pass_connect_inputs_for_module(self, modules: _ModuleMap, module: Module) -> None:
+    def _pass_connect_inputs_for_module(
+        self, modules: _ModuleMap, module: Module
+    ) -> None:
         for link in module.links:
             spec = self._spec_of(module)
 
@@ -255,7 +270,8 @@ class Linker:
                     # TODO: Handle case where input source does not align with output target (either is broader)
 
                     absolute_output_ref = (
-                        InterpolatedReference("module", link.name, "output") + output_ref
+                        SimpleInterpolatedReference("module", link.name, "output")
+                        + output_ref
                     )
 
                     input_visitor.set(
@@ -313,6 +329,39 @@ class Linker:
                 found[alias][ref] = parsed
 
         return found
+
+    def _build_connection_map(
+        self, dp: str, input_spec: InputLinkSpec, output_spec: OutputLinkSpec
+    ) -> Dict[Reference, Reference]:
+        # TODO: How are unset values handled?
+
+        if input_spec.connect_all_to and output_spec.connect_all_from:
+            return {input_spec.connect_all_to: output_spec.connect_all_from}
+
+        if input_spec.connect_all_to is None and output_spec.connect_all_from is None:
+            if not input_spec.connections:
+                raise RuntimeError(f"Unexpected empty input connections list on {dp}")
+
+            if not output_spec.connections:
+                raise RuntimeError(f"Unexpected empty output connections list on {dp}")
+
+            output_ref_map: Dict[Reference, Reference] = {
+                conn.target: conn.source for conn in output_spec.connections
+            }
+
+            return {
+                conn.target: output_ref_map[conn.source]
+                for conn in input_spec.connections
+            }
+
+        if input_spec.connect_all_to:
+            print(f"TODO: Skipping connect_all_to on {dp}")
+            return {}
+        elif output_spec.connect_all_from:
+            print(f"TODO: Skipping connect_all_from on {dp}")
+            return {}
+
+        return {}
 
     def _check_explicit_links(self, all_modules: _ModuleMap, module: Module) -> Set[str]:
         """

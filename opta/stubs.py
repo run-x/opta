@@ -2,12 +2,13 @@ from typing import Dict, List, Optional, Protocol, Type, TypeVar
 
 T = TypeVar("T", bound="_Stub")
 
+
 class _Stub:
     def __init__(self) -> None:
-        self._raw = None
+        self._raw: dict = {}
 
     @classmethod
-    def from_dict(cls: T, raw: dict) -> T:
+    def from_dict(cls: Type[T], raw: dict) -> T:
         stub = cls()
         stub._raw = raw
 
@@ -16,24 +17,27 @@ class _Stub:
 
 T_FromDict = TypeVar("T_FromDict", bound="FromDict")
 
+
 class FromDict(Protocol):
     @classmethod
-    def from_dict(cls: T_FromDict, raw: dict) -> T_FromDict:
+    def from_dict(cls: Type[T_FromDict], raw: dict) -> T_FromDict:
         ...
 
-def from_dict(cls: Type[T_FromDict], data: dict, key: str) -> T_FromDict:
-    return [
-        cls.from_dict(raw) for raw in data.get(key, [])
-    ]
+
+def from_dict(cls: Type[T_FromDict], data: dict, key: str) -> List[T_FromDict]:
+    return [cls.from_dict(raw) for raw in data.get(key, [])]
+
 
 class Environment(_Stub):
     pass
 
+
 class Provider(_Stub):
     pass
 
+
 class AWSProvider(Provider):
-    def __init__(self):
+    def __init__(self) -> None:
         self.region: Optional[str] = None
         self.account_ids: List[str] = []
 
@@ -51,8 +55,8 @@ class AWSProvider(Provider):
 
 
 class ProviderConfig:
-    def __init__(self):
-        self.aws: Provider = None
+    def __init__(self) -> None:
+        self.aws: Optional[AWSProvider] = None
 
     @classmethod
     def from_dict(cls, raw: dict) -> "ProviderConfig":

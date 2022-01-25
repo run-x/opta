@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import copy
-from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
 from opta.link import Link
@@ -90,6 +89,18 @@ class Module:
         except StopIteration:
             raise KeyError(f"Link to module {module_alias} not found") from None
 
+    def pre_terraform_plan(self, vars: Dict[str, Any]) -> None:
+        if self.processor:
+            self.processor.pre_terraform_plan(vars)
+
+    def pre_terraform_apply(self) -> None:
+        if self.processor:
+            self.processor.pre_terraform_apply()
+
+    def post_terraform_apply(self) -> None:
+        if self.processor:
+            self.processor.post_terraform_apply()
+
 
 class ModuleProxy:
     def __init__(self, source: Module) -> None:
@@ -97,15 +108,15 @@ class ModuleProxy:
         self.__input: Optional[Dict[str, Any]] = None
 
     @property
-    def type(self):
+    def type(self) -> str:
         return self.__source.type
 
     @property
-    def alias(self):
+    def alias(self) -> str:
         return self.__source.alias
 
     @property
-    def input(self):
+    def input(self) -> Dict[str, Any]:
         if self.__input is None:
             self.__input = copy.deepcopy(self.__source.input)
 
@@ -130,7 +141,6 @@ class ModuleProcessor:
 
     def post_terraform_apply(self) -> None:
         pass
-
 
 
 Module2 = Module

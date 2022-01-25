@@ -4,8 +4,8 @@ from opta.utils.ref import (
     _INTERPOLATION_REGEX,
     _PART_REGEX,
     ComplexInterpolatedReference,
-    InterpolatedReference,
     Reference,
+    SimpleInterpolatedReference,
 )
 
 
@@ -20,16 +20,16 @@ class TestRef:
         assert _INTERPOLATION_REGEX.fullmatch("${foo.bar}") is not None
 
 
-class TestInterpolatedReference:
+class TestSimpleInterpolatedReference:
     def test_parse(self) -> None:
-        assert InterpolatedReference.parse("${foo.bar}") == InterpolatedReference(
-            "foo", "bar"
-        )
+        assert SimpleInterpolatedReference.parse(
+            "${foo.bar}"
+        ) == SimpleInterpolatedReference("foo", "bar")
 
         # TODO: Test parse exception
 
     def test_str(self) -> None:
-        assert str(InterpolatedReference("foo", "bar")) == "${foo.bar}"
+        assert str(SimpleInterpolatedReference("foo", "bar")) == "${foo.bar}"
 
 
 class TestReference:
@@ -50,9 +50,9 @@ class TestComplexInterpolatedReference:
         built = ComplexInterpolatedReference(
             [
                 "secure_",
-                InterpolatedReference("postgres", "db"),
+                SimpleInterpolatedReference("postgres", "db"),
                 "_read_",
-                InterpolatedReference("postgres", "someparameter"),
+                SimpleInterpolatedReference("postgres", "someparameter"),
             ]
         )
         assert input == str(built)

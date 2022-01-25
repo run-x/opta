@@ -1,5 +1,5 @@
-from dataclasses import dataclass
 import os
+from dataclasses import dataclass
 from typing import Any, Dict
 
 import click
@@ -8,18 +8,13 @@ from opta.constants import TF_FILE_PATH, TF_PLAN_PATH
 from opta.core.cloud_provider import AWSProvider
 from opta.core.plan_displayer import PlanDisplayer
 from opta.core.terraform2 import Terraform, TerraformFile
-from opta.exceptions import UserErrors
-from opta.generator import TerraformGenerator
-from opta.layer2 import Layer
 from opta.linker import Linker
 from opta.loader import LayerLoader, ModuleSpecLoader
 from opta.module2 import Module, ModuleProcessor
 from opta.module_spec import ModuleSpec
-from opta.preprocessor import preprocess_layer
-from opta.utils import yaml, logger
-from opta.utils.ref import InterpolatedReference, Reference, is_interpolated_reference
+from opta.utils import json, logger
+from opta.utils.ref import Reference, is_interpolated_reference
 from opta.utils.visit import Visitor, fill_missing_list_or_dict
-from opta.utils import json
 
 
 @dataclass
@@ -29,7 +24,7 @@ class ApplyOptions:
     detailed_plan: bool = False
 
 
-def apply(options: ApplyOptions):
+def apply(options: ApplyOptions) -> None:
     loader = LayerLoader()
 
     # TODO: Handle local?
@@ -48,7 +43,6 @@ def apply(options: ApplyOptions):
     # TODO: Get cloud client
 
     # TODO: Check state version issues
-
 
     # ---
 
@@ -80,14 +74,9 @@ def apply(options: ApplyOptions):
     #     "version": "3.70.0",
     # })
 
-    # tf_generator = TerraformGenerator()
-
     for step in result.execution_order:
         # Ensure consistent execution order
-        modules = [
-            module_map[id]
-            for id in sorted(step)
-        ]
+        modules = [module_map[id] for id in sorted(step)]
 
         # TODO: Resolve interpolations in input
         # Until supported, make sure we aren't using any
@@ -108,12 +97,17 @@ def apply(options: ApplyOptions):
                 }.items()
             }
 
-            module_vars = _build_initial_terraform_variables(module, spec, special_references)
+            module_vars = _build_initial_terraform_variables(
+                module, spec, special_references
+            )
 
-            module.processor.pre_terraform_plan(module_vars)
+            module.pre_terraform_plan(module_vars)
 
             # TODO: We should be more intelligent with this path. Keep it relative?
             #   What does this look like for "compiled" opta?
+            if not spec.dir:
+                raise ValueError(f"unknown path for module {spec.name}")
+
             module_vars["source"] = os.path.join(spec.dir, "tf_module")
 
             # TODO: How do we define the special variables like env_name, layer_name, and module_name
@@ -124,12 +118,7 @@ def apply(options: ApplyOptions):
 
         write_tf(tf_config)
 
-        # return
-
-        targets = [
-            f"module.{id}"
-            for id in step
-        ]
+        targets = [f"module.{id}" for id in step]
 
         tf.plan(lock=False, targets=targets, out=TF_PLAN_PATH, quiet=False)
         PlanDisplayer.display(detailed_plan=options.detailed_plan)
@@ -142,13 +131,14 @@ def apply(options: ApplyOptions):
 
         for module in modules:
             # TODO: Pass in plan details
-            module.processor.pre_terraform_apply()
+            module.pre_terraform_apply()
 
         tf.apply(auto_approve=options.auto_approve, plan=TF_PLAN_PATH, quiet=False)
 
         for module in modules:
             # TODO: Pass in plan details (and terraform run results?)
-            module.processor.post_terraform_apply()
+            module.post_terraform_apply()
+
 
 def write_tf(config: TerraformFile) -> None:
     path = TF_FILE_PATH
@@ -158,7 +148,10 @@ def write_tf(config: TerraformFile) -> None:
 
     logger.debug(f"Output written to {path}")
 
-def _build_initial_terraform_variables(module: Module, spec: ModuleSpec, extra_refs: Dict[Reference, Any]) -> Dict[str, Any]:
+
+def _build_initial_terraform_variables(
+    module: Module, spec: ModuleSpec, extra_refs: Dict[Reference, Any]
+) -> Dict[str, Any]:
     vars: Dict[str, Any] = {}
 
     input_visitor = Visitor(module.input)
@@ -172,6 +165,11 @@ def _build_initial_terraform_variables(module: Module, spec: ModuleSpec, extra_r
         else:
             val = input_visitor[conn.source]
 
-        var_visitor.set(conn.target, val, allow_missing_leaf=True, fill_missing=fill_missing_list_or_dict)
+        var_visitor.set(
+            conn.target,
+            val,
+            allow_missing_leaf=True,
+            fill_missing=fill_missing_list_or_dict,
+        )
 
     return vars
