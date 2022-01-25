@@ -1,6 +1,5 @@
 import datetime
 import os
-import random
 from pathlib import Path
 from subprocess import CalledProcessError  # nosec
 from threading import Thread
@@ -34,6 +33,7 @@ from opta.pre_check import pre_check
 from opta.process import ApplyOptions
 from opta.process import apply as apply2
 from opta.utils import check_opta_file_exists, fmt_msg, logger
+from opta.utils.features import is_module_api_enabled
 
 
 @click.command()
@@ -132,7 +132,7 @@ def _apply(
     stdout_logs: bool = True,
     detailed_plan: bool = False,
 ) -> None:
-    if random.random() >= 0:  # Avoid warnings about unreachable code
+    if is_module_api_enabled():
         opts = ApplyOptions(auto_approve=auto_approve, config_path=config)
         apply2(opts)
         return
