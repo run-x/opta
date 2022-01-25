@@ -7,8 +7,8 @@ import pytz
 from opta.amplitude import amplitude_client
 from opta.core.generator import gen_all
 from opta.core.kubernetes import (
-    configure_kubectl,
     load_opta_kube_config,
+    set_kube_config,
     tail_namespace_events,
 )
 from opta.layer import Layer
@@ -45,6 +45,6 @@ def events(env: Optional[str], config: str, seconds: Optional[int]) -> None:
         )
     layer.verify_cloud_credentials()
     gen_all(layer)
-    configure_kubectl(layer)
+    set_kube_config(layer)
     load_opta_kube_config()
     tail_namespace_events(layer, start_time)

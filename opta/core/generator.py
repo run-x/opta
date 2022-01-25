@@ -6,9 +6,9 @@ from colored import attr
 from opta import gen_tf
 from opta.constants import TF_FILE_PATH
 from opta.core.kubernetes import (
-    configure_kubectl,
     current_image_digest_tag,
     get_cluster_name,
+    set_kube_config,
 )
 from opta.utils import deep_merge, logger
 
@@ -47,7 +47,7 @@ def gen(
             and len(service_modules) > 0
             and (get_cluster_name(layer.root()) is not None)
         ):
-            configure_kubectl(layer)
+            set_kube_config(layer)
 
             for service_module in service_modules:
                 current_image_info = current_image_digest_tag(layer)

@@ -9,6 +9,7 @@ from mypy_boto3_ec2.type_defs import NetworkInterfaceTypeDef
 from mypy_boto3_logs import CloudWatchLogsClient
 
 from modules.base import ModuleProcessor
+from opta.core.kubernetes import purge_opta_kube_config
 from opta.exceptions import UserErrors
 from opta.utils import logger
 
@@ -31,6 +32,7 @@ class AwsEksProcessor(ModuleProcessor):
         self.cleanup_cloudwatch_log_group(region)
         self.cleanup_dangling_enis(region)
         self.cleanup_security_groups(region)
+        purge_opta_kube_config(layer=self.layer)
 
     def cleanup_security_groups(self, region: str) -> None:
         logger.debug("Seeking dangling security groups EKS forgot to destroy.")

@@ -5,7 +5,7 @@ from opta.commands.kubectl import configure_kubectl
 from opta.layer import Layer
 
 
-def test_configure_kubectl(mocker: MockFixture) -> None:
+def test_set_kube_config(mocker: MockFixture) -> None:
     # Mock tf file generation
     mocked_layer_class = mocker.patch("opta.commands.kubectl.Layer")
     mocked_layer = mocker.Mock(spec=Layer)
@@ -19,8 +19,8 @@ def test_configure_kubectl(mocker: MockFixture) -> None:
     mocked_check_opta_file_exists = mocker.patch(
         "opta.commands.kubectl.check_opta_file_exists"
     )
-    mocked_load_opta_config_to_default = mocker.patch(
-        "opta.commands.kubectl.load_opta_config_to_default"
+    mocked_load_opta_kube_config_to_default = mocker.patch(
+        "opta.commands.kubectl.load_opta_kube_config_to_default"
     )
 
     runner = CliRunner()
@@ -29,5 +29,5 @@ def test_configure_kubectl(mocker: MockFixture) -> None:
     mocked_layer_class.load_from_yaml.assert_called_with(mocker.ANY, None)
     mocked_layer.verify_cloud_credentials.assert_called_once_with()
     mocked_configure.assert_called_once_with(mocked_layer)
-    mocked_load_opta_config_to_default.assert_called_once_with(mocked_layer)
+    mocked_load_opta_kube_config_to_default.assert_called_once_with(mocked_layer)
     mocked_check_opta_file_exists.assert_called_once_with("opta.yaml")

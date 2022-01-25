@@ -29,7 +29,7 @@ class TestSecretManager:
         )
 
         mocker.patch("opta.commands.secret.gen_all")
-        mocker.patch("opta.commands.secret.configure_kubectl")
+        mocker.patch("opta.commands.secret.set_kube_config")
 
         mocked_create_namespace_if_not_exists = mocker.patch(
             "opta.commands.secret.create_namespace_if_not_exists"
@@ -62,7 +62,7 @@ class TestSecretManager:
         )
         mocked_print = mocker.patch("builtins.print")
         mocker.patch("opta.commands.secret.gen_all")
-        mocker.patch("opta.commands.secret.configure_kubectl")
+        mocker.patch("opta.commands.secret.set_kube_config")
 
         mocked_create_namespace_if_not_exists = mocker.patch(
             "opta.commands.secret.create_namespace_if_not_exists"
@@ -105,7 +105,7 @@ class TestSecretManager:
             "opta.commands.secret.update_manual_secrets"
         )
 
-        mocker.patch("opta.commands.secret.configure_kubectl")
+        mocker.patch("opta.commands.secret.set_kube_config")
 
         mocked_amplitude_client = mocker.patch(
             "opta.commands.secret.amplitude_client", spec=AmplitudeClient
@@ -147,7 +147,7 @@ class TestSecretManager:
         )
         mocker.patch("opta.utils.os.path.exists")
         mocker.patch("opta.commands.secret.gen_all")
-        mocker.patch("opta.commands.secret.configure_kubectl")
+        mocker.patch("opta.commands.secret.set_kube_config")
         mocked_create_namespace_if_not_exists = mocker.patch(
             "opta.commands.secret.create_namespace_if_not_exists"
         )
