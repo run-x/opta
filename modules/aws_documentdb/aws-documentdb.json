@@ -19,6 +19,11 @@
       "minimum": 1,
       "default": 1
     },
+    "deletion_protection": {
+      "type": "boolean",
+      "description": "A value that indicates whether the DB cluster has deletion protection enabled. The database can't be deleted when deletion protection is enabled. By default, deletion protection is disabled.",
+      "default": false
+    },
     "type": {
       "description": "The name of this module",
       "enum": [
