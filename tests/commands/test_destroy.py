@@ -29,7 +29,6 @@ def test_destroy_env_with_children(mocker: MockFixture) -> None:
     )
     mocker.patch("opta.commands.destroy.amplitude_client.send_event")
     mocker.patch("opta.commands.destroy.Terraform.init")
-    mocker.patch("opta.commands.destroy.Terraform.destroy_all")
     mocker.patch("opta.commands.destroy.Terraform.download_state", return_value=True)
 
     mocker.patch(
@@ -68,7 +67,6 @@ def test_destroy_env_without_children(mocker: MockFixture) -> None:
     mocker.patch("opta.commands.destroy.click.confirm", return_value=True)
     mocker.patch("opta.commands.destroy.amplitude_client.send_event")
     mocker.patch("opta.commands.destroy.Terraform.init")
-    mocker.patch("opta.commands.destroy.Terraform.destroy_all")
     mocker.patch(
         "opta.commands.destroy.Terraform.get_existing_modules", return_value={"base"}
     )
@@ -184,7 +182,6 @@ def test_destroy_service(mocker: MockFixture) -> None:
     mocker.patch("opta.commands.destroy.click.confirm", return_value=True)
     mocker.patch("opta.commands.destroy.amplitude_client.send_event")
     mocker.patch("opta.commands.destroy.Terraform.init")
-    mocker.patch("opta.commands.destroy.Terraform.destroy_all")
     mocker.patch(
         "opta.commands.destroy.Terraform.get_existing_modules", return_value={"base"}
     )
@@ -283,7 +280,6 @@ def test_destroy_service(mocker: MockFixture) -> None:
 def test_destroy_service_single_env_wrong_input(mocker: MockFixture) -> None:
     mocker.patch("opta.commands.destroy.amplitude_client.send_event")
     mocker.patch("opta.commands.destroy.Terraform.init")
-    mocker.patch("opta.commands.destroy.Terraform.destroy_all")
     mocker.patch("opta.commands.destroy.Terraform.download_state", return_value=True)
     mocker.patch("opta.commands.destroy.Layer.verify_cloud_credentials")
 
@@ -301,7 +297,6 @@ def test_destroy_service_single_env_wrong_input(mocker: MockFixture) -> None:
 def test_destroy_service_multiple_env_wrong_input(mocker: MockFixture) -> None:
     mocker.patch("opta.commands.destroy.amplitude_client.send_event")
     mocker.patch("opta.commands.destroy.Terraform.init")
-    mocker.patch("opta.commands.destroy.Terraform.destroy_all")
     mocker.patch("opta.commands.destroy.Terraform.download_state", return_value=True)
     mocker.patch("opta.commands.destroy.Layer.verify_cloud_credentials")
 
