@@ -16,14 +16,7 @@ from opta.utils import check_opta_file_exists
 @click.option(
     "-e", "--env", default=None, help="The env to use when loading the config file"
 )
-@click.option(
-    "-f",
-    "--force",
-    is_flag=True,
-    default=False,
-    help="Purge the existing cached kube config",
-)
-def configure_kubectl(config: str, env: Optional[str], force: bool) -> None:
+def configure_kubectl(config: str, env: Optional[str]) -> None:
     """
     Configure kubectl so you can connect to the cluster
 
@@ -40,7 +33,6 @@ def configure_kubectl(config: str, env: Optional[str], force: bool) -> None:
         event_properties={"org_name": layer.org_name, "layer_name": layer.name},
     )
     layer.verify_cloud_credentials()
-    if force:
-        purge_opta_kube_config(layer)
+    purge_opta_kube_config(layer)
     configure(layer)
     load_opta_kube_config_to_default(layer)
