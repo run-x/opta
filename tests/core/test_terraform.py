@@ -8,8 +8,6 @@ from pytest_mock import MockFixture
 from opta.core.terraform import Terraform, fetch_terraform_state_resources
 from opta.exceptions import UserErrors
 from opta.layer import Layer
-from opta.module import Module
-from tests.util import get_call_args
 
 
 class TestTerraform:

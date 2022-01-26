@@ -7,7 +7,6 @@ import pytest
 from pytest_mock import MockFixture
 
 from modules.base import ModuleProcessor
-from opta.core.terraform import Terraform
 from opta.exceptions import UserErrors
 from opta.layer import Layer
 
