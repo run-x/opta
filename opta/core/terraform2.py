@@ -1,6 +1,6 @@
 import os
 from shutil import copyfile
-from subprocess import DEVNULL, PIPE
+from subprocess import DEVNULL, PIPE  # nosec
 from typing import Any, Dict, List, Optional
 
 from opta.core.terraform import Terraform as LegacyTerraform
