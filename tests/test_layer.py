@@ -7,7 +7,6 @@ import pytest
 from pytest_mock import MockFixture
 
 from modules.base import ModuleProcessor
-from opta.core.terraform import Terraform
 from opta.exceptions import UserErrors
 from opta.layer import Layer
 
@@ -453,32 +452,31 @@ class TestLayer:
             "opta.core.kubernetes.delete_persistent_volume_claims"
         )
 
-        Terraform.destroy_all(
-            Layer.load_from_yaml(
-                os.path.join(
-                    os.path.dirname(os.path.dirname(__file__)),
-                    "tests",
-                    "fixtures",
-                    "sample_opta_files",
-                    "service.yaml",
-                ),
-                None,
-            )
+        layer = Layer.load_from_yaml(
+            os.path.join(
+                os.path.dirname(os.path.dirname(__file__)),
+                "tests",
+                "fixtures",
+                "sample_opta_files",
+                "service.yaml",
+            ),
+            None,
         )
+        layer.post_delete(0)
+
         # check if delete pvc was NOT called
         mocked_delete_persistent_volume_claims.assert_not_called()
 
-        Terraform.destroy_all(
-            Layer.load_from_yaml(
-                os.path.join(
-                    os.path.dirname(os.path.dirname(__file__)),
-                    "tests",
-                    "fixtures",
-                    "sample_opta_files",
-                    "service_persistent_storage.yaml",
-                ),
-                None,
-            )
+        layer = Layer.load_from_yaml(
+            os.path.join(
+                os.path.dirname(os.path.dirname(__file__)),
+                "tests",
+                "fixtures",
+                "sample_opta_files",
+                "service_persistent_storage.yaml",
+            ),
+            None,
         )
+        layer.post_delete(0)
         # check if delete pvc was called
         mocked_delete_persistent_volume_claims.assert_called_once()

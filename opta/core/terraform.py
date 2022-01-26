@@ -175,102 +175,6 @@ class Terraform:
             **kwargs,
         )
 
-    @classmethod
-    def destroy_resources(
-        cls, layer: "Layer", target_resources: List[str], *tf_flags: str
-    ) -> None:
-        # If no targets are passed, "terraform destroy" attempts to destroy ALL
-        # resources, which should be avoided unless explicitly done.
-        if len(target_resources) == 0:
-            raise Exception(
-                "Target resources was specified to be destroyed, but contained an empty list"
-            )
-
-        # Refreshing the state is necessary to update terraform outputs.
-        # This includes fetching the latest EKS cluster auth token, which is
-        # necessary for destroying many k8s resources.
-        cls.refresh(layer)
-        kwargs = cls.insert_extra_env(layer)
-
-        for module in reversed(layer.modules):
-            module_address_prefix = f"module.{module.name}"
-            module_resources = [
-                resource
-                for resource in target_resources
-                if module_address_prefix in resource
-            ]
-            if len(module_resources) == 0:
-                continue
-
-            resource_targets = [f"-target={resource}" for resource in module_resources]
-            try:
-                nice_run(
-                    ["terraform", "destroy", *resource_targets, *tf_flags],
-                    check=True,
-                    use_asyncio_nice_run=True,
-                    **kwargs,
-                )
-            except CalledProcessError:
-                raise
-
-    @classmethod
-    def destroy_all(cls, layer: "Layer", *tf_flags: str) -> None:
-
-        # Refreshing the state is necessary to update terraform outputs.
-        # This includes fetching the latest EKS cluster auth token, which is
-        # necessary for destroying many k8s resources.
-        cls.refresh(layer)
-        kwargs = cls.insert_extra_env(layer)
-
-        idx = len(layer.modules) - 1
-        for module in reversed(layer.modules):
-            module_address_prefix = f"module.{module.name}"
-
-            cls.refresh(layer, f"-target={module_address_prefix}")
-            try:
-                nice_run(
-                    [
-                        "terraform",
-                        "destroy",
-                        f"-target={module_address_prefix}",
-                        *tf_flags,
-                    ],
-                    check=True,
-                    use_asyncio_nice_run=True,
-                    **kwargs,
-                )
-                layer.post_delete(idx)
-                idx -= 1
-            except CalledProcessError:
-                raise
-
-        # After the layer is completely deleted, remove the opta config from the state bucket.
-        if layer.cloud == "aws":
-            cloud_client: CloudClient = AWS(layer)
-        elif layer.cloud == "google":
-            cloud_client = GCP(layer)
-        elif layer.cloud == "azurerm":
-            cloud_client = Azure(layer)
-        elif layer.cloud == "local":
-            cloud_client = Local(layer)
-        else:
-            raise Exception(
-                f"Can not handle opta config deletion for cloud {layer.cloud}"
-            )
-        cloud_client.delete_opta_config()
-        cloud_client.delete_remote_state()
-
-        # If this is the env layer, delete the state bucket & dynamo table as well.
-        if layer.name == layer.root().name:
-
-            logger.info(f"Deleting the state storage for {layer.name}...")
-            if layer.cloud == "aws":
-                cls._aws_delete_state_storage(layer)
-            elif layer.cloud == "google":
-                cls._gcp_delete_state_storage(layer)
-            elif layer.cloud == "local":
-                cls._local_delete_state_storage(layer)
-
     # Remove a resource from the terraform state, but does not destroy it.
     @classmethod
     def remove_from_state(cls, resource_address: str) -> None:
@@ -941,6 +845,38 @@ class Terraform:
             cls._create_azure_state_storage(providers)
         if "local" in providers.get("terraform", {}).get("backend", {}):
             cls._create_local_state_storage(providers)
+
+    @classmethod
+    def delete_state_storage(cls, layer: "Layer") -> None:
+        """
+        Idempotently remove remote storage for tf state
+        """
+        # After the layer is completely deleted, remove the opta config from the state bucket.
+        if layer.cloud == "aws":
+            cloud_client: CloudClient = AWS(layer)
+        elif layer.cloud == "google":
+            cloud_client = GCP(layer)
+        elif layer.cloud == "azurerm":
+            cloud_client = Azure(layer)
+        elif layer.cloud == "local":
+            cloud_client = Local(layer)
+        else:
+            raise Exception(
+                f"Can not handle opta config deletion for cloud {layer.cloud}"
+            )
+        cloud_client.delete_opta_config()
+        cloud_client.delete_remote_state()
+
+        # If this is the env layer, delete the state bucket & dynamo table as well.
+        if layer.name == layer.root().name:
+
+            logger.info(f"Deleting the state storage for {layer.name}...")
+            if layer.cloud == "aws":
+                cls._aws_delete_state_storage(layer)
+            elif layer.cloud == "google":
+                cls._gcp_delete_state_storage(layer)
+            elif layer.cloud == "local":
+                cls._local_delete_state_storage(layer)
 
     @classmethod
     def get_local_opta_dir(cls) -> str:

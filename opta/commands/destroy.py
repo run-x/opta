@@ -13,9 +13,11 @@ from google.cloud.exceptions import NotFound
 
 from opta.amplitude import amplitude_client
 from opta.commands.local_flag import _clean_tf_folder, _handle_local_flag
+from opta.constants import TF_PLAN_PATH
 from opta.core.azure import Azure
 from opta.core.gcp import GCP
 from opta.core.generator import gen_all
+from opta.core.plan_displayer import PlanDisplayer
 from opta.core.terraform import Terraform
 from opta.error_constants import USER_ERROR_TF_LOCK
 from opta.exceptions import UserErrors
@@ -36,6 +38,12 @@ from opta.utils import check_opta_file_exists, logger
     help="Automatically approve terraform plan.",
 )
 @click.option(
+    "--detailed-plan",
+    is_flag=True,
+    default=False,
+    help="Show full terraform plan in detail, not the opta provided summary",
+)
+@click.option(
     "--local",
     is_flag=True,
     default=False,
@@ -43,7 +51,11 @@ from opta.utils import check_opta_file_exists, logger
     hidden=False,
 )
 def destroy(
-    config: str, env: Optional[str], auto_approve: bool, local: Optional[bool]
+    config: str,
+    env: Optional[str],
+    auto_approve: bool,
+    detailed_plan: bool,
+    local: Optional[bool],
 ) -> None:
     """Destroy all opta resources from the current config
 
@@ -105,8 +117,36 @@ def destroy(
     layer.modules = [x for x in layer.modules if x.name in modules]
     gen_all(layer)
     Terraform.init(False, "-reconfigure", layer=layer)
-    logger.info(f"Destroying {layer.name}")
-    Terraform.destroy_all(layer, *tf_flags)
+    Terraform.refresh(layer)
+
+    idx = len(layer.modules) - 1
+    for module in reversed(layer.modules):
+        try:
+            module_address_prefix = f"-target=module.{module.name}"
+            logger.info("Planning your changes (might take a minute)")
+            Terraform.plan(
+                "-lock=false",
+                "-input=false",
+                "-destroy",
+                f"-out={TF_PLAN_PATH}",
+                layer=layer,
+                *list([module_address_prefix]),
+            )
+            PlanDisplayer.display(detailed_plan=detailed_plan)
+            tf_flags = []
+            if not auto_approve:
+                click.confirm(
+                    "The above are the planned changes for your opta run. Do you approve?",
+                    abort=True,
+                )
+            else:
+                tf_flags.append("-auto-approve")
+            Terraform.apply(layer, *tf_flags, TF_PLAN_PATH, no_init=True, quiet=False)
+            layer.post_delete(idx)
+        except Exception as e:
+            raise e
+
+    Terraform.delete_state_storage(layer)
 
 
 # Fetch all the children layers of the current layer.

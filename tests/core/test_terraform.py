@@ -8,8 +8,6 @@ from pytest_mock import MockFixture
 from opta.core.terraform import Terraform, fetch_terraform_state_resources
 from opta.exceptions import UserErrors
 from opta.layer import Layer
-from opta.module import Module
-from tests.util import get_call_args
 
 
 class TestTerraform:
@@ -439,44 +437,6 @@ class TestTerraform:
             ]
         )
         mocked_sleep.assert_called_once_with(120)
-
-    def test_destroy_modules_in_order(self, mocker: MockFixture) -> None:
-        fake_modules = [mocker.Mock(spec=Module) for _ in range(3)]
-        for i, module in enumerate(fake_modules):
-            module.name = f"fake_module_{i}"
-
-        fake_layer = mocker.Mock(spec=Layer)
-        fake_layer.name = "blah"
-        fake_layer.cloud = "aws"
-        fake_layer.modules = fake_modules
-
-        mocker.patch(
-            "opta.core.terraform.Terraform.get_existing_modules",
-            return_value={"fake_module_2", "fake_module_1", "fake_module_0"},
-        )
-        mocker.patch("opta.core.terraform.Terraform.refresh")
-        mocker.patch("opta.core.terraform.AWS")
-        mocked_cmd = mocker.patch("opta.core.terraform.nice_run")
-        Terraform.destroy_all(fake_layer)
-        assert get_call_args(mocked_cmd) == [
-            ["terraform", "destroy", "-target=module.fake_module_2"],
-            ["terraform", "destroy", "-target=module.fake_module_1"],
-            ["terraform", "destroy", "-target=module.fake_module_0"],
-        ]
-
-        # Additionally verify this works for destroy_resources()
-        fake_resources = [
-            "module.fake_module_1.bar",
-            "module.fake_module_2.foo",
-            "module.fake_module_0.baz",
-        ]
-        mocked_cmd = mocker.patch("opta.core.terraform.nice_run")
-        Terraform.destroy_resources(fake_layer, fake_resources)
-        assert get_call_args(mocked_cmd) == [
-            ["terraform", "destroy", "-target=module.fake_module_2.foo"],
-            ["terraform", "destroy", "-target=module.fake_module_1.bar"],
-            ["terraform", "destroy", "-target=module.fake_module_0.baz"],
-        ]
 
     def test_fetch_terraform_state_resources(self, mocker: MockFixture) -> None:
         raw_s3_tf_state = {
