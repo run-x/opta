@@ -1,5 +1,5 @@
 {{- range $index, $val := .Values.uriComponents }}
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name:  {{ include "k8s-service.fullname" $ }}-{{ $index }}
