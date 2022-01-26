@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 
 from modules.base import ModuleProcessor
 from opta.core.gcp import GCP
+from opta.core.kubernetes import purge_opta_kube_config
 from opta.exceptions import UserErrors
 
 if TYPE_CHECKING:
@@ -12,6 +13,9 @@ if TYPE_CHECKING:
 class GcpGkeProcessor(ModuleProcessor):
     def __init__(self, module: "Module", layer: "Layer"):
         super(GcpGkeProcessor, self).__init__(module, layer)
+
+    def post_delete(self, module_idx: int) -> None:
+        purge_opta_kube_config(layer=self.layer)
 
     def process(self, module_idx: int) -> None:
         gcp_base_module = None
