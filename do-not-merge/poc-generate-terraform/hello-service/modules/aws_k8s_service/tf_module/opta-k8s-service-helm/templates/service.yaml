@@ -1,0 +1,28 @@
+{{- if gt (len .Values.ports) 0 }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "k8s-service.serviceName" . }}
+  {{- with .Values.serviceAnnotations }}
+  annotations:
+    {{- range $key, $value := . }}
+    {{ $key | quote }}: {{ $value | quote}}
+    {{- end }}
+  {{- end }}
+  labels:
+    {{- include "k8s-service.labels" . | nindent 4 }}
+  namespace: {{ include "k8s-service.namespaceName" . }}
+spec:
+  ports:
+    {{- range $portSpec := .Values.ports }}
+    - port: {{ $portSpec.servicePort }}
+      targetPort: {{ $portSpec.name | quote }}
+      name: {{ $portSpec.name | quote }}
+      protocol: TCP
+    {{- end }}
+  {{- if ne (len .Values.persistentStorage) 0 }}
+  clusterIP: None
+  {{- end }}
+  selector:
+    {{- include "k8s-service.selectorLabels" . | nindent 4 }}
+{{- end }}

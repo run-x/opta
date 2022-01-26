@@ -1,0 +1,153 @@
+{
+
+  "//": [
+    "CHANGED: rename this file from main.tf.json to service-hello.tf.json",
+    "CHANGED: terraform/backend to use local, previsouly was S3",
+    "CHANGED: module/source point to local nested directory, previsouly was opta directory",
+    "CHANGED: terraform_remote_state/parent was using S3, no it's local pointing to the local env tfstate (also generated with terraform-generator)"
+  ],
+  "data": {
+    "aws_caller_identity": {
+      "provider": {}
+    },
+    "aws_region": {
+      "provider": {}
+    },
+    "aws_eks_cluster_auth": {
+      "k8s": {
+        "name": "${data.terraform_remote_state.parent.outputs.k8s_cluster_name}"
+      }
+    },
+    "terraform_remote_state": {
+      "parent": {
+        "backend": "local",
+        "config": {
+          "path": "../poc-stagging-env/tfstate/env-staging-base.tfstate"
+        }
+      }
+    }
+  },
+  "provider": {
+    "helm": {
+      "kubernetes": {
+        "host": "${data.terraform_remote_state.parent.outputs.k8s_endpoint}",
+        "token": "${data.aws_eks_cluster_auth.k8s.token}",
+        "cluster_ca_certificate": "${base64decode(data.terraform_remote_state.parent.outputs.k8s_ca_data)}"
+      }
+    },
+    "aws": {
+      "region": "us-east-1",
+      "allowed_account_ids": [
+        "248233625043"
+      ]
+    }
+  },
+  "terraform": {
+    "required_providers": {
+      "aws": {
+        "source": "hashicorp/aws",
+        "version": "3.70.0"
+      },
+      "helm": {
+        "source": "hashicorp/helm",
+        "version": "2.4.1"
+      }
+    },
+    "backend": {
+      "local": {
+        "path": "./tfstate/service-hello.tfstate"
+      }
+    }
+  },
+  "module": {
+    "hello": {
+      "source": "./modules/aws_k8s_service/tf_module",
+      "env_name": "staging",
+      "layer_name": "hello",
+      "module_name": "hello",
+      "openid_provider_url": "${data.terraform_remote_state.parent.outputs.k8s_openid_provider_url}",
+      "openid_provider_arn": "${data.terraform_remote_state.parent.outputs.k8s_openid_provider_arn}",
+      "tag": null,
+      "digest": null,
+      "link_secrets": [],
+      "manual_secrets": [],
+      "iam_policy": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "DescribeCluster",
+            "Action": [
+              "eks:DescribeCluster"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+              "*"
+            ]
+          }
+        ]
+      },
+      "image": "ghcr.io/run-x/opta-examples/hello-app:main",
+      "ports": [
+        {
+          "name": "main",
+          "type": "http",
+          "port": 80,
+          "protocol": null,
+          "tls": false,
+          "probeType": "http",
+          "servicePort": 80
+        }
+      ],
+      "probe_port": {
+        "name": "main",
+        "type": "http",
+        "port": 80,
+        "protocol": null,
+        "tls": false,
+        "probeType": "http",
+        "servicePort": 80
+      },
+      "http_port": {
+        "name": "main",
+        "type": "http",
+        "port": 80,
+        "protocol": null,
+        "tls": false,
+        "probeType": "http",
+        "servicePort": 80
+      },
+      "service_annotations": {},
+      "min_containers": 1,
+      "max_containers": 3,
+      "autoscaling_target_cpu_percentage": 80,
+      "autoscaling_target_mem_percentage": 80,
+      "secrets": [],
+      "env_vars": [],
+      "healthcheck_path": "/",
+      "liveness_probe_path": null,
+      "readiness_probe_path": null,
+      "initial_liveness_delay": 30,
+      "initial_readiness_delay": 30,
+      "consistent_hash": null,
+      "sticky_session": false,
+      "sticky_session_max_age": 86400,
+      "resource_request": {
+        "cpu": 100,
+        "memory": 128
+      },
+      "public_uri": [
+        "all/hello"
+      ],
+      "keep_path_prefix": false,
+      "additional_iam_policies": [],
+      "links": [],
+      "persistent_storage": [],
+      "ingress_extra_annotations": {}
+    }
+  },
+  "output": {
+    "docker_repo_url": {
+      "value": "${module.hello.docker_repo_url }"
+    }
+  }
+}

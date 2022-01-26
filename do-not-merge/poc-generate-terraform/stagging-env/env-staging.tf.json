@@ -1,0 +1,164 @@
+{
+  "//": [
+    "CHANGED: rename this file from main.tf.json to service-hello.tf.json",
+    "CHANGED: terraform/backend to use local, previsouly was S3",
+    "CHANGED: module/source point to local nested directory, previsouly was opta directory",
+  ],
+  "data": {
+    "aws_caller_identity": {
+      "provider": {}
+    },
+    "aws_region": {
+      "provider": {}
+    }
+    ,
+    "aws_eks_cluster_auth": {
+      "k8s": {
+        "name": "${module.k8scluster.k8s_cluster_name}"
+      }
+    }
+  },
+  "provider": {
+    "helm": {
+      "kubernetes": {
+        "host": "${module.k8scluster.k8s_endpoint}",
+        "token": "${data.aws_eks_cluster_auth.k8s.token}",
+        "cluster_ca_certificate": "${base64decode(module.k8scluster.k8s_ca_data)}"
+      }
+    },
+    "aws": {
+      "region": "us-east-1",
+      "allowed_account_ids": [
+        "248233625043"
+      ]
+    }
+  },
+  "terraform": {
+    "required_providers": {
+      "aws": {
+        "source": "hashicorp/aws",
+        "version": "3.70.0"
+      },
+      "helm": {
+        "source": "hashicorp/helm",
+        "version": "2.4.1"
+      }
+    },
+    "backend": {
+      "local": {
+        "path": "./tfstate/env-staging-base.tfstate"
+      }
+    }
+  },
+  "module": {
+    "base": {
+      "source": "./modules/aws_base/tf_module",
+      "env_name": "staging",
+      "layer_name": "staging",
+      "module_name": "base",
+      "total_ipv4_cidr_block": "10.0.0.0/16",
+      "vpc_log_retention": 90,
+      "private_ipv4_cidr_blocks": [
+        "10.0.128.0/21",
+        "10.0.136.0/21",
+        "10.0.144.0/21"
+      ],
+      "public_ipv4_cidr_blocks": [
+        "10.0.0.0/21",
+        "10.0.8.0/21",
+        "10.0.16.0/21"
+      ]
+    },
+    "k8scluster": {
+      "source": "./modules/aws_eks/tf_module",
+      "env_name": "staging",
+      "layer_name": "staging",
+      "module_name": "k8scluster",
+      "kms_account_key_arn": "${module.base.kms_account_key_arn}",
+      "private_subnet_ids": "${module.base.private_subnet_ids}",
+      "vpc_id": "${module.base.vpc_id}",
+      "eks_log_retention": 7,
+      "max_nodes": 5,
+      "min_nodes": 3,
+      "node_disk_size": 20,
+      "node_instance_type": "t3.medium",
+      "k8s_version": "1.18",
+      "control_plane_security_groups": [],
+      "spot_instances": false,
+      "enable_metrics": false,
+      "node_launch_template": {},
+      "depends_on": [
+        "module.base"
+      ]
+    },
+    "k8sbase": {
+      "source": "./modules/aws_k8s_base/tf_module",
+      "env_name": "staging",
+      "layer_name": "staging",
+      "module_name": "k8sbase",
+      "eks_cluster_name": "${module.k8scluster.k8s_cluster_name}",
+      "s3_log_bucket_name": "${module.base.s3_log_bucket_name}",
+      "openid_provider_url": "${module.k8scluster.k8s_openid_provider_url}",
+      "openid_provider_arn": "${module.k8scluster.k8s_openid_provider_arn}",
+      "domain": "",
+      "cert_arn": "",
+      "private_key": "",
+      "certificate_body": "",
+      "certificate_chain": "",
+      "nginx_high_availability": false,
+      "linkerd_high_availability": false,
+      "linkerd_enabled": true,
+      "admin_arns": [],
+      "nginx_config": {},
+      "nginx_extra_tcp_ports": {},
+      "nginx_extra_tcp_ports_tls": [],
+      "depends_on": [
+        "module.k8scluster"
+      ]
+    }
+  },
+  "output": {
+    "kms_account_key_arn": {
+      "value": "${module.base.kms_account_key_arn }"
+    },
+    "kms_account_key_id": {
+      "value": "${module.base.kms_account_key_id }"
+    },
+    "vpc_id": {
+      "value": "${module.base.vpc_id }"
+    },
+    "private_subnet_ids": {
+      "value": "${module.base.private_subnet_ids }"
+    },
+    "public_subnets_ids": {
+      "value": "${module.base.public_subnets_ids }"
+    },
+    "s3_log_bucket_name": {
+      "value": "${module.base.s3_log_bucket_name }"
+    },
+    "public_nat_ips": {
+      "value": "${module.base.public_nat_ips }"
+    },
+    "k8s_endpoint": {
+      "value": "${module.k8scluster.k8s_endpoint }"
+    },
+    "k8s_ca_data": {
+      "value": "${module.k8scluster.k8s_ca_data }"
+    },
+    "k8s_cluster_name": {
+      "value": "${module.k8scluster.k8s_cluster_name }"
+    },
+    "k8s_openid_provider_url": {
+      "value": "${module.k8scluster.k8s_openid_provider_url }"
+    },
+    "k8s_openid_provider_arn": {
+      "value": "${module.k8scluster.k8s_openid_provider_arn }"
+    },
+    "k8s_node_group_security_id": {
+      "value": "${module.k8scluster.k8s_node_group_security_id }"
+    },
+    "load_balancer_raw_dns": {
+      "value": "${module.k8sbase.load_balancer_raw_dns }"
+    }
+  }
+}

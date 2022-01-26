@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: opta-arns
+  namespace: default
+data:
+  {{ if ne (len .Values.adminArns) 0 }}
+  adminArns: |
+    {{ range $index, $val := .Values.adminArns }}
+    - {{ $val | quote }}
+    {{ end }}
+  {{ else }}
+  adminArns: "[]"
+  {{ end }}

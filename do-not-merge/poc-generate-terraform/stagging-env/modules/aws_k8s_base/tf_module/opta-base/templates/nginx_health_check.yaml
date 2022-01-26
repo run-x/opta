@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    opta-generated: "true"
+  name: opta-ingress-healthcheck
+  namespace: ingress-nginx
+spec:
+  ports:
+    - port: 80
+      targetPort: healthcheck
+      protocol: TCP
+      name: healthcheck
+  selector:
+    opta-ingress-healthcheck : "yes"
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name:  opta-ingress-healthcheck
+  namespace: ingress-nginx
+  labels:
+    opta-generated: "true"
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  rules:
+    - http:
+        paths:
+          - path: "/healthz"
+            backend:
+              serviceName: opta-ingress-healthcheck
+              servicePort: 80
