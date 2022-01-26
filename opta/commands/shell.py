@@ -6,7 +6,7 @@ from kubernetes.client import CoreV1Api
 from opta.amplitude import amplitude_client
 from opta.constants import SHELLS_ALLOWED
 from opta.core.generator import gen_all
-from opta.core.kubernetes import configure_kubectl, load_opta_kube_config
+from opta.core.kubernetes import load_opta_kube_config, set_kube_config
 from opta.exceptions import UserErrors
 from opta.layer import Layer
 from opta.nice_subprocess import nice_run
@@ -47,7 +47,7 @@ def shell(env: Optional[str], config: str, type: str) -> None:
     )
     layer.verify_cloud_credentials()
     gen_all(layer)
-    configure_kubectl(layer)
+    set_kube_config(layer)
     load_opta_kube_config()
 
     # Get a random pod in the service

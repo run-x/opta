@@ -5,7 +5,7 @@ import click
 from opta.amplitude import amplitude_client
 from opta.core.generator import gen_all
 from opta.core.helm import Helm
-from opta.core.kubernetes import configure_kubectl
+from opta.core.kubernetes import set_kube_config
 from opta.core.terraform import Terraform
 from opta.layer import Layer
 from opta.utils import check_opta_file_exists
@@ -51,7 +51,7 @@ def force_unlock(config: str, env: Optional[str]) -> None:
 
     if Terraform.download_state(layer):
         if layer.parent is not None or "k8scluster" in modules:
-            configure_kubectl(layer)
+            set_kube_config(layer)
             pending_upgrade_release_list = Helm.get_helm_list(status="pending-upgrade")
             click.confirm(
                 "Do you also wish to Rollback the Helm releases in Pending-Upgrade State?"

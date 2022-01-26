@@ -16,10 +16,10 @@ from pytest_mock import MockFixture
 
 from opta.core.kubernetes import (
     GENERATED_KUBE_CONFIG_DIR,
-    configure_kubectl,
     delete_persistent_volume_claims,
     get_required_path_executables,
     list_persistent_volume_claims,
+    set_kube_config,
     tail_module_log,
     tail_namespace_events,
     tail_pod_log,
@@ -28,7 +28,7 @@ from opta.layer import Layer
 
 
 class TestKubernetes:
-    def test_azure_configure_kubectl(self, mocker: MockFixture) -> None:
+    def test_azure_set_kube_config(self, mocker: MockFixture) -> None:
         mocked_ensure_installed = mocker.patch("opta.core.kubernetes.ensure_installed")
         layer = mocker.Mock(spec=Layer)
         layer.parent = None
@@ -60,7 +60,7 @@ class TestKubernetes:
         )
         mocked_nice_run = mocker.patch("opta.core.kubernetes.nice_run",)
 
-        configure_kubectl(layer)
+        set_kube_config(layer)
 
         mocked_terraform_output.assert_called_once_with(layer)
         mocked_ensure_installed.assert_has_calls(
@@ -86,7 +86,7 @@ class TestKubernetes:
             ]
         )
 
-    def test_aws_configure_kubectl(self, mocker: MockFixture) -> None:
+    def test_aws_set_kube_config(self, mocker: MockFixture) -> None:
         mocked_ensure_installed = mocker.patch("opta.core.kubernetes.ensure_installed")
         mocked_exist = mocker.patch("opta.core.kubernetes.exists")
         mocked_exist.return_value = False
@@ -112,7 +112,7 @@ class TestKubernetes:
         mocked_file = mocker.patch(
             "opta.core.kubernetes.open", mocker.mock_open(read_data="")
         )
-        configure_kubectl(layer)
+        set_kube_config(layer)
         config_file_name = f"{GENERATED_KUBE_CONFIG_DIR}/kubeconfig-{layer.root().name}-{layer.cloud}.yaml"
         mocked_file.assert_called_once_with(config_file_name, "w")
         mocked_file().write.assert_called_once_with(

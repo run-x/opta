@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 import yaml
 
-from opta.core.kubernetes import get_config_file_name
+from opta.core.kubernetes import get_kube_config_file_name
 
 
 class K8smanifestProcessor(ModuleProcessor):
@@ -27,7 +27,7 @@ class K8smanifestProcessor(ModuleProcessor):
         if layer.cloud == "local":
             return "~/.kube/config", "kind-opta-local-cluster"
         else:
-            config_file_name = get_config_file_name(layer)
+            config_file_name = get_kube_config_file_name(layer)
         with open(config_file_name, "r") as stream:
             context = (yaml.safe_load(stream))["current-context"]
         return config_file_name, context

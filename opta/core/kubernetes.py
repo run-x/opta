@@ -66,24 +66,67 @@ def get_required_path_executables(cloud: str) -> FrozenSet[str]:
     return frozenset({"kubectl"}) | exec_map.get(cloud, set())
 
 
-def configure_kubectl(layer: "Layer") -> None:
-    """Configure the kubectl CLI tool for the given layer"""
+def set_kube_config(layer: "Layer") -> None:
+    """Create a kubeconfig file to connect to a kubernetes cluster specified in a given layer"""
     # Make sure the user has the prerequisite CLI tools installed
     # kubectl may not *technically* be required for this opta command to run, but require
     # it anyways since user must install it to access the cluster.
     ensure_installed("kubectl")
     makedirs(GENERATED_KUBE_CONFIG_DIR, exist_ok=True)
     if layer.cloud == "aws":
-        _aws_configure_kubectl(layer)
+        _aws_set_kube_config(layer)
     elif layer.cloud == "google":
-        _gcp_configure_kubectl(layer)
+        _gcp_set_kube_config(layer)
     elif layer.cloud == "azurerm":
-        _azure_configure_kubectl(layer)
+        _azure_set_kube_config(layer)
     elif layer.cloud == "local":
-        _local_configure_kubectl(layer)
+        _local_set_kube_config(layer)
+    else:
+        raise Exception(
+            f"Unknown cloud {layer.cloud}. Can not handle setting kube config"
+        )
 
 
-def _local_configure_kubectl(layer: "Layer") -> None:
+def purge_opta_kube_config(layer: "Layer") -> None:
+    """Delete the kubeconfig file created for a given layer, and also remove it from the default kubeconfig file"""
+    kube_config_file_name = get_kube_config_file_name(layer)
+    opta_config: dict
+    if exists(kube_config_file_name):
+        opta_config = yaml.load(open(kube_config_file_name))
+        remove(kube_config_file_name)
+    else:
+        return
+
+    default_kube_config_filename = expanduser(
+        KUBE_CONFIG_DEFAULT_LOCATION.split(ENV_KUBECONFIG_PATH_SEPARATOR)[0]
+    )
+    if not exists(default_kube_config_filename):
+        return
+
+    default_kube_config = yaml.load(open(default_kube_config_filename))
+    opta_config_user = opta_config["users"][0]
+    opta_config_context = opta_config["contexts"][0]
+    opta_config_cluster = opta_config["clusters"][0]
+    for opta_value, key in [
+        [opta_config_user, "users"],
+        [opta_config_context, "contexts"],
+        [opta_config_cluster, "clusters"],
+    ]:
+        current_indices = [
+            i
+            for i, x in enumerate(default_kube_config[key])
+            if x["name"] == opta_value["name"]
+        ]
+        for index in sorted(current_indices, reverse=True):
+            del default_kube_config[key][index]
+
+    if default_kube_config["current-context"] == opta_config_context["name"]:
+        default_kube_config["current-context"] = ""
+    with open(default_kube_config_filename, "w") as f:
+        yaml.dump(default_kube_config, f)
+
+
+def _local_set_kube_config(layer: "Layer") -> None:
     nice_run(
         ["kubectl", "config", "use-context", "kind-opta-local-cluster"],
         check=True,
@@ -91,21 +134,21 @@ def _local_configure_kubectl(layer: "Layer") -> None:
     ).stdout
 
 
-def get_config_file_name(layer: "Layer") -> str:
+def get_kube_config_file_name(layer: "Layer") -> str:
     config_file_name = (
         f"{GENERATED_KUBE_CONFIG_DIR}/kubeconfig-{layer.root().name}-{layer.cloud}.yaml"
     )
     return config_file_name
 
 
-def load_opta_config_to_default(layer: "Layer") -> None:
-    config_file_name = get_config_file_name(layer)
-    if not exists(config_file_name):
+def load_opta_kube_config_to_default(layer: "Layer") -> None:
+    kube_config_file_name = get_kube_config_file_name(layer)
+    if not exists(kube_config_file_name):
         logger.debug(
-            f"Can not find opta managed kube config, {config_file_name}, to load to user default"
+            f"Can not find opta managed kube config, {kube_config_file_name}, to load to user default"
         )
         return
-    opta_config = yaml.load(open(config_file_name))
+    opta_config = yaml.load(open(kube_config_file_name))
     default_kube_config_filename = expanduser(
         KUBE_CONFIG_DEFAULT_LOCATION.split(ENV_KUBECONFIG_PATH_SEPARATOR)[0]
     )
@@ -153,16 +196,16 @@ def load_opta_config_to_default(layer: "Layer") -> None:
         yaml.dump(default_kube_config, f)
 
 
-def _gcp_configure_kubectl(layer: "Layer") -> None:
+def _gcp_set_kube_config(layer: "Layer") -> None:
     ensure_installed("gcloud")
-    config_file_name = get_config_file_name(layer)
+    kube_config_file_name = get_kube_config_file_name(layer)
     global GENERATED_KUBE_CONFIG
-    if exists(config_file_name):
-        if getmtime(config_file_name) > time.time() - ONE_WEEK_UNIX:
-            GENERATED_KUBE_CONFIG = config_file_name
+    if exists(kube_config_file_name):
+        if getmtime(kube_config_file_name) > time.time() - ONE_WEEK_UNIX:
+            GENERATED_KUBE_CONFIG = kube_config_file_name
             return
         else:
-            remove(config_file_name)
+            remove(kube_config_file_name)
 
     gcp = GCP(layer=layer)
     credentials = gcp.get_credentials()[0]
@@ -218,13 +261,13 @@ def _gcp_configure_kubectl(layer: "Layer") -> None:
             }
         ],
     }
-    with open(config_file_name, "w") as f:
+    with open(kube_config_file_name, "w") as f:
         yaml.dump(cluster_config, f)
-    GENERATED_KUBE_CONFIG = config_file_name
+    GENERATED_KUBE_CONFIG = kube_config_file_name
     return
 
 
-def _azure_configure_kubectl(layer: "Layer") -> None:
+def _azure_set_kube_config(layer: "Layer") -> None:
     root_layer = layer.root()
     providers = root_layer.gen_providers(0)
 
@@ -255,15 +298,15 @@ def _azure_configure_kubectl(layer: "Layer") -> None:
     )
 
 
-def _aws_configure_kubectl(layer: "Layer") -> None:
-    config_file_name = get_config_file_name(layer)
+def _aws_set_kube_config(layer: "Layer") -> None:
+    kube_config_file_name = get_kube_config_file_name(layer)
     global GENERATED_KUBE_CONFIG
-    if exists(config_file_name):
-        if getmtime(config_file_name) > time.time() - ONE_WEEK_UNIX:
-            GENERATED_KUBE_CONFIG = config_file_name
+    if exists(kube_config_file_name):
+        if getmtime(kube_config_file_name) > time.time() - ONE_WEEK_UNIX:
+            GENERATED_KUBE_CONFIG = kube_config_file_name
             return
         else:
-            remove(config_file_name)
+            remove(kube_config_file_name)
 
     region, account_id = _aws_get_cluster_env(layer.root())
 
@@ -328,9 +371,9 @@ def _aws_configure_kubectl(layer: "Layer") -> None:
             }
         ],
     }
-    with open(config_file_name, "w") as f:
+    with open(kube_config_file_name, "w") as f:
         yaml.dump(cluster_config, f)
-    GENERATED_KUBE_CONFIG = config_file_name
+    GENERATED_KUBE_CONFIG = kube_config_file_name
     return
 
 

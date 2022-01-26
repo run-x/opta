@@ -18,7 +18,7 @@ def test_logs(mocker: MockFixture) -> None:
     mocked_layer.cloud = "aws"
     mocked_layer_class.load_from_yaml.return_value = mocked_layer
     layer_gen_all = mocker.patch("opta.commands.logs.gen_all")
-    configure_kubectl = mocker.patch("opta.commands.logs.configure_kubectl")
+    set_kube_config = mocker.patch("opta.commands.logs.set_kube_config")
     load_kube_config = mocker.patch("opta.commands.logs.load_opta_kube_config")
 
     mocked_module = mocker.Mock(spec=Module)
@@ -33,7 +33,7 @@ def test_logs(mocker: MockFixture) -> None:
 
     assert result.exit_code == 0
     layer_gen_all.assert_called_once_with(mocked_layer)
-    configure_kubectl.assert_called_once_with(mocked_layer)
+    set_kube_config.assert_called_once_with(mocked_layer)
     load_kube_config.assert_called_once()
 
     mocked_tail_module_log.assert_called_once_with(mocked_layer, "module_name", None)

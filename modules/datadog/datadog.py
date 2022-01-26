@@ -6,7 +6,7 @@ from kubernetes.client import ApiException, CoreV1Api, V1Namespace, V1ObjectMeta
 from requests import codes, get
 
 from modules.base import ModuleProcessor
-from opta.core.kubernetes import configure_kubectl, load_opta_kube_config
+from opta.core.kubernetes import load_opta_kube_config, set_kube_config
 from opta.exceptions import UserErrors
 
 if TYPE_CHECKING:
@@ -23,7 +23,7 @@ class DatadogProcessor(ModuleProcessor):
         super(DatadogProcessor, self).__init__(module, layer)
 
     def process(self, module_idx: int) -> None:
-        configure_kubectl(self.layer)
+        set_kube_config(self.layer)
         load_opta_kube_config()
         v1 = CoreV1Api()
         # Update the secrets

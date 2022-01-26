@@ -3,8 +3,8 @@ from typing import Optional
 import click
 
 from opta.amplitude import amplitude_client
-from opta.core.kubernetes import configure_kubectl as configure
-from opta.core.kubernetes import load_opta_config_to_default
+from opta.core.kubernetes import load_opta_kube_config_to_default, purge_opta_kube_config
+from opta.core.kubernetes import set_kube_config as configure
 from opta.layer import Layer
 from opta.utils import check_opta_file_exists
 
@@ -33,5 +33,6 @@ def configure_kubectl(config: str, env: Optional[str]) -> None:
         event_properties={"org_name": layer.org_name, "layer_name": layer.name},
     )
     layer.verify_cloud_credentials()
+    purge_opta_kube_config(layer)
     configure(layer)
-    load_opta_config_to_default(layer)
+    load_opta_kube_config_to_default(layer)

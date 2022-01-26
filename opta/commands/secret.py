@@ -5,7 +5,7 @@ from click_didyoumean import DYMGroup
 
 from opta.amplitude import amplitude_client
 from opta.core.generator import gen_all
-from opta.core.kubernetes import configure_kubectl, create_namespace_if_not_exists
+from opta.core.kubernetes import create_namespace_if_not_exists, set_kube_config
 from opta.core.secrets import (
     bulk_update_manual_secrets,
     get_secrets,
@@ -60,7 +60,7 @@ def view(secret: str, env: Optional[str], config: str) -> None:
     layer.verify_cloud_credentials()
     gen_all(layer)
 
-    configure_kubectl(layer)
+    set_kube_config(layer)
     create_namespace_if_not_exists(layer.name)
     secrets = get_secrets(layer.name)
     if secret not in secrets:
@@ -98,7 +98,7 @@ def list_command(env: Optional[str], config: str) -> None:
     amplitude_client.send_event(amplitude_client.LIST_SECRETS_EVENT)
     gen_all(layer)
 
-    configure_kubectl(layer)
+    set_kube_config(layer)
     create_namespace_if_not_exists(layer.name)
     secrets = get_secrets(layer.name)
     for key, value in secrets.items():
@@ -126,7 +126,7 @@ def update(secret: str, value: str, env: Optional[str], config: str) -> None:
     layer = Layer.load_from_yaml(config, env)
     gen_all(layer)
 
-    configure_kubectl(layer)
+    set_kube_config(layer)
     create_namespace_if_not_exists(layer.name)
     amplitude_client.send_event(amplitude_client.UPDATE_SECRET_EVENT)
     update_manual_secrets(layer.name, {secret: str(value)})
@@ -156,7 +156,7 @@ def bulk_update(env_file: str, env: Optional[str], config: str) -> None:
     layer = Layer.load_from_yaml(config, env)
     gen_all(layer)
 
-    configure_kubectl(layer)
+    set_kube_config(layer)
     create_namespace_if_not_exists(layer.name)
     amplitude_client.send_event(amplitude_client.UPDATE_BULK_SECRET_EVENT)
 

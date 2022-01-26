@@ -46,7 +46,7 @@ def test_force_unlock_env(mocker: MockFixture) -> None:
         return_value=(True, "mock_lock_id"),
     )
     mocker.patch("opta.commands.force_unlock.Terraform.force_unlock")
-    mocker.patch("opta.commands.force_unlock.configure_kubectl")
+    mocker.patch("opta.commands.force_unlock.set_kube_config")
     mocked_helm_list = mocker.patch(
         "opta.commands.force_unlock.Helm.get_helm_list",
         return_value=[
@@ -122,7 +122,7 @@ def test_force_unlock_env_no_cluster(mocker: MockFixture) -> None:
         return_value=(True, "mock_lock_id"),
     )
     mocker.patch("opta.commands.force_unlock.Terraform.force_unlock")
-    mocker.patch("opta.commands.force_unlock.configure_kubectl")
+    mocker.patch("opta.commands.force_unlock.set_kube_config")
     mocked_helm_list = mocker.patch(
         "opta.commands.force_unlock.Helm.get_helm_list",
         return_value=[
@@ -185,7 +185,7 @@ def test_force_unlock_env_no_rollback(mocker: MockFixture) -> None:
         return_value=(True, "mock_lock_id"),
     )
     mocker.patch("opta.commands.force_unlock.Terraform.force_unlock")
-    mocker.patch("opta.commands.force_unlock.configure_kubectl")
+    mocker.patch("opta.commands.force_unlock.set_kube_config")
     mocked_helm_list = mocker.patch(
         "opta.commands.force_unlock.Helm.get_helm_list", return_value=[],
     )
