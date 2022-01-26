@@ -1,0 +1,12 @@
+name: azure # name of the environment
+org_name: my-org # A unique identifier for your organization
+providers:
+  azurerm:
+    location: centralus
+    tenant_id: XXX  # your Azure tenant id
+    subscription_id: YYY # your Azure subscription id
+modules:
+  - type: base
+  - type: k8s-cluster
+    admin_group_object_ids: [""]
+  - type: k8s-base

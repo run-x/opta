@@ -1,0 +1,56 @@
+name: minecraft
+org_name: <<org_name::org_name::Your Organization Name>>
+providers:
+  aws:
+    region: <<region::aws_region::Your AWS Region>>
+    account_id: <<account_id::aws_account_id::Your AWS Account ID>>
+modules:
+  - type: base
+#  - type: dns # Uncomment if you wish to use your DNS/domain -- see the readme
+#    domain: <<domain::string::The dns domain for your Retool deployment>>
+#    delegated: false
+  - type: k8s-cluster
+    min_nodes: 1
+    max_nodes: 1
+    node_instance_type: "t3.small"
+  - type: aws-nodegroup
+    min_nodes: 1
+    max_nodes: 1
+    node_instance_type: "c5.xlarge"
+    spot_instances: true
+  - type: k8s-base
+    linkerd_enabled: false
+    nginx_extra_tcp_ports:
+      - 25565
+  - name: app
+    type: k8s-service
+    image: "itzg/minecraft-server:java17"
+    min_containers: 1
+    max_containers: 1
+    ports:
+      - name: minecraft
+        type: tcp
+        port: 25565
+        service_port: 25565
+    env_vars:
+      TYPE: "VANILLA"
+      EULA: "TRUE"
+      ALLOW_NETHER: "true"
+      SPAWN_ANIMALS: "true"
+      SPAWN_MONSTERS: "true"
+      SPAWN_NPCS: "true"
+      SERVER_NAME: "opta"
+      ENABLE_WHITELIST: "true"
+      OPS: "YOUR_MINECRAFT_USER_NAME" # update
+      DIFFICULTY: "normal"
+      MOTD: "A minecraft server built with opta"
+      ANNOUNCE_PLAYER_ACHIEVEMENTS: "true"
+      GENERATE_STRUCTURES: "true"
+      MAX_BUILD_HEIGHT: "512"
+      MEMORY: "6G"
+    resource_request:
+      cpu: 1700 # in millicores
+      memory: 3300 # in megabytes
+    persistent_storage:
+      - path: "/data"
+        size: 30

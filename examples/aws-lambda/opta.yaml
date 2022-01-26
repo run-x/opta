@@ -1,0 +1,13 @@
+name: lambda-demo
+org_name: change_me  # use your org name
+providers:
+  aws:
+    region: us-east-1
+    account_id: 1234567890 # your 10 digit aws account id
+modules:
+  - type: base
+  - type: lambda-function
+    expose_via_domain: true  # this is used to expose the lambda to internet via a generated domain
+    filename: my-deployment-package.zip
+    runtime: "python3.9"
+    handler: "lambda_function.lambda_handler"  # function handler location, file_name.function_name

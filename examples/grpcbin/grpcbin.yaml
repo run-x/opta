@@ -1,0 +1,17 @@
+environments:
+  - name: aws
+    path: "env-aws.yaml"
+  - name: gcp
+    path: "env-gcp.yaml"
+  - name: azure
+    path: "env-azure.yaml"
+  - name: local
+    path: "env-local.yaml"
+name: grpcbin
+modules:
+  - name: app
+    type: k8s-service
+    image: moul/grpcbin
+    port:
+      grpc: 9000
+    public_uri: "/"

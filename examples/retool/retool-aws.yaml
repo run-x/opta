@@ -1,9 +1,9 @@
-name: <<environment_name>>  # update
-org_name: <<organization_name>>  # update
+name: retool
+org_name: <<org_name::org_name::Your Organization Name>>
 providers:
   aws:
-    region: <<aws_region>>  # update
-    account_id: <<aws_account_id>>  # update
+    region: <<region::aws_region::Your AWS Region>>
+    account_id: <<account_id::aws_account_id::Your AWS Account ID>>
 modules:
   - type: base
   - type: k8s-cluster
@@ -12,7 +12,7 @@ modules:
     spot_instances: true
   - type: k8s-base
   - type: dns
-    domain: <<your_domain>>  # update
+    domain: <<domain::string::The dns domain for your Retool deployment>>
     delegated: false
   - name: postgres
     type: postgres
@@ -25,8 +25,8 @@ modules:
       postgresql:
         enabled: false
       config:
-        encryptionKey: changeme123  # update
-        jwtSecret: changeme123  # update
+        encryptionKey: abcdefghijklmnopqrstuvwxyz
+        jwtSecret: abcdefghijklmnopqrstuvwxyq
         postgresql:
           port: 5432
           user: "${{module.postgres.db_user}}"
@@ -34,8 +34,8 @@ modules:
           db: "${{module.postgres.db_name}}"
           password: "${{module.postgres.db_password}}"
       image:
-        tag: 2.75.20
+        tag: <<image_tag::string::The docker image to deploy>>
       ingress:
-       enabled: true
-       apiVersion: "networking.k8s.io/v1beta1"
-       hostName: "{module.dns.domain}"
+        enabled: true
+        apiVersion: "networking.k8s.io/v1beta1"
+        hostName: "{module.dns.domain}"

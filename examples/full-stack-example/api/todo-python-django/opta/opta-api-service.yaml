@@ -1,0 +1,25 @@
+name: todoapi
+environments:
+  - name: awsenv
+    path: "../../../providers/aws.yaml"
+
+modules:
+  - name: todoapi
+    type: k8s-service
+    port:
+      http: 8000
+    image: AUTO
+    healthcheck_path: "ht/"
+    env_vars:
+    - name: "FORCE_SCRIPT_NAME"
+      value: "/djangoapi"
+    links:
+      - database:
+        - db_user: POSTGRES_USER
+          db_host: POSTGRES_HOST
+          db_name: POSTGRES_DB
+          db_password: POSTGRES_PASSWORD
+    public_uri: "/djangoapi"
+  - name: database
+    type: postgres
+

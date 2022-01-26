@@ -1,0 +1,10 @@
+name: awsenv
+org_name: optaapp
+providers:
+  aws:
+    region: us-east-1
+    account_id: XXXXXXXXXX
+modules:
+  - type: base
+  - type: k8s-cluster
+  - type: k8s-base

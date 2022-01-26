@@ -1,0 +1,19 @@
+name: hello
+environments:
+  - name: aws
+    path: "env-aws.yaml"
+  - name: gcp
+    path: "env-gcp.yaml"
+  - name: azure
+    path: "env-azure.yaml"
+  - name: local
+    path: "env-local.yaml"
+modules:
+  - type: k8s-service
+    name: hello
+    port:
+      http: 80
+    image: AUTO
+    healthcheck_path: "/"
+    # path on the load balancer to access this service
+    public_uri: "/hello"
