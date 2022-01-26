@@ -4,7 +4,7 @@ This is an example [opta](https://github.com/run-x/opta) configuration file to d
 
 You can also use this button to fill in the variable fields in the config.
 
-[![Deploy to AWS](https://raw.githubusercontent.com/run-x/opta/main/assets/deploy-to-aws-button.svg)](https://app.runx.dev/deploy-with-aws?url=https%3A%2F%2Fgithub.com%2Frun-x%2Fopta-examples%2Fblob%2Fmain%2Fretool%2Fretool-aws.yaml&name=Retool)
+[![Deploy to AWS](https://raw.githubusercontent.com/run-x/opta/main/assets/deploy-to-aws-button.svg)](https://app.runx.dev/deploy-with-aws?url=https%3A%2F%2Fgithub.com%2Frun-x%2Fopta%2Fblob%2Fmain%2Fexamples%2Fretool%2Fretool-aws.yaml&name=Retool)
 
 
 # What does this do?

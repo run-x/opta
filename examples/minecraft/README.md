@@ -5,7 +5,7 @@ This is an example [opta](https://github.com/run-x/opta) configuration file to d
 
 You can also use this button to fill in the variable fields in the config.
 
-[![Deploy to AWS](https://raw.githubusercontent.com/run-x/opta/main/assets/deploy-to-aws-button.svg)](https://app.runx.dev/deploy-with-aws?url=https%3A%2F%2Fgithub.com%2Frun-x%2Fopta-examples%2Fblob%2Fmain%2Fminecraft%2Fminecraft-aws.yaml&name=Minecraft)
+[![Deploy to AWS](https://raw.githubusercontent.com/run-x/opta/main/assets/deploy-to-aws-button.svg)](https://app.runx.dev/deploy-with-aws?url=https%3A%2F%2Fgithub.com%2Frun-x%2Fopta%2Fblob%2Fmain%2Fexamples%2Fminecraft%2Fminecraft-aws.yaml&name=Minecraft)
 
 **NOTE**: You will still need to set the `OPS` env var value to you minecraft user name. This is the field which
 controls who is an admin, so it is very important for this to be set correctly.
