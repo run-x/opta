@@ -1,0 +1,20 @@
+environments:
+  - name: aws
+    path: "env-aws.yaml"
+  - name: gcp
+    path: "env-gcp.yaml"
+  - name: azure
+    path: "env-azure.yaml"
+  - name: local
+    path: "env-local.yaml"
+name: httpbin
+modules:
+  - name: app
+    type: k8s-service
+    image: kennethreitz/httpbin
+    healthcheck_path: "/get"
+    port:
+      http: 80
+    env_vars:
+      GUNICORN_CMD_ARGS: "--bind=0.0.0.0:8000 --workers=3 --capture-output --error-logfile - --access-logfile - --access-logformat '%(h)s %(t)s %(r)s %(s)s Content-Type: %({Content-Type}i)s'"
+    public_uri: "/"

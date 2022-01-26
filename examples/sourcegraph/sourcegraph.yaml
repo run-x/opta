@@ -1,0 +1,52 @@
+name: sourcegraph
+org_name: <<org_name::org_name::Your Organization Name>>
+providers:
+  aws:
+    region: <<region::aws_region::Your AWS Region>>
+    account_id: <<account_id::aws_account_id::Your AWS Account ID>>
+modules:
+  - type: base
+  - type: k8s-cluster
+    node_instance_type: t3.medium
+    spot_instances: true
+  - type: k8s-base
+  - type: dns
+    domain: <<domain::string::The dns domain for your Sourcegraph deployment>>
+    delegated: false  # set this to true after setting dns records
+  - name: sourcegraph
+    type: k8s-service
+    image: sourcegraph/server:3.28.0
+    port:
+      http: 7080
+    resource_request:
+      cpu: 500
+      memory: 512 
+    public_uri: "{module.dns.domain}"      
+    env_vars:
+      - name: "PGSSLMODE"
+        value: "require"
+      - name: "PGPORT"
+        value: "5432"
+      - name: "CODEINTEL_PGSSLMODE"
+        value: "require"
+      - name: "CODEINTEL_PGPORT"
+        value: "5432"
+    links:
+      - dbfrontend:
+        - db_user: PGUSER
+          db_host: PGHOST
+          db_name: PGDATABASE
+          db_password: PGPASSWORD
+      - dbcodeintel:
+        - db_user: CODEINTEL_PGUSER
+          db_host: CODEINTEL_PGHOST
+          db_name: CODEINTEL_PGDATABASE
+          db_password: CODEINTEL_PGPASSWORD
+  - name: dbfrontend
+    type: postgres
+    instance_class: db.t3.medium
+    engine_version: "12.4"
+  - name: dbcodeintel
+    type: postgres
+    instance_class: db.t3.medium
+    engine_version: "12.4"

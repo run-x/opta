@@ -270,7 +270,7 @@ jobs:
           name: "Deploy opta environment"
           command: |
             ./dist/opta/opta apply \
-            --config ./examples/ci-tests/create-and-destroy-aws/environment.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml \
             --auto-approve \
             --refresh
       - run:
@@ -280,7 +280,7 @@ jobs:
           name: "Configure Kubectl"
           command: |
             ./dist/opta/opta configure-kubectl \
-            --config ./examples/ci-tests/create-and-destroy-aws/environment.yml
+            --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
 
   aws-create-env-dns-false:
     executor: ubuntu-machine
@@ -297,7 +297,7 @@ jobs:
           name: "Deploy opta environment with DNS Delegated False"
           command: |
             ./dist/opta/opta apply \
-            --config ./examples/ci-tests/todo-list/provider-aws-dns-false.yml \
+            --config ./.circleci/ci-tests/todo-list/provider-aws-dns-false.yml \
             --auto-approve \
             --refresh
 
@@ -314,7 +314,7 @@ jobs:
       - aws-cli/setup
       - run:
           name: "Run the Script for Setting NS"
-          command: ./examples/ci-tests/todo-list/set-ns.sh ./examples/ci-tests/todo-list/provider-aws-dns-false.yml
+          command: ./.circleci/ci-tests/todo-list/set-ns.sh ./.circleci/ci-tests/todo-list/provider-aws-dns-false.yml
 
   aws-dns-test:
     executor: ubuntu-machine
@@ -338,7 +338,7 @@ jobs:
           name: "Deploy opta environment with DNS Delegated False"
           command: |
             ./dist/opta/opta apply \
-            --config ./examples/ci-tests/todo-list/provider-aws-dns-true.yml \
+            --config ./.circleci/ci-tests/todo-list/provider-aws-dns-true.yml \
             --auto-approve \
             --refresh
 
@@ -357,7 +357,7 @@ jobs:
           name: "Deploy opta environment"
           command: |
             yes | $HOME/.opta/opta apply \
-            --config ./examples/ci-tests/create-and-destroy-aws/environment.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml \
             --auto-approve \
             --refresh || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
@@ -378,20 +378,20 @@ jobs:
           command: |
             OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-aws/service-cloudfront.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/service-cloudfront.yml \
             --auto-approve
       - run:
           name: "Test Cloudfront curl"
           command: |
             sleep 20
-            export HOST=`./dist/opta/opta output --env awsenv-ci --config ./examples/ci-tests/create-and-destroy-aws/service-cloudfront.yml | jq -r '.cloudfront_domain'`
+            export HOST=`./dist/opta/opta output --env awsenv-ci --config ./.circleci/ci-tests/create-and-destroy-aws/service-cloudfront.yml | jq -r '.cloudfront_domain'`
             curl --fail https://${HOST}
       - run:
           name: "Destroy Cloudfront Service with Opta"
           command: |
             yes | ./dist/opta/opta destroy \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-aws/service-cloudfront.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/service-cloudfront.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-test-lambda-function:
@@ -411,23 +411,23 @@ jobs:
           command: |
             OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-aws/service-lambda.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/service-lambda.yml \
             --auto-approve
       - run:
           name: "Test Lambda Invocation"
           command: |
             sleep 20
-            export LAMBDA_NAME=`./dist/opta/opta output --env awsenv-ci --config ./examples/ci-tests/create-and-destroy-aws/service-lambda.yml | jq -r '.function_name'`
+            export LAMBDA_NAME=`./dist/opta/opta output --env awsenv-ci --config ./.circleci/ci-tests/create-and-destroy-aws/service-lambda.yml | jq -r '.function_name'`
             export AWS_DEFAULT_REGION="us-east-2"
-            aws lambda invoke --function-name $LAMBDA_NAME  ./examples/ci-tests/create-and-destroy-aws/service-lambda.txt
-            export RESPONSE=`cat ./examples/ci-tests/create-and-destroy-aws/service-lambda.txt`
+            aws lambda invoke --function-name $LAMBDA_NAME  ./.circleci/ci-tests/create-and-destroy-aws/service-lambda.txt
+            export RESPONSE=`cat ./.circleci/ci-tests/create-and-destroy-aws/service-lambda.txt`
 
       - run:
           name: "Destroy Cloudfront Service with Opta"
           command: |
             yes | ./dist/opta/opta destroy \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-aws/service-lambda.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/service-lambda.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-test-websocket:
@@ -447,23 +447,23 @@ jobs:
           command: |
             OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-aws/websocket-service.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/websocket-service.yml \
             --auto-approve
       - run:
           name: "Test Websocket"
           command: |
             sleep 20
             source $(pipenv --venv)/bin/activate
-            DIRTY_HOST_NAME="{`./dist/opta/opta output --config ./examples/ci-tests/create-and-destroy-aws/environment.yml | grep load_balancer_raw_dns`\"\":\"\"}"
+            DIRTY_HOST_NAME="{`./dist/opta/opta output --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml | grep load_balancer_raw_dns`\"\":\"\"}"
             export HOST=`echo $DIRTY_HOST_NAME | jq -r '.load_balancer_raw_dns'`
-            python ./examples/ci-tests/create-and-destroy-aws/websocket-validate.py
+            python ./.circleci/ci-tests/create-and-destroy-aws/websocket-validate.py
             exit $?
       - run:
           name: "Destroy Websocket Service with Opta"
           command: |
             yes | ./dist/opta/opta destroy \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-aws/websocket-service.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/websocket-service.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-test-websocket-stable-version:
@@ -483,23 +483,23 @@ jobs:
           command: |
             yes | $HOME/.opta/opta apply \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-aws/websocket-service.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/websocket-service.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
       - run:
           name: "Test Websocket"
           command: |
             sleep 20
             source $(pipenv --venv)/bin/activate
-            DIRTY_HOST_NAME="{`$HOME/.opta/opta output --config ./examples/ci-tests/create-and-destroy-aws/environment.yml | grep load_balancer_raw_dns`\"\":\"\"}"
+            DIRTY_HOST_NAME="{`$HOME/.opta/opta output --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml | grep load_balancer_raw_dns`\"\":\"\"}"
             export HOST=`echo $DIRTY_HOST_NAME | jq -r '.load_balancer_raw_dns'`
-            python ./examples/ci-tests/create-and-destroy-aws/websocket-validate.py
+            python ./.circleci/ci-tests/create-and-destroy-aws/websocket-validate.py
             exit $?
       - run:
           name: "Destroy Websocket Service with Opta"
           command: |
             yes | $HOME/.opta/opta destroy \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-aws/websocket-service.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/websocket-service.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-test-additional-nodegroup:
@@ -517,13 +517,13 @@ jobs:
           name: "Add additional Node Group to Opta Environment."
           command: |
             ./dist/opta/opta apply \
-            --config ./examples/ci-tests/create-and-destroy-aws/environment-additional-nodegroup.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/environment-additional-nodegroup.yml \
             --auto-approve
       - run:
           name: "Remove additional Node Group from Opta Environment"
           command: |
             ./dist/opta/opta apply \
-            --config ./examples/ci-tests/create-and-destroy-aws/environment.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml \
             --auto-approve
 
   aws-test-service-helm:
@@ -542,14 +542,14 @@ jobs:
           command: |
             ./dist/opta/opta apply \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-aws/service-helm.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/service-helm.yml \
             --auto-approve
       - run:
           name: "Destroy test-service-helm"
           command: |
             yes | ./dist/opta/opta destroy \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-aws/service-helm.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/service-helm.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-test-service-s3:
@@ -572,7 +572,7 @@ jobs:
             ./dist/opta/opta deploy \
             --image app:latest \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-aws/service-s3.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/service-s3.yml \
             --tag $CIRCLE_SHA1 \
             --auto-approve
       - run:
@@ -580,7 +580,7 @@ jobs:
           command: |
             yes | ./dist/opta/opta destroy \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-aws/service-s3.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/service-s3.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-test-service-redis:
@@ -603,7 +603,7 @@ jobs:
             ./dist/opta/opta deploy \
             --image app:latest \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-aws/service-redis.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/service-redis.yml \
             --tag $CIRCLE_SHA1 \
             --auto-approve
       - run:
@@ -611,7 +611,7 @@ jobs:
           command: |
             yes | ./dist/opta/opta destroy \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-aws/service-redis.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/service-redis.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-test-service-docdb:
@@ -634,7 +634,7 @@ jobs:
             ./dist/opta/opta deploy \
             --image app:latest \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-aws/service-docdb.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/service-docdb.yml \
             --tag $CIRCLE_SHA1 \
             --auto-approve
       - run:
@@ -642,7 +642,7 @@ jobs:
           command: |
             yes | ./dist/opta/opta destroy \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-aws/service-docdb.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/service-docdb.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-test-service-pg:
@@ -664,7 +664,7 @@ jobs:
           command: |
             ./dist/opta/opta secret update \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-aws/service-pg.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/service-pg.yml \
             FAKE_SECRET foo
       - run:
           name: "Deploy test-service"
@@ -672,7 +672,7 @@ jobs:
             ./dist/opta/opta deploy \
             --image app:latest \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-aws/service-pg.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/service-pg.yml \
             --tag $CIRCLE_SHA1 \
             --auto-approve
       - run:
@@ -680,7 +680,7 @@ jobs:
           command: |
             ./dist/opta/opta logs \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-aws/service-pg.yml >> logs.log
+            --config ./.circleci/ci-tests/create-and-destroy-aws/service-pg.yml >> logs.log
           background: true
       - run:
           name: "Check opta logs"
@@ -695,7 +695,7 @@ jobs:
             ./dist/opta/opta deploy \
             --image app:latest \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-aws/service-additional-pg.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/service-additional-pg.yml \
             --tag $CIRCLE_SHA1 \
             --auto-approve
       - run:
@@ -704,7 +704,7 @@ jobs:
             ./dist/opta/opta deploy \
             --image app:latest \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-aws/service-pg.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/service-pg.yml \
             --tag $CIRCLE_SHA1 \
             --auto-approve
       - run:
@@ -712,7 +712,7 @@ jobs:
           command: |
             secret_value=$(./dist/opta/opta secret view \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-aws/service-pg.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/service-pg.yml \
             FAKE_SECRET | tail -1)
             echo "This was the found secret value: ${secret_value}"
             [[ "$secret_value" =~ .*"foo".* ]] || exit 1
@@ -721,7 +721,7 @@ jobs:
           command: |
             yes | ./dist/opta/opta destroy \
             --env awsenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-aws/service-pg.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/service-pg.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-opta-example-create-svcs:
@@ -745,7 +745,7 @@ jobs:
           command: |
             ./dist/opta/opta deploy \
             --image todo-api:v1 \
-            --config ./examples/ci-tests/todo-list/api-service.yml \
+            --config ./.circleci/ci-tests/todo-list/api-service.yml \
             --env awsenv-ci \
             --auto-approve
       - run:
@@ -753,20 +753,20 @@ jobs:
           command: |
             ./dist/opta/opta deploy \
             --image todo-frontend:v1 \
-            --config ./examples/ci-tests/todo-list/frontend-service.yml \
+            --config ./.circleci/ci-tests/todo-list/frontend-service.yml \
             --env awsenv-ci \
             --auto-approve
       - run:
           name: "Deploy Monitoring Service"
           command: |
             ./dist/opta/opta apply \
-            --config ./examples/ci-tests/todo-list/monitoring-service.yml \
+            --config ./.circleci/ci-tests/todo-list/monitoring-service.yml \
             --env awsenv-ci \
             --auto-approve
       - run:
           name: "Ping Tests"
           command: |
-            DIRTY_HOST_NAME="{`./dist/opta/opta output -c ./examples/ci-tests/create-and-destroy-aws/environment.yml | grep load_balancer_raw_dns`\"\":\"\"}"
+            DIRTY_HOST_NAME="{`./dist/opta/opta output -c ./.circleci/ci-tests/create-and-destroy-aws/environment.yml | grep load_balancer_raw_dns`\"\":\"\"}"
             export HOST_NAME=`echo $DIRTY_HOST_NAME | jq -r '.load_balancer_raw_dns'`
             curl $HOST_NAME/frontend --fail
             curl $HOST_NAME/djangoapi/ht/ --fail
@@ -787,21 +787,21 @@ jobs:
           name: "Destroy Monitoring Service"
           command: |
             yes | ./dist/opta/opta destroy \
-            --config ./examples/ci-tests/todo-list/monitoring-service.yml \
+            --config ./.circleci/ci-tests/todo-list/monitoring-service.yml \
             --env awsenv-ci \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
       - run:
           name: "Destroy Todo-Frontend Service"
           command: |
             yes | ./dist/opta/opta destroy \
-            --config ./examples/ci-tests/todo-list/frontend-service.yml \
+            --config ./.circleci/ci-tests/todo-list/frontend-service.yml \
             --env awsenv-ci \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
       - run:
           name: "Destroy Todo-Api Service"
           command: |
             yes | ./dist/opta/opta destroy \
-            --config ./examples/ci-tests/todo-list/api-service.yml \
+            --config ./.circleci/ci-tests/todo-list/api-service.yml \
             --env awsenv-ci \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
@@ -820,7 +820,7 @@ jobs:
           name: "Destroy environment"
           command: |
             yes | ./dist/opta/opta destroy \
-            --config ./examples/ci-tests/create-and-destroy-aws/environment.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-destroy-env-dns-false:
@@ -838,7 +838,7 @@ jobs:
           name: "Destroy environment with DNS Delegated True"
           command: |
             yes | ./dist/opta/opta destroy \
-            --config ./examples/ci-tests/todo-list/provider-aws-dns-false.yml \
+            --config ./.circleci/ci-tests/todo-list/provider-aws-dns-false.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-destroy-env-dns-true:
@@ -856,7 +856,7 @@ jobs:
           name: "Destroy environment with DNS Delegated True"
           command: |
             yes | ./dist/opta/opta destroy \
-            --config ./examples/ci-tests/todo-list/provider-aws-dns-true.yml \
+            --config ./.circleci/ci-tests/todo-list/provider-aws-dns-true.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-destroy-env-stable-version:
@@ -874,7 +874,7 @@ jobs:
           name: "Destroy environment"
           command: |
             yes | $HOME/.opta/opta destroy \
-            --config ./examples/ci-tests/create-and-destroy-aws/environment.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   gcp-create-env:
@@ -895,7 +895,7 @@ jobs:
           name: "Deploy opta environment"
           command: |
             ./dist/opta/opta apply \
-            --config ./examples/ci-tests/create-and-destroy-gcp/environment.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml \
             --auto-approve \
             --refresh
       - run:
@@ -905,7 +905,7 @@ jobs:
           name: "Configure Kubectl"
           command: |
             ./dist/opta/opta configure-kubectl \
-            --config ./examples/ci-tests/create-and-destroy-gcp/environment.yml
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml
 
   gcp-create-env-stable-version:
     executor: ubuntu-machine
@@ -925,7 +925,7 @@ jobs:
           name: "Deploy opta environment"
           command: |
             yes | $HOME/.opta/opta apply \
-            --config ./examples/ci-tests/create-and-destroy-gcp/environment.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml \
             --auto-approve \
             --refresh || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
@@ -947,13 +947,13 @@ jobs:
           name: "Add additional Node Group to Opta Environment."
           command: |
             ./dist/opta/opta apply \
-            --config ./examples/ci-tests/create-and-destroy-gcp/environment-additional-nodepool.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/environment-additional-nodepool.yml \
             --auto-approve
       - run:
           name: "Remove additional Node Group from Opta Environment"
           command: |
             ./dist/opta/opta apply \
-            --config ./examples/ci-tests/create-and-destroy-gcp/environment.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml \
             --auto-approve
 
   gcp-test-service-helm:
@@ -978,14 +978,14 @@ jobs:
           command: |
             ./dist/opta/opta apply \
             --env gcpenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-gcp/service-helm.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/service-helm.yml \
             --auto-approve
       - run:
           name: "Destroy test-service-helm"
           command: |
             yes | ./dist/opta/opta destroy \
             --env gcpenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-gcp/service-helm.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/service-helm.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   gcp-test-service-redis:
@@ -1011,7 +1011,7 @@ jobs:
             ./dist/opta/opta deploy \
             --image app:latest \
             --env gcpenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-gcp/service-redis.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/service-redis.yml \
             --tag $CIRCLE_SHA1 \
             --auto-approve
       - run:
@@ -1019,7 +1019,7 @@ jobs:
           command: |
             yes | ./dist/opta/opta destroy \
             --env gcpenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-gcp/service-redis.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/service-redis.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   gcp-test-service-gcs:
@@ -1045,7 +1045,7 @@ jobs:
             ./dist/opta/opta deploy \
             --image app:latest \
             --env gcpenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-gcp/service-gcs.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/service-gcs.yml \
             --tag $CIRCLE_SHA1 \
             --auto-approve
       - run:
@@ -1053,7 +1053,7 @@ jobs:
           command: |
             yes | ./dist/opta/opta destroy \
             --env gcpenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-gcp/service-gcs.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/service-gcs.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   gcp-test-service-pg:
@@ -1078,7 +1078,7 @@ jobs:
           command: |
             ./dist/opta/opta secret update \
             --env gcpenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/service-pg.yml \
             FAKE_SECRET foo
       - run:
           name: "Deploy test-service-pg"
@@ -1086,7 +1086,7 @@ jobs:
             ./dist/opta/opta deploy \
             --image app:latest \
             --env gcpenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/service-pg.yml \
             --tag $CIRCLE_SHA1 \
             --auto-approve
       - run:
@@ -1095,7 +1095,7 @@ jobs:
             ./dist/opta/opta deploy \
             --image app:latest \
             --env gcpenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-gcp/service-additional-pg.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/service-additional-pg.yml \
             --tag $CIRCLE_SHA1 \
             --auto-approve
       - run:
@@ -1104,7 +1104,7 @@ jobs:
             ./dist/opta/opta deploy \
             --image app:latest \
             --env gcpenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/service-pg.yml \
             --tag $CIRCLE_SHA1 \
             --auto-approve
       - run:
@@ -1112,7 +1112,7 @@ jobs:
           command: |
             secret_value=$(./dist/opta/opta secret view \
             --env gcpenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/service-pg.yml \
             FAKE_SECRET | tail -1)
             echo "This was the found secret value: ${secret_value}"
             [[ "$secret_value" =~ .*"foo".* ]] || exit 1
@@ -1121,7 +1121,7 @@ jobs:
           command: |
             yes | ./dist/opta/opta destroy \
             --env gcpenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/service-pg.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   gcp-test-service-pg-latest-version:
@@ -1148,7 +1148,7 @@ jobs:
           command: |
             yes | $HOME/.opta/opta secret update \
             --env gcpenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/service-pg.yml \
             FAKE_SECRET foo || if [[ $? -eq 141 ]]; then true; else exit $?; fi
       - run:
           name: "Deploy test-service-pg"
@@ -1156,7 +1156,7 @@ jobs:
             yes | $HOME/.opta/opta deploy \
             --image app:latest \
             --env gcpenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/service-pg.yml \
             --tag $CIRCLE_SHA1 \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
       - run:
@@ -1165,7 +1165,7 @@ jobs:
             yes | $HOME/.opta/opta deploy \
             --image app:latest \
             --env gcpenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-gcp/service-additional-pg.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/service-additional-pg.yml \
             --tag $CIRCLE_SHA1 \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
       - run:
@@ -1174,7 +1174,7 @@ jobs:
             yes | $HOME/.opta/opta deploy \
             --image app:latest \
             --env gcpenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/service-pg.yml \
             --tag $CIRCLE_SHA1 \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
       - run:
@@ -1182,7 +1182,7 @@ jobs:
           command: |
             secret_value=$($HOME/.opta/opta secret view \
             --env gcpenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/service-pg.yml \
             FAKE_SECRET | tail -1)
             echo "This was the found secret value: ${secret_value}"
             [[ "$secret_value" =~ .*"foo".* ]] || exit 1
@@ -1191,7 +1191,7 @@ jobs:
           command: |
             yes | $HOME/.opta/opta destroy \
             --env gcpenv-ci \
-            --config ./examples/ci-tests/create-and-destroy-gcp/service-pg.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/service-pg.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   gcp-destroy-env:
@@ -1212,7 +1212,7 @@ jobs:
           name: "Destroy environment"
           command: |
             yes | ./dist/opta/opta destroy \
-            --config ./examples/ci-tests/create-and-destroy-gcp/environment.yml \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   gcp-opta-example-create-svcs:
@@ -1239,7 +1239,7 @@ jobs:
           command: |
             ./dist/opta/opta deploy \
             --image todo-api:v1 \
-            --config ./examples/ci-tests/todo-list/api-service.yml \
+            --config ./.circleci/ci-tests/todo-list/api-service.yml \
             --env gcpenv-ci \
             --auto-approve
       - run:
@@ -1247,20 +1247,20 @@ jobs:
           command: |
             ./dist/opta/opta deploy \
             --image todo-frontend:v1 \
-            --config ./examples/ci-tests/todo-list/frontend-service.yml \
+            --config ./.circleci/ci-tests/todo-list/frontend-service.yml \
             --env gcpenv-ci \
             --auto-approve
       - run:
           name: "Deploy Monitoring Service"
           command: |
             ./dist/opta/opta apply \
-            --config ./examples/ci-tests/todo-list/monitoring-service.yml \
+            --config ./.circleci/ci-tests/todo-list/monitoring-service.yml \
             --env gcpenv-ci \
             --auto-approve
       - run:
           name: "Ping Tests"
           command: |
-            DIRTY_HOST_NAME="{`./dist/opta/opta output -c ./examples/ci-tests/create-and-destroy-gcp/environment.yml | grep load_balancer_raw_ip`\"\":\"\"}"
+            DIRTY_HOST_NAME="{`./dist/opta/opta output -c ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml | grep load_balancer_raw_ip`\"\":\"\"}"
             export HOST_NAME=`echo $DIRTY_HOST_NAME | jq -r '.load_balancer_raw_ip'`
             curl $HOST_NAME/frontend --fail
             curl $HOST_NAME/djangoapi/ht/ --fail
@@ -1284,21 +1284,21 @@ jobs:
           name: "Destroy Monitoring Service"
           command: |
             yes | ./dist/opta/opta destroy \
-            --config ./examples/ci-tests/todo-list/monitoring-service.yml \
+            --config ./.circleci/ci-tests/todo-list/monitoring-service.yml \
             --env gcpenv-ci \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
       - run:
           name: "Destroy Todo-Frontend Service"
           command: |
             yes | ./dist/opta/opta destroy \
-            --config ./examples/ci-tests/todo-list/frontend-service.yml \
+            --config ./.circleci/ci-tests/todo-list/frontend-service.yml \
             --env gcpenv-ci \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
       - run:
           name: "Destroy Todo-Api Service"
           command: |
             yes | ./dist/opta/opta destroy \
-            --config ./examples/ci-tests/todo-list/api-service.yml \
+            --config ./.circleci/ci-tests/todo-list/api-service.yml \
             --env gcpenv-ci \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
@@ -1321,7 +1321,7 @@ jobs:
           command: |
             ./dist/opta/opta deploy \
             --image todo-api:v1 \
-            --config ./examples/ci-tests/todo-list/api-service.yml \
+            --config ./.circleci/ci-tests/todo-list/api-service.yml \
             --auto-approve \
             --local
       - run:
@@ -1329,14 +1329,14 @@ jobs:
           command: |
             ./dist/opta/opta deploy \
             --image todo-frontend:v1 \
-            --config ./examples/ci-tests/todo-list/frontend-service.yml \
+            --config ./.circleci/ci-tests/todo-list/frontend-service.yml \
             --auto-approve \
             --local
       - run:
           name: "Deploy Monitoring Service"
           command: |
             ./dist/opta/opta apply \
-            --config ./examples/ci-tests/todo-list/monitoring-service.yml \
+            --config ./.circleci/ci-tests/todo-list/monitoring-service.yml \
             --auto-approve \
             --local
       - run:
@@ -1359,21 +1359,21 @@ jobs:
           name: "Destroy Monitoring Service"
           command: |
             yes | ./dist/opta/opta destroy \
-            --config ./examples/ci-tests/todo-list/monitoring-service.yml \
+            --config ./.circleci/ci-tests/todo-list/monitoring-service.yml \
             --auto-approve \
             --local || if [[ $? -eq 141 ]]; then true; else exit $?; fi
       - run:
           name: "Destroy Todo-Frontend Service"
           command: |
             yes | ./dist/opta/opta destroy \
-            --config ./examples/ci-tests/todo-list/frontend-service.yml \
+            --config ./.circleci/ci-tests/todo-list/frontend-service.yml \
             --auto-approve \
             --local || if [[ $? -eq 141 ]]; then true; else exit $?; fi
       - run:
           name: "Destroy Todo-Api Service"
           command: |
             yes | ./dist/opta/opta destroy \
-            --config ./examples/ci-tests/todo-list/api-service.yml \
+            --config ./.circleci/ci-tests/todo-list/api-service.yml \
             --auto-approve \
             --local || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 

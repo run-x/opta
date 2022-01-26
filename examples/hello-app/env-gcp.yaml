@@ -1,0 +1,10 @@
+name: gcp # name of the environment
+org_name: my-org # A unique identifier for your organization
+providers:
+  google:
+    region: us-central1
+    project: XXXXX # the name of your GCP project
+modules:
+  - type: base
+  - type: k8s-cluster
+  - type: k8s-base
