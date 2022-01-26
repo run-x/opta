@@ -48,9 +48,9 @@ def py_check(files_changed: Collection[str], precommit: bool, apply: bool) -> in
 
     isort = "pipenv run isort --check-only"
     black = "pipenv run black --check"
-    flake8 = "pipenv run flake8"
+    flake8 = "pipenv run flake8 --exclude examples"
 
-    mypy = "pipenv run mypy"
+    mypy = "pipenv run mypy --exclude examples"
 
     if precommit or apply:
         isort = "pipenv run isort"
