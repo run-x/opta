@@ -65,12 +65,18 @@ spec:
       http:
         paths:
           - path: {{ $val.pathPrefix }}{{ if not (eq $val.pathPrefix "/") }}(/|$)(.*){{ end }}
+            - {{ if (eq $val.cloud "gcp")}}
             pathType: Prefix
             backend:
               service:
                 name: {{ include "k8s-service.serviceName" $ }}
                 port: 
                   name: {{ $.Values.httpPort.name | quote }}
+              {{ else }}
+            backend:
+              serviceName: {{ include "k8s-service.serviceName" $ }}
+              servicePort: {{ $.Values.httpPort.name | quote }}
+              {{ end }}
 ---
 {{- end }}
 {{- end }}
