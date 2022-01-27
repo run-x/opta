@@ -28,6 +28,9 @@ spec:
     - http:
         paths:
           - path: "/healthz"
+            pathType: Exact
             backend:
-              serviceName: opta-ingress-healthcheck
-              servicePort: 80
+              service:
+                port:
+                  name: opta-ingress-healthcheck
+                  number: 80

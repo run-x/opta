@@ -65,9 +65,12 @@ spec:
       http:
         paths:
           - path: {{ $val.pathPrefix }}{{ if not (eq $val.pathPrefix "/") }}(/|$)(.*){{ end }}
+            pathType: Prefix
             backend:
-              serviceName: {{ include "k8s-service.serviceName" $ }}
-              servicePort: {{ $.Values.httpPort.name | quote }}
+              service:
+                name: {{ include "k8s-service.serviceName" $ }}
+                port: 
+                  name: {{ $.Values.httpPort.name | quote }}
 ---
 {{- end }}
 {{- end }}
