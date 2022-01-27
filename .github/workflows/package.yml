@@ -1,6 +1,7 @@
 name: Package
 
-on: 
+on:
+  workflow_dispatch: {}
   release:
     types: [published]
 
