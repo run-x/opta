@@ -31,7 +31,6 @@ from opta.exceptions import MissingState, UserErrors
 from opta.layer import Layer, StructuredConfig
 from opta.pre_check import pre_check
 from opta.utils import check_opta_file_exists, fmt_msg, logger
-from opta.utils.globals import Interpolation
 
 
 @click.command()
@@ -211,7 +210,6 @@ def _apply(
         for module_idx, current_modules, total_block_count in gen(
             layer, existing_config, image_tag, image_digest, test, True, auto_approve
         ):
-            Interpolation.bad_fields_present()
             if first_loop:
                 # This is set during the first iteration, since the tf file must exist.
                 existing_modules = Terraform.get_existing_modules(layer)
