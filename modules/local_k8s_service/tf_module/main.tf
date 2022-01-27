@@ -47,6 +47,7 @@ resource "helm_release" "k8s-service" {
       layerName : var.layer_name,
       moduleName : var.module_name,
       environmentName : var.env_name,
+      cloud: "local"
       stickySession : var.sticky_session
       stickySessionMaxAge : var.sticky_session_max_age
       consistentHash : var.consistent_hash
