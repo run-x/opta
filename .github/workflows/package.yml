@@ -45,13 +45,9 @@ jobs:
     # needs: create-destroy-tests
     runs-on: ubuntu-18.04
     container:
-      image: "centos:centos8"
+      image: "centos/python-38-centos7"
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.8
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.8
       - name: Install python dependencies
         run: |
           pip install pipenv
