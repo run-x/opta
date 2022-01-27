@@ -6,6 +6,8 @@ if TYPE_CHECKING:
     from opta.layer import Layer
     from opta.module import Module
 
+import os
+
 import yaml
 
 from opta.core.kubernetes import get_kube_config_file_name
@@ -22,6 +24,13 @@ class K8smanifestProcessor(ModuleProcessor):
             module.data["kubecontext"],
         ) = self.get_k8s_config_context(layer)
         super(K8smanifestProcessor, self).__init__(module, layer)
+
+    def process(self, module_idx: int) -> None:
+        file_path: str = self.module.data.get("file_path")
+        if not file_path.startswith("/"):
+            file_path = os.path.join(os.path.dirname(self.layer.path), file_path)
+        self.module.data["file_path"] = file_path
+        super(K8smanifestProcessor, self).process(module_idx)
 
     def get_k8s_config_context(self, layer: "Layer") -> Tuple[str, str]:
         if layer.cloud == "local":
