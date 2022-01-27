@@ -45,12 +45,15 @@ jobs:
     # needs: create-destroy-tests
     runs-on: ubuntu-18.04
     container:
-      image: "centos/python-38-centos7"
+      image: "centos/centos8"
     steps:
       - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: |
+          yum install -y python3.8 unzip
       - name: Install python dependencies
         run: |
-          pip install pipenv
+          pip3.8 install pipenv
           pipenv install --deploy --dev
           source $(pipenv --venv)/bin/activate
       - name: Package
