@@ -12,6 +12,9 @@
 {{ $domain_pathPrefix_sha256 = trunc 8 (sha256sum $domain_pathPrefix) }}
 {{ $ingress_name_new_convention = print $ingress_base_name "-" $domain_pathPrefix_sha256 }}
 {{ $old_ingress_convention = (lookup "networking.k8s.io/v1beta1" "Ingress" $namespace_name $ingress_name_old_convention) }}
+{{- $ingressApiIsStable := eq (include "ingress.isStable" .) "true" -}}
+{{- $ingressSupportsIngressClassName := eq (include "ingress.supportsIngressClassName" .) "true" -}}
+{{- $ingressSupportsPathType := eq (include "ingress.supportsPathType" .) "true" -}}
 
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
@@ -45,7 +48,9 @@ metadata:
     nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
     {{- end }}
     cert-manager.io/cluster-issuer: opta-selfsigned
+    {{- if not $ingressSupportsIngressClassName }}
     kubernetes.io/ingress.class: "nginx"
+    {{- end }}
     nginx.ingress.kubernetes.io/configuration-snippet: |
       proxy_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;
       grpc_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;
@@ -58,6 +63,9 @@ metadata:
     {{ $k | quote }}: {{ $v | quote }}
     {{- end }}
 spec:
+  {{- if $ingressSupportsIngressClassName }}
+  ingressClassName: "nginx"
+  {{- end }}
   rules:
     - {{ if not (eq $val.domain "all" ) }}
       host: {{ $val.domain }}
@@ -65,9 +73,19 @@ spec:
       http:
         paths:
           - path: {{ $val.pathPrefix }}{{ if not (eq $val.pathPrefix "/") }}(/|$)(.*){{ end }}
+            {{- if $ingressSupportsPathType }}
+            pathType: "prefix"
+            {{- end }}
             backend:
+              {{- if $ingressApiIsStable }}
+              service:
+                name: {{ include "k8s-service.serviceName" $ }}
+                port:
+                  name: {{ $.Values.httpPort.name | quote }}
+              {{- else }}
               serviceName: {{ include "k8s-service.serviceName" $ }}
               servicePort: {{ $.Values.httpPort.name | quote }}
+              {{- end }}
 ---
 {{- end }}
 {{- end }}

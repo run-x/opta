@@ -1,3 +1,6 @@
+{{- $ingressApiIsStable := eq (include "ingress.isStable" .) "true" -}}
+{{- $ingressSupportsIngressClassName := eq (include "ingress.supportsIngressClassName" .) "true" -}}
+{{- $ingressSupportsPathType := eq (include "ingress.supportsPathType" .) "true" -}}
 apiVersion: v1
 kind: Service
 metadata:
@@ -22,12 +25,27 @@ metadata:
   labels:
     opta-generated: "true"
   annotations:
+    {{- if not $ingressSupportsIngressClassName }}
     kubernetes.io/ingress.class: "nginx"
+    {{- end }}
 spec:
+  {{- if $ingressSupportsIngressClassName }}
+  ingressClassName: "nginx"
+  {{- end }}
   rules:
     - http:
         paths:
           - path: "/healthz"
+            {{- if $ingressSupportsPathType }}
+            pathType: "prefix"
+            {{- end }}
             backend:
+              {{- if $ingressApiIsStable }}
+              service:
+                name: opta-ingress-healthcheck
+                port:
+                  number: 80
+              {{- else }}
               serviceName: opta-ingress-healthcheck
               servicePort: 80
+              {{- end }}
