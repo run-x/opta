@@ -45,7 +45,7 @@ jobs:
     # needs: create-destroy-tests
     runs-on: ubuntu-18.04
     container:
-      image: "centos/centos8"
+      image: "centos:centos8"
     steps:
       - uses: actions/checkout@v2
       - name: Install dependencies
