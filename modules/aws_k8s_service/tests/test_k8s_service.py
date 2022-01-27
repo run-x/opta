@@ -47,9 +47,8 @@ class TestK8sServiceProcessor:
             {"name": "DOCDBHOST2", "value": "${{module.docdb2.db_host}}"},
             {"name": "DOCDBPASSWORD2", "value": "${{module.docdb2.db_password}}"},
         ]
-        assert app_module.data["manual_secrets"] == [
-            "BALONEY",
-        ]
+        # this field has been deprecated, no longer populated
+        assert "manual_secrets" not in app_module.data.keys()
         assert app_module.data["iam_policy"] == {
             "Version": "2012-10-17",
             "Statement": [

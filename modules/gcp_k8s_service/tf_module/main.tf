@@ -40,7 +40,6 @@ resource "helm_release" "k8s-service" {
       initialReadinessDelay : var.initial_readiness_delay
       envVars : var.env_vars,
       linkSecrets : var.link_secrets,
-      manualSecrets : var.manual_secrets,
       uriComponents : local.uri_components,
       layerName : var.layer_name,
       moduleName : var.module_name,

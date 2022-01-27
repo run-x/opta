@@ -20,9 +20,7 @@ class TestLinkerHelper:
         atlas_module = layer.get_module("mongodbatlas", idx)
 
         atlas_module.data["link_secrets"] = []
-        atlas_module.data["manual_secrets"] = []
         app_module.data["link_secrets"] = []
-        app_module.data["manual_secrets"] = []
         link_permissions = []
         for link_data in app_module.data.get("links", []):
             if type(link_data) is str:

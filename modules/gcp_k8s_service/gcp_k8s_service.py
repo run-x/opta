@@ -16,8 +16,8 @@ class GcpK8sServiceProcessor(GcpK8sModuleProcessor, K8sServiceModuleProcessor):
             raise Exception(
                 f"The module {module.name} was expected to be of type k8s service"
             )
-        self.read_buckets: list[str] = []
-        self.write_buckets: list[str] = []
+        self.read_buckets: List[str] = []
+        self.write_buckets: List[str] = []
         super(GcpK8sServiceProcessor, self).__init__(module, layer)
 
     def pre_hook(self, module_idx: int) -> None:
@@ -26,7 +26,6 @@ class GcpK8sServiceProcessor(GcpK8sModuleProcessor, K8sServiceModuleProcessor):
 
     def process(self, module_idx: int) -> None:
         # Update the secrets
-        self.module.data["manual_secrets"] = self.module.data.get("secrets", [])
         self.module.data["link_secrets"] = self.module.data.get("link_secrets", [])
 
         current_envars: Union[List, Dict[str, str]] = self.module.data.get("env_vars", [])

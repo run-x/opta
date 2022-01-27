@@ -159,11 +159,6 @@ variable "link_secrets" {
   default = []
 }
 
-variable "manual_secrets" {
-  type    = list(string)
-  default = []
-}
-
 variable "iam_policy" {
 }
 

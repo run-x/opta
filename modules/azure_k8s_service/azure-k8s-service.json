@@ -38,7 +38,7 @@
     },
     "secrets": {
       "type": "array",
-      "description": "Optional. A list of secrets to add as environment variables for your container. All secrets must be set following the [secrets instructions](/tutorials/secrets).",
+      "description": "Deprecated, see [secrets instructions](/tutorials/secrets).",
       "items": {
         "type": "string"
       },
