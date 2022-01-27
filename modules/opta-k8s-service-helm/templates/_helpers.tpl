@@ -1,4 +1,11 @@
 {{/*
+Get KubeVersion removing pre-release information.
+*/}}
+{{- define "opta.kubeVersion" -}}
+  {{- default .Capabilities.KubeVersion.Version (regexFind "v[0-9]+\\.[0-9]+\\.[0-9]+" .Capabilities.KubeVersion.Version) -}}
+{{- end -}}
+
+{{/*
 Expand the name of the chart.
 */}}
 {{- define "k8s-service.name" -}}
@@ -75,7 +82,7 @@ opta.dev/environment-name: {{ .Values.environmentName }}
 {{- end }}
 
 {{- define "ingress.apiVersion" -}}
-  {{- if and (.Capabilities.APIVersions.Has "networking.k8s.io/v1") (semverCompare ">= 1.19.x" (include "prometheus.kubeVersion" .)) -}}
+  {{- if and (.Capabilities.APIVersions.Has "networking.k8s.io/v1") (semverCompare ">= 1.19.x" (include "opta.kubeVersion" .)) -}}
       {{- print "networking.k8s.io/v1" -}}
   {{- else if .Capabilities.APIVersions.Has "networking.k8s.io/v1beta1" -}}
     {{- print "networking.k8s.io/v1beta1" -}}
@@ -95,11 +102,11 @@ Return if ingress is stable.
 Return if ingress supports ingressClassName.
 */}}
 {{- define "ingress.supportsIngressClassName" -}}
-  {{- or (eq (include "ingress.isStable" .) "true") (and (eq (include "ingress.apiVersion" .) "networking.k8s.io/v1beta1") (semverCompare ">= 1.18.x" (include "prometheus.kubeVersion" .))) -}}
+  {{- or (eq (include "ingress.isStable" .) "true") (and (eq (include "ingress.apiVersion" .) "networking.k8s.io/v1beta1") (semverCompare ">= 1.18.x" (include "opta.kubeVersion" .))) -}}
 {{- end -}}
 {{/*
 Return if ingress supports pathType.
 */}}
 {{- define "ingress.supportsPathType" -}}
-  {{- or (eq (include "ingress.isStable" .) "true") (and (eq (include "ingress.apiVersion" .) "networking.k8s.io/v1beta1") (semverCompare ">= 1.18.x" (include "prometheus.kubeVersion" .))) -}}
+  {{- or (eq (include "ingress.isStable" .) "true") (and (eq (include "ingress.apiVersion" .) "networking.k8s.io/v1beta1") (semverCompare ">= 1.18.x" (include "opta.kubeVersion" .))) -}}
 {{- end -}}
