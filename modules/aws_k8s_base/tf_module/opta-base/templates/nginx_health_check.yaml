@@ -31,6 +31,6 @@ spec:
             pathType: Exact
             backend:
               service:
+                name: http
                 port:
-                  name: opta-ingress-healthcheck
                   number: 80
