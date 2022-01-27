@@ -13,6 +13,8 @@ jobs:
   package-linux:
     # needs: create-destroy-tests
     runs-on: ubuntu-18.04
+    env:
+      VERSION: ${{ github.event.inputs.version }}
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python 3.8
@@ -44,23 +46,29 @@ jobs:
   package-centos:
     # needs: create-destroy-tests
     runs-on: ubuntu-18.04
+    env:
+      VERSION: ${{ github.event.inputs.version }}
     container:
       image: "centos:centos8"
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.8
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.8
+      - name: Install dependencies
+        run: |
+          yum install -y python3.8 unzip make zip
       - name: Install python dependencies
         run: |
-          pip install pipenv
+          pip3.8 install pipenv
           pipenv install --deploy --dev
           source $(pipenv --venv)/bin/activate
       - name: Package
         run: |
           if [ -z "$VERSION" ]; then export VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/v||'); fi
           make build-binary
+      - name: Setup AWS CLI
+        run: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          ./aws/install
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -77,6 +85,8 @@ jobs:
   package-macos:
     # needs: create-destroy-tests
     runs-on: macos-10.15
+    env:
+      VERSION: ${{ github.event.inputs.version }}
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python 3.8
