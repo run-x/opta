@@ -57,6 +57,11 @@ jobs:
         run: |
           if [ -z "$VERSION" ]; then export VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/v||'); fi
           make build-binary
+      - name: Setup AWS CLI
+        run: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
