@@ -1,7 +1,11 @@
 name: Package
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Opta version to mark as latest
+        required: false
   release:
     types: [published]
 
@@ -22,7 +26,7 @@ jobs:
           source $(pipenv --venv)/bin/activate
       - name: Package
         run: |
-          export VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/||')
+          if [ -z "$VERSION" ]; then export VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/v||'); fi
           make build-binary
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -32,7 +36,7 @@ jobs:
           aws-region: us-east-1
       - name: Upload to S3
         run: |
-          VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/v||')
+          if [ -z "$VERSION" ]; then export VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/v||'); fi
           cd dist/opta
           zip -r opta.zip ./*
           aws s3 cp opta.zip s3://dev-runx-opta-binaries/linux/$VERSION/ --acl public-read
@@ -55,7 +59,7 @@ jobs:
           source $(pipenv --venv)/bin/activate
       - name: Package
         run: |
-          export VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/||')
+          if [ -z "$VERSION" ]; then export VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/v||'); fi
           make build-binary
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -65,7 +69,7 @@ jobs:
           aws-region: us-east-1
       - name: Upload to S3
         run: |
-          VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/v||')
+          if [ -z "$VERSION" ]; then export VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/v||'); fi
           cd dist/opta
           zip -r opta.zip ./*
           aws s3 cp opta.zip s3://dev-runx-opta-binaries/centos/$VERSION/ --acl public-read
@@ -86,7 +90,7 @@ jobs:
           source $(pipenv --venv)/bin/activate
       - name: Package
         run: |
-          export VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/||')
+          if [ -z "$VERSION" ]; then export VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/v||'); fi
           make build-binary
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -96,7 +100,7 @@ jobs:
           aws-region: us-east-1
       - name: Upload to S3
         run: |
-          VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/v||')
+          if [ -z "$VERSION" ]; then export VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/v||'); fi
           cd dist/opta
           zip -r opta.zip ./*
           aws s3 cp opta.zip s3://dev-runx-opta-binaries/mac/$VERSION/ --acl public-read
