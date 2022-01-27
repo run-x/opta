@@ -45,7 +45,7 @@ resource "helm_release" "k8s-service" {
       uriComponents : local.uri_components,
       layerName : var.layer_name,
       moduleName : var.module_name,
-      cloud: "aws",
+      cloud : "aws",
       environmentName : var.env_name,
       iamRoleArn : aws_iam_role.k8s_service.arn
       stickySession : var.sticky_session
