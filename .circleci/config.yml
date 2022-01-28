@@ -268,6 +268,26 @@ jobs:
             - todo-api
             - todo-frontend
 
+  azure-create-env:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - download-opta
+      - checkout
+      - attach_workspace:
+          at: ~/
+      - install-opta-dependencies
+      - azure-cli/install
+      - azure-cli/login-with-service-principal
+      - run:
+          name: Run opta apply on environment configuration
+          command: |
+            $HOME/.opta/opta apply \
+            --config ./.circleci/ci-tests/create-and-destroy-azure/environment.yaml \
+            --auto-approve \
+            --refresh
+
   aws-create-env:
     executor: ubuntu-machine
     environment:
@@ -1670,7 +1690,10 @@ workflows:
   test:
     when: << pipeline.parameters.test >>
     jobs:
-      - az-test-user
+      - download-opta
+      - azure-create-env:
+          requires:
+            - download-opta
 
   nightly:
     triggers:
