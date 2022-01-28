@@ -542,9 +542,14 @@ jobs:
       - aws-cli/setup
       - install-python-dependencies
       - run:
+          name: "Configure Kubectl"
+          command: |
+            ./dist/opta/opta configure-kubectl \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
+      - run:
           name: "Apply K8s Manifest with Opta"
           command: |
-            OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
+            ./dist/opta/opta apply \
             --env awsenv-ci \
             --config ./.circleci/ci-tests/create-and-destroy-aws/k8s-manifest.yaml \
             --auto-approve
@@ -1006,9 +1011,14 @@ jobs:
           name: "Setting up gcp envar"
           command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
       - run:
+          name: "Configure Kubectl"
+          command: |
+            ./dist/opta/opta configure-kubectl \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml
+      - run:
           name: "Apply K8s Manifest with Opta"
           command: |
-            OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
+            ./dist/opta/opta apply \
             --env gcpenv-ci \
             --config ./.circleci/ci-tests/create-and-destroy-gcp/k8s-manifest.yaml \
             --auto-approve
