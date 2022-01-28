@@ -49,7 +49,7 @@ jobs:
     env:
       VERSION: ${{ github.event.inputs.version }}
     container:
-      image: "centos:centos8"
+      image: "centos:centos7"
     steps:
       - uses: actions/checkout@v2
       - name: Install dependencies
