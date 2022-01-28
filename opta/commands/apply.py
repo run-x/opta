@@ -175,7 +175,7 @@ def _apply(
             raise UserErrors(
                 fmt_msg(
                     f"""
-                    Opta requires a region with at least *3* availability zones.
+                    Opta requires a region with at least *3* availability zones like us-east-1 or us-west-2.
                     ~You configured {aws_region}, which only has the availability zones: {azs}.
                     ~Please choose a different region.
                     """
