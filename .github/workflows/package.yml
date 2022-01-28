@@ -54,16 +54,21 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install dependencies
         run: |
-          yum install -y python3.8 unzip make zip
+          yum install -y unzip make zip centos-release-scl
+          yum install -y rh-python38
       - name: Install python dependencies
         run: |
+          scl enable rh-python38 - << \EOF
           pip3.8 install pipenv
           pipenv install --deploy --dev
           source $(pipenv --venv)/bin/activate
+          EOF
       - name: Package
         run: |
+          scl enable rh-python38 - << \EOF
           if [ -z "$VERSION" ]; then export VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/v||'); fi
           make build-binary
+          EOF
       - name: Setup AWS CLI
         run: |
           curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
