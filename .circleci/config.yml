@@ -220,8 +220,7 @@ jobs:
     executor: ubuntu-machine
     steps:
       - azure-cli/install
-      - azure-cli/login-with-user:
-          alternate-tenant: true
+      - azure-cli/ogin-with-service-principal
       - run:
           name: "Azure Resources"
           command: "az resource list"
