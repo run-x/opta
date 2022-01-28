@@ -40,6 +40,9 @@ parameters:
   run-destroy-aws-dns-true:
     type: boolean
     default: false
+  test:
+    type: boolean
+    default: false
 
 orbs:
   terraform: circleci/terraform@3.0.0
@@ -48,6 +51,7 @@ orbs:
   kubernetes: circleci/kubernetes@0.12.1
   helm: circleci/helm@1.2.0
   gcp-cli: circleci/gcp-cli@2.4.0
+  azure-cli: circleci/azure-cli@1.2.0
 
 executors:
   ubuntu-machine:
@@ -211,6 +215,13 @@ jobs:
           root: ./
           paths:
             - dist
+
+  az-test-user:
+    executor: ubuntu-machine
+    steps:
+      - azure-cli/install
+      - azure-cli/login-with-user
+          alternate-tenant: true
 
   build-test-service-image:
     executor: ubuntu-machine
@@ -1653,6 +1664,11 @@ workflows:
       - aws-destroy-env-dns-true:
           requires:
             - build-opta-binary
+
+  test:
+    when: << pipeline.parameters.test >>
+    jobs:
+      - az-test-user
 
   nightly:
     triggers:
