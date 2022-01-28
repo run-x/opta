@@ -273,10 +273,11 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - download-opta
       - checkout
       - attach_workspace:
           at: ~/
+      - attach_workspace:
+          at: ./
       - install-opta-dependencies
       - azure-cli/install
       - azure-cli/login-with-service-principal
