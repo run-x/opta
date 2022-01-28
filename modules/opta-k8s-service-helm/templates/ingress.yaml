@@ -13,7 +13,7 @@
 {{ $ingress_name_new_convention = print $ingress_base_name "-" $domain_pathPrefix_sha256 }}
 {{ $old_ingress_convention = (lookup "networking.k8s.io/v1beta1" "Ingress" $namespace_name $ingress_name_old_convention) }}
 
-- {{- if eq .Values.cloud "gcp" }}
+- {{- if eq $.Values.cloud "gcp" }}
 apiVersion: networking.k8s.io/v1
   {{ else }}
 apiVersion: networking.k8s.io/v1beta1
@@ -69,7 +69,7 @@ spec:
       http:
         paths:
           - path: {{ $val.pathPrefix }}{{ if not (eq $val.pathPrefix "/") }}(/|$)(.*){{ end }}
-            - {{- if eq .Values.cloud "gcp" }}
+            - {{- if eq $.Values.cloud "gcp" }}
             pathType: Prefix
             backend:
               service:
