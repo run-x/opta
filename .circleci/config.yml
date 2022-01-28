@@ -220,8 +220,11 @@ jobs:
     executor: ubuntu-machine
     steps:
       - azure-cli/install
-      - azure-cli/login-with-user
+      - azure-cli/login-with-user:
           alternate-tenant: true
+      - run:
+          name: "Azure Resources"
+          command: "az resource list"
 
   build-test-service-image:
     executor: ubuntu-machine
