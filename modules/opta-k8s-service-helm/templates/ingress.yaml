@@ -13,9 +13,9 @@
 {{ $ingress_name_new_convention = print $ingress_base_name "-" $domain_pathPrefix_sha256 }}
 {{ $old_ingress_convention = (lookup "networking.k8s.io/v1beta1" "Ingress" $namespace_name $ingress_name_old_convention) }}
 
-{{- if eq ($.Values.cloud) "gcp" }}
+{{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
 apiVersion: networking.k8s.io/v1
-  {{ else }}
+{{- else if $.Capabilities.APIVersions.Has "networking.k8s.io/v1beta1/Ingress" }}
 apiVersion: networking.k8s.io/v1beta1
 {{ end }}  
 kind: Ingress
@@ -69,14 +69,14 @@ spec:
       http:
         paths:
           - path: {{ $val.pathPrefix }}{{ if not (eq $val.pathPrefix "/") }}(/|$)(.*){{ end }}
-          {{- if eq ($.Values.cloud) "gcp" }}
+            {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
             pathType: Prefix
             backend:
               service:
                 name: {{ include "k8s-service.serviceName" $ }}
                 port: 
                   name: {{ $.Values.httpPort.name | quote }}
-            {{- else }}
+            {{- else if $.Capabilities.APIVersions.Has "networking.k8s.io/v1beta1/Ingress" }}
             backend:
               serviceName: {{ include "k8s-service.serviceName" $ }}
               servicePort: {{ $.Values.httpPort.name | quote }}

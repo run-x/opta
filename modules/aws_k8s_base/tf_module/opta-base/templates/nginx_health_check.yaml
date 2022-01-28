@@ -14,6 +14,11 @@ spec:
   selector:
     opta-ingress-healthcheck : "yes"
 ---
+{{- if .$.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
+apiVersion: networking.k8s.io/v1
+{{- else if .$.Capabilities.APIVersions.Has "networking.k8s.io/v1beta1/Ingress" }}
+apiVersion: networking.k8s.io/v1beta1
+{{ end }}  
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
@@ -27,7 +32,17 @@ spec:
   rules:
     - http:
         paths:
+        {{- if .$.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
+          - path: "/healthz"
+            pathType: Exact
+            backend:
+              service:
+                name: opta-ingress-healthcheck
+                port:
+                  number: 80
+        {{- else if .$.Capabilities.APIVersions.Has "networking.k8s.io/v1beta1/Ingress" }}
           - path: "/healthz"
             backend:
               serviceName: opta-ingress-healthcheck
               servicePort: 80
+        {{ end }}
