@@ -197,8 +197,9 @@ def test_fail_on_2_azs(mocker: MockFixture, mocked_layer: Any) -> None:
     runner = CliRunner()
     result = runner.invoke(apply)
     mock_tf_download_state.assert_called_once_with(mocked_layer)
-    assert "Opta requires a region with at least *3* availability zones." in str(
-        result.exception
+    assert (
+        "Opta requires a region with at least *3* availability zones like us-east-1 or us-west-2."
+        in str(result.exception)
     )
 
 
