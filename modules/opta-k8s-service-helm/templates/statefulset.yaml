@@ -81,14 +81,10 @@ spec:
                   key: {{ $val.name | quote }}
                   optional: true
             {{ end }}
-            {{ range $val := .Values.manualSecrets }}
-            - name: {{ $val | quote }}
-              valueFrom:
-                secretKeyRef:
-                  name: manual-secrets
-                  key: {{ $val | quote }}
-                  optional: true
-            {{ end }}
+          envFrom:
+          - secretRef:
+              name: manual-secrets
+              optional: true
           {{- if .Values.livenessProbePath }}
           livenessProbe:
             initialDelaySeconds: {{ .Values.initialLivenessDelay }}

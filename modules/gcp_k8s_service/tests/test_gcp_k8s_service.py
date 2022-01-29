@@ -41,9 +41,6 @@ class TestGCPK8sServiceProcessor:
             {"name": "CACHEHOST2", "value": "${{module.redis2.cache_host}}"},
             {"name": "CACHEAUTH2", "value": "${{module.redis2.cache_auth_token}}"},
         ]
-        assert app_module.data["manual_secrets"] == [
-            "BALONEY",
-        ]
         assert app_module.data["read_buckets"] == ["${{module.bucket1.bucket_name}}"]
         assert app_module.data["write_buckets"] == [
             "${{module.bucket2.bucket_name}}",

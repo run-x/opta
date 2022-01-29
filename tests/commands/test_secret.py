@@ -104,7 +104,9 @@ class TestSecretManager:
         mocked_update_manual_secrets = mocker.patch(
             "opta.commands.secret.update_manual_secrets"
         )
-
+        mocked_restart_deployments = mocker.patch(
+            "opta.commands.secret.restart_deployments"
+        )
         mocker.patch("opta.commands.secret.set_kube_config")
 
         mocked_amplitude_client = mocker.patch(
@@ -133,6 +135,7 @@ class TestSecretManager:
         mocked_amplitude_client.send_event.assert_called_once_with(
             amplitude_client.UPDATE_SECRET_EVENT
         )
+        mocked_restart_deployments.assert_called_once_with("dummy_layer")
 
         # test updating a secret that is not listed in the config file - should work
         result = runner.invoke(update, ["unlistedsecret", "newvalue"])
@@ -155,6 +158,9 @@ class TestSecretManager:
         mocked_amplitude_event = mocker.patch(
             "opta.commands.secret.amplitude_client.send_event"
         )
+        mocked_restart_deployments = mocker.patch(
+            "opta.commands.secret.restart_deployments"
+        )
 
         runner = CliRunner()
         result = runner.invoke(
@@ -173,3 +179,12 @@ class TestSecretManager:
         mocked_amplitude_event.assert_called_once_with(
             amplitude_client.UPDATE_BULK_SECRET_EVENT
         )
+        mocked_restart_deployments.assert_called_once_with("dummy_layer")
+
+        # test deployment is not restarted with flag --no-restart
+        mocked_restart_deployments.reset_mock()
+        result = runner.invoke(
+            bulk_update,
+            [env_file, "--env", "dummyenv", "--config", "--no-restart", "dummyconfig"],
+        )
+        mocked_restart_deployments.assert_not_called()
