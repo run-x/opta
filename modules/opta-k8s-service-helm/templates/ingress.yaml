@@ -11,7 +11,10 @@
 {{ $domain_pathPrefix = print $val.domain "-" $val.pathPrefixName }}
 {{ $domain_pathPrefix_sha256 = trunc 8 (sha256sum $domain_pathPrefix) }}
 {{ $ingress_name_new_convention = print $ingress_base_name "-" $domain_pathPrefix_sha256 }}
+
+{{ if $.Capabilities.APIVersions.Has "networking.k8s.io/v1beta1/Ingress" }}
 {{ $old_ingress_convention = (lookup "networking.k8s.io/v1beta1" "Ingress" $namespace_name $ingress_name_old_convention) }}
+{{ end }}  
 
 {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
 apiVersion: networking.k8s.io/v1
