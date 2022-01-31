@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Dict, List, Any
 
 if TYPE_CHECKING:
     from opta.layer import Layer, StructuredConfig
@@ -28,3 +28,11 @@ class CloudClient(ABC):
     @abstractmethod
     def get_terraform_lock_id(self) -> str:
         raise NotImplementedError()
+
+    @abstractmethod
+    def list_child_config_names(self) -> List[str]:
+        pass
+
+    @abstractmethod
+    def get_configuration_details(self, config_name: str) -> Dict[str, Any]:
+        pass
