@@ -1,4 +1,5 @@
-name: aznv-ci
+# This opta environment is used by the test-ci job in the runxc repo.
+name: azenv-ci
 org_name: runx
 providers:
   azurerm:

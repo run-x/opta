@@ -275,8 +275,6 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: ~/
-      - attach_workspace:
           at: ./
       - install-opta-dependencies
       - azure-cli/install
@@ -284,8 +282,34 @@ jobs:
       - run:
           name: Run opta apply on environment configuration
           command: |
-            $HOME/.opta/opta apply \
+            ./dist/opta/opta apply \
             --config ./.circleci/ci-tests/create-and-destroy-azure/environment.yaml \
+            --auto-approve \
+            --refresh
+
+  azure-test-service-http:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - azure-cli/install
+      - azure-cli/login-with-service-principal
+      - run:
+          name: Run opta apply on HTTP service configuration
+          command: |
+            ./dist/opta/opta apply \
+            --config ./.circleci/ci-tests/create-and-destroy-azure/service-http.yaml \
+            --auto-approve \
+            --refresh
+      - run:
+          name: Run opta destroy on HTTP service configuration
+          command: |
+            ./dist/opta/opta destroy \
+            --config ./.circleci/ci-tests/create-and-destroy-azure/service-http.yaml \
             --auto-approve \
             --refresh
 
@@ -296,8 +320,6 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: ~/
-      - attach_workspace:
           at: ./
       - install-opta-dependencies
       - azure-cli/install
@@ -305,7 +327,7 @@ jobs:
       - run:
           name: Run opta apply on environment configuration
           command: |
-            $HOME/.opta/opta destroy \
+            ./dist/opta/opta destroy \
             --config ./.circleci/ci-tests/create-and-destroy-azure/environment.yaml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
@@ -1526,6 +1548,15 @@ workflows:
       - local-opta-example-destroy-svcs:
           requires:
             - local-opta-example-create-svcs
+      - azure-create-env:
+          requires:
+            - build-opta-binary
+      - azure-test-service-http:
+          requires:
+            - azure-create-env
+      - azure-destroy-env:
+          requires:
+            - azure-test-service-http
 
   run-ci:
     when: << pipeline.parameters.run-ci >>
@@ -1711,13 +1742,16 @@ workflows:
   test:
     when: << pipeline.parameters.test >>
     jobs:
-      - download-opta
+      - build-opta-binary
       - azure-create-env:
           requires:
-            - download-opta
-      - azure-destroy-env:
+            - build-opta-binary
+      - azure-test-service-http:
           requires:
             - azure-create-env
+      - azure-destroy-env:
+          requires:
+            - azure-test-service-http
 
   nightly:
     triggers:
