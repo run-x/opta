@@ -276,6 +276,8 @@ jobs:
       - checkout
       - attach_workspace:
           at: ./
+      - attach_workspace:
+          at: ~/
       - install-opta-dependencies
       - azure-cli/install
       - azure-cli/login-with-service-principal
@@ -295,6 +297,8 @@ jobs:
       - checkout
       - attach_workspace:
           at: ./
+      - attach_workspace:
+          at: ~/
       - install-opta-dependencies
       - azure-cli/install
       - azure-cli/login-with-service-principal
@@ -321,6 +325,8 @@ jobs:
       - checkout
       - attach_workspace:
           at: ./
+      - attach_workspace:
+          at: ~/
       - install-opta-dependencies
       - azure-cli/install
       - azure-cli/login-with-service-principal
