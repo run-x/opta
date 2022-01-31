@@ -23,3 +23,9 @@ def load(f: IO) -> Any:
     y = YAML()
 
     return y.load(f)
+
+
+def dump(data: Any, f: IO) -> None:
+    y = YAML()
+
+    y.dump(data, f)

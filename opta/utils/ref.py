@@ -17,7 +17,12 @@ from typing import (
 
 from opta.utils.yaml import register_yaml_class
 
-_PART_REGEX = re.compile(r"[a-z]([a-z0-9_]*[a-z0-9])?", re.IGNORECASE)
+_PART_STR_REGEX = re.compile(r"(?:[a-z]([a-z0-9_]*[a-z0-9])?)", re.IGNORECASE)
+_PART_INT_REGEX = re.compile(r"(?:[1-9]\d*)")
+_PART_REGEX = re.compile(
+    r"(?:" + _PART_STR_REGEX.pattern + r"|" + _PART_INT_REGEX.pattern + r")",
+    re.IGNORECASE,
+)
 _INTERPOLATION_REGEX = re.compile(
     r"\$\{(" + _PART_REGEX.pattern + r"(?:\." + _PART_REGEX.pattern + r")*)\}",
     re.IGNORECASE,
@@ -52,7 +57,9 @@ class Reference(Sequence):
     def __repr__(self) -> str:
         cls = type(self).__name__
 
-        return f"{cls}(*{self._path})"
+        path = ", ".join(repr(part) for part in self._path)
+
+        return f"{cls}({path})"
 
     def __lt__(self, other: Any) -> bool:
         if not isinstance(other, Reference):
@@ -120,7 +127,17 @@ class Reference(Sequence):
     @classmethod
     def parse(cls, raw: str) -> Reference:
         # TODO: Parse array subscript syntax
-        parts = raw.split(".")
+        parts: List[PathElement] = list(
+            raw.split(".")
+        )  # Wrap in `list()` call to appease type checker
+
+        for idx, part in enumerate(parts[:]):
+            try:
+                part = int(part)
+            except ValueError:
+                continue
+
+            parts[idx] = part
 
         try:
             ref = cls(*parts)
@@ -135,7 +152,7 @@ class Reference(Sequence):
                 if part < 0:
                     raise ValueError(f"Path part {idx} must be non-negative")
             elif isinstance(part, str):
-                if not _PART_REGEX.fullmatch(part):
+                if not _PART_STR_REGEX.fullmatch(part):
                     raise ValueError(f"Path part {idx} invalid: {part}")
             else:
                 raise TypeError(f"unsupported part type {type(part).__name__}")
