@@ -289,6 +289,26 @@ jobs:
             --auto-approve \
             --refresh
 
+  azure-destroy-env:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - azure-cli/install
+      - azure-cli/login-with-service-principal
+      - run:
+          name: Run opta apply on environment configuration
+          command: |
+            $HOME/.opta/opta destroy \
+            --config ./.circleci/ci-tests/create-and-destroy-azure/environment.yaml \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+
   aws-create-env:
     executor: ubuntu-machine
     environment:
@@ -1695,6 +1715,9 @@ workflows:
       - azure-create-env:
           requires:
             - download-opta
+      - azure-destroy-env:
+          requires:
+            - azure-create-env
 
   nightly:
     triggers:
