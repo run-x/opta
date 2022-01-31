@@ -314,8 +314,7 @@ jobs:
           command: |
             $HOME/.opta/opta destroy \
             --config ./.circleci/ci-tests/create-and-destroy-azure/service-http.yaml \
-            --auto-approve \
-            --refresh
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   azure-destroy-env:
     executor: ubuntu-machine
