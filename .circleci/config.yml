@@ -284,7 +284,7 @@ jobs:
       - run:
           name: Run opta apply on environment configuration
           command: |
-            ./dist/opta/opta apply \
+            $HOME/.opta/opta apply \
             --config ./.circleci/ci-tests/create-and-destroy-azure/environment.yaml \
             --auto-approve \
             --refresh
@@ -305,14 +305,14 @@ jobs:
       - run:
           name: Run opta apply on HTTP service configuration
           command: |
-            ./dist/opta/opta apply \
+            $HOME/.opta/opta apply \
             --config ./.circleci/ci-tests/create-and-destroy-azure/service-http.yaml \
             --auto-approve \
             --refresh
       - run:
           name: Run opta destroy on HTTP service configuration
           command: |
-            ./dist/opta/opta destroy \
+            $HOME/.opta/opta destroy \
             --config ./.circleci/ci-tests/create-and-destroy-azure/service-http.yaml \
             --auto-approve \
             --refresh
@@ -333,7 +333,7 @@ jobs:
       - run:
           name: Run opta apply on environment configuration
           command: |
-            ./dist/opta/opta destroy \
+            $HOME/.opta/opta destroy \
             --config ./.circleci/ci-tests/create-and-destroy-azure/environment.yaml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
@@ -1748,10 +1748,11 @@ workflows:
   test:
     when: << pipeline.parameters.test >>
     jobs:
-      - build-opta-binary
+      - download-opta
+#      - build-opta-binary
       - azure-create-env:
           requires:
-            - build-opta-binary
+            - download-opta
       - azure-test-service-http:
           requires:
             - azure-create-env
