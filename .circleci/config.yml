@@ -526,6 +526,46 @@ jobs:
             --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml \
             --auto-approve
 
+  aws-test-k8s-manifest:
+    executor: python-docker
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - aws-cli/install
+      - aws-cli/setup
+      - install-python-dependencies
+      - run:
+          name: "Update KUBECONFIG"
+          command: echo 'export KUBECONFIG="$HOME/kube_config.yaml"' >> $BASH_ENV
+      - run:
+          name: "Configure Kubectl"
+          command: |
+            ./dist/opta/opta configure-kubectl \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
+      - run:
+          name: "Apply K8s Manifest with Opta"
+          command: |
+            ./dist/opta/opta apply \
+            --env awsenv-ci \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/k8s-manifest.yaml \
+            --auto-approve
+      - run:
+          name: "Test manifest pod creation"
+          command: |
+            kubectl get pod -n default nginx
+            exit $?
+      - run:
+          name: "Destroy K8s Manifest with Opta"
+          command: |
+            yes | ./dist/opta/opta destroy \
+            --env awsenv-ci \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/k8s-manifest.yaml \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+
   aws-test-service-helm:
     executor: ubuntu-machine
     environment:
@@ -955,6 +995,48 @@ jobs:
             ./dist/opta/opta apply \
             --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml \
             --auto-approve
+
+  gcp-test-k8s-manifest:
+    executor: python-docker
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - gcp-cli/install
+      - gcp-cli/initialize
+      - run:
+          name: "Setting up gcp envar"
+          command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+      - run:
+          name: "Update KUBECONFIG"
+          command: echo 'export KUBECONFIG="$HOME/kube_config.yaml"' >> $BASH_ENV
+      - run:
+          name: "Configure Kubectl"
+          command: |
+            ./dist/opta/opta configure-kubectl \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml
+      - run:
+          name: "Apply K8s Manifest with Opta"
+          command: |
+            ./dist/opta/opta apply \
+            --env gcpenv-ci \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/k8s-manifest.yaml \
+            --auto-approve
+      - run:
+          name: "Test manifest pod creation"
+          command: |
+            kubectl get pod -n default nginx
+            exit $?
+      - run:
+          name: "Destroy K8s Manifest with Opta"
+          command: |
+            yes | ./dist/opta/opta destroy \
+            --env gcpenv-ci \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/k8s-manifest.yaml \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   gcp-test-service-helm:
     executor: ubuntu-machine
@@ -1429,6 +1511,9 @@ workflows:
       - aws-test-service-helm:
           requires:
             - aws-create-env
+      - aws-test-k8s-manifest:
+          requires:
+            - aws-create-env
       - aws-destroy-env:
           requires:
             - aws-test-websocket
@@ -1440,6 +1525,7 @@ workflows:
             - aws-test-service-docdb
             - aws-test-service-redis
             - aws-test-service-helm
+            - aws-test-k8s-manifest
       - gcp-create-env:
           requires:
             - build-opta-binary
@@ -1458,6 +1544,9 @@ workflows:
       - gcp-test-service-gcs:
           requires:
             - gcp-create-env
+      - gcp-test-k8s-manifest:
+          requires:
+            - gcp-create-env
       - gcp-destroy-env:
           requires:
             - gcp-test-additional-nodegroup
@@ -1465,6 +1554,7 @@ workflows:
             - gcp-test-service-redis
             - gcp-test-service-helm
             - gcp-test-service-gcs
+            - gcp-test-k8s-manifest
       - local-opta-example-create-svcs:
           requires:
             - build-opta-binary
