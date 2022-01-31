@@ -1,5 +1,5 @@
 import os
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Any
 
 import google.auth.transport.requests
 from google.auth import default
@@ -93,6 +93,36 @@ class GCP(CloudClient):
                 "Could not successfully download and parse any pre-existing config"
             )
             return None
+
+    def list_child_config_names(self) -> List[str]:
+        bucket_name = self.layer.state_storage()
+        gcs_config_dir = "opta_config/"
+        credentials, project_id = self.get_credentials()
+        gcs_client = storage.Client(project=project_id, credentials=credentials)
+        try:
+            bucket_object = gcs_client.get_bucket(bucket_name)
+        except NotFound:
+            logger.warn(
+                "Couldn't find the state bucket, must have already been destroyed in a previous destroy run"
+            )
+            return []
+        blobs: List[storage.Blob] = list(
+            gcs_client.list_blobs(bucket_object, prefix=gcs_config_dir)
+        )
+        configs = [blob.name[len(gcs_config_dir):] for blob in blobs]
+        if self.layer.name in configs:
+            configs.remove(self.layer.name)
+        return configs
+
+    def get_configuration_details(self, config_name: str) -> Dict[str, Any]:
+        bucket = self.layer.state_storage()
+        config_path = f"opta_config/{config_name}"
+        credentials, project_id = self.get_credentials()
+        gcs_client = storage.Client(project=project_id, credentials=credentials)
+        bucket_object = gcs_client.get_bucket(bucket)
+        blob = storage.Blob(config_path, bucket_object)
+        config_details = json.loads(blob.download_as_text())
+        return config_details
 
     # Upload the current opta config to the state bucket, under opta_config/.
     def upload_opta_config(self) -> None:
