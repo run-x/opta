@@ -1,6 +1,6 @@
 # What is this?
 
-This is an example [Opta](https://github.com/run-x/opta) configuration file to deploy [Ghost](https://github.com/TryGhost/Ghost) on AWS.
+This is an example [Opta](https://github.com/run-x/opta) configuration file to deploy [NocoDB](https://github.com/nocodb/nocodb) on AWS.
 
 You can also use this button to fill in the variable fields in the config.
 
@@ -14,7 +14,7 @@ It deploys a horizontally scalable NocoDB deployment on EKS in AWS. It uses AWS 
 * Run `opta apply -c nocodb-aws.yaml` on the config file
 * You will be prompted to approve changes a couple of times as opta will go through various stages. This is expected, just keep approving.
 
-That's it. Ghost is deployed on AWS. You can find the AWS load balancer URL to access the deployment by running `opta output` (looks for the field called `load_balancer_raw_dns`).
+That's it. NocoDB is deployed on AWS. You can find the AWS load balancer URL to access the deployment by running `opta output` (looks for the field called `load_balancer_raw_dns`).
 
 **NOTE**: DNS and SSL/TLS is currently not set up. To get them to work, follow the next section.
 
@@ -32,7 +32,7 @@ name_servers = tolist([
 * Update `delegated` field to `true` in the `nocodb-aws.yaml` file
 * Run `opta apply -c nocodb-aws.yaml` again to generate the TLS certificate
 
-Your domain should now be pointing to the Ghost deployment with secure TLS
+Your domain should now be pointing to the NocoDB deployment with secure TLS
 
 * Go to https://{your-domain} and login as admin and start working.
 
