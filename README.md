@@ -16,7 +16,7 @@ Supercharge DevOps on any cloud</p>
   </a>
 
   <img src="https://img.shields.io/github/commit-activity/w/run-x/opta.svg?style=plastic" alt="Commit Activity" />
-
+<img src="https://img.shields.io/badge/downloads-500%2Fweek-blue" />
   <a href="https://github.com/PyCQA/bandit">
     <img src="https://img.shields.io/badge/security-bandit-yellow.svg" alt="Security" />
   </a>
@@ -26,8 +26,6 @@ Supercharge DevOps on any cloud</p>
   <a href="https://docs.opta.dev/">Documentation</a> |
 <a href="https://slack.opta.dev">
     Slack Community
-  </a> | <a href="https://runx.dev/">
-    Website
   </a> | <a href="mailto:info@runx.dev">
     Email: info@runx.dev
   </a>
@@ -45,7 +43,7 @@ Opta is designed for folks who are not Infrastructure or Devops experts but stil
 scalable, secure Infra in the cloud. Opta is used by both small and big companies. Many companies depend on it for 
 their production workloads - it's battle tested :)
 
-If you'd like to try it out or have any questions - feel free to join our [Slack](https://slack.opta.dev/)!
+If you'd like to try it out or have any questions - feel free to join our [Slack](https://slack.opta.dev/) or explore the [Getting Started Guide](https://docs.opta.dev/getting-started)!
 
 
 <p align="center">
@@ -55,27 +53,46 @@ If you'd like to try it out or have any questions - feel free to join our [Slack
   
 </p>
 
+# Features
+
+### Cloud services
+Opta supports the 3 major clouds - AWS, GCP and Azure. It has modules for the most commonly used services in these clouds like:
+* Microservices (powered by [Kubernetes](https://docs.opta.dev/architecture/aws/))
+* Databases - Postgres, MySQL, Redis
+* Serverless workloads
+* Networking - VPCs, Subnets, Load balancers
+* Cloudfront
+* Object storage (S3, GCS)
+
+Additionally, we bake in best practices like:
+* Observability (Datadog, LogDNA)
+* [SOC2 compliance](https://docs.opta.dev/compliance/)
+* [Continuous Deployment](https://docs.opta.dev/tutorials/continuous_deployment/)
+* [Hardened network and security configurations](https://docs.opta.dev/architecture/aws/)
+* Auto-scaling and high availability (HA)
+
+
+### Coexistence with existing Infrastructure
+Opta aims to be compatible with your existing Infrastructure setup. You can:
+
+* Import existing Terraform infrastructure into Opta
+* Use Opta outputs in Terraform files
+* Write [custom Terraform modules](https://docs.opta.dev/reference/aws/environment_modules/custom-terraform/) (for services that Opta doesn't support yet)
+* Run Opta in existing VPCs (WIP)
+
 # Try out Opta
 
+The best place to get started is the [Getting Started Guide](https://docs.opta.dev/getting-started/).
 
-To use Opta, you first need to create some simple yaml configuration files that describe your needs. You can use:
-
-* Our [magical GUI](https://app.runx.dev/yaml-generator) to help generate these files.
-
-* The [getting started](https://docs.opta.dev/getting-started/) guide and the detailed docs.
-
-* Also, check out more [examples](https://github.com/run-x/opta/tree/main/examples)
-
-# What you get with Opta
-* Production ready [Architecture](https://docs.opta.dev/architecture/aws/)
-* **SOC2** compliant infrastructure
-* Continuous Deployment for containerized workloads
-* Hardened network and security configurations
-* Support for multiple environments (like Dev/QA/Staging/Prod)
-* Integrations with observability tools (like Datadog/LogDNA/Prometheus/SumoLogic)
-* Support for non-kubernetes resources like RDS, Cloud SQL, DocumentDB etc
-* Built-in auto-scaling and high availability (HA)
-* Support for spot instances
+You can also check out some [examples](https://github.com/run-x/opta/tree/main/examples) to get a better idea of what you can do with Opta.
 
 # Development
-[Dev guide](https://github.com/run-x/opta/blob/main/development.md)
+We love user contributions! Check out our [Dev guide](https://github.com/run-x/opta/blob/main/development.md) to get started.
+
+# Miscellaneous
+* [Team behind Opta](https://www.runx.dev/about)
+* How Opta delivers upgrades (WIP)
+* Bugfix / Feature request policy (WIP)
+* Comparision with other tools (WIP)
+* Public roadmap (WIP)
+* Case studies (WIP)
