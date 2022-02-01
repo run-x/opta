@@ -7,7 +7,7 @@ providers:
 modules:
   - type: base
   - type: dns
-    domain: <<domain::string::The dns domain for your Mattermost deployment>>
+    domain: <<domain::string::The dns domain for your Ghost deployment>>
     delegated: false
   - type: k8s-cluster
   - type: k8s-base
