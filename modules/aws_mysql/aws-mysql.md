@@ -1,6 +1,6 @@
 ---
-title: "postgres"
-linkTitle: "postgres"
+title: "mysql"
+linkTitle: "mysql"
 date: 2021-07-21
 draft: false
 weight: 1
