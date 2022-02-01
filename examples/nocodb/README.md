@@ -41,6 +41,12 @@ Your domain should now be pointing to the NocoDB deployment with secure TLS
 ![Alt text](add-projects.png?raw=true "Add Projects/External DBs")
 ![Alt text](external-db.png?raw=true "External DB addition and test")
 
+# Working with CloudFront
+If you are ready to start hosting your site with your domain via the cloudfront distribution, then proceed as follows:
+* Get an [AWS ACM certificate](https://docs.aws.amazon.com/acm/latest/userguide/gs-acm-request-public.html) for your site.
+* Set the acm_cert_arn and domains fields in opta accordingly
+* Run `opta apply -c nocodb-aws.yaml` and viola.
+
 # [FAQ](../FAQ.md)
 
 For more guidance, please reach out to us in our [slack channel](https://slack.opta.dev).
