@@ -61,14 +61,14 @@ Opta supports the 3 major clouds - AWS, GCP and Azure. It has modules for the mo
 * Databases - Postgres, MySQL, Redis
 * Serverless workloads
 * Networking - VPCs, Subnets, Load balancers
-* Cloudfront
+* CDN (Content Delivery Network)
 * Object storage (S3, GCS)
 
 Additionally, we bake in best practices like:
-* Observability (Datadog, LogDNA)
+* [Observability](https://docs.opta.dev/observability/) (Datadog, LogDNA)
 * [SOC2 compliance](https://docs.opta.dev/compliance/)
 * [Continuous Deployment](https://docs.opta.dev/tutorials/continuous_deployment/)
-* [Hardened network and security configurations](https://docs.opta.dev/architecture/aws/)
+* Hardened network and security configurations ([AWS](https://docs.opta.dev/architecture/aws/), [GCP](https://docs.opta.dev/architecture/gcp/), [Azure](https://docs.opta.dev/architecture/azure))
 * Auto-scaling and high availability (HA)
 
 
@@ -76,9 +76,9 @@ Additionally, we bake in best practices like:
 Opta aims to be compatible with your existing Infrastructure setup. You can:
 
 * Import existing Terraform infrastructure into Opta
-* Use Opta outputs in Terraform files
 * Write [custom Terraform modules](https://docs.opta.dev/reference/aws/environment_modules/custom-terraform/) (for services that Opta doesn't support yet)
 * Run Opta in existing VPCs (WIP)
+* Export the generated Terraform (WIP)
 
 # Try out Opta
 
@@ -93,6 +93,6 @@ We love user contributions! Check out our [Dev guide](https://github.com/run-x/o
 * [Team behind Opta](https://www.runx.dev/about)
 * How Opta delivers upgrades (WIP)
 * Bugfix / Feature request policy (WIP)
-* Comparision with other tools (WIP)
+* Comparison with other tools (WIP)
 * Public roadmap (WIP)
-* Case studies (WIP)
+* Case studies - [Flyte](https://blog.flyte.org/how-opta-makes-deploying-flyte-much-easier) (More on the way!)
