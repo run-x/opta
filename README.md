@@ -16,7 +16,7 @@ Supercharge DevOps on any cloud</p>
   </a>
 
   <img src="https://img.shields.io/github/commit-activity/w/run-x/opta.svg?style=plastic" alt="Commit Activity" />
-
+<img src="https://img.shields.io/badge/downloads-500%2Fweek-blue" />
   <a href="https://github.com/PyCQA/bandit">
     <img src="https://img.shields.io/badge/security-bandit-yellow.svg" alt="Security" />
   </a>
@@ -26,26 +26,29 @@ Supercharge DevOps on any cloud</p>
   <a href="https://docs.opta.dev/">Documentation</a> |
 <a href="https://slack.opta.dev">
     Slack Community
-  </a> | <a href="https://runx.dev/">
-    Website
   </a> | <a href="mailto:info@runx.dev">
     Email: info@runx.dev
   </a>
   </p>
 
-# What is Opta?
+# What is Opta
 Opta is an Infrastructure-As-Code framework where you work with high-level constructs
 instead of getting lost in low level cloud configuration. Opta gives you a vast library of modules that you
 can connect together to build your ideal Infrastructure stack. Best of all, Opta uses Terraform under the 
 hood - so you're never locked in. You can always write custom Terraform or even take the Opta generated Terraform
 and go your own way!
 
-### Who is it for?
-Opta is designed for folks who are not Infrastructure or Devops experts but still want to build amazing,
-scalable, secure Infra in the cloud. Opta is used by both small and big companies. Many companies depend on it for 
-their production workloads - it's battle tested :)
+### Why use Opta
+Infrastructure as code (IaC) has rapidly become the standard for provisioning and managing Infrastructure and for the right reasons! 
+But the leading IaC tools are still complicated to use and require deep Cloud/Infrastructure expertise. Opta was conceptualized to help address
+this complexity. Opta is a simpler IaC framework with best practices built-in. It enables users to set up automated, scalable and secure infrastructure
+without being a cloud expert or spending days figuring out cloud minutiae!
 
-If you'd like to try it out or have any questions - feel free to join our [Slack](https://slack.opta.dev/)!
+We are confident it can drastically reduce the cloud complexity and devops headaches of most fast moving organizations. It is already being used by companies - big and small :)
+
+To read more about the vision behind Opta, check out this [blog post](https://blog.runx.dev/infrastructure-as-code-for-everyone-7dad6b813cbc).
+
+If you'd like to try it out or have any questions - feel free to join our [Slack](https://slack.opta.dev/) or explore the [Getting Started Guide](https://docs.opta.dev/getting-started)!
 
 
 <p align="center">
@@ -55,27 +58,46 @@ If you'd like to try it out or have any questions - feel free to join our [Slack
   
 </p>
 
+# Features
+
+### Cloud services
+Opta supports the 3 major clouds - AWS, GCP and Azure. It has modules for the most commonly used services in these clouds like:
+* Microservices (powered by [Kubernetes](https://docs.opta.dev/architecture/aws/))
+* Databases - Postgres, MySQL, Redis
+* Serverless workloads
+* Networking - VPCs, Subnets, Load balancers
+* CDN (Content Delivery Network)
+* Object storage (S3, GCS)
+
+Additionally, we bake in best practices like:
+* [Observability](https://docs.opta.dev/observability/) (Datadog, LogDNA)
+* [SOC2 compliance](https://docs.opta.dev/compliance/)
+* [Continuous Deployment](https://docs.opta.dev/tutorials/continuous_deployment/)
+* Hardened network and security configurations ([AWS](https://docs.opta.dev/architecture/aws/), [GCP](https://docs.opta.dev/architecture/gcp/), [Azure](https://docs.opta.dev/architecture/azure))
+* Auto-scaling and high availability (HA)
+
+
+### Coexistence with existing Infrastructure
+Opta aims to be compatible with your existing Infrastructure setup. You can:
+
+* Import existing Terraform infrastructure into Opta
+* Write [custom Terraform modules](https://docs.opta.dev/reference/aws/environment_modules/custom-terraform/) (for services that Opta doesn't support yet)
+* Run Opta in existing VPCs (WIP)
+* Export the generated Terraform (WIP)
+
 # Try out Opta
 
+Check out the [Getting Started Guide](https://docs.opta.dev/getting-started/).
 
-To use Opta, you first need to create some simple yaml configuration files that describe your needs. You can use:
-
-* Our [magical GUI](https://app.runx.dev/yaml-generator) to help generate these files.
-
-* The [getting started](https://docs.opta.dev/getting-started/) guide and the detailed docs.
-
-* Also, check out more [examples](https://github.com/run-x/opta/tree/main/examples)
-
-# What you get with Opta
-* Production ready [Architecture](https://docs.opta.dev/architecture/aws/)
-* **SOC2** compliant infrastructure
-* Continuous Deployment for containerized workloads
-* Hardened network and security configurations
-* Support for multiple environments (like Dev/QA/Staging/Prod)
-* Integrations with observability tools (like Datadog/LogDNA/Prometheus/SumoLogic)
-* Support for non-kubernetes resources like RDS, Cloud SQL, DocumentDB etc
-* Built-in auto-scaling and high availability (HA)
-* Support for spot instances
+You can also explore some [examples](https://github.com/run-x/opta/tree/main/examples) to get a better idea of what you can do with Opta.
 
 # Development
-[Dev guide](https://github.com/run-x/opta/blob/main/development.md)
+We love user contributions! Check out our [Dev guide](https://github.com/run-x/opta/blob/main/development.md) to get started.
+
+# Miscellaneous
+* [Team behind Opta](https://www.runx.dev/about)
+* How Opta delivers upgrades (WIP)
+* Bugfix / Feature request policy (WIP)
+* Comparison with other tools (WIP)
+* Public roadmap (WIP)
+* Case studies - [Flyte](https://blog.flyte.org/how-opta-makes-deploying-flyte-much-easier) (More on the way!)
