@@ -87,9 +87,9 @@ Opta aims to be compatible with your existing Infrastructure setup. You can:
 
 # Try out Opta
 
-The best place to get started is the [Getting Started Guide](https://docs.opta.dev/getting-started/).
+Check out the [Getting Started Guide](https://docs.opta.dev/getting-started/).
 
-You can also check out some [examples](https://github.com/run-x/opta/tree/main/examples) to get a better idea of what you can do with Opta.
+You can also explore some [examples](https://github.com/run-x/opta/tree/main/examples) to get a better idea of what you can do with Opta.
 
 # Development
 We love user contributions! Check out our [Dev guide](https://github.com/run-x/opta/blob/main/development.md) to get started.
