@@ -39,7 +39,7 @@ class SensitiveFormatter(Formatter):
         (r"[a-zA-Z0-9_\-]+.svc.id.goog", "REDACTED.svc.id.goog",),
         (r"gcr.io/[a-zA-Z0-9_\-]+", "gcr.io/REDACTED"),
         (
-            r"\"project\": {\"constant_value\": \"[a-zA-Z0-9_\-]+\"",
+            r"\"project\": \{\"constant_value\": \"[a-zA-Z0-9_\-]+\"\}",
             '"project": {"constant_value": "REDACTED"}',
         ),
     ]
