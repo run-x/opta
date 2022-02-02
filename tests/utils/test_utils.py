@@ -1,9 +1,64 @@
+import json
+import os
+
 import click
 import pytest
 from pytest_mock import MockFixture
 
 from opta.exceptions import UserErrors
-from opta.utils import alternate_yaml_extension, check_opta_file_exists, exp_backoff
+from opta.layer import Layer
+from opta.utils import (
+    SensitiveFormatter,
+    alternate_yaml_extension,
+    check_opta_file_exists,
+    exp_backoff,
+)
+
+
+def test_sensitive_formatter_on_aws_yaml() -> None:
+    layer = Layer.load_from_yaml(
+        os.path.join(
+            os.getcwd(), "tests", "fixtures", "dummy_data", "dummy_config_parent.yaml"
+        ),
+        None,
+    )
+    original_spec = layer.original_spec
+    formatted_spec = SensitiveFormatter.filter(original_spec)
+    assert "111111111111" not in formatted_spec
+
+
+def test_sensitive_formatter_on_gcp_yaml() -> None:
+    layer = Layer.load_from_yaml(
+        os.path.join(
+            os.getcwd(), "tests", "fixtures", "dummy_data", "gcp_dummy_config_parent.yaml"
+        ),
+        None,
+    )
+    original_spec = layer.original_spec
+    formatted_spec = SensitiveFormatter.filter(original_spec)
+    assert "my-gcp-project" not in formatted_spec
+
+
+def test_sensitive_formatter_on_aws_tfplan() -> None:
+    tfplan_text = open(
+        os.path.join(
+            os.getcwd(), "tests", "fixtures", "sample_tf_plan_files", "aws_tfplan"
+        )
+    ).read()
+    formatted_tfplan = SensitiveFormatter.filter(tfplan_text)
+    assert "111111111111" not in formatted_tfplan
+    assert json.loads(formatted_tfplan)
+
+
+def test_sensitive_formatter_on_gcp_tfplan() -> None:
+    tfplan_text = open(
+        os.path.join(
+            os.getcwd(), "tests", "fixtures", "sample_tf_plan_files", "gcp_tfplan"
+        )
+    ).read()
+    formatted_tfplan = SensitiveFormatter.filter(tfplan_text)
+    assert "my-gcp-project" not in formatted_tfplan
+    assert json.loads(formatted_tfplan)
 
 
 def test_exp_backoff(mocker: MockFixture) -> None:
