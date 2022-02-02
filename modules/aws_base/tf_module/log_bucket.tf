@@ -121,5 +121,5 @@ data "aws_iam_policy_document" "log_bucket_policy" {
 resource "aws_s3_bucket_policy" "log_bucket_policy" {
   bucket = aws_s3_bucket.log_bucket.id
   policy = data.aws_iam_policy_document.log_bucket_policy.json
-# Visit (https://run-x.atlassian.net/browse/RUNX-1125) for further reference
+  # Visit (https://run-x.atlassian.net/browse/RUNX-1125) for further reference
 }
