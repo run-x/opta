@@ -42,15 +42,7 @@ resource "aws_s3_bucket" "log_bucket" {
   }
 }
 
-resource "aws_s3_bucket_public_access_block" "block" {
-  bucket = aws_s3_bucket.log_bucket.id
-
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
-}
-
+# Visit (https://run-x.atlassian.net/browse/RUNX-1125) for further reference
 
 data "aws_iam_policy_document" "log_bucket_policy" {
   statement {
@@ -129,7 +121,5 @@ data "aws_iam_policy_document" "log_bucket_policy" {
 resource "aws_s3_bucket_policy" "log_bucket_policy" {
   bucket = aws_s3_bucket.log_bucket.id
   policy = data.aws_iam_policy_document.log_bucket_policy.json
-  depends_on = [
-    aws_s3_bucket_public_access_block.block
-  ]
+# Visit (https://run-x.atlassian.net/browse/RUNX-1125) for further reference
 }
