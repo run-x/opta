@@ -27,3 +27,8 @@ variable "timeout" {
   type    = number
   default = 600
 }
+
+variable "chart_version" {
+  description = "Chart version"
+  type        = string
+}

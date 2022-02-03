@@ -28,6 +28,11 @@ inputs:
     validator: any(required=False)
     description: Additional configuration for datadog. [Available options](https://github.com/DataDog/helm-charts/blob/master/charts/datadog/README.md#values)
     default: { }
+  - name: chart_version
+    user_facing: true
+    validator: str(required=False)
+    description: Datadog Helm chart version. [Available versions](https://github.com/DataDog/helm-charts/releases)
+    default: "2.30.2"
 outputs: { }
 output_providers: { }
 output_data: { }

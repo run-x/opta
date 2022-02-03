@@ -17,6 +17,11 @@
       "description": "Additional configuration for datadog. [Available options](https://github.com/DataDog/helm-charts/blob/master/charts/datadog/README.md#values)",
       "default": {}
     },
+    "chart_version": {
+      "type": "string",
+      "description": "Datadog Helm chart version. [Available versions](https://github.com/DataDog/helm-charts/releases)",
+      "default": "2.30.2"
+    },
     "type": {
       "description": "The name of this module",
       "enum": [
