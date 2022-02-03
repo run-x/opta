@@ -166,7 +166,11 @@ def __check_layer_and_image(layer: "Layer", image: str) -> str:
     k8s_module = layer.get_module_by_type("k8s-service")
     image_name = k8s_module[0].data.get("image")
     if image_name == "AUTO" and image is None:
-        raise UserErrors("An image should be passed when using `image` as AUTO in configuration")
+        raise UserErrors(
+            "An image should be passed when using `image` as AUTO in configuration"
+        )
     if image_name != "AUTO" and image is not None:
-        raise UserErrors(f"Do not pass any image. Image {image_name} already present in configuration.")
+        raise UserErrors(
+            f"Do not pass any image. Image {image_name} already present in configuration."
+        )
     return image_name
