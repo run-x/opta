@@ -17,7 +17,7 @@ resource "helm_release" "datadog" {
   repository = "https://helm.datadoghq.com"
   chart      = "datadog"
   name       = "${var.layer_name}-${var.module_name}"
-  version    = "2.10.3"
+  version    = var.chart_version
   values = [
     yamlencode({
       datadog : {
@@ -51,9 +51,6 @@ resource "helm_release" "datadog" {
         useHostNetwork : true
         enabled : true
         token : random_password.cluster_agent_token.result
-        metricsProvider : {
-          enabled : true
-        }
         admissionController : {
           enabled : true
           mutateUnlabelled : true
