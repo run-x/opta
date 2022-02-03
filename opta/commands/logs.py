@@ -9,6 +9,7 @@ from opta.core.kubernetes import load_opta_kube_config, set_kube_config, tail_mo
 from opta.exceptions import UserErrors
 from opta.layer import Layer
 from opta.utils import check_opta_file_exists
+from opta.utils.clickoptions import local_option
 
 
 @click.command()
@@ -19,13 +20,6 @@ from opta.utils import check_opta_file_exists
     "-c", "--config", default="opta.yaml", help="Opta config file", show_default=True
 )
 @click.option(
-    "--local",
-    is_flag=True,
-    default=False,
-    help="""Use the local Kubernetes cluster for development and testing, irrespective of the environment specified inside the opta service yaml file""",
-    hidden=False,
-)
-@click.option(
     "-s",
     "--seconds",
     default=None,
@@ -33,6 +27,7 @@ from opta.utils import check_opta_file_exists
     show_default=False,
     type=int,
 )
+@local_option
 def logs(
     env: Optional[str], config: str, seconds: Optional[int], local: Optional[bool]
 ) -> None:
