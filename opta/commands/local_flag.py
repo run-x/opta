@@ -1,44 +1,45 @@
 import os
 from pathlib import Path
 from shutil import rmtree
+from typing import Tuple
 
 from ruamel import yaml
 
-from opta.utils import logger
 
+def _handle_local_flag(config: str, test: bool = False) -> Tuple[str, str]:
 
-def _handle_local_flag(config: str, test: bool = False) -> str:
+    with open(config, "r") as fr:
+        y = yaml.round_trip_load(fr, preserve_quotes=True)
+        if "org_name" in y:
+            org_name = y["org_name"]
+        else:
+            org_name = "localorg"
+    env_yaml_path = os.path.join(Path.home(), ".opta", "local", org_name)
     if test:
-        return config
+        return config, env_yaml_path + "/localopta.yaml"
     if "opta-local-" in config:
-        return config
-    logger.info("Checking local Opta Kubernetes environment, will install if needed.")
+        return config, env_yaml_path + "/localopta.yaml"
 
-    dir_path = os.path.join(Path.home(), ".opta", "local")
-    if not os.path.exists(dir_path):
-        os.makedirs(dir_path)
-    with open(os.path.join(dir_path, "localopta.yaml"), "w") as fw:
+    if not os.path.exists(env_yaml_path):
+        os.makedirs(os.path.abspath(env_yaml_path))
+    with open(env_yaml_path + "/localopta.yaml", "w") as fw:
         yaml.safe_dump(
             {
                 "name": "localopta",
-                "org_name": "local",
+                "org_name": org_name,
                 "providers": {"local": {}},
                 "modules": [{"type": "local-base"}],
             },
             fw,
         )
-
-    with open(config, "r") as fr:
-        y = yaml.round_trip_load(fr, preserve_quotes=True)
-    if "environments" not in y:  # This is an environment opta file, so do nothing
-        return config
-    y["environments"] = [{"name": "localopta", "path": dir_path + "/localopta.yaml"}]
+    y["environments"] = [{"name": "localopta", "path": env_yaml_path + "/localopta.yaml"}]
+    y.pop("org_name", None)
     p = Path(config)
-    config = os.path.join(p.parent, "opta-local-" + p.name)
+    config = os.path.join(env_yaml_path, "opta-local-" + p.name)
     with open(config, "w") as fw:
         yaml.round_trip_dump(y, fw, explicit_start=True)
 
-    return config
+    return config, env_yaml_path + "/localopta.yaml"
 
 
 def _clean_tf_folder() -> None:

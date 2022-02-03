@@ -24,6 +24,7 @@ from opta.exceptions import UserErrors
 from opta.layer import Layer
 from opta.pre_check import pre_check
 from opta.utils import check_opta_file_exists, logger
+from opta.utils.clickoptions import local_option
 
 
 @click.command()
@@ -43,13 +44,7 @@ from opta.utils import check_opta_file_exists, logger
     default=False,
     help="Show full terraform plan in detail, not the opta provided summary",
 )
-@click.option(
-    "--local",
-    is_flag=True,
-    default=False,
-    help="""Use the local Kubernetes cluster for development and testing, irrespective of the environment specified inside the opta service yaml file""",
-    hidden=False,
-)
+@local_option
 def destroy(
     config: str,
     env: Optional[str],
@@ -72,7 +67,7 @@ def destroy(
 
     config = check_opta_file_exists(config)
     if local:
-        config = _handle_local_flag(config, False)
+        config, _ = _handle_local_flag(config, False)
         _clean_tf_folder()
     layer = Layer.load_from_yaml(config, env)
     event_properties: Dict = layer.get_event_properties()
