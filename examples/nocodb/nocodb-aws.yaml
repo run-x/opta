@@ -1,0 +1,33 @@
+name: nocodb
+org_name: <<org_name::org_name::Your Organization Name>>
+providers:
+  aws:
+    region: <<region::aws_region::Your AWS Region>>
+    account_id: <<account_id::aws_account_id::Your AWS Account ID>>
+modules:
+  - type: base
+  - type: dns
+    domain: <domain::string::The dns domain for your NocoDB deployment>>
+    delegated: false # set to true once ready https://docs.opta.dev/miscellaneous/ingress/
+  - type: k8s-cluster
+  - type: k8s-base
+    name: k8sbase
+  - type: cloudfront-distribution
+    # acm_cert_arn: arn:aws:acm:{aws.region}:{aws.account_id}:certificate/<valid_arn_id>    # Use the ACM cert ARN here
+    # domains:
+    #   - {module.dns.domain}
+    links:
+      - k8sbase
+  - name: pg
+    type: postgres
+    safety: false
+  - type: k8s-service
+    env_vars:
+      - name: NC_DB
+        value: "pg://${{module.pg.db_host}}:5432?u=${{module.pg.db_user}}&p=${{module.pg.db_password}}&d=${{module.pg.db_name}}"
+    public_uri: "/"
+    port:
+      tcp: 8080
+    image: nocodb/nocodb
+    links:
+      - pg
