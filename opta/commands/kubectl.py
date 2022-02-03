@@ -3,9 +3,9 @@ from typing import Optional
 import click
 
 from opta.amplitude import amplitude_client
+from opta.commands.apply import _local_setup
 from opta.core.kubernetes import load_opta_kube_config_to_default, purge_opta_kube_config
 from opta.core.kubernetes import set_kube_config as configure
-from opta.commands.apply import _local_setup
 from opta.layer import Layer
 from opta.utils import check_opta_file_exists
 

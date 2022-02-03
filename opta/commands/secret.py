@@ -2,7 +2,7 @@ from typing import Optional
 
 import click
 from click_didyoumean import DYMGroup
-from opta.commands.apply import _local_setup
+
 from opta.amplitude import amplitude_client
 from opta.commands.apply import _local_setup
 from opta.core.generator import gen_all
@@ -46,9 +46,9 @@ local_option = click.option(
     hidden=False,
 )
 
+
 def __restart_deployments(no_restart: bool, layer_name: str) -> None:
     restart_deployments(layer_name) if not no_restart else None
-
 
 
 @click.group(cls=DYMGroup)
@@ -148,7 +148,12 @@ def list_command(env: Optional[str], config: str, local: Optional[bool]) -> None
 @restart_option
 @local_option
 def update(
-    secret: str, value: str, env: Optional[str], config: str, no_restart: bool,  local: Optional[bool]
+    secret: str,
+    value: str,
+    env: Optional[str],
+    config: str,
+    no_restart: bool,
+    local: Optional[bool],
 ) -> None:
     """Update a given secret of a k8s service with a new value
 
@@ -179,7 +184,13 @@ def update(
 @config_option
 @restart_option
 @local_option
-def bulk_update(env_file: str, env: Optional[str], config: str, no_restart: bool,  local: Optional[bool]) -> None:
+def bulk_update(
+    env_file: str,
+    env: Optional[str],
+    config: str,
+    no_restart: bool,
+    local: Optional[bool],
+) -> None:
     """Bulk update a list of secrets for a k8s service using a dotenv file as in input.
 
     Each line of the file should be in VAR=VAL format.
