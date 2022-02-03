@@ -10,6 +10,7 @@ from opta.core.kubernetes import set_kube_config
 from opta.core.terraform import Terraform
 from opta.layer import Layer
 from opta.utils import check_opta_file_exists
+from opta.utils.clickoptions import local_option
 
 
 @click.command()
@@ -17,13 +18,7 @@ from opta.utils import check_opta_file_exists
 @click.option(
     "-e", "--env", default=None, help="The env to use when loading the config file."
 )
-@click.option(
-    "--local",
-    is_flag=True,
-    default=False,
-    help="""Use the local Kubernetes cluster for development and testing, irrespective of the environment specified inside the opta service yaml file""",
-    hidden=False,
-)
+@local_option
 def force_unlock(config: str, env: Optional[str], local: Optional[bool]) -> None:
     """Release a stuck lock on the current workspace
 

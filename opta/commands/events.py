@@ -13,15 +13,9 @@ from opta.core.kubernetes import (
     tail_namespace_events,
 )
 from opta.layer import Layer
+from opta.utils.clickoptions import local_option
 
 
-@click.option(
-    "--local",
-    is_flag=True,
-    default=False,
-    help="""Use the local Kubernetes cluster for development and testing, irrespective of the environment specified inside the opta service yaml file""",
-    hidden=False,
-)
 @click.command(hidden=True)
 @click.option(
     "-e", "--env", default=None, help="The env to use when loading the config file"
@@ -37,6 +31,7 @@ from opta.layer import Layer
     show_default=False,
     type=int,
 )
+@local_option
 def events(
     env: Optional[str], config: str, seconds: Optional[int], local: Optional[bool]
 ) -> None:

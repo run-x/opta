@@ -11,6 +11,7 @@ from opta.layer import Layer
 from opta.pre_check import pre_check
 from opta.resource import Resource
 from opta.utils import check_opta_file_exists, column_print, deep_merge, json
+from opta.utils.clickoptions import local_option
 
 
 @click.command(hidden=True)
@@ -20,13 +21,7 @@ from opta.utils import check_opta_file_exists, column_print, deep_merge, json
 @click.option(
     "-e", "--env", default=None, help="The env to use when loading the config file"
 )
-@click.option(
-    "--local",
-    is_flag=True,
-    default=False,
-    help="""Use the local Kubernetes cluster for development and testing, irrespective of the environment specified inside the opta service yaml file""",
-    hidden=False,
-)
+@local_option
 def inspect(config: str, env: Optional[str], local: Optional[bool]) -> None:
     """Displays important resources and AWS/Datadog links to them"""
 

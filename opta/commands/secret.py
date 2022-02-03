@@ -19,6 +19,7 @@ from opta.core.secrets import (
 from opta.exceptions import UserErrors
 from opta.layer import Layer
 from opta.utils import check_opta_file_exists
+from opta.utils.clickoptions import local_option
 
 env_option = click.option(
     "-e", "--env", default=None, help="The env to use when loading the config file"
@@ -36,14 +37,6 @@ restart_option = click.option(
     If this flag is set, the deployment(s) will need to be restarted to have the latest secret values
     """,
     show_default=True,
-)
-
-local_option = click.option(
-    "--local",
-    is_flag=True,
-    default=False,
-    help="""Use the local Kubernetes cluster for development and testing, irrespective of the environment specified inside the opta service yaml file""",
-    hidden=False,
 )
 
 

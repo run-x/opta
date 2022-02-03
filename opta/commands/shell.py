@@ -12,6 +12,7 @@ from opta.exceptions import UserErrors
 from opta.layer import Layer
 from opta.nice_subprocess import nice_run
 from opta.utils import check_opta_file_exists
+from opta.utils.clickoptions import local_option
 
 
 @click.command()
@@ -29,13 +30,7 @@ from opta.utils import check_opta_file_exists
     show_default=True,
     type=click.Choice(SHELLS_ALLOWED),
 )
-@click.option(
-    "--local",
-    is_flag=True,
-    default=False,
-    help="""Use the local Kubernetes cluster for development and testing, irrespective of the environment specified inside the opta service yaml file""",
-    hidden=False,
-)
+@local_option
 def shell(env: Optional[str], config: str, type: str, local: Optional[bool]) -> None:
     """
     Get a shell into one of the pods in a service
