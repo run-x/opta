@@ -18,7 +18,7 @@ from opta.utils import check_opta_file_exists, fmt_msg, logger
 
 @click.command()
 @click.option(
-    "-i", "--image", required=True, help="Your local image in the for myimage:tag"
+    "-i", "--image", help="Your local image in the for myimage:tag", default=None
 )
 @click.option("-c", "--config", default="opta.yaml", help="Opta config file.")
 @click.option(
@@ -118,6 +118,7 @@ def deploy(
         amplitude_client.DEPLOY_EVENT,
         event_properties={"org_name": layer.org_name, "layer_name": layer.name},
     )
+    custom_image_name = __check_layer_and_image(layer, image)
     layer.verify_cloud_credentials()
     layer.validate_required_path_dependencies()
     if Terraform.download_state(layer):
@@ -129,22 +130,25 @@ def deploy(
         outputs = Terraform.get_outputs(layer)
     except MissingState:
         outputs = {}
-    if "docker_repo_url" not in outputs or outputs["docker_repo_url"] == "":
-        logger.info(
-            "Did not find docker repository in state, so applying once to create it before deployment"
-        )
-        _apply(
-            config=config,
-            env=env,
-            refresh=False,
-            image_tag=None,
-            test=False,
-            local=local,
-            auto_approve=auto_approve,
-            stdout_logs=False,
-            detailed_plan=detailed_plan,
-        )
-    image_digest, image_tag = _push(image=image, config=config, env=env, tag=tag)
+
+    image_digest, image_tag = (None, None)
+    if custom_image_name == "AUTO":
+        if "docker_repo_url" not in outputs or outputs["docker_repo_url"] == "":
+            logger.info(
+                "Did not find docker repository in state, so applying once to create it before deployment"
+            )
+            _apply(
+                config=config,
+                env=env,
+                refresh=False,
+                image_tag=None,
+                test=False,
+                local=local,
+                auto_approve=auto_approve,
+                stdout_logs=False,
+                detailed_plan=detailed_plan,
+            )
+        image_digest, image_tag = _push(image=image, config=config, env=env, tag=tag)
     _apply(
         config=config,
         env=env,
@@ -156,3 +160,13 @@ def deploy(
         image_digest=image_digest,
         detailed_plan=detailed_plan,
     )
+
+
+def __check_layer_and_image(layer: "Layer", image: str) -> str:
+    k8s_module = layer.get_module_by_type("k8s-service")
+    image_name = k8s_module[0].data.get("image")
+    if image_name == "AUTO" and image is None:
+        raise UserErrors("An image should be passed when using `image` as AUTO in configuration")
+    if image_name != "AUTO" and image is not None:
+        raise UserErrors(f"Do not pass any image. Image {image_name} already present in configuration.")
+    return image_name
