@@ -12,7 +12,8 @@
     },
     "image": {
       "type": "string",
-      "description": "Set to AUTO to create a private repo for your own images. Otherwises attempts to pull image from public dockerhub"
+      "description": "Set to AUTO to create a private repo for your own images. Otherwises attempts to pull image from public dockerhub",
+      "default": "AUTO"
     },
     "min_containers": {
       "type": "integer",
