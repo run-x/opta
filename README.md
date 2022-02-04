@@ -1,4 +1,4 @@
-<p align="center"><img src="https://user-images.githubusercontent.com/4830700/152586743-fe398a3d-641d-4283-8c9e-e2189e5f451d.png" width="175"><img src="https://user-images.githubusercontent.com/855699/125824286-149ea52e-ef45-4f41-9579-8dba9bca38ac.png" width="250"><br/>
+<img src="https://user-images.githubusercontent.com/4830700/152586743-fe398a3d-641d-4283-8c9e-e2189e5f451d.png" width="175"><p align="center"><img src="https://user-images.githubusercontent.com/855699/125824286-149ea52e-ef45-4f41-9579-8dba9bca38ac.png" width="250"><br/>
 Supercharge DevOps on any cloud</p>
 
 <p align="center">
