@@ -27,7 +27,7 @@ from opta.utils.clickoptions import local_option
     "-s",
     "--seconds",
     default=None,
-    help="Start showing logs from these many seconds in the past",
+    help="Start showing events from these many seconds in the past",
     show_default=False,
     type=int,
 )
@@ -35,7 +35,14 @@ from opta.utils.clickoptions import local_option
 def events(
     env: Optional[str], config: str, seconds: Optional[int], local: Optional[bool]
 ) -> None:
-    """Get stream of logs from your service"""
+    """
+    List the events for a service
+
+    Examples:
+
+    opta events -c my-service.yaml
+
+    """
     if local:
         config = _local_setup(config)
     # Configure kubectl
