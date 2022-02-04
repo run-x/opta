@@ -15,7 +15,7 @@ Here's a list of repositories that contain Opta-related code:
 
 ### Report Bug
 
-The best way to report a bug is to file an issue on GitHub. Please include:
+The best way to report a bug is to file an issue on GitHub. Please make sure there is an open issue discussing your contribution. Before opening a new issue, please check for [existing issues](https://github.com/run-x/opta/issues). If you find an existing issue that matches closely with yours, please thumbs-up or comment on it, so we know that the issue is relevant to many people. For any new issue please include:
 
 - Your operating system name and version.
 - Opta version.
@@ -66,3 +66,7 @@ If you wish to share your work which is not ready to merge yet, create a [Draft 
 
 Finally, never submit a PR that will put the main branch in broken state. If the PR is part of multiple PRs to complete a large feature and cannot work on its own, you can create a feature branch and merge all related PRs into the feature branch before creating a PR from feature branch to main.
 
+## Community
+Everyone is welcome to come and hangout in our [Slack](https://slack.opta.dev/).
+
+Please maintain appropriate, professional conduct while participating in our community. This includes all channels of communication. We take reports of harassment or unwelcoming behavior very seriously. To report such behavior, please contact us via [email](mailto:info@runx.dev).
