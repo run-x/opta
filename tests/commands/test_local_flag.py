@@ -1,6 +1,5 @@
 import os
 import unittest
-from pathlib import Path
 
 import yaml
 
@@ -10,9 +9,7 @@ from opta.commands.local_flag import _handle_local_flag
 class Local_Flag_Tests(unittest.TestCase):
     def setUp(self) -> None:
         self.serviceconfig = "/tmp/test_local_flag.yaml"
-        self.derivedconfig = os.path.join(
-            "/tmp","opta-local-test_local_flag.yaml"
-        )
+        self.derivedconfig = os.path.join("/tmp", "opta-local-test_local_flag.yaml")
         with open(self.serviceconfig, "w") as fw:
             yaml.dump(
                 {
