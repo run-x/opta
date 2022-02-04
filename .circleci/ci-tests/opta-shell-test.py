@@ -1,16 +1,16 @@
 import os
 import sys
 
-import yaml
 from kubernetes.client import CoreV1Api
 from kubernetes.config import load_kube_config
 from kubernetes.stream import stream
 
+from opta.utils import yaml
+
 configuration_file = sys.argv[1]
 
-namespace = None
 with open(configuration_file) as f:
-    configuration = yaml.load(f, Loader=yaml.FullLoader)
+    configuration = yaml.load(f.read())
     namespace = configuration["name"]
 
 KUBECONFIG_PATH = os.environ.get("KUBECONFIG", "~/.kube/config")
