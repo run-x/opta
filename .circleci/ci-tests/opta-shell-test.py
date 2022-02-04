@@ -19,18 +19,16 @@ load_kube_config(config_file=KUBECONFIG_PATH)
 v1 = CoreV1Api()
 pod_list = v1.list_namespaced_pod(namespace).items
 
-test_value = "test"
-
 response = stream(
     v1.connect_post_namespaced_pod_exec,
     pod_list[0].metadata.name,
     namespace,
     container="k8s-service",
-    command=["/bin/bash", "-c", f"echo {test_value}"],
+    command=["/bin/bash", "-c", "echo test"],
     stderr=True,
     stdin=False,
     stdout=True,
     tty=False,
 )
 
-assert response.strip() == test_value
+assert response.strip() == "test"
