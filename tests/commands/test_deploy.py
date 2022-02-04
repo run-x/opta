@@ -29,7 +29,7 @@ def test_check_layer_and_image_auto_image_no_image_flag(mocker: MockFixture) -> 
     mock_layer.get_module_by_type.return_value = [mock_k8s_service_module]
 
     mocker.patch("opta.commands.deploy.pre_check")
-    mock_os_path_exists = mocker.patch("opta.utils.os.path.exists", return_value=True)
+    mocker.patch("opta.utils.os.path.exists", return_value=True)
 
     mock_layer_class = mocker.patch("opta.commands.deploy.Layer")
     mock_layer_class.load_from_yaml.return_value = mock_layer
@@ -70,7 +70,7 @@ def test_check_layer_and_image_xyz_image_image_flag(mocker: MockFixture) -> None
     mock_layer.get_module_by_type.return_value = [mock_k8s_service_module]
 
     mocker.patch("opta.commands.deploy.pre_check")
-    mock_os_path_exists = mocker.patch("opta.utils.os.path.exists", return_value=True)
+    mocker.patch("opta.utils.os.path.exists", return_value=True)
 
     mock_layer_class = mocker.patch("opta.commands.deploy.Layer")
     mock_layer_class.load_from_yaml.return_value = mock_layer
