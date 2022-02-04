@@ -44,7 +44,6 @@ def test_check_layer_and_image_auto_image_no_image_flag(mocker: MockFixture) -> 
     result = runner.invoke(cli, ["deploy"])
 
     assert result.exit_code == 1
-    mock_os_path_exists.assert_called_once()
     mock_check_layer_and_image.assert_called_once_with(mock_layer, None)
     assert (
         type(result.exception) == UserErrors
@@ -86,7 +85,6 @@ def test_check_layer_and_image_xyz_image_image_flag(mocker: MockFixture) -> None
     result = runner.invoke(cli, ["deploy", "-i", "app:main"])
 
     assert result.exit_code == 1
-    mock_os_path_exists.assert_called_once()
     mock_check_layer_and_image.assert_called_once_with(mock_layer, "app:main")
     assert (
         type(result.exception) == UserErrors
