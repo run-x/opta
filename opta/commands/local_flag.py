@@ -9,9 +9,9 @@ from ruamel import yaml
 def _handle_local_flag(config: str, test: bool = False) -> Tuple[str, str]:
 
     with open(config, "r") as fr:
-        y = yaml.round_trip_load(fr, preserve_quotes=True)
-        if "org_name" in y:
-            org_name = y["org_name"]
+        yamlcontent = yaml.round_trip_load(fr, preserve_quotes=True)
+        if "org_name" in yamlcontent:
+            org_name = yamlcontent["org_name"]
         else:
             org_name = "localorg"
     env_yaml_path = os.path.join(Path.home(), ".opta", "local", org_name)
@@ -32,12 +32,14 @@ def _handle_local_flag(config: str, test: bool = False) -> Tuple[str, str]:
             },
             fw,
         )
-    y["environments"] = [{"name": "localopta", "path": env_yaml_path + "/localopta.yaml"}]
-    y.pop("org_name", None)
-    p = Path(config)
-    config = os.path.join(p.parent, "opta-local-" + p.name)
+    yamlcontent["environments"] = [
+        {"name": "localopta", "path": env_yaml_path + "/localopta.yaml"}
+    ]
+    yamlcontent.pop("org_name", None)
+    yamlpath = Path(config)
+    config = os.path.join(yamlpath.parent, "opta-local-" + yamlpath.name)
     with open(config, "w") as fw:
-        yaml.round_trip_dump(y, fw, explicit_start=True)
+        yaml.round_trip_dump(yamlcontent, fw, explicit_start=True)
 
     return config, env_yaml_path + "/localopta.yaml"
 
