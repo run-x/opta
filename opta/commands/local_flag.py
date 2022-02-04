@@ -35,7 +35,7 @@ def _handle_local_flag(config: str, test: bool = False) -> Tuple[str, str]:
     y["environments"] = [{"name": "localopta", "path": env_yaml_path + "/localopta.yaml"}]
     y.pop("org_name", None)
     p = Path(config)
-    config = os.path.join(env_yaml_path, "opta-local-" + p.name)
+    config = os.path.join(p.parent, "opta-local-" + p.name)
     with open(config, "w") as fw:
         yaml.round_trip_dump(y, fw, explicit_start=True)
 

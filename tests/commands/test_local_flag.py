@@ -11,7 +11,7 @@ class Local_Flag_Tests(unittest.TestCase):
     def setUp(self) -> None:
         self.serviceconfig = "/tmp/test_local_flag.yaml"
         self.derivedconfig = os.path.join(
-            Path.home(), ".opta", "local", "whatever", "opta-local-test_local_flag.yaml"
+            "/tmp","opta-local-test_local_flag.yaml"
         )
         with open(self.serviceconfig, "w") as fw:
             yaml.dump(
