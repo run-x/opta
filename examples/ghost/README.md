@@ -7,7 +7,7 @@ You can also use this button to fill in the variable fields in the config.
 [![Deploy](https://raw.githubusercontent.com/run-x/opta/main/assets/deploy-to-aws-button.svg)](https://app.runx.dev/deploy-with-aws?url=https%3A%2F%2Fgithub.com%2Frun-x%2Fopta%2Fblob%2Fmain%2Fexamples%2Fghost%2Fghost-aws.yaml&name=Ghost)
 
 # What does this do?
-It deploys a horizontally scalable Ghost deployment on EKS in AWS. It uses AWS managed the RDS mysql instance. It also sets up various other resources like VPCs, subnets, load balancers etc.
+It deploys a horizontally scalable Ghost deployment on EKS in AWS. It uses AWS managed for the RDS mysql instance. It also sets up various other resources like VPCs, subnets, load balancers etc.
 
 # Steps to deploy
 * Fill in the required variables in the config file, ghost-aws.yaml.
@@ -38,6 +38,16 @@ Your domain should now be pointing to the Ghost deployment with secure TLS
 
 
 ![Alt text](ghost-dashboard.png?raw=true "What it should look like")
+
+# Getting emails feature to work
+* Fill in the `mail__options__service` and `mail__options__auth__user` field in the yaml
+* Use the opta secret command to provide the auth password for the email as a secret
+```bash
+opta secret update -c ghost-aws.yaml mail__options__auth__pass MY_SECRET_EMAIL_PASSWORD
+```
+
+That's it, now your ghost app can also send emails from your email
+
 
 # [FAQ](../FAQ.md)
 

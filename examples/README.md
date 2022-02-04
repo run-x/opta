@@ -6,6 +6,7 @@ This directory holds a compiled list of advanced, standalone, usages of Opta, mo
 - [aws-lambda](/examples/aws-lambda): Deploy Apache Airflow on AWS
 - [flyte](/examples/flyte): Deploy Flyte on AWS
 - [full-stack-example](/examples/full-stack-example): Deploy a a todo list (including frontend, api, database, monitoring) locally or on AWS
+- [ghost](/examples/ghost): Deploy Ghost app on AWS
 - [grpcbin](/examples/grpcbin): Deploy grpcbin on AWS, GCP, Azure
 - [hello-app](/examples/hello-app): Deploy a web application locally or on AWS, GCP, Azure
 - [httpbin](/examples/httpbin): Deploy httpbin locally or on AWS, GCP, Azure
