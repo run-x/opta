@@ -40,9 +40,6 @@ parameters:
   run-destroy-aws-dns-true:
     type: boolean
     default: false
-  test:
-    type: boolean
-    default: false
 
 orbs:
   terraform: circleci/terraform@3.0.0
