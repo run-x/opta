@@ -149,7 +149,8 @@ def deploy(
                 stdout_logs=False,
                 detailed_plan=detailed_plan,
             )
-        image_digest, image_tag = _push(image=image, config=config, env=env, tag=tag)
+        if image is not None:
+            image_digest, image_tag = _push(image=image, config=config, env=env, tag=tag)
     _apply(
         config=config,
         env=env,
@@ -166,7 +167,7 @@ def deploy(
 def __check_layer_and_image(layer: "Layer", option_image: str) -> Tuple[str, bool]:
     k8s_modules = layer.get_module_by_type("k8s-service")
     if len(k8s_modules) == 0:
-        raise UserErrors('k8s-service module not present.')
+        raise UserErrors("k8s-service module not present.")
     configuration_image_name: str = k8s_modules[0].data.get("image")
     configuration_image_name = configuration_image_name.lower()
     if configuration_image_name != "auto" and option_image is not None:
