@@ -1,4 +1,4 @@
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 
 import click
 
@@ -9,6 +9,7 @@ from opta.core.terraform import Terraform
 from opta.error_constants import USER_ERROR_TF_LOCK
 from opta.exceptions import MissingState, UserErrors
 from opta.layer import Layer
+from opta.module import Module
 from opta.pre_check import pre_check
 from opta.utils import check_opta_file_exists, fmt_msg, logger
 from opta.utils.clickoptions import local_option
@@ -140,7 +141,7 @@ def deploy(
 
 
 def __check_layer_and_image(layer: "Layer", option_image: str) -> Tuple[str, bool]:
-    k8s_modules = layer.get_module_by_type("k8s-service")
+    k8s_modules: List[Module] = layer.get_module_by_type("k8s-service")
     if len(k8s_modules) == 0:
         raise UserErrors("k8s-service module not present.")
     configuration_image_name: str = k8s_modules[0].data.get("image")
