@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Tuple
 
 import click
 
@@ -58,19 +58,20 @@ def deploy(
     detailed_plan: bool,
     local: Optional[bool],
 ) -> None:
-    """Deploy a local image to Kubernetes
+    """Deploys an image to Kubernetes
 
-    1. Push the image to the private container registry (ECR, GCR, ACR)
+    - Pushes the local image to private container registry (ECR, GCR, ACR), iff configuration contains `image: AUTO`,
+      else uses the image provided from a Repo.
 
-    2. Update the kubernetes deployment to use the new container image.
+    - Update the kubernetes deployment to use the new image.
 
-    3. Create new pods to use the new container image - automatically done by kubernetes.
+    - Create new pods to use the new image - automatically done by kubernetes.
 
     Examples:
 
-    opta deploy -c my-service.yaml -i my-image:latest --auto-approve
+    opta deploy -c image-auto-configuration.yaml -i image:local --auto-approve
 
-    opta deploy -c my-service.yaml -i my-image:latest -e prod
+    opta deploy -c repo-provided-configuration.yaml -e prod
 
     opta deploy -c my-service.yaml -i my-image:latest --local
 
@@ -118,7 +119,7 @@ def deploy(
         amplitude_client.DEPLOY_EVENT,
         event_properties={"org_name": layer.org_name, "layer_name": layer.name},
     )
-    custom_image_name = __check_layer_and_image(layer, image)
+    _, is_auto = __check_layer_and_image(layer, image)
     layer.verify_cloud_credentials()
     layer.validate_required_path_dependencies()
     if Terraform.download_state(layer):
@@ -132,7 +133,7 @@ def deploy(
         outputs = {}
 
     image_digest, image_tag = (None, None)
-    if custom_image_name == "AUTO":
+    if is_auto:
         if "docker_repo_url" not in outputs or outputs["docker_repo_url"] == "":
             logger.info(
                 "Did not find docker repository in state, so applying once to create it before deployment"
@@ -162,15 +163,14 @@ def deploy(
     )
 
 
-def __check_layer_and_image(layer: "Layer", image: str) -> str:
-    k8s_module = layer.get_module_by_type("k8s-service")
-    image_name = k8s_module[0].data.get("image")
-    if image_name == "AUTO" and image is None:
+def __check_layer_and_image(layer: "Layer", option_image: str) -> Tuple[str, bool]:
+    k8s_modules = layer.get_module_by_type("k8s-service")
+    if len(k8s_modules) == 0:
+        raise UserErrors('k8s-service module not present.')
+    configuration_image_name: str = k8s_modules[0].data.get("image")
+    configuration_image_name = configuration_image_name.lower()
+    if configuration_image_name != "auto" and option_image is not None:
         raise UserErrors(
-            "An image should be passed when using `image` as AUTO in configuration"
+            f"Do not pass any image. Image {configuration_image_name} already present in configuration."
         )
-    if image_name != "AUTO" and image is not None:
-        raise UserErrors(
-            f"Do not pass any image. Image {image_name} already present in configuration."
-        )
-    return image_name
+    return configuration_image_name, configuration_image_name == "auto"
