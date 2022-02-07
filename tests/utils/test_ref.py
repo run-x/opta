@@ -1,4 +1,5 @@
 import io
+from typing import Any, List
 
 import pytest
 
@@ -9,11 +10,11 @@ from opta.utils.ref import (
     _PART_REGEX,
     _PART_STR_REGEX,
     _SIMPLE_INTERPOLATION_REGEX,
-    ComplexInterpolatedReference,
-    Reference,
-    ReferenceParseError,
-    SimpleInterpolatedReference,
 )
+from opta.utils.ref import ComplexInterpolatedReference as Complex
+from opta.utils.ref import Reference, ReferenceParseError
+from opta.utils.ref import SimpleInterpolatedReference as Simple
+from opta.utils.ref import get_all_references, is_interpolated_reference, parse_ref_string
 from opta.utils.yaml import dump, load
 
 
@@ -154,27 +155,27 @@ class TestReference:
 
 
 class TestSimpleInterpolatedReference:
-    def test_parse(self, ref1: SimpleInterpolatedReference) -> None:
-        assert SimpleInterpolatedReference.parse("${a.1.x}") == ref1
+    def test_parse(self, ref1: Simple) -> None:
+        assert Simple.parse("${a.1.x}") == ref1
 
     @pytest.mark.parametrize("input", ["foo.bar", "{foo}", "${21b}", "${-1}"])
     def test_parse_fail(self, input: str) -> None:
         with pytest.raises(ReferenceParseError):
-            SimpleInterpolatedReference.parse(input)
+            Simple.parse(input)
 
-    def test_str(self, ref1: SimpleInterpolatedReference) -> None:
+    def test_str(self, ref1: Simple) -> None:
         assert str(ref1) == "${a.1.x}"
 
-    def test_ref(self, ref1: SimpleInterpolatedReference) -> None:
+    def test_ref(self, ref1: Simple) -> None:
         ref = ref1.ref
         assert ref.__class__ is Reference
         assert ref == Reference("a", 1, "x")
 
-    def test_parse_dotted(self, ref1: SimpleInterpolatedReference) -> None:
-        parsed = SimpleInterpolatedReference.parse_dotted("a.1.x")
+    def test_parse_dotted(self, ref1: Simple) -> None:
+        parsed = Simple.parse_dotted("a.1.x")
         assert parsed == ref1
 
-    def test_to_yaml(self, ref1: SimpleInterpolatedReference) -> None:
+    def test_to_yaml(self, ref1: Simple) -> None:
         expected = "!ref a.1.x\n...\n"
 
         buf = io.BytesIO()
@@ -183,7 +184,7 @@ class TestSimpleInterpolatedReference:
         actual = buf.getvalue().decode("utf-8")
         assert actual == expected
 
-    def test_from_yaml(self, ref1: SimpleInterpolatedReference) -> None:
+    def test_from_yaml(self, ref1: Simple) -> None:
         input = "!ref a.1.x".encode("utf-8")
         buf = io.BytesIO(input)
         actual = load(buf)
@@ -191,23 +192,32 @@ class TestSimpleInterpolatedReference:
         assert actual == ref1
 
     @pytest.fixture
-    def ref1(self) -> SimpleInterpolatedReference:
-        return SimpleInterpolatedReference("a", 1, "x")
+    def ref1(self) -> Simple:
+        return Simple("a", 1, "x")
 
 
 class TestComplexInterpolatedReference:
     def test_components_to_str(self) -> None:
         input = "secure_${postgres.db}_read_${postgres.someparameter}"
 
-        built = ComplexInterpolatedReference(
-            [
-                "secure_",
-                SimpleInterpolatedReference("postgres", "db"),
-                "_read_",
-                SimpleInterpolatedReference("postgres", "someparameter"),
-            ]
+        built = Complex(
+            "secure_",
+            Simple("postgres", "db"),
+            "_read_",
+            Simple("postgres", "someparameter"),
         )
         assert input == str(built)
+
+    @pytest.mark.parametrize(
+        ["input", "expected"],
+        [["foo${bar}${spam}", [Reference("bar"), Reference("spam")]], ["foo", []]],
+    )
+    def test_refs(self, input: str, expected: List[Reference]) -> None:
+        ref = Complex.parse(input)
+        print(ref._parts)
+        refs = ref.refs
+
+        assert refs == expected
 
     @pytest.mark.parametrize(
         "input",
@@ -222,5 +232,45 @@ class TestComplexInterpolatedReference:
         ],
     )
     def test_parse_and_str_roundtrip(self, input: str) -> None:
-        processed = str(ComplexInterpolatedReference.parse(input))
+        ref = Complex.parse(input)
+        processed = str(ref)
         assert input == processed
+
+
+class TestFuncs:
+    @pytest.mark.parametrize(
+        ["input", "expected"],
+        [
+            ["${foo}", Simple("foo")],
+            ["foo", "foo"],
+            ["${foo}bar", Complex(Simple("foo"), "bar")],
+        ],
+    )
+    def test_parse_ref_string(self, input: str, expected: Any) -> None:
+        assert parse_ref_string(input) == expected
+
+    @pytest.mark.parametrize(
+        ["input", "expected"],
+        [
+            ["foo", False],
+            [Reference("foo"), False],
+            [Simple("foo"), True],
+            [Complex.parse("foo"), True],
+            [Complex("foo"), True],
+        ],
+    )
+    def test_is_interpolated_reference(self, input: Any, expected: bool) -> None:
+        assert is_interpolated_reference(input) == expected
+
+    @pytest.mark.parametrize(
+        ["input", "expected"],
+        [
+            ["foo", []],
+            [Simple("foo"), [Simple("foo")]],
+            [Complex.parse("foo${bar}${spam}"), [Simple("bar"), Simple("spam")]],
+        ],
+    )
+    def test_get_all_references(self, input: Any, expected: List[Reference]) -> None:
+        actual = get_all_references(input)
+
+        assert actual == expected

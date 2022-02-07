@@ -212,11 +212,17 @@ ComplexPart = Union[str, SimpleInterpolatedReference]
 
 
 class ComplexInterpolatedReference:
-    def __init__(self, parts: List[ComplexPart]) -> None:
-        self._parts: List[ComplexPart] = parts
+    def __init__(self, *parts: ComplexPart) -> None:
+        self._parts: Tuple[ComplexPart, ...] = parts
 
     def __str__(self) -> str:
         return "".join(str(part) for part in self._parts)
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, ComplexInterpolatedReference):
+            return NotImplemented
+
+        return self._parts == other._parts
 
     def simplify(self) -> Union[str, InterpolatedReference]:
         if len(self._parts) > 1:
@@ -228,7 +234,7 @@ class ComplexInterpolatedReference:
         return self._parts[0]
 
     @property
-    def refs(self) -> Iterable[Reference]:
+    def refs(self) -> List[Reference]:
         return [
             part.ref
             for part in self._parts
@@ -257,7 +263,7 @@ class ComplexInterpolatedReference:
 
             parts.append(part)
 
-        return cls(parts)
+        return cls(*parts)
 
 
 InterpolatedReference = Union[SimpleInterpolatedReference, ComplexInterpolatedReference]
