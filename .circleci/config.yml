@@ -266,13 +266,15 @@ jobs:
       - checkout
       - attach_workspace:
           at: ./
+      - attach_workspace:
+          at: ~/
       - install-opta-dependencies
       - aws-cli/install
       - aws-cli/setup
       - run:
           name: "Deploy opta environment"
           command: |
-            ./dist/opta/opta apply \
+            $HOME/.opta/opta apply \
             --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml \
             --auto-approve \
             --refresh
@@ -282,7 +284,7 @@ jobs:
       - run:
           name: "Configure Kubectl"
           command: |
-            ./dist/opta/opta configure-kubectl \
+            $HOME/.opta/opta configure-kubectl \
             --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
 
   aws-create-env-dns-false:
