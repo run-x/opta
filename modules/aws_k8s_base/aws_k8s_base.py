@@ -63,6 +63,14 @@ class AwsK8sBaseProcessor(AWSK8sModuleProcessor, K8sBaseModuleProcessor):
             "s3_log_bucket_name"
         ] = f"${{{{module.{aws_base_module.name}.s3_log_bucket_name}}}}"
 
+        aws_eks_modules = self.layer.get_module_by_type("k8s-cluster", module_idx)
+        if len(aws_eks_modules) == 0:
+            raise UserErrors("Must have the k8s cluster module in before the k8s-base")
+        aws_eks_module = aws_eks_modules[0]
+        self.module.data[
+            "k8s_cluster_name"
+        ] = f"${{{{module.{aws_eks_module.name}.k8s_cluster_name}}}}"
+
         super(AwsK8sBaseProcessor, self).process(module_idx)
 
     def pre_hook(self, module_idx: int) -> None:

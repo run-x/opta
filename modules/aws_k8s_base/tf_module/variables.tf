@@ -1,4 +1,7 @@
 data "aws_region" "current" {}
+data "aws_eks_cluster" "current" {
+  name = var.k8s_cluster_name
+}
 
 locals {
   target_ports    = var.cert_arn == "" && var.private_key == "" ? { http : "http" } : { http : "http", https : "https" }
@@ -45,6 +48,10 @@ variable "domain" {
 variable "cert_arn" {
   type    = string
   default = ""
+}
+
+variable "k8s_cluster_name" {
+  type = string
 }
 
 variable "openid_provider_url" {
