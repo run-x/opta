@@ -5,8 +5,7 @@ from typing import Optional, Tuple
 import click
 
 from opta.amplitude import amplitude_client
-from opta.commands.apply import _apply
-from opta.commands.local_flag import _clean_tf_folder, _handle_local_flag
+from opta.commands.apply import _apply, _local_setup
 from opta.commands.push import _push, is_service_config
 from opta.core.terraform import Terraform
 from opta.error_constants import USER_ERROR_TF_LOCK
@@ -14,6 +13,7 @@ from opta.exceptions import MissingState, UserErrors
 from opta.layer import Layer
 from opta.pre_check import pre_check
 from opta.utils import check_opta_file_exists, fmt_msg, logger
+from opta.utils.clickoptions import local_option
 
 
 @click.command()
@@ -42,13 +42,7 @@ from opta.utils import check_opta_file_exists, fmt_msg, logger
     default=False,
     help="Show full terraform plan in detail, not the opta provided summary",
 )
-@click.option(
-    "--local",
-    is_flag=True,
-    default=False,
-    help="""Run the service locally on a local Kubernetes cluster for development and testing,  irrespective of the environment specified inside the opta service yaml file""",
-    hidden=False,
-)
+@local_option
 def deploy(
     image: str,
     config: str,
@@ -82,6 +76,8 @@ def deploy(
     pre_check()
 
     config = check_opta_file_exists(config)
+    if local:
+        config = _local_setup(config, image_tag=tag, refresh_local_env=True)
     if not is_service_config(config):
         raise UserErrors(
             fmt_msg(
@@ -94,25 +90,6 @@ def deploy(
             """
             )
         )
-
-    if local:
-        adjusted_config = _handle_local_flag(config, False)
-        if adjusted_config != config:  # Only do this for service opta files
-            config = adjusted_config
-            localopta_envfile = os.path.join(
-                Path.home(), ".opta", "local", "localopta.yaml"
-            )
-            _apply(
-                config=localopta_envfile,
-                auto_approve=True,
-                local=False,
-                env="",
-                refresh=True,
-                image_tag="",
-                test=False,
-                detailed_plan=True,
-            )
-            _clean_tf_folder()
 
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(

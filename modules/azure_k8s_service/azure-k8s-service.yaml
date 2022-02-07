@@ -34,7 +34,7 @@ inputs: # (what users see)
     user_facing: true
     validator: str(required=True)
     description: Set to AUTO to create a private repo for your own images. Otherwises attempts to pull image from public dockerhub
-    default: null
+    default: AUTO
   - name: port
     user_facing: true
     validator: any(include('service_port'), required=False)
