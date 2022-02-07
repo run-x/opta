@@ -1202,6 +1202,8 @@ jobs:
       - run:
           name: "Test Opta Shell"
           command: |
+            source $(pipenv --venv)/bin/activate
+            export PYTHONPATH=$(pwd)
             python ./.circleci/ci-tests/opta-shell-test.py \
             ./.circleci/ci-tests/create-and-destroy-gcp/service-pg.yml
       - run:
@@ -1790,6 +1792,32 @@ workflows:
       - aws-destroy-env-dns-true:
           requires:
             - build-opta-binary
+
+  test:
+    when: << pipeline.parameters.test >>
+    jobs:
+      - build-opta-binary
+      - build-test-service-image
+      - aws-create-env:
+          requires:
+            - build-opta-binary
+      - aws-test-service-pg:
+          requires:
+            - aws-create-env
+            - build-test-service-image
+      - aws-destroy-env:
+          requires:
+            - aws-test-service-pg
+      - gcp-create-env:
+          requires:
+            - build-opta-binary
+      - gcp-test-service-pg:
+          requires:
+            - gcp-create-env
+            - build-test-service-image
+      - gcp-destroy-env:
+          requires:
+            - gcp-test-service-pg
 
   nightly:
     triggers:
