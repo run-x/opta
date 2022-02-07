@@ -748,24 +748,24 @@ jobs:
             pkill -SIGQUIT opta
             cat logs.log | grep "\"GET /healthcheck HTTP/1.1\" 200"
             exit $?
-       - run:
-           name: "Deploy test-service with Additional PG"
-           command: |
-             ./dist/opta/opta deploy \
-             --image app:latest \
-             --env awsenv-ci \
-             --config ./.circleci/ci-tests/create-and-destroy-aws/service-additional-pg.yml \
-             --tag $CIRCLE_SHA1 \
-             --auto-approve
-       - run:
-           name: "Deploy test-service remove Additional PG"
-           command: |
-             ./dist/opta/opta deploy \
-             --image app:latest \
-             --env awsenv-ci \
-             --config ./.circleci/ci-tests/create-and-destroy-aws/service-pg.yml \
-             --tag $CIRCLE_SHA1 \
-             --auto-approve
+      - run:
+          name: "Deploy test-service with Additional PG"
+          command: |
+            ./dist/opta/opta deploy \
+            --image app:latest \
+            --env awsenv-ci \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/service-additional-pg.yml \
+            --tag $CIRCLE_SHA1 \
+            --auto-approve
+      - run:
+          name: "Deploy test-service remove Additional PG"
+          command: |
+            ./dist/opta/opta deploy \
+            --image app:latest \
+            --env awsenv-ci \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/service-pg.yml \
+            --tag $CIRCLE_SHA1 \
+            --auto-approve
       - run:
           name: "View secret and check value"
           command: |
@@ -1218,24 +1218,24 @@ jobs:
             pkill -SIGQUIT opta
             cat logs.log | grep "\"GET /healthcheck HTTP/1.1\" 200"
             exit $?
-       - run:
-           name: "Deploy test-service with Additional PG"
-           command: |
-             ./dist/opta/opta deploy \
-             --image app:latest \
-             --env gcpenv-ci \
-             --config ./.circleci/ci-tests/create-and-destroy-gcp/service-additional-pg.yml \
-             --tag $CIRCLE_SHA1 \
-             --auto-approve
-       - run:
-           name: "Deploy test-service remove Additional PG"
-           command: |
-             ./dist/opta/opta deploy \
-             --image app:latest \
-             --env gcpenv-ci \
-             --config ./.circleci/ci-tests/create-and-destroy-gcp/service-pg.yml \
-             --tag $CIRCLE_SHA1 \
-             --auto-approve
+      - run:
+          name: "Deploy test-service with Additional PG"
+          command: |
+            ./dist/opta/opta deploy \
+            --image app:latest \
+            --env gcpenv-ci \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/service-additional-pg.yml \
+            --tag $CIRCLE_SHA1 \
+            --auto-approve
+      - run:
+          name: "Deploy test-service remove Additional PG"
+          command: |
+            ./dist/opta/opta deploy \
+            --image app:latest \
+            --env gcpenv-ci \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/service-pg.yml \
+            --tag $CIRCLE_SHA1 \
+            --auto-approve
       - run:
           name: "View secret and check value"
           command: |
