@@ -281,6 +281,10 @@ jobs:
           name: "Check aws env config"
           command: |
             ls .circleci/ci-tests/create-and-destroy-aws/
+      - run:
+          name: "Check aws env config"
+          command: |
+            ls .circleci/ci-tests/
 
   aws-check-file-persistence:
     executor: ubuntu-machine
@@ -292,6 +296,10 @@ jobs:
           name: "Check aws env config"
           command: |
             ls .circleci/ci-tests/create-and-destroy-aws/
+      - run:
+          name: "Check aws env config"
+          command: |
+            ls .circleci/ci-tests/
 
   aws-create-env:
     executor: ubuntu-machine
