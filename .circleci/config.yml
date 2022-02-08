@@ -40,6 +40,9 @@ parameters:
   run-destroy-aws-dns-true:
     type: boolean
     default: false
+  test:
+    type: boolean
+    default: false
 
 orbs:
   terraform: circleci/terraform@3.0.0
@@ -254,6 +257,41 @@ jobs:
           paths:
             - todo-api
             - todo-frontend
+
+  aws-make-env-config:
+    executor: ubuntu-machine
+    steps:
+      - checkout
+      - install-python
+      - install-python-dependencies
+      - run:
+          name: "Make env config"
+          command: |
+            python ./.circleci/ci-tests/generate_aws_env_config.py
+      - persist_to_workspace:
+          root: $HOME/project/
+          paths:
+            - .circleci
+
+  aws-check-file:
+    executor: ubuntu-machine
+    steps:
+      - checkout
+      - run:
+          name: "Check aws env config"
+          command: |
+            ls .circleci/ci-tests/create-and-destroy-aws/
+
+  aws-check-file-persistence:
+    executor: ubuntu-machine
+    steps:
+      - checkout
+      - attach_workspace:
+          at: $HOME/project/
+      - run:
+          name: "Check aws env config"
+          command: |
+            ls .circleci/ci-tests/create-and-destroy-aws/
 
   aws-create-env:
     executor: ubuntu-machine
@@ -1789,6 +1827,17 @@ workflows:
       - aws-destroy-env-dns-true:
           requires:
             - build-opta-binary
+
+  test:
+    when: << pipeline.parameters.test >>
+    jobs:
+      - aws-make-env-config
+      - aws-check-file:
+          requires:
+            - aws-make-env-config
+      - aws-check-file-persistence:
+          requires:
+            - aws-make-env-config
 
   nightly:
     triggers:
