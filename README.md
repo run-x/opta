@@ -96,8 +96,8 @@ We love user contributions! Check out our [Contributing](https://github.com/run-
 
 # Miscellaneous
 * [Team behind Opta](https://www.runx.dev/about)
-* How Opta delivers [upgrades](https://github.com/run-x/opta/blob/main/UPGRADING.md)
-* Bugfix / Feature request [policy] (https://github.com/run-x/opta/blob/main/CONTRIBUTING.md)
+* [How Opta delivers upgrades](https://github.com/run-x/opta/blob/main/UPGRADING.md)
+* [Bugfix / Feature request policy](https://github.com/run-x/opta/blob/main/CONTRIBUTING.md)
 * Comparison with other tools (WIP)
-* Public [roadmap] (https://github.com/orgs/run-x/projects/1/views/1)
+* [Public roadmap](https://github.com/orgs/run-x/projects/1/views/1)
 * Case studies - [Flyte](https://blog.flyte.org/how-opta-makes-deploying-flyte-much-easier) (More on the way!)
