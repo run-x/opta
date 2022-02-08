@@ -1,5 +1,4 @@
 from datetime import date
-# import yaml
 import os
 
 absolute_path = os.path.abspath(os.path.dirname(__file__))

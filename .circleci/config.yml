@@ -269,7 +269,7 @@ jobs:
           command: |
             python ./.circleci/ci-tests/generate_aws_env_config.py
       - persist_to_workspace:
-          root: $HOME/project/
+          root: ./
           paths:
             - .circleci
 
