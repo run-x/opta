@@ -1,5 +1,5 @@
 import os
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Any
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 import google.auth.transport.requests
 from google.auth import default
@@ -109,7 +109,7 @@ class GCP(CloudClient):
         blobs: List[storage.Blob] = list(
             gcs_client.list_blobs(bucket_object, prefix=gcs_config_dir)
         )
-        configs = [blob.name[len(gcs_config_dir):] for blob in blobs]
+        configs = [blob.name[len(gcs_config_dir) :] for blob in blobs]
         if self.layer.name in configs:
             configs.remove(self.layer.name)
         return configs

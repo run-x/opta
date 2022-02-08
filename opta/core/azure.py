@@ -1,7 +1,7 @@
 import base64
 from contextlib import redirect_stderr
 from io import StringIO
-from typing import TYPE_CHECKING, Optional, List, Dict, Any
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from azure.core.exceptions import ClientAuthenticationError, ResourceNotFoundError
 from azure.identity import DefaultAzureCredential
@@ -75,7 +75,7 @@ class Azure(CloudClient):
         )
         prefix = "opta_config/"
         blobs = storage_client.list_blobs(name_starts_with=prefix)
-        configs = [blob.name[len(prefix):] for blob in blobs]
+        configs = [blob.name[len(prefix) :] for blob in blobs]
         if self.layer.name in configs:
             configs.remove(self.layer.name)
         return configs
@@ -95,7 +95,9 @@ class Azure(CloudClient):
             credential=credentials,
         )
         config_path = f"opta_config/{config_name}"
-        download_stream: StorageStreamDownloader = storage_client.download_blob(config_path)
+        download_stream: StorageStreamDownloader = storage_client.download_blob(
+            config_path
+        )
         data = download_stream.readall()
         config_details = json.loads(data)
         return config_details
