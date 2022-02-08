@@ -68,9 +68,7 @@ def test_deploy_basic(mocker: MockFixture) -> None:
         "opta.commands.deploy._push", return_value=("local_digest", "local_tag")
     )
     mock_apply = mocker.patch("opta.commands.deploy._apply")
-    mocker.patch(
-        "opta.commands.deploy.__check_layer_and_image", return_value=("AUTO", True)
-    )
+    mocker.patch("opta.commands.deploy.__check_layer_and_image", return_value=True)
     mocked_layer_class = mocker.patch("opta.commands.deploy.Layer")
     mocked_layer = mocker.Mock(spec=Layer)
     mocked_layer_class.load_from_yaml.return_value = mocked_layer
@@ -118,9 +116,7 @@ def test_deploy_auto_approve(mocker: MockFixture) -> None:
         "opta.commands.deploy._push", return_value=("local_digest", "local_tag")
     )
     mock_apply = mocker.patch("opta.commands.deploy._apply")
-    mocker.patch(
-        "opta.commands.deploy.__check_layer_and_image", return_value=("AUTO", True)
-    )
+    mocker.patch("opta.commands.deploy.__check_layer_and_image", return_value=True)
     mocked_layer_class = mocker.patch("opta.commands.deploy.Layer")
     mocked_layer = mocker.Mock(spec=Layer)
     mocked_layer_class.load_from_yaml.return_value = mocked_layer
@@ -169,9 +165,7 @@ def test_deploy_all_flags(mocker: MockFixture) -> None:
         "opta.commands.deploy._push", return_value=("local_digest", "latest")
     )
     mock_apply = mocker.patch("opta.commands.deploy._apply")
-    mocker.patch(
-        "opta.commands.deploy.__check_layer_and_image", return_value=("AUTO", True)
-    )
+    mocker.patch("opta.commands.deploy.__check_layer_and_image", return_value=True)
     mocked_layer_class = mocker.patch("opta.commands.deploy.Layer")
     mocked_layer = mocker.Mock(spec=Layer)
     mocked_layer_class.load_from_yaml.return_value = mocked_layer
@@ -229,9 +223,7 @@ def test_deploy_ecr_apply(mocker: MockFixture) -> None:
     mock_push = mocker.patch(
         "opta.commands.deploy._push", return_value=("local_digest", "latest")
     )
-    mocker.patch(
-        "opta.commands.deploy.__check_layer_and_image", return_value=("AUTO", True)
-    )
+    mocker.patch("opta.commands.deploy.__check_layer_and_image", return_value=True)
     mock_apply = mocker.patch("opta.commands.deploy._apply")
     mocked_layer_class = mocker.patch("opta.commands.deploy.Layer")
     mocked_layer = mocker.Mock(spec=Layer)

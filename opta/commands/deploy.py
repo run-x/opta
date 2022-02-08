@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, List
+from typing import List, Optional
 
 import click
 
@@ -53,7 +53,7 @@ def deploy(
 ) -> None:
     """Deploys an image to Kubernetes
 
-    - Pushes the local image to private container registry (ECR, GCR, ACR), iff configuration contains `image: AUTO`,
+    - Pushes the local image to private container registry (ECR, GCR, ACR), if configuration contains `image: AUTO`,
       else uses the image provided from a Repo.
 
     - Update the kubernetes deployment to use the new image.
@@ -95,7 +95,7 @@ def deploy(
         amplitude_client.DEPLOY_EVENT,
         event_properties={"org_name": layer.org_name, "layer_name": layer.name},
     )
-    _, is_auto = __check_layer_and_image(layer, image)
+    is_auto = __check_layer_and_image(layer, image)
     layer.verify_cloud_credentials()
     layer.validate_required_path_dependencies()
     if Terraform.download_state(layer):
@@ -140,14 +140,14 @@ def deploy(
     )
 
 
-def __check_layer_and_image(layer: "Layer", option_image: str) -> Tuple[str, bool]:
+def __check_layer_and_image(layer: "Layer", option_image: str) -> bool:
     k8s_modules: List[Module] = layer.get_module_by_type("k8s-service")
     if len(k8s_modules) == 0:
         raise UserErrors("k8s-service module not present.")
-    configuration_image_name: str = k8s_modules[0].data.get("image")
+    configuration_image_name: str = k8s_modules[0].data.get("image")  # type: ignore
     configuration_image_name = configuration_image_name.lower()
     if configuration_image_name != "auto" and option_image is not None:
         raise UserErrors(
             f"Do not pass any image. Image {configuration_image_name} already present in configuration."
         )
-    return configuration_image_name, configuration_image_name == "auto"
+    return configuration_image_name == "auto"
