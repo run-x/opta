@@ -1,5 +1,5 @@
 from time import sleep
-from typing import TYPE_CHECKING, List, Optional, TypedDict, Tuple, Dict, Any
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypedDict
 
 import boto3
 from botocore.config import Config
@@ -97,7 +97,7 @@ class AWS(CloudClient):
         resp = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=s3_config_dir)
         s3_config_paths = [obj["Key"] for obj in resp.get("Contents", [])]
 
-        configs = [config_path[len(s3_config_dir):] for config_path in s3_config_paths]
+        configs = [config_path[len(s3_config_dir) :] for config_path in s3_config_paths]
         if self.layer.name in configs:
             configs.remove(self.layer.name)
         return configs
@@ -109,7 +109,7 @@ class AWS(CloudClient):
         s3_client = boto3.client("s3", config=Config(region_name=region))
 
         obj = s3_client.get_object(Bucket=bucket_name, Key=s3_config)
-        config_details = json.loads(obj["Body"].read())['original_spec']
+        config_details = json.loads(obj["Body"].read())["original_spec"]
         return config_details
 
     # Upload the current opta config to the state bucket, under opta_config/.

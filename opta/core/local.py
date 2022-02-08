@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from opta.core.cloud_client import CloudClient
 from opta.utils import json, logger
@@ -60,3 +60,9 @@ class Local(CloudClient):
 
     def get_terraform_lock_id(self) -> str:
         return ""
+
+    def list_child_config_names(self) -> List[str]:
+        return []
+
+    def get_configuration_details(self, config_name: str) -> Dict[str, Any]:
+        return {}

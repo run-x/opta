@@ -14,7 +14,12 @@ from opta.utils import check_opta_file_exists, logger
 @click.command()
 @click.option("-c", "--config", default="opta.yaml", help="Opta environment config file")
 @click.option("-n", "--service-name", default=None, help="Name of dependent service")
-@click.option("-o", "--output-file", default=None, help="Local file to download service configuration")
+@click.option(
+    "-o",
+    "--output-file",
+    default=None,
+    help="Local file to download service configuration",
+)
 def get_service(config: str, service_name: str, output_file: str) -> None:
     """
     Get the Dependent Service configuration for a given Environment.
@@ -46,7 +51,7 @@ def get_service(config: str, service_name: str, output_file: str) -> None:
     elif layer.cloud == "azurerm":
         cloud_client = Azure(layer)
     elif layer.cloud == "local":
-        raise Exception(f"Configurations would be present on the same system.")
+        raise Exception("Configurations would be present on the same system.")
     else:
         raise Exception(f"Cannot handle upload config for cloud {layer.cloud}")
 
@@ -70,8 +75,8 @@ def get_service(config: str, service_name: str, output_file: str) -> None:
         logger.info(requested_service_configuration)
         return
 
-    with open(abs_output_file, 'w') as f:
-        f.write(requested_service_configuration)
+    with open(abs_output_file, "w") as f:
+        f.write(requested_service_configuration)    # type: ignore
 
 
 def get_abs_path(file_path: str) -> str:
@@ -83,4 +88,6 @@ def get_abs_path(file_path: str) -> str:
 
 def overwrite_existing_file(file_path: str) -> None:
     if os.path.isfile(file_path):
-        click.confirm("File with such name already exists. Do you want to overwrite it?", abort=True)
+        click.confirm(
+            "File with such name already exists. Do you want to overwrite it?", abort=True
+        )
