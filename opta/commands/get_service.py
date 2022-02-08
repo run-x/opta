@@ -41,7 +41,8 @@ def get_service(config: str, service_name: str, output_file: str) -> None:
     config = check_opta_file_exists(config)
     layer = Layer.load_from_yaml(config, None)
     abs_output_file = get_abs_path(output_file) if output_file is not None else None
-    overwrite_existing_file(abs_output_file)
+    if abs_output_file is not None:
+        overwrite_existing_file(abs_output_file)
     layer.verify_cloud_credentials()
     cloud_client: CloudClient
     if layer.cloud == "aws":
