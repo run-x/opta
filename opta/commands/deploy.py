@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 import click
 
@@ -9,6 +9,7 @@ from opta.core.terraform import Terraform
 from opta.error_constants import USER_ERROR_TF_LOCK
 from opta.exceptions import MissingState, UserErrors
 from opta.layer import Layer
+from opta.module import Module
 from opta.pre_check import pre_check
 from opta.utils import check_opta_file_exists, fmt_msg, logger
 from opta.utils.clickoptions import local_option
@@ -16,7 +17,7 @@ from opta.utils.clickoptions import local_option
 
 @click.command()
 @click.option(
-    "-i", "--image", required=True, help="Your local image in the for myimage:tag"
+    "-i", "--image", help="Your local image in the for myimage:tag", default=None
 )
 @click.option("-c", "--config", default="opta.yaml", help="Opta config file.")
 @click.option(
@@ -50,19 +51,20 @@ def deploy(
     detailed_plan: bool,
     local: Optional[bool],
 ) -> None:
-    """Deploy a local image to Kubernetes
+    """Deploys an image to Kubernetes
 
-    1. Push the image to the private container registry (ECR, GCR, ACR)
+    - Pushes the local image to private container registry (ECR, GCR, ACR), if configuration contains `image: AUTO`,
+      else uses the image provided from a Repo.
 
-    2. Update the kubernetes deployment to use the new container image.
+    - Update the kubernetes deployment to use the new image.
 
-    3. Create new pods to use the new container image - automatically done by kubernetes.
+    - Create new pods to use the new image - automatically done by kubernetes.
 
     Examples:
 
-    opta deploy -c my-service.yaml -i my-image:latest --auto-approve
+    opta deploy -c image-auto-configuration.yaml -i image:local --auto-approve
 
-    opta deploy -c my-service.yaml -i my-image:latest -e prod
+    opta deploy -c repo-provided-configuration.yaml -e prod
 
     opta deploy -c my-service.yaml -i my-image:latest --local
 
@@ -93,6 +95,7 @@ def deploy(
         amplitude_client.DEPLOY_EVENT,
         event_properties={"org_name": layer.org_name, "layer_name": layer.name},
     )
+    is_auto = __check_layer_and_image(layer, image)
     layer.verify_cloud_credentials()
     layer.validate_required_path_dependencies()
     if Terraform.download_state(layer):
@@ -104,22 +107,26 @@ def deploy(
         outputs = Terraform.get_outputs(layer)
     except MissingState:
         outputs = {}
-    if "docker_repo_url" not in outputs or outputs["docker_repo_url"] == "":
-        logger.info(
-            "Did not find docker repository in state, so applying once to create it before deployment"
-        )
-        _apply(
-            config=config,
-            env=env,
-            refresh=False,
-            image_tag=None,
-            test=False,
-            local=local,
-            auto_approve=auto_approve,
-            stdout_logs=False,
-            detailed_plan=detailed_plan,
-        )
-    image_digest, image_tag = _push(image=image, config=config, env=env, tag=tag)
+
+    image_digest, image_tag = (None, None)
+    if is_auto:
+        if "docker_repo_url" not in outputs or outputs["docker_repo_url"] == "":
+            logger.info(
+                "Did not find docker repository in state, so applying once to create it before deployment"
+            )
+            _apply(
+                config=config,
+                env=env,
+                refresh=False,
+                image_tag=None,
+                test=False,
+                local=local,
+                auto_approve=auto_approve,
+                stdout_logs=False,
+                detailed_plan=detailed_plan,
+            )
+        if image is not None:
+            image_digest, image_tag = _push(image=image, config=config, env=env, tag=tag)
     _apply(
         config=config,
         env=env,
@@ -131,3 +138,16 @@ def deploy(
         image_digest=image_digest,
         detailed_plan=detailed_plan,
     )
+
+
+def __check_layer_and_image(layer: "Layer", option_image: str) -> bool:
+    k8s_modules: List[Module] = layer.get_module_by_type("k8s-service")
+    if len(k8s_modules) == 0:
+        raise UserErrors("k8s-service module not present.")
+    configuration_image_name: str = k8s_modules[0].data.get("image")  # type: ignore
+    configuration_image_name = configuration_image_name.lower()
+    if configuration_image_name != "auto" and option_image is not None:
+        raise UserErrors(
+            f"Do not pass any image. Image {configuration_image_name} already present in configuration."
+        )
+    return configuration_image_name == "auto"
