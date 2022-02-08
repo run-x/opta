@@ -23,7 +23,7 @@ The best way to report a bug is to file an issue on GitHub. Please make sure the
 - Any details about your local setup that might be helpful in troubleshooting.
 - When posting Python stack traces, please quote them using
 [Markdown blocks](https://help.github.com/articles/creating-and-highlighting-code-blocks/).
-- Tag the issue with `bug`
+- Label the issue with `bug`
 - Remember that this is a volunteer-driven project, and that contributions are welcome :)
 
 **Bugfix resolution time expectations**
@@ -38,7 +38,7 @@ The best way is to file an issue on GitHub:
 
 - Explain in detail how it would work.
 - Keep the scope as narrow as possible, to make it easier to implement.
-- Tag the issue with `feature-request`
+- Label the issue with `feature-request`
 
 ### Improve Documentation
 
