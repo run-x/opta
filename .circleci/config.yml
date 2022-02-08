@@ -271,7 +271,7 @@ jobs:
       - persist_to_workspace:
           root: ./
           paths:
-            - .circleci
+            - ./
 
   aws-check-file:
     executor: ubuntu-machine
