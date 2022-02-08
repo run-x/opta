@@ -26,7 +26,7 @@ The best way to report a bug is to file an issue on GitHub. Please make sure the
 - Tag the issue with `bug`
 - Remember that this is a volunteer-driven project, and that contributions are welcome :)
 
-**SLO**
+**Bugfix resolution time expectations**
 
 - We will respond to all new issues within 24 hours
 - For any serious (production breaking) bug we will try to resolve ASAP and do a hotfix release
