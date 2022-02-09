@@ -1,21 +1,22 @@
-from datetime import date
 import os
+import sys
 
-absolute_path = os.path.abspath(os.path.dirname(__file__))
-
+ABSOLUTE_FILE_PATH = os.path.abspath(os.path.dirname(__file__))
 AWS_REGIONS = ["us-east-1", "us-east-2", "us-west-1", "us-west-2"]
-ENV_NAMES = ["awsenv-ci-0", "awsenv-ci-1", "awsenv-ci-2", "awsenv-ci-3"]
 
-index = date.today().day % 4
+ENV_NAME = sys.argv[1]
+input_aws_region = sys.argv[2]
 
-AWS_REGION = AWS_REGIONS[index]
-ENV_NAME = ENV_NAMES[index]
+if input_aws_region not in AWS_REGIONS:
+    sys.exit(1)
 
-template_environment_file = os.path.join(absolute_path, "create-and-destroy-aws", "template-environment.yml")
-template_environment_additional_nodegroup_file = os.path.join(absolute_path, "create-and-destroy-aws", "template-environment-additional-nodegroup.yml")
+AWS_REGION = input_aws_region
 
-environment_file = os.path.join(absolute_path, "create-and-destroy-aws", "environment1.yml")
-environment_additional_nodegroup_file = os.path.join(absolute_path, "create-and-destroy-aws", "environment-additional-nodegroup1.yml")
+template_environment_file = os.path.join(ABSOLUTE_FILE_PATH, "create-and-destroy-aws", "template-environment.yml")
+template_environment_additional_nodegroup_file = os.path.join(ABSOLUTE_FILE_PATH, "create-and-destroy-aws", "template-environment-additional-nodegroup.yml")
+
+environment_file = os.path.join(ABSOLUTE_FILE_PATH, "create-and-destroy-aws", "environment1.yml")
+environment_additional_nodegroup_file = os.path.join(ABSOLUTE_FILE_PATH, "create-and-destroy-aws", "environment-additional-nodegroup1.yml")
 
 with open(template_environment_file, "r") as f:
     environment_template = f.read()

@@ -43,6 +43,18 @@ parameters:
   test:
     type: boolean
     default: false
+  ci-use-diff-env:
+    type: boolean
+    default: false
+  ci-env-name:
+    type: string
+    default: ''
+  ci-env-region-aws:
+    type: string
+    default: ''
+  ci-env-region-gcp:
+    type: string
+    default: ''
 
 orbs:
   terraform: circleci/terraform@3.0.0
@@ -86,6 +98,15 @@ commands:
       - kubernetes/install-kubectl
       - helm/install-helm-client:
           version: v3.7.1
+
+  remake-environment-configs:
+    steps:
+      - run:
+          name: Make AWS config.
+          command: python ./.circleci/ci-tests/generate_aws_env_config.py << pipeline.parameters.ci-env-name >> << pipeline.parameters.ci-env-region-aws >>
+      - run:
+          name: Make GCP config.
+          command: python ./.circleci/ci-tests/generate_gcp_env_config.py << pipeline.parameters.ci-env-name >> << pipeline.parameters.ci-env-region-gcp >>
 
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
@@ -258,20 +279,21 @@ jobs:
             - todo-api
             - todo-frontend
 
-  aws-make-env-config:
+  remake-env-config:
     executor: ubuntu-machine
     steps:
       - checkout
-      - install-python
-      - install-python-dependencies
+      - when: 
+          condition: << ci-use-default-env >>
+          steps:
+            - remake-environment-configs
       - run:
-          name: "Make env config"
+          name: "Show"
           command: |
-            python ./.circleci/ci-tests/generate_aws_env_config.py
-      - persist_to_workspace:
-          root: ./
-          paths:
-            - ./
+            cat ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
+            cat ./.circleci/ci-tests/create-and-destroy-aws/environment-additional-nodegroup.yml
+            cat ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml
+            cat ./.circleci/ci-tests/create-and-destroy-gcp/environment-additional-nodepool.yml
 
   aws-check-file:
     executor: ubuntu-machine
@@ -1839,13 +1861,7 @@ workflows:
   test:
     when: << pipeline.parameters.test >>
     jobs:
-      - aws-make-env-config
-      - aws-check-file:
-          requires:
-            - aws-make-env-config
-      - aws-check-file-persistence:
-          requires:
-            - aws-make-env-config
+      - remake-env-config
 
   nightly:
     triggers:
