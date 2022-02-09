@@ -99,6 +99,7 @@ commands:
       - helm/install-helm-client:
           version: v3.7.1
 
+# Note: The below command is dependent on the Repo being checked out and should always have a checkout command in the pipeline.
   remake-environment-configs:
     steps:
       - run:
@@ -107,6 +108,13 @@ commands:
       - run:
           name: Make GCP config.
           command: python ./.circleci/ci-tests/generate_gcp_env_config.py << pipeline.parameters.ci-env-name >> << pipeline.parameters.ci-env-region-gcp >>
+      - run:
+          name: Show configs.
+          command: |
+            cat ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
+            cat ./.circleci/ci-tests/create-and-destroy-aws/environment-additional-nodegroup.yml
+            cat ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml
+            cat ./.circleci/ci-tests/create-and-destroy-gcp/environment-additional-nodepool.yml 
 
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
@@ -117,22 +125,22 @@ jobs:
       - run:
           name: Get all parameter values.
           command: |
-            echo "run-create-and-destroy: " << pipeline.parameters.run-create-and-destroy >>
-            echo << pipeline.parameters.run-destroy-gcp-env >>
-            echo << pipeline.parameters.run-destroy-aws-env >>
-            echo << pipeline.parameters.run-destroy-all-envs >>
-            echo << pipeline.parameters.run-ci >>
-            echo << pipeline.parameters.run-create-destroy-local >>
-            echo << pipeline.parameters.run-service-mesh-e2e >>
-            echo << pipeline.parameters.test-aws-lambda >>
-            echo << pipeline.parameters.run-release-vs-stable >>
-            echo << pipeline.parameters.test-aws-dns >>
-            echo << pipeline.parameters.run-destroy-aws-dns-false >>
-            echo << pipeline.parameters.run-destroy-aws-dns-true >>
-            echo << pipeline.parameters.ci-use-diff-env >>
-            echo << pipeline.parameters.ci-env-name >>
-            echo << pipeline.parameters.ci-env-region-aws >>
-            echo << pipeline.parameters.ci-env-region-gcp >>
+            echo "run-create-and-destroy:     " << pipeline.parameters.run-create-and-destroy >>
+            echo "run-destroy-gcp-env:        " << pipeline.parameters.run-destroy-gcp-env >>
+            echo "run-destroy-aws-env:        " << pipeline.parameters.run-destroy-aws-env >>
+            echo "run-destroy-all-envs:       " << pipeline.parameters.run-destroy-all-envs >>
+            echo "run-ci:                     "  << pipeline.parameters.run-ci >>
+            echo "run-create-destroy-local:   " << pipeline.parameters.run-create-destroy-local >>
+            echo "run-service-mesh-e2e:       " << pipeline.parameters.run-service-mesh-e2e >>
+            echo "test-aws-lambda:            " << pipeline.parameters.test-aws-lambda >>
+            echo "run-release-vs-stable:      " << pipeline.parameters.run-release-vs-stable >>
+            echo "test-aws-dns:               " << pipeline.parameters.test-aws-dns >>
+            echo "run-destroy-aws-dns-false:  " << pipeline.parameters.run-destroy-aws-dns-false >>
+            echo "run-destroy-aws-dns-true:   " << pipeline.parameters.run-destroy-aws-dns-true >>
+            echo "ci-use-diff-env:            " << pipeline.parameters.ci-use-diff-env >>
+            echo "ci-env-name:                " << pipeline.parameters.ci-env-name >>
+            echo "ci-env-region-aws:          " << pipeline.parameters.ci-env-region-aws >>
+            echo "ci-env-region-gcp:          " << pipeline.parameters.ci-env-region-gcp >>
 
   no-pdb:
     executor: ubuntu-machine
@@ -302,22 +310,6 @@ jobs:
             - todo-api
             - todo-frontend
 
-  remake-env-config:
-    executor: ubuntu-machine
-    steps:
-      - checkout
-      - when: 
-          condition: << pipeline.parameters.ci-use-diff-env >>
-          steps:
-            - remake-environment-configs
-      - run:
-          name: "Show"
-          command: |
-            cat ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
-            cat ./.circleci/ci-tests/create-and-destroy-aws/environment-additional-nodegroup.yml
-            cat ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml
-            cat ./.circleci/ci-tests/create-and-destroy-gcp/environment-additional-nodepool.yml
-
   aws-create-env:
     executor: ubuntu-machine
     environment:
@@ -355,6 +347,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -374,6 +370,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -396,6 +396,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -415,6 +419,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ~/
       - install-opta-dependencies
@@ -434,6 +442,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -467,6 +479,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -503,6 +519,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -539,6 +559,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ~/
       - install-opta-dependencies
@@ -575,6 +599,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -599,6 +627,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -639,6 +671,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -665,6 +701,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -696,6 +736,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -727,6 +771,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -758,6 +806,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -853,6 +905,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -901,6 +957,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -934,6 +994,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -952,6 +1016,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -970,6 +1038,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -988,6 +1060,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ~/
       - install-opta-dependencies
@@ -1006,6 +1082,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -1036,6 +1116,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ~/
       - install-opta-dependencies
@@ -1058,6 +1142,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -1085,6 +1173,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -1127,6 +1219,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -1159,6 +1255,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -1193,6 +1293,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -1227,6 +1331,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -1325,6 +1433,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ~/
       - attach_workspace:
@@ -1395,6 +1507,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -1416,6 +1532,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -1467,6 +1587,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -1503,6 +1627,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -1547,6 +1675,10 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -1589,6 +1721,7 @@ workflows:
   run-create-and-destroy:
     when: << pipeline.parameters.run-create-and-destroy >>
     jobs: &fullsuite
+      - get-all-parameter-values
       - build-test-service-image
       - build-opta-example-images
       - build-opta-binary:
@@ -1690,6 +1823,7 @@ workflows:
   run-destroy-gcp-env:
     when: << pipeline.parameters.run-destroy-gcp-env >>
     jobs:
+      - get-all-parameter-values
       - build-opta-binary
       - gcp-destroy-env:
           requires:
@@ -1698,6 +1832,7 @@ workflows:
   run-destroy-aws-env:
     when: << pipeline.parameters.run-destroy-aws-env >>
     jobs:
+      - get-all-parameter-values
       - build-opta-binary
       - aws-destroy-env:
           requires:
@@ -1706,6 +1841,7 @@ workflows:
   run-destroy-all-envs:
     when: << pipeline.parameters.run-destroy-all-envs >>
     jobs:
+      - get-all-parameter-values
       - build-opta-binary
       - gcp-destroy-env:
           requires:
@@ -1717,6 +1853,7 @@ workflows:
   run-create-destroy-local-example:
     when: << pipeline.parameters.run-create-destroy-local >>
     jobs:
+      - get-all-parameter-values
       - build-opta-binary
       - build-opta-example-images
       - local-opta-example-create-svcs:
@@ -1730,6 +1867,7 @@ workflows:
   run-aws-lambda:
     when: << pipeline.parameters.test-aws-lambda >>
     jobs:
+      - get-all-parameter-values
       - build-opta-binary
       - aws-create-env:
           requires:
@@ -1744,6 +1882,7 @@ workflows:
   run-service-mesh-e2e:
     when: << pipeline.parameters.run-service-mesh-e2e >>
     jobs:
+      - get-all-parameter-values
       - build-opta-binary
       - build-opta-example-images
       - aws-create-env:
@@ -1776,6 +1915,7 @@ workflows:
   run-release-vs-stable:
     when: << pipeline.parameters.run-release-vs-stable >>
     jobs:
+      - get-all-parameter-values
       - build-opta-binary
       - build-test-service-image
       - download-opta
@@ -1824,6 +1964,7 @@ workflows:
   run-aws-dns:
     when: << pipeline.parameters.test-aws-dns >>
     jobs:
+      - get-all-parameter-values
       - build-opta-binary
       - aws-create-env-dns-false:
           requires:
@@ -1844,6 +1985,7 @@ workflows:
   run-destroy-aws-dns-false:
     when: << pipeline.parameters.run-destroy-aws-dns-false >>
     jobs:
+      - get-all-parameter-values
       - build-opta-binary
       - aws-destroy-env-dns-false:
           requires:
@@ -1852,6 +1994,7 @@ workflows:
   run-destroy-aws-dns-true:
     when: << pipeline.parameters.run-destroy-aws-dns-true >>
     jobs:
+      - get-all-parameter-values
       - build-opta-binary
       - aws-destroy-env-dns-true:
           requires:
@@ -1861,7 +2004,26 @@ workflows:
     when: << pipeline.parameters.test >>
     jobs:
       - get-all-parameter-values
-      - remake-env-config
+      - build-opta-binary
+      - aws-create-env:
+          requires:
+            - build-opta-binary
+      - aws-test-additional-nodegroup:
+          requires:
+            - aws-create-env
+      - aws-destroy-env:
+          requires:
+            - aws-test-additional-nodegroup
+      - gcp-create-env:
+          requires:
+            - build-opta-binary
+      - gcp-test-additional-nodegroup:
+          requires:
+            - gcp-create-env
+      - aws-destroy-env:
+          requires:
+            - gcp-test-additional-nodegroup
+      
 
   nightly:
     triggers:
