@@ -284,7 +284,7 @@ jobs:
     steps:
       - checkout
       - when: 
-          condition: << ci-use-default-env >>
+          condition: << ci-use-diff-env >>
           steps:
             - remake-environment-configs
       - run:
