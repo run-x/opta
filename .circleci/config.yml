@@ -2020,7 +2020,7 @@ workflows:
       - gcp-test-additional-nodegroup:
           requires:
             - gcp-create-env
-      - aws-destroy-env:
+      - gcp-destroy-env:
           requires:
             - gcp-test-additional-nodegroup
       
