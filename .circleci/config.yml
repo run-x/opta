@@ -284,7 +284,7 @@ jobs:
     steps:
       - checkout
       - when: 
-          condition: << ci-use-diff-env >>
+          condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
             - remake-environment-configs
       - run:
