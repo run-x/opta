@@ -92,12 +92,12 @@ Check out the [Getting Started Guide](https://docs.opta.dev/getting-started/).
 You can also explore some [examples](https://github.com/run-x/opta/tree/main/examples) to get a better idea of what you can do with Opta.
 
 # Development
-We love user contributions! Check out our [Dev guide](https://github.com/run-x/opta/blob/main/development.md) to get started.
+We love user contributions! Check out our [Contributing](https://github.com/run-x/opta/blob/main/CONTRIBUTING.md) and [Dev guide](https://github.com/run-x/opta/blob/main/development.md) to get started.
 
 # Miscellaneous
 * [Team behind Opta](https://www.runx.dev/about)
-* How Opta delivers upgrades (WIP)
-* Bugfix / Feature request policy (WIP)
+* [How Opta delivers upgrades](https://github.com/run-x/opta/blob/main/UPGRADING.md)
+* [Bugfix / Feature request policy](https://github.com/run-x/opta/blob/main/CONTRIBUTING.md)
 * Comparison with other tools (WIP)
-* Public roadmap (WIP)
+* [Public roadmap](https://github.com/orgs/run-x/projects/1/views/1)
 * Case studies - [Flyte](https://blog.flyte.org/how-opta-makes-deploying-flyte-much-easier) (More on the way!)
