@@ -104,7 +104,7 @@ commands:
     steps:
       - run:
           name: Remake configs.
-          command: python ./.circleci/ci-tests/generate_aws_env_config.py << pipeline.parameters.ci-env-name >> << pipeline.parameters.ci-env-region-aws >> << pipeline.parameters.ci-env-region-gcp >>
+          command: python ./.circleci/ci-tests/generate_env_config.py << pipeline.parameters.ci-env-name >> << pipeline.parameters.ci-env-region-aws >> << pipeline.parameters.ci-env-region-gcp >>
       - run:
           name: Show configs.
           command: |
