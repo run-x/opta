@@ -103,11 +103,8 @@ commands:
   remake-environment-configs:
     steps:
       - run:
-          name: Make AWS config.
-          command: python ./.circleci/ci-tests/generate_aws_env_config.py << pipeline.parameters.ci-env-name >> << pipeline.parameters.ci-env-region-aws >>
-      - run:
-          name: Make GCP config.
-          command: python ./.circleci/ci-tests/generate_gcp_env_config.py << pipeline.parameters.ci-env-name >> << pipeline.parameters.ci-env-region-gcp >>
+          name: Remake configs.
+          command: python ./.circleci/ci-tests/generate_aws_env_config.py << pipeline.parameters.ci-env-name >> << pipeline.parameters.ci-env-region-aws >> << pipeline.parameters.ci-env-region-gcp >>
       - run:
           name: Show configs.
           command: |
@@ -115,6 +112,9 @@ commands:
             cat ./.circleci/ci-tests/create-and-destroy-aws/environment-additional-nodegroup.yml
             cat ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml
             cat ./.circleci/ci-tests/create-and-destroy-gcp/environment-additional-nodepool.yml 
+            cat ./.circleci/ci-tests/todo-list/provider-aws-dns-false.yml
+            cat ./.circleci/ci-tests/todo-list/provider-aws-dns-true.yml
+            cat ./.circleci/ci-tests/todo-list/provider-gcp.yml
 
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
