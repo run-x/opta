@@ -15,7 +15,7 @@ GCP_REGION = input_gcp_region
 template_environment_file = os.path.join(ABSOLUTE_FILE_PATH, "create-and-destroy-gcp", "template-environment.yml")
 template_environment_additional_nodepool_file = os.path.join(ABSOLUTE_FILE_PATH, "create-and-destroy-gcp", "template-environment-additional-nodepool.yml")
 
-environment_file = os.path.join(ABSOLUTE_FILE_PATH, "create-and-destroy-gcp", "environment1.yml")
+environment_file = os.path.join(ABSOLUTE_FILE_PATH, "create-and-destroy-gcp", "environment.yml")
 environment_additional_nodepool_file = os.path.join(ABSOLUTE_FILE_PATH, "create-and-destroy-gcp", "environment-additional-nodepool.yml")
 
 with open(template_environment_file, "r") as f:

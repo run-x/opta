@@ -48,13 +48,13 @@ parameters:
     default: false
   ci-env-name:
     type: string
-    default: ''
+    default: 'env-ci'
   ci-env-region-aws:
     type: string
-    default: ''
+    default: 'us-east-2'
   ci-env-region-gcp:
     type: string
-    default: ''
+    default: 'us-central1'
 
 orbs:
   terraform: circleci/terraform@3.0.0
@@ -111,6 +111,29 @@ commands:
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
+  get-all-parameter-values:
+    executor: ubuntu-machine
+    steps:
+      - run:
+          name: Get all parameter values.
+          command: |
+            echo "run-create-and-destroy: " << pipeline.parameters.run-create-and-destroy >>
+            echo << pipeline.parameters.run-destroy-gcp-env >>
+            echo << pipeline.parameters.run-destroy-aws-env >>
+            echo << pipeline.parameters.run-destroy-all-envs >>
+            echo << pipeline.parameters.run-ci >>
+            echo << pipeline.parameters.run-create-destroy-local >>
+            echo << pipeline.parameters.run-service-mesh-e2e >>
+            echo << pipeline.parameters.test-aws-lambda >>
+            echo << pipeline.parameters.run-release-vs-stable >>
+            echo << pipeline.parameters.test-aws-dns >>
+            echo << pipeline.parameters.run-destroy-aws-dns-false >>
+            echo << pipeline.parameters.run-destroy-aws-dns-true >>
+            echo << pipeline.parameters.ci-use-diff-env >>
+            echo << pipeline.parameters.ci-env-name >>
+            echo << pipeline.parameters.ci-env-region-aws >>
+            echo << pipeline.parameters.ci-env-region-gcp >>
+
   no-pdb:
     executor: ubuntu-machine
     steps:
@@ -295,40 +318,16 @@ jobs:
             cat ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml
             cat ./.circleci/ci-tests/create-and-destroy-gcp/environment-additional-nodepool.yml
 
-  aws-check-file:
-    executor: ubuntu-machine
-    steps:
-      - checkout
-      - run:
-          name: "Check aws env config"
-          command: |
-            ls .circleci/ci-tests/create-and-destroy-aws/
-      - run:
-          name: "Check aws env config"
-          command: |
-            ls .circleci/ci-tests/
-
-  aws-check-file-persistence:
-    executor: ubuntu-machine
-    steps:
-      - checkout
-      - attach_workspace:
-          at: $HOME/project/
-      - run:
-          name: "Check aws env config"
-          command: |
-            ls .circleci/ci-tests/create-and-destroy-aws/
-      - run:
-          name: "Check aws env config"
-          command: |
-            ls .circleci/ci-tests/
-
   aws-create-env:
     executor: ubuntu-machine
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -1861,6 +1860,7 @@ workflows:
   test:
     when: << pipeline.parameters.test >>
     jobs:
+      - get-all-parameter-values
       - remake-env-config
 
   nightly:

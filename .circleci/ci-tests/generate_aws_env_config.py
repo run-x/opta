@@ -15,8 +15,8 @@ AWS_REGION = input_aws_region
 template_environment_file = os.path.join(ABSOLUTE_FILE_PATH, "create-and-destroy-aws", "template-environment.yml")
 template_environment_additional_nodegroup_file = os.path.join(ABSOLUTE_FILE_PATH, "create-and-destroy-aws", "template-environment-additional-nodegroup.yml")
 
-environment_file = os.path.join(ABSOLUTE_FILE_PATH, "create-and-destroy-aws", "environment1.yml")
-environment_additional_nodegroup_file = os.path.join(ABSOLUTE_FILE_PATH, "create-and-destroy-aws", "environment-additional-nodegroup1.yml")
+environment_file = os.path.join(ABSOLUTE_FILE_PATH, "create-and-destroy-aws", "environment.yml")
+environment_additional_nodegroup_file = os.path.join(ABSOLUTE_FILE_PATH, "create-and-destroy-aws", "environment-additional-nodegroup.yml")
 
 with open(template_environment_file, "r") as f:
     environment_template = f.read()
