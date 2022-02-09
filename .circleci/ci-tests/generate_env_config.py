@@ -2,9 +2,7 @@ import os
 import sys
 
 
-def create_config_from_template(
-    provider: str, directory: str, template_file: str, output_file: str
-) -> None:
+def create_config_from_template(provider, directory, template_file, output_file) -> None:
     template_file = os.path.join(ABSOLUTE_FILE_PATH, directory, template_file)
     output_file = os.path.join(ABSOLUTE_FILE_PATH, directory, output_file)
     with open(template_file, "r") as f:
