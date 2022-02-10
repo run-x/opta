@@ -104,7 +104,7 @@ commands:
       - run:
           name: "Set git user"
           command: |
-            git config --global user.email runx-ci@runx.dev"
+            git config --global user.email "runx-ci@runx.dev"
             git config --global user.name "Runx CI"
       - checkout
 
@@ -328,6 +328,7 @@ jobs:
           command: |
             git config --get user.name
             git config --get user.email
+            exit 0
       - run:
           name: "Run some commands"
           command: |
@@ -343,6 +344,7 @@ jobs:
           command: |
             git config --get user.name
             git config --get user.email
+            exit 0
       - run:
           name: "Run some commands"
           command: |
