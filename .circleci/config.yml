@@ -99,6 +99,15 @@ commands:
       - helm/install-helm-client:
           version: v3.7.1
 
+  checkout-opta:
+    steps:
+      - run:
+          name: "Set git user"
+          command: |
+            git config --global user.email runx-ci@runx.dev"
+            git config --global user.name "Runx CI"
+      - checkout
+
 # Note: The below command is dependent on the Repo being checked out and should always have a checkout command in the pipeline.
   remake-environment-configs:
     steps:
@@ -309,6 +318,36 @@ jobs:
           paths:
             - todo-api
             - todo-frontend
+
+  test-checkout-opta:
+    executor: ubuntu-machine
+    steps:
+      - checkout-opta
+      - run:
+          name: "Test git user"
+          command: |
+            git config --get user.name
+            git config --get user.email
+      - run:
+          name: "Run some commands"
+          command: |
+            pwd
+            ls -la
+
+  test-checkout:
+    executor: ubuntu-machine
+    steps:
+      - checkout
+      - run:
+          name: "Test git user"
+          command: |
+            git config --get user.name
+            git config --get user.email
+      - run:
+          name: "Run some commands"
+          command: |
+            pwd
+            ls -la
 
   aws-create-env:
     executor: ubuntu-machine
@@ -2004,26 +2043,8 @@ workflows:
     when: << pipeline.parameters.test >>
     jobs:
       - get-all-parameter-values
-      - build-opta-binary
-      - aws-create-env:
-          requires:
-            - build-opta-binary
-      - aws-test-additional-nodegroup:
-          requires:
-            - aws-create-env
-      - aws-destroy-env:
-          requires:
-            - aws-test-additional-nodegroup
-      - gcp-create-env:
-          requires:
-            - build-opta-binary
-      - gcp-test-additional-nodegroup:
-          requires:
-            - gcp-create-env
-      - gcp-destroy-env:
-          requires:
-            - gcp-test-additional-nodegroup
-      
+      - test-checkout
+      - test-checkout-opta
 
   nightly:
     triggers:
