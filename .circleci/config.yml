@@ -99,6 +99,15 @@ commands:
       - helm/install-helm-client:
           version: v3.7.1
 
+  checkout-opta:
+    steps:
+      - run:
+          name: "Set git user"
+          command: |
+            git config --global user.email "runx-ci@runx.dev"
+            git config --global user.name "Runx CI"
+      - checkout
+
 # Note: The below command is dependent on the Repo being checked out and should always have a checkout command in the pipeline.
   remake-environment-configs:
     steps:
@@ -145,7 +154,7 @@ jobs:
   no-pdb:
     executor: ubuntu-machine
     steps:
-      - checkout
+      - checkout-opta
       - run:
           name: "No PDB"
           command: |
@@ -154,7 +163,7 @@ jobs:
   lint:
     executor: python-docker
     steps:
-      - checkout
+      - checkout-opta
       - install-python-dependencies
       - run:
           name: "Lint"
@@ -166,7 +175,7 @@ jobs:
   regula-lint:
     executor: ubuntu-machine
     steps:
-      - checkout
+      - checkout-opta
       - run:
           name: "Install regula"
           command: |
@@ -182,7 +191,7 @@ jobs:
   python-security:
     executor: python-docker
     steps:
-      - checkout
+      - checkout-opta
       - install-python-dependencies
       - run:
           name: "Security"
@@ -191,7 +200,7 @@ jobs:
   pytest:
     executor: python-docker
     steps:
-      - checkout
+      - checkout-opta
       - install-python-dependencies
       - terraform/install:
           arch: amd64
@@ -209,7 +218,7 @@ jobs:
   terraform-formatter:
     executor: ubuntu-machine
     steps:
-      - checkout
+      - checkout-opta
       - terraform/install:
           arch: amd64
           os: linux
@@ -253,7 +262,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - install-python
       - install-python-dependencies
       - run:
@@ -272,7 +281,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - run:
           name: "Git clone the test service"
           command: "git clone git@github.com:run-x/test-service.git"
@@ -290,7 +299,7 @@ jobs:
   build-opta-example-images:
     executor: ubuntu-machine
     steps:
-      - checkout
+      - checkout-opta
       - run:
           name: "Git clone Opta Example"
           command: "git clone git@github.com:run-x/opta-examples.git"
@@ -315,7 +324,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -346,7 +355,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -369,7 +378,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -395,7 +404,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -418,7 +427,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -441,7 +450,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -478,7 +487,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -518,7 +527,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -558,7 +567,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -598,7 +607,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -626,7 +635,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -670,7 +679,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -700,7 +709,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -735,7 +744,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -770,7 +779,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -805,7 +814,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -904,7 +913,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -956,7 +965,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -993,7 +1002,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1015,7 +1024,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1037,7 +1046,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1059,7 +1068,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1081,7 +1090,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1115,7 +1124,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1141,7 +1150,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1172,7 +1181,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1218,7 +1227,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1254,7 +1263,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1292,7 +1301,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1330,7 +1339,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1432,7 +1441,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1506,7 +1515,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1531,7 +1540,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1586,7 +1595,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1626,7 +1635,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1674,7 +1683,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1709,7 +1718,7 @@ jobs:
     # Add steps to the job
     # See: https://circleci.com/docs/2.0/configuration-reference/#steps
     steps:
-      - checkout
+      - checkout-opta
       - run:
           name: "Say hello"
           command: "echo Hello, World!"
@@ -2008,22 +2017,9 @@ workflows:
       - aws-create-env:
           requires:
             - build-opta-binary
-      - aws-test-additional-nodegroup:
-          requires:
-            - aws-create-env
       - aws-destroy-env:
           requires:
-            - aws-test-additional-nodegroup
-      - gcp-create-env:
-          requires:
-            - build-opta-binary
-      - gcp-test-additional-nodegroup:
-          requires:
-            - gcp-create-env
-      - gcp-destroy-env:
-          requires:
-            - gcp-test-additional-nodegroup
-      
+            - aws-create-env
 
   nightly:
     triggers:
