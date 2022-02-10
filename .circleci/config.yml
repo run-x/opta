@@ -356,7 +356,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1034,7 +1034,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -2045,8 +2045,13 @@ workflows:
     when: << pipeline.parameters.test >>
     jobs:
       - get-all-parameter-values
-      - test-checkout
-      - test-checkout-opta
+      - build-opta-binary
+      - aws-create-env:
+          requires:
+            - build-opta-binary
+      - aws-destroy-env:
+          requires:
+            - aws-create-env
 
   nightly:
     triggers:
