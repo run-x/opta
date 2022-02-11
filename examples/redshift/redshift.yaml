@@ -6,7 +6,7 @@ providers:
 modules:
   - type: base
   - type: custom-terraform
-    name: redshiftsg
+    name: redshiftsecuritygroup
     source: "terraform-aws-modules/security-group/aws//modules/redshift"
     version: "~> 4.0"
     terraform_inputs:
@@ -19,7 +19,7 @@ modules:
     source: "terraform-aws-modules/redshift/aws"
     version: "~> 3.0"
     terraform_inputs:
-      cluster_identifier: "demo-redshift"
+      cluster_identifier: "redshift-demo"
       cluster_node_type: "dc2.large"
       cluster_number_of_nodes: 1
       cluster_database_name: "mydb"
