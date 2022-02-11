@@ -5,7 +5,7 @@ resource "tls_private_key" "nginx_ca" {
 
 resource "tls_self_signed_cert" "nginx_ca" {
   key_algorithm     = "RSA"
-  private_key_pem   = "${tls_private_key.nginx_ca.private_key_pem}"
+  private_key_pem   = tls_private_key.nginx_ca.private_key_pem
   is_ca_certificate = true
 
   subject {
@@ -23,18 +23,18 @@ resource "tls_self_signed_cert" "nginx_ca" {
   ]
 }
 resource "tls_private_key" "default" {
-  algorithm   = "RSA"
-  rsa_bits    = "2048"
+  algorithm = "RSA"
+  rsa_bits  = "2048"
 }
 
 resource "tls_cert_request" "default_cert_request" {
   key_algorithm   = tls_private_key.default.algorithm
   private_key_pem = tls_private_key.default.private_key_pem
-  dns_names = ["optaisawesome.com"]
-  ip_addresses = ["${google_compute_global_address.load_balancer.address}"]
+  dns_names       = ["optaisawesome.com"]
+  ip_addresses    = ["${google_compute_global_address.load_balancer.address}"]
 
   subject {
-    common_name = "optaisawesome.com"
+    common_name  = "optaisawesome.com"
     organization = "Org"
   }
 }

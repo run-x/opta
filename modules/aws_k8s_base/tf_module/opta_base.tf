@@ -5,7 +5,7 @@ resource "tls_private_key" "nginx_ca" {
 
 resource "tls_self_signed_cert" "nginx_ca" {
   key_algorithm     = "RSA"
-  private_key_pem   = "${tls_private_key.nginx_ca.private_key_pem}"
+  private_key_pem   = tls_private_key.nginx_ca.private_key_pem
   is_ca_certificate = true
 
   subject {
@@ -23,17 +23,17 @@ resource "tls_self_signed_cert" "nginx_ca" {
   ]
 }
 resource "tls_private_key" "default" {
-  algorithm   = "RSA"
-  rsa_bits    = "2048"
+  algorithm = "RSA"
+  rsa_bits  = "2048"
 }
 
 resource "tls_cert_request" "default_cert_request" {
   key_algorithm   = tls_private_key.default.algorithm
   private_key_pem = tls_private_key.default.private_key_pem
-  dns_names = ["*.elb.${data.aws_region.current.name}.amazonaws.com"]
+  dns_names       = ["*.elb.${data.aws_region.current.name}.amazonaws.com"]
 
   subject {
-    common_name = "*.elb.${data.aws_region.current.name}.amazonaws.com"
+    common_name  = "*.elb.${data.aws_region.current.name}.amazonaws.com"
     organization = "Org"
   }
 }
@@ -60,8 +60,8 @@ resource "helm_release" "opta_base" {
   values = [
     yamlencode({
       adminArns : var.admin_arns
-#      tls_key : base64encode(var.private_key),
-#      tls_crt : base64encode(join("\n", [var.certificate_body, var.certificate_chain])),
+      #      tls_key : base64encode(var.private_key),
+      #      tls_crt : base64encode(join("\n", [var.certificate_body, var.certificate_chain])),
       tls_key : base64encode(tls_private_key.default.private_key_pem),
       tls_crt : base64encode(tls_locally_signed_cert.default_cert.cert_pem)
     })
