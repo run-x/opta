@@ -284,6 +284,22 @@ def test_generate_terraform_env_and_service() -> None:
     _check_file_exist("modules/opta-k8s-service-helm/")
 
 
+def test_generate_terraform_undefined_dir() -> None:
+
+    service_file = os.path.join(
+        os.getcwd(), "tests", "fixtures", "dummy_data", "aws_service_getting_started.yaml"
+    )
+
+    # the value is empty
+    directory = " "
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli, ["generate-terraform", "-c", service_file, "-d", directory, "--replace"]
+    )
+    assert result.exit_code != 0
+
+
 def _check_file_exist(rel_path: str, text_to_find: List[str] = []) -> None:
     file = os.path.join(tmp_dir, rel_path)
     assert os.path.exists(file)
