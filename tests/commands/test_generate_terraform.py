@@ -43,7 +43,12 @@ def test_generate_terraform_env(mocker: MockFixture) -> None:
     mocked_amplitude_client = mocker.patch(
         "opta.commands.generate_terraform.amplitude_client", spec=AmplitudeClient
     )
-    mocked_amplitude_client.GEN_TERRAFORM = amplitude_client.GEN_TERRAFORM
+    mocked_amplitude_client.START_GEN_TERRAFORM_EVENT = (
+        amplitude_client.START_GEN_TERRAFORM_EVENT
+    )
+    mocked_amplitude_client.FINISH_GEN_TERRAFORM_EVENT = (
+        amplitude_client.FINISH_GEN_TERRAFORM_EVENT
+    )
 
     runner = CliRunner()
     result = runner.invoke(cli, ["generate-terraform", "-c", env_file, "-d", tmp_dir])
@@ -125,14 +130,29 @@ def test_generate_terraform_env(mocker: MockFixture) -> None:
     _check_file_exist("modules/aws_eks/tf_module/eks.tf", ["aws_eks_cluster"])
     _check_file_exist("modules/aws_k8s_base/tf_module/ingress_nginx.tf", ["aws_lb"])
 
-    mocked_amplitude_client.send_event.assert_called_once_with(
-        amplitude_client.GEN_TERRAFORM,
-        event_properties={
-            "total_resources": 0,
-            "org_name": "opta-tests",
-            "layer_name": "staging",
-            "parent_name": "",
-        },
+    mocked_amplitude_client.send_event.assert_has_calls(
+        [
+            mocker.call(
+                amplitude_client.START_GEN_TERRAFORM_EVENT,
+                event_properties={
+                    "total_resources": 0,
+                    "org_name": "opta-tests",
+                    "layer_name": "staging",
+                    "parent_name": "",
+                    "success": True,
+                },
+            ),
+            mocker.call(
+                amplitude_client.FINISH_GEN_TERRAFORM_EVENT,
+                event_properties={
+                    "total_resources": 0,
+                    "org_name": "opta-tests",
+                    "layer_name": "staging",
+                    "parent_name": "",
+                    "success": True,
+                },
+            ),
+        ]
     )
 
 

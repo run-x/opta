@@ -82,108 +82,122 @@ def generate_terraform(
 
     event_properties: Dict = layer.get_event_properties()
     amplitude_client.send_event(
-        amplitude_client.GEN_TERRAFORM, event_properties=event_properties,
+        amplitude_client.START_GEN_TERRAFORM_EVENT, event_properties=event_properties,
     )
 
-    # work in a temp directory until command is over, to prevent messing up existing files
-    tmp_dir = tempfile.TemporaryDirectory(prefix="opta-gen-tf").name
-    output_dir = os.path.join(os.getcwd(), directory)
-
-    # to keep consistent with what opta does - we could make this an option if opta tags are not desirable
-    gen_opta_resource_tags(layer)
-
-    # copy helm service dir
-    if "k8s-service" in [m.type for m in layer.modules]:
-        # find module root directory
-        service_helm_dir = os.path.join(
-            layer.modules[0].module_dir_path, "..", "..", "opta-k8s-service-helm"
-        )
-        target_dir = os.path.join(tmp_dir, "modules", "opta-k8s-service-helm")
-        logger.debug(f"Copying helm charts from {service_helm_dir} to {target_dir}")
-        shutil.copytree(service_helm_dir, target_dir, dirs_exist_ok=True)
-
-    # copy module directories and update the module path to point to local directory
-    for module in layer.modules:
-        src_path = module.module_dir_path
-        rel_path = "./" + src_path[src_path.index("modules/") :]
-        abs_path = os.path.join(tmp_dir, rel_path)
-        logger.debug(f"Copying module from {module.aliased_type} to {abs_path}")
-        shutil.copytree(src_path, abs_path, dirs_exist_ok=True)
-        # configure module path to use new relative path
-        module.module_dir_path = rel_path
-
-    # update terraform backend to be local (currently defined in the registry)
-    # this is needed as the generated terraform should work outside of opta
-    backend_dir = f"./tfstate/{layer.root().name}.tfstate"
-    logger.debug(f"Setting terraform backend to local: {backend_dir}")
-    original_backend = REGISTRY[layer.cloud]["backend"]
-    REGISTRY[layer.cloud]["backend"] = {"local": {"path": backend_dir}}
-    # generate the main.tf.json
     try:
-        execution_plan = list(gen(layer))
-    finally:
-        REGISTRY[layer.cloud]["backend"] = original_backend
 
-    # break down json file in multiple files
-    main_tf_json = json.load(open(TF_FILE_PATH))
-    for key in ["provider", "data", "output", "terraform"]:
-        # extract the relevant json
-        main_tf_json, extracted_json = dicts.extract(main_tf_json, key)
+        # work in a temp directory until command is over, to prevent messing up existing files
+        tmp_dir = tempfile.TemporaryDirectory(prefix="opta-gen-tf").name
+        output_dir = os.path.join(os.getcwd(), directory)
 
-        # if there was already a file for it, merge it
-        # ex: combine all the terraform "output" variables
-        prev_tf_file = os.path.join(output_dir, f"{key}.tf.json")
-        if os.path.exists(prev_tf_file):
-            logger.debug(
-                f"Found existing terraform file: {prev_tf_file}, merging it with new values"
+        # to keep consistent with what opta does - we could make this an option if opta tags are not desirable
+        gen_opta_resource_tags(layer)
+
+        # copy helm service dir
+        if "k8s-service" in [m.type for m in layer.modules]:
+            # find module root directory
+            service_helm_dir = os.path.join(
+                layer.modules[0].module_dir_path, "..", "..", "opta-k8s-service-helm"
             )
-            prev_json = json.load(open(prev_tf_file))
-            extracted_json = dicts.merge(extracted_json, prev_json)
+            target_dir = os.path.join(tmp_dir, "modules", "opta-k8s-service-helm")
+            logger.debug(f"Copying helm charts from {service_helm_dir} to {target_dir}")
+            shutil.copytree(service_helm_dir, target_dir, dirs_exist_ok=True)
 
-        # save it as it's own file
-        _write_json(extracted_json, os.path.join(tmp_dir, f"{key}.tf.json"))
+        # copy module directories and update the module path to point to local directory
+        for module in layer.modules:
+            src_path = module.module_dir_path
+            rel_path = "./" + src_path[src_path.index("modules/") :]
+            abs_path = os.path.join(tmp_dir, rel_path)
+            logger.debug(f"Copying module from {module.aliased_type} to {abs_path}")
+            shutil.copytree(src_path, abs_path, dirs_exist_ok=True)
+            # configure module path to use new relative path
+            module.module_dir_path = rel_path
 
-    # extract modules tf.json in their own files
-    main_tf_json, modules_json = dicts.extract(main_tf_json, "module")
-    for name, value in modules_json["module"].items():
-        _write_json(
-            {"module": {name: value}}, os.path.join(tmp_dir, f"module-{name}.tf.json")
-        )
+        # update terraform backend to be local (currently defined in the registry)
+        # this is needed as the generated terraform should work outside of opta
+        backend_dir = f"./tfstate/{layer.root().name}.tfstate"
+        logger.debug(f"Setting terraform backend to local: {backend_dir}")
+        original_backend = REGISTRY[layer.cloud]["backend"]
+        REGISTRY[layer.cloud]["backend"] = {"local": {"path": backend_dir}}
+        # generate the main.tf.json
+        try:
+            execution_plan = list(gen(layer))
+        finally:
+            REGISTRY[layer.cloud]["backend"] = original_backend
 
-    # update the main file without the extracted sections
-    if main_tf_json:
-        # only write file there is anything remaining
-        _write_json(
-            main_tf_json, os.path.join(tmp_dir, f"{tmp_dir}/{layer.name}.tf.json")
-        )
+        # break down json file in multiple files
+        main_tf_json = json.load(open(TF_FILE_PATH))
+        for key in ["provider", "data", "output", "terraform"]:
+            # extract the relevant json
+            main_tf_json, extracted_json = dicts.extract(main_tf_json, key)
 
-    # generate the readme
-    readme_name = f"{layer.name}.md"
-    opta_cmd = f"opta {ctx.info_name} {str_options(ctx)}"
-    _generate_readme(layer, execution_plan, f"{tmp_dir}/{readme_name}", opta_cmd)
-
-    # if everything was successfull, copy tmp dir to target dir
-    if os.path.exists(output_dir):
-        if replace:
-            logger.info(
-                f"Output directory {directory} already exists and --replace flag is on, deleting it"
-            )
-            if not auto_approve:
-                click.confirm(
-                    f"The existing directory will be deleted: {output_dir}.\n Do you approve?",
-                    abort=True,
+            # if there was already a file for it, merge it
+            # ex: combine all the terraform "output" variables
+            prev_tf_file = os.path.join(output_dir, f"{key}.tf.json")
+            if os.path.exists(prev_tf_file):
+                logger.debug(
+                    f"Found existing terraform file: {prev_tf_file}, merging it with new values"
                 )
-            _clean_folder(output_dir)
-        else:
-            logger.info(
-                f"Output directory {directory} already exists, adding new files to it"
+                prev_json = json.load(open(prev_tf_file))
+                extracted_json = dicts.merge(extracted_json, prev_json)
+
+            # save it as it's own file
+            _write_json(extracted_json, os.path.join(tmp_dir, f"{key}.tf.json"))
+
+        # extract modules tf.json in their own files
+        main_tf_json, modules_json = dicts.extract(main_tf_json, "module")
+        for name, value in modules_json["module"].items():
+            _write_json(
+                {"module": {name: value}}, os.path.join(tmp_dir, f"module-{name}.tf.json")
             )
 
-    logger.debug(f"Copy {tmp_dir} to {output_dir}")
-    shutil.copytree(tmp_dir, output_dir, dirs_exist_ok=True)
-    logger.info(
-        f"Terraform files generated, check {os.path.join(directory, readme_name)} for documentation"
-    )
+        # update the main file without the extracted sections
+        if main_tf_json:
+            # only write file there is anything remaining
+            _write_json(
+                main_tf_json, os.path.join(tmp_dir, f"{tmp_dir}/{layer.name}.tf.json")
+            )
+
+        # generate the readme
+        readme_name = f"{layer.name}.md"
+        opta_cmd = f"opta {ctx.info_name} {str_options(ctx)}"
+        _generate_readme(layer, execution_plan, f"{tmp_dir}/{readme_name}", opta_cmd)
+
+        # if everything was successfull, copy tmp dir to target dir
+        if os.path.exists(output_dir):
+            if replace:
+                logger.info(
+                    f"Output directory {directory} already exists and --replace flag is on, deleting it"
+                )
+                if not auto_approve:
+                    click.confirm(
+                        f"The existing directory will be deleted: {output_dir}.\n Do you approve?",
+                        abort=True,
+                    )
+                _clean_folder(output_dir)
+            else:
+                logger.info(
+                    f"Output directory {directory} already exists, adding new files to it"
+                )
+
+        logger.debug(f"Copy {tmp_dir} to {output_dir}")
+        shutil.copytree(tmp_dir, output_dir, dirs_exist_ok=True)
+        logger.info(
+            f"Terraform files generated, check {os.path.join(directory, readme_name)} for documentation"
+        )
+
+    except Exception as e:
+        event_properties["success"] = False
+        event_properties["error_name"] = e.__class__.__name__
+        raise e
+    else:
+        event_properties["success"] = True
+    finally:
+        amplitude_client.send_event(
+            amplitude_client.FINISH_GEN_TERRAFORM_EVENT,
+            event_properties=event_properties,
+        )
 
 
 def _write_json(data: dict, file_path: str) -> None:
