@@ -145,7 +145,16 @@ def test_generate_terraform_service() -> None:
 
     runner = CliRunner()
     result = runner.invoke(
-        cli, ["generate-terraform", "-c", service_file, "-d", tmp_dir, "--replace"]
+        cli,
+        [
+            "generate-terraform",
+            "-c",
+            service_file,
+            "-d",
+            tmp_dir,
+            "--replace",
+            "--auto-approve",
+        ],
     )
     assert result.exit_code == 0
 

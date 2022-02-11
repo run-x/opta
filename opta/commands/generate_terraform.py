@@ -44,9 +44,20 @@ from opta.utils.markdown import Code, Markdown, Text, Title1, Title2
     Warning: If used, the existing files will be lost, including the terraform state files if local backend is used.""",
     show_default=True,
 )
+@click.option(
+    "--auto-approve",
+    is_flag=True,
+    default=False,
+    help="Automatically approve confirmation message for deleting existing files.",
+)
 @click.pass_context
 def generate_terraform(
-    ctx: click.Context, config: str, env: Optional[str], directory: str, replace: bool
+    ctx: click.Context,
+    config: str,
+    env: Optional[str],
+    directory: str,
+    replace: bool,
+    auto_approve: bool,
 ) -> None:
     """Generate Terraform language files
 
@@ -157,6 +168,11 @@ def generate_terraform(
             logger.info(
                 f"Output directory {directory} already exists and --replace flag is on, deleting it"
             )
+            if not auto_approve:
+                click.confirm(
+                    f"The existing directory will be deleted: {output_dir}.\n Do you approve?",
+                    abort=True,
+                )
             _clean_folder(output_dir)
         else:
             logger.info(
