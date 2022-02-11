@@ -1,6 +1,6 @@
 resource "tls_private_key" "nginx_ca" {
   algorithm = "RSA"
-  rsa_bits  = "4096"
+  rsa_bits  = "2048"
 }
 
 resource "tls_self_signed_cert" "nginx_ca" {
@@ -24,7 +24,7 @@ resource "tls_self_signed_cert" "nginx_ca" {
 }
 resource "tls_private_key" "default" {
   algorithm   = "RSA"
-  rsa_bits    = "4096"
+  rsa_bits    = "2048"
 }
 
 resource "tls_cert_request" "default_cert_request" {
