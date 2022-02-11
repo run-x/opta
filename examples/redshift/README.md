@@ -1,7 +1,7 @@
 # What is this?
 
-This example shows how one can use Opta combined with existing remote terraform modules to spin up
-an [Amazon Redshift](https://docs.aws.amazon.com/redshift/latest/mgmt/welcome.html) instance.
+This example shows how Opta can use a remote terraform module to spin up an
+[Amazon Redshift](https://docs.aws.amazon.com/redshift/latest/mgmt/welcome.html) instance.
 
 You can also use this button to fill in the variable fields in the config.
 [![Deploy](https://raw.githubusercontent.com/run-x/opta/main/assets/deploy-to-aws-button.svg)](https://app.runx.dev/deploy-with-aws?url=https%3A%2F%2Fgithub.com%2Frun-x%2Fopta%2Fblob%2Fmain%2Fexamples%2Fredshift%2Fredshift.yaml&name=Redshift)
