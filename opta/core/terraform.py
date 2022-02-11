@@ -327,6 +327,10 @@ class Terraform:
 
     @classmethod
     def download_state(cls, layer: "Layer") -> bool:
+        if layer.is_stateless_mode() is True:
+            # no remote state for stateless mode
+            return False
+
         if not cls.verify_storage(layer):
             logger.debug(
                 fmt_msg(

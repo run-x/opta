@@ -73,38 +73,19 @@ def test_generate_terraform_env(mocker: MockFixture) -> None:
         ],
     )
     _check_file_exist(
-        "data.tf.json",
-        [
-            "aws_caller_identity",
-            "aws_region",
-            "aws_eks_cluster_auth",
-        ],
+        "data.tf.json", ["aws_caller_identity", "aws_region", "aws_eks_cluster_auth"]
     )
     _check_file_exist(
         "output.tf.json",
-        [
-            "kms_account_key_arn",
-            "vpc_id",
-            "k8s_cluster_name",
-            "load_balancer_raw_dns",
-        ],
+        ["kms_account_key_arn", "vpc_id", "k8s_cluster_name", "load_balancer_raw_dns"],
     )
     _check_file_exist(
         "provider.tf.json",
-        [
-            "helm",
-            "cluster_ca_certificate",
-            "aws",
-            "allowed_account_ids",
-        ],
+        ["helm", "cluster_ca_certificate", "aws", "allowed_account_ids"],
     )
     _check_file_exist(
         "terraform.tf.json",
-        [
-            "hashicorp/aws",
-            "hashicorp/helm",
-            "./tfstate/staging.tfstate",
-        ],
+        ["hashicorp/aws", "hashicorp/helm", "./tfstate/staging.tfstate"],
     )
     _check_file_exist(
         "module-base.tf.json",
@@ -199,20 +180,11 @@ def test_generate_terraform_service() -> None:
         ],
     )
     _check_file_exist(
-        "output.tf.json",
-        [
-            "docker_repo_url",
-            "module.hello.docker_repo_url",
-        ],
+        "output.tf.json", ["docker_repo_url", "module.hello.docker_repo_url"]
     )
     _check_file_exist(
         "provider.tf.json",
-        [
-            "helm",
-            "cluster_ca_certificate",
-            "aws",
-            "allowed_account_ids",
-        ],
+        ["helm", "cluster_ca_certificate", "aws", "allowed_account_ids"],
     )
     _check_file_exist(
         "terraform.tf.json",
@@ -245,10 +217,7 @@ def test_generate_terraform_service() -> None:
 
     # check helm chart
     _check_file_exist(
-        "modules/opta-k8s-service-helm/templates/deployment.yaml",
-        [
-            "kind: Deployment",
-        ],
+        "modules/opta-k8s-service-helm/templates/deployment.yaml", ["kind: Deployment"]
     )
 
 
@@ -303,20 +272,11 @@ def test_generate_terraform_env_and_service() -> None:
     )
     _check_file_exist(
         "provider.tf.json",
-        [
-            "helm",
-            "cluster_ca_certificate",
-            "aws",
-            "allowed_account_ids",
-        ],
+        ["helm", "cluster_ca_certificate", "aws", "allowed_account_ids"],
     )
     _check_file_exist(
         "terraform.tf.json",
-        [
-            "hashicorp/aws",
-            "hashicorp/helm",
-            "./tfstate/staging.tfstate",
-        ],
+        ["hashicorp/aws", "hashicorp/helm", "./tfstate/staging.tfstate"],
     )
     _check_file_exist("modules/aws_base/")
     _check_file_exist("modules/aws_eks/")

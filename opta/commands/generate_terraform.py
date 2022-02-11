@@ -71,8 +71,7 @@ def generate_terraform(
 
     event_properties: Dict = layer.get_event_properties()
     amplitude_client.send_event(
-        amplitude_client.GEN_TERRAFORM,
-        event_properties=event_properties,
+        amplitude_client.GEN_TERRAFORM, event_properties=event_properties,
     )
 
     # work in a temp directory until command is over, to prevent messing up existing files

@@ -8,12 +8,7 @@ def test_extract() -> None:
     }
 
     assert dicts.extract(val, "unknown") == (val, {})
-    assert dicts.extract(val, "foo") == (
-        {
-            "abc": 123,
-        },
-        {"foo": "bar"},
-    )
+    assert dicts.extract(val, "foo") == ({"abc": 123}, {"foo": "bar"})
     assert val == {
         "abc": 123,
         "foo": "bar",
