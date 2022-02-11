@@ -1,0 +1,12 @@
+name: hello
+environments:
+  - name: staging
+    path: "aws_env_getting_started.yaml"
+modules:
+  - type: k8s-service
+    name: hello
+    port:
+      http: 80
+    image: ghcr.io/run-x/opta-examples/hello-app:main
+    healthcheck_path: "/"
+    public_uri: "/hello"

@@ -32,6 +32,7 @@ class AmplitudeClient:
     VIEW_OUTPUT_EVENT = "VIEW_OUTPUT"
     FORCE_UNLOCK_EVENT = "FORCE_UNLOCK"
     FINISH_GEN_EVENT = "FINISH_GEN"
+    GEN_TERRAFORM = "GEN_TERRAFORM"
     VALID_EVENTS = [
         UPDATE_SECRET_EVENT,
         UPDATE_BULK_SECRET_EVENT,
@@ -51,6 +52,7 @@ class AmplitudeClient:
         VIEW_OUTPUT_EVENT,
         FORCE_UNLOCK_EVENT,
         FINISH_GEN_EVENT,
+        GEN_TERRAFORM,
     ]
 
     def __init__(self) -> None:

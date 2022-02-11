@@ -389,10 +389,16 @@ class K8sServiceModuleProcessor(ModuleProcessor):
 
 
 class K8sBaseModuleProcessor:
-    def _process_nginx_extra_ports(self, data: Dict[Any, Any]) -> None:
+    def _process_nginx_extra_ports(self, layer: "Layer", data: Dict[Any, Any]) -> None:
         extra_ports: List[int] = data.get("nginx_extra_tcp_ports", [])
         extra_tls_ports: List[int] = data.get("nginx_extra_tcp_ports_tls", [])
 
+        # stateless mode - no k8s available
+        if layer.is_stateless_mode() is True:
+            data["nginx_extra_tcp_ports"] = {}
+            return
+
+        kubernetes.set_kube_config(layer)
         service_port_mapping = reconcile_nginx_extra_ports(update_config_map=False)
 
         # In a separate function to make logic more testable

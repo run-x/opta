@@ -37,7 +37,7 @@ def gen(
     total_module_count = len(layer.modules)
     current_modules = []
     for module_idx, module in enumerate(layer.modules):
-        logger.debug(f"Generating {module_idx}")
+        logger.debug(f"Generating {module_idx} - {module.name}")
         current_modules.append(module)
         if not module.halt and module_idx + 1 != total_module_count:
             continue
