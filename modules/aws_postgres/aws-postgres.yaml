@@ -34,6 +34,11 @@ inputs:
     validator: bool(required=False)
     description: Add deletion protection to stop accidental db deletions
     default: false
+  - name: backup_retention_days
+    user_facing: true
+    validator: int(required=False)
+    description: How many days to keep the backup retention
+    default: 7
 outputs:
   - name: db_user
     export: false

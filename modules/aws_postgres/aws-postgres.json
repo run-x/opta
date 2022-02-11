@@ -14,6 +14,11 @@
       "description": "The version of the database to use.",
       "default": "11.9"
     },
+    "backup_retention_days": {
+      "type": "boolean",
+      "description": "How many days to keep the backup retention",
+      "default": 7
+    },
     "multi_az": {
       "type": "boolean",
       "description": "Enable read-write replication across different availability zones on the same reason (doubles the cost, but needed for compliance). Can be added and updated at a later date without need to recreate.",
