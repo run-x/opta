@@ -13,7 +13,7 @@ resource "helm_release" "ingress-nginx" {
         podLabels : {
           "opta-ingress-healthcheck" : "yes"
         }
-        extraArgs : var.private_key == "" ? {} : { default-ssl-certificate : "ingress-nginx/secret-tls" }
+        extraArgs : { default-ssl-certificate : "ingress-nginx/secret-tls" }
         config : local.config
         podAnnotations : {
           "config.linkerd.io/skip-inbound-ports" : "80,443" // NOTE: should be removed when this is fixed: https://github.com/linkerd/linkerd2/issues/4219

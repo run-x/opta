@@ -1,12 +1,35 @@
-# Reusing CA authority made for linkerd
+resource "tls_private_key" "nginx_ca" {
+  algorithm = "RSA"
+  rsa_bits  = "4096"
+}
+
+resource "tls_self_signed_cert" "nginx_ca" {
+  key_algorithm     = "RSA"
+  private_key_pem   = "${tls_private_key.nginx_ca.private_key_pem}"
+  is_ca_certificate = true
+
+  subject {
+    common_name         = "Opta is awesome"
+    organization        = "Opta Self Signed"
+    organizational_unit = "opta"
+  }
+
+  validity_period_hours = 87600
+
+  allowed_uses = [
+    "digital_signature",
+    "cert_signing",
+    "crl_signing",
+  ]
+}
 resource "tls_private_key" "default" {
   algorithm   = "RSA"
-#  ecdsa_curve = "P256"
+  rsa_bits    = "4096"
 }
 
 resource "tls_cert_request" "default_cert_request" {
-  key_algorithm   = tls_private_key.issuer_key.algorithm
-  private_key_pem = tls_private_key.issuer_key.private_key_pem
+  key_algorithm   = tls_private_key.default.algorithm
+  private_key_pem = tls_private_key.default.private_key_pem
   dns_names = ["*.elb.${data.aws_region.current.name}.amazonaws.com"]
 
   subject {
@@ -17,14 +40,14 @@ resource "tls_cert_request" "default_cert_request" {
 
 resource "tls_locally_signed_cert" "default_cert" {
   cert_request_pem      = tls_cert_request.default_cert_request.cert_request_pem
-  ca_key_algorithm      = tls_private_key.trustanchor_key.algorithm
-  ca_private_key_pem    = tls_private_key.trustanchor_key.private_key_pem
-  ca_cert_pem           = tls_self_signed_cert.trustanchor_cert.cert_pem
+  ca_key_algorithm      = tls_private_key.nginx_ca.algorithm
+  ca_private_key_pem    = tls_private_key.nginx_ca.private_key_pem
+  ca_cert_pem           = tls_self_signed_cert.nginx_ca.cert_pem
   validity_period_hours = 87600
 
   allowed_uses = [
-    "crl_signing",
-    "cert_signing",
+    "key_encipherment",
+    "digital_signature",
     "server_auth",
     "client_auth"
   ]
