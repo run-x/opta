@@ -6,10 +6,11 @@ from botocore.config import Config
 from mypy_boto3_autoscaling import AutoScalingClient
 from mypy_boto3_ec2 import EC2Client
 from mypy_boto3_ec2.type_defs import NetworkInterfaceTypeDef
+from mypy_boto3_eks import EKSClient
 from mypy_boto3_logs import CloudWatchLogsClient
 
 from modules.base import ModuleProcessor
-from opta.core.kubernetes import purge_opta_kube_config
+from opta.core.kubernetes import get_cluster_name, purge_opta_kube_config
 from opta.exceptions import UserErrors
 from opta.utils import logger
 
@@ -93,6 +94,29 @@ class AwsEksProcessor(ModuleProcessor):
                 f"Cloudwatch Log group {log_group_name} has recreated itself. Not stopping the destroy, but you will "
                 "wanna check this out."
             )
+
+    def delete_preexisting_cloudwatch_log_group(self, region: str) -> None:
+        """If there is a pre-existing cloudwatch log group (which can happen if the opta module was destroyed, but the
+        log group was revived because of dalyed final log messages), then delete the log group"""
+        cluster_name = get_cluster_name(self.layer.root())
+        if cluster_name is None:
+            return
+
+        eks_client: EKSClient = boto3.client("eks", config=Config(region_name=region))
+        try:
+            eks_client.describe_cluster(name=cluster_name)
+            return
+        except eks_client.exceptions.ResourceNotFoundException:
+            pass
+        client: CloudWatchLogsClient = boto3.client(
+            "logs", config=Config(region_name=region)
+        )
+        log_group_name = f"/aws/eks/opta-{self.layer.name}/cluster"
+        log_groups = client.describe_log_groups(logGroupNamePrefix=log_group_name)
+        if len(log_groups["logGroups"]) == 0:
+            return
+        logger.info("Found pre-existing cloudwatch log group. Deleting now.")
+        client.delete_log_group(logGroupName=log_group_name)
 
     def cleanup_dangling_enis(self, region: str) -> None:
         client: EC2Client = boto3.client("ec2", config=Config(region_name=region))
@@ -192,4 +216,8 @@ class AwsEksProcessor(ModuleProcessor):
             "kms_account_key_arn"
         ] = f"${{{{module.{aws_base_module.name}.kms_account_key_arn}}}}"
         self.module.data["vpc_id"] = f"${{{{module.{aws_base_module.name}.vpc_id}}}}"
+
+        providers = self.layer.gen_providers(0)
+        region = providers["provider"]["aws"]["region"]
+        self.delete_preexisting_cloudwatch_log_group(region)
         super(AwsEksProcessor, self).process(module_idx)
