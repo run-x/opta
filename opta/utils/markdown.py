@@ -5,6 +5,8 @@ This module can generate some markdown (.md) output
 
 from typing import List, Optional
 
+import markdown as markdown_lib
+
 
 class Text:
 
@@ -36,8 +38,18 @@ class Markdown:
 
     def write(self, path: str) -> None:
         """write to file"""
+        Markdown._write(path, str(self))
+
+    def writeHTML(self, path: str) -> None:
+        """write to html file"""
+        html = markdown_lib.markdown(str(self))
+        Markdown._write(path, html)
+
+    @staticmethod
+    def _write(path: str, content: str) -> None:
+        """write to file"""
         file = open(path, "w")
-        file.write(str(self))
+        file.write(content)
         file.close()
 
 

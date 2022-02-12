@@ -51,7 +51,10 @@ def test_generate_terraform_env(mocker: MockFixture) -> None:
     )
 
     runner = CliRunner()
-    result = runner.invoke(cli, ["generate-terraform", "-c", env_file, "-d", tmp_dir])
+    result = runner.invoke(
+        cli,
+        ["generate-terraform", "-c", env_file, "-d", tmp_dir, "--readme-format", "md"],
+    )
     assert result.exit_code == 0
 
     # check existing file was kept
@@ -59,7 +62,7 @@ def test_generate_terraform_env(mocker: MockFixture) -> None:
 
     # check what was created
     _check_file_exist(
-        "staging.md",
+        "readme-staging.md",
         [
             "# Terraform stack staging",
             "## Check the backend configuration",
@@ -183,13 +186,13 @@ def test_generate_terraform_service() -> None:
 
     # check what was created
     _check_file_exist(
-        "hello.md",
+        "readme-hello.html",
         [
-            "# Terraform stack hello",
-            "## Check the backend configuration",
-            "## Initialize Terraform",
-            "## Execute Terraform for module hello",
-            "## Destroy",
+            "Terraform stack hello",
+            "Check the backend configuration",
+            "Initialize Terraform",
+            "Execute Terraform for module hello",
+            "Destroy",
             "terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello",
             "terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello -destroy",
             "terraform apply -compact-warnings -auto-approve tf.plan",
@@ -269,12 +272,23 @@ def test_generate_terraform_env_and_service() -> None:
     assert result.exit_code == 0
 
     # run for service - same output directory
-    result = runner.invoke(cli, ["generate-terraform", "-c", service_file, "-d", tmp_dir])
+    result = runner.invoke(
+        cli,
+        [
+            "generate-terraform",
+            "-c",
+            service_file,
+            "-d",
+            tmp_dir,
+            "--readme-format",
+            "none",
+        ],
+    )
     assert result.exit_code == 0
 
-    # check what was created
-    _check_file_exist("staging.md")
-    _check_file_exist("hello.md")
+    # check readme files were not created because `--readme-format none`
+    _check_file_not_exist("staging.md")
+    _check_file_not_exist("hello.html")
 
     _check_file_exist(
         "data.tf.json",
