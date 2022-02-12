@@ -16,7 +16,7 @@ variable "module_name" {
 
 variable "backup_retention_days" {
   description = "How many days to keep the backup retention"
-  type = number
+  type        = number
 }
 
 
