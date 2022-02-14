@@ -137,7 +137,6 @@ def generate_terraform(
 
         # break down json file in multiple files
         main_tf_json = json.load(open(TF_FILE_PATH))
-        updated_files: list = []
         for key in ["provider", "data", "output", "terraform"]:
             # extract the relevant json
             main_tf_json, extracted_json = dicts.extract(main_tf_json, key)
@@ -146,7 +145,6 @@ def generate_terraform(
             # ex: combine all the terraform "output" variables
             prev_tf_file = os.path.join(output_dir, f"{key}.tf.json")
             if os.path.exists(prev_tf_file):
-                updated_files.append(prev_tf_file)
                 logger.debug(
                     f"Found existing terraform file: {prev_tf_file}, merging it with new values"
                 )
