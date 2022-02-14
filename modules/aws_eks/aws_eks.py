@@ -35,6 +35,14 @@ class AwsEksProcessor(ModuleProcessor):
         self.cleanup_security_groups(region)
         purge_opta_kube_config(layer=self.layer)
 
+    def pre_hook(self, module_idx: int) -> None:
+        cluster_name = get_cluster_name(self.layer.root())
+        if cluster_name is not None:
+            return
+        providers = self.layer.gen_providers(0)
+        region = providers["provider"]["aws"]["region"]
+        self.cleanup_cloudwatch_log_group(region)
+
     def cleanup_security_groups(self, region: str) -> None:
         logger.debug("Seeking dangling security groups EKS forgot to destroy.")
         client: EC2Client = boto3.client("ec2", config=Config(region_name=region))
@@ -94,29 +102,6 @@ class AwsEksProcessor(ModuleProcessor):
                 f"Cloudwatch Log group {log_group_name} has recreated itself. Not stopping the destroy, but you will "
                 "wanna check this out."
             )
-
-    def delete_preexisting_cloudwatch_log_group(self, region: str) -> None:
-        """If there is a pre-existing cloudwatch log group (which can happen if the opta module was destroyed, but the
-        log group was revived because of delayed final log messages), then delete the log group"""
-        cluster_name = get_cluster_name(self.layer.root())
-        if cluster_name is None:
-            return
-
-        eks_client: EKSClient = boto3.client("eks", config=Config(region_name=region))
-        try:
-            eks_client.describe_cluster(name=cluster_name)
-            return
-        except eks_client.exceptions.ResourceNotFoundException:
-            pass
-        client: CloudWatchLogsClient = boto3.client(
-            "logs", config=Config(region_name=region)
-        )
-        log_group_name = f"/aws/eks/opta-{self.layer.name}/cluster"
-        log_groups = client.describe_log_groups(logGroupNamePrefix=log_group_name)
-        if len(log_groups["logGroups"]) == 0:
-            return
-        logger.info("Found pre-existing cloudwatch log group. Deleting now.")
-        client.delete_log_group(logGroupName=log_group_name)
 
     def cleanup_dangling_enis(self, region: str) -> None:
         client: EC2Client = boto3.client("ec2", config=Config(region_name=region))
@@ -219,5 +204,4 @@ class AwsEksProcessor(ModuleProcessor):
 
         providers = self.layer.gen_providers(0)
         region = providers["provider"]["aws"]["region"]
-        self.delete_preexisting_cloudwatch_log_group(region)
         super(AwsEksProcessor, self).process(module_idx)
