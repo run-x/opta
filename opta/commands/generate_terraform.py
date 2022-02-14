@@ -113,6 +113,7 @@ def generate_terraform(
             shutil.copytree(service_helm_dir, target_dir, dirs_exist_ok=True)
 
         # copy module directories and update the module path to point to local directory
+        # note this will only copy the 'tf_module' subdirectory ex: modules/aws_base/tf_module
         for module in layer.modules:
             src_path = module.module_dir_path
             rel_path = "./" + src_path[src_path.index("modules/") :]
@@ -136,6 +137,7 @@ def generate_terraform(
 
         # break down json file in multiple files
         main_tf_json = json.load(open(TF_FILE_PATH))
+        updated_files: list = []
         for key in ["provider", "data", "output", "terraform"]:
             # extract the relevant json
             main_tf_json, extracted_json = dicts.extract(main_tf_json, key)
@@ -144,6 +146,7 @@ def generate_terraform(
             # ex: combine all the terraform "output" variables
             prev_tf_file = os.path.join(output_dir, f"{key}.tf.json")
             if os.path.exists(prev_tf_file):
+                updated_files.append(prev_tf_file)
                 logger.debug(
                     f"Found existing terraform file: {prev_tf_file}, merging it with new values"
                 )
@@ -177,18 +180,21 @@ def generate_terraform(
         if os.path.exists(output_dir):
             if replace:
                 logger.info(
-                    f"Output directory {directory} already exists and --replace flag is on, deleting it"
+                    f"Output directory {output_dir} already exists and --replace flag is on, deleting it"
                 )
                 if not auto_approve:
                     click.confirm(
-                        f"The existing directory will be deleted: {output_dir}.\n Do you approve?",
+                        f"The output directory will be deleted: {output_dir}.\n Do you approve?",
                         abort=True,
                     )
                 _clean_folder(output_dir)
             else:
-                logger.info(
-                    f"Output directory {directory} already exists, adding new files to it"
-                )
+                logger.info(f"Output directory {output_dir} already exists, using it.")
+                if not auto_approve:
+                    click.confirm(
+                        "The output directory will be updated.\n Do you approve?",
+                        abort=True,
+                    )
 
         logger.debug(f"Copy {tmp_dir} to {output_dir}")
         shutil.copytree(tmp_dir, output_dir, dirs_exist_ok=True)

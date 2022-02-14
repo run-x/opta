@@ -53,7 +53,16 @@ def test_generate_terraform_env(mocker: MockFixture) -> None:
     runner = CliRunner()
     result = runner.invoke(
         cli,
-        ["generate-terraform", "-c", env_file, "-d", tmp_dir, "--readme-format", "md"],
+        [
+            "generate-terraform",
+            "-c",
+            env_file,
+            "-d",
+            tmp_dir,
+            "--auto-approve",
+            "--readme-format",
+            "md",
+        ],
     )
     assert result.exit_code == 0
 
@@ -282,6 +291,7 @@ def test_generate_terraform_env_and_service() -> None:
             tmp_dir,
             "--readme-format",
             "none",
+            "--auto-approve",
         ],
     )
     assert result.exit_code == 0
@@ -341,6 +351,36 @@ def test_generate_terraform_undefined_dir() -> None:
         cli, ["generate-terraform", "-c", service_file, "-d", directory, "--replace"]
     )
     assert result.exit_code != 0
+    assert "Error: --directory can't be empty" in result.output
+
+
+def test_generate_terraform_dir_already_exist() -> None:
+
+    service_file = os.path.join(
+        os.getcwd(), "tests", "fixtures", "dummy_data", "aws_service_getting_started.yaml"
+    )
+
+    runner = CliRunner()
+
+    # start with an existing dir with some files
+    directory = tmp_dir
+    _random_file()
+
+    # if --auto-aprove is not set, except a confirmation message
+    result = runner.invoke(
+        cli, ["generate-terraform", "-c", service_file, "-d", directory]
+    )
+    assert result.exit_code != 0
+    assert "The output directory will be updated" in result.output
+    assert "Do you approve?" in result.output
+
+    # if --replace is set, except a confirmation message before deleting
+    result = runner.invoke(
+        cli, ["generate-terraform", "-c", service_file, "-d", directory, "--replace"]
+    )
+    assert result.exit_code != 0
+    assert "The output directory will be deleted:" in result.output
+    assert "Do you approve?" in result.output
 
 
 def _check_file_exist(rel_path: str, text_to_find: List[str] = []) -> None:
