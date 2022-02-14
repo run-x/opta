@@ -97,7 +97,7 @@ class AwsEksProcessor(ModuleProcessor):
 
     def delete_preexisting_cloudwatch_log_group(self, region: str) -> None:
         """If there is a pre-existing cloudwatch log group (which can happen if the opta module was destroyed, but the
-        log group was revived because of dalyed final log messages), then delete the log group"""
+        log group was revived because of delayed final log messages), then delete the log group"""
         cluster_name = get_cluster_name(self.layer.root())
         if cluster_name is None:
             return
