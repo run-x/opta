@@ -28,8 +28,8 @@ Here is the directory structure for this example:
 ```
 
 
-{{< tabs tabTotal="3" tabID="1" tabName1="custom-tf.yaml" tabName2="opta.yaml" tabName3="main.tf" >}}
-{{< tab tabNum="1" >}}
+{{< tabs tabTotal="3" >}}
+{{< tab tabName="custom-tf.yaml" >}}
 ```yaml
 # custom-tf.yaml
 name: customtf
@@ -49,7 +49,7 @@ modules:
 ```
 {{< /tab >}}
 
-{{< tab tabNum="2" >}}
+{{< tab tabName="opta.yaml" >}}
 
 ```yaml
 # opta.yaml
@@ -67,7 +67,7 @@ modules:
 
 {{< /tab >}}
 
-{{< tab tabNum="3" >}}
+{{< tab tabName="main.tf" >}}
 
 ```
 # main.tf
@@ -183,6 +183,6 @@ modules:
       input1: "${{module.tf1.output1}}" # <-- HERE. Note the ${{}} wrapping
 ```
 
-These outputs, however, currently can not be used in other yamls (e.g. if you put custom terraform in an environment 
-yaml its outputs can't be used in the services), and will not show up in the `opta output` command. Work on supporting 
+These outputs, however, currently can not be used in other yamls (e.g. if you put custom terraform in an environment
+yaml its outputs can't be used in the services), and will not show up in the `opta output` command. Work on supporting
 this is ongoing.
