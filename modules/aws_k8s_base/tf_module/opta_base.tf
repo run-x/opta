@@ -12,6 +12,7 @@ resource "tls_self_signed_cert" "nginx_ca" {
     common_name         = "Opta is awesome"
     organization        = "Opta Self Signed"
     organizational_unit = "opta"
+    street_address      = []
   }
 
   validity_period_hours = 87600
@@ -21,6 +22,12 @@ resource "tls_self_signed_cert" "nginx_ca" {
     "cert_signing",
     "crl_signing",
   ]
+
+  lifecycle {
+    ignore_changes = [
+      id
+    ]
+  }
 }
 resource "tls_private_key" "default" {
   algorithm = "RSA"
@@ -33,8 +40,15 @@ resource "tls_cert_request" "default_cert_request" {
   dns_names       = ["*.elb.${data.aws_region.current.name}.amazonaws.com"]
 
   subject {
-    common_name  = "*.elb.${data.aws_region.current.name}.amazonaws.com"
-    organization = "Org"
+    common_name     = "*.elb.${data.aws_region.current.name}.amazonaws.com"
+    organization    = "Org"
+    street_address  = []
+  }
+
+  lifecycle {
+    ignore_changes = [
+      id
+    ]
   }
 }
 
@@ -60,10 +74,8 @@ resource "helm_release" "opta_base" {
   values = [
     yamlencode({
       adminArns : var.admin_arns
-      #      tls_key : base64encode(var.private_key),
-      #      tls_crt : base64encode(join("\n", [var.certificate_body, var.certificate_chain])),
-      tls_key : base64encode(tls_private_key.default.private_key_pem),
-      tls_crt : base64encode(tls_locally_signed_cert.default_cert.cert_pem)
+      tls_key : var.private_key == "" ? base64encode(tls_private_key.default.private_key_pem) : base64encode(var.private_key),
+      tls_crt : var.private_key == "" ? base64encode(tls_locally_signed_cert.default_cert.cert_pem) : base64encode(join("\n", [var.certificate_body, var.certificate_chain]))
     })
   ]
   depends_on = [
