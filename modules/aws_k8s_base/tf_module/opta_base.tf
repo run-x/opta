@@ -40,9 +40,9 @@ resource "tls_cert_request" "default_cert_request" {
   dns_names       = ["*.elb.${data.aws_region.current.name}.amazonaws.com"]
 
   subject {
-    common_name     = "*.elb.${data.aws_region.current.name}.amazonaws.com"
-    organization    = "Org"
-    street_address  = []
+    common_name    = "*.elb.${data.aws_region.current.name}.amazonaws.com"
+    organization   = "Org"
+    street_address = []
   }
 
   lifecycle {
