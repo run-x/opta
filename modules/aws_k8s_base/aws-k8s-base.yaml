@@ -93,7 +93,7 @@ inputs:
   - name: expose_self_signed_ssl
     user_facing: true
     validator: bool(required=False)
-    description: Expose self-signed SSL certs to the public internet.
+    description: Expose self-signed SSL certs.
     default: false
 outputs:
   - name: load_balancer_raw_dns

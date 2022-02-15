@@ -25,7 +25,7 @@
     },
     "expose_self_signed_ssl": {
       "type": "boolean",
-      "description": "Expose the self signed ssl certificate to the public.",
+      "description": "Expose self-signed SSL certs.",
       "default": false
     },
     "type": {

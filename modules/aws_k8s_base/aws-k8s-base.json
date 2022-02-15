@@ -58,7 +58,7 @@
     },
     "expose_self_signed_ssl": {
       "type": "boolean",
-      "description": "Expose the self-signed certificate for the ingress controller.",
+      "description": "Expose self-signed SSL certs.",
       "default": false
     },
     "type": {
