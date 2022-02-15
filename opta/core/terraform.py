@@ -327,6 +327,10 @@ class Terraform:
 
     @classmethod
     def download_state(cls, layer: "Layer") -> bool:
+        if layer.is_stateless_mode() is True:
+            # no remote state for stateless mode
+            return False
+
         if not cls.verify_storage(layer):
             logger.debug(
                 fmt_msg(
@@ -341,7 +345,8 @@ class Terraform:
 
         state_file: str = "./tmp.tfstate"
         providers = layer.gen_providers(0)
-        if "s3" in providers.get("terraform", {}).get("backend", {}):
+        terraform_backends = providers.get("terraform", {}).get("backend", {})
+        if "s3" in terraform_backends:
             bucket = providers["terraform"]["backend"]["s3"]["bucket"]
             region = providers["terraform"]["backend"]["s3"]["region"]
             key = providers["terraform"]["backend"]["s3"]["key"]
@@ -358,7 +363,7 @@ class Terraform:
                     logger.debug("Did not find terraform state file")
                     return False
                 raise
-        elif "gcs" in providers.get("terraform", {}).get("backend", {}):
+        elif "gcs" in terraform_backends:
             bucket = providers["terraform"]["backend"]["gcs"]["bucket"]
             prefix = providers["terraform"]["backend"]["gcs"]["prefix"]
             credentials, project_id = GCP.get_credentials()
@@ -374,7 +379,7 @@ class Terraform:
                     os.remove(state_file)
                     return False
                 raise
-        elif "azurerm" in providers.get("terraform", {}).get("backend", {}):
+        elif "azurerm" in terraform_backends:
             storage_account_name = providers["terraform"]["backend"]["azurerm"][
                 "storage_account_name"
             ]

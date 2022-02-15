@@ -41,8 +41,7 @@ class AwsK8sBaseProcessor(AWSK8sModuleProcessor, K8sBaseModuleProcessor):
                 "certificate_chain"
             ] = f"${{{{module.{byo_cert_module.name}.certificate_chain}}}}"
 
-        set_kube_config(self.layer)
-        self._process_nginx_extra_ports(self.module.data)
+        self._process_nginx_extra_ports(self.layer, self.module.data)
 
         aws_dns_module = None
         for module in self.layer.modules:

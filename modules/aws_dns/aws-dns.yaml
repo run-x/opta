@@ -1,6 +1,7 @@
 halt: false
 environment_module: true
 is_unique: true
+is_exportable: false
 inputs:
   - name: env_name
     user_facing: false

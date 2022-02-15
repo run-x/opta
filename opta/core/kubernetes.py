@@ -1,6 +1,8 @@
 import base64
 import datetime
 import time
+import traceback
+from logging import DEBUG
 from os import makedirs, remove
 from os.path import exists, expanduser, getmtime
 from shutil import which
@@ -68,6 +70,14 @@ def get_required_path_executables(cloud: str) -> FrozenSet[str]:
 
 def set_kube_config(layer: "Layer") -> None:
     """Create a kubeconfig file to connect to a kubernetes cluster specified in a given layer"""
+
+    if layer.is_stateless_mode() is True:
+        if logger.isEnabledFor(DEBUG):
+            logger.debug(
+                "set_kube_config called in stateless mode, verify implementation. See stack trace below:"
+            )
+            traceback.print_stack()
+
     # Make sure the user has the prerequisite CLI tools installed
     # kubectl may not *technically* be required for this opta command to run, but require
     # it anyways since user must install it to access the cluster.

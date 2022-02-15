@@ -45,5 +45,9 @@ def _handle_local_flag(config: str, test: bool = False) -> Tuple[str, str]:
 
 
 def _clean_tf_folder() -> None:
-    if os.path.isdir(os.getcwd() + "/.terraform"):
-        rmtree(os.getcwd() + "/.terraform")
+    _clean_folder(os.getcwd() + "/.terraform")
+
+
+def _clean_folder(path: str) -> None:
+    if os.path.isdir(path):
+        rmtree(path)

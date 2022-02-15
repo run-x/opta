@@ -109,6 +109,7 @@ class Layer:
         parent: Optional[Layer] = None,
         variables: Optional[Dict[str, Any]] = None,
         original_spec: str = "",
+        stateless_mode: bool = False,
     ):
         if not Layer.valid_name(name):
             raise UserErrors(
@@ -156,6 +157,7 @@ class Layer:
                     f"The module name {module.name} is used multiple time in the "
                     "layer. Module names must be unique per layer"
                 )
+        self.stateless_mode = stateless_mode
 
     @classmethod
     def load_from_yaml(
@@ -165,6 +167,7 @@ class Layer:
         is_parent: bool = False,
         local: bool = False,
         json_schema: bool = False,
+        stateless_mode: bool = False,
     ) -> Layer:
         t = None
         if config.startswith("git@"):
@@ -205,7 +208,7 @@ class Layer:
         conf["original_spec"] = config_string
         conf["path"] = config_path
 
-        layer = cls.load_from_dict(conf, env, is_parent)
+        layer = cls.load_from_dict(conf, env, is_parent, stateless_mode)
         if local:
             pass
         validate_yaml(config_path, layer.cloud, json_schema)
@@ -227,7 +230,11 @@ class Layer:
 
     @classmethod
     def load_from_dict(
-        cls, conf: Dict[Any, Any], env: Optional[str], is_parent: bool = False
+        cls,
+        conf: Dict[Any, Any],
+        env: Optional[str],
+        is_parent: bool = False,
+        stateless_mode: bool = False,
     ) -> Layer:
         modules_data = conf.get("modules", [])
         environments = conf.pop("environments", None)
@@ -299,9 +306,16 @@ class Layer:
                 current_parent,
                 current_variables,
                 original_spec,
+                stateless_mode,
             )
         return cls(
-            name, org_name, providers, modules_data, path, original_spec=original_spec
+            name,
+            org_name,
+            providers,
+            modules_data,
+            path,
+            original_spec=original_spec,
+            stateless_mode=stateless_mode,
         )
 
     @classmethod
@@ -341,9 +355,14 @@ class Layer:
             return self.parent.get_env()
         return self.name
 
+    def get_modules(self, module_idx: Optional[int] = None) -> List[Module]:
+        module_idx = len(self.modules) - 1 if module_idx is None else module_idx
+        return self.modules[0 : module_idx + 1]
+
     def get_module(
         self, module_name: str, module_idx: Optional[int] = None
     ) -> Optional[Module]:
+        # TODO this code is duplicated everywhere
         module_idx = len(self.modules) - 1 if module_idx is None else module_idx
         for module in self.modules[0 : module_idx + 1]:
             if module.name == module_name:
@@ -535,18 +554,18 @@ class Layer:
         providers = self.providers
         if self.parent is not None:
             providers = deep_merge(providers, self.parent.providers)
-        for k, v in providers.items():
-            new_v = self.handle_special_providers(k, v, clean)
-            ret["provider"][k] = new_v
-            if k in REGISTRY:
+        for cloud, provider in providers.items():
+            provider = self.handle_special_providers(cloud, provider, clean)
+            ret["provider"][cloud] = provider
+            if cloud in REGISTRY:
                 ret["terraform"] = hydrate(
-                    {x: REGISTRY[k][x] for x in ["required_providers", "backend"]},
-                    deep_merge(hydration, {"provider": new_v}),
+                    {x: REGISTRY[cloud][x] for x in ["required_providers", "backend"]},
+                    deep_merge(hydration, {"provider": provider}),
                 )
 
                 if self.parent is not None:
                     # Add remote state
-                    backend, config = list(REGISTRY[k]["backend"].items())[0]
+                    backend, config = list(REGISTRY[cloud]["backend"].items())[0]
                     ret["data"] = {
                         "terraform_remote_state": {
                             "parent": {
@@ -557,7 +576,7 @@ class Layer:
                                         "layer_name": self.parent.name,
                                         "env": self.get_env(),
                                         "state_storage": self.state_storage(),
-                                        "provider": self.parent.providers.get(k, {}),
+                                        "provider": self.parent.providers.get(cloud, {}),
                                         "region": region,
                                         "k8s_access_token": k8s_access_token,
                                     },
@@ -613,6 +632,14 @@ class Layer:
             layer = layer.parent
 
         return layer
+
+    def is_stateless_mode(self) -> bool:
+        """is_stateless_mode returns True if this layer state is NOT managed by opta
+        In most case, the state is managed by Opta, except for commands like `generate-terraform` where no remote state is needed
+
+        Note: if this method is mocked and used in a condition it would be evaluated to True, to prevent this use `layer.is_stateless_mode() is True`
+        """
+        return self.stateless_mode
 
     def verify_cloud_credentials(self) -> None:
         if self.cloud == "aws":

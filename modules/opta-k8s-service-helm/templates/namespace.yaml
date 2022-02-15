@@ -1,5 +1,19 @@
+{{- /*
+use cases supported:
+- the namespace doesn't exist, create it (result=true)
+- the namespace was previously created by helm, keep it (result=true)
+- the namespace was created by opta secret, ignore it (existingNamespace= true, result=false)
+*/}}
 {{- $existingNamespace := (lookup "v1" "Namespace" "" ( include "k8s-service.namespaceName" . ) ) -}}
-{{- if and ( $existingNamespace ) ( hasKey $existingNamespace.metadata.annotations "meta.helm.sh/release-name" ) }}
+{{ $result := false }}
+{{- if  $existingNamespace }}
+  {{- if ( hasKey $existingNamespace.metadata "annotations"  ) }}
+    {{- if ( hasKey $existingNamespace.metadata.annotations "meta.helm.sh/release-name"  ) }}
+      {{ $result := true }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- if or ( not $existingNamespace ) ( $result ) }}
 apiVersion: v1
 kind: Namespace
 metadata:

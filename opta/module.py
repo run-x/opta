@@ -206,6 +206,17 @@ class Module:
 
         return terraform_resources
 
+    def is_exportable(self) -> bool:
+        """is_exportable returns True if the module can be exported to Terraform
+        by default, a module is exportable.
+        But if the processing the module relies on existing infrastructure it could be false.
+        """
+        return self.desc.get("is_exportable", True)
+
+    def get_type(self) -> str:
+        """return aliased type if set or type"""
+        return self.aliased_type or self.type
+
     # Read all terraform files in the module and return its contents as a single dict.
     def _read_tf_module_config(self) -> dict:
         tf_module_config = {}

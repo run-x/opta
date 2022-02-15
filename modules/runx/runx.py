@@ -42,6 +42,11 @@ class RunxProcessor(ModuleProcessor):
         super(RunxProcessor, self).__init__(module, layer)
 
     def process(self, module_idx: int) -> None:
+        if self.layer.stateless_mode:
+            logger.warning(
+                f"Module {self.module.name} is not supported in stateless mode, ignoring it."
+            )
+            return
         logger.debug("Checking for runx api key secret")
         current_api_key = self.fetch_secret()
         if current_api_key is None:

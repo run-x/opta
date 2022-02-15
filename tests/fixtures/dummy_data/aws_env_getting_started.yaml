@@ -1,0 +1,10 @@
+name: staging
+org_name: opta-tests
+providers:
+  aws:
+    region: us-east-1
+    account_id: 011111111111
+modules:
+  - type: base
+  - type: k8s-cluster
+  - type: k8s-base

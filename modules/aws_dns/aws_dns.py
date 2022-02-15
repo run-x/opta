@@ -37,6 +37,11 @@ class AwsDnsProcessor(DNSModuleProcessor):
         super(AwsDnsProcessor, self).__init__(module, layer)
 
     def process(self, module_idx: int) -> None:
+        if self.layer.is_stateless_mode() is True:
+            # do not do create any certificate
+            super(AwsDnsProcessor, self).process(module_idx)
+            return
+
         providers = self.layer.gen_providers(0)
         region = providers["provider"]["aws"]["region"]
         self.validate_dns()
