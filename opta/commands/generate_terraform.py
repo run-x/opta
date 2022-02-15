@@ -68,7 +68,7 @@ def generate_terraform(
     replace: bool,
     auto_approve: bool,
 ) -> None:
-    """Generate Terraform language files
+    """(beta) Generate Terraform language files
 
     Examples:
 
@@ -76,6 +76,11 @@ def generate_terraform(
 
     opta generate-terraform -c my-config.yaml -d ./tf
     """
+
+    print("This command is in beta mode")
+    print(
+        "If you have any error or suggestion, please let us know in our slack channel  https://slack.opta.dev\n"
+    )
 
     if directory.strip() == "":
         raise click.UsageError("--directory can't be empty")
