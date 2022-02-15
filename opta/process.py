@@ -25,7 +25,9 @@ class ApplyOptions:
 
 
 def apply(options: ApplyOptions) -> None:
-    logger.warning("Opta's module API mode is in preview and is NOT READY FOR PRODUCTION USE.")
+    logger.warning(
+        "Opta's module API mode is in preview and is NOT READY FOR PRODUCTION USE."
+    )
     loader = LayerLoader()
 
     # TODO: Handle local?

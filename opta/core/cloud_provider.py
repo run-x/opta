@@ -30,7 +30,8 @@ class AWSProvider(CloudProvider):
         bucket = self.state_storage(layer)
         provider_config = self._provider_config(layer)
 
-        region = provider_config.region
+        # TODO: Should we error out if no region configured?
+        region = provider_config.region or "us-east-1"
 
         s3 = boto3.client("s3", config=Config(region_name=region))
         try:

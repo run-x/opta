@@ -1,5 +1,5 @@
-
 from typing import Any
+
 import pytest
 
 from opta.utils.ref import Reference
@@ -10,12 +10,8 @@ class TestVisitor:
     @pytest.fixture
     def basic_nested_object(self) -> dict:
         return {
-            1: {
-                "a": [2, 3],
-            },
-            "b": {
-                "c": "d",
-            },
+            1: {"a": [2, 3]},
+            "b": {"c": "d"},
         }
 
     @pytest.fixture
@@ -35,9 +31,11 @@ class TestVisitor:
             [Reference(1, "a", 1), True],
             [Reference(1, "a", 2), False],
             # [Reference("b", "c", 0), False],  # TODO: Broken test to fix
-        ]
+        ],
     )
-    def test_contains(self, path: Reference, expected: bool, basic_visitor: Visitor) -> None:
+    def test_contains(
+        self, path: Reference, expected: bool, basic_visitor: Visitor
+    ) -> None:
         actual = path in basic_visitor
 
         assert actual == expected
@@ -59,11 +57,7 @@ class TestVisitor:
         ]
 
     @pytest.mark.parametrize(
-        ["path", "value"],
-        [
-            [Reference(1, "a"), [2, 3]],
-            [Reference("b", "c"), "d"],
-        ],
+        ["path", "value"], [[Reference(1, "a"), [2, 3]], [Reference("b", "c"), "d"]],
     )
     def test_getitem(self, path: Reference, value: Any, basic_visitor: Visitor) -> None:
         assert basic_visitor[path] == value
