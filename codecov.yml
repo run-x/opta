@@ -6,3 +6,19 @@ coverage:
         # basic settings
         target: 75
         threshold: 5% # Raise exception if it drops lower by 5% (e.g. 97% coverage to 92%)
+ignore:
+  - opta/core/cloud_provider.py
+  - opta/core/terraform2
+  - opta/layer2.py
+  - opta/link_spec.py
+  - opta/link.py
+  - opta/linker.py
+  - opta/loader.py
+  - opta/loader.py
+  - opta/module_spec.py
+  - opta/module2.py
+  - opta/process.py
+  - opta/stubs.py
+  - opta/utils/features.py
+  - opta/utils/schema.py
+  - opta/utils/visit.py

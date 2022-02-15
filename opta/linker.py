@@ -40,9 +40,6 @@ class Linker:
         # Pass: TODO Run validation of input, but ignore defaults or required; assume refs are valid
         # Pass: TODO Make sure that there are no interpolations in the link params
 
-        # Pass: TODO Run validation of input, but ignore defaults or required; assume refs are valid
-        # Pass: TODO Make sure that there are no interpolations in the link params
-
         self._pass_automatic_links(module_map)
         self._pass_add_links_from_interpolation(module_map, result.interpolations)
 

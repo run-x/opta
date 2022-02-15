@@ -25,6 +25,7 @@ class ApplyOptions:
 
 
 def apply(options: ApplyOptions) -> None:
+    logger.warning("Opta's module API mode is in preview and is NOT READY FOR PRODUCTION USE.")
     loader = LayerLoader()
 
     # TODO: Handle local?
@@ -67,7 +68,7 @@ def apply(options: ApplyOptions) -> None:
     tf_config = TerraformFile()
 
     cloud = AWSProvider()
-    cloud.add_provider_config(tf_config, layer)
+    cloud.configure_providers(tf_config, layer)
 
     # tf_config.add_required_provider("aws", {
     #     "source": "hashicorp/aws",

@@ -32,10 +32,12 @@ class Visitor:
 
         current: Any = self.root
         for part in path:
-            if part not in current:
+            try:
+                next = current[part]
+            except (TypeError, KeyError, IndexError):
                 return False
 
-            current = current[part]
+            current = next
 
         return True
 

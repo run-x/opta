@@ -46,10 +46,10 @@ class AWSProvider(Provider):
         p = cls()
         p.region = raw.get("region")
         account_ids = raw.get("account_id", [])
-        if isinstance(account_ids, str):
-            p.account_ids = [account_ids]
+        if isinstance(account_ids, list):
+            p.account_ids = [str(id) for id in account_ids]
         else:
-            p.account_ids = account_ids
+            p.account_ids = [str(account_ids)]
 
         return p
 

@@ -4,23 +4,33 @@ from botocore.exceptions import ClientError
 
 from opta.core.terraform2 import TerraformFile
 from opta.layer2 import Layer
+from opta.stubs import AWSProvider as AWSProviderConfig
 
 
 class CloudProvider:
     def state_storage(self, layer: Layer) -> str:
+        """
+        Cloud-specific identifier for where state is stored.
+        In AWS, this is an S3 bucket name.
+        """
         return f"opta-tf-state-{layer.org_name}-{layer.name}"
 
     def verify_storage(self, layer: Layer) -> bool:
+        """
+        Validates state storage in this cloud provider
+        """
         raise NotImplementedError()
 
-    def add_provider_config(self, file: TerraformFile, layer: Layer) -> None:
+    def configure_providers(self, file: TerraformFile, layer: Layer) -> None:
         raise NotImplementedError()
 
 
 class AWSProvider(CloudProvider):
     def verify_storage(self, layer: Layer) -> bool:
         bucket = self.state_storage(layer)
-        region = "us-east-1"  # TODO: Read from provider data in layer
+        provider_config = self._provider_config(layer)
+
+        region = provider_config.region
 
         s3 = boto3.client("s3", config=Config(region_name=region))
         try:
@@ -31,11 +41,8 @@ class AWSProvider(CloudProvider):
             raise e
         return True
 
-    def add_provider_config(self, file: TerraformFile, layer: Layer) -> None:
-        config = layer.providers.aws
-
-        if not config:
-            raise ValueError("expected AWS provider to be configured")
+    def configure_providers(self, file: TerraformFile, layer: Layer) -> None:
+        config = self._provider_config(layer)
 
         # TODO: Support other, non-aws providers
 
@@ -50,3 +57,10 @@ class AWSProvider(CloudProvider):
 
         file.add_data("aws_caller_identity", "provider", {})
         file.add_data("aws_region", "provider", {})
+
+    def _provider_config(self, layer: Layer) -> AWSProviderConfig:
+        provider_config = layer.providers.aws
+        if not provider_config:
+            raise ValueError("expected AWS provider config to be present")
+
+        return provider_config

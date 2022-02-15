@@ -16,6 +16,7 @@ def _check_env(key: str) -> bool:
         "true",
         "1",
         "yes",
+        "y",
     ]
 
     return val.lower() in true_values

@@ -1,9 +1,8 @@
 name: aws-base
+description: Sets up VPCs, a default KMS key, and the db/cache subnets for your environment
 clouds:
   - aws
 input_schema: {
-    "$id": "https://app.runx.dev/modules/aws-base",
-    "description": "Sets up VPCs, a default KMS key, and the db/cache subnets for your environment",
     "type": "object",
     "properties": {
       "vpc_log_retention": {
@@ -39,20 +38,7 @@ input_schema: {
         "$ref": "/common-types/cidr-block",
         "description": "This is the total cidr block for the VPC.",
         "default": "10.0.0.0/16"
-      },
-      "type": {
-        "description": "The name of this module",
-        "enum": [
-          "aws-base",
-          "base"
-        ]
       }
-    },
-    "opta_metadata": {
-      "module_type": "env",
-      "clouds": [
-        "aws"
-      ]
     },
     "required": [
       "type"
@@ -69,3 +55,42 @@ input_terraform_connections:
   - both: vpc_log_retention
   - both: public_ipv4_cidr_blocks
   - both: total_ipv4_cidr_block
+output_schema: {
+    "$id": "http://localhost:7800/modules/aws_base/output_schema.aws-base.json",
+    "description": "Outputs for your environment",
+    "type": "object",
+    "required": [],
+    "additionalProperties": false,
+    "properties": {
+      "kms_account_key_arn": {
+        "export": true,
+        "description": "The [ARN](https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html) of the default [KMS](https://aws.amazon.com/kms/) key (this is what handles encryption for redis, documentdb, eks, etc…)"
+      },
+      "kms_account_key_id": {
+        "export": true,
+        "description": "The [ID](https://docs.aws.amazon.com/kms/latest/developerguide/find-cmk-id-arn.html) of the default KMS key (sometimes things need the ID, sometimes the ARN, so we’re giving both)"
+      },
+      "vpc_id": {
+        "export": true,
+        "description": "The ID of the [VPC](https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html) we created for this environment"
+      },
+      "private_subnet_ids": {
+        "export": true,
+        "description": "The IDs of the private [subnets](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html) we setup for your environment",
+        "$ref": "http://localhost:7800/modules/common_schemas/ipv4_cidr_blocks.json"
+      },
+      "public_subnets_ids": {
+        "$ref": "http://localhost:7800/modules/common_schemas/ipv4_cidr_blocks.json",
+        "export": true,
+        "description": "The IDs of the public [subnets](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html) we setup for your environment"
+      },
+      "s3_log_bucket_name": {
+        "export": true,
+        "description": "The name of the default logging bucket provisioned by opta"
+      },
+      "public_nat_ips": {
+        "export": true,
+        "description": "Public static IP of nat gateway(s)"
+      }
+    }
+  }
