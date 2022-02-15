@@ -63,6 +63,7 @@ orbs:
   kubernetes: circleci/kubernetes@0.12.1
   helm: circleci/helm@1.2.0
   gcp-cli: circleci/gcp-cli@2.4.0
+  azure-cli: circleci/azure-cli@1.2.0
 
 executors:
   ubuntu-machine:
@@ -276,6 +277,15 @@ jobs:
           paths:
             - dist
 
+  az-test-user:
+    executor: ubuntu-machine
+    steps:
+      - azure-cli/install
+      - azure-cli/login-with-service-principal
+      - run:
+          name: "Azure Resources"
+          command: "az resource list"
+
   build-test-service-image:
     executor: ubuntu-machine
     environment:
@@ -318,6 +328,74 @@ jobs:
           paths:
             - todo-api
             - todo-frontend
+
+  azure-create-env:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - attach_workspace:
+          at: ~/
+      - install-opta-dependencies
+      - azure-cli/install
+      - azure-cli/login-with-service-principal
+      - run:
+          name: Run opta apply on environment configuration
+          command: |
+            ./dist/opta/opta apply \
+            --config ./.circleci/ci-tests/create-and-destroy-azure/environment.yaml \
+            --auto-approve \
+            --refresh
+
+  azure-test-service-http:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - attach_workspace:
+          at: ~/
+      - install-opta-dependencies
+      - azure-cli/install
+      - azure-cli/login-with-service-principal
+      - run:
+          name: Run opta apply on HTTP service configuration
+          command: |
+            ./dist/opta/opta apply \
+            --config ./.circleci/ci-tests/create-and-destroy-azure/service-http.yaml \
+            --auto-approve \
+            --refresh
+      - run:
+          name: Run opta destroy on HTTP service configuration
+          command: |
+            ./dist/opta/opta destroy \
+            --config ./.circleci/ci-tests/create-and-destroy-azure/service-http.yaml \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+
+  azure-destroy-env:
+    executor: ubuntu-machine
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - attach_workspace:
+          at: ~/
+      - install-opta-dependencies
+      - azure-cli/install
+      - azure-cli/login-with-service-principal
+      - run:
+          name: Run opta destroy on environment configuration
+          command: |
+            ./dist/opta/opta destroy \
+            --config ./.circleci/ci-tests/create-and-destroy-azure/environment.yaml \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-create-env:
     executor: ubuntu-machine
@@ -1499,7 +1577,7 @@ jobs:
             secret_value=$($HOME/.opta/opta secret view \
             --env gcpenv-ci \
             --config ./.circleci/ci-tests/create-and-destroy-gcp/service-pg.yml \
-            FAKE_SECRET | tail -1)
+            FAKE_SECRET | grep foo)
             echo "This was the found secret value: ${secret_value}"
             [[ "$secret_value" =~ .*"foo".* ]] || exit 1
       - run:
@@ -1817,6 +1895,15 @@ workflows:
       - local-opta-example-destroy-svcs:
           requires:
             - local-opta-example-create-svcs
+      - azure-create-env:
+          requires:
+            - build-opta-binary
+      - azure-test-service-http:
+          requires:
+            - azure-create-env
+      - azure-destroy-env:
+          requires:
+            - azure-test-service-http
 
   run-ci:
     when: << pipeline.parameters.run-ci >>

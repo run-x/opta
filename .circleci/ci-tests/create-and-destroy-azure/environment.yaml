@@ -1,0 +1,14 @@
+# This opta environment is used by the test-ci job in the runxc repo.
+name: azenv-ci
+org_name: runx
+providers:
+  azurerm:
+    location: centralus
+    tenant_id: e1cebc17-5d81-4d16-b435-702e291d395b
+    subscription_id: 0fca99ae-5717-4a86-a891-6d64d2a04788
+modules:
+  - type: base
+  - type: k8s-cluster
+    admin_group_object_ids: ["35959136-eccf-44ec-beed-559a8b33c18e"]
+    max_nodes: 6
+  - type: k8s-base
