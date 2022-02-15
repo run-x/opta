@@ -56,6 +56,11 @@
       },
       "default": []
     },
+    "expose_self_signed_cert": {
+      "type": "boolean",
+      "description": "Expose the self-signed certificate for the ingress controller.",
+      "default": false
+    },
     "type": {
       "description": "The name of this module",
       "enum": [

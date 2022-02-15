@@ -110,3 +110,8 @@ variable "nginx_extra_tcp_ports_tls" {
   type    = list(number)
   default = []
 }
+
+variable "expose_self_signed_ssl" {
+  type    = bool
+  default = false
+}

@@ -1,11 +1,13 @@
 resource "tls_private_key" "nginx_ca" {
+  count     = var.expose_self_signed_ssl ? 1 : 0
   algorithm = "RSA"
   rsa_bits  = "2048"
 }
 
 resource "tls_self_signed_cert" "nginx_ca" {
+  count             = var.expose_self_signed_ssl ? 1 : 0
   key_algorithm     = "RSA"
-  private_key_pem   = tls_private_key.nginx_ca.private_key_pem
+  private_key_pem   = tls_private_key.nginx_ca[0].private_key_pem
   is_ca_certificate = true
 
   subject {
@@ -30,13 +32,15 @@ resource "tls_self_signed_cert" "nginx_ca" {
   }
 }
 resource "tls_private_key" "default" {
+  count     = var.expose_self_signed_ssl ? 1 : 0
   algorithm = "RSA"
   rsa_bits  = "2048"
 }
 
 resource "tls_cert_request" "default_cert_request" {
-  key_algorithm   = tls_private_key.default.algorithm
-  private_key_pem = tls_private_key.default.private_key_pem
+  count           = var.expose_self_signed_ssl ? 1 : 0
+  key_algorithm   = tls_private_key.default[0].algorithm
+  private_key_pem = tls_private_key.default[0].private_key_pem
   dns_names       = ["*.elb.${data.aws_region.current.name}.amazonaws.com"]
 
   subject {
@@ -53,10 +57,11 @@ resource "tls_cert_request" "default_cert_request" {
 }
 
 resource "tls_locally_signed_cert" "default_cert" {
-  cert_request_pem      = tls_cert_request.default_cert_request.cert_request_pem
-  ca_key_algorithm      = tls_private_key.nginx_ca.algorithm
-  ca_private_key_pem    = tls_private_key.nginx_ca.private_key_pem
-  ca_cert_pem           = tls_self_signed_cert.nginx_ca.cert_pem
+  count                 = var.expose_self_signed_ssl ? 1 : 0
+  cert_request_pem      = tls_cert_request.default_cert_request[0].cert_request_pem
+  ca_key_algorithm      = tls_private_key.nginx_ca[0].algorithm
+  ca_private_key_pem    = tls_private_key.nginx_ca[0].private_key_pem
+  ca_cert_pem           = tls_self_signed_cert.nginx_ca[0].cert_pem
   validity_period_hours = 87600
 
   allowed_uses = [
@@ -74,8 +79,8 @@ resource "helm_release" "opta_base" {
   values = [
     yamlencode({
       adminArns : var.admin_arns
-      tls_key : var.private_key == "" ? base64encode(tls_private_key.default.private_key_pem) : base64encode(var.private_key),
-      tls_crt : var.private_key == "" ? base64encode(tls_locally_signed_cert.default_cert.cert_pem) : base64encode(join("\n", [var.certificate_body, var.certificate_chain]))
+      tls_key : var.private_key == "" && var.expose_self_signed_ssl ? base64encode(tls_private_key.default[0].private_key_pem) : base64encode(var.private_key),
+      tls_crt : var.private_key == "" && var.expose_self_signed_ssl ? base64encode(tls_locally_signed_cert.default_cert[0].cert_pem) : base64encode(join("\n", [var.certificate_body, var.certificate_chain]))
     })
   ]
   depends_on = [
