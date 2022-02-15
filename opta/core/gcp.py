@@ -173,4 +173,3 @@ class GCP(CloudClient):
         except NotFound:
             return True
         return False
-

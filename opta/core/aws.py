@@ -374,7 +374,6 @@ class AWS(CloudClient):
         return True
 
 
-
 # AWS Resource ARNs can be one of the following 3 formats:
 # 1). arn:partition:service:region:account-id:resource-id
 # 2). arn:partition:service:region:account-id:resource-type/resource-id
