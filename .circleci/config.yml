@@ -1562,15 +1562,6 @@ workflows:
       - azure-destroy-env:
           requires:
             - azure-test-service-http
-      - azure-create-env:
-          requires:
-            - build-opta-binary
-      - azure-test-service-http:
-          requires:
-            - azure-create-env
-      - azure-destroy-env:
-          requires:
-            - azure-test-service-http
 
   run-ci:
     when: << pipeline.parameters.run-ci >>
