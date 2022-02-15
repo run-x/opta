@@ -1562,6 +1562,15 @@ workflows:
       - azure-destroy-env:
           requires:
             - azure-test-service-http
+      - azure-create-env:
+          requires:
+            - build-opta-binary
+      - azure-test-service-http:
+          requires:
+            - azure-create-env
+      - azure-destroy-env:
+          requires:
+            - azure-test-service-http
 
   run-ci:
     when: << pipeline.parameters.run-ci >>
@@ -1743,22 +1752,6 @@ workflows:
       - aws-destroy-env-dns-true:
           requires:
             - build-opta-binary
-
-  test:
-    when: << pipeline.parameters.test >>
-    jobs:
-      - download-opta
-      - build-opta-binary
-      - azure-create-env:
-          requires:
-            - download-opta
-            - build-opta-binary
-      - azure-test-service-http:
-          requires:
-            - azure-create-env
-      - azure-destroy-env:
-          requires:
-            - azure-test-service-http
 
   nightly:
     triggers:
