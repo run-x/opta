@@ -42,6 +42,15 @@ jobs:
           cd dist/opta
           zip -r opta.zip ./*
           aws s3 cp opta.zip s3://dev-runx-opta-binaries/linux/$VERSION/ --acl public-read
+      - name: Upload Linux Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.ALL_GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: opta.zip
+          asset_name: opta_linux.zip
+          asset_content_type: application/zip
 
   package-centos:
     # needs: create-destroy-tests
@@ -86,6 +95,15 @@ jobs:
           cd dist/opta
           zip -r opta.zip ./*
           aws s3 cp opta.zip s3://dev-runx-opta-binaries/centos/$VERSION/ --acl public-read
+      - name: Upload CentOS Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.ALL_GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: opta.zip
+          asset_name: opta_centos.zip
+          asset_content_type: application/zip
 
   package-macos:
     # needs: create-destroy-tests
@@ -119,3 +137,12 @@ jobs:
           cd dist/opta
           zip -r opta.zip ./*
           aws s3 cp opta.zip s3://dev-runx-opta-binaries/mac/$VERSION/ --acl public-read
+      - name: Upload Mac Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.ALL_GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: opta.zip
+          asset_name: opta_mac.zip
+          asset_content_type: application/zip
