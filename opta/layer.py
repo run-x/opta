@@ -1,5 +1,8 @@
 from __future__ import annotations
-
+from opta.core.aws import AWS
+from opta.core.azure import Azure
+from opta.core.cloud_client import CloudClient
+from opta.core.gcp import GCP
 import hashlib
 import importlib
 import os
@@ -10,7 +13,7 @@ from datetime import datetime
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Dict, FrozenSet, Iterable, List, Optional, Set, Tuple, TypedDict
-
+from botocore.config import Config
 import boto3
 import click
 import google.auth.transport.requests
@@ -504,18 +507,54 @@ class Layer:
         current_keys["parent_name"] = self.parent.name if self.parent is not None else ""
         return current_keys
 
+
+    def bucket_exists(self, bucket_name: str)-> bool:
+        providers = self.gen_providers(0, clean=False)
+        if self.cloud == "aws":
+             return AWS.bucket_exists(bucket_name, self.providers[0]["region"] )
+        elif self.cloud == "google":
+            return GCP.bucket_exists(bucket_name)
+        else:
+            return False
+
+    def _get_unique_hash(self):
+        provider = self.providers[0]
+        if self.cloud == "aws":
+             str2hash = provider["region"] + provider["account_id"]
+        elif self.cloud == "google":
+            str2hash = provider["region"] + provider["project_id"]
+        # elif self.cloud == "azurerm":
+        #     str2hash = provider["location"] + provider["tenant_id"] + provider["subscription_id"]
+        else:
+            return ""
+        return hashlib.md5(  # nosec
+                str2hash.encode("utf-8")
+            ).hexdigest()[0:4]
+
+
     def state_storage(self) -> str:
+        if self.cloud =="local":
+            return os.path.join(str(Path.home()), ".opta", "local", "tfstate")
+
         if self.parent is not None:
             return self.parent.state_storage()
-        elif self.cloud == "azurerm":
+        
+        suffix = self._get_unique_hash()
+                
+        if self.cloud == "azurerm":
             name_hash = hashlib.md5(  # nosec
                 f"{self.org_name}{self.name}".encode("utf-8")
             ).hexdigest()[0:16]
-            return f"opta{name_hash}"
-        elif self.cloud == "local":
-            return os.path.join(str(Path.home()), ".opta", "local", "tfstate")
+            orig_name = f"opta{name_hash}"
+            return orig_name  # For now, azure is not getting new bucket name suffixes
         else:
-            return f"opta-tf-state-{self.org_name}-{self.name}"
+            orig_name = f"opta-tf-state-{self.org_name}-{self.name}" 
+        
+        if self.bucket_exists(orig_name + "-" + suffix):
+            return orig_name + "-" + suffix
+        else:
+            return orig_name
+        
 
     def gen_providers(self, module_idx: int, clean: bool = True) -> Dict[Any, Any]:
         ret: Dict[Any, Any] = {"provider": {}}

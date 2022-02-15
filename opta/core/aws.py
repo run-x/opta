@@ -8,6 +8,7 @@ from mypy_boto3_dynamodb import DynamoDBClient
 from opta.core.cloud_client import CloudClient
 from opta.exceptions import UserErrors
 from opta.utils import fmt_msg, json, logger
+from botocore.exceptions import ClientError
 
 if TYPE_CHECKING:
     from opta.layer import Layer, StructuredConfig
@@ -361,6 +362,17 @@ class AWS(CloudClient):
         elif ":" in result["resource"]:
             result["resource_type"], result["resource"] = result["resource"].split(":", 1)
         return result
+
+    @staticmethod
+    def bucket_exists(bucket_name: str, region: str) -> bool:
+        s3 = boto3.client("s3", config=Config(region_name=region))
+        try:
+            s3.get_bucket_encryption(Bucket=bucket_name,)
+        except ClientError as e:
+            if e.response["Error"]["Code"] == "NoSuchBucket":
+                return False
+        return True
+
 
 
 # AWS Resource ARNs can be one of the following 3 formats:
