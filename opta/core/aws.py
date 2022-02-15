@@ -3,12 +3,12 @@ from typing import TYPE_CHECKING, List, Optional, TypedDict
 
 import boto3
 from botocore.config import Config
+from botocore.exceptions import ClientError
 from mypy_boto3_dynamodb import DynamoDBClient
 
 from opta.core.cloud_client import CloudClient
 from opta.exceptions import UserErrors
 from opta.utils import fmt_msg, json, logger
-from botocore.exceptions import ClientError
 
 if TYPE_CHECKING:
     from opta.layer import Layer, StructuredConfig

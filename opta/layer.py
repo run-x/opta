@@ -1,8 +1,5 @@
 from __future__ import annotations
-from opta.core.aws import AWS
-from opta.core.azure import Azure
-from opta.core.cloud_client import CloudClient
-from opta.core.gcp import GCP
+
 import hashlib
 import importlib
 import os
@@ -10,15 +7,17 @@ import re
 import shutil
 import tempfile
 from datetime import datetime
+from functools import lru_cache
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Dict, FrozenSet, Iterable, List, Optional, Set, Tuple, TypedDict
-from botocore.config import Config
+
 import boto3
 import click
 import google.auth.transport.requests
 from azure.core.exceptions import ClientAuthenticationError
 from azure.identity import DefaultAzureCredential
+from botocore.config import Config
 from botocore.exceptions import ClientError, NoCredentialsError
 from google.auth import default
 from google.auth.exceptions import DefaultCredentialsError
@@ -28,6 +27,8 @@ from modules.base import ModuleProcessor
 from modules.runx.runx import RunxProcessor
 from opta.constants import MODULE_DEPENDENCY, REGISTRY, VERSION
 from opta.core.aws import AWS
+from opta.core.azure import Azure
+from opta.core.cloud_client import CloudClient
 from opta.core.gcp import GCP
 from opta.core.validator import validate_yaml
 from opta.crash_reporter import CURRENT_CRASH_REPORTER
@@ -507,20 +508,22 @@ class Layer:
         current_keys["parent_name"] = self.parent.name if self.parent is not None else ""
         return current_keys
 
-
+    @lru_cache(maxsize=None)
     def bucket_exists(self, bucket_name: str)-> bool:
-        providers = self.gen_providers(0, clean=False)
+        
         if self.cloud == "aws":
-             return AWS.bucket_exists(bucket_name, self.providers[0]["region"] )
+             region =  self.providers["aws"]["region"]
+             return AWS.bucket_exists(bucket_name, region)
         elif self.cloud == "google":
             return GCP.bucket_exists(bucket_name)
         else:
             return False
 
     def _get_unique_hash(self):
-        provider = self.providers[0]
+        
         if self.cloud == "aws":
-             str2hash = provider["region"] + provider["account_id"]
+            provider = self.providers["aws"]
+            str2hash = provider["region"] + provider["account_id"]
         elif self.cloud == "google":
             str2hash = provider["region"] + provider["project_id"]
         # elif self.cloud == "azurerm":
@@ -550,10 +553,10 @@ class Layer:
         else:
             orig_name = f"opta-tf-state-{self.org_name}-{self.name}" 
         
-        if self.bucket_exists(orig_name + "-" + suffix):
-            return orig_name + "-" + suffix
-        else:
+        if self.bucket_exists(orig_name):
             return orig_name
+        else:
+            return orig_name + "-" + suffix
         
 
     def gen_providers(self, module_idx: int, clean: bool = True) -> Dict[Any, Any]:
