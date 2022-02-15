@@ -6,7 +6,6 @@ from botocore.config import Config
 from mypy_boto3_autoscaling import AutoScalingClient
 from mypy_boto3_ec2 import EC2Client
 from mypy_boto3_ec2.type_defs import NetworkInterfaceTypeDef
-from mypy_boto3_eks import EKSClient
 from mypy_boto3_logs import CloudWatchLogsClient
 
 from modules.base import ModuleProcessor

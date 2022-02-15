@@ -1,9 +1,6 @@
 # type: ignore
 import os
 
-import boto3
-from botocore.config import Config
-from mypy_boto3_eks import EKSClient
 from pytest_mock import MockFixture
 
 from modules.aws_eks.aws_eks import AwsEksProcessor
@@ -115,9 +112,6 @@ class TestAwsEksModuleProcessor:
             None,
         )
         aws_eks_module = layer.get_module("awseks", 8)
-        mocked_delete_preexisting_cloudwatch_log_group = mocker.patch(
-            "modules.aws_eks.aws_eks.AwsEksProcessor.delete_preexisting_cloudwatch_log_group"
-        )
         AwsEksProcessor(aws_eks_module, layer).process(8)
         assert (
             aws_eks_module.data["private_subnet_ids"]
@@ -127,4 +121,3 @@ class TestAwsEksModuleProcessor:
             aws_eks_module.data["kms_account_key_arn"]
             == "${{module.awsbase.kms_account_key_arn}}"
         )
-        mocked_delete_preexisting_cloudwatch_log_group.assert_called()
