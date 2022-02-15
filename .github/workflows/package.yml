@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Opta version to mark as latest
+        description: version tag
         required: false
   release:
     types: [published]
