@@ -1,0 +1,16 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+flask-pymongo = "*"
+flask = "*"
+ddtrace = "*"
+gunicorn = "*"
+dnspython = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"

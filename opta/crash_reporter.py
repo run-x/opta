@@ -6,7 +6,7 @@ from logging import DEBUG, Handler, LogRecord
 from typing import TYPE_CHECKING, List
 
 from opta.constants import VERSION
-from opta.utils import LogFormatMultiplexer, ansi_scrub, logger
+from opta.utils import SensitiveFormatter, ansi_scrub, logger
 
 # from opta.core.terraform import Terraform
 if TYPE_CHECKING:
@@ -48,17 +48,17 @@ class CrashReporter:
         if self.tf_plan_text != "":
             tfplan_file = f"{report_path}/tfplan"
             with open(tfplan_file, "w") as f:
-                f.write(self.tf_plan_text)
+                f.write(SensitiveFormatter.filter(self.tf_plan_text))
 
         if self.opta_yaml != "":
             opta_file = f"{report_path}/opta.yaml"
             with open(opta_file, "w") as f:
-                f.write(self.opta_yaml)
+                f.write(SensitiveFormatter.filter(self.opta_yaml))
 
         if self.opta_parent_yaml != "":
             opta_parent_file = f"{report_path}/opta_parent.yaml"
             with open(opta_parent_file, "w") as f:
-                f.write(self.opta_parent_yaml)
+                f.write(SensitiveFormatter.filter(self.opta_parent_yaml))
 
         shutil.make_archive("opta_crash_report", "zip", report_path)
         shutil.rmtree(report_path)
@@ -79,5 +79,5 @@ class ListHandler(Handler):  # Inherit from logging.Handler
 CURRENT_CRASH_REPORTER = CrashReporter()
 crash_report_handler = ListHandler(CURRENT_CRASH_REPORTER.log_lines)
 crash_report_handler.setLevel(DEBUG)
-crash_report_handler.setFormatter(LogFormatMultiplexer())
+crash_report_handler.setFormatter(SensitiveFormatter())
 logger.addHandler(crash_report_handler)

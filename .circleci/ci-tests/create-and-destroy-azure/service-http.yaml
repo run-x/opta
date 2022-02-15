@@ -1,0 +1,17 @@
+environments:
+  - name: azure-example
+    path: "environment.yaml"
+    variables:
+      max_containers: 2
+name: service-k8s
+modules:
+  - name: app
+    type: k8s-service
+    image: kennethreitz/httpbin
+    min_containers: 2
+    max_containers: "{vars.max_containers}"
+    liveness_probe_path: "/get"
+    readiness_probe_path: "/get"
+    public_uri: "/"
+    port:
+      http: 80

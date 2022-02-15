@@ -160,11 +160,6 @@ variable "link_secrets" {
   default = []
 }
 
-variable "manual_secrets" {
-  type    = list(string)
-  default = []
-}
-
 variable "acr_registry_name" {
   type = string
 }

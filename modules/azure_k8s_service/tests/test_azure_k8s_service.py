@@ -40,9 +40,6 @@ class TestAzureK8sServiceProcessor:
             {"name": "CACHEHOST2", "value": "${{module.redis2.cache_host}}"},
             {"name": "CACHEAUTH2", "value": "${{module.redis2.cache_auth_token}}"},
         ]
-        assert app_module.data["manual_secrets"] == [
-            "BALONEY",
-        ]
 
     def test_prehook(self, mocker: MockFixture):
         layer = Layer.load_from_yaml(

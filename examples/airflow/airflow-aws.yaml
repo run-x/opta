@@ -1,0 +1,60 @@
+name: airflow
+org_name: <<org_name::org_name::Your Organization Name>>
+providers:
+  aws:
+    region: <<region::aws_region::Your AWS Region>>
+    account_id: <<account_id::aws_account_id::Your AWS Account ID>>
+modules:
+  - type: base
+  - type: k8s-cluster
+    node_instance_type: t3.medium
+    max_nodes: 5
+    spot_instances: true
+  - type: k8s-base
+  - type: dns
+    domain: <<domain::string::The dns domain for your airflow deployment>>
+    delegated: false
+  - name: db
+    type: postgres
+  - name: redis
+    type: redis
+  - type: helm-chart
+    repository: https://airflow.apache.org
+    chart: airflow
+    namespace: airflow
+    chart_version: 1.4.0
+    create_namespace: true
+    wait: false
+    atomic: false
+    values:
+      postgresql:
+        enabled: false
+      redis:
+        enabled: false
+      statsd:
+        enabled: false
+      flower:
+        enabled: false
+      # Remove extraEnv if you don't want to load the example DAGs
+      extraEnv: |-
+        - name: AIRFLOW__CORE__LOAD_EXAMPLES
+          value: "true"
+      workers:
+        replicas: 1 # Change this if you want more workers
+      data:
+        metadataConnection:
+          host: "${{module.db.db_host}}"
+          db: "${{module.db.db_name}}"
+          user: "${{module.db.db_user}}"
+          pass: "${{module.db.db_password}}"
+        brokerUrl: "rediss://:${{module.redis.cache_auth_token}}@${{module.redis.cache_host}}"
+      airflow:
+        config:
+          AIRFLOW__WEBSERVER__BASE_URL: "http://{module.dns.domain}"
+      ingress:
+        enabled: true
+        web:
+          path: ""
+          host: "{module.dns.domain}"
+          annotations:
+            kubernetes.io/ingress.class: "nginx"

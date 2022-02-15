@@ -5,21 +5,25 @@ import pytz
 from kubernetes.client import (
     ApiException,
     CoreV1Api,
+    V1Deployment,
+    V1DeploymentList,
     V1Event,
     V1EventList,
     V1PersistentVolumeClaim,
     V1PersistentVolumeClaimList,
     V1Pod,
 )
+from kubernetes.client.api.apps_v1_api import AppsV1Api
 from kubernetes.watch import Watch
 from pytest_mock import MockFixture
 
 from opta.core.kubernetes import (
     GENERATED_KUBE_CONFIG_DIR,
-    configure_kubectl,
     delete_persistent_volume_claims,
     get_required_path_executables,
     list_persistent_volume_claims,
+    restart_deployments,
+    set_kube_config,
     tail_module_log,
     tail_namespace_events,
     tail_pod_log,
@@ -28,7 +32,7 @@ from opta.layer import Layer
 
 
 class TestKubernetes:
-    def test_azure_configure_kubectl(self, mocker: MockFixture) -> None:
+    def test_azure_set_kube_config(self, mocker: MockFixture) -> None:
         mocked_ensure_installed = mocker.patch("opta.core.kubernetes.ensure_installed")
         layer = mocker.Mock(spec=Layer)
         layer.parent = None
@@ -60,7 +64,7 @@ class TestKubernetes:
         )
         mocked_nice_run = mocker.patch("opta.core.kubernetes.nice_run",)
 
-        configure_kubectl(layer)
+        set_kube_config(layer)
 
         mocked_terraform_output.assert_called_once_with(layer)
         mocked_ensure_installed.assert_has_calls(
@@ -86,7 +90,7 @@ class TestKubernetes:
             ]
         )
 
-    def test_aws_configure_kubectl(self, mocker: MockFixture) -> None:
+    def test_aws_set_kube_config(self, mocker: MockFixture) -> None:
         mocked_ensure_installed = mocker.patch("opta.core.kubernetes.ensure_installed")
         mocked_exist = mocker.patch("opta.core.kubernetes.exists")
         mocked_exist.return_value = False
@@ -112,7 +116,7 @@ class TestKubernetes:
         mocked_file = mocker.patch(
             "opta.core.kubernetes.open", mocker.mock_open(read_data="")
         )
-        configure_kubectl(layer)
+        set_kube_config(layer)
         config_file_name = f"{GENERATED_KUBE_CONFIG_DIR}/kubeconfig-{layer.root().name}-{layer.cloud}.yaml"
         mocked_file.assert_called_once_with(config_file_name, "w")
         mocked_file().write.assert_called_once_with(
@@ -476,3 +480,26 @@ class TestKubernetes:
 
         # pv are automatically deleted by k8s after deleting the claim, not by opta
         mocked_core_v1_api.assert_not_called()
+
+    def test_restart_deployments(self, mocker: MockFixture) -> None:
+        mocked_aps_v1_api = mocker.Mock(spec=AppsV1Api)
+        mocker.patch("opta.core.kubernetes.AppsV1Api", return_value=mocked_aps_v1_api)
+        mocker.patch("opta.core.kubernetes.load_kube_config")
+        mocked_deploy = mocker.Mock(spec=V1Deployment)
+        mocked_deploy.metadata = mocker.Mock()
+        mocked_deploy.metadata.name = "deploy-name"
+
+        mocked_deployments = mocker.Mock(spec=V1DeploymentList)
+        mocked_deployments.items = [mocked_deploy]
+        mocked_aps_v1_api.list_namespaced_deployment.return_value = mocked_deployments
+
+        namespace = "ns-name"
+        restart_deployments(namespace)
+        mocked_aps_v1_api.list_namespaced_deployment.assert_called_once_with(
+            namespace=namespace
+        )
+
+        # check that the deployment to restart was patched
+        mocked_aps_v1_api.patch_namespaced_deployment.assert_called_once_with(
+            "deploy-name", namespace, mocker.ANY
+        )

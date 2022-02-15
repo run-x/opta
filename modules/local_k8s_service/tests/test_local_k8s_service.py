@@ -49,6 +49,3 @@ class TestLocalK8sServiceProcessor:
                 "value": "${{module.mongodbatlas.mongodb_atlas_connection_string}}",
             },
         ]
-        assert app_module.data["manual_secrets"] == [
-            "BALONEY",
-        ]

@@ -34,7 +34,6 @@ class AwsK8sServiceProcessor(
 
     def process(self, module_idx: int) -> None:
         # Update the secrets
-        self.module.data["manual_secrets"] = self.module.data.get("secrets", [])
         self.module.data["link_secrets"] = self.module.data.get("link_secrets", [])
 
         current_envars: Union[List, Dict[str, str]] = self.module.data.get("env_vars", [])

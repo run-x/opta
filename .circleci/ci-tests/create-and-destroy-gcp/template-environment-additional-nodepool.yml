@@ -1,0 +1,18 @@
+name: ENV_NAME
+org_name: runx
+providers:
+  google:
+    region: GCP_REGION
+    project: opta-ci-1
+modules:
+  - type: base
+  - type: dns
+    domain: gcp-release.runx.dev
+    delegated: false
+  - type: k8s-cluster
+    max_nodes: 4
+  - type: k8s-base
+  - type: gcp-nodepool
+    name: additionalnodepool
+    min_nodes: 1
+    max_nodes: 5

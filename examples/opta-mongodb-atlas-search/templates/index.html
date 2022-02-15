@@ -1,0 +1,163 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+   <style>
+    .jumbotron {
+        background-color: white;
+        border-style:solid;
+        border-width: 1px;
+        border-color: darkgreen;
+        margin-bottom: 20px;
+        margin-top: 20px;
+        -moz-box-shadow: 5px 5px 5px rgba(68, 68, 68, 0.6);
+        -webkit-box-shadow: 5px 5px 5px rgba(68, 68, 68, 0.6);
+        box-shadow: 5px 5px 5px rgba(68, 68, 68, 0.6);
+        filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius=3,MakeShadow=true,ShadowOpacity=0.30);
+        -ms-filter: "progid:DXImageTransform.Microsoft.Blur(PixelRadius=3,MakeShadow=true,ShadowOpacity=0.30)";
+        zoom: 1;
+    }
+    .fa-search {
+        color: green;
+        padding-top: 10px;
+        font-size: 32px;
+    }
+    #box {
+        border-radius: 25px;
+        border: 1px solid white;
+        box-shadow: 0 0 5px gray;
+    }
+    .form-control:focus {
+        border-color: inherit;
+        -webkit-box-shadow: none;
+        box-shadow: none;
+    }
+    input:focus::-webkit-input-placeholder{
+        color: transparent;
+    }
+   </style>
+    <script src="https://kit.fontawesome.com/e1f93e03c9.js"></script>
+    <title>MovieSearchApp connected to Mongodb Atlas at </title>
+</head>
+<body>
+<div class="container">
+    <header class="jumbotron">
+        <div class="row">
+                <div class="col-3 view overlay">
+                    <img src="https://webassets.mongodb.com/_com_assets/cms/full%20text%20search%20icon-xz2924vpgn.png" style="height:12em;">
+                </div>
+            <!-- Grid column -->
+
+            <div class="col-9">
+                <h1 style="text-align:center">Let's Watch a Movie! Atlas Search this endpoint </h1>
+                <br>
+                <div class="row" id="box">
+                    <div class="col-11">
+                        <form onsubmit="userAction()" action="javascript:">
+                            <input type="text" onsubmit="userAction()" autocomplete="off" id="myInput" class="form-control" placeholder="search movies..." aria-label="Search" style="font-size: 2em; border:none">
+                        </form>
+                    </div>
+                    <div class="col-1">
+                        <span><i class="fa fa-search" aria-hidden="true" onclick="userAction()" ></i></span>
+                    </div>
+                </div>
+            </div>
+            <br>
+        </div>
+    </header>
+
+    <div>
+        <p id="results" style="font-size: 1.8em"></p>
+    </div>
+
+</div>
+<script>
+    function userAction(){
+        let searchString = document.getElementById("myInput").value;
+        let txt = "";
+        console.log(searchString);
+        
+        //----------------- MODIFY WEBHOOK_URL BELOW ------------------------
+
+        let webhook_url = "/search";
+        let url = webhook_url + "?arg=" + searchString;
+
+        fetch(url)
+            .then(function (response) {
+                if(!response.ok){
+                    console.log(response);
+                    txt += `<br><br><br><b><h3>Sadly you have an error. Status: ${response.status}`;
+                    if (response.json.length === 0)
+                        txt+=`<br><br>Make sure to search for some type of movie. Don't leave your search box empty.</h3></b>`;
+                    document.getElementById("results").innerHTML = txt;
+                    throw Error(response.statusText);
+                }
+                return response.json();
+            })
+            .then(function (movieJSON) {
+                
+                if (movieJSON["$undefined"] === true) {
+                    console.log('NO FETCH RESULT');
+                    txt += `<br><br><br><b><h3>IMPLEMENT FULL TEXT SEARCH AGGREGATION TO SEARCH MOVIE COLLECTION</h3></b>`;
+                } else {
+                    console.log("FETCHED RESULT... "  );
+                    if (movieJSON.length !== 0) {
+                        console.log("Fetched array has " + movieJSON.length + " entries");
+                        txt = buildMovieList(movieJSON);
+                    } else {
+                        console.log("Fetched array has " + movieJSON.length + " entries");
+                        txt += `<br><br><br><b><h3>Sadly you have no search results. Try checking your spelling or changing your search terms.</h3></b>`;
+                    }
+                }  // end of ELSE
+
+            document.getElementById("results").innerHTML = txt;
+        }).catch(function(error){
+            console.log('Whoopsie!', error);
+        });
+    }
+
+    function buildMovieList(movies){
+        // HELPER FUNCTION FOR USER ACTION
+        
+        let i = 0;      // for number of movie documents returned
+        let j = 0;      // for number of highlight entries
+        let k = 0;      // for highlight.texts type entries - either "hit" or "text"
+        let highlight_length = 0;
+        let txt = "";
+        
+
+        for (i; i < movies.length; i++) {
+            highlight_length = movies[i].highlight.length;
+
+            txt += `<br><b><p style="color:green">${movies[i].title }</p></b><br>`;
+            txt += `<b>Score:  ${movies[i].score} </b><br>`;
+            
+            txt += `Year: ${movies[i].year} <br><br>`;
+
+            // BUILD OUT HIGHLIGHTS FROM  FULLPLOT FIELD
+            for (j = 0; j < highlight_length; j++) {
+                for (k = 0; k < movies[i].highlight[j].texts.length; k++) {
+                    if (movies[i].highlight[j].texts[k].type === "hit") {
+                        txt += `<b><span style="background-color: #FFFF00"> ${movies[i].highlight[j].texts[k].value} </span></b>`;
+                    } else {
+                        txt += movies[i].highlight[j].texts[k].value;
+                    }
+                } // end of k
+            }  // end of j
+
+            txt += "<hr>";
+        }
+        return txt;
+    }
+</script>
+
+</body>
+</html>
+
+

@@ -47,11 +47,8 @@ resource "null_resource" "kind-installer" {
   provisioner "local-exec" {
     working_dir = path.module
     command     = <<EOT
-      echo "Installing Nginx ingress"
-      kubectl config use-context kind-opta-local-cluster
-      kubectl  apply -f deploy.yaml
-      echo "Waiting 20s for nginx ingress to stabilize"
-      sleep 20 # Wait for nginx to be ready
+      kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+      kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=90s
     EOT
   }
 }

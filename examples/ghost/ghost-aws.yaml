@@ -1,0 +1,43 @@
+name: ghost
+org_name: <<org_name::org_name::Your Organization Name>>
+providers:
+  aws:
+    region: <<region::aws_region::Your AWS Region>>
+    account_id: <<account_id::aws_account_id::Your AWS Account ID>>
+modules:
+  - type: base
+  - type: dns
+    domain: <<domain::string::The dns domain for your Ghost deployment>>
+    delegated: false
+  - type: k8s-cluster
+  - type: k8s-base
+  - type: mysql
+    name: mysql
+    safety: false
+  - type: k8s-service
+    env_vars:
+      - name: database__client
+        value: "mysql"
+      - name: url
+        value: "https://${{module.dns.domain}}/dashboard"
+      - name: NODE_ENV
+        value: "production node current/index.js"
+      - name: mail__transport
+        value: "SMTP"
+      - name: mail__options__service
+        value: "Gmail"
+      - name: mail__options__auth__user
+        value: ""
+    secrets:
+      - mail__options__auth__pass
+    public_uri:
+      - "{module.dns.domain}"
+    port:
+      tcp: 2368
+    image: ghost
+    links:
+      - mysql:
+        - db_user: database__connection__user
+          db_host: database__connection__host
+          db_name: database__connection__database
+          db_password: database__connection__password

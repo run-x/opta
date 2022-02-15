@@ -1,0 +1,25 @@
+name: mernbackend
+environments:
+  - name: awsenv
+    path: "../awsenv.yaml"
+
+modules:
+  - name: mernbackend
+    type: k8s-service
+    port:
+      http: 80
+    public_uri: "/mernbackend"
+    image: AUTO
+    healthcheck_path: "/record"
+    env_vars:
+      DATABASE_NAME: "myFirstDatabase"
+    links:
+      - mongodb:
+         -  mongodb_atlas_connection_string: MONGODB_URI
+            db_user: MONGODB_USER
+            db_password: MONGODB_PASSWORD
+  - name: mongodb
+    type: mongodb-atlas
+    mongodb_instance_size: M10
+    region: US_EAST_1
+    mongodb_atlas_project_id: <<project_id::mongodb_project_id::Your MongoDB project ID>>

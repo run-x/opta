@@ -1,0 +1,16 @@
+name: mernfrontend
+environments:
+  - name: awsenv
+    path: "../awsenv.yaml"
+modules:
+  - name: mernfrontend
+    type: k8s-service
+    port:
+      http: 80
+    image: AUTO
+    env_vars:
+      - name: "API_ENDPOINT"
+        value: <replace with load_balancer_raw_dns>
+    healthcheck_path: "/"
+    public_uri: "/mernfrontend"
+

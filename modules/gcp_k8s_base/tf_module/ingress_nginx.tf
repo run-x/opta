@@ -16,6 +16,7 @@ resource "helm_release" "ingress-nginx" {
         extraArgs : var.private_key == "" ? {} : { default-ssl-certificate : "ingress-nginx/secret-tls" }
         config : local.config
         podAnnotations : {
+          "config.linkerd.io/skip-inbound-ports" : "80,443" // NOTE: should be removed when this is fixed: https://github.com/linkerd/linkerd2/issues/4219
           "linkerd.io/inject" : "enabled"
           "cluster-autoscaler.kubernetes.io/safe-to-evict" : "true"
         }

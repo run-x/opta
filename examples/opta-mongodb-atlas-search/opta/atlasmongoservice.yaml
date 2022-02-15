@@ -1,0 +1,29 @@
+#name: atlassearch
+# name: atlassearchaws
+name: localoptamongodb
+environments:
+  - name: optaapp
+    path: "awsenv.yaml"
+modules:
+  - name: searchapp
+    type: k8s-service
+    port:
+      http: 5000
+    image: AUTO
+    public_uri: "/"
+    healthcheck_path: "/"
+    env_vars:
+      DATABASE_NAME: "sample_mflix"
+    links:
+      - mongodbatlas:
+         -  mongodb_atlas_connection_string: MONGODB_URI
+            db_user: DB_USER
+            db_password: DB_PASSWORD
+  - name: mongodbatlas
+    type: mongodb-atlas
+    mongodb_instance_size: M10
+    region: US_EAST_1
+    mongodb_atlas_project_id: 6166e8eff8f4f80e0f14cb55
+
+  
+  

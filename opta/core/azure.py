@@ -3,7 +3,7 @@ from contextlib import redirect_stderr
 from io import StringIO
 from typing import TYPE_CHECKING, Optional
 
-from azure.core.exceptions import ResourceNotFoundError
+from azure.core.exceptions import ClientAuthenticationError, ResourceNotFoundError
 from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient, ContainerClient, StorageStreamDownloader
 
@@ -26,6 +26,8 @@ class Azure(CloudClient):
             try:
                 with redirect_stderr(f):
                     cls.credentials.get_token("https://storage.azure.com/")
+            except ClientAuthenticationError:
+                pass
             except Exception as e:
                 logger.error(f.getvalue())
                 raise e

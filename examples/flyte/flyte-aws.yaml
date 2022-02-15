@@ -1,0 +1,183 @@
+name: flyte
+org_name: <<org_name::org_name::Your Organization Name>>
+providers:
+  aws:
+    region: <<region::aws_region::Your AWS Region>>
+    account_id: <<account_id::aws_account_id::Your AWS Account ID>>
+modules:
+  - type: base
+  - type: dns
+    domain: <<domain::string::The dns domain for your Flyte deployment>>
+    delegated: false # set to true once ready https://docs.opta.dev/miscellaneous/ingress/
+  - type: k8s-cluster
+    max_nodes: 15
+  - type: k8s-base
+  - name: postgres
+    type: aws-postgres
+  - name: s3
+    type: aws-s3
+    bucket_name: "{parent_name}-{layer_name}"
+  - name: notifcationsQueue
+    type: aws-sqs
+  - name: schedulesQueue
+    type: aws-sqs
+  - name: topic
+    type: aws-sns
+    sqs_subscribers:
+      - "${{module.notifcationsQueue.queue_arn}}"
+  - name: adminflyterole
+    type: aws-iam-role
+    extra_iam_policies:
+      - "arn:aws:iam::aws:policy/CloudWatchEventsFullAccess"
+    #      - "arn:aws:iam::{aws.account_id}:policy/{env}-{env}-awsses-sender" # Uncomment out for SES
+    allowed_k8s_services:
+      - namespace: "*"
+        service_name: "*"
+    links:
+      - s3: ["write"]
+      - notifcationsQueue
+      - schedulesQueue
+      - topic
+  - name: userflyterole
+    type: aws-iam-role
+    extra_iam_policies:
+      - "arn:aws:iam::aws:policy/CloudWatchEventsFullAccess"
+    #      - "arn:aws:iam::{aws.account_id}:policy/{env}-{env}-awsses-sender" # Uncomment out for SESre, change the templating
+    allowed_k8s_services:
+      - namespace: "*"
+        service_name: "*"
+    links:
+      - s3: ["write"]
+  - type: helm-chart
+    chart: "flyte-core"
+    repository: "https://flyteorg.github.io/flyte"
+    namespace: flyte
+    timeout: 600
+    create_namespace: true
+    values_file: "values-eks.yaml"
+    chart_version: "v0.18.2"
+    values:
+      postgres:
+        enabled: false
+      db:
+        datacatalog:
+          database:
+            port: 5432
+            username: "${{module.postgres.db_user}}"
+            host: "${{module.postgres.db_host}}"
+            dbname: "${{module.postgres.db_name}}"
+        admin:
+          database:
+            port: 5432
+            username: "${{module.postgres.db_user}}"
+            host: "${{module.postgres.db_host}}"
+            dbname: "${{module.postgres.db_name}}"
+      common:
+        ingress:
+          albSSLRedirect: false
+          host: "{module.dns.domain}"
+          annotations:
+            kubernetes.io/ingress.class: "nginx"
+            nginx.ingress.kubernetes.io/app-root: /console
+        databaseSecret:
+          secretManifest:
+            stringData:
+              pass.txt: "${{module.postgres.db_password}}"
+      storage:
+        bucketName: "{parent_name}-{layer_name}"
+        s3:
+          region: "{aws.region}"
+      flyteadmin:
+        serviceAccount:
+          create: true
+          annotations:
+            eks.amazonaws.com/role-arn: "${{module.adminflyterole.role_arn}}"
+      datacatalog:
+        serviceAccount:
+          create: true
+          annotations:
+            eks.amazonaws.com/role-arn: "${{module.adminflyterole.role_arn}}"
+      flytepropeller:
+        serviceAccount:
+          create: true
+          annotations:
+            eks.amazonaws.com/role-arn: "${{module.adminflyterole.role_arn}}"
+      workflow_scheduler:
+        enabled: true
+        config:
+          scheduler:
+            # -- This is configured to use Cloudwatch schedules as explained [here](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/Create-CloudWatch-Events-Scheduled-Rule.html)
+            eventScheduler:
+              scheme: aws
+              region: "{aws.region}"
+              scheduleRole: "${{module.adminflyterole.role_arn}}"
+              targetName: "${{module.schedulesQueue.queue_arn}}"
+              scheduleNamePrefix: flyte
+            workflowExecutor:
+              scheme: aws
+              region: "{aws.region}"
+              scheduleQueueName: "${{module.schedulesQueue.queue_name}}"
+              accountId: "{aws.account_id}"
+              reconnectAttempts: 10
+              reconnectDelaySeconds: 30
+      workflow_notifications:
+        enabled: true
+        config:
+          notifications:
+            type: aws
+            region: "{aws.region}"
+            publisher:
+              topicName: "${{module.topic.topic_arn}}"
+            processor:
+              queueName: "${{module.notifcationsQueue.queue_name}}"
+              accountId: "{aws.account_id}"
+            emailer:
+              subject: "Flyte: {{ project }}/{{ domain }}/{{ launch_plan.name }} has '{{ phase }}'"
+              sender: "flyte@{parent.domain}"
+              body: |
+                Execution {{ workflow.project }}/{{ workflow.domain }}/{{ workflow.name }}/{{ name }} has {{ phase }}.
+                Details: https://flyte.example.com/console/projects/{{ project }}/domains/{{ domain }}/executions/{{ name }}.
+                {{ error }}
+      configmap:
+        remoteData:
+          remoteData:
+            region: "{aws.region}"
+            scheme: aws
+            signedUrls:
+              durationMinutes: 3
+        task_logs:
+          plugins:
+            logs:
+              cloudwatch-region: "{aws.region}"
+        resource_manager:
+        # -- resource manager configuration
+          propeller:
+            resourcemanager:
+              type: noop
+      cluster_resource_manager:
+        enabled: true
+        config:
+          cluster_resources:
+            customData:
+              - production:
+                  - defaultIamRole:
+                      value: "${{module.userflyterole.role_arn}}"
+                  - projectQuotaCpu:
+                      value: "6"
+                  - projectQuotaMemory:
+                      value: "6000Mi"
+              - staging:
+                  - defaultIamRole:
+                      value: "${{module.userflyterole.role_arn}}"
+                  - projectQuotaCpu:
+                      value: "6"
+                  - projectQuotaMemory:
+                      value: "6000Mi"
+              - development:
+                  - defaultIamRole:
+                      value: "${{module.userflyterole.role_arn}}"
+                  - projectQuotaCpu:
+                      value: "6"
+                  - projectQuotaMemory:
+                      value: "6000Mi"
+

@@ -29,7 +29,7 @@ class TestSecretManager:
         )
 
         mocker.patch("opta.commands.secret.gen_all")
-        mocker.patch("opta.commands.secret.configure_kubectl")
+        mocker.patch("opta.commands.secret.set_kube_config")
 
         mocked_create_namespace_if_not_exists = mocker.patch(
             "opta.commands.secret.create_namespace_if_not_exists"
@@ -62,7 +62,7 @@ class TestSecretManager:
         )
         mocked_print = mocker.patch("builtins.print")
         mocker.patch("opta.commands.secret.gen_all")
-        mocker.patch("opta.commands.secret.configure_kubectl")
+        mocker.patch("opta.commands.secret.set_kube_config")
 
         mocked_create_namespace_if_not_exists = mocker.patch(
             "opta.commands.secret.create_namespace_if_not_exists"
@@ -104,8 +104,10 @@ class TestSecretManager:
         mocked_update_manual_secrets = mocker.patch(
             "opta.commands.secret.update_manual_secrets"
         )
-
-        mocker.patch("opta.commands.secret.configure_kubectl")
+        mocked_restart_deployments = mocker.patch(
+            "opta.commands.secret.restart_deployments"
+        )
+        mocker.patch("opta.commands.secret.set_kube_config")
 
         mocked_amplitude_client = mocker.patch(
             "opta.commands.secret.amplitude_client", spec=AmplitudeClient
@@ -133,6 +135,7 @@ class TestSecretManager:
         mocked_amplitude_client.send_event.assert_called_once_with(
             amplitude_client.UPDATE_SECRET_EVENT
         )
+        mocked_restart_deployments.assert_called_once_with("dummy_layer")
 
         # test updating a secret that is not listed in the config file - should work
         result = runner.invoke(update, ["unlistedsecret", "newvalue"])
@@ -147,13 +150,16 @@ class TestSecretManager:
         )
         mocker.patch("opta.utils.os.path.exists")
         mocker.patch("opta.commands.secret.gen_all")
-        mocker.patch("opta.commands.secret.configure_kubectl")
+        mocker.patch("opta.commands.secret.set_kube_config")
         mocked_create_namespace_if_not_exists = mocker.patch(
             "opta.commands.secret.create_namespace_if_not_exists"
         )
         mocked_update_secrets = mocker.patch("opta.core.secrets.update_secrets")
         mocked_amplitude_event = mocker.patch(
             "opta.commands.secret.amplitude_client.send_event"
+        )
+        mocked_restart_deployments = mocker.patch(
+            "opta.commands.secret.restart_deployments"
         )
 
         runner = CliRunner()
@@ -173,3 +179,12 @@ class TestSecretManager:
         mocked_amplitude_event.assert_called_once_with(
             amplitude_client.UPDATE_BULK_SECRET_EVENT
         )
+        mocked_restart_deployments.assert_called_once_with("dummy_layer")
+
+        # test deployment is not restarted with flag --no-restart
+        mocked_restart_deployments.reset_mock()
+        result = runner.invoke(
+            bulk_update,
+            [env_file, "--env", "dummyenv", "--config", "--no-restart", "dummyconfig"],
+        )
+        mocked_restart_deployments.assert_not_called()

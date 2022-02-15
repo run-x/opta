@@ -1,0 +1,10 @@
+name: aws # name of the environment
+org_name: my-org # A unique identifier for your organization
+providers:
+  aws:
+    region: us-east-1
+    account_id: 000000000000 # Your 12 digit AWS account id
+modules:
+  - type: base
+  - type: k8s-cluster
+  - type: k8s-base

@@ -1,0 +1,6 @@
+node_modules/
+config.env
+.terraform/
+tf.plan
+*opta_crash_report*
+*/.terraform*

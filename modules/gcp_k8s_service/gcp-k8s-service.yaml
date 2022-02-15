@@ -26,10 +26,6 @@ inputs:
     user_facing: false
     description: "Secrets from links"
     default: []
-  - name: manual_secrets
-    user_facing: false
-    description: "Manually set secrets"
-    default: []
   - name: read_buckets
     user_facing: false
     description: Buckets to grant read permissions for
@@ -42,7 +38,7 @@ inputs:
     user_facing: true
     validator: str(required=True)
     description: Set to AUTO to create a private repo for your own images. Otherwises attempts to pull image from public dockerhub
-    default: null
+    default: AUTO
   - name: port
     user_facing: true
     validator: any(include('service_port'), required=False)
@@ -80,7 +76,7 @@ inputs:
   - name: secrets
     user_facing: true
     validator: list(str(), required=False)
-    description: Optional. A list of secrets to add as environment variables for your container. All secrets must be set following the [secrets instructions](/tutorials/secrets).
+    description: Deprecated, see [secrets instructions](/tutorials/secrets).
     default: []
   - name: env_vars
     user_facing: true

@@ -7,7 +7,7 @@ from ruamel.yaml.compat import StringIO
 
 from modules.base import AWSK8sModuleProcessor, K8sBaseModuleProcessor
 from opta.core.aws import AWS
-from opta.core.kubernetes import configure_kubectl, list_namespaces, load_opta_kube_config
+from opta.core.kubernetes import list_namespaces, load_opta_kube_config, set_kube_config
 from opta.exceptions import UserErrors
 from opta.utils import yaml
 
@@ -41,7 +41,7 @@ class AwsK8sBaseProcessor(AWSK8sModuleProcessor, K8sBaseModuleProcessor):
                 "certificate_chain"
             ] = f"${{{{module.{byo_cert_module.name}.certificate_chain}}}}"
 
-        configure_kubectl(self.layer)
+        set_kube_config(self.layer)
         self._process_nginx_extra_ports(self.module.data)
 
         aws_dns_module = None
@@ -63,10 +63,18 @@ class AwsK8sBaseProcessor(AWSK8sModuleProcessor, K8sBaseModuleProcessor):
             "s3_log_bucket_name"
         ] = f"${{{{module.{aws_base_module.name}.s3_log_bucket_name}}}}"
 
+        aws_eks_modules = self.layer.get_module_by_type("k8s-cluster", module_idx)
+        if len(aws_eks_modules) == 0:
+            raise UserErrors("Must have the k8s cluster module in before the k8s-base")
+        aws_eks_module = aws_eks_modules[0]
+        self.module.data[
+            "k8s_cluster_name"
+        ] = f"${{{{module.{aws_eks_module.name}.k8s_cluster_name}}}}"
+
         super(AwsK8sBaseProcessor, self).process(module_idx)
 
     def pre_hook(self, module_idx: int) -> None:
-        configure_kubectl(self.layer)
+        set_kube_config(self.layer)
         list_namespaces()
         super(AwsK8sBaseProcessor, self).pre_hook(module_idx)
 
@@ -78,7 +86,7 @@ class AwsK8sBaseProcessor(AWSK8sModuleProcessor, K8sBaseModuleProcessor):
     def add_admin_roles(self) -> None:
         if self.module.data.get("admin_arns") is None:
             return
-        configure_kubectl(self.layer)
+        set_kube_config(self.layer)
         load_opta_kube_config()
         v1 = CoreV1Api()
         aws_auth_config_map: V1ConfigMap = v1.read_namespaced_config_map(

@@ -4,8 +4,13 @@ import click
 from click_didyoumean import DYMGroup
 
 from opta.amplitude import amplitude_client
+from opta.commands.apply import _local_setup
 from opta.core.generator import gen_all
-from opta.core.kubernetes import configure_kubectl, create_namespace_if_not_exists
+from opta.core.kubernetes import (
+    create_namespace_if_not_exists,
+    restart_deployments,
+    set_kube_config,
+)
 from opta.core.secrets import (
     bulk_update_manual_secrets,
     get_secrets,
@@ -14,6 +19,29 @@ from opta.core.secrets import (
 from opta.exceptions import UserErrors
 from opta.layer import Layer
 from opta.utils import check_opta_file_exists
+from opta.utils.clickoptions import local_option
+
+env_option = click.option(
+    "-e", "--env", default=None, help="The env to use when loading the config file"
+)
+
+config_option = click.option(
+    "-c", "--config", default="opta.yaml", help="Opta config file", show_default=True
+)
+restart_option = click.option(
+    # this flag is under the form '--no' because the default behavior is to do a restart (no flag needed)
+    "--no-restart",
+    is_flag=True,
+    default=False,
+    help="""Do not restart the deployment(s) using the secrets.
+    If this flag is set, the deployment(s) will need to be restarted to have the latest secret values
+    """,
+    show_default=True,
+)
+
+
+def __restart_deployments(no_restart: bool, layer_name: str) -> None:
+    restart_deployments(layer_name) if not no_restart else None
 
 
 @click.group(cls=DYMGroup)
@@ -37,13 +65,10 @@ def secret() -> None:
 
 @secret.command()
 @click.argument("secret")
-@click.option(
-    "-e", "--env", default=None, help="The env to use when loading the config file"
-)
-@click.option(
-    "-c", "--config", default="opta.yaml", help="Opta config file", show_default=True
-)
-def view(secret: str, env: Optional[str], config: str) -> None:
+@env_option
+@config_option
+@local_option
+def view(secret: str, env: Optional[str], config: str, local: Optional[bool]) -> None:
     """View a given secret of a k8s service
 
     Examples:
@@ -52,6 +77,9 @@ def view(secret: str, env: Optional[str], config: str) -> None:
     """
 
     config = check_opta_file_exists(config)
+    if local:
+        config = _local_setup(config)
+        env = "localopta"
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(
         amplitude_client.VIEW_SECRET_EVENT,
@@ -60,7 +88,7 @@ def view(secret: str, env: Optional[str], config: str) -> None:
     layer.verify_cloud_credentials()
     gen_all(layer)
 
-    configure_kubectl(layer)
+    set_kube_config(layer)
     create_namespace_if_not_exists(layer.name)
     secrets = get_secrets(layer.name)
     if secret not in secrets:
@@ -73,13 +101,10 @@ def view(secret: str, env: Optional[str], config: str) -> None:
 
 
 @secret.command(name="list")
-@click.option(
-    "-e", "--env", default=None, help="The env to use when loading the config file"
-)
-@click.option(
-    "-c", "--config", default="opta.yaml", help="Opta config file", show_default=True
-)
-def list_command(env: Optional[str], config: str) -> None:
+@env_option
+@config_option
+@local_option
+def list_command(env: Optional[str], config: str, local: Optional[bool]) -> None:
     """List the secrets (names and values) for the given k8s service module
 
       It expects a file in the dotenv file format.
@@ -94,11 +119,14 @@ def list_command(env: Optional[str], config: str) -> None:
       opta secret list -c my-service.yaml
     """
     config = check_opta_file_exists(config)
+    if local:
+        config = _local_setup(config)
+        env = "localopta"
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(amplitude_client.LIST_SECRETS_EVENT)
     gen_all(layer)
 
-    configure_kubectl(layer)
+    set_kube_config(layer)
     create_namespace_if_not_exists(layer.name)
     secrets = get_secrets(layer.name)
     for key, value in secrets.items():
@@ -108,13 +136,18 @@ def list_command(env: Optional[str], config: str) -> None:
 @secret.command()
 @click.argument("secret")
 @click.argument("value")
-@click.option(
-    "-e", "--env", default=None, help="The env to use when loading the config file"
-)
-@click.option(
-    "-c", "--config", default="opta.yaml", help="Opta config file", show_default=True
-)
-def update(secret: str, value: str, env: Optional[str], config: str) -> None:
+@env_option
+@config_option
+@restart_option
+@local_option
+def update(
+    secret: str,
+    value: str,
+    env: Optional[str],
+    config: str,
+    no_restart: bool,
+    local: Optional[bool],
+) -> None:
     """Update a given secret of a k8s service with a new value
 
     Examples:
@@ -123,26 +156,34 @@ def update(secret: str, value: str, env: Optional[str], config: str) -> None:
     """
 
     config = check_opta_file_exists(config)
+    if local:
+        config = _local_setup(config)
+        env = "localopta"
     layer = Layer.load_from_yaml(config, env)
     gen_all(layer)
 
-    configure_kubectl(layer)
+    set_kube_config(layer)
     create_namespace_if_not_exists(layer.name)
     amplitude_client.send_event(amplitude_client.UPDATE_SECRET_EVENT)
     update_manual_secrets(layer.name, {secret: str(value)})
+    __restart_deployments(no_restart, layer.name)
 
     print("Success")
 
 
 @secret.command()
 @click.argument("env-file")
-@click.option(
-    "-c", "--config", default="opta.yaml", help="Opta config file", show_default=True
-)
-@click.option(
-    "-e", "--env", default=None, help="The env to use when loading the config file"
-)
-def bulk_update(env_file: str, env: Optional[str], config: str) -> None:
+@env_option
+@config_option
+@restart_option
+@local_option
+def bulk_update(
+    env_file: str,
+    env: Optional[str],
+    config: str,
+    no_restart: bool,
+    local: Optional[bool],
+) -> None:
     """Bulk update a list of secrets for a k8s service using a dotenv file as in input.
 
     Each line of the file should be in VAR=VAL format.
@@ -153,13 +194,17 @@ def bulk_update(env_file: str, env: Optional[str], config: str) -> None:
     """
 
     config = check_opta_file_exists(config)
+    if local:
+        config = _local_setup(config)
+        env = "localopta"
     layer = Layer.load_from_yaml(config, env)
     gen_all(layer)
 
-    configure_kubectl(layer)
+    set_kube_config(layer)
     create_namespace_if_not_exists(layer.name)
     amplitude_client.send_event(amplitude_client.UPDATE_BULK_SECRET_EVENT)
 
     bulk_update_manual_secrets(layer.name, env_file)
+    __restart_deployments(no_restart, layer.name)
 
     print("Success")
