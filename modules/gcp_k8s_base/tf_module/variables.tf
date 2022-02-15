@@ -89,3 +89,8 @@ variable "certificate_chain" {
 variable "nginx_config" {
   default = {}
 }
+
+variable "expose_self_signed_ssl" {
+  type    = bool
+  default = false
+}
