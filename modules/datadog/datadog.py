@@ -23,7 +23,11 @@ class DatadogProcessor(ModuleProcessor):
         super(DatadogProcessor, self).__init__(module, layer)
 
     def process(self, module_idx: int) -> None:
-        # TODO not work with generate-terraform
+        if self.layer.is_stateless_mode() is True:
+            # no k8s available, skip injecting secret
+            super(DatadogProcessor, self).process(module_idx)
+            return
+
         set_kube_config(self.layer)
         load_opta_kube_config()
         v1 = CoreV1Api()

@@ -3,7 +3,7 @@ import json
 import os
 import shutil
 import tempfile  # nosec
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 import click
 
@@ -12,6 +12,7 @@ from opta.commands.local_flag import _clean_folder, _clean_tf_folder
 from opta.constants import REGISTRY, TF_FILE_PATH, VERSION
 from opta.core.generator import gen, gen_opta_resource_tags
 from opta.layer import Layer
+from opta.module import Module
 from opta.pre_check import pre_check
 from opta.utils import check_opta_file_exists, dicts, logger
 from opta.utils.clickoptions import str_options
@@ -89,6 +90,7 @@ def generate_terraform(
     layer.validate_required_path_dependencies()
 
     event_properties: Dict = layer.get_event_properties()
+    event_properties["modules"] = ",".join([m.get_type() for m in layer.get_modules()])
     amplitude_client.send_event(
         amplitude_client.START_GEN_TERRAFORM_EVENT, event_properties=event_properties,
     )
@@ -116,12 +118,24 @@ def generate_terraform(
         # note this will only copy the 'tf_module' subdirectory ex: modules/aws_base/tf_module
         for module in layer.modules:
             src_path = module.module_dir_path
+            if not os.path.exists(src_path):
+                logger.warn(
+                    f"Could not find source directory for module '{module.name}', ignoring it"
+                )
+                # dynamically mark it as not exportable
+                module.desc["is_exportable"] = False
+                continue
             rel_path = "./" + src_path[src_path.index("modules/") :]
             abs_path = os.path.join(tmp_dir, rel_path)
-            logger.debug(f"Copying module from {module.aliased_type} to {abs_path}")
+            logger.debug(f"Copying module from {module.get_type()} to {abs_path}")
             shutil.copytree(src_path, abs_path, dirs_exist_ok=True)
             # configure module path to use new relative path
             module.module_dir_path = rel_path
+            # if there is some export documentation load it now - it will be added to the readme
+            export_md = os.path.join(src_path, "..", "export.md")
+            if os.path.exists(export_md):
+                with open(export_md, "r") as f:
+                    module.desc["export"] = f.read()
 
         # update terraform backend to be local (currently defined in the registry)
         # this is needed as the generated terraform should work outside of opta
@@ -177,7 +191,7 @@ def generate_terraform(
         # if everything was successfull, copy tmp dir to target dir
         if os.path.exists(output_dir):
             if replace:
-                logger.info(
+                print(
                     f"Output directory {output_dir} already exists and --replace flag is on, deleting it"
                 )
                 if not auto_approve:
@@ -187,7 +201,7 @@ def generate_terraform(
                     )
                 _clean_folder(output_dir)
             else:
-                logger.info(f"Output directory {output_dir} already exists, using it.")
+                print(f"Output directory {output_dir} already exists, using it.")
                 if not auto_approve:
                     click.confirm(
                         "The output directory will be updated.\n Do you approve?",
@@ -196,10 +210,21 @@ def generate_terraform(
 
         logger.debug(f"Copy {tmp_dir} to {output_dir}")
         shutil.copytree(tmp_dir, output_dir, dirs_exist_ok=True)
-        logger.info("Terraform files generated successfully.")
+        unsupported_modules = [m for m in layer.get_modules() if not m.is_exportable()]
+
+        if unsupported_modules:
+            unsupported_modules_str = ",".join(
+                [m.get_type() for m in unsupported_modules]
+            )
+            event_properties["unsupported_modules"] = unsupported_modules_str
+            print(
+                f"Terraform files partially generated, a few modules are not supported: {unsupported_modules_str}"
+            )
+        else:
+            print("Terraform files generated successfully.")
         if readme_file:
             copied_readme = os.path.join(output_dir, os.path.basename(readme_file))
-            logger.info(f"Check {copied_readme} for documentation.")
+            print(f"Check {copied_readme} for documentation.")
 
     except Exception as e:
         event_properties["success"] = False
@@ -248,32 +273,60 @@ def _generate_readme(
     )
     readme >> Title2("Initialize Terraform")
     readme >> Code("terraform init")
+
+    def add_custom_export(modules: List[Module]) -> None:
+        for module in modules:
+            export_doc = module.desc.get("export", "")
+            if export_doc:
+                readme >> Text(export_doc)
+
     covered_modules: list = []
     for module_idx, _, _ in execution_plan:
-        new_modules = [
-            m.name for m in layer.get_modules(module_idx) if m.name not in covered_modules
-        ]
+
+        new_modules, unsupported_modules = [], []
+        for m in layer.get_modules(module_idx):
+            if m in covered_modules:
+                continue
+            elif m.is_exportable():
+                new_modules.append(m)
+            elif m not in unsupported_modules:
+                unsupported_modules.append(m)
+
+        if unsupported_modules:
+            readme >> Title2(
+                f"Unsupported {_print_modules(unsupported_modules, prefix='module')}"
+            )
+            readme >> Text(
+                f"Exporting {_print_modules(unsupported_modules, prefix='module')} is not supported at this time."
+            )
+            add_custom_export(unsupported_modules)
 
         # Add terraform instructions for current step
-        readme >> Title2(f"Execute Terraform for {_print_list('module', new_modules)}")
-        if not covered_modules:
-            if layer.parent is None:
-                # first step for environment provisioning
-                readme >> Text("This step has no dependency.")
-            else:
-                # first step for a service
-                readme >> Text(f"This step depends on the stack '{layer.parent.name}'.")
-        else:
-            readme >> Text(
-                f"This step depends on {_print_list('module', covered_modules)}."
+        if new_modules:
+            readme >> Title2(
+                f"Execute Terraform for {_print_modules(new_modules, prefix='module')}"
             )
-        readme >> Text(
-            f"This step will execute terraform for the {_print_list('module', new_modules)}."
-        )
-        readme >> Code(
-            f"""terraform plan -compact-warnings -lock=false -input=false -out=tf.plan {" ".join([f"-target=module.{name}" for name in new_modules])}"""
-        )
-        readme >> Code("terraform apply -compact-warnings -auto-approve tf.plan")
+            if not covered_modules:
+                if layer.parent is None:
+                    # first step for environment provisioning
+                    readme >> Text("This step has no dependency.")
+                else:
+                    # first step for a service
+                    readme >> Text(
+                        f"This step depends on the stack '{layer.parent.name}'."
+                    )
+            else:
+                readme >> Text(
+                    f"This step depends on {_print_modules(covered_modules, prefix='module')}."
+                )
+            readme >> Text(
+                f"This step will execute terraform for the {_print_modules(new_modules, prefix='module')}."
+            )
+            readme >> Code(
+                f"""terraform plan -compact-warnings -lock=false -input=false -out=tf.plan {_print_modules(list=new_modules, name_prefix='-target=module.', separator=' ')}"""
+            )
+            readme >> Code("terraform apply -compact-warnings -auto-approve tf.plan")
+            add_custom_export(new_modules)
 
         # add modules as covered
         covered_modules = covered_modules + new_modules
@@ -287,7 +340,7 @@ def _generate_readme(
     readme >> Title2("Destroy")
     readme >> Text("To destroy all remote objects, run:")
     readme >> Code(
-        f"""terraform plan -compact-warnings -lock=false -input=false -out=tf.plan {" ".join([f"-target=module.{name}" for name in covered_modules])} -destroy"""
+        f"""terraform plan -compact-warnings -lock=false -input=false -out=tf.plan {_print_modules(list=covered_modules, name_prefix='-target=module.', separator=' ')} -destroy"""
     )
     readme >> Code("terraform apply -compact-warnings -auto-approve tf.plan")
 
@@ -302,7 +355,12 @@ def _generate_readme(
     return target_path
 
 
-def _print_list(word: str, list: list, separator: str = ", ") -> str:
-    list_str = separator.join(list)
-    word = word if len(list) <= 1 else f"{word}s"
-    return f"{word} {list_str}"
+def _print_modules(
+    list: List[Module], separator: str = ", ", prefix: str = "", name_prefix: str = ""
+) -> str:
+    list_str = separator.join([f"{name_prefix}{m.name}" for m in list])
+    if prefix:
+        # add trailing s if plural
+        prefix = prefix if len(list) <= 1 else f"{prefix}s"
+        return f"{prefix} {list_str}"
+    return list_str

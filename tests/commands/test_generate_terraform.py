@@ -65,6 +65,7 @@ def test_generate_terraform_env(mocker: MockFixture) -> None:
         ],
     )
     assert result.exit_code == 0
+    assert "Terraform files generated successfully" in result.output
 
     # check existing file was kept
     _check_file_exist(existing_file)
@@ -151,6 +152,7 @@ def test_generate_terraform_env(mocker: MockFixture) -> None:
                     "org_name": "opta-tests",
                     "layer_name": "staging",
                     "parent_name": "",
+                    "modules": "aws-base,aws-eks,aws-k8s-base",
                     "success": True,
                 },
             ),
@@ -161,6 +163,7 @@ def test_generate_terraform_env(mocker: MockFixture) -> None:
                     "org_name": "opta-tests",
                     "layer_name": "staging",
                     "parent_name": "",
+                    "modules": "aws-base,aws-eks,aws-k8s-base",
                     "success": True,
                 },
             ),
@@ -189,6 +192,7 @@ def test_generate_terraform_service() -> None:
         ],
     )
     assert result.exit_code == 0
+    assert "Terraform files generated successfully" in result.output
 
     # check existing file was deleted
     _check_file_not_exist(existing_file)
@@ -279,6 +283,7 @@ def test_generate_terraform_env_and_service() -> None:
     # run for env
     result = runner.invoke(cli, ["generate-terraform", "-c", env_file, "-d", tmp_dir])
     assert result.exit_code == 0
+    assert "Terraform files generated successfully" in result.output
 
     # run for service - same output directory
     result = runner.invoke(
@@ -381,6 +386,88 @@ def test_generate_terraform_dir_already_exist() -> None:
     assert result.exit_code != 0
     assert "The output directory will be deleted:" in result.output
     assert "Do you approve?" in result.output
+
+
+def test_generate_terraform_unsupported_module(mocker: MockFixture) -> None:
+
+    # this file has a aws-dns module which is currently not exportable
+    env_file = os.path.join(
+        os.getcwd(), "tests", "fixtures", "dummy_data", "aws_env_dns.yaml"
+    )
+
+    mocked_amplitude_client = mocker.patch(
+        "opta.commands.generate_terraform.amplitude_client", spec=AmplitudeClient
+    )
+    mocked_amplitude_client.START_GEN_TERRAFORM_EVENT = (
+        amplitude_client.START_GEN_TERRAFORM_EVENT
+    )
+    mocked_amplitude_client.FINISH_GEN_TERRAFORM_EVENT = (
+        amplitude_client.FINISH_GEN_TERRAFORM_EVENT
+    )
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "generate-terraform",
+            "-c",
+            env_file,
+            "-d",
+            tmp_dir,
+            "--auto-approve",
+            "--readme-format",
+            "md",
+        ],
+    )
+    assert result.exit_code == 0
+    assert (
+        "Terraform files partially generated, a few modules are not supported: aws-dns"
+        in result.output
+    )
+
+    # check what was created
+    _check_file_exist(
+        "readme-staging.md",
+        [
+            "Terraform stack staging",
+            "Exporting module dns is not supported at this time.",
+            # includes the custom export documentation
+            "Follow these [instructions](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-configuring.html) to configure the DNS.",
+        ],
+    )
+
+    # we still copy the unsupported module files
+    _check_file_exist("module-dns.tf.json")
+    _check_file_exist("modules/aws_dns/tf_module/main.tf")
+
+    mocked_amplitude_client.send_event.assert_has_calls(
+        [
+            mocker.call(
+                amplitude_client.START_GEN_TERRAFORM_EVENT,
+                event_properties={
+                    "total_resources": 0,
+                    "org_name": "opta-tests",
+                    "layer_name": "staging",
+                    "parent_name": "",
+                    "modules": "aws-base,aws-eks,aws-k8s-base,aws-dns",
+                    "unsupported_modules": "aws-dns",
+                    "success": True,
+                },
+            ),
+            mocker.call(
+                amplitude_client.FINISH_GEN_TERRAFORM_EVENT,
+                event_properties={
+                    "total_resources": 0,
+                    "org_name": "opta-tests",
+                    "layer_name": "staging",
+                    "parent_name": "",
+                    "modules": "aws-base,aws-eks,aws-k8s-base,aws-dns",
+                    "unsupported_modules": "aws-dns",
+                    "success": True,
+                },
+            ),
+        ]
+    )
 
 
 def _check_file_exist(rel_path: str, text_to_find: List[str] = []) -> None:
