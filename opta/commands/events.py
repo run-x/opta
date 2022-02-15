@@ -5,6 +5,7 @@ import click
 import pytz
 
 from opta.amplitude import amplitude_client
+from opta.commands.apply import _local_setup
 from opta.core.generator import gen_all
 from opta.core.kubernetes import (
     load_opta_kube_config,
@@ -12,6 +13,7 @@ from opta.core.kubernetes import (
     tail_namespace_events,
 )
 from opta.layer import Layer
+from opta.utils.clickoptions import local_option
 
 
 @click.command(hidden=True)
@@ -25,13 +27,24 @@ from opta.layer import Layer
     "-s",
     "--seconds",
     default=None,
-    help="Start showing logs from these many seconds in the past",
+    help="Start showing events from these many seconds in the past",
     show_default=False,
     type=int,
 )
-def events(env: Optional[str], config: str, seconds: Optional[int]) -> None:
-    """Get stream of logs from your service"""
+@local_option
+def events(
+    env: Optional[str], config: str, seconds: Optional[int], local: Optional[bool]
+) -> None:
+    """
+    List the events for a service
 
+    Examples:
+
+    opta events -c my-service.yaml
+
+    """
+    if local:
+        config = _local_setup(config)
     # Configure kubectl
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(

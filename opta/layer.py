@@ -141,7 +141,10 @@ class Layer:
         elif "local" in total_base_providers:
             self.cloud = "local"
         else:
-            raise UserErrors("No cloud provider (AWS, GCP, or Azure) found")
+            raise UserErrors(
+                "No cloud provider (AWS, GCP, or Azure) found, \n"
+                + " or did you miss providing the --local flag for local deployment?"
+            )
         self.variables = variables or {}
         self.modules: List[Module] = []
         for module_data in modules_data:

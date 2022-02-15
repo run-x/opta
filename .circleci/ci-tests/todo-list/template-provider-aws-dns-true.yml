@@ -1,0 +1,13 @@
+name: ENV_NAME
+org_name: runx
+providers:
+  aws:
+    region: AWS_REGION
+    account_id: 693658092572
+modules:
+  - type: base
+  - type: dns
+    domain: testing.optaci.com
+    delegated: true
+  - type: k8s-cluster
+  - type: k8s-base

@@ -43,6 +43,18 @@ parameters:
   test:
     type: boolean
     default: false
+  ci-use-diff-env:
+    type: boolean
+    default: false
+  ci-env-name:
+    type: string
+    default: 'env-ci'
+  ci-env-region-aws:
+    type: string
+    default: 'us-east-2'
+  ci-env-region-gcp:
+    type: string
+    default: 'us-central1'
 
 orbs:
   terraform: circleci/terraform@3.0.0
@@ -88,13 +100,62 @@ commands:
       - helm/install-helm-client:
           version: v3.7.1
 
+  checkout-opta:
+    steps:
+      - run:
+          name: "Set git user"
+          command: |
+            git config --global user.email "runx-ci@runx.dev"
+            git config --global user.name "Runx CI"
+      - checkout
+
+# Note: The below command is dependent on the Repo being checked out and should always have a checkout command in the pipeline.
+  remake-environment-configs:
+    steps:
+      - run:
+          name: Remake configs.
+          command: python ./.circleci/ci-tests/generate_env_config.py << pipeline.parameters.ci-env-name >> << pipeline.parameters.ci-env-region-aws >> << pipeline.parameters.ci-env-region-gcp >>
+      - run:
+          name: Show configs.
+          command: |
+            cat ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
+            cat ./.circleci/ci-tests/create-and-destroy-aws/environment-additional-nodegroup.yml
+            cat ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml
+            cat ./.circleci/ci-tests/create-and-destroy-gcp/environment-additional-nodepool.yml 
+            cat ./.circleci/ci-tests/todo-list/provider-aws-dns-false.yml
+            cat ./.circleci/ci-tests/todo-list/provider-aws-dns-true.yml
+            cat ./.circleci/ci-tests/todo-list/provider-gcp.yml
+
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
+  get-all-parameter-values:
+    executor: ubuntu-machine
+    steps:
+      - run:
+          name: Get all parameter values.
+          command: |
+            echo "run-create-and-destroy:     " << pipeline.parameters.run-create-and-destroy >>
+            echo "run-destroy-gcp-env:        " << pipeline.parameters.run-destroy-gcp-env >>
+            echo "run-destroy-aws-env:        " << pipeline.parameters.run-destroy-aws-env >>
+            echo "run-destroy-all-envs:       " << pipeline.parameters.run-destroy-all-envs >>
+            echo "run-ci:                     "  << pipeline.parameters.run-ci >>
+            echo "run-create-destroy-local:   " << pipeline.parameters.run-create-destroy-local >>
+            echo "run-service-mesh-e2e:       " << pipeline.parameters.run-service-mesh-e2e >>
+            echo "test-aws-lambda:            " << pipeline.parameters.test-aws-lambda >>
+            echo "run-release-vs-stable:      " << pipeline.parameters.run-release-vs-stable >>
+            echo "test-aws-dns:               " << pipeline.parameters.test-aws-dns >>
+            echo "run-destroy-aws-dns-false:  " << pipeline.parameters.run-destroy-aws-dns-false >>
+            echo "run-destroy-aws-dns-true:   " << pipeline.parameters.run-destroy-aws-dns-true >>
+            echo "ci-use-diff-env:            " << pipeline.parameters.ci-use-diff-env >>
+            echo "ci-env-name:                " << pipeline.parameters.ci-env-name >>
+            echo "ci-env-region-aws:          " << pipeline.parameters.ci-env-region-aws >>
+            echo "ci-env-region-gcp:          " << pipeline.parameters.ci-env-region-gcp >>
+
   no-pdb:
     executor: ubuntu-machine
     steps:
-      - checkout
+      - checkout-opta
       - run:
           name: "No PDB"
           command: |
@@ -103,7 +164,7 @@ jobs:
   lint:
     executor: python-docker
     steps:
-      - checkout
+      - checkout-opta
       - install-python-dependencies
       - run:
           name: "Lint"
@@ -115,7 +176,7 @@ jobs:
   regula-lint:
     executor: ubuntu-machine
     steps:
-      - checkout
+      - checkout-opta
       - run:
           name: "Install regula"
           command: |
@@ -131,7 +192,7 @@ jobs:
   python-security:
     executor: python-docker
     steps:
-      - checkout
+      - checkout-opta
       - install-python-dependencies
       - run:
           name: "Security"
@@ -140,7 +201,7 @@ jobs:
   pytest:
     executor: python-docker
     steps:
-      - checkout
+      - checkout-opta
       - install-python-dependencies
       - terraform/install:
           arch: amd64
@@ -158,7 +219,7 @@ jobs:
   terraform-formatter:
     executor: ubuntu-machine
     steps:
-      - checkout
+      - checkout-opta
       - terraform/install:
           arch: amd64
           os: linux
@@ -202,7 +263,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - install-python
       - install-python-dependencies
       - run:
@@ -230,7 +291,7 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
       - run:
           name: "Git clone the test service"
           command: "git clone git@github.com:run-x/test-service.git"
@@ -248,7 +309,7 @@ jobs:
   build-opta-example-images:
     executor: ubuntu-machine
     steps:
-      - checkout
+      - checkout-opta
       - run:
           name: "Git clone Opta Example"
           command: "git clone git@github.com:run-x/opta-examples.git"
@@ -341,7 +402,11 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -368,7 +433,11 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -387,7 +456,11 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -409,7 +482,11 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -428,7 +505,11 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ~/
       - install-opta-dependencies
@@ -447,7 +528,11 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -480,7 +565,11 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -516,7 +605,11 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -552,7 +645,11 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ~/
       - install-opta-dependencies
@@ -588,7 +685,11 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -607,12 +708,60 @@ jobs:
             --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml \
             --auto-approve
 
+  aws-test-k8s-manifest:
+    executor: python-docker
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - aws-cli/install
+      - aws-cli/setup
+      - install-python-dependencies
+      - run:
+          name: "Update KUBECONFIG"
+          command: echo 'export KUBECONFIG="$HOME/kube_config.yaml"' >> $BASH_ENV
+      - run:
+          name: "Configure Kubectl"
+          command: |
+            ./dist/opta/opta configure-kubectl \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
+      - run:
+          name: "Apply K8s Manifest with Opta"
+          command: |
+            ./dist/opta/opta apply \
+            --env awsenv-ci \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/k8s-manifest.yaml \
+            --auto-approve
+      - run:
+          name: "Test manifest pod creation"
+          command: |
+            kubectl get pod -n default nginx
+            exit $?
+      - run:
+          name: "Destroy K8s Manifest with Opta"
+          command: |
+            yes | ./dist/opta/opta destroy \
+            --env awsenv-ci \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/k8s-manifest.yaml \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+
   aws-test-service-helm:
     executor: ubuntu-machine
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -638,7 +787,11 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -669,7 +822,11 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -700,7 +857,11 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -731,12 +892,17 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
       - aws-cli/install
       - aws-cli/setup
+      - install-python-dependencies
       - run:
           name: "Load test-service image"
           command: docker load -i test-service-image
@@ -756,6 +922,21 @@ jobs:
             --config ./.circleci/ci-tests/create-and-destroy-aws/service-pg.yml \
             --tag $CIRCLE_SHA1 \
             --auto-approve
+      - run:
+          name: "Update KUBECONFIG"
+          command: echo 'export KUBECONFIG="$HOME/kube_config.yaml"' >> $BASH_ENV
+      - run:
+          name: "Configure Kubectl"
+          command: |
+            ./dist/opta/opta configure-kubectl \
+            --config ./.circleci/ci-tests/create-and-destroy-aws/service-pg.yml
+      - run:
+          name: "Test Opta Shell"
+          command: |
+            source $(pipenv --venv)/bin/activate
+            export PYTHONPATH=$(pwd)
+            python ./.circleci/ci-tests/opta-shell-test.py \
+            ./.circleci/ci-tests/create-and-destroy-aws/service-pg.yml
       - run:
           name: "Opta logs"
           command: |
@@ -810,7 +991,11 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -858,7 +1043,11 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -891,7 +1080,11 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -909,7 +1102,11 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -927,7 +1124,11 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -945,7 +1146,11 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ~/
       - install-opta-dependencies
@@ -963,7 +1168,11 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -993,7 +1202,11 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ~/
       - install-opta-dependencies
@@ -1015,7 +1228,11 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -1037,12 +1254,62 @@ jobs:
             --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml \
             --auto-approve
 
+  gcp-test-k8s-manifest:
+    executor: python-docker
+    environment:
+      OPTA_DISABLE_REPORTING: "true"
+    steps:
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - gcp-cli/install
+      - gcp-cli/initialize
+      - run:
+          name: "Setting up gcp envar"
+          command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+      - run:
+          name: "Update KUBECONFIG"
+          command: echo 'export KUBECONFIG="$HOME/kube_config.yaml"' >> $BASH_ENV
+      - run:
+          name: "Configure Kubectl"
+          command: |
+            ./dist/opta/opta configure-kubectl \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml
+      - run:
+          name: "Apply K8s Manifest with Opta"
+          command: |
+            ./dist/opta/opta apply \
+            --env gcpenv-ci \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/k8s-manifest.yaml \
+            --auto-approve
+      - run:
+          name: "Test manifest pod creation"
+          command: |
+            kubectl get pod -n default nginx
+            exit $?
+      - run:
+          name: "Destroy K8s Manifest with Opta"
+          command: |
+            yes | ./dist/opta/opta destroy \
+            --env gcpenv-ci \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/k8s-manifest.yaml \
+            --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+
   gcp-test-service-helm:
     executor: ubuntu-machine
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -1074,7 +1341,11 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -1108,7 +1379,11 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -1142,12 +1417,17 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
+      - install-python-dependencies
       - run:
           name: "Setting up gcp envar"
           command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
@@ -1170,6 +1450,35 @@ jobs:
             --config ./.circleci/ci-tests/create-and-destroy-gcp/service-pg.yml \
             --tag $CIRCLE_SHA1 \
             --auto-approve
+      - run:
+          name: "Update KUBECONFIG"
+          command: echo 'export KUBECONFIG="$HOME/kube_config.yaml"' >> $BASH_ENV
+      - run:
+          name: "Configure Kubectl"
+          command: |
+            ./dist/opta/opta configure-kubectl \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/service-pg.yml
+      - run:
+          name: "Test Opta Shell"
+          command: |
+            source $(pipenv --venv)/bin/activate
+            export PYTHONPATH=$(pwd)
+            python ./.circleci/ci-tests/opta-shell-test.py \
+            ./.circleci/ci-tests/create-and-destroy-gcp/service-pg.yml
+      - run:
+          name: "Opta logs"
+          command: |
+            ./dist/opta/opta logs \
+            --env gcpenv-ci \
+            --config ./.circleci/ci-tests/create-and-destroy-gcp/service-pg.yml >> logs.log
+          background: true
+      - run:
+          name: "Check opta logs"
+          command: |
+            sleep 90
+            pkill -SIGQUIT opta
+            cat logs.log | grep "\"GET /healthcheck HTTP/1.1\" 200"
+            exit $?
       - run:
           name: "Deploy test-service with Additional PG"
           command: |
@@ -1210,7 +1519,11 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ~/
       - attach_workspace:
@@ -1280,7 +1593,11 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -1301,7 +1618,11 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -1352,7 +1673,11 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -1388,7 +1713,11 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -1432,7 +1761,11 @@ jobs:
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
-      - checkout
+      - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -1463,7 +1796,7 @@ jobs:
     # Add steps to the job
     # See: https://circleci.com/docs/2.0/configuration-reference/#steps
     steps:
-      - checkout
+      - checkout-opta
       - run:
           name: "Say hello"
           command: "echo Hello, World!"
@@ -1475,6 +1808,7 @@ workflows:
   run-create-and-destroy:
     when: << pipeline.parameters.run-create-and-destroy >>
     jobs: &fullsuite
+      - get-all-parameter-values
       - build-test-service-image
       - build-opta-example-images
       - build-opta-binary:
@@ -1510,6 +1844,9 @@ workflows:
       - aws-test-service-helm:
           requires:
             - aws-create-env
+      - aws-test-k8s-manifest:
+          requires:
+            - aws-create-env
       - aws-destroy-env:
           requires:
             - aws-test-websocket
@@ -1521,6 +1858,7 @@ workflows:
             - aws-test-service-docdb
             - aws-test-service-redis
             - aws-test-service-helm
+            - aws-test-k8s-manifest
       - gcp-create-env:
           requires:
             - build-opta-binary
@@ -1539,6 +1877,9 @@ workflows:
       - gcp-test-service-gcs:
           requires:
             - gcp-create-env
+      - gcp-test-k8s-manifest:
+          requires:
+            - gcp-create-env
       - gcp-destroy-env:
           requires:
             - gcp-test-additional-nodegroup
@@ -1546,6 +1887,7 @@ workflows:
             - gcp-test-service-redis
             - gcp-test-service-helm
             - gcp-test-service-gcs
+            - gcp-test-k8s-manifest
       - local-opta-example-create-svcs:
           requires:
             - build-opta-binary
@@ -1577,6 +1919,7 @@ workflows:
   run-destroy-gcp-env:
     when: << pipeline.parameters.run-destroy-gcp-env >>
     jobs:
+      - get-all-parameter-values
       - build-opta-binary
       - gcp-destroy-env:
           requires:
@@ -1585,6 +1928,7 @@ workflows:
   run-destroy-aws-env:
     when: << pipeline.parameters.run-destroy-aws-env >>
     jobs:
+      - get-all-parameter-values
       - build-opta-binary
       - aws-destroy-env:
           requires:
@@ -1593,6 +1937,7 @@ workflows:
   run-destroy-all-envs:
     when: << pipeline.parameters.run-destroy-all-envs >>
     jobs:
+      - get-all-parameter-values
       - build-opta-binary
       - gcp-destroy-env:
           requires:
@@ -1604,6 +1949,7 @@ workflows:
   run-create-destroy-local-example:
     when: << pipeline.parameters.run-create-destroy-local >>
     jobs:
+      - get-all-parameter-values
       - build-opta-binary
       - build-opta-example-images
       - local-opta-example-create-svcs:
@@ -1617,6 +1963,7 @@ workflows:
   run-aws-lambda:
     when: << pipeline.parameters.test-aws-lambda >>
     jobs:
+      - get-all-parameter-values
       - build-opta-binary
       - aws-create-env:
           requires:
@@ -1631,6 +1978,7 @@ workflows:
   run-service-mesh-e2e:
     when: << pipeline.parameters.run-service-mesh-e2e >>
     jobs:
+      - get-all-parameter-values
       - build-opta-binary
       - build-opta-example-images
       - aws-create-env:
@@ -1663,6 +2011,7 @@ workflows:
   run-release-vs-stable:
     when: << pipeline.parameters.run-release-vs-stable >>
     jobs:
+      - get-all-parameter-values
       - build-opta-binary
       - build-test-service-image
       - download-opta
@@ -1711,6 +2060,7 @@ workflows:
   run-aws-dns:
     when: << pipeline.parameters.test-aws-dns >>
     jobs:
+      - get-all-parameter-values
       - build-opta-binary
       - aws-create-env-dns-false:
           requires:
@@ -1731,6 +2081,7 @@ workflows:
   run-destroy-aws-dns-false:
     when: << pipeline.parameters.run-destroy-aws-dns-false >>
     jobs:
+      - get-all-parameter-values
       - build-opta-binary
       - aws-destroy-env-dns-false:
           requires:
@@ -1739,10 +2090,23 @@ workflows:
   run-destroy-aws-dns-true:
     when: << pipeline.parameters.run-destroy-aws-dns-true >>
     jobs:
+      - get-all-parameter-values
       - build-opta-binary
       - aws-destroy-env-dns-true:
           requires:
             - build-opta-binary
+
+  test:
+    when: << pipeline.parameters.test >>
+    jobs:
+      - get-all-parameter-values
+      - build-opta-binary
+      - aws-create-env:
+          requires:
+            - build-opta-binary
+      - aws-destroy-env:
+          requires:
+            - aws-create-env
 
   nightly:
     triggers:

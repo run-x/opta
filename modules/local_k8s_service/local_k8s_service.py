@@ -25,7 +25,6 @@ class LocalK8sServiceProcessor(LocalK8sModuleProcessor, K8sServiceModuleProcesso
 
     def process(self, module_idx: int) -> None:
         # Update the secrets
-        self.module.data["manual_secrets"] = self.module.data.get("secrets", [])
         self.module.data["link_secrets"] = self.module.data.get("link_secrets", [])
 
         if isinstance(self.module.data.get("public_uri"), str):

@@ -152,11 +152,6 @@ variable "link_secrets" {
   default = []
 }
 
-variable "manual_secrets" {
-  type    = list(string)
-  default = []
-}
-
 variable "local_registry_name" {
   type    = string
   default = "localhost:5000"

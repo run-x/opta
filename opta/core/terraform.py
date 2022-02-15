@@ -754,15 +754,7 @@ class Terraform:
                     ]
                 },
             )
-            s3.put_public_access_block(
-                Bucket=bucket_name,
-                PublicAccessBlockConfiguration={
-                    "BlockPublicAcls": True,
-                    "IgnorePublicAcls": True,
-                    "BlockPublicPolicy": True,
-                    "RestrictPublicBuckets": True,
-                },
-            )
+            # Visit (https://run-x.atlassian.net/browse/RUNX-1125) for further reference
             s3.put_bucket_versioning(
                 Bucket=bucket_name, VersioningConfiguration={"Status": "Enabled"},
             )

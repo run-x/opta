@@ -12,17 +12,9 @@ LINKED_SECRET_NAME = "secret"  # nosec
 
 def get_secrets(layer_name: str) -> dict:
     """:return: manual and linked secrets"""
-    return deep_merge(get_manual_secrets(layer_name), get_linked_secrets(layer_name))
-
-
-def get_manual_secrets(layer_name: str) -> dict:
-    """:return: manual secrets, saved in the secret called 'manual-secrets'"""
-    return get_namespaced_secrets(layer_name, MANUAL_SECRET_NAME)
-
-
-def get_linked_secrets(layer_name: str) -> dict:
-    """:return: manual secrets, saved in the secret called 'secret'"""
-    return get_namespaced_secrets(layer_name, LINKED_SECRET_NAME)
+    manual_secrets = get_namespaced_secrets(layer_name, MANUAL_SECRET_NAME)
+    linked_secrets = get_namespaced_secrets(layer_name, LINKED_SECRET_NAME)
+    return deep_merge(manual_secrets, linked_secrets)
 
 
 def update_manual_secrets(layer_name: str, new_values: dict) -> None:

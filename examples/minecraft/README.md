@@ -1,19 +1,24 @@
-# What is this?
+# Overview
 
-This is an example [opta](https://github.com/run-x/opta) configuration file to deploy a 
-[Minecraft](https://www.minecraft.net/en-us) "vanilla" server (e.g. no mods) on AWS.
+This page describes how to run a [Minecraft](https://www.minecraft.net/en-us) server in AWS (on Kubernetes).
 
-You can also use this button to fill in the variable fields in the config.
+> We'll be using Opta to handle provisioning and deployment. Opta is an Infrastrucutre-as-code framework that packages
+all the best practices and provides you a robust cloud setup - without being an Infrastructure expert.
+
+If you're looking to just deploy and start playing, just click on this button:
 
 [![Deploy to AWS](https://raw.githubusercontent.com/run-x/opta/main/assets/deploy-to-aws-button.svg)](https://app.runx.dev/deploy-with-aws?url=https%3A%2F%2Fgithub.com%2Frun-x%2Fopta%2Fblob%2Fmain%2Fexamples%2Fminecraft%2Fminecraft-aws.yaml&name=Minecraft)
 
-**NOTE**: You will still need to set the `OPS` env var value to you minecraft user name. This is the field which
+**Make sure** to set the `OPS` env var to you minecraft user name. This is the field which
 controls who is an admin, so it is very important for this to be set correctly.
 
-# What does this do?
-It deploys a single container version of Minecraft on EKS in AWS. It uses EBS volumes that persist between different
+# How it works
+All the magic happens in the [minecraft-aws.yaml](./minecraft-aws.yaml) file - Opta reads this file and configures your cloud account.
+
+We are deploying a single container version of Minecraft on EKS in AWS. It uses EBS volumes that persist between different
 restorations of the container to preserve the state of the world it is hosting. It also sets up various other resources 
 like VPCs, subnets, load balancers etc.
+
 
 # Steps to deploy
 * Fill in the required variables in the config file
@@ -21,14 +26,13 @@ like VPCs, subnets, load balancers etc.
 * Run `opta apply -c minecraft-aws.yaml`
 * You will be prompted to approve changes a couple of times as opta will go through various stages. This is expected, just keep approving.
 
-That's it. Minecraft is deployed on AWS. You can find the AWS load balancer URL to access the deployment by running `opta output`
+That's it. Minecraft is deployed on your cloud account! You can find the AWS load balancer URL to access the deployment by running `opta output`,
 
-All you gotta do to start playing minecraft in this new world is to start the minecraft client on your computer,
-and on the multiplayer window, click to add a new server and fill in the load balancer domain as the address
-(do not include the "https://" prefix). Complete this client config, and jump in!
+To start playing on this server: Start the minecraft client on your computer and on the multiplayer window, click to add a new server 
+and fill in the load balancer domain as the address (do not include the "https://" prefix). Complete this client config, and jump in!
 
 # Further Configuration
-This Opta minecraft example is using the [docker-minecraft-server](https://github.com/itzg/docker-minecraft-server) to
+This example is using the [docker-minecraft-server](https://github.com/itzg/docker-minecraft-server) to
 function. This project is well documented and has a vibrant online community that will be happy to answer 
 minecraft-specific questions. Most of the configuration is determined by environment variables and you can update
 this by modifying the `env_vars` field of the k8s-service module of the deployment.
@@ -38,7 +42,7 @@ If you wish to host multiple minecraft servers/worlds in the same environment, d
 
 * Create a new [Opta Service](https://docs.opta.dev/getting-started/aws/#service-creation) yaml manifest holding a new
   k8s-service module instance under the modules list (**WARNING**: this is needed because Opta currently only allows
-  one kk8s service per yaml manifest).
+  one k8s service per yaml manifest).
 * In your new service manifest, update the `service_port` field set to 25565 to a new value (typically just increment
   by 1 in each new service yaml). Also update the original minecraft-aws.yaml and append the new port to the
   `nginx_extra_tcp_ports` list

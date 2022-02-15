@@ -1,0 +1,10 @@
+name: ENV_NAME
+org_name: runx
+providers:
+  google:
+    region: us-central1
+    project: GCP_REGION
+modules:
+  - type: base
+  - type: k8s-cluster
+  - type: k8s-base

@@ -10,7 +10,6 @@ stickySession: false
 stickySessionMaxAge: 86400
 envVars: []
 linkSecrets: []
-manualSecrets: []
 ports: []
 probePort: null
 httpPort: null

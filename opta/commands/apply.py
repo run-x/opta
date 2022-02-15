@@ -1,6 +1,4 @@
 import datetime
-import os
-from pathlib import Path
 from subprocess import CalledProcessError  # nosec
 from threading import Thread
 from typing import Dict, List, Optional, Set
@@ -31,6 +29,7 @@ from opta.exceptions import MissingState, UserErrors
 from opta.layer import Layer, StructuredConfig
 from opta.pre_check import pre_check
 from opta.utils import check_opta_file_exists, fmt_msg, logger
+from opta.utils.clickoptions import local_option
 
 
 @click.command()
@@ -65,13 +64,6 @@ from opta.utils import check_opta_file_exists, fmt_msg, logger
     hidden=True,
 )
 @click.option(
-    "--local",
-    is_flag=True,
-    default=False,
-    help="""Run the service locally on a local Kubernetes cluster for development and testing,  irrespective of the environment specified inside the opta service yaml file""",
-    hidden=False,
-)
-@click.option(
     "--auto-approve",
     is_flag=True,
     default=False,
@@ -83,6 +75,7 @@ from opta.utils import check_opta_file_exists, fmt_msg, logger
     default=False,
     help="Show full terraform plan in detail, not the opta provided summary",
 )
+@local_option
 def apply(
     config: str,
     env: Optional[str],
@@ -131,24 +124,8 @@ def _apply(
 ) -> None:
     pre_check()
     _clean_tf_folder()
-    if local:
-        adjusted_config = _handle_local_flag(config, test)
-        if adjusted_config != config:  # Only do this for service opta files
-            config = adjusted_config  # Config for service
-            localopta_envfile = os.path.join(
-                Path.home(), ".opta", "local", "localopta.yaml"
-            )
-            _apply(
-                config=localopta_envfile,
-                auto_approve=True,
-                local=False,
-                env="",
-                refresh=True,
-                image_tag=image_tag,
-                test=test,
-                detailed_plan=True,
-            )
-            _clean_tf_folder()
+    if local and not test:
+        config = _local_setup(config, image_tag, refresh_local_env=True)
 
     layer = Layer.load_from_yaml(config, env)
     layer.verify_cloud_credentials()
@@ -175,7 +152,7 @@ def _apply(
             raise UserErrors(
                 fmt_msg(
                     f"""
-                    Opta requires a region with at least *3* availability zones.
+                    Opta requires a region with at least *3* availability zones like us-east-1 or us-west-2.
                     ~You configured {aws_region}, which only has the availability zones: {azs}.
                     ~Please choose a different region.
                     """
@@ -418,3 +395,24 @@ def _verify_parent_layer(layer: Layer, auto_approve: bool = False) -> None:
             auto_approve=False,
         )
         cleanup_files()
+
+
+def _local_setup(
+    config: str, image_tag: Optional[str] = "", refresh_local_env: bool = False
+) -> str:
+    adjusted_config, localopta_envfile = _handle_local_flag(config, False)
+    if adjusted_config != config:  # Only do this for service opta files
+        config = adjusted_config  # Config for service
+        if refresh_local_env:
+            _apply(
+                config=localopta_envfile,
+                image_tag=image_tag,
+                auto_approve=True,
+                local=False,
+                env="",
+                refresh=True,
+                test=False,
+                detailed_plan=True,
+            )
+            _clean_tf_folder()
+    return config

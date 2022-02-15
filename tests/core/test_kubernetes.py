@@ -5,12 +5,15 @@ import pytz
 from kubernetes.client import (
     ApiException,
     CoreV1Api,
+    V1Deployment,
+    V1DeploymentList,
     V1Event,
     V1EventList,
     V1PersistentVolumeClaim,
     V1PersistentVolumeClaimList,
     V1Pod,
 )
+from kubernetes.client.api.apps_v1_api import AppsV1Api
 from kubernetes.watch import Watch
 from pytest_mock import MockFixture
 
@@ -19,6 +22,7 @@ from opta.core.kubernetes import (
     delete_persistent_volume_claims,
     get_required_path_executables,
     list_persistent_volume_claims,
+    restart_deployments,
     set_kube_config,
     tail_module_log,
     tail_namespace_events,
@@ -476,3 +480,26 @@ class TestKubernetes:
 
         # pv are automatically deleted by k8s after deleting the claim, not by opta
         mocked_core_v1_api.assert_not_called()
+
+    def test_restart_deployments(self, mocker: MockFixture) -> None:
+        mocked_aps_v1_api = mocker.Mock(spec=AppsV1Api)
+        mocker.patch("opta.core.kubernetes.AppsV1Api", return_value=mocked_aps_v1_api)
+        mocker.patch("opta.core.kubernetes.load_kube_config")
+        mocked_deploy = mocker.Mock(spec=V1Deployment)
+        mocked_deploy.metadata = mocker.Mock()
+        mocked_deploy.metadata.name = "deploy-name"
+
+        mocked_deployments = mocker.Mock(spec=V1DeploymentList)
+        mocked_deployments.items = [mocked_deploy]
+        mocked_aps_v1_api.list_namespaced_deployment.return_value = mocked_deployments
+
+        namespace = "ns-name"
+        restart_deployments(namespace)
+        mocked_aps_v1_api.list_namespaced_deployment.assert_called_once_with(
+            namespace=namespace
+        )
+
+        # check that the deployment to restart was patched
+        mocked_aps_v1_api.patch_namespaced_deployment.assert_called_once_with(
+            "deploy-name", namespace, mocker.ANY
+        )

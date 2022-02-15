@@ -21,6 +21,40 @@ from opta.special_formatter import PartialFormatter
 yaml = YAML(typ="safe")
 
 
+class SensitiveFormatter(Formatter):
+    regex_and_replacements: List[Tuple[str, str]] = [
+        (
+            r"([\"\: \'\n])[0-9]{12}([\"\: \'\n])",
+            "\g<1>REDACTED\g<2>",  # noqa: W605
+        ),  # An AWS Account ID is always exactly 12 digits
+        (
+            r"([\"\: \'\n]?)project([\"\: \'\n]?): ([\"\: \'\n]?)[a-zA-Z0-9_\-]+([\"\: \'\n]?)",
+            "\g<1>project\g<2>: \g<3>REDACTED\g<4>",  # noqa: W605
+        ),
+        (r"projects/[a-zA-Z0-9_\-]+/", "projects/REDACTED/"),
+        (
+            r"@[a-zA-Z0-9_\-]+\.iam\.gserviceaccount\.com",
+            "@REDACTED.iam.gserviceaccount.com",
+        ),
+        (r"[a-zA-Z0-9_\-]+\.svc\.id\.goog", "REDACTED.svc.id.goog",),
+        (r"gcr\.io/[a-zA-Z0-9_\-]+", "gcr.io/REDACTED"),
+        (
+            r"\"project\": \{\"constant_value\": \"[a-zA-Z0-9_\-]+\"\}",
+            '"project": {"constant_value": "REDACTED"}',
+        ),
+    ]
+
+    @classmethod
+    def filter(cls, message: str) -> str:
+        for pattern, replacement in cls.regex_and_replacements:
+            message = re.sub(pattern, replacement, message)
+        return message
+
+    def format(self, record: LogRecord) -> str:
+        original_message = super().format(record)
+        return self.filter(original_message)
+
+
 class LogFormatMultiplexer(Formatter):
     def __init__(
         self,
@@ -68,6 +102,7 @@ def initialize_logger() -> Tuple[Logger, QueueListener, DatadogLogHandler]:
     queue_handler.setLevel(logging.DEBUG)
     dd_handler = DatadogLogHandler()
     dd_handler.setLevel(logging.DEBUG)
+    dd_handler.setFormatter(SensitiveFormatter())
     dd_listener = QueueListener(dd_queue, dd_handler)
     ch.setFormatter(formatter)
     logger.addHandler(queue_handler)

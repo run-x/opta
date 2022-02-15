@@ -30,10 +30,6 @@ inputs:
     validator: list(any(str(), map()), required=False)
     description: A list of extra IAM role policies not captured by Opta which you wish to give to your service.
     default: []
-  - name: manual_secrets
-    user_facing: false
-    description: "Manually set secrets"
-    default: [ ]
   - name: image
     user_facing: true
     validator: str(required=True)
@@ -76,7 +72,7 @@ inputs:
   - name: secrets
     user_facing: true
     validator: list(str(), required=False)
-    description: A list of secrets to add as environment variables for your container. All secrets must be set following the [secrets instructions](/miscellaneous/secrets).
+    description: Deprecated, see [secrets instructions](/tutorials/secrets).
     default: []
   - name: env_vars
     user_facing: true

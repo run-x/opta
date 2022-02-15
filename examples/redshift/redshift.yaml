@@ -1,0 +1,30 @@
+name: redshift
+org_name: <<org_name::org_name::Your Organization Name>>
+providers:
+  aws:
+    region: <<region::aws_region::Your AWS Region>>
+modules:
+  - type: base
+  - type: custom-terraform
+    name: redshiftsecuritygroup
+    source: "terraform-aws-modules/security-group/aws//modules/redshift"
+    version: "~> 4.0"
+    terraform_inputs:
+      name: "redshift-demo"
+      vpc_id: "${{module.base.vpc_id}}"
+      ingress_cidr_blocks: ["10.0.0.0/16"]
+      egress_rules: ["all-all"]
+  - type: custom-terraform
+    name: redshift
+    source: "terraform-aws-modules/redshift/aws"
+    version: "~> 3.0"
+    terraform_inputs:
+      cluster_identifier: "redshift-demo"
+      cluster_node_type: "dc2.large"
+      cluster_number_of_nodes: 1
+      cluster_database_name: "mydb"
+      cluster_master_username: "mydbuser"
+      cluster_master_password: "mySecretPassw0rd"
+      wlm_json_configuration: "[{{\"query_concurrency\": 5}}]"
+      subnets:  ${{module.base.public_subnets_ids}}
+      vpc_security_group_ids: ["${{module.redshiftsg.security_group_id}}"]

@@ -7,7 +7,6 @@ moduleName: ""
 environmentName: ""
 envVars: []
 linkSecrets: []
-manualSecrets: []
 port: {}
 serviceAccount:
   # The name of the service account to use.

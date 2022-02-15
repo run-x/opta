@@ -336,15 +336,7 @@ class TestTerraform:
                 ]
             },
         )
-        mocked_s3_client.put_public_access_block.assert_called_once_with(
-            Bucket="opta-tf-state-test-dev1",
-            PublicAccessBlockConfiguration={
-                "BlockPublicAcls": True,
-                "IgnorePublicAcls": True,
-                "BlockPublicPolicy": True,
-                "RestrictPublicBuckets": True,
-            },
-        )
+        # Visit (https://run-x.atlassian.net/browse/RUNX-1125) for further reference
         mocked_boto3.client.assert_has_calls(
             [
                 mocker.call("s3", config=mocker.ANY),
