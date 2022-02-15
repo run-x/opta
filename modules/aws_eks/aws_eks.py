@@ -200,7 +200,4 @@ class AwsEksProcessor(ModuleProcessor):
             "kms_account_key_arn"
         ] = f"${{{{module.{aws_base_module.name}.kms_account_key_arn}}}}"
         self.module.data["vpc_id"] = f"${{{{module.{aws_base_module.name}.vpc_id}}}}"
-
-        providers = self.layer.gen_providers(0)
-        region = providers["provider"]["aws"]["region"]
         super(AwsEksProcessor, self).process(module_idx)
