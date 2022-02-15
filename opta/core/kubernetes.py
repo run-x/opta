@@ -103,7 +103,7 @@ def purge_opta_kube_config(layer: "Layer") -> None:
     if not exists(default_kube_config_filename):
         return
 
-    default_kube_config = yaml.load(open(default_kube_config_filename))
+    default_kube_config = yaml.load(open(default_kube_config_filename)) or {}
     opta_config_user = opta_config["users"][0]
     opta_config_context = opta_config["contexts"][0]
     opta_config_cluster = opta_config["clusters"][0]
@@ -114,13 +114,13 @@ def purge_opta_kube_config(layer: "Layer") -> None:
     ]:
         current_indices = [
             i
-            for i, x in enumerate(default_kube_config[key])
+            for i, x in enumerate(default_kube_config.get(key, []))
             if x["name"] == opta_value["name"]
         ]
         for index in sorted(current_indices, reverse=True):
             del default_kube_config[key][index]
 
-    if default_kube_config["current-context"] == opta_config_context["name"]:
+    if default_kube_config.get("current-context") == opta_config_context["name"]:
         default_kube_config["current-context"] = ""
     with open(default_kube_config_filename, "w") as f:
         yaml.dump(default_kube_config, f)
