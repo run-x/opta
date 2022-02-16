@@ -31,7 +31,9 @@ class TestLayer:
                 None,
             )
 
-    def test_hydration_aws(self):
+    def test_hydration_aws(self, mocker: MockFixture):
+        mocked_state_storage = mocker.patch("opta.layer.Layer.state_storage")
+        mocked_state_storage.return_value = "opta-tf-state-opta-tests-dummy-parent-195d"
         layer = Layer.load_from_yaml(
             os.path.join(
                 os.getcwd(), "tests", "fixtures", "dummy_data", "dummy_config1.yaml"
@@ -68,7 +70,9 @@ class TestLayer:
             "vars": SimpleNamespace(),
         }
 
-    def test_hydration_gcp(self):
+    def test_hydration_gcp(self, mocker: MockFixture):
+        mocked_state_storage = mocker.patch("opta.layer.Layer.state_storage")
+        mocked_state_storage.return_value = "opta-tf-state-opta-tests-gcp-dummy-parent"
         layer = Layer.load_from_yaml(
             os.path.join(
                 os.getcwd(), "tests", "fixtures", "dummy_data", "gcp_dummy_config.yaml"
@@ -480,3 +484,16 @@ class TestLayer:
         layer.post_delete(0)
         # check if delete pvc was called
         mocked_delete_persistent_volume_claims.assert_called_once()
+
+    def test_state_storage(self, mocker: MockFixture):
+        mocked_bucket_exists = mocker.patch("opta.layer.Layer.bucket_exists")
+        layer = Layer.load_from_yaml(
+            os.path.join(
+                os.getcwd(), "tests", "fixtures", "dummy_data", "dummy_config1.yaml"
+            ),
+            None,
+        )
+        mocked_bucket_exists.return_value = True
+        assert layer.state_storage() == "opta-tf-state-opta-tests-dummy-parent"
+        mocked_bucket_exists.return_value = False
+        assert layer.state_storage() == "opta-tf-state-opta-tests-dummy-parent-195d"

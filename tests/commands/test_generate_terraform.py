@@ -20,6 +20,7 @@ def run_before_and_after_tests(mocker: MockFixture) -> Generator:
     mocked_boto_client = mocker.patch("opta.core.terraform.boto3.client")
     mocked_load_kube_config = mocker.patch("opta.core.kubernetes.load_kube_config")
     mocked_aws_set_kube_config = mocker.patch("opta.core.kubernetes._aws_set_kube_config")
+    mocked_shared_state = mocker.patch("opta.layer.Layer.state_storage")
     global tmp_dir
     tmp_dir = tempfile.TemporaryDirectory(prefix="opta-gen-tf").name
 
@@ -30,10 +31,11 @@ def run_before_and_after_tests(mocker: MockFixture) -> Generator:
     mocked_boto_client.assert_not_called()
     mocked_load_kube_config.assert_not_called()
     mocked_aws_set_kube_config.assert_not_called()
+    mocked_shared_state.assert_not_called()
 
 
 def test_generate_terraform_env(mocker: MockFixture) -> None:
-
+    mocked_shared_state = mocker.patch("opta.layer.Layer.state_storage")  # noqa: F841
     env_file = os.path.join(
         os.getcwd(), "tests", "fixtures", "dummy_data", "aws_env_getting_started.yaml"
     )
@@ -171,8 +173,8 @@ def test_generate_terraform_env(mocker: MockFixture) -> None:
     )
 
 
-def test_generate_terraform_service() -> None:
-
+def test_generate_terraform_service(mocker: MockFixture) -> None:
+    mocked_shared_state = mocker.patch("opta.layer.Layer.state_storage")  # noqa: F841
     service_file = os.path.join(
         os.getcwd(), "tests", "fixtures", "dummy_data", "aws_service_getting_started.yaml"
     )
@@ -266,10 +268,10 @@ def test_generate_terraform_service() -> None:
     )
 
 
-def test_generate_terraform_env_and_service() -> None:
+def test_generate_terraform_env_and_service(mocker: MockFixture) -> None:
     # when generating terraform files for an env and a service, some terraform files are merged to prevent some terraform error
     # ex: there can only be one provider named 'aws' defined
-
+    mocked_shared_state = mocker.patch("opta.layer.Layer.state_storage")  # noqa: F841
     env_file = os.path.join(
         os.getcwd(), "tests", "fixtures", "dummy_data", "aws_env_getting_started.yaml"
     )
@@ -342,8 +344,8 @@ def test_generate_terraform_env_and_service() -> None:
     _check_file_exist("modules/opta-k8s-service-helm/")
 
 
-def test_generate_terraform_undefined_dir() -> None:
-
+def test_generate_terraform_undefined_dir(mocker: MockFixture) -> None:
+    mocked_shared_state = mocker.patch("opta.layer.Layer.state_storage")  # noqa: F841
     service_file = os.path.join(
         os.getcwd(), "tests", "fixtures", "dummy_data", "aws_service_getting_started.yaml"
     )
@@ -359,8 +361,8 @@ def test_generate_terraform_undefined_dir() -> None:
     assert "Error: --directory can't be empty" in result.output
 
 
-def test_generate_terraform_dir_already_exist() -> None:
-
+def test_generate_terraform_dir_already_exist(mocker: MockFixture) -> None:
+    mocked_shared_state = mocker.patch("opta.layer.Layer.state_storage")  # noqa: F841
     service_file = os.path.join(
         os.getcwd(), "tests", "fixtures", "dummy_data", "aws_service_getting_started.yaml"
     )
@@ -389,7 +391,7 @@ def test_generate_terraform_dir_already_exist() -> None:
 
 
 def test_generate_terraform_unsupported_module(mocker: MockFixture) -> None:
-
+    mocked_shared_state = mocker.patch("opta.layer.Layer.state_storage")  # noqa: F841
     # this file has a aws-dns module which is currently not exportable
     env_file = os.path.join(
         os.getcwd(), "tests", "fixtures", "dummy_data", "aws_env_dns.yaml"

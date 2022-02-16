@@ -489,11 +489,9 @@ class TestTerraform:
                 }
             },
         }
-        mocked_azure = mocker.patch("opta.core.terraform.Azure")
- 
-        assert Terraform._azure_verify_storage(layer)
+        mocked_azure = mocker.patch("opta.core.terraform.Azure")  # noqa: F841
 
- 
+        assert Terraform._azure_verify_storage(layer)
 
     def test_create_azure_state_storage(self, mocker: MockFixture) -> None:
         layer = mocker.Mock(spec=Layer)
