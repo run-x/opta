@@ -525,8 +525,10 @@ class Layer:
             provider = self.providers["aws"]
             str2hash = provider["region"] + provider["account_id"]
         elif self.cloud == "google":
-            str2hash = provider["region"] + provider["project_id"]
+            provider = self.providers["google"]
+            str2hash = provider["region"] + provider["project"]
         elif self.cloud == "azurerm":
+            provider = self.providers["azurerm"]
             str2hash = (
                 provider["location"] + provider["tenant_id"] + provider["subscription_id"]
             )

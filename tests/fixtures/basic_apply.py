@@ -12,9 +12,9 @@ BASIC_APPLY = (
         "terraform": {
             "backend": {
                 "s3": {
-                    "bucket": "opta-tf-state-test-dev1",
+                    "bucket": "opta-tf-state-test-dev1-98f2",
                     "key": "dev1",
-                    "dynamodb_table": "opta-tf-state-test-dev1",
+                    "dynamodb_table": "opta-tf-state-test-dev1-98f2",
                     "region": "us-east-1",
                 }
             },

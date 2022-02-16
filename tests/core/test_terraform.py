@@ -490,23 +490,10 @@ class TestTerraform:
             },
         }
         mocked_azure = mocker.patch("opta.core.terraform.Azure")
-        mocked_credentials = mocker.Mock()
-        mocked_azure.get_credentials.return_value = mocked_credentials
-        mocked_storage_client_instance = mocker.Mock()
-        mocked_storage_client = mocker.patch(
-            "opta.core.terraform.StorageManagementClient",
-            return_value=mocked_storage_client_instance,
-        )
-
+ 
         assert Terraform._azure_verify_storage(layer)
 
-        mocked_azure.get_credentials.assert_called_once_with()
-        mocked_storage_client.assert_called_once_with(
-            mocked_credentials, "blah99ae-blah-blah-blah-blahd2a04788"
-        )
-        mocked_storage_client_instance.blob_containers.get.assert_called_once_with(
-            "dummy_resource_group", "dummy_storage_account", "dummy_container_name"
-        )
+ 
 
     def test_create_azure_state_storage(self, mocker: MockFixture) -> None:
         layer = mocker.Mock(spec=Layer)

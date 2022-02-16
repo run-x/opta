@@ -63,7 +63,7 @@ class TestLayer:
                 load_balancer_raw_dns="${data.terraform_remote_state.parent.outputs.load_balancer_raw_dns}",
             ),
             "parent_name": "dummy-parent",
-            "state_storage": "opta-tf-state-opta-tests-dummy-parent",
+            "state_storage": "opta-tf-state-opta-tests-dummy-parent-195d",
             "variables": SimpleNamespace(),
             "vars": SimpleNamespace(),
         }
