@@ -45,10 +45,10 @@ from opta.utils.markdown import Code, Markdown, Text, Title1, Title2
     show_default=True,
 )
 @click.option(
-    "--replace",
+    "--delete",
     is_flag=True,
     default=False,
-    help="""Replace the existing directory if it already exists.
+    help="""Delete the existing directory if it already exists.
     Warning: If used, the existing files will be lost, including the terraform state files if local backend is used.""",
     show_default=True,
 )
@@ -72,7 +72,7 @@ def generate_terraform(
     env: Optional[str],
     directory: str,
     readme_format: str,
-    replace: bool,
+    delete: bool,
     auto_approve: bool,
     backend: str,
 ) -> None:
@@ -206,13 +206,18 @@ def generate_terraform(
 
         # if everything was successfull, copy tmp dir to target dir
         if os.path.exists(output_dir):
-            if replace:
+            if delete:
                 print(
-                    f"Output directory {output_dir} already exists and --replace flag is on, deleting it"
+                    f"Output directory {output_dir} already exists and --delete flag is on, deleting it"
                 )
                 if not auto_approve:
+                    state_file_warning = (
+                        ", including terraform state files"
+                        if os.path.exists(os.path.join(output_dir, "tfstate"))
+                        else ""
+                    )
                     click.confirm(
-                        f"The output directory will be deleted: {output_dir}.\n Do you approve?",
+                        f"The output directory will be deleted{state_file_warning}: {output_dir}.\n Do you approve?",
                         abort=True,
                     )
                 _clean_folder(output_dir)

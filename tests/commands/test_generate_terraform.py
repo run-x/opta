@@ -187,7 +187,7 @@ def test_generate_terraform_service() -> None:
             service_file,
             "-d",
             tmp_dir,
-            "--replace",
+            "--delete",
             "--auto-approve",
         ],
     )
@@ -353,7 +353,7 @@ def test_generate_terraform_undefined_dir() -> None:
 
     runner = CliRunner()
     result = runner.invoke(
-        cli, ["generate-terraform", "-c", service_file, "-d", directory, "--replace"]
+        cli, ["generate-terraform", "-c", service_file, "-d", directory, "--delete"]
     )
     assert result.exit_code != 0
     assert "Error: --directory can't be empty" in result.output
@@ -379,12 +379,25 @@ def test_generate_terraform_dir_already_exist() -> None:
     assert "The output directory will be updated" in result.output
     assert "Do you approve?" in result.output
 
-    # if --replace is set, except a confirmation message before deleting
+    # if --delete is set, except a confirmation message before deleting
     result = runner.invoke(
-        cli, ["generate-terraform", "-c", service_file, "-d", directory, "--replace"]
+        cli, ["generate-terraform", "-c", service_file, "-d", directory, "--delete"]
     )
     assert result.exit_code != 0
     assert "The output directory will be deleted:" in result.output
+    assert "Do you approve?" in result.output
+
+    # if --delete is set and there is a tfstate folder, except a custom confirmation message before deleting
+    os.mkdir(os.path.join(directory, "tfstate"))
+    result = runner.invoke(
+        cli, ["generate-terraform", "-c", service_file, "-d", directory, "--delete"]
+    )
+    assert result.exit_code != 0
+    # custom message
+    assert (
+        "The output directory will be deleted, including terraform state files:"
+        in result.output
+    )
     assert "Do you approve?" in result.output
 
 
