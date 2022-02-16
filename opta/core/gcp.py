@@ -203,3 +203,32 @@ class GCP(CloudClient):
         except NotFound:
             return False
         return True
+
+    @classmethod
+    def get_config_map(cls) -> Dict[str, List[str]]:
+        prefix = "opta_config/"
+        credentials, project_id = cls.get_credentials()
+        storage_client = storage.Client(project=project_id, credentials=credentials)
+        opta_config_map = {}
+        for bucket in storage_client.list_buckets():
+            config_list = []
+            for response in storage_client.list_blobs(bucket.name, prefix=prefix, delimiter="/"):
+                config_list.append(response.name[len(prefix):])
+            if config_list:
+                opta_config_map[bucket.name] = config_list
+        return opta_config_map
+
+    @classmethod
+    def get_detailed_config_map(cls, environment: Optional[str] = None):
+        prefix = "opta_config/"
+        credentials, project_id = cls.get_credentials()
+        storage_client = storage.Client(project=project_id, credentials=credentials)
+        opta_config_detailed_map = {}
+        for bucket in storage_client.list_buckets():
+            detailed_config = {}
+            for response in storage_client.list_blobs(bucket.name, prefix=prefix, delimiter="/"):
+                blob = storage.Blob(response.name, bucket)
+                detailed_config[response.name[len(prefix):]] = json.loads(blob.download_as_text())
+            if detailed_config:
+                opta_config_detailed_map[bucket.name] = detailed_config
+        return opta_config_detailed_map
