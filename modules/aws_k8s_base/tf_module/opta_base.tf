@@ -24,12 +24,6 @@ resource "tls_self_signed_cert" "nginx_ca" {
     "cert_signing",
     "crl_signing",
   ]
-
-  lifecycle {
-    ignore_changes = [
-      id
-    ]
-  }
 }
 resource "tls_private_key" "default" {
   count     = var.expose_self_signed_ssl ? 1 : 0
