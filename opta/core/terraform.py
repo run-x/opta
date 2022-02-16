@@ -204,50 +204,20 @@ class Terraform:
 
     @classmethod
     def _azure_verify_storage(cls, layer: "Layer") -> bool:
-        credentials = Azure.get_credentials()
         providers = layer.gen_providers(0)
-
-        resource_group_name = providers["terraform"]["backend"]["azurerm"][
-            "resource_group_name"
-        ]
-        storage_account_name = providers["terraform"]["backend"]["azurerm"][
-            "storage_account_name"
-        ]
         container_name = providers["terraform"]["backend"]["azurerm"]["container_name"]
-        subscription_id = providers["provider"]["azurerm"]["subscription_id"]
-
-        storage_client = StorageManagementClient(credentials, subscription_id)
-        try:
-            storage_client.blob_containers.get(
-                resource_group_name, storage_account_name, container_name
-            )
-            return True
-        except ResourceNotFoundError:
-            return False
+        return Azure(layer).bucket_exists(container_name)
 
     @classmethod
     def _gcp_verify_storage(cls, layer: "Layer") -> bool:
-        credentials, project_id = GCP.get_credentials()
         bucket = layer.state_storage()
-        gcs_client = storage.Client(project=project_id, credentials=credentials)
-        try:
-            gcs_client.get_bucket(bucket)
-        except NotFound:
-            return False
-        return True
+        return GCP(layer).bucket_exists(bucket)
 
     @classmethod
     def _aws_verify_storage(cls, layer: "Layer") -> bool:
         bucket = layer.state_storage()
         region = layer.root().providers["aws"]["region"]
-        s3 = boto3.client("s3", config=Config(region_name=region))
-        try:
-            s3.get_bucket_encryption(Bucket=bucket,)
-        except ClientError as e:
-            if e.response["Error"]["Code"] == "NoSuchBucket":
-                return False
-            raise e
-        return True
+        return AWS(layer).bucket_exists(bucket, region)
 
     @classmethod
     def plan(cls, *tf_flags: str, quiet: Optional[bool] = False, layer: "Layer",) -> None:

@@ -147,3 +147,26 @@ class Azure(CloudClient):
             return ""
         except Exception:
             return ""
+
+    def bucket_exists(self, bucket_name: str) -> bool:
+        providers = self.layer.gen_providers(0)
+        credentials = self.get_credentials()
+        resource_group_name = providers["terraform"]["backend"]["azurerm"][
+            "resource_group_name"
+        ]
+        storage_account_name = providers["terraform"]["backend"]["azurerm"][
+            "storage_account_name"
+        ]
+
+        storage_client = ContainerClient(
+            account_url=f"https://{storage_account_name}.blob.core.windows.net",
+            container_name=bucket_name,
+            credential=credentials,
+        )
+        try:
+            storage_client.blob_containers.get(
+                resource_group_name, storage_account_name, bucket_name
+            )
+            return True
+        except ResourceNotFoundError:
+            return False

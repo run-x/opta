@@ -26,6 +26,7 @@ from modules.base import ModuleProcessor
 from modules.runx.runx import RunxProcessor
 from opta.constants import MODULE_DEPENDENCY, REGISTRY, VERSION
 from opta.core.aws import AWS
+from opta.core.azure import Azure
 from opta.core.gcp import GCP
 from opta.core.validator import validate_yaml
 from opta.crash_reporter import CURRENT_CRASH_REPORTER
@@ -513,6 +514,8 @@ class Layer:
             return AWS(self).bucket_exists(bucket_name, region)
         elif self.cloud == "google":
             return GCP(self).bucket_exists(bucket_name)
+        elif self.cloud == "azurerm":
+            return Azure(self).bucket_exists(bucket_name)
         else:
             return False
 
@@ -523,8 +526,10 @@ class Layer:
             str2hash = provider["region"] + provider["account_id"]
         elif self.cloud == "google":
             str2hash = provider["region"] + provider["project_id"]
-        # elif self.cloud == "azurerm":
-        #     str2hash = provider["location"] + provider["tenant_id"] + provider["subscription_id"]
+        elif self.cloud == "azurerm":
+            str2hash = (
+                provider["location"] + provider["tenant_id"] + provider["subscription_id"]
+            )
         else:
             return ""
         return hashlib.md5(str2hash.encode("utf-8")).hexdigest()[0:4]  # nosec
@@ -543,7 +548,10 @@ class Layer:
                 f"{self.org_name}{self.name}".encode("utf-8")
             ).hexdigest()[0:16]
             orig_name = f"opta{name_hash}"
-            return orig_name  # For now, azure is not getting new bucket name suffixes
+            if self.bucket_exists(orig_name):
+                return orig_name
+            else:
+                return f"{orig_name}-{suffix}"
         else:
             orig_name = f"opta-tf-state-{self.org_name}-{self.name}"
 
