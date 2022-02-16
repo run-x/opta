@@ -9,6 +9,7 @@ from colored import attr, fg
 
 import opta.sentry  # noqa: F401 This leads to initialization of sentry sdk
 from opta.cleanup_files import cleanup_files
+from opta.commands.config import config
 from opta.commands.apply import apply
 from opta.commands.deploy import deploy
 from opta.commands.destroy import destroy
@@ -62,6 +63,7 @@ cli.add_command(events)
 cli.add_command(force_unlock)
 cli.add_command(upgrade)
 cli.add_command(get_service)
+cli.add_command(config)
 
 
 if __name__ == "__main__":

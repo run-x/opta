@@ -5,6 +5,8 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from azure.core.exceptions import ResourceNotFoundError
 from azure.identity import DefaultAzureCredential
+from azure.mgmt.resource import SubscriptionClient
+from azure.mgmt.storage import StorageManagementClient
 from azure.storage.blob import BlobServiceClient, ContainerClient, StorageStreamDownloader
 
 from opta.core.cloud_client import CloudClient
@@ -187,3 +189,56 @@ class Azure(CloudClient):
             return ""
         except Exception:
             return ""
+
+    @classmethod
+    def get_config_map(cls) -> Dict[str, List[str]]:
+        prefix = "opta_config/"
+        subscription_client = SubscriptionClient(cls.get_credentials())
+        opta_config_map = {}
+        for subscription in subscription_client.subscriptions.list():
+            storage_client = StorageManagementClient(cls.get_credentials(), subscription.subscription_id)
+            try:
+                for storage in storage_client.storage_accounts.list():
+                    config_list = []
+                    container_client = ContainerClient(
+                        account_url=f"https://{storage.name}.blob.core.windows.net",
+                        container_name="tfstate",
+                        credential=cls.get_credentials(),
+                    )
+                    try:
+                        for response in container_client.list_blobs(name_starts_with=prefix):
+                            config_list.append(response.name[len(prefix):])
+                        if config_list:
+                            opta_config_map[storage.name] = config_list
+                    except:
+                        pass
+            except:
+                pass
+        return opta_config_map
+
+    @classmethod
+    def get_detailed_config_map(cls, environment: Optional[str] = None):
+        prefix = "opta_config/"
+        subscription_client = SubscriptionClient(cls.get_credentials())
+        opta_config_detailed_map = {}
+        for subscription in subscription_client.subscriptions.list():
+            storage_client = StorageManagementClient(cls.get_credentials(), subscription.subscription_id)
+            try:
+                for storage in storage_client.storage_accounts.list():
+                    detailed_configs = {}
+                    container_client = ContainerClient(
+                        account_url=f"https://{storage.name}.blob.core.windows.net",
+                        container_name="tfstate",
+                        credential=cls.get_credentials(),
+                    )
+                    try:
+                        for response in container_client.list_blobs(name_starts_with=prefix):
+                            config_object = container_client.download_blob(response.name)
+                            detailed_configs[response.name[len(prefix):]] = json.loads(config_object.read_all())
+                        if detailed_configs:
+                            opta_config_detailed_map[storage.name] = detailed_configs
+                    except:
+                        pass
+            except:
+                pass
+        return opta_config_detailed_map

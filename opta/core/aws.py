@@ -190,6 +190,38 @@ class AWS(CloudClient):
             Key={"LockID": {"S": f"{bucket}/{self.layer.name}"}},
         )
 
+    @classmethod
+    def get_config_map(cls) -> Dict[str, List[str]]:
+        prefix = "opta_config/"
+        s3 = boto3.client("s3")
+        opta_config_map = {}
+        for aws_bucket in cls.get_bucket_list():
+            response = s3.list_objects(Bucket=aws_bucket, Prefix=prefix, Delimiter="/")
+            if "Contents" in response:
+                opta_config_map[aws_bucket] = [data["Key"][len(prefix):] for data in response["Contents"]]
+        return opta_config_map
+
+    @classmethod
+    def get_detailed_config_map(cls, environment: Optional[str] = None):
+        prefix = "opta_config/"
+        s3 = boto3.client("s3")
+        opta_config_detailed_map = {}
+        for aws_bucket in cls.get_bucket_list():
+            detailed_configs = {}
+            response = s3.list_objects(Bucket=aws_bucket, Prefix=prefix, Delimiter="/")
+            if "Contents" in response:
+                for data in response["Contents"]:
+                    config_object = s3.get_object(Bucket=aws_bucket, Key=data["Key"])
+                    detailed_configs[data["Key"][len(prefix):]] = json.loads(config_object["Body"].read())["original_spec"]
+                opta_config_detailed_map[aws_bucket] = detailed_configs
+        return opta_config_detailed_map
+
+    @classmethod
+    def get_bucket_list(cls) -> List[str]:
+        s3 = boto3.client("s3")
+        aws_bucket_data = s3.list_buckets().get("Buckets", [])
+        return [data["Name"] for data in aws_bucket_data]
+
     @staticmethod
     def get_all_versions(bucket: str, filename: str, region: str) -> List[str]:
         s3 = boto3.client("s3", config=Config(region_name=region))

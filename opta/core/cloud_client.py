@@ -36,3 +36,11 @@ class CloudClient(ABC):
     @abstractmethod
     def get_configuration_details(self, config_name: str) -> Dict[str, Any]:
         pass
+
+    @classmethod
+    def get_config_map(cls) -> Dict[str, List[str]]:
+        pass
+
+    @classmethod
+    def get_detailed_config_map(cls, environment: Optional[str] = None):
+        pass
