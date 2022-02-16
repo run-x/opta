@@ -193,6 +193,10 @@ def test_generate_terraform_service() -> None:
     )
     assert result.exit_code == 0
     assert "Terraform files generated successfully" in result.output
+    assert (
+        "the output directory doesn't include terraform files for the environment"
+        in result.output
+    )
 
     # check existing file was deleted
     _check_file_not_exist(existing_file)
@@ -300,6 +304,10 @@ def test_generate_terraform_env_and_service() -> None:
         ],
     )
     assert result.exit_code == 0
+    assert (
+        "the output directory doesn't include terraform files for the environment"
+        not in result.output
+    )
 
     # check readme files were not created because `--readme-format none`
     _check_file_not_exist("staging.md")

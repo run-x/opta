@@ -204,7 +204,7 @@ def generate_terraform(
             layer, execution_plan, tmp_dir, readme_format, opta_cmd, backend
         )
 
-        # if everything was successfull, copy tmp dir to target dir
+        # various warnings if the directory already exist
         if os.path.exists(output_dir):
             if delete:
                 print(
@@ -229,6 +229,16 @@ def generate_terraform(
                         abort=True,
                     )
 
+        # we have a service file but the env was not exported
+        if layer.name != layer.root().name and not os.path.exists(
+            os.path.join(output_dir, "module-base.tf.json")
+        ):
+            print(
+                f"Warning: the output directory doesn't include terraform files for the environment named '{layer.root().name}', "
+                "some dependencies might be missing for terraform to work."
+            )
+
+        # if everything was successfull, copy tmp dir to target dir
         logger.debug(f"Copy {tmp_dir} to {output_dir}")
         shutil.copytree(tmp_dir, output_dir, dirs_exist_ok=True)
         unsupported_modules = [m for m in layer.get_modules() if not m.is_exportable()]
