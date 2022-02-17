@@ -340,10 +340,10 @@ jobs:
           name: "Generate Terraform Language Files"
           command: |
             mkdir ./.circleci/ci-tests/terraform-generated-aws/generated-tf-files
-            ./dist/dist/opta generate-terraform \
+            ./dist/opta/opta generate-terraform \
             --config ./.circleci/ci-tests/terraform-generated-aws/environment.yaml \
             --directory ./.circleci/ci-tests/terraform-generated-aws/generated-tf-files
-            ./dist/dist/opta generate-terraform \
+            ./dist/opta/opta generate-terraform \
             --config ./.circleci/ci-tests/terraform-generated-aws/service-http.yaml \
             --directory ./.circleci/ci-tests/terraform-generated-aws/generated-tf-files
       - persist_to_workspace:
