@@ -5,6 +5,13 @@ resource "google_compute_ssl_certificate" "external" {
   private_key = var.private_key
 }
 
+resource "google_compute_ssl_certificate" "default" {
+  count       = var.expose_self_signed_ssl ? 1 : 0
+  name        = "opta-${var.layer_name}-default"
+  certificate = tls_locally_signed_cert.default_cert[0].cert_pem
+  private_key = tls_private_key.default[0].private_key_pem
+}
+
 resource "google_compute_global_address" "load_balancer" {
   name = "opta-${var.layer_name}"
 }
@@ -55,7 +62,7 @@ resource "google_compute_url_map" "http" {
 }
 
 resource "google_compute_url_map" "https" {
-  count           = var.delegated || var.private_key != "" ? 1 : 0
+  count           = var.delegated || var.private_key != "" || var.expose_self_signed_ssl ? 1 : 0
   name            = "opta-${var.layer_name}-https"
   default_service = google_compute_backend_service.backend_service.id
 }
@@ -67,10 +74,10 @@ resource "google_compute_target_http_proxy" "proxy" {
 }
 
 resource "google_compute_target_https_proxy" "proxy" {
-  count            = var.delegated || var.private_key != "" ? 1 : 0
+  count            = var.delegated || var.private_key != "" || var.expose_self_signed_ssl ? 1 : 0
   name             = "opta-${var.layer_name}"
   url_map          = google_compute_url_map.https[0].name
-  ssl_certificates = var.delegated ? [var.cert_self_link] : [google_compute_ssl_certificate.external[0].self_link]
+  ssl_certificates = var.delegated ? [var.cert_self_link] : (var.private_key != "" ? [google_compute_ssl_certificate.external[0].self_link] : [google_compute_ssl_certificate.default[0].self_link])
   ssl_policy       = google_compute_ssl_policy.policy.self_link
 }
 
@@ -82,7 +89,7 @@ resource "google_compute_global_forwarding_rule" "http" {
 }
 
 resource "google_compute_global_forwarding_rule" "https" {
-  count      = var.delegated || var.private_key != "" ? 1 : 0
+  count      = var.delegated || var.private_key != "" || var.expose_self_signed_ssl ? 1 : 0
   name       = "opta-${var.layer_name}-https"
   target     = google_compute_target_https_proxy.proxy[0].self_link
   ip_address = google_compute_global_address.load_balancer.address

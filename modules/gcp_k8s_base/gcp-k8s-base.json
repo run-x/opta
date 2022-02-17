@@ -23,6 +23,11 @@
       "description": "Additional configuration for nginx ingress. [Available options](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/#configuration-options)",
       "default": {}
     },
+    "expose_self_signed_ssl": {
+      "type": "boolean",
+      "description": "Expose self-signed SSL certs.",
+      "default": false
+    },
     "type": {
       "description": "The name of this module",
       "enum": [

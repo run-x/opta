@@ -14,7 +14,7 @@ resource "helm_release" "ingress-nginx" {
         podLabels : {
           "opta-ingress-healthcheck" : "yes"
         }
-        extraArgs : var.private_key == "" ? {} : { default-ssl-certificate : "ingress-nginx/secret-tls" }
+        extraArgs : var.private_key != "" || var.expose_self_signed_ssl ? { default-ssl-certificate : "ingress-nginx/secret-tls" } : {}
         config : local.config
         podAnnotations : {
           "linkerd.io/inject" : "enabled"
@@ -66,7 +66,7 @@ resource "helm_release" "ingress-nginx" {
         service : {
           loadBalancerSourceRanges : ["0.0.0.0/0"]
           externalTrafficPolicy : "Local"
-          enableHttps : var.cert_arn == "" && var.private_key == "" ? false : true
+          enableHttps : var.cert_arn != "" || var.private_key != "" || var.expose_self_signed_ssl ? true : false
           targetPorts : local.target_ports
           annotations : {
             "service.beta.kubernetes.io/aws-load-balancer-scheme" : "internet-facing"

@@ -66,6 +66,11 @@ inputs:
     validator: any(required=False)
     description: Additional configuration for nginx ingress. [Available options](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/#configuration-options)
     default: {}
+  - name: expose_self_signed_ssl
+    user_facing: true
+    validator: bool(required=False)
+    description: Expose self-signed SSL certs.
+    default: false
 outputs:
   - name: load_balancer_raw_ip
     export: bool
