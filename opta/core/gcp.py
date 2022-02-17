@@ -171,5 +171,5 @@ class GCP(CloudClient):
         try:
             _ = gcs_client.get_bucket(bucket_name)
         except NotFound:
-            return True
-        return False
+            return False
+        return True
