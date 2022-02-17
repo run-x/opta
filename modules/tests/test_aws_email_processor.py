@@ -18,6 +18,8 @@ class TestAwsEmailProcessor:
             None,
         )
         aws_email_module = layer.get_module("awsses", 8)
+        mocked_state_storage = mocker.patch("opta.layer.Layer.state_storage")
+        mocked_state_storage.return_value = True
         with pytest.raises(UserErrors):
             AwsEmailProcessor(aws_email_module, layer).process(8)
         aws_dns_modules = layer.get_module("awsdns", 8)
@@ -41,6 +43,8 @@ class TestAwsEmailProcessor:
         mocked_sesv2.get_account.return_value = {"ProductionAccessEnabled": True}
         aws_dns_modules = layer.get_module("awsdns", 8)
         aws_dns_modules.data["delegated"] = True
+        mocked_state_storage = mocker.patch("opta.layer.Layer.state_storage")
+        mocked_state_storage.return_value = True
         AwsEmailProcessor(aws_email_module, layer).post_hook(8, None)
         mocked_boto3.client.assert_called_once()
         mocked_sesv2.get_account.assert_called_once()
@@ -64,6 +68,8 @@ class TestAwsEmailProcessor:
         }
         aws_dns_modules = layer.get_module("awsdns", 8)
         aws_dns_modules.data["delegated"] = True
+        mocked_state_storage = mocker.patch("opta.layer.Layer.state_storage")
+        mocked_state_storage.return_value = True
         AwsEmailProcessor(aws_email_module, layer).post_hook(8, None)
         mocked_boto3.client.assert_called_once()
         mocked_sesv2.get_account.assert_called_once()
@@ -113,6 +119,8 @@ class TestAwsEmailProcessor:
         mocked_sesv2.get_account.return_value = {
             "ProductionAccessEnabled": False,
         }
+        mocked_state_storage = mocker.patch("opta.layer.Layer.state_storage")
+        mocked_state_storage.return_value = True
         aws_dns_modules = layer.get_module("awsdns", 8)
         aws_dns_modules.data["delegated"] = True
         AwsEmailProcessor(aws_email_module, layer).post_hook(8, None)
