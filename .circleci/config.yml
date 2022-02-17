@@ -329,6 +329,40 @@ jobs:
             - todo-api
             - todo-frontend
 
+  aws-generate-terraform-language-files:
+    executor: ubuntu-machine
+    steps:
+      - checkout-opta
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - run:
+          name: "Generate Terraform Language Files"
+          command: |
+            mkdir ./.circleci/ci-tests/terraform-generated-aws/generated-tf-files
+            ./dist/dist/opta generate-terraform \
+            --config ./.circleci/ci-tests/terraform-generated-aws/environment.yaml \
+            --directory ./.circleci/ci-tests/terraform-generated-aws/generated-tf-files
+            ./dist/dist/opta generate-terraform \
+            --config ./.circleci/ci-tests/terraform-generated-aws/service-http.yaml \
+            --directory ./.circleci/ci-tests/terraform-generated-aws/generated-tf-files
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - .circleci/ci-tests/terraform-generated-aws/generated-tf-files
+
+  aws-test-terraform-generated-files:
+    executor: ubuntu-machine
+    steps:
+      - checkout-opta
+      - attach_workspace:
+          at: ./
+      - run:
+          name: "Test Terraform Generated Files"
+          command: |
+            cd .circleci/ci-tests/terraform-generated-aws/generated-tf-files
+            ls -la
+
   azure-create-env:
     executor: ubuntu-machine
     environment:
@@ -2101,12 +2135,12 @@ workflows:
     jobs:
       - get-all-parameter-values
       - build-opta-binary
-      - aws-create-env:
+      - aws-generate-terraform-language-files:
           requires:
             - build-opta-binary
-      - aws-destroy-env:
+      - aws-test-terraform-generated-files:
           requires:
-            - aws-create-env
+            - aws-generate-terraform-language-files
 
   nightly:
     triggers:
