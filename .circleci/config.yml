@@ -377,10 +377,17 @@ jobs:
             terraform init
             terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base
             terraform apply -compact-warnings -auto-approve tf.plan
+            cat ./tfstate/awsenv-tg.tfstate
             terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8scluster
             terraform apply -compact-warnings -auto-approve tf.plan
+            cat ./tfstate/awsenv-tg.tfstate
             terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8sbase
             terraform apply -compact-warnings -auto-approve tf.plan
+            cat ./tfstate/awsenv-tg.tfstate
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - generated-tf-files-aws/tfstate/awsenv-tg.tfstate
 
   aws-tg-test-service-http:
     executor: ubuntu-machine
@@ -395,6 +402,7 @@ jobs:
             terraform init
             terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.app
             terraform apply -compact-warnings -auto-approve tf.plan
+            cat ./tfstate/awsenv-tg.tfstate
       - run:
           name: "Get Output"
           command: |
@@ -410,6 +418,10 @@ jobs:
             cd $HOME/generated-tf-files-aws
             terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.app -destroy
             terraform apply -compact-warnings -auto-approve tf.plan
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - generated-tf-files-aws/tfstate/awsenv-tg.tfstate
 
   aws-tg-destroy-env:
     executor: ubuntu-machine
@@ -423,6 +435,11 @@ jobs:
             cd $HOME/generated-tf-files-aws
             terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base -target=module.k8scluster -target=module.k8sbase -destroy
             terraform apply -compact-warnings -auto-approve tf.plan
+            cat ./tfstate/awsenv-tg.tfstate
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - generated-tf-files-aws/tfstate/awsenv-tg.tfstate
 
   azure-create-env:
     executor: ubuntu-machine
