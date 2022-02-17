@@ -55,6 +55,9 @@ parameters:
   ci-env-region-gcp:
     type: string
     default: 'us-central1'
+  run-opta-terraform-generate-test:
+    type: boolean
+    default: false
 
 orbs:
   terraform: circleci/terraform@3.0.0
@@ -151,6 +154,7 @@ jobs:
             echo "ci-env-name:                " << pipeline.parameters.ci-env-name >>
             echo "ci-env-region-aws:          " << pipeline.parameters.ci-env-region-aws >>
             echo "ci-env-region-gcp:          " << pipeline.parameters.ci-env-region-gcp >>
+            echo "run-opta-terraform-generate-test: " << pipeline.parameters.run-opta-terraform-generate-test >>
 
   no-pdb:
     executor: ubuntu-machine
@@ -352,17 +356,6 @@ jobs:
           root: ~/
           paths:
             - generated-tf-files-aws
-
-  aws-test-terraform-generated-files:
-    executor: ubuntu-machine
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          name: "Test Terraform Generated Files"
-          command: |
-            cd $HOME/generated-tf-files-aws
-            ls -la
 
   aws-tg-create-env:
     executor: ubuntu-machine
@@ -2216,17 +2209,14 @@ workflows:
           requires:
             - build-opta-binary
 
-  test:
-    when: << pipeline.parameters.test >>
+  run-opta-terraform-generate-test:
+    when: << pipeline.parameters.run-opta-terraform-generate-test >>
     jobs:
       - get-all-parameter-values
       - build-opta-binary
       - aws-generate-terraform-language-files:
           requires:
             - build-opta-binary
-      - aws-test-terraform-generated-files:
-          requires:
-            - aws-generate-terraform-language-files
       - aws-tg-create-env:
           requires:
             - aws-generate-terraform-language-files
