@@ -29,6 +29,8 @@ class TestGenerator:
         opta_config = opta_config.copy()
         mocker.patch("opta.layer.yaml.load", return_value=opta_config)
         layer = Layer.load_from_yaml("", None)
+        mocked_state_storage = mocker.patch("opta.layer.Layer.state_storage")
+        mocked_state_storage.return_value = "opta-tf-state-test-dev1-98f2"
         gen_all(layer)
         real_output = json.load(open(test_gen_file_path))
         assert gen_tf_file == real_output

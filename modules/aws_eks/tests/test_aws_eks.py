@@ -95,7 +95,8 @@ class TestAwsEksModuleProcessor:
                 },
             ]
         }
-
+        mocked_state_storage = mocker.patch("opta.layer.Layer.state_storage")
+        mocked_state_storage.return_value = "whatever"
         AwsEksProcessor(aws_eks_module, layer).post_hook(8, None)
 
         mocked_boto3.client.assert_called_once_with("autoscaling", config=mocker.ANY)
