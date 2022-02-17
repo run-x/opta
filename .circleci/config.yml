@@ -342,10 +342,12 @@ jobs:
             mkdir ./.circleci/ci-tests/terraform-generated-aws/generated-tf-files
             ./dist/opta/opta generate-terraform \
             --config ./.circleci/ci-tests/terraform-generated-aws/environment.yaml \
-            --directory ./.circleci/ci-tests/terraform-generated-aws/generated-tf-files
+            --directory ./.circleci/ci-tests/terraform-generated-aws/generated-tf-files \
+            --auto-approve
             ./dist/opta/opta generate-terraform \
             --config ./.circleci/ci-tests/terraform-generated-aws/service-http.yaml \
-            --directory ./.circleci/ci-tests/terraform-generated-aws/generated-tf-files
+            --directory ./.circleci/ci-tests/terraform-generated-aws/generated-tf-files \
+            --auto-approve
       - persist_to_workspace:
           root: ./
           paths:
