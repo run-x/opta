@@ -368,31 +368,24 @@ jobs:
     executor: ubuntu-machine
     steps:
       - install-opta-dependencies
-      # - checkout-opta
       - attach_workspace:
           at: ~/
       - run:
-          name: "Test Terraform Generated Environment"
+          name: "Create Terraform Generated Environment"
           command: |
             cd $HOME/generated-tf-files-aws
-            terraform init          
-      # - run:
-      #     name: "Create Terraform Generated Environment"
-      #     command: |
-      #       cd $HOME/generated-tf-files-aws
-      #       terraform init
-      #       terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base
-      #       terraform apply -compact-warnings -auto-approve tf.plan
-      #       terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8scluster
-      #       terraform apply -compact-warnings -auto-approve tf.plan
-      #       terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8sbase
-      #       terraform apply -compact-warnings -auto-approve tf.plan
+            terraform init
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base
+            terraform apply -compact-warnings -auto-approve tf.plan
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8scluster
+            terraform apply -compact-warnings -auto-approve tf.plan
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8sbase
+            terraform apply -compact-warnings -auto-approve tf.plan
 
   aws-tg-test-service-http:
     executor: ubuntu-machine
     steps:
       - install-opta-dependencies
-      # - checkout-opta
       - attach_workspace:
           at: ~/
       - run:
@@ -400,47 +393,36 @@ jobs:
           command: |
             cd $HOME/generated-tf-files-aws
             terraform init
-      # - run:
-      #     name: "Create Terraform Generated Http Service"
-      #     command: |
-      #       cd $HOME/generated-tf-files-aws
-      #       terraform init
-      #       terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.app
-      #       terraform apply -compact-warnings -auto-approve tf.plan
-      # - run:
-      #     name: "Get Output"
-      #     command: |
-      #       cd .circleci/ci-tests/terraform-generated-aws/generated-tf-files
-      #       terraform output -json
-      # - run:
-      #     name: "Sleep 120 seconds"
-      #     command: |
-      #       sleep 120
-      # - run:
-      #     name: "Destroy Terraform Generated Http Service"
-      #     command: |
-      #       cd .circleci/ci-tests/terraform-generated-aws/generated-tf-files
-      #       terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.app -destroy
-      #       terraform apply -compact-warnings -auto-approve tf.plan
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.app
+            terraform apply -compact-warnings -auto-approve tf.plan
+      - run:
+          name: "Get Output"
+          command: |
+            cd $HOME/generated-tf-files-aws
+            terraform output -json
+      - run:
+          name: "Sleep 120 seconds"
+          command: |
+            sleep 120
+      - run:
+          name: "Destroy Terraform Generated Http Service"
+          command: |
+            cd $HOME/generated-tf-files-aws
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.app -destroy
+            terraform apply -compact-warnings -auto-approve tf.plan
 
   aws-tg-destroy-env:
     executor: ubuntu-machine
     steps:
       - install-opta-dependencies
-      # - checkout-opta
       - attach_workspace:
           at: ~/
       - run:
-            name: "Test Terraform Generated Environment"
-            command: |
-              cd $HOME/generated-tf-files-aws
-              terraform init
-      # - run:
-      #     name: "Destroy Terraform Generated Environment"
-      #     command: |
-      #       cd .circleci/ci-tests/terraform-generated-aws/generated-tf-files
-      #       terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base -target=module.k8scluster -target=module.k8sbase -destroy
-      #       terraform apply -compact-warnings -auto-approve tf.plan
+          name: "Destroy Terraform Generated Environment"
+          command: |
+            cd $HOME/generated-tf-files-aws
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base -target=module.k8scluster -target=module.k8sbase -destroy
+            terraform apply -compact-warnings -auto-approve tf.plan
 
   azure-create-env:
     executor: ubuntu-machine
