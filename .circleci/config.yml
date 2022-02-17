@@ -404,12 +404,17 @@ jobs:
             terraform apply -compact-warnings -auto-approve tf.plan
             cat ./tfstate/awsenv-tg.tfstate
       - run:
+          name: "Sleep 120 seconds"
+          command: |
+            sleep 120
+      - run:
           name: "Get Output and Test Load Balancer"
           command: |
             cd $HOME/generated-tf-files-aws
             terraform output -json >> terraform_output.json
-            export LOAD_BALANCER=`cat output.json | jq -r '.load_balancer_raw_dns' |jq -r '.value'`
+            export LOAD_BALANCER=`cat terraform_output.json | jq -r '.load_balancer_raw_dns' |jq -r '.value'`
             echo $LOAD_BALANCER
+            curl $LOAD_BALANCER
             echo "1"
       - run:
           name: "Sleep 120 seconds"
