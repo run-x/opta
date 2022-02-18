@@ -7,6 +7,7 @@ import re
 import shutil
 import tempfile
 from datetime import datetime
+from functools import lru_cache
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Dict, FrozenSet, Iterable, List, Optional, Set, Tuple, TypedDict
@@ -25,6 +26,7 @@ from modules.base import ModuleProcessor
 from modules.runx.runx import RunxProcessor
 from opta.constants import MODULE_DEPENDENCY, REGISTRY, VERSION
 from opta.core.aws import AWS
+from opta.core.azure import Azure
 from opta.core.gcp import GCP
 from opta.core.validator import validate_yaml
 from opta.crash_reporter import CURRENT_CRASH_REPORTER
@@ -504,18 +506,61 @@ class Layer:
         current_keys["parent_name"] = self.parent.name if self.parent is not None else ""
         return current_keys
 
+    @lru_cache(maxsize=None)
+    def bucket_exists(self, bucket_name: str) -> bool:
+
+        if self.cloud == "aws":
+            region = self.providers["aws"]["region"]
+            return AWS(self).bucket_exists(bucket_name, region)
+        elif self.cloud == "google":
+            return GCP(self).bucket_exists(bucket_name)
+        elif self.cloud == "azurerm":
+            return Azure(self).bucket_exists(bucket_name)
+        else:
+            return False
+
+    def _get_unique_hash(self) -> str:
+
+        if self.cloud == "aws":
+            provider = self.providers["aws"]
+            str2hash = provider["region"] + provider["account_id"]
+        elif self.cloud == "google":
+            provider = self.providers["google"]
+            str2hash = provider["region"] + provider["project"]
+        elif self.cloud == "azurerm":
+            provider = self.providers["azurerm"]
+            str2hash = (
+                provider["location"] + provider["tenant_id"] + provider["subscription_id"]
+            )
+        else:
+            return ""
+        return hashlib.md5(str2hash.encode("utf-8")).hexdigest()[0:4]  # nosec
+
     def state_storage(self) -> str:
+        if self.cloud == "local":
+            return os.path.join(str(Path.home()), ".opta", "local", "tfstate")
+
         if self.parent is not None:
             return self.parent.state_storage()
-        elif self.cloud == "azurerm":
+
+        suffix = self._get_unique_hash()
+
+        if self.cloud == "azurerm":
             name_hash = hashlib.md5(  # nosec
                 f"{self.org_name}{self.name}".encode("utf-8")
             ).hexdigest()[0:16]
-            return f"opta{name_hash}"
-        elif self.cloud == "local":
-            return os.path.join(str(Path.home()), ".opta", "local", "tfstate")
+            orig_name = f"opta{name_hash}"
+            if self.bucket_exists(orig_name):
+                return orig_name
+            else:
+                return f"{orig_name}-{suffix}"
         else:
-            return f"opta-tf-state-{self.org_name}-{self.name}"
+            orig_name = f"opta-tf-state-{self.org_name}-{self.name}"
+
+        if self.bucket_exists(orig_name):
+            return orig_name
+        else:
+            return orig_name + "-" + suffix
 
     def gen_providers(self, module_idx: int, clean: bool = True) -> Dict[Any, Any]:
         ret: Dict[Any, Any] = {"provider": {}}

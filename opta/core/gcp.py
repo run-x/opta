@@ -164,3 +164,12 @@ class GCP(CloudClient):
         gcs_client = storage.Client(project=project_id, credentials=credentials)
         bucket_object = gcs_client.get_bucket(bucket)
         bucket_object.delete_blob(tf_lock_path)
+
+    def bucket_exists(self, bucket_name: str) -> bool:
+        credentials, project_id = GCP.get_credentials()
+        gcs_client = storage.Client(project=project_id, credentials=credentials)
+        try:
+            _ = gcs_client.get_bucket(bucket_name)
+        except NotFound:
+            return False
+        return True

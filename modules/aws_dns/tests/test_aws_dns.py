@@ -108,6 +108,8 @@ class TestAwsDnsProcessor:
                 {"Name": f"/opta-{layer.get_env()}/{CERTIFICATE_BODY_FILE_NAME}"},
             ]
         }
+        mocked_state_storage = mocker.patch("opta.layer.Layer.state_storage")
+        mocked_state_storage.return_value = "whatever"
         processor = AwsDnsProcessor(dns_module, layer)
         processor.process(2)
         mocked_boto3.client.assert_called_once_with("ssm", config=mocker.ANY)
@@ -133,7 +135,8 @@ class TestAwsDnsProcessor:
             ),
             "",
         ]
-
+        mocked_state_storage = mocker.patch("opta.layer.Layer.state_storage")
+        mocked_state_storage.return_value = "whatever"
         processor = AwsDnsProcessor(dns_module, layer)
         processor.process(2)
         mocked_boto3.client.assert_called_once_with("ssm", config=mocker.ANY)
@@ -170,6 +173,8 @@ class TestAwsDnsProcessor:
         mocked_acm.describe_certificate.return_value = {
             "Certificate": {"DomainName": "www.blah.com", "SubjectAlternativeNames": []}
         }
+        mocked_state_storage = mocker.patch("opta.layer.Layer.state_storage")
+        mocked_state_storage.return_value = "whatever"
         processor = AwsDnsProcessor(dns_module, layer)
         processor.process(2)
         mocked_boto3.client.assert_called_once_with("acm", config=mocker.ANY)
