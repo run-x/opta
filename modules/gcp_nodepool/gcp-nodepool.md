@@ -33,7 +33,7 @@ service accounts for each K8s service, but for any non-opta managed workloads in
 
 ## Taints
 
-Opta now gives you the option of adding [taints](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/)
+Opta gives you the option of adding [taints](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/)
 to the nodes created in this nodepool. The official documentation gives an excellent detailed summary, but in short
 one can use taints to stop workloads from running in said nodes unless they have a matching toleration. Simply provide 
 a list of such taints as inputs like so:
@@ -43,14 +43,21 @@ a list of such taints as inputs like so:
     min_nodes: 1
     max_nodes: 3
     taints:
-      - key: blah1
-        value: baloney
-        effect: "NO_EXECUTE"
-      - key: blah2
-        value: baloney
-        # Default "effect" is no schedule
-      - key: blah3 # key must always be given
-        # Default "value" is opta
+      - key: instancetype
+        value: memoryoptimized
+        effect: "NoExecute"
+      - key: team
+        value: booking
+        # Tolerates for default effect of NoSchedule
+      - key: highpriority
+        # Tolerates for default value of opta
 ```
 
 For most cases, simply specifying the `key` should do.
+
+{{% alert title="Warning" color="warning" %}}
+Adding taints to nodes also forbids most [daemonsets](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)
+from running in said node. This can be a problem with security/monitoring solutions (e.g. Datadog) which typiclly use
+daemonsets to run their agents in each node, so please be careful and read their instructions on how to add
+[tolerations](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/)
+{{% /alert %}}
