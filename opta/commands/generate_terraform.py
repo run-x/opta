@@ -45,10 +45,10 @@ from opta.utils.markdown import Code, Markdown, Text, Title1, Title2
     show_default=True,
 )
 @click.option(
-    "--replace",
+    "--delete",
     is_flag=True,
     default=False,
-    help="""Replace the existing directory if it already exists.
+    help="""Delete the existing directory if it already exists.
     Warning: If used, the existing files will be lost, including the terraform state files if local backend is used.""",
     show_default=True,
 )
@@ -58,6 +58,13 @@ from opta.utils.markdown import Code, Markdown, Text, Title1, Title2
     default=False,
     help="Automatically approve confirmation message for deleting existing files.",
 )
+@click.option(
+    "--backend",
+    type=click.Choice(["local", "remote"], case_sensitive=False),
+    default="local",
+    help="Terraform backend type. If you have no underlying infrastructure, 'local' would get you started. If you have already provisonned your infrastructure with opta use 'remote' to import the current state.",
+    show_default=True,
+)
 @click.pass_context
 def generate_terraform(
     ctx: click.Context,
@@ -65,8 +72,9 @@ def generate_terraform(
     env: Optional[str],
     directory: str,
     readme_format: str,
-    replace: bool,
+    delete: bool,
     auto_approve: bool,
+    backend: str,
 ) -> None:
     """(beta) Generate Terraform language files
 
@@ -74,7 +82,9 @@ def generate_terraform(
 
     opta generate-terraform -c my-config.yaml
 
-    opta generate-terraform -c my-config.yaml -d ./tf
+    opta generate-terraform -c my-config.yaml --directory ./terraform
+
+    opta generate-terraform -c my-config.yaml --auto-approve --backend remote --readme-format md
     """
 
     print("This command is in beta mode")
@@ -144,10 +154,11 @@ def generate_terraform(
 
         # update terraform backend to be local (currently defined in the registry)
         # this is needed as the generated terraform should work outside of opta
-        backend_dir = f"./tfstate/{layer.root().name}.tfstate"
-        logger.debug(f"Setting terraform backend to local: {backend_dir}")
         original_backend = REGISTRY[layer.cloud]["backend"]
-        REGISTRY[layer.cloud]["backend"] = {"local": {"path": backend_dir}}
+        if backend.lower() == "local":
+            backend_dir = f"./tfstate/{layer.root().name}.tfstate"
+            logger.debug(f"Setting terraform backend to local: {backend_dir}")
+            REGISTRY[layer.cloud]["backend"] = {"local": {"path": backend_dir}}
         # generate the main.tf.json
         try:
             execution_plan = list(gen(layer))
@@ -190,18 +201,23 @@ def generate_terraform(
         # generate the readme
         opta_cmd = f"opta {ctx.info_name} {str_options(ctx)}"
         readme_file = _generate_readme(
-            layer, execution_plan, tmp_dir, readme_format, opta_cmd
+            layer, execution_plan, tmp_dir, readme_format, opta_cmd, backend
         )
 
-        # if everything was successfull, copy tmp dir to target dir
+        # various warnings if the directory already exist
         if os.path.exists(output_dir):
-            if replace:
+            if delete:
                 print(
-                    f"Output directory {output_dir} already exists and --replace flag is on, deleting it"
+                    f"Output directory {output_dir} already exists and --delete flag is on, deleting it"
                 )
                 if not auto_approve:
+                    state_file_warning = (
+                        ", including terraform state files"
+                        if os.path.exists(os.path.join(output_dir, "tfstate"))
+                        else ""
+                    )
                     click.confirm(
-                        f"The output directory will be deleted: {output_dir}.\n Do you approve?",
+                        f"The output directory will be deleted{state_file_warning}: {output_dir}.\n Do you approve?",
                         abort=True,
                     )
                 _clean_folder(output_dir)
@@ -213,6 +229,16 @@ def generate_terraform(
                         abort=True,
                     )
 
+        # we have a service file but the env was not exported
+        if layer.name != layer.root().name and not os.path.exists(
+            os.path.join(output_dir, "module-base.tf.json")
+        ):
+            print(
+                f"Warning: the output directory doesn't include terraform files for the environment named '{layer.root().name}', "
+                "some dependencies might be missing for terraform to work."
+            )
+
+        # if everything was successfull, copy tmp dir to target dir
         logger.debug(f"Copy {tmp_dir} to {output_dir}")
         shutil.copytree(tmp_dir, output_dir, dirs_exist_ok=True)
         unsupported_modules = [m for m in layer.get_modules() if not m.is_exportable()]
@@ -251,7 +277,12 @@ def _write_json(data: dict, file_path: str) -> None:
 
 
 def _generate_readme(
-    layer: Layer, execution_plan: list, output_dir: str, format: str, opta_command: str
+    layer: Layer,
+    execution_plan: list,
+    output_dir: str,
+    format: str,
+    opta_command: str,
+    backend: str,
 ) -> Optional[str]:
     """generate the readme, returns the generated file if any.
 
@@ -271,10 +302,24 @@ def _generate_readme(
         "Follow the steps defined in this document to allow the depending resources to be created in the expected order."
     )
     readme >> Title2("Check the backend configuration")
+    if backend.lower() == "local":
+        readme >> Text(
+            """The terraform file [terraform.tf.json](./terraform.tf.json) comes pre-configured
+        to use a local terraform state file."""
+        )
+    else:
+        readme >> Text(
+            """The terraform file [terraform.tf.json](./terraform.tf.json) comes pre-configured
+        to point to the remote backend used by opta."""
+        )
+        readme >> Text(
+            """The first time `terraform plan` is executed, you will see a message `Note: Objects have changed outside of Terraform`.
+            This is expected, running the subsequent `terraform apply` will import the remote state."""
+        )
+
     readme >> Text(
-        """The terraform file [provider.tf.json](./provider.tf.json) comes pre-configured
-    to point to a local terraform state file. If you want to use a remote state instead,
-    change the section `terraform/backend`. See the terraform documentation for supported backends."""
+        """If you want to use a different backend, change the section `terraform/backend`.
+        See the [terraform documentation](https://www.terraform.io/language/settings/backends) for supported backends."""
     )
     readme >> Title2("Initialize Terraform")
     readme >> Code("terraform init")
@@ -350,9 +395,9 @@ def _generate_readme(
     readme >> Code("terraform apply -compact-warnings -auto-approve tf.plan")
 
     readme >> Title2("Additional information")
-    readme >> Text("This file was generated by opta.")
+    readme >> Text("This file was generated by [opta](https://github.com/run-x/opta).")
     readme >> Text(f"- opta version: {VERSION}")
-    readme >> Text(f"- Command: `{opta_command}`")
+    readme >> Text(f"- Command (including default values): `{opta_command}`")
     readme >> Text(f"- Generated at: {datetime.datetime.now()}")
     target_path = os.path.join(output_dir, f"readme-{layer.name}.{format}")
     logger.debug(f"Writing file: {target_path}")
