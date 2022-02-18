@@ -15,7 +15,7 @@
       "default": "11.9"
     },
     "backup_retention_days": {
-      "type": "boolean",
+      "type": "integer",
       "description": "How many days to keep the backup retention",
       "default": 7
     },

@@ -15,7 +15,7 @@
       "default": "5.7.mysql_aurora.2.04.2"
     },
     "backup_retention_days": {
-      "type": "boolean",
+      "type": "integer",
       "description": "How many days to keep the backup retention",
       "default": 7
     },
