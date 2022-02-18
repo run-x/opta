@@ -94,7 +94,7 @@ def apply(options: ApplyOptions) -> None:
             special_references = {
                 Reference.parse(ref): value
                 for ref, value in {
-                    "meta.env": "foo",  # TODO: Figure out actual env name
+                    "meta.env": layer.name,  # TODO: Figure out actual env name
                     "meta.layer": layer.name,
                     "meta.module": module.alias,
                 }.items()
@@ -136,7 +136,10 @@ def apply(options: ApplyOptions) -> None:
             # TODO: Pass in plan details
             module.pre_terraform_apply()
 
-        tf.apply(auto_approve=options.auto_approve, plan=TF_PLAN_PATH, quiet=False)
+        try:
+            tf.apply(auto_approve=options.auto_approve, plan=TF_PLAN_PATH, quiet=False)
+        finally:
+            tf.upload_state(layer)
 
         for module in modules:
             # TODO: Pass in plan details (and terraform run results?)
