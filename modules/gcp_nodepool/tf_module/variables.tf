@@ -67,6 +67,6 @@ variable "preemptible" {
 }
 
 variable "taints" {
-  type = list(map(string))
+  type    = list(map(string))
   default = []
 }

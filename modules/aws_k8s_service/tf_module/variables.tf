@@ -193,6 +193,6 @@ variable "ingress_extra_annotations" {
 }
 
 variable "tolerations" {
-  type = list(map(string))
+  type    = list(map(string))
   default = []
 }
