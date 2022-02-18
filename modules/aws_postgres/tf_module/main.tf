@@ -26,7 +26,7 @@ resource "aws_rds_cluster" "db_cluster" {
   master_username         = "postgres"
   master_password         = random_password.pg_password.result
   vpc_security_group_ids  = [data.aws_security_group.security_group.id]
-  backup_retention_period = 7
+  backup_retention_period = var.backup_retention_days
   apply_immediately       = true
   skip_final_snapshot     = true
   storage_encrypted       = true

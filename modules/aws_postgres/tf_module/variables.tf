@@ -13,6 +13,13 @@ variable "module_name" {
   type        = string
 }
 
+
+variable "backup_retention_days" {
+  description = "How many days to keep the backup retention"
+  type        = number
+}
+
+
 variable "engine_version" {
   type    = string
   default = "11.9"

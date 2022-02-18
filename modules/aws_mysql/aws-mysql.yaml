@@ -29,6 +29,11 @@ inputs:
     validator: bool(required=False)
     description: Enable read-write replication across different availability zones on the same reason (doubles the cost, but needed for compliance). Can be added and updated at a later date without need to recreate.
     default: false
+  - name: backup_retention_days
+    user_facing: true
+    validator: int(required=False)
+    description: How many days to keep the backup retention
+    default: 7
   - name: safety
     user_facing: true
     validator: bool(required=False)
