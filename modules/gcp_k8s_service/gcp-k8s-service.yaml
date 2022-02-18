@@ -176,7 +176,16 @@ inputs:
     description: A list of extra project-level iam roles to grant to the service account created for this k8s service
     validator: list(str(), required=False)
     default: []
+  - name: tolerations
+    user_facing: true
+    validator: list(include('toleration'), required=False)
+    description: Taint tolerations to add to the nodes in this nodegroup.
+    default: []
 extra_validators:
+  toleration:
+    key: str(required=True)
+    value: str(required=False)
+    effect: str(required=False)
   persistent_storage:
     size: int(required=True)
     path: str(required=True)

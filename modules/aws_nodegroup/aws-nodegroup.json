@@ -23,6 +23,11 @@
       "description": "The size of disk to give the nodes' ec2s in GB.",
       "default": 20
     },
+    "taints": {
+      "type": "list",
+      "description": "Taints to add to the nodes in this nodegroup.",
+      "default": []
+    },
     "node_instance_type": {
       "$ref": "/common-types/ec2-instance-type",
       "default": "t3.medium",

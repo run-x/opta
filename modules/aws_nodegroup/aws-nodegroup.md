@@ -28,3 +28,27 @@ THIS IAM ROLE IS NOT THE ONE USED BY YOUR CONTAINERS RUNNING IN THE CLUSTER-- Op
 IAM roles for each K8s service, but for any non-opta managed workloads in the cluster, please refer to this
 [AWS documentation](https://docs.aws.amazon.com/eks/latest/userguide/create-service-account-iam-policy-and-role.html)
 (the OIDC provider is created by Opta).
+
+## Taints
+
+Opta now gives you the option of adding [taints](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/)
+to the nodes created in this nodepool. The official documentation gives an excellent detailed summary, but in short
+one can use taints to stop workloads from running in said nodes unless they have a matching toleration. Simply provide
+a list of such taints as inputs like so:
+```yaml
+  - type: aws-nodegroup
+    name: nodepool1
+    min_nodes: 1
+    max_nodes: 3
+    taints:
+      - key: blah1
+        value: baloney
+        effect: "NO_EXECUTE"
+      - key: blah2
+        value: baloney
+        # Default "effect" is no schedule
+      - key: blah3 # key must always be given
+        # Default "value" is opta
+```
+
+For most cases, simply specifying the `key` should do.

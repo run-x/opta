@@ -63,3 +63,8 @@ variable "labels" {
   default = {}
 }
 
+variable "taints" {
+  type = list(map(string))
+  default = []
+}
+

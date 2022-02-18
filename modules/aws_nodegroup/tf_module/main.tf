@@ -66,6 +66,15 @@ resource "aws_eks_node_group" "node_group" {
     min_size     = var.min_nodes
   }
 
+  dynamic "taint" {
+    for_each = var.taints
+    content {
+      key = taint.value["key"]
+      effect = lookup(taint.value, "effect", "NO_SCHEDULE" )
+      value = lookup(taint.value, "value", "opta" )
+    }
+  }
+
   # Ensure that IAM Role permissions are created before and deleted after EKS Node Group handling.
   # Otherwise, EKS will not be able to properly delete EC2 Instances and Elastic Network Interfaces.
   depends_on = [
