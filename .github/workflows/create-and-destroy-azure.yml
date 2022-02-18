@@ -50,7 +50,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install pipenv
-          pipenv install --deploy --dev
+          pipenv install --deploy
           source $(pipenv --venv)/bin/activate
       - name: Build binary
         run: |
