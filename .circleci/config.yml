@@ -437,10 +437,6 @@ jobs:
             terraform init
             terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base -target=module.k8scluster -target=module.k8sbase -destroy
             terraform apply -compact-warnings -auto-approve tf.plan
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - generated-tf-files-aws/tfstate/awsenv-tg.tfstate
 
   azure-create-env:
     executor: ubuntu-machine
