@@ -14,6 +14,7 @@ class ModuleSpec:
     """
     Type describing the specification of a module type, shared between instances of that module
     """
+
     name: str
     clouds: List[str]
     input_schema: Schema

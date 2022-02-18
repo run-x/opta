@@ -9,6 +9,7 @@ class Link:
     """
     Describes a link defined in an opta file or created automatically via the linker
     """
+
     name: str  # Name of module we are linking to (required)
     types: Optional[Set[str]]  # List of link types or their aliases; if None, automatic
     params: Optional[Dict[str, Any]]

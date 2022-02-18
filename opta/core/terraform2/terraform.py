@@ -6,7 +6,6 @@ from shutil import copyfile
 from subprocess import DEVNULL, PIPE  # nosec
 from typing import Any, Dict, List, Optional
 
-from opta.core.terraform import Terraform as LegacyTerraform
 from opta.exceptions import UserErrors
 from opta.layer2 import Layer
 from opta.nice_subprocess import nice_run
@@ -66,7 +65,6 @@ class Terraform:
         state_file = "./terraform.tfstate"
         local_storage_path = self.local_state_filepath(layer)
         copyfile(state_file, local_storage_path)
-
 
     def ensure_local_state_dir(self) -> None:
         os.makedirs(self.local_state_dir, exist_ok=True)

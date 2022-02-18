@@ -12,6 +12,7 @@ class Module:
     """
     New type for module instances (as specified in opta files)
     """
+
     type: str
     links: List[Link]
     input: Dict[str, Any]
