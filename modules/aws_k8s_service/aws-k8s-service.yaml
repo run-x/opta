@@ -188,7 +188,7 @@ inputs:
   - name: tolerations
     user_facing: true
     validator: list(include('toleration'), required=False)
-    description: Taint tolerations to add to the nodes in this nodegroup.
+    description: Taint tolerations to add to the pods.
     default: []
 extra_validators:
   toleration:

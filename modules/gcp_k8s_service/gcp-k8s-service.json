@@ -29,7 +29,7 @@
     },
     "tolerations": {
       "type": "list",
-      "description": "Taint tolerations to add to the nodes in this nodegroup.",
+      "description": "Taint tolerations to add to the pods.",
       "default": []
     },
     "autoscaling_target_cpu_percentage": {
