@@ -52,9 +52,7 @@ class AWS(Cloud):
         if config.account_ids is not None:
             provider_config["allowed_account_ids"] = config.account_ids
 
-        file.add_provider(
-            "aws", provider_config
-        )
+        file.add_provider("aws", provider_config)
 
         # TODO: Upgraded from v3.58.0 to v3.73.0 to fix bug when creating routes (fixed in v3.70.0)
         file.add_required_provider(
