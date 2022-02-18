@@ -27,6 +27,11 @@
       "default": 3,
       "minimum": 0
     },
+    "tolerations": {
+      "type": "list",
+      "description": "Taint tolerations to add to the pods.",
+      "default": []
+    },
     "autoscaling_target_cpu_percentage": {
       "type": "integer",
       "description": "See the [autoscaling](https://docs.opta.dev/reference/google/service_modules/gcp-k8s-service/#autoscaling) section.",

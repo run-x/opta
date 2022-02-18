@@ -185,7 +185,16 @@ inputs:
     default: {}
     description: |
       These are extra annotations to add to ingress objects
+  - name: tolerations
+    user_facing: true
+    validator: list(include('toleration'), required=False)
+    description: Taint tolerations to add to the pods.
+    default: []
 extra_validators:
+  toleration:
+    key: str(required=True)
+    value: str(required=False)
+    effect: enum("NoSchedule", "PreferNoSchedule", "NoExecute", required=False)
   persistent_storage:
     size: int(required=True)
     path: str(required=True)

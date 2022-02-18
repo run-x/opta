@@ -23,6 +23,11 @@
       "description": "The [gcloud machine type](https://cloud.google.com/compute/docs/machine-types) for the nodes.",
       "default": "n2-highcpu-4"
     },
+    "taints": {
+      "type": "integer",
+      "description": "Taints to add to the nodes in this nodegroup.",
+      "default": []
+    },
     "gke_channel": {
       "description": "The GKE K8s [release channel](https://cloud.google.com/kubernetes-engine/docs/concepts/release-channels) to bind the cluster too. Gives you automatic K8s version management for the cluster and node pools.",
       "enum": [

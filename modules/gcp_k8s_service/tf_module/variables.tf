@@ -195,3 +195,8 @@ variable "initial_readiness_delay" {
   default = 30
 }
 
+variable "tolerations" {
+  type    = list(map(string))
+  default = []
+}
+

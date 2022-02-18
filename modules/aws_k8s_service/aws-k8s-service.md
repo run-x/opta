@@ -88,3 +88,30 @@ underlying resource kind is being switched.
 _NOTE_ because of the nature of these volumes, they will not be cleaned up automatically unless during a service 
 destruction. If you wish to release the EBS volumes for whatever reason you will need to manually do so by deleting
 the kubernetes persistent volume claims.
+
+### Tolerations
+
+Opta gives you the option of adding [taints](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/)
+to the nodes created in this nodepool, and thusly the ability to add _tolerations_ for said taints. The official 
+documentation gives an excellent detailed summary, but in short one can use taints to stop workloads from running in 
+said nodes unless they have a matching toleration. Simply provide a list of desired tolerations as inputs like so:
+```yaml
+  - name: app
+    type: k8s-service
+    image: AUTO
+    healthcheck_path: "/get"
+    port:
+      http: 80
+    tolerations:
+      - key: instancetype
+        value: memoryoptimized
+        effect: "NoExecute"
+      - key: team
+        value: booking
+        # Tolerates for default effect of NoSchedule
+      - key: highpriority
+        # Tolerates for default value of opta
+```
+
+Please refer to the taints specified in your environment Opta manifests to know what matching tolerations are right 
+for you.

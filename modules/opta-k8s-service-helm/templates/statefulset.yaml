@@ -122,5 +122,13 @@ spec:
             items:
               - key: "rds_ca.pem"
                 path: "rds_ca.pem"
+      {{- if ne ( len .Values.tolerations ) 0 }}
+      tolerations:
+        {{ range $toleration :=  .Values.tolerations }}
+        - key: {{ $toleration.key | quote }}
+          value: {{ default "opta" $toleration.value | quote }}
+          effect: {{ default "NoSchedule" $toleration.effect | quote }}
+      {{ end }}
+  {{- end }}
 {{- end }}
 {{- end }}

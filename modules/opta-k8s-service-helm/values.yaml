@@ -17,6 +17,7 @@ serviceAnnotations: {}
 keepPathPrefix: false
 persistentStorage: []
 ingressExtraAnnotations: {}
+tolerations: []
 
 serviceAccount:
   # The name of the service account to use.
