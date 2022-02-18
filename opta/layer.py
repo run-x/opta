@@ -265,7 +265,9 @@ class Layer:
                 parent_path: str = env_meta["path"]
                 if not parent_path.startswith("git@") and not parent_path.startswith("/"):
                     parent_path = os.path.join(os.path.dirname(path), env_meta["path"])
-                current_parent = cls.load_from_yaml(parent_path, None, is_parent=True)
+                current_parent = cls.load_from_yaml(
+                    parent_path, None, is_parent=True, stateless_mode=stateless_mode
+                )
                 if current_parent.parent is not None:
                     raise UserErrors(
                         "A parent can not have a parent, only one level of parent-child allowed."
@@ -508,6 +510,9 @@ class Layer:
 
     @lru_cache(maxsize=None)
     def bucket_exists(self, bucket_name: str) -> bool:
+
+        if self.is_stateless_mode() is True:
+            return False
 
         if self.cloud == "aws":
             region = self.providers["aws"]["region"]
