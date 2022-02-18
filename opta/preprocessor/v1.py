@@ -1,3 +1,5 @@
+# new-module-api
+
 from string import Formatter
 
 from opta.preprocessor.util import ModuleHandler, VersionProcessor

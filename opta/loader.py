@@ -1,3 +1,8 @@
+# new-module-api
+"""
+Contains classes for loading objects from files
+"""
+
 from __future__ import annotations
 
 import os

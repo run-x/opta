@@ -1,3 +1,5 @@
+# new-module-api
+
 from typing import Any, Dict, Iterable, List, Optional, TypeVar
 
 from opta.link_spec import InputLinkSpec, LinkConnectionSpec, LinkSpec, OutputLinkSpec
@@ -9,6 +11,9 @@ _T_LinkSpec = TypeVar("_T_LinkSpec", bound=LinkSpec)
 
 
 class ModuleSpec:
+    """
+    Type describing the specification of a module type, shared between instances of that module
+    """
     name: str
     clouds: List[str]
     input_schema: Schema

@@ -1,5 +1,7 @@
 # Module API Review Notes
 
+Must set `OPTA_MODULE_API_ENABLED=1` as an env var before running in order to use the module API code.
+
 ## Current Major Limitations
 - Only local state is supported
 - Only the `aws-base` module works so far. Module type aliases do not work, so it must still be referenced as `aws-base`.

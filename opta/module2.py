@@ -1,3 +1,5 @@
+# new-module-api
+
 from __future__ import annotations
 
 import copy
@@ -7,6 +9,9 @@ from opta.link import Link
 
 
 class Module:
+    """
+    New type for module instances (as specified in opta files)
+    """
     type: str
     links: List[Link]
     input: Dict[str, Any]

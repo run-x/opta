@@ -1,3 +1,5 @@
+# new-module-api
+
 from __future__ import annotations
 
 import functools

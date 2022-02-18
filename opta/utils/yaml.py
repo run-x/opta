@@ -1,3 +1,5 @@
+# new-module-api
+
 from typing import IO, Any, Set, Type
 
 from ruamel.yaml import YAML as lib_YAML

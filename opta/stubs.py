@@ -1,3 +1,7 @@
+# new-module-api
+"""
+Quick "stub" classes that are added to provided needed functionality but will need to be expanded before the module API is complete
+"""
 from typing import Dict, List, Optional, Protocol, Type, TypeVar
 
 T = TypeVar("T", bound="_Stub")

@@ -1,3 +1,5 @@
+# new-module-api
+
 from collections.abc import MutableSequence
 from dataclasses import dataclass, field
 from typing import Any, Dict, FrozenSet, Iterable, List, Set
@@ -28,6 +30,9 @@ class LinkResult:
 
 
 class Linker:
+    """
+    Responsible for forming the links between modules defined in an opta file
+    """
     def __init__(self, module_specs: Iterable[ModuleSpec]):
         self._module_specs = {spec.name: spec for spec in module_specs}
 

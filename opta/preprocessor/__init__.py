@@ -1,3 +1,5 @@
+# new-module-api
+
 from opta.exceptions import UserErrors
 from opta.preprocessor.registry import registered
 from opta.preprocessor.util import CURRENT_VERSION, DEFAULT_VERSION

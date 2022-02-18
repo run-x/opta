@@ -1,9 +1,14 @@
+# new-module-api
+
 from typing import Any, Dict, Optional, Set, Union
 
 RawLink = Union[str, Dict[str, Any]]
 
 
 class Link:
+    """
+    Describes a link defined in an opta file or created automatically via the linker
+    """
     name: str  # Name of module we are linking to (required)
     types: Optional[Set[str]]  # List of link types or their aliases; if None, automatic
     params: Optional[Dict[str, Any]]

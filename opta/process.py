@@ -1,3 +1,8 @@
+# new-module-api
+"""
+Contains the module api versions of commands, but these command implementations will probably be moved later
+"""
+
 import os
 from dataclasses import dataclass
 from typing import Any, Dict

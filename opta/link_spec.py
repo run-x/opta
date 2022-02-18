@@ -1,3 +1,8 @@
+# new-module-api
+"""
+Classes defining the specs for links
+"""
+
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Type, TypeVar
 
