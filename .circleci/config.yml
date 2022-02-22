@@ -7,6 +7,9 @@ parameters:
   run-create-and-destroy:
     type: boolean
     default: false
+  run-create-and-destroy-azure:
+    type: boolean
+    default: false
   run-destroy-gcp-env:
     type: boolean
     default: false
