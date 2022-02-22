@@ -7,7 +7,12 @@ from ruamel.yaml.compat import StringIO
 
 from modules.base import AWSK8sModuleProcessor, K8sBaseModuleProcessor
 from opta.core.aws import AWS
-from opta.core.kubernetes import list_namespaces, load_opta_kube_config, set_kube_config
+from opta.core.kubernetes import (
+    add_linkerd_label_to_kubesystem,
+    list_namespaces,
+    load_opta_kube_config,
+    set_kube_config,
+)
 from opta.exceptions import UserErrors
 from opta.utils import yaml
 
@@ -74,7 +79,9 @@ class AwsK8sBaseProcessor(AWSK8sModuleProcessor, K8sBaseModuleProcessor):
 
     def pre_hook(self, module_idx: int) -> None:
         set_kube_config(self.layer)
+        add_linkerd_label_to_kubesystem()
         list_namespaces()
+
         super(AwsK8sBaseProcessor, self).pre_hook(module_idx)
 
     def post_hook(self, module_idx: int, exception: Optional[Exception]) -> None:

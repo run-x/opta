@@ -1,6 +1,11 @@
 from typing import TYPE_CHECKING
 
 from modules.base import ModuleProcessor
+from opta.core.kubernetes import (
+    add_linkerd_label_to_kubesystem,
+    list_namespaces,
+    set_kube_config,
+)
 
 if TYPE_CHECKING:
     from opta.layer import Layer
@@ -14,6 +19,12 @@ class AzureK8sBaseProcessor(ModuleProcessor):
                 f"The module {module.name} was expected to be of type k8s base"
             )
         super(AzureK8sBaseProcessor, self).__init__(module, layer)
+
+    def pre_hook(self, module_idx: int) -> None:
+        set_kube_config(self.layer)
+        add_linkerd_label_to_kubesystem()
+        list_namespaces()
+        super(AzureK8sBaseProcessor, self).pre_hook(module_idx)
 
     def process(self, module_idx: int) -> None:
         byo_cert_module = None

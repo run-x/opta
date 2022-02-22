@@ -443,6 +443,15 @@ def create_namespace_if_not_exists(layer_name: str) -> None:
         )
 
 
+def add_linkerd_label_to_kubesystem() -> None:
+    load_opta_kube_config()
+    v1 = CoreV1Api()
+    patch_obj = {
+        "metadata": {"labels": {"config.linkerd.io/admission-webhooks": "disabled"}}
+    }
+    v1.patch_namespace("kube_system", patch_obj, False)
+
+
 def create_secret_if_not_exists(namespace: str, secret_name: str) -> None:
     """create the secret in the namespace if it doesn't exist"""
     load_opta_kube_config()

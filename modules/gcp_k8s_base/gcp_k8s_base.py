@@ -2,6 +2,11 @@ from typing import TYPE_CHECKING
 
 from modules.base import GcpK8sModuleProcessor
 from opta.core.gcp import GCP
+from opta.core.kubernetes import (
+    add_linkerd_label_to_kubesystem,
+    list_namespaces,
+    set_kube_config,
+)
 
 if TYPE_CHECKING:
     from opta.layer import Layer
@@ -15,6 +20,12 @@ class GcpK8sBaseProcessor(GcpK8sModuleProcessor):
                 f"The module {module.name} was expected to be of type k8s base"
             )
         super(GcpK8sBaseProcessor, self).__init__(module, layer)
+
+    def pre_hook(self, module_idx: int) -> None:
+        set_kube_config(self.layer)
+        add_linkerd_label_to_kubesystem()
+        list_namespaces()
+        super(GcpK8sBaseProcessor, self).pre_hook(module_idx)
 
     def process(self, module_idx: int) -> None:
         byo_cert_module = None
