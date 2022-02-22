@@ -26,7 +26,6 @@ from modules.base import ModuleProcessor
 from modules.runx.runx import RunxProcessor
 from opta.constants import MODULE_DEPENDENCY, REGISTRY, VERSION
 from opta.core.aws import AWS
-from opta.core.azure import Azure
 from opta.core.gcp import GCP
 from opta.core.validator import validate_yaml
 from opta.crash_reporter import CURRENT_CRASH_REPORTER
@@ -519,9 +518,7 @@ class Layer:
             return AWS(self).bucket_exists(bucket_name, region)
         elif self.cloud == "google":
             return GCP(self).bucket_exists(bucket_name)
-        elif self.cloud == "azurerm":
-            return Azure(self).bucket_exists(bucket_name)
-        else:
+        else:  # Note - this function does not work for Azure
             return False
 
     def _get_unique_hash(self) -> str:
@@ -554,11 +551,7 @@ class Layer:
             name_hash = hashlib.md5(  # nosec
                 f"{self.org_name}{self.name}".encode("utf-8")
             ).hexdigest()[0:16]
-            orig_name = f"opta{name_hash}"
-            if self.bucket_exists(orig_name):
-                return orig_name
-            else:
-                return f"{orig_name}-{suffix}"
+            return name_hash  # For Azure, for now we don't add suffix
         else:
             orig_name = f"opta-tf-state-{self.org_name}-{self.name}"
 

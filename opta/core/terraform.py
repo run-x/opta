@@ -205,8 +205,16 @@ class Terraform:
     @classmethod
     def _azure_verify_storage(cls, layer: "Layer") -> bool:
         providers = layer.gen_providers(0)
+        resource_group_name = providers["terraform"]["backend"]["azurerm"][
+            "resource_group_name"
+        ]
+        storage_account_name = providers["terraform"]["backend"]["azurerm"][
+            "storage_account_name"
+        ]
         container_name = providers["terraform"]["backend"]["azurerm"]["container_name"]
-        return Azure(layer).bucket_exists(container_name)
+        return Azure(layer).bucket_exists(
+            container_name, resource_group_name, storage_account_name
+        )
 
     @classmethod
     def _gcp_verify_storage(cls, layer: "Layer") -> bool:
