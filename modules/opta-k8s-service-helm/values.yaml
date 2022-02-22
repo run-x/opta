@@ -18,7 +18,7 @@ keepPathPrefix: false
 persistentStorage: []
 ingressExtraAnnotations: {}
 tolerations: []
-crons: []
+cron_jobs: []
 
 serviceAccount:
   # The name of the service account to use.

@@ -53,7 +53,7 @@ resource "helm_release" "k8s-service" {
       persistentStorage : var.persistent_storage
       ingressExtraAnnotations : var.ingress_extra_annotations
       tolerations : var.tolerations
-      crons : var.crons
+      cron_jobs : var.cron_jobs
     })
   ]
   atomic          = true

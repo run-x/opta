@@ -118,7 +118,7 @@ for you.
 
 ### Crons
 
-Opta gives you the option of adding a list of cron jobs to run as part of this service. This is done via the `crons` 
+Opta gives you the option of adding a list of cron jobs to run as part of this service. This is done via the `cron_jobs` 
 field which a user can fill with entries for each con job in mind. Each entry must specify a command in array format
 (for most cases simply specify the shell you wish to use, the `-c` flag and the executable to run), as well as a 
 schedule following the [Cron Syntax](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#cron-schedule-syntax).
@@ -135,7 +135,7 @@ For example, here is a service which has a cron job that runs every minute and s
     healthcheck_path: "/get"
     port:
       http: 80
-    crons:
+    cron_jobs:
       - commands:
         - /bin/sh
         - -c
@@ -145,3 +145,7 @@ For example, here is a service which has a cron job that runs every minute and s
           CRON: "1"
 ```
 
+{{% alert title="Pure Cron Jobs" color="info" %}}
+If a user wishes to just have a cron job and no service, then they could simply set the min/max containers to
+0.
+{{% /alert %}}

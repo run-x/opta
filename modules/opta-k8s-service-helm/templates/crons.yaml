@@ -1,4 +1,4 @@
-{{- range $index, $cron := .Values.crons }}
+{{- range $index, $cron := .Values.cron_jobs }}
 apiVersion: batch/v1
 kind: CronJob
 metadata:

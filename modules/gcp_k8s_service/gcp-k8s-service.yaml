@@ -181,7 +181,7 @@ inputs:
     validator: list(include('toleration'), required=False)
     description: Taint tolerations to add to the pods.
     default: []
-  - name: crons
+  - name: cron_jobs
     user_facing: true
     validator: list(include('cron'), required=False)
     description: A list of cronjobs to execute as part of this service

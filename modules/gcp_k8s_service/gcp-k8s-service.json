@@ -27,7 +27,7 @@
       "default": 3,
       "minimum": 0
     },
-    "crons": {
+    "cron_jobs": {
       "type": "array",
       "description": "A list of cronjobs to execute as part of this service",
       "items": {
