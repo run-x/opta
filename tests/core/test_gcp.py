@@ -72,7 +72,7 @@ class TestGcp:
             f"{gcp_layer.name}/default.tflock"
         )
 
-    def test_get_config_map_configuration_present(self, mocker: MockFixture):
+    def test_get_config_map_configuration_present(self, mocker: MockFixture) -> None:
         mocker.patch(
             "opta.core.gcp.default",
             return_value=(mocker.Mock(spec=Credentials), "dummy_project_id"),
@@ -92,7 +92,7 @@ class TestGcp:
             mock_gcs_bucket_instance.name, prefix="opta_config/", delimiter="/"
         )
 
-    def test_get_config_map_configuration_not_present(self, mocker: MockFixture):
+    def test_get_config_map_configuration_not_present(self, mocker: MockFixture) -> None:
         mocker.patch(
             "opta.core.gcp.default",
             return_value=(mocker.Mock(spec=Credentials), "dummy_project_id"),
@@ -110,7 +110,7 @@ class TestGcp:
             mock_gcs_bucket_instance.name, prefix="opta_config/", delimiter="/"
         )
 
-    def test_get_config_map_bucket_not_present(self, mocker: MockFixture):
+    def test_get_config_map_bucket_not_present(self, mocker: MockFixture) -> None:
         mocker.patch(
             "opta.core.gcp.default",
             return_value=(mocker.Mock(spec=Credentials), "dummy_project_id"),
