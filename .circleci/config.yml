@@ -1921,6 +1921,10 @@ workflows:
   run-create-and-destroy-azure:
     when: << pipeline.parameters.run-create-and-destroy-azure >>
     jobs:
+      - build-test-service-image
+      - build-opta-binary:
+          requires:
+            - build-test-service-image
       - azure-create-env:
           requires:
             - build-opta-binary
