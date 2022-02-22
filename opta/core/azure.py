@@ -148,9 +148,7 @@ class Azure(CloudClient):
         except Exception:
             return ""
 
-    def bucket_exists(
-        self, bucket_name: str, resource_group_name: str, storage_account_name: str
-    ) -> bool:
+    def bucket_exists(self, bucket_name: str, storage_account_name: str) -> bool:
         credentials = self.get_credentials()
         storage_client = ContainerClient(
             account_url=f"https://{storage_account_name}.blob.core.windows.net",
@@ -158,9 +156,6 @@ class Azure(CloudClient):
             credential=credentials,
         )
         try:
-            storage_client.blob_containers.get(
-                resource_group_name, storage_account_name, bucket_name
-            )
-            return True
-        except ResourceNotFoundError:
+            return storage_client.exists()
+        except Exception:
             return False
