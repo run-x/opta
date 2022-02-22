@@ -122,7 +122,7 @@ class GCP(CloudClient):
         bucket_object = gcs_client.get_bucket(bucket)
         blob = storage.Blob(config_path, bucket_object)
         config_details = json.loads(blob.download_as_text())
-        return config_details
+        return config_details["original_spec"]
 
     # Upload the current opta config to the state bucket, under opta_config/.
     def upload_opta_config(self) -> None:
@@ -203,23 +203,31 @@ class GCP(CloudClient):
         opta_config_map = {}
         for bucket in storage_client.list_buckets():
             config_list = []
-            for response in storage_client.list_blobs(bucket.name, prefix=prefix, delimiter="/"):
-                config_list.append(response.name[len(prefix):])
+            for response in storage_client.list_blobs(
+                bucket.name, prefix=prefix, delimiter="/"
+            ):
+                config_list.append(response.name[len(prefix) :])
             if config_list:
                 opta_config_map[bucket.name] = config_list
         return opta_config_map
 
     @classmethod
-    def get_detailed_config_map(cls, environment: Optional[str] = None):
+    def get_detailed_config_map(
+        cls, environment: Optional[str] = None
+    ) -> Dict[str, Dict[str, str]]:
         prefix = "opta_config/"
         credentials, project_id = cls.get_credentials()
         storage_client = storage.Client(project=project_id, credentials=credentials)
         opta_config_detailed_map = {}
         for bucket in storage_client.list_buckets():
             detailed_config = {}
-            for response in storage_client.list_blobs(bucket.name, prefix=prefix, delimiter="/"):
+            for response in storage_client.list_blobs(
+                bucket.name, prefix=prefix, delimiter="/"
+            ):
                 blob = storage.Blob(response.name, bucket)
-                detailed_config[response.name[len(prefix):]] = json.loads(blob.download_as_text())
+                detailed_config[response.name[len(prefix) :]] = json.loads(
+                    blob.download_as_text()
+                )["original_spec"]
             if detailed_config:
                 opta_config_detailed_map[bucket.name] = detailed_config
         return opta_config_detailed_map

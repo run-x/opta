@@ -42,5 +42,7 @@ class CloudClient(ABC):
         pass
 
     @classmethod
-    def get_detailed_config_map(cls, environment: Optional[str] = None):
+    def get_detailed_config_map(
+        cls, environment: Optional[str] = None
+    ) -> Dict[str, Dict[str, str]]:
         pass

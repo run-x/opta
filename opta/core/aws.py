@@ -198,11 +198,15 @@ class AWS(CloudClient):
         for aws_bucket in cls.get_bucket_list():
             response = s3.list_objects(Bucket=aws_bucket, Prefix=prefix, Delimiter="/")
             if "Contents" in response:
-                opta_config_map[aws_bucket] = [data["Key"][len(prefix):] for data in response["Contents"]]
+                opta_config_map[aws_bucket] = [
+                    data["Key"][len(prefix) :] for data in response["Contents"]
+                ]
         return opta_config_map
 
     @classmethod
-    def get_detailed_config_map(cls, environment: Optional[str] = None):
+    def get_detailed_config_map(
+        cls, environment: Optional[str] = None
+    ) -> Dict[str, Dict[str, str]]:
         prefix = "opta_config/"
         s3 = boto3.client("s3")
         opta_config_detailed_map = {}
@@ -212,7 +216,9 @@ class AWS(CloudClient):
             if "Contents" in response:
                 for data in response["Contents"]:
                     config_object = s3.get_object(Bucket=aws_bucket, Key=data["Key"])
-                    detailed_configs[data["Key"][len(prefix):]] = json.loads(config_object["Body"].read())["original_spec"]
+                    detailed_configs[data["Key"][len(prefix) :]] = json.loads(
+                        config_object["Body"].read()
+                    )["original_spec"]
                 opta_config_detailed_map[aws_bucket] = detailed_configs
         return opta_config_detailed_map
 
