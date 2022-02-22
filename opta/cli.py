@@ -15,7 +15,6 @@ from opta.commands.deploy import deploy
 from opta.commands.destroy import destroy
 from opta.commands.events import events
 from opta.commands.force_unlock import force_unlock
-from opta.commands.get_service import get_service
 from opta.commands.inspect_cmd import inspect
 from opta.commands.kubectl import configure_kubectl
 from opta.commands.logs import logs
@@ -62,7 +61,6 @@ cli.add_command(version)
 cli.add_command(events)
 cli.add_command(force_unlock)
 cli.add_command(upgrade)
-cli.add_command(get_service)
 cli.add_command(config)
 
 
