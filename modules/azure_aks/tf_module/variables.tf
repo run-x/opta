@@ -43,7 +43,7 @@ variable "node_disk_size" {
 
 variable "kubernetes_version" {
   type    = string
-  default = "1.19.11"
+  default = "1.21.9"
 }
 
 variable "admin_group_object_ids" {
