@@ -27,6 +27,14 @@
       "default": 3,
       "minimum": 0
     },
+    "crons": {
+      "type": "array",
+      "description": "A list of cronjobs to execute as part of this service",
+      "items": {
+        "$ref": "/common-types/cron"
+      },
+      "default": []
+    },
     "tolerations": {
       "type": "list",
       "description": "Taint tolerations to add to the pods.",

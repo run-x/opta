@@ -1,0 +1,23 @@
+{
+  "$id": "https://app.runx.dev/common-types/cron",
+  "type": "object",
+  "properties": {
+    "commands": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "The command array to execute",
+      "pattern": "^[a-zA-Z0-9-]+$"
+    },
+    "schedule": {
+      "type": "string",
+      "description": "The crontab schedule for this job",
+      "pattern": "^[a-zA-Z0-9 /*-]+$"
+    },
+    "env_vars": {
+      "type": "object"
+    }
+  },
+  "required": ["commands", "schedule"]
+}
