@@ -381,6 +381,10 @@ jobs:
           root: ~/
           paths:
             - generated-tf-files-aws/tfstate/awsenv-tg.tfstate
+      - store_artifacts:
+          path: $HOME/generated-tf-files-aws/tfstate/awsenv-tg.tfstate
+          destination: tfstate-after-apply-env.tfstate
+
 
   aws-tg-test-service-http:
     executor: ubuntu-machine
@@ -423,6 +427,9 @@ jobs:
           root: ~/
           paths:
             - generated-tf-files-aws/tfstate/awsenv-tg.tfstate
+      - store_artifacts:
+          path: $HOME/generated-tf-files-aws/tfstate/awsenv-tg.tfstate
+          destination: tfstate-after-apply-svc-cnd.tfstate
 
   aws-tg-destroy-env:
     executor: ubuntu-machine
@@ -437,6 +444,9 @@ jobs:
             terraform init
             terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base -target=module.k8scluster -target=module.k8sbase -destroy
             terraform apply -compact-warnings -auto-approve tf.plan
+      - store_artifacts:
+          path: $HOME/generated-tf-files-aws/tfstate/awsenv-tg.tfstate
+          destination: tfstate-after-destroy.tfstate
 
   azure-create-env:
     executor: ubuntu-machine
