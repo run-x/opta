@@ -136,6 +136,7 @@ jobs:
           name: Get all parameter values.
           command: |
             echo "run-create-and-destroy:     " << pipeline.parameters.run-create-and-destroy >>
+            echo "run-create-and-destroy-azure:     " << pipeline.parameters.run-create-and-destroy-azure >>
             echo "run-destroy-gcp-env:        " << pipeline.parameters.run-destroy-gcp-env >>
             echo "run-destroy-aws-env:        " << pipeline.parameters.run-destroy-aws-env >>
             echo "run-destroy-all-envs:       " << pipeline.parameters.run-destroy-all-envs >>
@@ -1904,7 +1905,6 @@ workflows:
       - azure-destroy-env:
           requires:
             - azure-test-service-http
-
   run-ci:
     when: << pipeline.parameters.run-ci >>
     jobs:
@@ -1915,6 +1915,18 @@ workflows:
       - terraform-formatter
       - regula-lint
       - pytest
+  run-create-and-destroy-azure:
+    when: << pipeline.parameters.run-create-and-destroy-azure >>
+    jobs:
+      - azure-create-env:
+          requires:
+            - build-opta-binary
+      - azure-test-service-http:
+          requires:
+            - azure-create-env
+      - azure-destroy-env:
+          requires:
+            - azure-test-service-http
 
   run-destroy-gcp-env:
     when: << pipeline.parameters.run-destroy-gcp-env >>
