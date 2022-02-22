@@ -221,7 +221,9 @@ class Azure(CloudClient):
         subscription_client = SubscriptionClient(cls.get_credentials())
         opta_config_map = {}
         for subscription in subscription_client.subscriptions.list():
-            storage_client = StorageManagementClient(cls.get_credentials(), subscription.subscription_id)
+            storage_client = StorageManagementClient(
+                cls.get_credentials(), subscription.subscription_id
+            )
             try:
                 for storage in storage_client.storage_accounts.list():
                     config_list = []
@@ -231,23 +233,29 @@ class Azure(CloudClient):
                         credential=cls.get_credentials(),
                     )
                     try:
-                        for response in container_client.list_blobs(name_starts_with=prefix):
-                            config_list.append(response.name[len(prefix):])
+                        for response in container_client.list_blobs(
+                            name_starts_with=prefix
+                        ):
+                            config_list.append(response.name[len(prefix) :])
                         if config_list:
                             opta_config_map[storage.name] = config_list
-                    except:
+                    except:  # noqa: E722
                         pass
-            except:
+            except:  # noqa: E722
                 pass
         return opta_config_map
 
     @classmethod
-    def get_detailed_config_map(cls, environment: Optional[str] = None):
+    def get_detailed_config_map(
+        cls, environment: Optional[str] = None
+    ) -> Dict[str, Dict[str, str]]:
         prefix = "opta_config/"
         subscription_client = SubscriptionClient(cls.get_credentials())
         opta_config_detailed_map = {}
         for subscription in subscription_client.subscriptions.list():
-            storage_client = StorageManagementClient(cls.get_credentials(), subscription.subscription_id)
+            storage_client = StorageManagementClient(
+                cls.get_credentials(), subscription.subscription_id
+            )
             try:
                 for storage in storage_client.storage_accounts.list():
                     detailed_configs = {}
@@ -257,13 +265,17 @@ class Azure(CloudClient):
                         credential=cls.get_credentials(),
                     )
                     try:
-                        for response in container_client.list_blobs(name_starts_with=prefix):
+                        for response in container_client.list_blobs(
+                            name_starts_with=prefix
+                        ):
                             config_object = container_client.download_blob(response.name)
-                            detailed_configs[response.name[len(prefix):]] = json.loads(config_object.read_all())
+                            detailed_configs[response.name[len(prefix) :]] = json.loads(
+                                config_object.read_all()
+                            )["original_spec"]
                         if detailed_configs:
                             opta_config_detailed_map[storage.name] = detailed_configs
-                    except:
+                    except:  # noqa: E722
                         pass
-            except:
+            except:  # noqa: E722
                 pass
         return opta_config_detailed_map
