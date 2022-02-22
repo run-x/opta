@@ -551,7 +551,7 @@ class Layer:
             name_hash = hashlib.md5(  # nosec
                 f"{self.org_name}{self.name}".encode("utf-8")
             ).hexdigest()[0:16]
-            return name_hash  # For Azure, for now we don't add suffix
+            return f"opta{name_hash}"  # For Azure, for now we don't add suffix
         else:
             orig_name = f"opta-tf-state-{self.org_name}-{self.name}"
 
