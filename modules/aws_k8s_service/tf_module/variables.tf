@@ -196,3 +196,7 @@ variable "tolerations" {
   type    = list(map(string))
   default = []
 }
+
+variable "crons" {
+  default = []
+}

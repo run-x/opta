@@ -200,3 +200,6 @@ variable "tolerations" {
   default = []
 }
 
+variable "crons" {
+  default = []
+}
