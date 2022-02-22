@@ -239,10 +239,12 @@ class Azure(CloudClient):
                             config_list.append(response.name[len(prefix) :])
                         if config_list:
                             opta_config_map[storage.name] = config_list
-                    except:  # noqa: E722
-                        pass
-            except:  # noqa: E722
-                pass
+                    except Exception as e:
+                        logger.debug(
+                            f"Could not list blobs in container {storage.name}: {e}"
+                        )
+            except Exception as e:
+                logger.debug(f"Could not list storage accounts: {e}")
         return opta_config_map
 
     @classmethod
@@ -274,8 +276,10 @@ class Azure(CloudClient):
                             )["original_spec"]
                         if detailed_configs:
                             opta_config_detailed_map[storage.name] = detailed_configs
-                    except:  # noqa: E722
-                        pass
-            except:  # noqa: E722
-                pass
+                    except Exception as e:
+                        logger.debug(
+                            f"Could not list blobs in container {storage.name}: {e}"
+                        )
+            except Exception as e:
+                logger.debug(f"Could not list storage accounts: {e}")
         return opta_config_detailed_map
