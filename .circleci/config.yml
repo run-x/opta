@@ -58,6 +58,9 @@ parameters:
   ci-env-region-gcp:
     type: string
     default: 'us-central1'
+  run-opta-terraform-generate-test:
+    type: boolean
+    default: false
 
 orbs:
   terraform: circleci/terraform@3.0.0
@@ -155,6 +158,7 @@ jobs:
             echo "ci-env-name:                " << pipeline.parameters.ci-env-name >>
             echo "ci-env-region-aws:          " << pipeline.parameters.ci-env-region-aws >>
             echo "ci-env-region-gcp:          " << pipeline.parameters.ci-env-region-gcp >>
+            echo "run-opta-terraform-generate-test: " << pipeline.parameters.run-opta-terraform-generate-test >>
 
   no-pdb:
     executor: ubuntu-machine
@@ -332,6 +336,121 @@ jobs:
           paths:
             - todo-api
             - todo-frontend
+
+  aws-generate-terraform-language-files:
+    executor: ubuntu-machine
+    steps:
+      - checkout-opta
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - run:
+          name: "Generate Terraform Language Files"
+          command: |
+            mkdir $HOME/generated-tf-files-aws
+            ./dist/opta/opta generate-terraform \
+            --config ./.circleci/ci-tests/terraform-generated-aws/environment.yaml \
+            --directory $HOME/generated-tf-files-aws \
+            --auto-approve
+            ./dist/opta/opta generate-terraform \
+            --config ./.circleci/ci-tests/terraform-generated-aws/service-http.yaml \
+            --directory $HOME/generated-tf-files-aws \
+            --auto-approve
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - generated-tf-files-aws
+
+  aws-tg-create-env:
+    executor: ubuntu-machine
+    steps:
+      - install-opta-dependencies
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: "Create Terraform Generated Environment"
+          command: |
+            cd $HOME/generated-tf-files-aws
+            terraform init
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base
+            terraform apply -compact-warnings -auto-approve tf.plan
+            cat ./tfstate/awsenv-tg.tfstate
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8scluster
+            terraform apply -compact-warnings -auto-approve tf.plan
+            cat ./tfstate/awsenv-tg.tfstate
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8sbase
+            terraform apply -compact-warnings -auto-approve tf.plan
+            cat ./tfstate/awsenv-tg.tfstate
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - generated-tf-files-aws/tfstate/awsenv-tg.tfstate
+      - store_artifacts:
+          path: ../generated-tf-files-aws/tfstate/awsenv-tg.tfstate
+          destination: tfstate-after-apply-env.tfstate
+
+
+  aws-tg-test-service-http:
+    executor: ubuntu-machine
+    steps:
+      - install-opta-dependencies
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: "Create Terraform Generated Http Service"
+          command: |
+            cd $HOME/generated-tf-files-aws
+            terraform init
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.app
+            terraform apply -compact-warnings -auto-approve tf.plan
+            cat ./tfstate/awsenv-tg.tfstate
+      - run:
+          name: "Sleep 120 seconds"
+          command: |
+            sleep 120
+      - run:
+          name: "Get Output and Test Load Balancer"
+          command: |
+            cd $HOME/generated-tf-files-aws
+            terraform output -json >> terraform_output.json
+            export LOAD_BALANCER=`cat terraform_output.json | jq -r '.load_balancer_raw_dns' |jq -r '.value'`
+            echo $LOAD_BALANCER
+            curl $LOAD_BALANCER
+            echo "1"
+      - run:
+          name: "Sleep 120 seconds"
+          command: |
+            sleep 120
+      - run:
+          name: "Destroy Terraform Generated Http Service"
+          command: |
+            cd $HOME/generated-tf-files-aws
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.app -destroy
+            terraform apply -compact-warnings -auto-approve tf.plan
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - generated-tf-files-aws/tfstate/awsenv-tg.tfstate
+      - store_artifacts:
+          path: ../generated-tf-files-aws/tfstate/awsenv-tg.tfstate
+          destination: tfstate-after-apply-svc-cnd.tfstate
+
+  aws-tg-destroy-env:
+    executor: ubuntu-machine
+    steps:
+      - install-opta-dependencies
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: "Destroy Terraform Generated Environment"
+          command: |
+            cd $HOME/generated-tf-files-aws
+            terraform init
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base -target=module.k8scluster -target=module.k8sbase -destroy
+            terraform apply -compact-warnings -auto-approve tf.plan
+      - store_artifacts:
+          path: ../generated-tf-files-aws/tfstate/awsenv-tg.tfstate
+          destination: tfstate-after-destroy.tfstate
 
   azure-create-env:
     executor: ubuntu-machine
@@ -2115,17 +2234,23 @@ workflows:
           requires:
             - build-opta-binary
 
-  test:
-    when: << pipeline.parameters.test >>
+  run-opta-terraform-generate-test:
+    when: << pipeline.parameters.run-opta-terraform-generate-test >>
     jobs:
       - get-all-parameter-values
       - build-opta-binary
-      - aws-create-env:
+      - aws-generate-terraform-language-files:
           requires:
             - build-opta-binary
-      - aws-destroy-env:
+      - aws-tg-create-env:
           requires:
-            - aws-create-env
+            - aws-generate-terraform-language-files
+      - aws-tg-test-service-http:
+          requires:
+            - aws-tg-create-env
+      - aws-tg-destroy-env:
+          requires:
+            - aws-tg-test-service-http
 
   nightly:
     triggers:
