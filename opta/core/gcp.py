@@ -175,9 +175,7 @@ class GCP(CloudClient):
         return True
 
     @classmethod
-    def get_detailed_config_map(
-        cls, environment: Optional[str] = None
-    ) -> Dict[str, Dict[str, str]]:
+    def get_detailed_config_map(cls) -> Dict[str, Dict[str, str]]:
         prefix = "opta_config/"
         credentials, project_id = cls.get_credentials()
         storage_client = storage.Client(project=project_id, credentials=credentials)

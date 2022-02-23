@@ -168,9 +168,7 @@ class AWS(CloudClient):
         )
 
     @classmethod
-    def get_detailed_config_map(
-        cls, environment: Optional[str] = None
-    ) -> Dict[str, Dict[str, str]]:
+    def get_detailed_config_map(cls) -> Dict[str, Dict[str, str]]:
         prefix = "opta_config/"
         s3 = boto3.client("s3")
         opta_config_detailed_map = {}

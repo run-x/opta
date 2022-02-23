@@ -174,9 +174,7 @@ class Azure(CloudClient):
             return False
 
     @classmethod
-    def get_detailed_config_map(
-        cls, environment: Optional[str] = None
-    ) -> Dict[str, Dict[str, str]]:
+    def get_detailed_config_map(cls) -> Dict[str, Dict[str, str]]:
         prefix = "opta_config/"
         subscription_client = SubscriptionClient(cls.get_credentials())
         opta_config_detailed_map = {}

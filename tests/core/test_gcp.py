@@ -71,3 +71,99 @@ class TestGcp:
         mock_gcs_bucket_instance.delete_blob.assert_called_once_with(
             f"{gcp_layer.name}/default.tflock"
         )
+
+    def test_get_detailed_config_map_configuration_present(
+        self, mocker: MockFixture
+    ) -> None:
+        mocker.patch(
+            "opta.core.gcp.default",
+            return_value=(mocker.Mock(spec=Credentials), "dummy_project_id"),
+        )
+        mock_storage_instance = mocker.Mock(spec=Client)
+        mock_bucket_instance = mocker.Mock(spec=Bucket)
+        mock_bucket_instance.name = "test"
+        mock_blob_list_blob_instance = mocker.Mock(spec=Blob)
+        mock_blob_list_blob_instance.name = "opta_config/test-config"
+        mock_storage_instance.list_buckets.return_value = [mock_bucket_instance]
+        mock_storage_instance.list_blobs.return_value = [mock_blob_list_blob_instance]
+        mock_response_blob = mocker.Mock(spec=Blob)
+        mocker.patch("opta.core.gcp.storage.Blob", return_value=mock_response_blob)
+        mocker.patch(
+            "opta.core.gcp.storage.Blob.download_as_text",
+            return_value="""{"original_spec": "actual_config"}""",
+        )
+        mock_response_blob.download_as_text.return_value = (
+            """{"original_spec": "actual_config"}"""
+        )
+
+        mocker_list_bucket_call = mocker.patch(
+            "opta.core.gcp.storage.Client.list_buckets",
+            return_value=[mock_bucket_instance],
+        )
+        mocker_list_blob_call = mocker.patch(
+            "opta.core.gcp.storage.Client.list_blobs",
+            return_value=[mock_blob_list_blob_instance],
+        )
+
+        detailed_config_map = GCP.get_detailed_config_map()
+
+        mocker_list_bucket_call.assert_called_once()
+        mocker_list_blob_call.assert_called_once_with(
+            mock_bucket_instance.name, prefix="opta_config/", delimiter="/"
+        )
+        assert detailed_config_map == {"test": {"test-config": "actual_config"}}
+
+    def test_get_detailed_config_map_configuration_not_present(
+        self, mocker: MockFixture
+    ) -> None:
+        mocker.patch(
+            "opta.core.gcp.default",
+            return_value=(mocker.Mock(spec=Credentials), "dummy_project_id"),
+        )
+        mock_storage_instance = mocker.Mock(spec=Client)
+        mock_bucket_instance = mocker.Mock(spec=Bucket)
+        mock_bucket_instance.name = "test"
+        mock_storage_instance.list_buckets.return_value = [mock_bucket_instance]
+        mock_storage_instance.list_blobs.return_value = []
+
+        mocker_list_bucket_call = mocker.patch(
+            "opta.core.gcp.storage.Client.list_buckets",
+            return_value=[mock_bucket_instance],
+        )
+        mocker_list_blob_call = mocker.patch(
+            "opta.core.gcp.storage.Client.list_blobs", return_value=[]
+        )
+
+        detailed_config_map = GCP.get_detailed_config_map()
+
+        assert detailed_config_map == {}
+        mocker_list_bucket_call.assert_called_once()
+        mocker_list_blob_call.assert_called_once_with(
+            mock_bucket_instance.name, prefix="opta_config/", delimiter="/"
+        )
+
+    def test_get_detailed_config_map_bucket_not_present(
+        self, mocker: MockFixture
+    ) -> None:
+        mocker.patch(
+            "opta.core.gcp.default",
+            return_value=(mocker.Mock(spec=Credentials), "dummy_project_id"),
+        )
+        mock_storage_instance = mocker.Mock(spec=Client)
+        mock_bucket_instance = mocker.Mock(spec=Bucket)
+        mock_bucket_instance.name = "test"
+        mock_storage_instance.list_buckets.return_value = []
+        mock_storage_instance.list_blobs.return_value = []
+
+        mocker_list_bucket_call = mocker.patch(
+            "opta.core.gcp.storage.Client.list_buckets", return_value=[]
+        )
+        mocker_list_blob_call = mocker.patch(
+            "opta.core.gcp.storage.Client.list_blobs", return_value=[]
+        )
+
+        detailed_config_map = GCP.get_detailed_config_map()
+
+        assert detailed_config_map == {}
+        mocker_list_bucket_call.assert_called_once()
+        mocker_list_blob_call.assert_not_called()
