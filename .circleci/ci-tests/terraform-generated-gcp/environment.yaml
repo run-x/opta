@@ -3,7 +3,7 @@ org_name: runx
 providers:
   google:
     region: us-central1
-    project: gcp-opta-live-example
+    project: opta-ci-1
 modules:
   - type: base
   - type: k8s-cluster
