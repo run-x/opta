@@ -3,9 +3,11 @@
 import functools
 import os
 
+_FEATURE_MODULE_API_ENV = "OPTA_MODULE_API_ENABLED"
+
 
 def is_module_api_enabled() -> bool:
-    return _check_env("OPTA_MODULE_API_ENABLED")
+    return _check_env(_FEATURE_MODULE_API_ENV)
 
 
 @functools.lru_cache

@@ -1,0 +1,17 @@
+org_name: runx
+name: module-api-test
+providers:
+  aws:
+    region: us-east-1
+    account_id: "652824372180" # big-opta-testing
+modules:
+  - type: aws-base
+    total_ipv4_cidr_block: 10.50.0.0/16
+    private_ipv4_cidr_blocks:
+      - 10.50.128.0/24
+      - 10.50.136.0/24
+      - 10.50.144.0/24
+    public_ipv4_cidr_blocks:
+      - 10.50.0.0/24
+      - 10.50.8.0/24
+      - 10.50.16.0/24
