@@ -1,0 +1,11 @@
+name: gcpenv-tg
+org_name: runx
+providers:
+  google:
+    region: us-central1
+    project: gcp-opta-live-example
+modules:
+  - type: base
+  - type: k8s-cluster
+    gke_channel: "RAPID"
+  - type: k8s-base

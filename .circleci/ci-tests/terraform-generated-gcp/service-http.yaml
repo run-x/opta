@@ -1,0 +1,20 @@
+environments:
+  - name: env-tg
+    path: "environment.yaml"
+    variables:
+      max_containers: 2
+name: http-service
+modules:
+  - name: app
+    type: k8s-service
+    image: kennethreitz/httpbin
+    public_uri: "/"
+    min_containers: 1
+    max_containers: "{vars.max_containers}"
+    liveness_probe_path: "/get"
+    readiness_probe_path: "/get"
+    sticky_session: true
+    sticky_session_max_age: 20
+    keep_path_prefix: true
+    port:
+      http: 80

@@ -1286,6 +1286,122 @@ jobs:
             --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
+  gcp-generate-terraform-language-files:
+    executor: ubuntu-machine
+    steps:
+      - checkout-opta
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - run:
+          name: "Generate Terraform Language Files"
+          command: |
+            mkdir $HOME/generated-tf-files-gcp
+            ./dist/opta/opta generate-terraform \
+            --config ./.circleci/ci-tests/terraform-generated-gcp/environment.yaml \
+            --directory $HOME/generated-tf-files-gcp \
+            --auto-approve
+            ./dist/opta/opta generate-terraform \
+            --config ./.circleci/ci-tests/terraform-generated-gcp/service-http.yaml \
+            --directory $HOME/generated-tf-files-gcp \
+            --auto-approve
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - generated-tf-files-gcp
+
+  gcp-tg-create-env:
+    executor: ubuntu-machine
+    steps:
+      - install-opta-dependencies
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: "Create Terraform Generated Environment"
+          command: |
+            cd $HOME/generated-tf-files-gcp
+            terraform init
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base
+            terraform apply -compact-warnings -auto-approve tf.plan
+            cat ./tfstate/gcpenv-tg.tfstate
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8scluster
+            terraform apply -compact-warnings -auto-approve tf.plan
+            cat ./tfstate/gcpenv-tg.tfstate
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8sbase
+            terraform apply -compact-warnings -auto-approve tf.plan
+            cat ./tfstate/gcpenv-tg.tfstate
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - generated-tf-files-gcp/tfstate/gcpenv-tg.tfstate
+      - store_artifacts:
+          path: ../generated-tf-files-gcp/tfstate/gcpenv-tg.tfstate
+          destination: tfstate-after-apply-env.tfstate
+
+
+  gcp-tg-test-service-http:
+    executor: ubuntu-machine
+    steps:
+      - install-opta-dependencies
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: "Create Terraform Generated Http Service"
+          command: |
+            cd $HOME/generated-tf-files-gcp
+            terraform init
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.app
+            terraform apply -compact-warnings -auto-approve tf.plan
+            cat ./tfstate/gcpenv-tg.tfstate
+      - run:
+          name: "Sleep 120 seconds"
+          command: |
+            sleep 120
+      - run:
+          name: "Get Output and Test Load Balancer"
+          command: |
+            cd $HOME/generated-tf-files-gcp
+            # terraform output -json >> terraform_output.json
+            # export LOAD_BALANCER=`cat terraform_output.json | jq -r '.load_balancer_raw_ip' |jq -r '.value'`
+            # echo $LOAD_BALANCER
+            # curl $LOAD_BALANCER
+            terraform output
+            echo "1"
+      - run:
+          name: "Sleep 120 seconds"
+          command: |
+            sleep 120
+      - run:
+          name: "Destroy Terraform Generated Http Service"
+          command: |
+            cd $HOME/generated-tf-files-gcp
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.app -destroy
+            terraform apply -compact-warnings -auto-approve tf.plan
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - generated-tf-files-gcp/tfstate/gcpenv-tg.tfstate
+      - store_artifacts:
+          path: ../generated-tf-files-gcp/tfstate/gcpenv-tg.tfstate
+          destination: tfstate-after-apply-svc-cnd.tfstate
+
+  gcp-tg-destroy-env:
+    executor: ubuntu-machine
+    steps:
+      - install-opta-dependencies
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: "Destroy Terraform Generated Environment"
+          command: |
+            cd $HOME/generated-tf-files-gcp
+            terraform init
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base -target=module.k8scluster -target=module.k8sbase -destroy
+            terraform apply -compact-warnings -auto-approve tf.plan
+      - store_artifacts:
+          path: ../generated-tf-files-gcp/tfstate/gcpenv-tg.tfstate
+          destination: tfstate-after-destroy.tfstate
+
   gcp-create-env:
     executor: ubuntu-machine
     environment:
@@ -2239,18 +2355,30 @@ workflows:
     jobs:
       - get-all-parameter-values
       - build-opta-binary
-      - aws-generate-terraform-language-files:
+      # - aws-generate-terraform-language-files:
+      #     requires:
+      #       - build-opta-binary
+      # - aws-tg-create-env:
+      #     requires:
+      #       - aws-generate-terraform-language-files
+      # - aws-tg-test-service-http:
+      #     requires:
+      #       - aws-tg-create-env
+      # - aws-tg-destroy-env:
+      #     requires:
+      #       - aws-tg-test-service-http
+      - gcp-generate-terraform-language-files:
           requires:
             - build-opta-binary
-      - aws-tg-create-env:
+      - gcp-tg-create-env:
           requires:
-            - aws-generate-terraform-language-files
-      - aws-tg-test-service-http:
+            - gcp-generate-terraform-language-files
+      - gcp-tg-test-service-http:
           requires:
-            - aws-tg-create-env
-      - aws-tg-destroy-env:
+            - gcp-tg-create-env
+      - gcp-tg-destroy-env:
           requires:
-            - aws-tg-test-service-http
+            - gcp-tg-test-service-http
 
   nightly:
     triggers:
