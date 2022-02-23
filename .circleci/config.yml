@@ -1294,6 +1294,9 @@ jobs:
           at: ./
       - install-opta-dependencies
       - run:
+          name: "Setting up gcp envar"
+          command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+      - run:
           name: "Generate Terraform Language Files"
           command: |
             mkdir $HOME/generated-tf-files-gcp
@@ -1314,6 +1317,9 @@ jobs:
     executor: ubuntu-machine
     steps:
       - install-opta-dependencies
+      - run:
+          name: "Setting up gcp envar"
+          command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
       - attach_workspace:
           at: ~/
       - run:
@@ -1343,6 +1349,9 @@ jobs:
     executor: ubuntu-machine
     steps:
       - install-opta-dependencies
+      - run:
+          name: "Setting up gcp envar"
+          command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
       - attach_workspace:
           at: ~/
       - run:
@@ -1389,6 +1398,9 @@ jobs:
     executor: ubuntu-machine
     steps:
       - install-opta-dependencies
+      - run:
+          name: "Setting up gcp envar"
+          command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
       - attach_workspace:
           at: ~/
       - run:
