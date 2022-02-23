@@ -145,3 +145,7 @@ For example, here is a service which has a cron job that runs every minute and s
 If a user wishes to just have a cron job and no service, then they could simply set the min/max containers to
 0.
 {{% /alert %}}
+
+{{% alert title="Warning" color="warning" %}}
+Cron Jobs are currently created outside the default linkerd service mesh.
+{{% /alert %}}
