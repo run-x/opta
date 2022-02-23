@@ -5,6 +5,7 @@ from opta.core.aws import AWS
 from opta.core.azure import Azure
 from opta.core.cloud_client import CloudClient
 from opta.core.gcp import GCP
+from opta.exceptions import UserErrors
 from opta.utils import logger
 
 
@@ -24,13 +25,15 @@ cloud_option = click.option(
 @config.command()
 @cloud_option
 def view(cloud: str) -> None:
+    if cloud.lower() == "azurerm":
+        raise UserErrors("Currently AzureRM isn't supported.")
     cloud_client: CloudClient = __get_cloud_client(cloud)
     detailed_config_map = cloud_client.get_detailed_config_map()
     if detailed_config_map:
         for bucket, detailed_configs in detailed_config_map.items():
             for config_name, actual_config in detailed_configs.items():
                 logger.info(
-                    f"Bucket Name: {bucket}\nConfig Name: {config_name}\nActual Config:\n{actual_config}"
+                    f"# Bucket Name: {bucket}\n# Config Name: {config_name}\n\n{actual_config}"
                 )
 
 
