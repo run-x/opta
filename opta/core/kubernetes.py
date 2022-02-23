@@ -449,7 +449,7 @@ def add_linkerd_label_to_kubesystem() -> None:
     patch_obj = {
         "metadata": {"labels": {"config.linkerd.io/admission-webhooks": "disabled"}}
     }
-    v1.patch_namespace("kube_system", patch_obj)
+    v1.patch_namespace("kube-system", patch_obj)
 
 
 def create_secret_if_not_exists(namespace: str, secret_name: str) -> None:
