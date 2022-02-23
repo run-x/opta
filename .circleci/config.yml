@@ -1293,6 +1293,8 @@ jobs:
       - attach_workspace:
           at: ./
       - install-opta-dependencies
+      - gcp-cli/install
+      - gcp-cli/initialize
       - run:
           name: "Setting up gcp envar"
           command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
@@ -1317,6 +1319,8 @@ jobs:
     executor: ubuntu-machine
     steps:
       - install-opta-dependencies
+      - gcp-cli/install
+      - gcp-cli/initialize
       - run:
           name: "Setting up gcp envar"
           command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
@@ -1349,6 +1353,8 @@ jobs:
     executor: ubuntu-machine
     steps:
       - install-opta-dependencies
+      - gcp-cli/install
+      - gcp-cli/initialize
       - run:
           name: "Setting up gcp envar"
           command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
@@ -1398,6 +1404,8 @@ jobs:
     executor: ubuntu-machine
     steps:
       - install-opta-dependencies
+      - gcp-cli/install
+      - gcp-cli/initialize
       - run:
           name: "Setting up gcp envar"
           command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
