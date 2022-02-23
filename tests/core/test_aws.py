@@ -73,36 +73,6 @@ class TestAWS:
             Key={"LockID": {"S": f"{aws_layer.state_storage()}/{aws_layer.name}"}},
         )
 
-    def test_get_config_map_configuration_present(self, mocker: MockFixture) -> None:
-        mock_s3_client_instance = mocker.Mock(spec=S3Client)
-        mocker.patch("opta.core.aws.boto3.client", return_value=mock_s3_client_instance)
-        mocker.patch("opta.core.aws.AWS.get_bucket_list", return_value=["test"])
-        mock_s3_client_instance.list_objects.return_value = {
-            "Contents": [{"Key": "opta_config/test-config"}]
-        }
-        AWS.get_config_map()
-        mock_s3_client_instance.list_objects.assert_called_once_with(
-            Bucket="test", Prefix="opta_config/", Delimiter="/"
-        )
-
-    def test_get_config_map_configuration_not_present(self, mocker: MockFixture) -> None:
-        mock_s3_client_instance = mocker.Mock(spec=S3Client)
-        mocker.patch("opta.core.aws.boto3.client", return_value=mock_s3_client_instance)
-        mocker.patch("opta.core.aws.AWS.get_bucket_list", return_value=["test"])
-        mock_s3_client_instance.list_objects.return_value = {}
-        AWS.get_config_map()
-        mock_s3_client_instance.list_objects.assert_called_once_with(
-            Bucket="test", Prefix="opta_config/", Delimiter="/"
-        )
-
-    def test_get_config_map_buckets_not_present(self, mocker: MockFixture) -> None:
-        mock_s3_client_instance = mocker.Mock(spec=S3Client)
-        mocker.patch("opta.core.aws.boto3.client", return_value=mock_s3_client_instance)
-        mocker.patch("opta.core.aws.AWS.get_bucket_list", return_value=[])
-        mock_s3_client_instance.list_objects.return_value = {}
-        AWS.get_config_map()
-        mock_s3_client_instance.list_objects.assert_not_called()
-
     def test_get_detailed_config_map_configuration_present(
         self, mocker: MockFixture
     ) -> None:
@@ -134,4 +104,15 @@ class TestAWS:
         mock_s3_client_instance.list_objects.assert_called_once_with(
             Bucket="test", Prefix="opta_config/", Delimiter="/"
         )
+        mock_s3_client_instance.get_object.assert_not_called()
+
+    def test_get_detailed_config_map_buckets_not_present(
+        self, mocker: MockFixture
+    ) -> None:
+        mock_s3_client_instance = mocker.Mock(spec=S3Client)
+        mocker.patch("opta.core.aws.boto3.client", return_value=mock_s3_client_instance)
+        mocker.patch("opta.core.aws.AWS.get_bucket_list", return_value=[])
+        mock_s3_client_instance.list_objects.return_value = {}
+        AWS.get_detailed_config_map()
+        mock_s3_client_instance.list_objects.assert_not_called()
         mock_s3_client_instance.get_object.assert_not_called()

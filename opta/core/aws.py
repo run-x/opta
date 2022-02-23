@@ -1,5 +1,5 @@
 from time import sleep
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypedDict
+from typing import TYPE_CHECKING, Dict, List, Optional, TypedDict
 
 import boto3
 from botocore.config import Config
@@ -89,30 +89,6 @@ class AWS(CloudClient):
             )
             return None
 
-    def list_child_config_names(self) -> List[str]:
-        bucket_name = self.layer.state_storage()
-        region = self.layer.root().providers["aws"]["region"]
-        s3_config_dir = "opta_config/"
-        s3_client = boto3.client("s3", config=Config(region_name=region))
-
-        resp = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=s3_config_dir)
-        s3_config_paths = [obj["Key"] for obj in resp.get("Contents", [])]
-
-        configs = [config_path[len(s3_config_dir) :] for config_path in s3_config_paths]
-        if self.layer.name in configs:
-            configs.remove(self.layer.name)
-        return configs
-
-    def get_configuration_details(self, config_name: str) -> Dict[str, Any]:
-        bucket_name = self.layer.state_storage()
-        region = self.layer.root().providers["aws"]["region"]
-        s3_config = f"opta_config/{config_name}"
-        s3_client = boto3.client("s3", config=Config(region_name=region))
-
-        obj = s3_client.get_object(Bucket=bucket_name, Key=s3_config)
-        config_details = json.loads(obj["Body"].read())["original_spec"]
-        return config_details
-
     # Upload the current opta config to the state bucket, under opta_config/.
     def upload_opta_config(self) -> None:
         bucket = self.layer.state_storage()
@@ -190,19 +166,6 @@ class AWS(CloudClient):
             TableName=dynamodb_table,
             Key={"LockID": {"S": f"{bucket}/{self.layer.name}"}},
         )
-
-    @classmethod
-    def get_config_map(cls) -> Dict[str, List[str]]:
-        prefix = "opta_config/"
-        s3 = boto3.client("s3")
-        opta_config_map = {}
-        for aws_bucket in cls.get_bucket_list():
-            response = s3.list_objects(Bucket=aws_bucket, Prefix=prefix, Delimiter="/")
-            if "Contents" in response:
-                opta_config_map[aws_bucket] = [
-                    data["Key"][len(prefix) :] for data in response["Contents"]
-                ]
-        return opta_config_map
 
     @classmethod
     def get_detailed_config_map(

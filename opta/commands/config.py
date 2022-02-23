@@ -1,5 +1,3 @@
-from typing import Optional
-
 import click
 from click_didyoumean import DYMGroup
 
@@ -16,41 +14,16 @@ def config() -> None:
 
 
 cloud_option = click.option(
-    "-c",
     "--cloud",
     help="The cloud provider to use",
     required=True,
     type=click.Choice(["aws", "google", "azurerm"]),
 )
 
-name_option = click.option(
-    "-n", "--name", help="The name of the configuration", required=False
-)
-
-environment_option = click.option(
-    "-e", "--environment", help="The name of the environment", required=False
-)
-
-
-@config.command(name="list")
-@cloud_option
-@environment_option
-def list_command(cloud: str, environment: Optional[str]) -> None:
-    if environment:
-        logger.info("Environment option is a feature in progress.")
-    cloud_client: CloudClient = __get_cloud_client(cloud)
-    config_map = cloud_client.get_config_map()
-    if config_map:
-        logger.info(config_map)
-
 
 @config.command()
 @cloud_option
-@environment_option
-@name_option
-def view(cloud: str, environment: Optional[str], name: Optional[str]) -> None:
-    if environment or name:
-        logger.info("Environment/Name option is a feature in progress.")
+def view(cloud: str) -> None:
     cloud_client: CloudClient = __get_cloud_client(cloud)
     detailed_config_map = cloud_client.get_detailed_config_map()
     if detailed_config_map:
@@ -63,11 +36,11 @@ def view(cloud: str, environment: Optional[str], name: Optional[str]) -> None:
 
 def __get_cloud_client(cloud: str) -> CloudClient:
     cloud_client: CloudClient
-    if cloud == "aws":
+    if cloud.lower() == "aws":
         cloud_client = AWS  # type: ignore
-    elif cloud == "google":
+    elif cloud.lower() == "google":
         cloud_client = GCP  # type: ignore
-    elif cloud == "azurerm":
+    elif cloud.lower() == "azurerm":
         cloud_client = Azure  # type: ignore
 
     return cloud_client  # type: ignore

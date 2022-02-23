@@ -1,7 +1,7 @@
 import base64
 from contextlib import redirect_stderr
 from io import StringIO
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 from azure.core.exceptions import ClientAuthenticationError, ResourceNotFoundError
 from azure.identity import DefaultAzureCredential
@@ -61,48 +61,6 @@ class Azure(CloudClient):
                 "Could not successfully download and parse any pre-existing config"
             )
             return None
-
-    def list_child_config_names(self) -> List[str]:
-        providers = self.layer.gen_providers(0)
-
-        credentials = Azure.get_credentials()
-        storage_account_name = providers["terraform"]["backend"]["azurerm"][
-            "storage_account_name"
-        ]
-        container_name = providers["terraform"]["backend"]["azurerm"]["container_name"]
-        storage_client = ContainerClient(
-            account_url=f"https://{storage_account_name}.blob.core.windows.net",
-            container_name=container_name,
-            credential=credentials,
-        )
-        prefix = "opta_config/"
-        blobs = storage_client.list_blobs(name_starts_with=prefix)
-        configs = [blob.name[len(prefix) :] for blob in blobs]
-        if self.layer.name in configs:
-            configs.remove(self.layer.name)
-        return configs
-
-    def get_configuration_details(self, config_name: str) -> Dict[str, Any]:
-        providers = self.layer.gen_providers(0)
-        credentials = self.get_credentials()
-
-        storage_account_name = providers["terraform"]["backend"]["azurerm"][
-            "storage_account_name"
-        ]
-        container_name = providers["terraform"]["backend"]["azurerm"]["container_name"]
-
-        storage_client = ContainerClient(
-            account_url=f"https://{storage_account_name}.blob.core.windows.net",
-            container_name=container_name,
-            credential=credentials,
-        )
-        config_path = f"opta_config/{config_name}"
-        download_stream: StorageStreamDownloader = storage_client.download_blob(
-            config_path
-        )
-        data = download_stream.readall()
-        config_details = json.loads(data)
-        return config_details
 
     # Upload the current opta config to the state bucket, under opta_config/.
     def upload_opta_config(self) -> None:
@@ -214,38 +172,6 @@ class Azure(CloudClient):
             return True
         except ResourceNotFoundError:
             return False
-
-    @classmethod
-    def get_config_map(cls) -> Dict[str, List[str]]:
-        prefix = "opta_config/"
-        subscription_client = SubscriptionClient(cls.get_credentials())
-        opta_config_map = {}
-        for subscription in subscription_client.subscriptions.list():
-            storage_client = StorageManagementClient(
-                cls.get_credentials(), subscription.subscription_id
-            )
-            try:
-                for storage in storage_client.storage_accounts.list():
-                    config_list = []
-                    container_client = ContainerClient(
-                        account_url=f"https://{storage.name}.blob.core.windows.net",
-                        container_name="tfstate",
-                        credential=cls.get_credentials(),
-                    )
-                    try:
-                        for response in container_client.list_blobs(
-                            name_starts_with=prefix
-                        ):
-                            config_list.append(response.name[len(prefix) :])
-                        if config_list:
-                            opta_config_map[storage.name] = config_list
-                    except Exception as e:
-                        logger.debug(
-                            f"Could not list blobs in container {storage.name}: {e}"
-                        )
-            except Exception as e:
-                logger.debug(f"Could not list storage accounts: {e}")
-        return opta_config_map
 
     @classmethod
     def get_detailed_config_map(
