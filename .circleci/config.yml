@@ -93,6 +93,15 @@ commands:
           name: "Install python dependencies"
           command: |
             pip install pipenv
+            pipenv install --deploy
+            source $(pipenv --venv)/bin/activate
+
+  install-python-dependencies-development:
+    steps:
+      - run:
+          name: "Install python development dependencies"
+          command: |
+            pip install pipenv
             pipenv install --deploy --dev
             source $(pipenv --venv)/bin/activate
 
@@ -127,7 +136,7 @@ commands:
             cat ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
             cat ./.circleci/ci-tests/create-and-destroy-aws/environment-additional-nodegroup.yml
             cat ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml
-            cat ./.circleci/ci-tests/create-and-destroy-gcp/environment-additional-nodepool.yml 
+            cat ./.circleci/ci-tests/create-and-destroy-gcp/environment-additional-nodepool.yml
             cat ./.circleci/ci-tests/todo-list/provider-aws-dns-false.yml
             cat ./.circleci/ci-tests/todo-list/provider-aws-dns-true.yml
             cat ./.circleci/ci-tests/todo-list/provider-gcp.yml
@@ -173,7 +182,7 @@ jobs:
     executor: python-docker
     steps:
       - checkout-opta
-      - install-python-dependencies
+      - install-python-dependencies-development
       - run:
           name: "Lint"
           command: |
@@ -201,7 +210,7 @@ jobs:
     executor: python-docker
     steps:
       - checkout-opta
-      - install-python-dependencies
+      - install-python-dependencies-development
       - run:
           name: "Security"
           command: "make security_tests"
@@ -210,7 +219,7 @@ jobs:
     executor: python-docker
     steps:
       - checkout-opta
-      - install-python-dependencies
+      - install-python-dependencies-development
       - terraform/install:
           arch: amd64
           os: linux
