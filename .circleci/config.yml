@@ -1307,7 +1307,7 @@ jobs:
             --directory $HOME/generated-tf-files-gcp \
             --auto-approve
             ./dist/opta/opta generate-terraform \
-            --config ./.circleci/ci-tests/terraform-generated-gcp/hello-app.yaml \
+            --config ./.circleci/ci-tests/terraform-generated-gcp/service-http.yaml \
             --directory $HOME/generated-tf-files-gcp \
             --auto-approve
       - persist_to_workspace:
@@ -1365,7 +1365,7 @@ jobs:
           command: |
             cd $HOME/generated-tf-files-gcp
             terraform init
-            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.app
             terraform apply -compact-warnings -auto-approve tf.plan
             cat ./tfstate/gcpenv-tg.tfstate
       - run:
@@ -1385,12 +1385,12 @@ jobs:
       - run:
           name: "Sleep 120 seconds"
           command: |
-            sleep 300
+            sleep 120
       - run:
           name: "Destroy Terraform Generated Http Service"
           command: |
             cd $HOME/generated-tf-files-gcp
-            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello -destroy
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.app -destroy
             terraform apply -compact-warnings -auto-approve tf.plan
       - persist_to_workspace:
           root: ~/
