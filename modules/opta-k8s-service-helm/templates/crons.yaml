@@ -1,0 +1,67 @@
+{{- range $index, $cron := .Values.cron_jobs }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "k8s-service.fullname" $ }}-{{ $index }}
+  labels:
+    tags.datadoghq.com/service: {{ include "k8s-service.serviceName" $ }}-{{ include "k8s-service.namespaceName" $ }}
+    tags.datadoghq.com/version: {{ $.Values.version | quote }}
+  {{- include "k8s-service.labels" $ | nindent 4 }}
+  namespace: {{ include "k8s-service.namespaceName" $ }}
+spec:
+  schedule: {{ $cron.schedule | quote }}
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            tags.datadoghq.com/service: {{ include "k8s-service.serviceName" $ }}-{{ include "k8s-service.namespaceName" $ }}
+            tags.datadoghq.com/version: {{ $.Values.version | quote }}
+            {{- include "k8s-service.labels" $ | nindent 12 }}
+            cronjob: "true"
+          annotations:
+            # Disable linkerd because https://github.com/linkerd/linkerd2/issues/1869
+            linkerd.io/inject: disabled
+        spec:
+          restartPolicy: "Never"
+          {{- if ne ( len $.Values.tolerations ) 0 }}
+          tolerations:
+          {{ range $toleration :=  $.Values.tolerations }}
+          - key: {{ $toleration.key | quote }}
+            value: {{ default "opta" $toleration.value | quote }}
+            effect: {{ default "NoSchedule" $toleration.effect | quote }}
+          {{ end }}
+          {{- end }}
+          containers:
+            - name: cron
+              image: "{{ $.Values.image }}"
+              imagePullPolicy: Always
+              command:
+              {{ range $command := $cron.commands }}
+              - {{ $command | quote }}
+              {{ end }}
+              env:
+              - name: RDS_CA_PATH # This is the path to the public key for the docdb tls
+                value: "/config/rds_ca.pem"
+              {{ range $.Values.envVars }}
+              - name: {{ .name | quote }}
+                value: {{ .value | quote }}
+              {{ end }}
+              {{ range $val := $.Values.linkSecrets }}
+              - name: {{ $val.name | quote }}
+                valueFrom:
+                  secretKeyRef:
+                    name: secret
+                    key: {{ $val.name | quote }}
+                    optional: true
+              {{ end }}
+              envFrom:
+              - secretRef:
+                  name: manual-secrets
+                  optional: true
+              resources:
+                limits:
+                  {{- toYaml $.Values.containerResourceLimits | nindent 18 }}
+                requests:
+                  {{- toYaml $.Values.containerResourceRequests | nindent 18 }}
+{{- end }}
