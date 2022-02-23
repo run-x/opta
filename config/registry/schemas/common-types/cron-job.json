@@ -1,5 +1,5 @@
 {
-  "$id": "https://app.runx.dev/common-types/cron",
+  "$id": "https://app.runx.dev/common-types/cron-job",
   "type": "object",
   "properties": {
     "commands": {

@@ -192,11 +192,11 @@ inputs:
     default: []
   - name: cron_jobs
     user_facing: true
-    validator: list(include('cron'), required=False)
+    validator: list(include('cron_job'), required=False)
     description: A list of cronjobs to execute as part of this service
     default: []
 extra_validators:
-  cron:
+  cron_job:
     commands: list(required=True)
     schedule: str(required=True)
   toleration:
