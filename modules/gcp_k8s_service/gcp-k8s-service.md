@@ -116,15 +116,13 @@ said nodes unless they have a matching toleration. Simply provide a list of desi
 Please refer to the taints specified in your environment Opta manifests to know what matching tolerations are right
 for you.
 
-### Crons
+### Cron Jobs
 
 Opta gives you the option of adding a list of cron jobs to run as part of this service. This is done via the `cron_jobs` 
 field which a user can fill with entries for each con job in mind. Each entry must specify a command in array format
 (for most cases simply specify the shell you wish to use, the `-c` flag and the executable to run), as well as a 
 schedule following the [Cron Syntax](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#cron-schedule-syntax).
-A user may additionally specify extra environment variables to use. All links and environment variables specified
-for the server will also be passed on to the cron tasks. The cron jobs will use the same resource requests/limits as the
-servers.
+The cron jobs will use the same resource requests/limits as the servers.
 
 For example, here is a service which has a cron job that runs every minute and simply outputs "Hello world!" to stdout:
 
@@ -141,8 +139,6 @@ For example, here is a service which has a cron job that runs every minute and s
         - -c
         - 'echo "Hello world!"'
         schedule: "* * * * *"
-        env_vars:
-          CRON: "1"
 ```
 
 {{% alert title="Pure Cron Jobs" color="info" %}}

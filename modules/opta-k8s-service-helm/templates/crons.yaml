@@ -13,6 +13,15 @@ spec:
   jobTemplate:
     spec:
       template:
+        metadata:
+          labels:
+            tags.datadoghq.com/service: {{ include "k8s-service.serviceName" $ }}-{{ include "k8s-service.namespaceName" $ }}
+            tags.datadoghq.com/version: {{ $.Values.version | quote }}
+            {{- include "k8s-service.labels" $ | nindent 12 }}
+            cronjob: "true"
+          annotations:
+            # Disable linkerd because https://github.com/linkerd/linkerd2/issues/1869
+            linkerd.io/inject: disabled
         spec:
           restartPolicy: "Never"
           {{- if ne ( len $.Values.tolerations ) 0 }}
@@ -37,10 +46,6 @@ spec:
               {{ range $.Values.envVars }}
               - name: {{ .name | quote }}
                 value: {{ .value | quote }}
-              {{ end }}
-              {{ range $k, $v := $cron.env_vars }}
-              - name: {{ $k | quote }}
-                value: {{ $v | quote }}
               {{ end }}
               {{ range $val := $.Values.linkSecrets }}
               - name: {{ $val.name | quote }}
