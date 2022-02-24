@@ -374,13 +374,10 @@ jobs:
             terraform init
             terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base
             terraform apply -compact-warnings -auto-approve tf.plan
-            cat ./tfstate/awsenv-tg.tfstate
             terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8scluster
             terraform apply -compact-warnings -auto-approve tf.plan
-            cat ./tfstate/awsenv-tg.tfstate
             terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8sbase
             terraform apply -compact-warnings -auto-approve tf.plan
-            cat ./tfstate/awsenv-tg.tfstate
       - persist_to_workspace:
           root: ~/
           paths:
@@ -403,7 +400,6 @@ jobs:
             terraform init
             terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.app
             terraform apply -compact-warnings -auto-approve tf.plan
-            cat ./tfstate/awsenv-tg.tfstate
       - run:
           name: "Sleep 120 seconds"
           command: |
@@ -1333,13 +1329,10 @@ jobs:
             terraform init
             terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base
             terraform apply -compact-warnings -auto-approve tf.plan
-            cat ./tfstate/gcpenv-tg.tfstate
             terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8scluster
             terraform apply -compact-warnings -auto-approve tf.plan
-            cat ./tfstate/gcpenv-tg.tfstate
             terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8sbase
             terraform apply -compact-warnings -auto-approve tf.plan
-            cat ./tfstate/gcpenv-tg.tfstate
       - persist_to_workspace:
           root: ~/
           paths:
@@ -1367,7 +1360,6 @@ jobs:
             terraform init
             terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.app
             terraform apply -compact-warnings -auto-approve tf.plan
-            cat ./tfstate/gcpenv-tg.tfstate
       - run:
           name: "Sleep 120 seconds"
           command: |
@@ -1376,11 +1368,10 @@ jobs:
           name: "Get Output and Test Load Balancer"
           command: |
             cd $HOME/generated-tf-files-gcp
-            # terraform output -json >> terraform_output.json
-            # export LOAD_BALANCER=`cat terraform_output.json | jq -r '.load_balancer_raw_ip' |jq -r '.value'`
-            # echo $LOAD_BALANCER
-            # curl $LOAD_BALANCER
-            terraform output
+            terraform output -json >> terraform_output.json
+            export LOAD_BALANCER=`cat terraform_output.json | jq -r '.load_balancer_raw_ip' |jq -r '.value'`
+            echo $LOAD_BALANCER
+            curl $LOAD_BALANCER
             echo "1"
       - run:
           name: "Sleep 120 seconds"
@@ -2375,18 +2366,18 @@ workflows:
     jobs:
       - get-all-parameter-values
       - build-opta-binary
-      # - aws-generate-terraform-language-files:
-      #     requires:
-      #       - build-opta-binary
-      # - aws-tg-create-env:
-      #     requires:
-      #       - aws-generate-terraform-language-files
-      # - aws-tg-test-service-http:
-      #     requires:
-      #       - aws-tg-create-env
-      # - aws-tg-destroy-env:
-      #     requires:
-      #       - aws-tg-test-service-http
+       - aws-generate-terraform-language-files:
+           requires:
+             - build-opta-binary
+       - aws-tg-create-env:
+           requires:
+             - aws-generate-terraform-language-files
+       - aws-tg-test-service-http:
+           requires:
+             - aws-tg-create-env
+       - aws-tg-destroy-env:
+           requires:
+             - aws-tg-test-service-http
       - gcp-generate-terraform-language-files:
           requires:
             - build-opta-binary
