@@ -399,6 +399,7 @@ jobs:
   aws-tg-test-service-http:
     executor: ubuntu-machine
     steps:
+      - checkout-opta
       - install-opta-dependencies
       - attach_workspace:
           at: ~/
