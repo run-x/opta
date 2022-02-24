@@ -1,6 +1,6 @@
 {{- if ne (len .Values.persistentStorage) 0 }}
 {{- if .Values.deployPods }}
-{{- if ne "0" .Values.autoscaling.maxReplicas }}
+{{- if ne "0" (toString .Values.autoscaling.maxReplicas) }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:

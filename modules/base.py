@@ -201,6 +201,21 @@ class K8sServiceModuleProcessor(ModuleProcessor):
         )
 
     def process(self, module_idx: int) -> None:
+        # Min containers must be less than or equal to max containers and can only be 0 if both are
+        min_containers = str(self.module.data.get("min_containers", ""))
+        max_containers = str(self.module.data.get("max_containers", ""))
+        if min_containers.isdigit() and max_containers.isdigit():
+            min_containers = int(min_containers)
+            max_containers = int(max_containers)
+            if min_containers > max_containers:
+                raise UserErrors(
+                    "Min containers must be less than or equal to max containers"
+                )
+            if min_containers == 0 and max_containers != 0:
+                raise UserErrors(
+                    "Min containers can only equal 0 if max containers equals zero"
+                )
+
         self._process_ports(self.module.data)
 
         if isinstance(self.module.data.get("public_uri"), str):
