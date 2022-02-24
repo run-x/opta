@@ -440,6 +440,35 @@ jobs:
           path: ../generated-tf-files-aws/tfstate/awsenv-tg.tfstate
           destination: tfstate-after-apply-svc-cnd.tfstate
 
+  aws-tg-test-other-modules-plan:
+    executor: ubuntu-machine
+    steps:
+      - install-opta-dependencies
+      - attach_workspace:
+          at: ~/
+      - attach_workspace:
+          at: ./
+      - run:
+          name: "Generate Terraform Language Files for Other Modules"
+          command: |
+            ./dist/opta/opta generate-terraform \
+            --config ./.circleci/ci-tests/terraform-generated-aws/other-modules.yaml \
+            --directory $HOME/generated-tf-files-aws \
+            --auto-approve
+      - run:
+          name: "Plan Terraform Generated Other Modules"
+          command: |
+            cd $HOME/generated-tf-files-aws
+            terraform init
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan \ 
+            -target=module.tgpg \
+            -target=module.tgdocdb \
+            -target=module.tgredishelm \
+            -target=module.tglambdafunction \
+            -target=module.tgmysql \
+            -target=module.tgredis \
+            -target=module.tgbucket
+
   aws-tg-destroy-env:
     executor: ubuntu-machine
     steps:
@@ -2381,7 +2410,7 @@ workflows:
       - aws-tg-create-env:
           requires:
             - aws-generate-terraform-language-files
-      - aws-tg-test-service-http:
+      - aws-tg-test-other-modules-plan:
           requires:
             - aws-tg-create-env
       - aws-tg-destroy-env:
