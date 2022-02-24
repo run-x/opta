@@ -5,6 +5,7 @@ import boto3
 from botocore.config import Config
 from botocore.exceptions import ClientError
 from mypy_boto3_dynamodb import DynamoDBClient
+from mypy_boto3_s3 import S3Client
 
 from opta.core.cloud_client import CloudClient
 from opta.exceptions import UserErrors
@@ -80,14 +81,7 @@ class AWS(CloudClient):
         config_path = f"opta_config/{self.layer.name}"
 
         s3_client = boto3.client("s3", config=Config(region_name=self.region))
-        try:
-            obj = s3_client.get_object(Bucket=bucket, Key=config_path)
-            return json.loads(obj["Body"].read())
-        except Exception:  # Backwards compatibility
-            logger.debug(
-                "Could not successfully download and parse any pre-existing config"
-            )
-            return None
+        return self._download_remote_config(s3_client, bucket, config_path)
 
     # Upload the current opta config to the state bucket, under opta_config/.
     def upload_opta_config(self) -> None:
@@ -168,27 +162,33 @@ class AWS(CloudClient):
         )
 
     @classmethod
-    def get_detailed_config_map(cls) -> Dict[str, Dict[str, str]]:
+    def get_all_remote_configs(cls) -> Dict[str, Dict[str, "StructuredConfig"]]:
         prefix = "opta_config/"
         s3 = boto3.client("s3")
         opta_config_detailed_map = {}
-        for aws_bucket in cls.get_bucket_list():
+        for aws_bucket in cls._get_bucket_list():
             detailed_configs = {}
             response = s3.list_objects(Bucket=aws_bucket, Prefix=prefix, Delimiter="/")
             if "Contents" in response:
                 for data in response["Contents"]:
-                    config_object = s3.get_object(Bucket=aws_bucket, Key=data["Key"])
-                    detailed_configs[data["Key"][len(prefix) :]] = json.loads(
-                        config_object["Body"].read()
-                    )["original_spec"]
+                    structured_config = cls._download_remote_config(
+                        s3, aws_bucket, data["Key"]
+                    )
+                    if structured_config:
+                        detailed_configs[data["Key"][len(prefix) :]] = structured_config
                 opta_config_detailed_map[aws_bucket] = detailed_configs
         return opta_config_detailed_map
 
-    @classmethod
-    def get_bucket_list(cls) -> List[str]:
+    @staticmethod
+    def _get_bucket_list() -> List[str]:
         s3 = boto3.client("s3")
         aws_bucket_data = s3.list_buckets().get("Buckets", [])
-        return [data["Name"] for data in aws_bucket_data]
+        return list(
+            filter(
+                lambda data: (data.count("opta-tf-state")),
+                [data["Name"] for data in aws_bucket_data],
+            )
+        )
 
     @staticmethod
     def get_all_versions(bucket: str, filename: str, region: str) -> List[str]:
@@ -395,6 +395,19 @@ class AWS(CloudClient):
             if e.response["Error"]["Code"] == "NoSuchBucket":
                 return False
         return True
+
+    @staticmethod
+    def _download_remote_config(
+        s3_client: S3Client, bucket: str, key: str
+    ) -> Optional["StructuredConfig"]:
+        try:
+            obj = s3_client.get_object(Bucket=bucket, Key=key)
+            return json.loads(obj["Body"].read())
+        except Exception:
+            logger.debug(
+                "Could not successfully download and parse any pre-existing config"
+            )
+            return None
 
 
 # AWS Resource ARNs can be one of the following 3 formats:

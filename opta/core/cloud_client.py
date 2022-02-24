@@ -30,5 +30,5 @@ class CloudClient(ABC):
         raise NotImplementedError()
 
     @classmethod
-    def get_detailed_config_map(cls) -> Dict[str, Dict[str, str]]:
+    def get_all_remote_configs(cls) -> Dict[str, Dict[str, "StructuredConfig"]]:
         pass

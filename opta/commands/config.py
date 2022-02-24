@@ -41,12 +41,12 @@ def view(cloud: str) -> None:
     if cloud.lower() == "azurerm":
         raise UserErrors("Currently AzureRM isn't supported.")
     cloud_client: CloudClient = __get_cloud_client(cloud)
-    detailed_config_map = cloud_client.get_detailed_config_map()
+    detailed_config_map = cloud_client.get_all_remote_configs()
     if detailed_config_map:
         for bucket, detailed_configs in detailed_config_map.items():
             for config_name, actual_config in detailed_configs.items():
                 logger.info(
-                    f"# Bucket Name: {bucket}\n# Config Name: {config_name}\n{actual_config}\n\n"
+                    f"# Bucket Name: {bucket}\n# Config Name: {config_name}\n{actual_config['original_spec']}\n"
                 )
 
 

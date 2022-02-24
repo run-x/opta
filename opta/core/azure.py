@@ -50,17 +50,7 @@ class Azure(CloudClient):
             credential=credentials,
         )
         config_path = f"opta_config/{self.layer.name}"
-        try:
-            download_stream: StorageStreamDownloader = storage_client.download_blob(
-                config_path
-            )
-            data = download_stream.readall()
-            return json.loads(data)
-        except Exception:  # Backwards compatibility
-            logger.debug(
-                "Could not successfully download and parse any pre-existing config"
-            )
-            return None
+        return self.__download_remote_config(storage_client, config_path)
 
     # Upload the current opta config to the state bucket, under opta_config/.
     def upload_opta_config(self) -> None:
@@ -174,7 +164,7 @@ class Azure(CloudClient):
             return False
 
     @classmethod
-    def get_detailed_config_map(cls) -> Dict[str, Dict[str, str]]:
+    def get_detailed_config_map(cls,) -> Dict[str, Dict[str, "StructuredConfig"]]:
         prefix = "opta_config/"
         subscription_client = SubscriptionClient(cls.get_credentials())
         opta_config_detailed_map = {}
@@ -194,10 +184,14 @@ class Azure(CloudClient):
                         for response in container_client.list_blobs(
                             name_starts_with=prefix
                         ):
-                            config_object = container_client.download_blob(response.name)
-                            detailed_configs[response.name[len(prefix) :]] = json.loads(
-                                config_object.read_all()
-                            )["original_spec"]
+                            structured_config = cls.__download_remote_config(
+                                container_client, response.name
+                            )
+                            if structured_config:
+                                detailed_configs[
+                                    response.name[len(prefix) :]
+                                ] = structured_config
+
                         if detailed_configs:
                             opta_config_detailed_map[storage.name] = detailed_configs
                     except Exception as e:
@@ -207,3 +201,19 @@ class Azure(CloudClient):
             except Exception as e:
                 logger.debug(f"Could not list storage accounts: {e}")
         return opta_config_detailed_map
+
+    @staticmethod
+    def __download_remote_config(
+        storage_client: ContainerClient, config_path: str
+    ) -> Optional["StructuredConfig"]:
+        try:
+            download_stream: StorageStreamDownloader = storage_client.download_blob(
+                config_path
+            )
+            data = download_stream.readall()
+            return json.loads(data)
+        except Exception:  # Backwards compatibility
+            logger.debug(
+                "Could not successfully download and parse any pre-existing config"
+            )
+            return None

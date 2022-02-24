@@ -86,14 +86,14 @@ class TestGcp:
         mock_blob_list_blob_instance.name = "opta_config/test-config"
         mock_storage_instance.list_buckets.return_value = [mock_bucket_instance]
         mock_storage_instance.list_blobs.return_value = [mock_blob_list_blob_instance]
-        mock_response_blob = mocker.Mock(spec=Blob)
-        mocker.patch("opta.core.gcp.storage.Blob", return_value=mock_response_blob)
-        mocker.patch(
-            "opta.core.gcp.storage.Blob.download_as_text",
-            return_value="""{"original_spec": "actual_config"}""",
-        )
-        mock_response_blob.download_as_text.return_value = (
-            """{"original_spec": "actual_config"}"""
+        mock_download_remote_config = mocker.patch(
+            "opta.core.gcp.GCP._download_remote_config",
+            return_value={
+                "opta_version": "dev",
+                "date": "test_datetime",
+                "original_spec": "actual_config",
+                "defaults": {},
+            },
         )
 
         mocker_list_bucket_call = mocker.patch(
@@ -105,13 +105,25 @@ class TestGcp:
             return_value=[mock_blob_list_blob_instance],
         )
 
-        detailed_config_map = GCP.get_detailed_config_map()
+        detailed_config_map = GCP.get_all_remote_configs()
 
         mocker_list_bucket_call.assert_called_once()
         mocker_list_blob_call.assert_called_once_with(
             mock_bucket_instance.name, prefix="opta_config/", delimiter="/"
         )
-        assert detailed_config_map == {"test": {"test-config": "actual_config"}}
+        mock_download_remote_config.assert_called_once_with(
+            mock_bucket_instance, mock_blob_list_blob_instance.name
+        )
+        assert detailed_config_map == {
+            "test": {
+                "test-config": {
+                    "opta_version": "dev",
+                    "date": "test_datetime",
+                    "original_spec": "actual_config",
+                    "defaults": {},
+                }
+            }
+        }
 
     def test_get_detailed_config_map_configuration_not_present(
         self, mocker: MockFixture
@@ -133,14 +145,18 @@ class TestGcp:
         mocker_list_blob_call = mocker.patch(
             "opta.core.gcp.storage.Client.list_blobs", return_value=[]
         )
+        mock_download_remote_config = mocker.patch(
+            "opta.core.gcp.GCP._download_remote_config"
+        )
 
-        detailed_config_map = GCP.get_detailed_config_map()
+        detailed_config_map = GCP.get_all_remote_configs()
 
         assert detailed_config_map == {}
         mocker_list_bucket_call.assert_called_once()
         mocker_list_blob_call.assert_called_once_with(
             mock_bucket_instance.name, prefix="opta_config/", delimiter="/"
         )
+        mock_download_remote_config.assert_not_called()
 
     def test_get_detailed_config_map_bucket_not_present(
         self, mocker: MockFixture
@@ -161,9 +177,13 @@ class TestGcp:
         mocker_list_blob_call = mocker.patch(
             "opta.core.gcp.storage.Client.list_blobs", return_value=[]
         )
+        mock_download_remote_config = mocker.patch(
+            "opta.core.gcp.GCP._download_remote_config"
+        )
 
-        detailed_config_map = GCP.get_detailed_config_map()
+        detailed_config_map = GCP.get_all_remote_configs()
 
         assert detailed_config_map == {}
         mocker_list_bucket_call.assert_called_once()
         mocker_list_blob_call.assert_not_called()
+        mock_download_remote_config.assert_not_called()
