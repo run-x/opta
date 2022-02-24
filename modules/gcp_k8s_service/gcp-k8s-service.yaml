@@ -188,7 +188,7 @@ inputs:
     default: []
 extra_validators:
   cron_job:
-    command: list(required=True)
+    commands: list(required=True)
     schedule: str(required=True)
   toleration:
     key: str(required=True)
