@@ -1,4 +1,4 @@
-{{- if not (and (eq "0" .Values.autoscaling.minReplicas) (eq "0" .Values.autoscaling.maxReplicas)) }}
+{{- if ne "0" .Values.autoscaling.maxReplicas }}
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
