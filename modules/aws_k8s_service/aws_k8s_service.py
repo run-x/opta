@@ -42,6 +42,19 @@ class AwsK8sServiceProcessor(
                 {"name": x, "value": y} for x, y in current_envars.items()
             ]
 
+        # Min containers must be less than or equal to max containers and can only be 0 if both are
+        min_containers = self.module.data.get("min_containers")
+        max_containers = self.module.data.get("max_containers")
+        if min_containers is not None and max_containers is not None:
+            if min_containers > max_containers:
+                raise UserErrors(
+                    "Min containers must be less than or equal to max containers"
+                )
+            if min_containers == 0 and max_containers != 0:
+                raise UserErrors(
+                    "Min containers can only equal 0 if max containers equals zero"
+                )
+
         # Handle links
         for link_data in self.module.data.get("links", []):
             if type(link_data) is str:

@@ -1,5 +1,6 @@
 {{- if eq (len .Values.persistentStorage) 0 }}
 {{- if .Values.deployPods }}
+{{- if not (and (eq "0" .Values.autoscaling.minReplicas) (eq "0" .Values.autoscaling.maxReplicas)) }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -114,5 +115,6 @@ spec:
           effect: {{ default "NoSchedule" $toleration.effect | quote }}
       {{ end }}
       {{- end }}
+{{- end }}
 {{- end }}
 {{- end }}
