@@ -11,6 +11,9 @@ from opta.utils import logger
 
 @click.group(cls=DYMGroup)
 def config() -> None:
+    """
+    (Beta) Manage opta configurations.
+    """
     pass
 
 
@@ -25,6 +28,16 @@ cloud_option = click.option(
 @config.command()
 @cloud_option
 def view(cloud: str) -> None:
+    """
+    View the opta configuration file for a given cloud provider.
+    Use the current cloud credentials to fetch the remote storage.
+
+    Examples:
+
+        - View opta configurations:
+
+            opta config view --cloud aws
+    """
     if cloud.lower() == "azurerm":
         raise UserErrors("Currently AzureRM isn't supported.")
     cloud_client: CloudClient = __get_cloud_client(cloud)
@@ -33,7 +46,7 @@ def view(cloud: str) -> None:
         for bucket, detailed_configs in detailed_config_map.items():
             for config_name, actual_config in detailed_configs.items():
                 logger.info(
-                    f"# Bucket Name: {bucket}\n# Config Name: {config_name}\n\n{actual_config}"
+                    f"# Bucket Name: {bucket}\n# Config Name: {config_name}\n{actual_config}\n\n"
                 )
 
 
