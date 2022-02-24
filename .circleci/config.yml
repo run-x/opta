@@ -2410,12 +2410,16 @@ workflows:
       - aws-tg-create-env:
           requires:
             - aws-generate-terraform-language-files
+      - aws-tg-test-service-http:
+          requires:
+            - aws-tg-create-env
       - aws-tg-test-other-modules-plan:
           requires:
             - aws-tg-create-env
       - aws-tg-destroy-env:
           requires:
             - aws-tg-test-service-http
+            - aws-tg-test-other-modules-plan
       - gcp-generate-terraform-language-files:
           requires:
             - build-opta-binary
