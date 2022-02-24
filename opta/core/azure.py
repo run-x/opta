@@ -1,12 +1,10 @@
 import base64
 from contextlib import redirect_stderr
 from io import StringIO
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, Optional
 
 from azure.core.exceptions import ClientAuthenticationError, ResourceNotFoundError
 from azure.identity import DefaultAzureCredential
-from azure.mgmt.resource import SubscriptionClient
-from azure.mgmt.storage import StorageManagementClient
 from azure.storage.blob import BlobServiceClient, ContainerClient, StorageStreamDownloader
 
 from opta.core.cloud_client import CloudClient
@@ -50,7 +48,17 @@ class Azure(CloudClient):
             credential=credentials,
         )
         config_path = f"opta_config/{self.layer.name}"
-        return self.__download_remote_config(storage_client, config_path)
+        try:
+            download_stream: StorageStreamDownloader = storage_client.download_blob(
+                config_path
+            )
+            data = download_stream.readall()
+            return json.loads(data)
+        except Exception:  # Backwards compatibility
+            logger.debug(
+                "Could not successfully download and parse any pre-existing config"
+            )
+            return None
 
     # Upload the current opta config to the state bucket, under opta_config/.
     def upload_opta_config(self) -> None:
@@ -162,58 +170,3 @@ class Azure(CloudClient):
             return True
         except ResourceNotFoundError:
             return False
-
-    @classmethod
-    def get_detailed_config_map(cls,) -> Dict[str, Dict[str, "StructuredConfig"]]:
-        prefix = "opta_config/"
-        subscription_client = SubscriptionClient(cls.get_credentials())
-        opta_config_detailed_map = {}
-        for subscription in subscription_client.subscriptions.list():
-            storage_client = StorageManagementClient(
-                cls.get_credentials(), subscription.subscription_id
-            )
-            try:
-                for storage in storage_client.storage_accounts.list():
-                    detailed_configs = {}
-                    container_client = ContainerClient(
-                        account_url=f"https://{storage.name}.blob.core.windows.net",
-                        container_name="tfstate",
-                        credential=cls.get_credentials(),
-                    )
-                    try:
-                        for response in container_client.list_blobs(
-                            name_starts_with=prefix
-                        ):
-                            structured_config = cls.__download_remote_config(
-                                container_client, response.name
-                            )
-                            if structured_config:
-                                detailed_configs[
-                                    response.name[len(prefix) :]
-                                ] = structured_config
-
-                        if detailed_configs:
-                            opta_config_detailed_map[storage.name] = detailed_configs
-                    except Exception as e:
-                        logger.debug(
-                            f"Could not list blobs in container {storage.name}: {e}"
-                        )
-            except Exception as e:
-                logger.debug(f"Could not list storage accounts: {e}")
-        return opta_config_detailed_map
-
-    @staticmethod
-    def __download_remote_config(
-        storage_client: ContainerClient, config_path: str
-    ) -> Optional["StructuredConfig"]:
-        try:
-            download_stream: StorageStreamDownloader = storage_client.download_blob(
-                config_path
-            )
-            data = download_stream.readall()
-            return json.loads(data)
-        except Exception:  # Backwards compatibility
-            logger.debug(
-                "Could not successfully download and parse any pre-existing config"
-            )
-            return None
