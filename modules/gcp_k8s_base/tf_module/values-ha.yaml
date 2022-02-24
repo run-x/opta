@@ -66,3 +66,20 @@ tapResources: *controller_resources
 
 # web configuration
 webResources: *controller_resources
+
+# proxy injector configuration
+proxyInjector:
+  # -- Namespace selector used by admission webhook. If not set defaults to all
+  # namespaces without the annotation
+  # config.linkerd.io/admission-webhooks=disabled
+  namespaceSelector:
+    matchExpressions:
+    - key: config.linkerd.io/admission-webhooks
+      operator: NotIn
+      values:
+      - disabled
+    - key: kubernetes.io/metadata.name
+      operator: NotIn
+      values:
+      - kube-system
+    
