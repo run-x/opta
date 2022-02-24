@@ -17,5 +17,5 @@ def test_config_view(mocker: MockFixture) -> None:
     result = runner.invoke(view, ["--cloud", "aws"])
     assert result.exit_code == 0
     mock_logger.info.assert_called_once_with(
-        f"# Bucket Name: {mock_bucket}\n# Config Name: {mock_config}\n\n{mock_yaml_config}"
+        f"# Bucket Name: {mock_bucket}\n# Config Name: {mock_config}\n{mock_yaml_config}\n\n"
     )
