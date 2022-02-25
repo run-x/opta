@@ -32,9 +32,15 @@ outputs:
   - name: vpc_id
     export: true
     description:  The ID of the [Azure virtual network](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-overview) we created for this environment
+  - name: vpc_name
+    export: true
+    description:  The name of the [Azure virtual network](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-overview) we created for this environment
   - name: private_subnet_id
     export: true
     description: The ID of the private [subnet](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-subnet) we setup for your environment
+  - name: private_subnet_name
+    export: true
+    description: The name of the private [subnet](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-subnet) we setup for your environment
   - name: acr_id
     export: true
     description: The ID of the [Azure container registry](https://azure.microsoft.com/en-us/services/container-registry/) created for this environment

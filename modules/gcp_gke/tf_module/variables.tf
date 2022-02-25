@@ -15,6 +15,10 @@ variable "module_name" {
   type        = string
 }
 
+variable "cluster_name" {
+  type = string
+}
+
 variable "gke_channel" {
   type    = string
   default = "REGULAR"

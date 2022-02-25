@@ -66,6 +66,7 @@ PROCESSOR_DICT: Dict[str, str] = {
     "cloudfront-distribution": "CloudfrontDistributionProcessor",
     "lambda-function": "LambdaFunctionProcessor",
     "k8s-manifest": "K8smanifestProcessor",
+    "azure-aks": "AzureAksProcessor",
 }
 
 

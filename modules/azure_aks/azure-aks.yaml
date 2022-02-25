@@ -14,6 +14,18 @@ inputs:
     user_facing: false
     description: Opta Module name
     default: None
+  - name: vpc_name
+    user_facing: false
+    description: Name of the vpc
+    default: None
+  - name: private_subnet_name
+    user_facing: false
+    description: Name of the private subnet
+    default: None
+  - name: cluster_name
+    user_facing: false
+    description: Name to give to cluster
+    default: None
   - name: max_nodes
     user_facing: true
     validator: any(str(), int(), required=False)

@@ -1,5 +1,6 @@
 import base64
 import datetime
+import json
 import time
 import traceback
 from logging import DEBUG
@@ -13,6 +14,7 @@ from typing import TYPE_CHECKING, Dict, FrozenSet, List, Optional, Set, Tuple
 import boto3
 from botocore.config import Config
 from colored import attr, fg
+from google.api_core.exceptions import NotFound
 from google.cloud.container_v1 import ClusterManagerClient
 from kubernetes.client import (
     ApiException,
@@ -43,7 +45,6 @@ from mypy_boto3_eks import EKSClient
 
 from opta.constants import REDS, yaml
 from opta.core.gcp import GCP
-from opta.core.terraform import get_terraform_outputs
 from opta.exceptions import UserErrors
 from opta.nice_subprocess import nice_run
 from opta.utils import logger
@@ -221,6 +222,12 @@ def _gcp_set_kube_config(layer: "Layer") -> None:
     credentials = gcp.get_credentials()[0]
     region, project_id = _gcp_get_cluster_env(layer.root())
     cluster_name = get_cluster_name(layer.root())
+
+    if not does_cluster_exist(layer.root()):
+        raise Exception(
+            "The GKE cluster name could not be determined -- please make sure it has been applied in the environment."
+        )
+
     gke_client = ClusterManagerClient(credentials=credentials)
     cluster_data = gke_client.get_cluster(
         name=f"projects/{project_id}/locations/{region}/clusters/{cluster_name}"
@@ -286,7 +293,7 @@ def _azure_set_kube_config(layer: "Layer") -> None:
     rg_name = providers["terraform"]["backend"]["azurerm"]["resource_group_name"]
     cluster_name = get_cluster_name(root_layer)
 
-    if not cluster_name:
+    if not does_cluster_exist(root_layer):
         raise Exception(
             "The AKS cluster name could not be determined -- please make sure it has been applied in the environment."
         )
@@ -324,7 +331,7 @@ def _aws_set_kube_config(layer: "Layer") -> None:
     root_layer = layer.root()
     cluster_name = get_cluster_name(root_layer)
 
-    if cluster_name is None:
+    if not does_cluster_exist(root_layer):
         raise Exception(
             "The EKS cluster name could not be determined -- please make sure it has been applied in the environment."
         )
@@ -387,12 +394,102 @@ def _aws_set_kube_config(layer: "Layer") -> None:
     return
 
 
-def get_cluster_name(layer: "Layer") -> Optional[str]:
-    outputs = get_terraform_outputs(layer)
-    cluster_name = outputs.get("parent.k8s_cluster_name") or outputs.get(
-        "k8s_cluster_name"
-    )
-    return cluster_name
+def get_cluster_name(layer: "Layer") -> str:
+    return f"opta-{layer.root().name}"
+
+
+def does_cluster_exist(layer: "Layer") -> bool:
+    if layer.is_stateless_mode() is True:
+        if logger.isEnabledFor(DEBUG):
+            logger.debug(
+                "does_cluster_exist called in stateless mode, verify implementation. See stack trace below:"
+            )
+            traceback.print_stack()
+
+    if layer.cloud == "aws":
+        return _aws_does_cluster_exist(layer)
+    elif layer.cloud == "google":
+        return _gcp_does_cluster_exist(layer)
+    elif layer.cloud == "azurerm":
+        return _azure_does_cluster_exist(layer)
+    elif layer.cloud == "local":
+        return _local_does_cluster_exist(layer)
+    else:
+        raise Exception(
+            f"Unknown cloud {layer.cloud}. Can not handle determining if cluster exists"
+        )
+
+
+def _local_does_cluster_exist(layer: "Layer") -> bool:
+    home_dir = expanduser("~")
+    try:
+        output: str = nice_run(
+            [f"{home_dir}/.opta/local/kind", "get", "clusters"],
+            check=True,
+            capture_output=True,
+        ).stdout
+        return output.strip() != ""
+    except Exception:
+        return False
+
+
+def _azure_does_cluster_exist(layer: "Layer") -> bool:
+    root_layer = layer.root()
+    providers = root_layer.gen_providers(0)
+
+    ensure_installed("az")
+
+    rg_name = providers["terraform"]["backend"]["azurerm"]["resource_group_name"]
+    subscription_id = providers["provider"]["azurerm"]["subscription_id"]
+    cluster_name = get_cluster_name(root_layer)
+    try:
+        output = nice_run(
+            [
+                "az",
+                "aks",
+                "list",
+                "--subscription",
+                subscription_id,
+                "--resource-group",
+                rg_name,
+            ],
+            capture_output=True,
+            check=True,
+        ).stdout
+        output_list = json.loads(output)
+        return any([x.get("name") == cluster_name for x in output_list])
+    except Exception:
+        return False
+
+
+def _gcp_does_cluster_exist(layer: "Layer") -> bool:
+    gcp = GCP(layer=layer)
+    credentials = gcp.get_credentials()[0]
+    region, project_id = _gcp_get_cluster_env(layer.root())
+    cluster_name = get_cluster_name(layer.root())
+    gke_client = ClusterManagerClient(credentials=credentials)
+    try:
+        gke_client.get_cluster(
+            name=f"projects/{project_id}/locations/{region}/clusters/{cluster_name}"
+        )
+        return True
+    except NotFound:
+        return False
+
+
+def _aws_does_cluster_exist(layer: "Layer") -> bool:
+    region, account_id = _aws_get_cluster_env(layer.root())
+
+    # Get the environment's account details from the opta config
+    root_layer = layer.root()
+    cluster_name = get_cluster_name(root_layer)
+    client: EKSClient = boto3.client("eks", config=Config(region_name=region))
+
+    try:
+        client.describe_cluster(name=cluster_name)
+        return True
+    except client.exceptions.ResourceNotFoundException:
+        return False
 
 
 def _aws_get_cluster_env(root_layer: "Layer") -> Tuple[str, str]:
