@@ -29,6 +29,7 @@ cloud_option = click.option(
 def view(cloud: str) -> None:
     """
     View the opta configuration file for a given cloud provider
+
     Use the current cloud credentials to fetch the remote opta config file
     """
     if cloud.lower() == "azurerm":
@@ -46,8 +47,8 @@ def view(cloud: str) -> None:
 def __get_cloud_client(cloud: str) -> CloudClient:
     cloud_client: CloudClient
     if cloud.lower() == "aws":
-        cloud_client = AWS  # type: ignore
+        cloud_client = AWS()
     elif cloud.lower() == "google":
-        cloud_client = GCP  # type: ignore
+        cloud_client = GCP()
 
-    return cloud_client  # type: ignore
+    return cloud_client

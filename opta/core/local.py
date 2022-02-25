@@ -1,8 +1,9 @@
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 from opta.core.cloud_client import CloudClient
+from opta.exceptions import UserErrors
 from opta.utils import json, logger
 
 if TYPE_CHECKING:
@@ -60,3 +61,6 @@ class Local(CloudClient):
 
     def get_terraform_lock_id(self) -> str:
         return ""
+
+    def get_all_remote_configs(self) -> Dict[str, Dict[str, "StructuredConfig"]]:
+        raise UserErrors("Feature Unsupported for Local")

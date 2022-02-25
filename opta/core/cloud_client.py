@@ -6,8 +6,9 @@ if TYPE_CHECKING:
 
 
 class CloudClient(ABC):
-    def __init__(self, layer: "Layer"):
-        self.layer = layer
+    def __init__(self, layer: Optional["Layer"] = None):
+        if layer:
+            self.layer = layer
 
     @abstractmethod
     def get_remote_config(self) -> Optional["StructuredConfig"]:
@@ -29,6 +30,6 @@ class CloudClient(ABC):
     def get_terraform_lock_id(self) -> str:
         raise NotImplementedError()
 
-    @classmethod
-    def get_all_remote_configs(cls) -> Dict[str, Dict[str, "StructuredConfig"]]:
+    @abstractmethod
+    def get_all_remote_configs(self) -> Dict[str, Dict[str, "StructuredConfig"]]:
         pass

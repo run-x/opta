@@ -26,8 +26,9 @@ class AwsArn(TypedDict):
 
 
 class AWS(CloudClient):
-    def __init__(self, layer: "Layer"):
-        self.region = layer.root().providers["aws"]["region"]
+    def __init__(self, layer: Optional["Layer"] = None):
+        if layer:
+            self.region = layer.root().providers["aws"]["region"]
         super().__init__(layer)
 
     def __get_dynamodb(self, dynamodb_table: str) -> DynamoDBClient:
@@ -161,34 +162,32 @@ class AWS(CloudClient):
             Key={"LockID": {"S": f"{bucket}/{self.layer.name}"}},
         )
 
-    @classmethod
-    def get_all_remote_configs(cls) -> Dict[str, Dict[str, "StructuredConfig"]]:
+    def get_all_remote_configs(self) -> Dict[str, Dict[str, "StructuredConfig"]]:
         prefix = "opta_config/"
         s3 = boto3.client("s3")
-        opta_config_detailed_map = {}
-        for aws_bucket in cls._get_bucket_list():
-            detailed_configs = {}
+        remote_configs = {}
+        for aws_bucket in self._get_opta_bucket():
+            configs = {}
             response = s3.list_objects(Bucket=aws_bucket, Prefix=prefix, Delimiter="/")
             if "Contents" in response:
                 for data in response["Contents"]:
-                    structured_config = cls._download_remote_config(
+                    structured_config = self._download_remote_config(
                         s3, aws_bucket, data["Key"]
                     )
                     if structured_config:
-                        detailed_configs[data["Key"][len(prefix) :]] = structured_config
-                opta_config_detailed_map[aws_bucket] = detailed_configs
-        return opta_config_detailed_map
+                        configs[data["Key"][len(prefix) :]] = structured_config
+                remote_configs[aws_bucket] = configs
+        return remote_configs
 
     @staticmethod
-    def _get_bucket_list() -> List[str]:
+    def _get_opta_bucket() -> List[str]:
         s3 = boto3.client("s3")
-        aws_bucket_data = s3.list_buckets().get("Buckets", [])
-        return list(
-            filter(
-                lambda data: (data.count("opta-tf-state")),
-                [data["Name"] for data in aws_bucket_data],
-            )
-        )
+        aws_bucket = s3.list_buckets().get("Buckets", [])
+        return [
+            bucket["Name"]
+            for bucket in aws_bucket
+            if bucket["Name"].startswith("opta-tf-state")
+        ]
 
     @staticmethod
     def get_all_versions(bucket: str, filename: str, region: str) -> List[str]:

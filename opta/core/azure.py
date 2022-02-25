@@ -1,13 +1,14 @@
 import base64
 from contextlib import redirect_stderr
 from io import StringIO
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 from azure.core.exceptions import ClientAuthenticationError, ResourceNotFoundError
 from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient, ContainerClient, StorageStreamDownloader
 
 from opta.core.cloud_client import CloudClient
+from opta.exceptions import UserErrors
 from opta.utils import json, logger
 
 if TYPE_CHECKING:
@@ -170,3 +171,6 @@ class Azure(CloudClient):
             return True
         except ResourceNotFoundError:
             return False
+
+    def get_all_remote_configs(self) -> Dict[str, Dict[str, "StructuredConfig"]]:
+        raise UserErrors("Feature Unsupported for Azure")

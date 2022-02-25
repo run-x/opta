@@ -72,7 +72,7 @@ class TestGcp:
             f"{gcp_layer.name}/default.tflock"
         )
 
-    def test_get_detailed_config_map_configuration_present(
+    def test_get_all_remote_configs_configuration_present(
         self, mocker: MockFixture
     ) -> None:
         mocker.patch(
@@ -105,7 +105,7 @@ class TestGcp:
             return_value=[mock_blob_list_blob_instance],
         )
 
-        detailed_config_map = GCP.get_all_remote_configs()
+        detailed_config_map = GCP().get_all_remote_configs()
 
         mocker_list_bucket_call.assert_called_once()
         mocker_list_blob_call.assert_called_once_with(
@@ -125,7 +125,7 @@ class TestGcp:
             }
         }
 
-    def test_get_detailed_config_map_configuration_not_present(
+    def test_get_all_remote_configs_configuration_not_present(
         self, mocker: MockFixture
     ) -> None:
         mocker.patch(
@@ -149,7 +149,7 @@ class TestGcp:
             "opta.core.gcp.GCP._download_remote_config"
         )
 
-        detailed_config_map = GCP.get_all_remote_configs()
+        detailed_config_map = GCP().get_all_remote_configs()
 
         assert detailed_config_map == {}
         mocker_list_bucket_call.assert_called_once()
@@ -158,9 +158,7 @@ class TestGcp:
         )
         mock_download_remote_config.assert_not_called()
 
-    def test_get_detailed_config_map_bucket_not_present(
-        self, mocker: MockFixture
-    ) -> None:
+    def test_get_all_remote_configs_bucket_not_present(self, mocker: MockFixture) -> None:
         mocker.patch(
             "opta.core.gcp.default",
             return_value=(mocker.Mock(spec=Credentials), "dummy_project_id"),
@@ -181,7 +179,7 @@ class TestGcp:
             "opta.core.gcp.GCP._download_remote_config"
         )
 
-        detailed_config_map = GCP.get_all_remote_configs()
+        detailed_config_map = GCP().get_all_remote_configs()
 
         assert detailed_config_map == {}
         mocker_list_bucket_call.assert_called_once()

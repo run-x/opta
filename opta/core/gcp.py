@@ -23,9 +23,10 @@ class GCP(CloudClient):
     project_id: Optional[str] = None
     credentials: Optional[Credentials] = None
 
-    def __init__(self, layer: "Layer"):
-        self.layer = layer
-        self.region = layer.root().providers["google"]["region"]
+    def __init__(self, layer: Optional["Layer"] = None):
+        if layer:
+            self.layer = layer
+            self.region = layer.root().providers["google"]["region"]
         super().__init__(layer)
 
     @classmethod
@@ -168,23 +169,22 @@ class GCP(CloudClient):
             return False
         return True
 
-    @classmethod
-    def get_all_remote_configs(cls) -> Dict[str, Dict[str, "StructuredConfig"]]:
+    def get_all_remote_configs(self) -> Dict[str, Dict[str, "StructuredConfig"]]:
         prefix = "opta_config/"
-        credentials, project_id = cls.get_credentials()
+        credentials, project_id = self.get_credentials()
         storage_client = storage.Client(project=project_id, credentials=credentials)
-        opta_config_detailed_map = {}
+        opta_configs = {}
         for bucket in storage_client.list_buckets(prefix="opta-tf-state"):
-            detailed_config = {}
+            config = {}
             for response in storage_client.list_blobs(
                 bucket.name, prefix=prefix, delimiter="/"
             ):
-                structured_config = cls._download_remote_config(bucket, response.name)
+                structured_config = self._download_remote_config(bucket, response.name)
                 if structured_config:
-                    detailed_config[response.name[len(prefix) :]] = structured_config
-            if detailed_config:
-                opta_config_detailed_map[bucket.name] = detailed_config
-        return opta_config_detailed_map
+                    config[response.name[len(prefix) :]] = structured_config
+            if config:
+                opta_configs[bucket.name] = config
+        return opta_configs
 
     @staticmethod
     def _download_remote_config(bucket: Bucket, key: str) -> Optional["StructuredConfig"]:
