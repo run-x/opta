@@ -405,6 +405,7 @@ def cluster_exist(layer: "Layer") -> bool:
                 "cluster_exist called in stateless mode, verify implementation. See stack trace below:"
             )
             traceback.print_stack()
+            return False
 
     if layer.cloud == "aws":
         return _aws_cluster_exist(layer)
