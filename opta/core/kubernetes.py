@@ -179,7 +179,7 @@ def cluster_exist(layer: "Layer") -> bool:
             )
             traceback.print_stack()
             return False
-    layer.get_cloud_client().cluster_exist()
+    return layer.get_cloud_client().cluster_exist()
 
 
 def load_opta_kube_config() -> None:
