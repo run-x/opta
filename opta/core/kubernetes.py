@@ -37,10 +37,6 @@ from kubernetes.watch import Watch
 
 import opta.constants as constants
 from opta.constants import GENERATED_KUBE_CONFIG_DIR, REDS, yaml
-from opta.core.aws import AWS
-from opta.core.azure import Azure
-from opta.core.gcp import GCP
-from opta.core.local import Local
 from opta.exceptions import UserErrors
 from opta.utils import logger
 from opta.utils.dependencies import ensure_installed
@@ -74,18 +70,7 @@ def set_kube_config(layer: "Layer") -> None:
     # it anyways since user must install it to access the cluster.
     ensure_installed("kubectl")
     makedirs(GENERATED_KUBE_CONFIG_DIR, exist_ok=True)
-    if layer.cloud == "aws":
-        AWS(layer).set_kube_config()
-    elif layer.cloud == "google":
-        GCP(layer).set_kube_config()
-    elif layer.cloud == "azurerm":
-        Azure(layer).set_kube_config()
-    elif layer.cloud == "local":
-        Local(layer).set_kube_config()
-    else:
-        raise Exception(
-            f"Unknown cloud {layer.cloud}. Can not handle setting kube config"
-        )
+    layer.get_cloud_client().set_kube_config()
 
 
 def purge_opta_kube_config(layer: "Layer") -> None:
@@ -194,19 +179,7 @@ def cluster_exist(layer: "Layer") -> bool:
             )
             traceback.print_stack()
             return False
-
-    if layer.cloud == "aws":
-        return AWS(layer).cluster_exist()
-    elif layer.cloud == "google":
-        return GCP(layer).cluster_exist()
-    elif layer.cloud == "azurerm":
-        return Azure(layer).cluster_exist()
-    elif layer.cloud == "local":
-        return Local(layer).cluster_exist()
-    else:
-        raise Exception(
-            f"Unknown cloud {layer.cloud}. Can not handle determining if cluster exists"
-        )
+    layer.get_cloud_client().cluster_exist()
 
 
 def load_opta_kube_config() -> None:

@@ -26,7 +26,10 @@ from modules.base import ModuleProcessor
 from modules.runx.runx import RunxProcessor
 from opta.constants import GENERATED_KUBE_CONFIG_DIR, MODULE_DEPENDENCY, REGISTRY, VERSION
 from opta.core.aws import AWS
+from opta.core.azure import Azure
+from opta.core.cloud_client import CloudClient
 from opta.core.gcp import GCP
+from opta.core.local import Local
 from opta.core.validator import validate_yaml
 from opta.crash_reporter import CURRENT_CRASH_REPORTER
 from opta.exceptions import UserErrors
@@ -169,6 +172,20 @@ class Layer:
             f"{GENERATED_KUBE_CONFIG_DIR}/kubeconfig-{self.root().name}-{self.cloud}.yaml"
         )
         return config_file_name
+
+    def get_cloud_client(self) -> CloudClient:
+        if self.cloud == "aws":
+            return AWS(self)
+        elif self.cloud == "google":
+            return GCP(self)
+        elif self.cloud == "azurerm":
+            return Azure(self)
+        elif self.cloud == "local":
+            return Local(self)
+        else:
+            raise Exception(
+                f"Unknown cloud {self.cloud}. Can not handle getting the cloud client"
+            )
 
     @classmethod
     def load_from_yaml(
