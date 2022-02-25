@@ -59,8 +59,10 @@ class TestKubernetes:
             },
         }
         mocked_terraform_output = mocker.patch(
-            "opta.core.kubernetes.get_terraform_outputs",
-            return_value={"k8s_cluster_name": "mocked_cluster_name"},
+            "opta.core.kubernetes.get_cluster_name", return_value="mocked_cluster_name",
+        )
+        mocker.patch(
+            "opta.core.kubernetes.does_cluster_exist", return_value=True,
         )
         mocked_nice_run = mocker.patch("opta.core.kubernetes.nice_run",)
 
@@ -110,8 +112,10 @@ class TestKubernetes:
         layer.providers = {"aws": {"region": "us-east-1", "account_id": "111111111111"}}
         layer.root.return_value = layer
         mocked_terraform_output = mocker.patch(
-            "opta.core.kubernetes.get_terraform_outputs",
-            return_value={"k8s_cluster_name": "mocked_cluster_name"},
+            "opta.core.kubernetes.get_cluster_name", return_value="mocked_cluster_name",
+        )
+        mocker.patch(
+            "opta.core.kubernetes.does_cluster_exist", return_value=True,
         )
         mocked_file = mocker.patch(
             "opta.core.kubernetes.open", mocker.mock_open(read_data="")
