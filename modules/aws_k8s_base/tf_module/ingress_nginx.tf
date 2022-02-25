@@ -63,6 +63,10 @@ resource "helm_release" "ingress-nginx" {
           }
         }
         containerPort : local.container_ports
+        ingressClassResource: {
+          default: true
+        }
+
         service : {
           loadBalancerSourceRanges : ["0.0.0.0/0"]
           externalTrafficPolicy : "Local"
