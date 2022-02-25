@@ -362,7 +362,7 @@ jobs:
             --directory $HOME/generated-tf-files-aws \
             --auto-approve
             ./dist/opta/opta generate-terraform \
-            --config ./.circleci/ci-tests/terraform-generated-aws/service-http.yaml \
+            --config ./.circleci/ci-tests/terraform-generated-aws/service-hello-opta.yaml \
             --directory $HOME/generated-tf-files-aws \
             --auto-approve
       - persist_to_workspace:
@@ -403,11 +403,11 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          name: "Create Terraform Generated Http Service"
+          name: "Create Terraform Generated Hello Opta Service"
           command: |
             cd $HOME/generated-tf-files-aws
             terraform init
-            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.app
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello
             terraform apply -compact-warnings -auto-approve tf.plan
       - run:
           name: "Sleep 120 seconds"
@@ -420,17 +420,17 @@ jobs:
             terraform output -json >> terraform_output.json
             export LOAD_BALANCER=`cat terraform_output.json | jq -r '.load_balancer_raw_dns' |jq -r '.value'`
             echo $LOAD_BALANCER
-            curl $LOAD_BALANCER
+            curl "$LOAD_BALANCER/hello"
             echo "1"
       - run:
           name: "Sleep 120 seconds"
           command: |
             sleep 120
       - run:
-          name: "Destroy Terraform Generated Http Service"
+          name: "Destroy Terraform Generated Hello Opta Service"
           command: |
             cd $HOME/generated-tf-files-aws
-            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.app -destroy
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello -destroy
             terraform apply -compact-warnings -auto-approve tf.plan
       - persist_to_workspace:
           root: ~/
@@ -438,7 +438,7 @@ jobs:
             - generated-tf-files-aws/tfstate/awsenv-tg.tfstate
       - store_artifacts:
           path: ../generated-tf-files-aws/tfstate/awsenv-tg.tfstate
-          destination: tfstate-after-apply-svc-cnd.tfstate
+          destination: tfstate-after-apply-hello-cnd.tfstate
 
   aws-tg-test-other-modules-plan:
     executor: ubuntu-machine
