@@ -223,7 +223,7 @@ def _gcp_set_kube_config(layer: "Layer") -> None:
     region, project_id = _gcp_get_cluster_env(layer.root())
     cluster_name = get_cluster_name(layer.root())
 
-    if not does_cluster_exist(layer.root()):
+    if not cluster_exist(layer.root()):
         raise Exception(
             "The GKE cluster name could not be determined -- please make sure it has been applied in the environment."
         )
@@ -293,7 +293,7 @@ def _azure_set_kube_config(layer: "Layer") -> None:
     rg_name = providers["terraform"]["backend"]["azurerm"]["resource_group_name"]
     cluster_name = get_cluster_name(root_layer)
 
-    if not does_cluster_exist(root_layer):
+    if not cluster_exist(root_layer):
         raise Exception(
             "The AKS cluster name could not be determined -- please make sure it has been applied in the environment."
         )
@@ -331,7 +331,7 @@ def _aws_set_kube_config(layer: "Layer") -> None:
     root_layer = layer.root()
     cluster_name = get_cluster_name(root_layer)
 
-    if not does_cluster_exist(root_layer):
+    if not cluster_exist(root_layer):
         raise Exception(
             "The EKS cluster name could not be determined -- please make sure it has been applied in the environment."
         )
@@ -398,29 +398,29 @@ def get_cluster_name(layer: "Layer") -> str:
     return f"opta-{layer.root().name}"
 
 
-def does_cluster_exist(layer: "Layer") -> bool:
+def cluster_exist(layer: "Layer") -> bool:
     if layer.is_stateless_mode() is True:
         if logger.isEnabledFor(DEBUG):
             logger.debug(
-                "does_cluster_exist called in stateless mode, verify implementation. See stack trace below:"
+                "cluster_exist called in stateless mode, verify implementation. See stack trace below:"
             )
             traceback.print_stack()
 
     if layer.cloud == "aws":
-        return _aws_does_cluster_exist(layer)
+        return _aws_cluster_exist(layer)
     elif layer.cloud == "google":
-        return _gcp_does_cluster_exist(layer)
+        return _gcp_cluster_exist(layer)
     elif layer.cloud == "azurerm":
-        return _azure_does_cluster_exist(layer)
+        return _azure_cluster_exist(layer)
     elif layer.cloud == "local":
-        return _local_does_cluster_exist(layer)
+        return _local_cluster_exist(layer)
     else:
         raise Exception(
             f"Unknown cloud {layer.cloud}. Can not handle determining if cluster exists"
         )
 
 
-def _local_does_cluster_exist(layer: "Layer") -> bool:
+def _local_cluster_exist(layer: "Layer") -> bool:
     home_dir = expanduser("~")
     try:
         output: str = nice_run(
@@ -433,7 +433,7 @@ def _local_does_cluster_exist(layer: "Layer") -> bool:
         return False
 
 
-def _azure_does_cluster_exist(layer: "Layer") -> bool:
+def _azure_cluster_exist(layer: "Layer") -> bool:
     root_layer = layer.root()
     providers = root_layer.gen_providers(0)
 
@@ -462,7 +462,7 @@ def _azure_does_cluster_exist(layer: "Layer") -> bool:
         return False
 
 
-def _gcp_does_cluster_exist(layer: "Layer") -> bool:
+def _gcp_cluster_exist(layer: "Layer") -> bool:
     gcp = GCP(layer=layer)
     credentials = gcp.get_credentials()[0]
     region, project_id = _gcp_get_cluster_env(layer.root())
@@ -477,7 +477,7 @@ def _gcp_does_cluster_exist(layer: "Layer") -> bool:
         return False
 
 
-def _aws_does_cluster_exist(layer: "Layer") -> bool:
+def _aws_cluster_exist(layer: "Layer") -> bool:
     region, account_id = _aws_get_cluster_env(layer.root())
 
     # Get the environment's account details from the opta config

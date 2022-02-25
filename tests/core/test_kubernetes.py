@@ -62,7 +62,7 @@ class TestKubernetes:
             "opta.core.kubernetes.get_cluster_name", return_value="mocked_cluster_name",
         )
         mocker.patch(
-            "opta.core.kubernetes.does_cluster_exist", return_value=True,
+            "opta.core.kubernetes.cluster_exist", return_value=True,
         )
         mocked_nice_run = mocker.patch("opta.core.kubernetes.nice_run",)
 
@@ -115,7 +115,7 @@ class TestKubernetes:
             "opta.core.kubernetes.get_cluster_name", return_value="mocked_cluster_name",
         )
         mocker.patch(
-            "opta.core.kubernetes.does_cluster_exist", return_value=True,
+            "opta.core.kubernetes.cluster_exist", return_value=True,
         )
         mocked_file = mocker.patch(
             "opta.core.kubernetes.open", mocker.mock_open(read_data="")

@@ -20,11 +20,7 @@ from opta.core.azure import Azure
 from opta.core.cloud_client import CloudClient
 from opta.core.gcp import GCP
 from opta.core.generator import gen, gen_opta_resource_tags
-from opta.core.kubernetes import (
-    does_cluster_exist,
-    tail_module_log,
-    tail_namespace_events,
-)
+from opta.core.kubernetes import cluster_exist, tail_module_log, tail_namespace_events
 from opta.core.local import Local
 from opta.core.plan_displayer import PlanDisplayer
 from opta.core.terraform import Terraform, get_terraform_outputs
@@ -263,7 +259,7 @@ def _apply(
                 )
                 if (
                     len(service_modules) != 0
-                    and does_cluster_exist(layer.root())
+                    and cluster_exist(layer.root())
                     and stdout_logs
                 ):
                     service_module = service_modules[0]

@@ -9,11 +9,7 @@ from mypy_boto3_ec2.type_defs import NetworkInterfaceTypeDef
 from mypy_boto3_logs import CloudWatchLogsClient
 
 from modules.base import ModuleProcessor
-from opta.core.kubernetes import (
-    does_cluster_exist,
-    get_cluster_name,
-    purge_opta_kube_config,
-)
+from opta.core.kubernetes import cluster_exist, get_cluster_name, purge_opta_kube_config
 from opta.exceptions import UserErrors
 from opta.utils import logger
 
@@ -39,7 +35,7 @@ class AwsEksProcessor(ModuleProcessor):
         purge_opta_kube_config(layer=self.layer)
 
     def pre_hook(self, module_idx: int) -> None:
-        if does_cluster_exist(self.layer.root()):
+        if cluster_exist(self.layer.root()):
             return
         providers = self.layer.gen_providers(0)
         region = providers["provider"]["aws"]["region"]
