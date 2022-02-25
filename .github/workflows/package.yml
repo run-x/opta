@@ -48,7 +48,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.ALL_GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: opta.zip
+          asset_path: dist/opta/opta.zip
           asset_name: opta_linux.zip
           asset_content_type: application/zip
 
@@ -101,7 +101,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.ALL_GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: opta.zip
+          asset_path: dist/opta/opta.zip
           asset_name: opta_centos.zip
           asset_content_type: application/zip
 
@@ -143,6 +143,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.ALL_GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: opta.zip
+          asset_path: dist/opta/opta.zip
           asset_name: opta_mac.zip
           asset_content_type: application/zip
