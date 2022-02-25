@@ -1,6 +1,7 @@
 import os
 import time
-from typing import Dict, Tuple
+from os.path import expanduser
+from typing import Dict, Optional, Tuple
 
 from ruamel.yaml import YAML
 
@@ -71,3 +72,8 @@ OPTA_INSTALL_URL = "https://docs.opta.dev/install.sh"
 successfull_upgrade = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), ".successfull_upgrade"
 )
+
+HOME = expanduser("~")
+GENERATED_KUBE_CONFIG_DIR = f"{HOME}/.opta/kubeconfigs"
+GENERATED_KUBE_CONFIG: Optional[str] = None
+ONE_WEEK_UNIX = 604800

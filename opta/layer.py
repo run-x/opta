@@ -24,7 +24,7 @@ from google.oauth2 import service_account
 
 from modules.base import ModuleProcessor
 from modules.runx.runx import RunxProcessor
-from opta.constants import MODULE_DEPENDENCY, REGISTRY, VERSION
+from opta.constants import GENERATED_KUBE_CONFIG_DIR, MODULE_DEPENDENCY, REGISTRY, VERSION
 from opta.core.aws import AWS
 from opta.core.gcp import GCP
 from opta.core.validator import validate_yaml
@@ -160,6 +160,15 @@ class Layer:
                     "layer. Module names must be unique per layer"
                 )
         self.stateless_mode = stateless_mode
+
+    def get_cluster_name(self) -> str:
+        return f"opta-{self.root().name}"
+
+    def get_kube_config_file_name(self) -> str:
+        config_file_name = (
+            f"{GENERATED_KUBE_CONFIG_DIR}/kubeconfig-{self.root().name}-{self.cloud}.yaml"
+        )
+        return config_file_name
 
     @classmethod
     def load_from_yaml(

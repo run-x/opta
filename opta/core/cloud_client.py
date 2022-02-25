@@ -28,3 +28,11 @@ class CloudClient(ABC):
     @abstractmethod
     def get_terraform_lock_id(self) -> str:
         raise NotImplementedError()
+
+    @abstractmethod
+    def cluster_exist(self) -> bool:
+        raise NotImplementedError()
+
+    @abstractmethod
+    def set_kube_config(self) -> None:
+        raise NotImplementedError()
