@@ -450,25 +450,83 @@ jobs:
       - attach_workspace:
           at: ./
       - run:
-          name: "Generate Terraform Language Files for Other Modules"
+          name: "Generate Terraform Language Files for DocDB"
           command: |
             ./dist/opta/opta generate-terraform \
-            --config ./.circleci/ci-tests/terraform-generated-aws/other-modules.yaml \
+            --config ./.circleci/ci-tests/terraform-generated-aws/module-docdb.yaml \
             --directory $HOME/generated-tf-files-aws \
             --auto-approve
       - run:
-          name: "Plan Terraform Generated Other Modules"
+          name: "Plan Terraform Generated for DocDB"
           command: |
             cd $HOME/generated-tf-files-aws
             terraform init
-            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan \ 
-            -target=module.tgpg \
-            -target=module.tgdocdb \
-            -target=module.tgredishelm \
-            -target=module.tglambdafunction \
-            -target=module.tgmysql \
-            -target=module.tgredis \
-            -target=module.tgbucket
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.tgdocdb
+      - run:
+          name: "Generate Terraform Language Files for Helm Chart"
+          command: |
+            ./dist/opta/opta generate-terraform \
+            --config ./.circleci/ci-tests/terraform-generated-aws/module-helm-chart.yaml \
+            --directory $HOME/generated-tf-files-aws \
+            --auto-approve
+      - run:
+          name: "Plan Terraform Generated for Helm Chart"
+          command: |
+            cd $HOME/generated-tf-files-aws
+            terraform init
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.tghelmchart
+      - run:
+          name: "Generate Terraform Language Files for MySQL"
+          command: |
+            ./dist/opta/opta generate-terraform \
+            --config ./.circleci/ci-tests/terraform-generated-aws/module-mysql.yaml \
+            --directory $HOME/generated-tf-files-aws \
+            --auto-approve
+      - run:
+          name: "Plan Terraform Generated for MySQL"
+          command: |
+            cd $HOME/generated-tf-files-aws
+            terraform init
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.tgmysql
+      - run:
+          name: "Generate Terraform Language Files for Postgres"
+          command: |
+            ./dist/opta/opta generate-terraform \
+            --config ./.circleci/ci-tests/terraform-generated-aws/module-pg.yaml \
+            --directory $HOME/generated-tf-files-aws \
+            --auto-approve
+      - run:
+          name: "Plan Terraform Generated for Postgres"
+          command: |
+            cd $HOME/generated-tf-files-aws
+            terraform init
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.tgpg
+      - run:
+          name: "Generate Terraform Language Files for Redis"
+          command: |
+            ./dist/opta/opta generate-terraform \
+            --config ./.circleci/ci-tests/terraform-generated-aws/module-redis.yaml \
+            --directory $HOME/generated-tf-files-aws \
+            --auto-approve
+      - run:
+          name: "Plan Terraform Generated for Redis"
+          command: |
+            cd $HOME/generated-tf-files-aws
+            terraform init
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.tgredis
+      - run:
+          name: "Generate Terraform Language Files for S3"
+          command: |
+            ./dist/opta/opta generate-terraform \
+            --config ./.circleci/ci-tests/terraform-generated-aws/module-s3.yaml \
+            --directory $HOME/generated-tf-files-aws \
+            --auto-approve
+      - run:
+          name: "Plan Terraform Generated for S3"
+          command: |
+            cd $HOME/generated-tf-files-aws
+            terraform init
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.tgbucket
 
   aws-tg-destroy-env:
     executor: ubuntu-machine

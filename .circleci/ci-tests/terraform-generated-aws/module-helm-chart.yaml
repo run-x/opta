@@ -1,0 +1,12 @@
+environments:
+  - name: env-tg
+    path: "environment.yaml"
+    variables:
+      max_containers: 2
+name: module-helm-chart
+modules:
+  - name: tghelmchart
+    type: helm-chart
+    chart: redis
+    chart_version: "15.3.2"
+    repository: "https://charts.bitnami.com/bitnami"
