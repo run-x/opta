@@ -108,8 +108,8 @@ resource "helm_release" "ingress-nginx" {
             ]
           }
         }
-        ingressClassResource: {
-          default: true
+        ingressClassResource : {
+          default : true
         }
         containerPort : local.container_ports
         service : {
