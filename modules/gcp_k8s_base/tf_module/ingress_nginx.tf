@@ -30,9 +30,6 @@ resource "helm_release" "ingress-nginx" {
           enabled : var.nginx_high_availability ? true : false
           minReplicas : var.nginx_high_availability ? 3 : 1
         }
-        ingressClassResource: {
-          default: true
-        }
         affinity : {
           podAntiAffinity : {
             preferredDuringSchedulingIgnoredDuringExecution : [
@@ -63,6 +60,9 @@ resource "helm_release" "ingress-nginx" {
               }
             ]
           }
+        }
+        ingressClassResource: {
+          default: true
         }
         containerPort : local.container_ports
         service : {
