@@ -466,12 +466,12 @@ jobs:
   aws-tg-test-other-modules-plan:
     executor: ubuntu-machine
     steps:
-      - checkout-opta
-      - install-opta-dependencies
-      - attach_workspace:
-          at: ~/
-      - attach_workspace:
-          at: ./
+#      - checkout-opta
+#      - install-opta-dependencies
+#      - attach_workspace:
+#          at: ~/
+#      - attach_workspace:
+#          at: ./
       - opta-module-with-terraform-generate:
           module: "s3"
 #      - run:
@@ -2486,24 +2486,25 @@ workflows:
   run-opta-terraform-generate-test:
     when: << pipeline.parameters.run-opta-terraform-generate-test >>
     jobs:
-      - get-all-parameter-values
-      - build-opta-binary
-      - aws-generate-terraform-language-files:
-          requires:
-            - build-opta-binary
-      - aws-tg-create-env:
-          requires:
-            - aws-generate-terraform-language-files
-      - aws-tg-test-service-http:
-          requires:
-            - aws-tg-create-env
-      - aws-tg-test-other-modules-plan:
-          requires:
-            - aws-tg-create-env
-      - aws-tg-destroy-env:
-          requires:
-            - aws-tg-test-service-http
-            - aws-tg-test-other-modules-plan
+      - aws-tg-test-other-modules-plan
+#      - get-all-parameter-values
+#      - build-opta-binary
+#      - aws-generate-terraform-language-files:
+#          requires:
+#            - build-opta-binary
+#      - aws-tg-create-env:
+#          requires:
+#            - aws-generate-terraform-language-files
+#      - aws-tg-test-service-http:
+#          requires:
+#            - aws-tg-create-env
+#      - aws-tg-test-other-modules-plan:
+#          requires:
+#            - aws-tg-create-env
+#      - aws-tg-destroy-env:
+#          requires:
+#            - aws-tg-test-service-http
+#            - aws-tg-test-other-modules-plan
 #      - gcp-generate-terraform-language-files:
 #          requires:
 #            - build-opta-binary
