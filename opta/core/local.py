@@ -84,4 +84,3 @@ class Local(CloudClient):
             return output.strip() != ""
         except Exception:
             return False
-
