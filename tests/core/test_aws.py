@@ -1,6 +1,9 @@
+from datetime import datetime
 from unittest.mock import Mock
 
+from botocore.response import StreamingBody
 from mypy_boto3_dynamodb import DynamoDBClient
+from mypy_boto3_s3 import S3Client
 from pytest import fixture
 from pytest_mock import MockFixture
 
@@ -116,3 +119,63 @@ class TestAWS:
             ],
             Key={"LockID": {"S": f"{aws_layer.state_storage()}/{aws_layer.name}"}},
         )
+
+    def test_get_all_remote_configs_configuration_present(
+        self, mocker: MockFixture
+    ) -> None:
+        mock_s3_client_instance = mocker.Mock(spec=S3Client)
+        mocker.patch("opta.core.aws.boto3.client", return_value=mock_s3_client_instance)
+        mocker.patch("opta.core.aws.AWS._get_opta_buckets", return_value=["test"])
+        mock_s3_client_instance.list_objects.return_value = {
+            "Contents": [{"Key": "opta_config/test-config"}]
+        }
+        mock_stream = mocker.Mock(spec=StreamingBody)
+        mock_stream.read.return_value = """{"original_spec": "actual_config"}"""
+        mock_s3_client_instance.get_object.return_value = {"Body": mock_stream}
+        mock_download_remote_config = mocker.patch(
+            "opta.core.aws.AWS._download_remote_config",
+            return_value={
+                "opta_version": "dev",
+                "date": datetime.utcnow().isoformat(),
+                "original_spec": "actual_config",
+                "defaults": {},
+            },
+        )
+
+        AWS().get_all_remote_configs()
+        mock_s3_client_instance.list_objects.assert_called_once_with(
+            Bucket="test", Prefix="opta_config/", Delimiter="/"
+        )
+        mock_download_remote_config.assert_called_once_with(
+            mock_s3_client_instance, "test", "opta_config/test-config"
+        )
+
+    def test_get_all_remote_configs_configuration_not_present(
+        self, mocker: MockFixture
+    ) -> None:
+        mock_s3_client_instance = mocker.Mock(spec=S3Client)
+        mocker.patch("opta.core.aws.boto3.client", return_value=mock_s3_client_instance)
+        mocker.patch("opta.core.aws.AWS._get_opta_buckets", return_value=["test"])
+        mock_s3_client_instance.list_objects.return_value = {}
+        mock_download_remote_config = mocker.patch(
+            "opta.core.aws.AWS._download_remote_config"
+        )
+        AWS().get_all_remote_configs()
+        mock_s3_client_instance.list_objects.assert_called_once_with(
+            Bucket="test", Prefix="opta_config/", Delimiter="/"
+        )
+        mock_download_remote_config.assert_not_called()
+
+    def test_get_all_remote_configs_buckets_not_present(
+        self, mocker: MockFixture
+    ) -> None:
+        mock_s3_client_instance = mocker.Mock(spec=S3Client)
+        mocker.patch("opta.core.aws.boto3.client", return_value=mock_s3_client_instance)
+        mocker.patch("opta.core.aws.AWS._get_opta_buckets", return_value=[])
+        mock_s3_client_instance.list_objects.return_value = {}
+        mock_download_remote_config = mocker.patch(
+            "opta.core.aws.AWS._download_remote_config"
+        )
+        AWS().get_all_remote_configs()
+        mock_s3_client_instance.list_objects.assert_not_called()
+        mock_download_remote_config.assert_not_called()

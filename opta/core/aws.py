@@ -1,13 +1,14 @@
 from os import remove
 from os.path import exists, getmtime
 from time import sleep, time
-from typing import TYPE_CHECKING, List, Optional, Tuple, TypedDict
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, TypedDict
 
 import boto3
 from botocore.config import Config
 from botocore.exceptions import ClientError
 from mypy_boto3_dynamodb import DynamoDBClient
 from mypy_boto3_eks import EKSClient
+from mypy_boto3_s3 import S3Client
 
 import opta.constants as constants
 from opta.constants import ONE_WEEK_UNIX, yaml
@@ -30,8 +31,9 @@ class AwsArn(TypedDict):
 
 
 class AWS(CloudClient):
-    def __init__(self, layer: "Layer"):
-        self.region = layer.root().providers["aws"]["region"]
+    def __init__(self, layer: Optional["Layer"] = None):
+        if layer:
+            self.region = layer.root().providers["aws"]["region"]
         super().__init__(layer)
 
     def __get_dynamodb(self, dynamodb_table: str) -> DynamoDBClient:
@@ -85,14 +87,7 @@ class AWS(CloudClient):
         config_path = f"opta_config/{self.layer.name}"
 
         s3_client = boto3.client("s3", config=Config(region_name=self.region))
-        try:
-            obj = s3_client.get_object(Bucket=bucket, Key=config_path)
-            return json.loads(obj["Body"].read())
-        except Exception:  # Backwards compatibility
-            logger.debug(
-                "Could not successfully download and parse any pre-existing config"
-            )
-            return None
+        return self._download_remote_config(s3_client, bucket, config_path)
 
     # Upload the current opta config to the state bucket, under opta_config/.
     def upload_opta_config(self) -> None:
@@ -171,6 +166,33 @@ class AWS(CloudClient):
             TableName=dynamodb_table,
             Key={"LockID": {"S": f"{bucket}/{self.layer.name}"}},
         )
+
+    def get_all_remote_configs(self) -> Dict[str, Dict[str, "StructuredConfig"]]:
+        prefix = "opta_config/"
+        s3 = boto3.client("s3")
+        remote_configs = {}
+        for aws_bucket in self._get_opta_buckets():
+            configs = {}
+            response = s3.list_objects(Bucket=aws_bucket, Prefix=prefix, Delimiter="/")
+            if "Contents" in response:
+                for data in response["Contents"]:
+                    structured_config = self._download_remote_config(
+                        s3, aws_bucket, data["Key"]
+                    )
+                    if structured_config:
+                        configs[data["Key"][len(prefix) :]] = structured_config
+                remote_configs[aws_bucket] = configs
+        return remote_configs
+
+    @staticmethod
+    def _get_opta_buckets() -> List[str]:
+        s3 = boto3.client("s3")
+        aws_bucket = s3.list_buckets().get("Buckets", [])
+        return [
+            bucket["Name"]
+            for bucket in aws_bucket
+            if bucket["Name"].startswith("opta-tf-state")
+        ]
 
     @staticmethod
     def get_all_versions(bucket: str, filename: str, region: str) -> List[str]:
@@ -377,6 +399,19 @@ class AWS(CloudClient):
             if e.response["Error"]["Code"] == "NoSuchBucket":
                 return False
         return True
+
+    @staticmethod
+    def _download_remote_config(
+        s3_client: S3Client, bucket: str, key: str
+    ) -> Optional["StructuredConfig"]:
+        try:
+            obj = s3_client.get_object(Bucket=bucket, Key=key)
+            return json.loads(obj["Body"].read())
+        except Exception:
+            logger.debug(
+                "Could not successfully download and parse any pre-existing config"
+            )
+            return None
 
     def get_cluster_env(self) -> Tuple[str, str]:
         aws_provider = self.layer.root().providers["aws"]

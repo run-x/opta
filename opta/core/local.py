@@ -1,9 +1,10 @@
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 from opta.constants import HOME
 from opta.core.cloud_client import CloudClient
+from opta.exceptions import LocalNotImplemented
 from opta.nice_subprocess import nice_run
 from opta.utils import json, logger
 
@@ -62,6 +63,9 @@ class Local(CloudClient):
 
     def get_terraform_lock_id(self) -> str:
         return ""
+
+    def get_all_remote_configs(self) -> Dict[str, Dict[str, "StructuredConfig"]]:
+        raise LocalNotImplemented("Feature Unsupported for Local")
 
     def set_kube_config(self) -> None:
         nice_run(

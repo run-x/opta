@@ -2,13 +2,14 @@ import base64
 from contextlib import redirect_stderr
 from io import StringIO
 from subprocess import DEVNULL  # nosec
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 from azure.core.exceptions import ClientAuthenticationError, ResourceNotFoundError
 from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient, ContainerClient, StorageStreamDownloader
 
 from opta.core.cloud_client import CloudClient
+from opta.exceptions import AzureNotImplemented
 from opta.nice_subprocess import nice_run
 from opta.utils import json, logger
 from opta.utils.dependencies import ensure_installed
@@ -189,6 +190,9 @@ class Azure(CloudClient):
             return any([x.get("name") == cluster_name for x in output_list])
         except Exception:
             return False
+
+    def get_all_remote_configs(self) -> Dict[str, Dict[str, "StructuredConfig"]]:
+        raise AzureNotImplemented("Feature Unsupported for Azure")
 
     def set_kube_config(self) -> None:
         providers = self.layer.root().gen_providers(0)

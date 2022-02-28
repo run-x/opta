@@ -1,13 +1,14 @@
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 if TYPE_CHECKING:
     from opta.layer import Layer, StructuredConfig
 
 
 class CloudClient(ABC):
-    def __init__(self, layer: "Layer"):
-        self.layer = layer
+    def __init__(self, layer: Optional["Layer"] = None):
+        if layer:
+            self.layer = layer
 
     @abstractmethod
     def get_remote_config(self) -> Optional["StructuredConfig"]:
@@ -28,6 +29,10 @@ class CloudClient(ABC):
     @abstractmethod
     def get_terraform_lock_id(self) -> str:
         raise NotImplementedError()
+
+    @abstractmethod
+    def get_all_remote_configs(self) -> Dict[str, Dict[str, "StructuredConfig"]]:
+        pass
 
     @abstractmethod
     def cluster_exist(self) -> bool:

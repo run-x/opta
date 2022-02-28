@@ -12,6 +12,7 @@ from google.auth.exceptions import DefaultCredentialsError, GoogleAuthError
 from google.cloud import storage  # type: ignore
 from google.cloud.container_v1 import ClusterManagerClient
 from google.cloud.exceptions import NotFound
+from google.cloud.storage import Bucket
 from google.oauth2 import service_account
 from googleapiclient import discovery
 
@@ -30,9 +31,10 @@ class GCP(CloudClient):
     project_id: Optional[str] = None
     credentials: Optional[Credentials] = None
 
-    def __init__(self, layer: "Layer"):
-        self.layer = layer
-        self.region = layer.root().providers["google"]["region"]
+    def __init__(self, layer: Optional["Layer"] = None):
+        if layer:
+            self.layer = layer
+            self.region = layer.root().providers["google"]["region"]
         super().__init__(layer)
 
     @classmethod
@@ -93,14 +95,7 @@ class GCP(CloudClient):
         credentials, project_id = self.get_credentials()
         gcs_client = storage.Client(project=project_id, credentials=credentials)
         bucket_object = gcs_client.get_bucket(bucket)
-        try:
-            blob = storage.Blob(config_path, bucket_object)
-            return json.loads(blob.download_as_text())
-        except Exception:  # Backwards compatibility
-            logger.debug(
-                "Could not successfully download and parse any pre-existing config"
-            )
-            return None
+        return self._download_remote_config(bucket_object, config_path)
 
     # Upload the current opta config to the state bucket, under opta_config/.
     def upload_opta_config(self) -> None:
@@ -181,6 +176,34 @@ class GCP(CloudClient):
         except NotFound:
             return False
         return True
+
+    def get_all_remote_configs(self) -> Dict[str, Dict[str, "StructuredConfig"]]:
+        prefix = "opta_config/"
+        credentials, project_id = self.get_credentials()
+        storage_client = storage.Client(project=project_id, credentials=credentials)
+        opta_configs = {}
+        for bucket in storage_client.list_buckets(prefix="opta-tf-state"):
+            config = {}
+            for response in storage_client.list_blobs(
+                bucket.name, prefix=prefix, delimiter="/"
+            ):
+                structured_config = self._download_remote_config(bucket, response.name)
+                if structured_config:
+                    config[response.name[len(prefix) :]] = structured_config
+            if config:
+                opta_configs[bucket.name] = config
+        return opta_configs
+
+    @staticmethod
+    def _download_remote_config(bucket: Bucket, key: str) -> Optional["StructuredConfig"]:
+        try:
+            blob = storage.Blob(key, bucket)
+            return json.loads(blob.download_as_text())
+        except Exception:  # Backwards compatibility
+            logger.debug(
+                "Could not successfully download and parse any pre-existing config"
+            )
+            return None
 
     def cluster_exist(self) -> bool:
         credentials = self.get_credentials()[0]
