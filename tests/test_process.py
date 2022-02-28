@@ -32,7 +32,7 @@ def run_before_and_after_tests(mocker: MockFixture) -> Generator:
     no_calls = [
         "boto3.client",
         "opta.core.kubernetes.load_kube_config",
-        "opta.core.kubernetes._aws_set_kube_config",
+        "opta.core.kubernetes.set_kube_config",
     ]
 
     mocked_no_calls = [mocker.patch(target) for target in no_calls]

@@ -1,6 +1,7 @@
 import base64
 from contextlib import redirect_stderr
 from io import StringIO
+from subprocess import DEVNULL  # nosec
 from typing import TYPE_CHECKING, Optional
 
 from azure.core.exceptions import ClientAuthenticationError, ResourceNotFoundError
@@ -8,7 +9,9 @@ from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient, ContainerClient, StorageStreamDownloader
 
 from opta.core.cloud_client import CloudClient
+from opta.nice_subprocess import nice_run
 from opta.utils import json, logger
+from opta.utils.dependencies import ensure_installed
 
 if TYPE_CHECKING:
     from opta.layer import StructuredConfig
@@ -159,3 +162,59 @@ class Azure(CloudClient):
             return storage_client.exists()
         except Exception:
             return False
+
+    def cluster_exist(self) -> bool:
+        providers = self.layer.root().gen_providers(0)
+
+        ensure_installed("az")
+
+        rg_name = providers["terraform"]["backend"]["azurerm"]["resource_group_name"]
+        subscription_id = providers["provider"]["azurerm"]["subscription_id"]
+        cluster_name = self.layer.get_cluster_name()
+        try:
+            output = nice_run(
+                [
+                    "az",
+                    "aks",
+                    "list",
+                    "--subscription",
+                    subscription_id,
+                    "--resource-group",
+                    rg_name,
+                ],
+                capture_output=True,
+                check=True,
+            ).stdout
+            output_list = json.loads(output)
+            return any([x.get("name") == cluster_name for x in output_list])
+        except Exception:
+            return False
+
+    def set_kube_config(self) -> None:
+        providers = self.layer.root().gen_providers(0)
+
+        ensure_installed("az")
+
+        rg_name = providers["terraform"]["backend"]["azurerm"]["resource_group_name"]
+        cluster_name = self.layer.get_cluster_name()
+
+        if not self.cluster_exist():
+            raise Exception(
+                "The AKS cluster name could not be determined -- please make sure it has been applied in the environment."
+            )
+
+        nice_run(
+            [
+                "az",
+                "aks",
+                "get-credentials",
+                "--resource-group",
+                rg_name,
+                "--name",
+                cluster_name,
+                "--admin",
+                "--overwrite-existing",
+            ],
+            stdout=DEVNULL,
+            check=True,
+        )

@@ -20,7 +20,7 @@ def run_before_and_after_tests(mocker: MockFixture) -> Generator:
     mocked_boto_client = mocker.patch("opta.core.terraform.boto3.client")
     mocked_boto_client2 = mocker.patch("opta.core.aws.boto3.client")
     mocked_load_kube_config = mocker.patch("opta.core.kubernetes.load_kube_config")
-    mocked_aws_set_kube_config = mocker.patch("opta.core.kubernetes._aws_set_kube_config")
+    mocked_set_kube_config = mocker.patch("opta.core.kubernetes.set_kube_config")
 
     global tmp_dir
     tmp_dir = tempfile.TemporaryDirectory(prefix="opta-gen-tf").name
@@ -32,7 +32,7 @@ def run_before_and_after_tests(mocker: MockFixture) -> Generator:
     mocked_boto_client.assert_not_called()
     mocked_boto_client2.assert_not_called()
     mocked_load_kube_config.assert_not_called()
-    mocked_aws_set_kube_config.assert_not_called()
+    mocked_set_kube_config.assert_not_called()
 
 
 def test_generate_terraform_env(mocker: MockFixture) -> None:

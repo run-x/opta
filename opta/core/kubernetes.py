@@ -4,16 +4,11 @@ import time
 import traceback
 from logging import DEBUG
 from os import makedirs, remove
-from os.path import exists, expanduser, getmtime
-from shutil import which
-from subprocess import DEVNULL  # nosec
+from os.path import exists, expanduser
 from threading import Thread
-from typing import TYPE_CHECKING, Dict, FrozenSet, List, Optional, Set, Tuple
+from typing import TYPE_CHECKING, Dict, FrozenSet, List, Optional, Set
 
-import boto3
-from botocore.config import Config
 from colored import attr, fg
-from google.cloud.container_v1 import ClusterManagerClient
 from kubernetes.client import (
     ApiException,
     AppsV1Api,
@@ -39,23 +34,15 @@ from kubernetes.config.kube_config import (
     KUBE_CONFIG_DEFAULT_LOCATION,
 )
 from kubernetes.watch import Watch
-from mypy_boto3_eks import EKSClient
 
-from opta.constants import REDS, yaml
-from opta.core.gcp import GCP
-from opta.core.terraform import get_terraform_outputs
+import opta.constants as constants
+from opta.constants import GENERATED_KUBE_CONFIG_DIR, REDS, yaml
 from opta.exceptions import UserErrors
-from opta.nice_subprocess import nice_run
 from opta.utils import logger
 from opta.utils.dependencies import ensure_installed
 
 if TYPE_CHECKING:
     from opta.layer import Layer
-
-GENERATED_KUBE_CONFIG: Optional[str] = None
-HOME = expanduser("~")
-GENERATED_KUBE_CONFIG_DIR = f"{HOME}/.opta/kubeconfigs"
-ONE_WEEK_UNIX = 604800
 
 
 def get_required_path_executables(cloud: str) -> FrozenSet[str]:
@@ -83,23 +70,12 @@ def set_kube_config(layer: "Layer") -> None:
     # it anyways since user must install it to access the cluster.
     ensure_installed("kubectl")
     makedirs(GENERATED_KUBE_CONFIG_DIR, exist_ok=True)
-    if layer.cloud == "aws":
-        _aws_set_kube_config(layer)
-    elif layer.cloud == "google":
-        _gcp_set_kube_config(layer)
-    elif layer.cloud == "azurerm":
-        _azure_set_kube_config(layer)
-    elif layer.cloud == "local":
-        _local_set_kube_config(layer)
-    else:
-        raise Exception(
-            f"Unknown cloud {layer.cloud}. Can not handle setting kube config"
-        )
+    layer.get_cloud_client().set_kube_config()
 
 
 def purge_opta_kube_config(layer: "Layer") -> None:
     """Delete the kubeconfig file created for a given layer, and also remove it from the default kubeconfig file"""
-    kube_config_file_name = get_kube_config_file_name(layer)
+    kube_config_file_name = layer.get_kube_config_file_name()
     opta_config: dict
     if exists(kube_config_file_name):
         opta_config = yaml.load(open(kube_config_file_name))
@@ -136,23 +112,8 @@ def purge_opta_kube_config(layer: "Layer") -> None:
         yaml.dump(default_kube_config, f)
 
 
-def _local_set_kube_config(layer: "Layer") -> None:
-    nice_run(
-        ["kubectl", "config", "use-context", "kind-opta-local-cluster"],
-        check=True,
-        capture_output=True,
-    ).stdout
-
-
-def get_kube_config_file_name(layer: "Layer") -> str:
-    config_file_name = (
-        f"{GENERATED_KUBE_CONFIG_DIR}/kubeconfig-{layer.root().name}-{layer.cloud}.yaml"
-    )
-    return config_file_name
-
-
 def load_opta_kube_config_to_default(layer: "Layer") -> None:
-    kube_config_file_name = get_kube_config_file_name(layer)
+    kube_config_file_name = layer.get_kube_config_file_name()
     if not exists(kube_config_file_name):
         logger.debug(
             f"Can not find opta managed kube config, {kube_config_file_name}, to load to user default"
@@ -206,207 +167,25 @@ def load_opta_kube_config_to_default(layer: "Layer") -> None:
         yaml.dump(default_kube_config, f)
 
 
-def _gcp_set_kube_config(layer: "Layer") -> None:
-    ensure_installed("gcloud")
-    kube_config_file_name = get_kube_config_file_name(layer)
-    global GENERATED_KUBE_CONFIG
-    if exists(kube_config_file_name):
-        if getmtime(kube_config_file_name) > time.time() - ONE_WEEK_UNIX:
-            GENERATED_KUBE_CONFIG = kube_config_file_name
-            return
-        else:
-            remove(kube_config_file_name)
-
-    gcp = GCP(layer=layer)
-    credentials = gcp.get_credentials()[0]
-    region, project_id = _gcp_get_cluster_env(layer.root())
-    cluster_name = get_cluster_name(layer.root())
-    gke_client = ClusterManagerClient(credentials=credentials)
-    cluster_data = gke_client.get_cluster(
-        name=f"projects/{project_id}/locations/{region}/clusters/{cluster_name}"
-    )
-
-    cluster_ca_certificate = cluster_data.master_auth.cluster_ca_certificate
-    cluster_endpoint = f"https://{cluster_data.endpoint}"
-    gcloud_path = which("gcloud")
-    kube_config_resource_name = f"{project_id}_{region}_{cluster_name}"
-
-    cluster_config = {
-        "apiVersion": "v1",
-        "kind": "Config",
-        "clusters": [
-            {
-                "cluster": {
-                    "server": cluster_endpoint,
-                    "certificate-authority-data": cluster_ca_certificate,
-                },
-                "name": kube_config_resource_name,
-            }
-        ],
-        "contexts": [
-            {
-                "context": {
-                    "cluster": kube_config_resource_name,
-                    "user": kube_config_resource_name,
-                },
-                "name": kube_config_resource_name,
-            }
-        ],
-        "current-context": kube_config_resource_name,
-        "preferences": {},
-        "users": [
-            {
-                "name": kube_config_resource_name,
-                "user": {
-                    "auth-provider": {
-                        "name": "gcp",
-                        "config": {
-                            "cmd-args": "config config-helper --format=json",
-                            "cmd-path": gcloud_path,
-                            "expiry-key": "{.credential.token_expiry}",
-                            "token-key": "{.credential.access_token}",
-                        },
-                    }
-                },
-            }
-        ],
-    }
-    with open(kube_config_file_name, "w") as f:
-        yaml.dump(cluster_config, f)
-    GENERATED_KUBE_CONFIG = kube_config_file_name
-    return
+def get_cluster_name(layer: "Layer") -> str:
+    return f"opta-{layer.root().name}"
 
 
-def _azure_set_kube_config(layer: "Layer") -> None:
-    root_layer = layer.root()
-    providers = root_layer.gen_providers(0)
-
-    ensure_installed("az")
-
-    rg_name = providers["terraform"]["backend"]["azurerm"]["resource_group_name"]
-    cluster_name = get_cluster_name(root_layer)
-
-    if not cluster_name:
-        raise Exception(
-            "The AKS cluster name could not be determined -- please make sure it has been applied in the environment."
-        )
-
-    nice_run(
-        [
-            "az",
-            "aks",
-            "get-credentials",
-            "--resource-group",
-            rg_name,
-            "--name",
-            cluster_name,
-            "--admin",
-            "--overwrite-existing",
-        ],
-        stdout=DEVNULL,
-        check=True,
-    )
-
-
-def _aws_set_kube_config(layer: "Layer") -> None:
-    kube_config_file_name = get_kube_config_file_name(layer)
-    global GENERATED_KUBE_CONFIG
-    if exists(kube_config_file_name):
-        if getmtime(kube_config_file_name) > time.time() - ONE_WEEK_UNIX:
-            GENERATED_KUBE_CONFIG = kube_config_file_name
-            return
-        else:
-            remove(kube_config_file_name)
-
-    region, account_id = _aws_get_cluster_env(layer.root())
-
-    # Get the environment's account details from the opta config
-    root_layer = layer.root()
-    cluster_name = get_cluster_name(root_layer)
-
-    if cluster_name is None:
-        raise Exception(
-            "The EKS cluster name could not be determined -- please make sure it has been applied in the environment."
-        )
-
-    client: EKSClient = boto3.client("eks", config=Config(region_name=region))
-
-    # get cluster details
-    cluster = client.describe_cluster(name=cluster_name)
-    cluster_cert = cluster["cluster"]["certificateAuthority"]["data"]
-    cluster_ep = cluster["cluster"]["endpoint"]
-    kube_config_resource_name = f"{account_id}_{region}_{cluster_name}"
-
-    cluster_config = {
-        "apiVersion": "v1",
-        "kind": "Config",
-        "clusters": [
-            {
-                "cluster": {
-                    "server": str(cluster_ep),
-                    "certificate-authority-data": str(cluster_cert),
-                },
-                "name": kube_config_resource_name,
-            }
-        ],
-        "contexts": [
-            {
-                "context": {
-                    "cluster": kube_config_resource_name,
-                    "user": kube_config_resource_name,
-                },
-                "name": kube_config_resource_name,
-            }
-        ],
-        "current-context": kube_config_resource_name,
-        "preferences": {},
-        "users": [
-            {
-                "name": kube_config_resource_name,
-                "user": {
-                    "exec": {
-                        "apiVersion": "client.authentication.k8s.io/v1alpha1",
-                        "command": "aws",
-                        "args": [
-                            "--region",
-                            region,
-                            "eks",
-                            "get-token",
-                            "--cluster-name",
-                            cluster_name,
-                        ],
-                        "env": None,
-                    }
-                },
-            }
-        ],
-    }
-    with open(kube_config_file_name, "w") as f:
-        yaml.dump(cluster_config, f)
-    GENERATED_KUBE_CONFIG = kube_config_file_name
-    return
-
-
-def get_cluster_name(layer: "Layer") -> Optional[str]:
-    outputs = get_terraform_outputs(layer)
-    cluster_name = outputs.get("parent.k8s_cluster_name") or outputs.get(
-        "k8s_cluster_name"
-    )
-    return cluster_name
-
-
-def _aws_get_cluster_env(root_layer: "Layer") -> Tuple[str, str]:
-    aws_provider = root_layer.providers["aws"]
-    return aws_provider["region"], aws_provider["account_id"]
-
-
-def _gcp_get_cluster_env(root_layer: "Layer") -> Tuple[str, str]:
-    googl_provider = root_layer.providers["google"]
-    return googl_provider["region"], googl_provider["project"]
+def cluster_exist(layer: "Layer") -> bool:
+    if layer.is_stateless_mode() is True:
+        if logger.isEnabledFor(DEBUG):
+            logger.debug(
+                "cluster_exist called in stateless mode, verify implementation. See stack trace below:"
+            )
+            traceback.print_stack()
+            return False
+    return layer.get_cloud_client().cluster_exist()
 
 
 def load_opta_kube_config() -> None:
-    load_kube_config(config_file=GENERATED_KUBE_CONFIG or KUBE_CONFIG_DEFAULT_LOCATION)
+    load_kube_config(
+        config_file=constants.GENERATED_KUBE_CONFIG or KUBE_CONFIG_DEFAULT_LOCATION
+    )
 
 
 def current_image_digest_tag(layer: "Layer") -> dict:

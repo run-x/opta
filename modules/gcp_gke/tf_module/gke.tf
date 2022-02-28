@@ -1,5 +1,5 @@
 resource "google_container_cluster" "primary" {
-  name           = "opta-${var.layer_name}"
+  name           = var.cluster_name
   location       = data.google_client_config.current.region
   node_locations = var.node_zone_names
 

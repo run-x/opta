@@ -1,4 +1,8 @@
 import os
+import time
+from os import remove
+from os.path import exists, getmtime
+from shutil import which
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 import google.auth.transport.requests
@@ -6,13 +10,17 @@ from google.auth import default
 from google.auth.credentials import Credentials
 from google.auth.exceptions import DefaultCredentialsError, GoogleAuthError
 from google.cloud import storage  # type: ignore
+from google.cloud.container_v1 import ClusterManagerClient
 from google.cloud.exceptions import NotFound
 from google.oauth2 import service_account
 from googleapiclient import discovery
 
+import opta.constants as constants
+from opta.constants import ONE_WEEK_UNIX, yaml
 from opta.core.cloud_client import CloudClient
 from opta.exceptions import UserErrors
 from opta.utils import fmt_msg, json, logger
+from opta.utils.dependencies import ensure_installed
 
 if TYPE_CHECKING:
     from opta.layer import Layer, StructuredConfig
@@ -173,3 +181,94 @@ class GCP(CloudClient):
         except NotFound:
             return False
         return True
+
+    def cluster_exist(self) -> bool:
+        credentials = self.get_credentials()[0]
+        region, project_id = self.get_cluster_env()
+        cluster_name = self.layer.get_cluster_name()
+        gke_client = ClusterManagerClient(credentials=credentials)
+        try:
+            gke_client.get_cluster(
+                name=f"projects/{project_id}/locations/{region}/clusters/{cluster_name}"
+            )
+            return True
+        except NotFound:
+            return False
+
+    def get_cluster_env(self) -> Tuple[str, str]:
+        googl_provider = self.layer.root().providers["google"]
+        return googl_provider["region"], googl_provider["project"]
+
+    def set_kube_config(self) -> None:
+        ensure_installed("gcloud")
+        kube_config_file_name = self.layer.get_kube_config_file_name()
+        if exists(kube_config_file_name):
+            if getmtime(kube_config_file_name) > time.time() - ONE_WEEK_UNIX:
+                constants.GENERATED_KUBE_CONFIG = kube_config_file_name
+                return
+            else:
+                remove(kube_config_file_name)
+
+        credentials = self.get_credentials()[0]
+        region, project_id = self.get_cluster_env()
+        cluster_name = self.layer.get_cluster_name()
+
+        if not self.cluster_exist():
+            raise Exception(
+                "The GKE cluster name could not be determined -- please make sure it has been applied in the environment."
+            )
+
+        gke_client = ClusterManagerClient(credentials=credentials)
+        cluster_data = gke_client.get_cluster(
+            name=f"projects/{project_id}/locations/{region}/clusters/{cluster_name}"
+        )
+
+        cluster_ca_certificate = cluster_data.master_auth.cluster_ca_certificate
+        cluster_endpoint = f"https://{cluster_data.endpoint}"
+        gcloud_path = which("gcloud")
+        kube_config_resource_name = f"{project_id}_{region}_{cluster_name}"
+
+        cluster_config = {
+            "apiVersion": "v1",
+            "kind": "Config",
+            "clusters": [
+                {
+                    "cluster": {
+                        "server": cluster_endpoint,
+                        "certificate-authority-data": cluster_ca_certificate,
+                    },
+                    "name": kube_config_resource_name,
+                }
+            ],
+            "contexts": [
+                {
+                    "context": {
+                        "cluster": kube_config_resource_name,
+                        "user": kube_config_resource_name,
+                    },
+                    "name": kube_config_resource_name,
+                }
+            ],
+            "current-context": kube_config_resource_name,
+            "preferences": {},
+            "users": [
+                {
+                    "name": kube_config_resource_name,
+                    "user": {
+                        "auth-provider": {
+                            "name": "gcp",
+                            "config": {
+                                "cmd-args": "config config-helper --format=json",
+                                "cmd-path": gcloud_path,
+                                "expiry-key": "{.credential.token_expiry}",
+                                "token-key": "{.credential.access_token}",
+                            },
+                        }
+                    },
+                }
+            ],
+        }
+        with open(kube_config_file_name, "w") as f:
+            yaml.dump(cluster_config, f)
+        constants.GENERATED_KUBE_CONFIG = kube_config_file_name
+        return
