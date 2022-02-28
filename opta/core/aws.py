@@ -171,7 +171,7 @@ class AWS(CloudClient):
         prefix = "opta_config/"
         s3 = boto3.client("s3")
         remote_configs = {}
-        for aws_bucket in self._get_opta_bucket():
+        for aws_bucket in self._get_opta_buckets():
             configs = {}
             response = s3.list_objects(Bucket=aws_bucket, Prefix=prefix, Delimiter="/")
             if "Contents" in response:
@@ -185,7 +185,7 @@ class AWS(CloudClient):
         return remote_configs
 
     @staticmethod
-    def _get_opta_bucket() -> List[str]:
+    def _get_opta_buckets() -> List[str]:
         s3 = boto3.client("s3")
         aws_bucket = s3.list_buckets().get("Buckets", [])
         return [

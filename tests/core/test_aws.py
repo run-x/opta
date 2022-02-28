@@ -125,7 +125,7 @@ class TestAWS:
     ) -> None:
         mock_s3_client_instance = mocker.Mock(spec=S3Client)
         mocker.patch("opta.core.aws.boto3.client", return_value=mock_s3_client_instance)
-        mocker.patch("opta.core.aws.AWS._get_opta_bucket", return_value=["test"])
+        mocker.patch("opta.core.aws.AWS._get_opta_buckets", return_value=["test"])
         mock_s3_client_instance.list_objects.return_value = {
             "Contents": [{"Key": "opta_config/test-config"}]
         }
@@ -155,7 +155,7 @@ class TestAWS:
     ) -> None:
         mock_s3_client_instance = mocker.Mock(spec=S3Client)
         mocker.patch("opta.core.aws.boto3.client", return_value=mock_s3_client_instance)
-        mocker.patch("opta.core.aws.AWS._get_opta_bucket", return_value=["test"])
+        mocker.patch("opta.core.aws.AWS._get_opta_buckets", return_value=["test"])
         mock_s3_client_instance.list_objects.return_value = {}
         mock_download_remote_config = mocker.patch(
             "opta.core.aws.AWS._download_remote_config"
@@ -171,7 +171,7 @@ class TestAWS:
     ) -> None:
         mock_s3_client_instance = mocker.Mock(spec=S3Client)
         mocker.patch("opta.core.aws.boto3.client", return_value=mock_s3_client_instance)
-        mocker.patch("opta.core.aws.AWS._get_opta_bucket", return_value=[])
+        mocker.patch("opta.core.aws.AWS._get_opta_buckets", return_value=[])
         mock_s3_client_instance.list_objects.return_value = {}
         mock_download_remote_config = mocker.patch(
             "opta.core.aws.AWS._download_remote_config"
