@@ -66,17 +66,17 @@ inputs:
   - name: autoscaling_target_cpu_percentage
     user_facing: true
     validator: any(str(), int(), required=False)
-    description: See the [autoscaling](https://docs.opta.dev/reference/google/service_modules/gcp-k8s-service/#autoscaling) section.
+    description: See the [autoscaling](https://docs.opta.dev/reference/google/modules/gcp-k8s-service/#autoscaling) section.
     default: 80
   - name: autoscaling_target_mem_percentage
     user_facing: true
     validator: any(str(), int(), required=False)
-    description: See the [autoscaling](https://docs.opta.dev/reference/google/service_modules/gcp-k8s-service/#autoscaling) section.
+    description: See the [autoscaling](https://docs.opta.dev/reference/google/modules/gcp-k8s-service/#autoscaling) section.
     default: 80
   - name: secrets
     user_facing: true
     validator: list(str(), required=False)
-    description: Deprecated, see [secrets instructions](/tutorials/secrets).
+    description: Deprecated, see [secrets instructions](/features/secrets).
     default: []
   - name: env_vars
     user_facing: true
@@ -91,7 +91,7 @@ inputs:
   - name: healthcheck_path
     user_facing: true
     validator: str(required=False)
-    description: See the See the [liveness/readiness](https://docs.opta.dev/reference/google/service_modules/gcp-k8s-service/#healthcheck-probe) section. Default `null` (i.e., no user-specified healthchecks)
+    description: See the See the [liveness/readiness](https://docs.opta.dev/reference/google/modules/gcp-k8s-service/#healthcheck-probe) section. Default `null` (i.e., no user-specified healthchecks)
     default: null
   - name: liveness_probe_path
     user_facing: true
@@ -133,7 +133,7 @@ inputs:
     user_facing: true
     validator: any(required=False)
     description: |
-      See the [container resources](https://docs.opta.dev/reference/google/service_modules/gcp-k8s-service/#container-resources) section. Default
+      See the [container resources](https://docs.opta.dev/reference/google/modules/gcp-k8s-service/#container-resources) section. Default
       ```yaml
       cpu: 100 # in millicores
       memory: 128 # in megabytes

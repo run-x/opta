@@ -57,7 +57,7 @@
     },
     "secrets": {
       "type": "array",
-      "description": "Deprecated, see [secrets instructions](/tutorials/secrets).",
+      "description": "Deprecated, see [secrets instructions](/features/secrets).",
       "items": {
         "type": "string"
       },

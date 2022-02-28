@@ -12,4 +12,4 @@ nodegroup to host your applications in. This needs to be added in the environmen
 as Opta services run on Kubernetes.
 
 For information about the default IAM permissions given to the node group please see
-[here](/reference/aws/environment_modules/aws-nodegroup).
+[here](/reference/aws/modules/aws-nodegroup).

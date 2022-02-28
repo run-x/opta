@@ -9,10 +9,10 @@ In some rare cases, upgrading an Opta version can cause a few minutes of downtim
 ## Upgrading Kubernetes version
 
 ### AWS
-Checkout our AWS EKS version upgrade guide [here](https://docs.opta.dev/tutorials/upgrading_eks/)
+Checkout our AWS EKS version upgrade guide [here](https://docs.opta.dev/reference/aws/eks_upgrade/)
 
 ### GCP
-Checkout our GCP GKE version upgrade guide [here](https://docs.opta.dev/tutorials/upgrade_gke/)
+Checkout our GCP GKE version upgrade guide [here](https://docs.opta.dev/reference/google/gke_upgrade/)
 
 ## Upgrading database version
 

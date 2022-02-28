@@ -72,7 +72,7 @@ inputs:
   - name: secrets
     user_facing: true
     validator: list(str(), required=False)
-    description: Deprecated, see [secrets instructions](/tutorials/secrets).
+    description: Deprecated, see [secrets instructions](/features/secrets).
     default: []
   - name: env_vars
     user_facing: true

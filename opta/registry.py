@@ -9,27 +9,17 @@ yaml = YAML(
     typ="safe"
 )  # Duplicate because constants can't import utils and yaml really is a util
 
-SERVICE_MODULE_INDEX = """---
-title: "Service"
-linkTitle: "Service"
+MODULE_INDEX = """---
+title: "Modules"
+linkTitle: "Modules"
 weight: 1
-description: This section provides the list of module types for the user to use in a service Opta yaml for this cloud, along with their inputs and outputs.
----
-"""
-
-ENVIRONMENT_MODULE_INDEX = """---
-title: "Environment"
-linkTitle: "Environment"
-weight: 1
-description: This section provides the list of module types for the user to use in a environment Opta yaml for this cloud, along with their inputs and outputs.
+description: This section provides the list of module types for the user to use in an Opta yaml for this cloud, along with their inputs and outputs.
 ---
 """
 
 
 def make_registry_dict() -> Dict[Any, Any]:
-    registry_path = os.path.join(
-        os.path.dirname(os.path.dirname(__file__)), "config", "registry"
-    )
+    registry_path = _registry_path()
     registry_dict: Dict[Any, Any] = yaml.load(
         open(os.path.join(registry_path, "index.yaml"))
     )
@@ -188,6 +178,7 @@ def make_registry_docs(directory: str) -> None:
     if not os.path.exists(directory):
         raise Exception(f"Non-existing directory given as input: {directory}")
     registry_dict = make_registry_dict()
+    registry_path = _registry_path()
     base_path = os.path.join(directory, "Reference")
     if os.path.exists(base_path):
         shutil.rmtree(base_path)
@@ -198,21 +189,25 @@ def make_registry_docs(directory: str) -> None:
         cloud_path = os.path.join(base_path, cloud)
         os.makedirs(cloud_path)
         cloud_dict = registry_dict[cloud]
-        with open(os.path.join(cloud_path, "_index.md"), "w") as f:
-            f.write(cloud_dict["text"])
-        environment_module_path = os.path.join(cloud_path, "environment_modules")
-        os.makedirs(environment_module_path)
-        with open(os.path.join(environment_module_path, "_index.md"), "w") as f:
-            f.write(ENVIRONMENT_MODULE_INDEX)
-        service_module_path = os.path.join(cloud_path, "service_modules")
-        os.makedirs(service_module_path)
-        with open(os.path.join(service_module_path, "_index.md"), "w") as f:
-            f.write(SERVICE_MODULE_INDEX)
+
+        # copy cloud documentation
+        from_dir = os.path.join(registry_path, cloud)
+        to_dir = os.path.join(cloud_path)
+        shutil.copytree(from_dir, to_dir, dirs_exist_ok=True)
+        shutil.move(
+            os.path.join(cloud_path, "index.md"), os.path.join(cloud_path, "_index.md")
+        )
+
+        # copy module documentation
+        module_path = os.path.join(cloud_path, "modules")
+        os.makedirs(module_path)
+        with open(os.path.join(module_path, "_index.md"), "w") as f:
+            f.write(MODULE_INDEX)
+
         for module_name, module_dict in cloud_dict["modules"].items():
-            module_path = (
-                environment_module_path
-                if module_dict["environment_module"]
-                else service_module_path
-            )
             with open(os.path.join(module_path, f"{module_name}.md"), "w") as f:
                 f.write(module_dict["text"])
+
+
+def _registry_path() -> str:
+    return os.path.join(os.path.dirname(os.path.dirname(__file__)), "config", "registry")

@@ -8,5 +8,5 @@ description: External SSL Certicate
 ---
 
 This is the external ssl certificate module used to pass in pre-existing ssl cerificates to add to the opta
-environment in the case dns delegation is not preferred. Please see the [ingress docs](/tutorials/ingress)
+environment in the case dns delegation is not preferred. Please see the [ingress docs](/features/dns)
 for more details.
