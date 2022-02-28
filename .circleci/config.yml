@@ -134,14 +134,14 @@ commands:
           name: Test command
           command: echo << parameters.module >>
       - run:
-          name: Generate Terraform Language Files for << parameters.module >>
+          name: Generate Terraform Language Files for Opta Module
           command: |
             ./dist/opta/opta generate-terraform \
-            --config ./.circleci/ci-tests/terraform-generated-aws/module-docdb.yaml \
+            --config ./.circleci/ci-tests/terraform-generated-aws/module-<< parameter.module >>.yaml \
             --directory $HOME/generated-tf-files-aws \
             --auto-approve
       - run:
-          name: Terraform Plan for << parameter.module >>
+          name: Terraform Plan for Opta Module
           commamd: |
             cd $HOME/generated-tf-files-aws
             terraform init
