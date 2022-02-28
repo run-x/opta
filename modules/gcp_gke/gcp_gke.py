@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 
 from modules.base import ModuleProcessor
 from opta.core.gcp import GCP
-from opta.core.kubernetes import purge_opta_kube_config
+from opta.core.kubernetes import get_cluster_name, purge_opta_kube_config
 from opta.exceptions import UserErrors
 
 if TYPE_CHECKING:
@@ -27,6 +27,7 @@ class GcpGkeProcessor(ModuleProcessor):
             raise UserErrors(
                 "The gcp-gke module needs to be run on the same yaml as the gcp-base"
             )
+        self.module.data["cluster_name"] = get_cluster_name(self.layer.root())
         self.module.data[
             "vpc_self_link"
         ] = f"${{{{module.{gcp_base_module.name}.vpc_self_link}}}}"

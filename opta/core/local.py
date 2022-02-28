@@ -2,8 +2,10 @@ import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, Optional
 
+from opta.constants import HOME
 from opta.core.cloud_client import CloudClient
 from opta.exceptions import UserErrors
+from opta.nice_subprocess import nice_run
 from opta.utils import json, logger
 
 if TYPE_CHECKING:
@@ -64,3 +66,22 @@ class Local(CloudClient):
 
     def get_all_remote_configs(self) -> Dict[str, Dict[str, "StructuredConfig"]]:
         raise UserErrors("Feature Unsupported for Local")
+
+    def set_kube_config(self) -> None:
+        nice_run(
+            ["kubectl", "config", "use-context", "kind-opta-local-cluster"],
+            check=True,
+            capture_output=True,
+        )
+
+    def cluster_exist(self) -> bool:
+        try:
+            output: str = nice_run(
+                [f"{HOME}/.opta/local/kind", "get", "clusters"],
+                check=True,
+                capture_output=True,
+            ).stdout
+            return output.strip() != ""
+        except Exception:
+            return False
+

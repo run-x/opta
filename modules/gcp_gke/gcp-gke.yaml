@@ -14,6 +14,10 @@ inputs:
     user_facing: false
     description: Opta Module name
     default: None
+  - name: cluster_name
+    user_facing: false
+    description: Name to give to cluster
+    default: None
   - name: node_zone_names
     user_facing: false
     description: The names of the zones to put the nodes in.

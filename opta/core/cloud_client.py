@@ -33,3 +33,11 @@ class CloudClient(ABC):
     @abstractmethod
     def get_all_remote_configs(self) -> Dict[str, Dict[str, "StructuredConfig"]]:
         pass
+
+    @abstractmethod
+    def cluster_exist(self) -> bool:
+        raise NotImplementedError()
+
+    @abstractmethod
+    def set_kube_config(self) -> None:
+        raise NotImplementedError()

@@ -1,12 +1,17 @@
-from time import sleep
-from typing import TYPE_CHECKING, Dict, List, Optional, TypedDict
+from os import remove
+from os.path import exists, getmtime
+from time import sleep, time
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, TypedDict
 
 import boto3
 from botocore.config import Config
 from botocore.exceptions import ClientError
 from mypy_boto3_dynamodb import DynamoDBClient
+from mypy_boto3_eks import EKSClient
 from mypy_boto3_s3 import S3Client
 
+import opta.constants as constants
+from opta.constants import ONE_WEEK_UNIX, yaml
 from opta.core.cloud_client import CloudClient
 from opta.exceptions import UserErrors
 from opta.utils import fmt_msg, json, logger
@@ -407,6 +412,99 @@ class AWS(CloudClient):
                 "Could not successfully download and parse any pre-existing config"
             )
             return None
+
+    def get_cluster_env(self) -> Tuple[str, str]:
+        aws_provider = self.layer.root().providers["aws"]
+        return aws_provider["region"], aws_provider["account_id"]
+
+    def cluster_exist(self) -> bool:
+        region, account_id = self.get_cluster_env()
+
+        # Get the environment's account details from the opta config
+        cluster_name = self.layer.get_cluster_name()
+        client: EKSClient = boto3.client("eks", config=Config(region_name=region))
+
+        try:
+            client.describe_cluster(name=cluster_name)
+            return True
+        except client.exceptions.ResourceNotFoundException:
+            return False
+
+    def set_kube_config(self) -> None:
+        kube_config_file_name = self.layer.get_kube_config_file_name()
+        if exists(kube_config_file_name):
+            if getmtime(kube_config_file_name) > time() - ONE_WEEK_UNIX:
+                constants.GENERATED_KUBE_CONFIG = kube_config_file_name
+                return
+            else:
+                remove(kube_config_file_name)
+
+        region, account_id = self.get_cluster_env()
+
+        # Get the environment's account details from the opta config
+        cluster_name = self.layer.get_cluster_name()
+
+        if not self.cluster_exist():
+            raise Exception(
+                "The EKS cluster name could not be determined -- please make sure it has been applied in the environment."
+            )
+
+        client: EKSClient = boto3.client("eks", config=Config(region_name=region))
+
+        # get cluster details
+        cluster = client.describe_cluster(name=cluster_name)
+        cluster_cert = cluster["cluster"]["certificateAuthority"]["data"]
+        cluster_ep = cluster["cluster"]["endpoint"]
+        kube_config_resource_name = f"{account_id}_{region}_{cluster_name}"
+
+        cluster_config = {
+            "apiVersion": "v1",
+            "kind": "Config",
+            "clusters": [
+                {
+                    "cluster": {
+                        "server": str(cluster_ep),
+                        "certificate-authority-data": str(cluster_cert),
+                    },
+                    "name": kube_config_resource_name,
+                }
+            ],
+            "contexts": [
+                {
+                    "context": {
+                        "cluster": kube_config_resource_name,
+                        "user": kube_config_resource_name,
+                    },
+                    "name": kube_config_resource_name,
+                }
+            ],
+            "current-context": kube_config_resource_name,
+            "preferences": {},
+            "users": [
+                {
+                    "name": kube_config_resource_name,
+                    "user": {
+                        "exec": {
+                            "apiVersion": "client.authentication.k8s.io/v1alpha1",
+                            "command": "aws",
+                            "args": [
+                                "--region",
+                                region,
+                                "eks",
+                                "get-token",
+                                "--cluster-name",
+                                cluster_name,
+                            ],
+                            "env": None,
+                        }
+                    },
+                }
+            ],
+        }
+        with open(kube_config_file_name, "w") as f:
+            yaml.dump(cluster_config, f)
+        constants.GENERATED_KUBE_CONFIG = kube_config_file_name
+        return
 
 
 # AWS Resource ARNs can be one of the following 3 formats:

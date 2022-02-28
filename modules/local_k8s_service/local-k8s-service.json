@@ -16,6 +16,19 @@
       "$ref": "/common-types/port-deprecated",
       "description": "Specifies what port your app was made to be listened to. Currently it must be a map of the form\n`http: [PORT_NUMBER_HERE]` or `tcp: [PORT_NUMBER_HERE]`. Use http if you just have a vanilla http server and tcp for\nwebsockets.\n"
     },
+    "cron_jobs": {
+      "type": "array",
+      "description": "A list of cronjobs to execute as part of this service",
+      "items": {
+        "$ref": "/common-types/cron-job"
+      },
+      "default": []
+    },
+    "tolerations": {
+      "type": "list",
+      "description": "Taint tolerations to add to the pods.",
+      "default": []
+    },
     "min_containers": {
       "type": "integer",
       "description": "The minimum number of replicas your app can autoscale to.",

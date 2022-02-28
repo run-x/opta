@@ -5,9 +5,9 @@ data "azurerm_subscription" "current" {}
 data "azurerm_client_config" "current" {}
 
 data "azurerm_subnet" "opta" {
-  name                 = "opta-${var.env_name}-subnet"
+  name                 = var.private_subnet_name
   resource_group_name  = data.azurerm_resource_group.opta.name
-  virtual_network_name = "opta-${var.env_name}"
+  virtual_network_name = var.vpc_name
 }
 
 variable "env_name" {
@@ -23,6 +23,18 @@ variable "layer_name" {
 variable "module_name" {
   description = "Module name"
   type        = string
+}
+
+variable "vpc_name" {
+  type = string
+}
+
+variable "private_subnet_name" {
+  type = string
+}
+
+variable "cluster_name" {
+  type = string
 }
 
 variable "max_nodes" {
@@ -43,7 +55,7 @@ variable "node_disk_size" {
 
 variable "kubernetes_version" {
   type    = string
-  default = "1.19.11"
+  default = "1.21.9"
 }
 
 variable "admin_group_object_ids" {

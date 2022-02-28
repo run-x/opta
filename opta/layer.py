@@ -24,10 +24,12 @@ from google.oauth2 import service_account
 
 from modules.base import ModuleProcessor
 from modules.runx.runx import RunxProcessor
-from opta.constants import MODULE_DEPENDENCY, REGISTRY, VERSION
+from opta.constants import GENERATED_KUBE_CONFIG_DIR, MODULE_DEPENDENCY, REGISTRY, VERSION
 from opta.core.aws import AWS
 from opta.core.azure import Azure
+from opta.core.cloud_client import CloudClient
 from opta.core.gcp import GCP
+from opta.core.local import Local
 from opta.core.validator import validate_yaml
 from opta.crash_reporter import CURRENT_CRASH_REPORTER
 from opta.exceptions import UserErrors
@@ -67,6 +69,7 @@ PROCESSOR_DICT: Dict[str, str] = {
     "cloudfront-distribution": "CloudfrontDistributionProcessor",
     "lambda-function": "LambdaFunctionProcessor",
     "k8s-manifest": "K8smanifestProcessor",
+    "azure-aks": "AzureAksProcessor",
 }
 
 
@@ -160,6 +163,29 @@ class Layer:
                     "layer. Module names must be unique per layer"
                 )
         self.stateless_mode = stateless_mode
+
+    def get_cluster_name(self) -> str:
+        return f"opta-{self.root().name}"
+
+    def get_kube_config_file_name(self) -> str:
+        config_file_name = (
+            f"{GENERATED_KUBE_CONFIG_DIR}/kubeconfig-{self.root().name}-{self.cloud}.yaml"
+        )
+        return config_file_name
+
+    def get_cloud_client(self) -> CloudClient:
+        if self.cloud == "aws":
+            return AWS(self)
+        elif self.cloud == "google":
+            return GCP(self)
+        elif self.cloud == "azurerm":
+            return Azure(self)
+        elif self.cloud == "local":
+            return Local(self)
+        else:
+            raise Exception(
+                f"Unknown cloud {self.cloud}. Can not handle getting the cloud client"
+            )
 
     @classmethod
     def load_from_yaml(
@@ -519,9 +545,7 @@ class Layer:
             return AWS(self).bucket_exists(bucket_name, region)
         elif self.cloud == "google":
             return GCP(self).bucket_exists(bucket_name)
-        elif self.cloud == "azurerm":
-            return Azure(self).bucket_exists(bucket_name)
-        else:
+        else:  # Note - this function does not work for Azure
             return False
 
     def _get_unique_hash(self) -> str:
@@ -554,11 +578,7 @@ class Layer:
             name_hash = hashlib.md5(  # nosec
                 f"{self.org_name}{self.name}".encode("utf-8")
             ).hexdigest()[0:16]
-            orig_name = f"opta{name_hash}"
-            if self.bucket_exists(orig_name):
-                return orig_name
-            else:
-                return f"{orig_name}-{suffix}"
+            return f"opta{name_hash}"  # For Azure, for now we don't add suffix
         else:
             orig_name = f"opta-tf-state-{self.org_name}-{self.name}"
 

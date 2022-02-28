@@ -21,6 +21,14 @@
         "$ref": "/common-types/port"
       }
     },
+    "cron_jobs": {
+      "type": "array",
+      "description": "A list of cronjobs to execute as part of this service",
+      "items": {
+        "$ref": "/common-types/cron-job"
+      },
+      "default": []
+    },
     "tolerations": {
       "type": "list",
       "description": "Taint tolerations to add to the pods.",

@@ -1,3 +1,4 @@
+{{- if ne "0" (toString .Values.autoscaling.maxReplicas) }}
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
@@ -29,3 +30,4 @@ spec:
         name: memory
         targetAverageUtilization: {{ .Values.autoscaling.targetMemoryUtilizationPercentage }}
     {{- end }}
+{{- end }}

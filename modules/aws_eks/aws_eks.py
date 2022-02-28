@@ -9,7 +9,7 @@ from mypy_boto3_ec2.type_defs import NetworkInterfaceTypeDef
 from mypy_boto3_logs import CloudWatchLogsClient
 
 from modules.base import ModuleProcessor
-from opta.core.kubernetes import get_cluster_name, purge_opta_kube_config
+from opta.core.kubernetes import cluster_exist, get_cluster_name, purge_opta_kube_config
 from opta.exceptions import UserErrors
 from opta.utils import logger
 
@@ -35,8 +35,7 @@ class AwsEksProcessor(ModuleProcessor):
         purge_opta_kube_config(layer=self.layer)
 
     def pre_hook(self, module_idx: int) -> None:
-        cluster_name = get_cluster_name(self.layer.root())
-        if cluster_name is not None:
+        if cluster_exist(self.layer.root()):
             return
         providers = self.layer.gen_providers(0)
         region = providers["provider"]["aws"]["region"]
@@ -193,6 +192,7 @@ class AwsEksProcessor(ModuleProcessor):
                 "Could not find aws base module in this opta yaml-- you need to have it for eks to work"
             )
         aws_base_module = aws_base_modules[0]
+        self.module.data["cluster_name"] = get_cluster_name(self.layer.root())
         self.module.data[
             "private_subnet_ids"
         ] = f"${{{{module.{aws_base_module.name}.private_subnet_ids}}}}"

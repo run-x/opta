@@ -2,8 +2,16 @@ output "vpc_id" {
   value = azurerm_virtual_network.opta.id
 }
 
+output "vpc_name" {
+  value = azurerm_virtual_network.opta.name
+}
+
 output "private_subnet_id" {
   value = azurerm_subnet.opta.id
+}
+
+output "private_subnet_name" {
+  value = azurerm_subnet.opta.name
 }
 
 output "acr_id" {

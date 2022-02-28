@@ -200,3 +200,6 @@ variable "tolerations" {
   default = []
 }
 
+variable "cron_jobs" {
+  default = []
+}

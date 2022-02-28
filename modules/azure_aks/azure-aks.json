@@ -90,7 +90,7 @@
     "kubernetes_version": {
       "type": "string",
       "description": "The Kubernetes version for the cluster. Must be [supported by AKS](https://docs.microsoft.com/en-us/azure/aks/supported-kubernetes-versions) to bind the cluster too. Gives you automatic K8s version management for the cluster and node pools.",
-      "default": "1.19.11"
+      "default": "1.21.9"
     },
     "admin_group_object_ids": {
       "type": "array",

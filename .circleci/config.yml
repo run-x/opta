@@ -7,6 +7,9 @@ parameters:
   run-create-and-destroy:
     type: boolean
     default: false
+  run-create-and-destroy-azure:
+    type: boolean
+    default: false
   run-destroy-gcp-env:
     type: boolean
     default: false
@@ -55,6 +58,9 @@ parameters:
   ci-env-region-gcp:
     type: string
     default: 'us-central1'
+  run-opta-terraform-generate-test:
+    type: boolean
+    default: false
 
 orbs:
   terraform: circleci/terraform@3.0.0
@@ -85,6 +91,15 @@ commands:
     steps:
       - run:
           name: "Install python dependencies"
+          command: |
+            pip install pipenv
+            pipenv install --deploy
+            source $(pipenv --venv)/bin/activate
+
+  install-python-dependencies-development:
+    steps:
+      - run:
+          name: "Install python development dependencies"
           command: |
             pip install pipenv
             pipenv install --deploy --dev
@@ -121,7 +136,7 @@ commands:
             cat ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
             cat ./.circleci/ci-tests/create-and-destroy-aws/environment-additional-nodegroup.yml
             cat ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml
-            cat ./.circleci/ci-tests/create-and-destroy-gcp/environment-additional-nodepool.yml 
+            cat ./.circleci/ci-tests/create-and-destroy-gcp/environment-additional-nodepool.yml
             cat ./.circleci/ci-tests/todo-list/provider-aws-dns-false.yml
             cat ./.circleci/ci-tests/todo-list/provider-aws-dns-true.yml
             cat ./.circleci/ci-tests/todo-list/provider-gcp.yml
@@ -136,6 +151,7 @@ jobs:
           name: Get all parameter values.
           command: |
             echo "run-create-and-destroy:     " << pipeline.parameters.run-create-and-destroy >>
+            echo "run-create-and-destroy-azure:     " << pipeline.parameters.run-create-and-destroy-azure >>
             echo "run-destroy-gcp-env:        " << pipeline.parameters.run-destroy-gcp-env >>
             echo "run-destroy-aws-env:        " << pipeline.parameters.run-destroy-aws-env >>
             echo "run-destroy-all-envs:       " << pipeline.parameters.run-destroy-all-envs >>
@@ -151,6 +167,7 @@ jobs:
             echo "ci-env-name:                " << pipeline.parameters.ci-env-name >>
             echo "ci-env-region-aws:          " << pipeline.parameters.ci-env-region-aws >>
             echo "ci-env-region-gcp:          " << pipeline.parameters.ci-env-region-gcp >>
+            echo "run-opta-terraform-generate-test: " << pipeline.parameters.run-opta-terraform-generate-test >>
 
   no-pdb:
     executor: ubuntu-machine
@@ -165,7 +182,7 @@ jobs:
     executor: python-docker
     steps:
       - checkout-opta
-      - install-python-dependencies
+      - install-python-dependencies-development
       - run:
           name: "Lint"
           command: |
@@ -193,7 +210,7 @@ jobs:
     executor: python-docker
     steps:
       - checkout-opta
-      - install-python-dependencies
+      - install-python-dependencies-development
       - run:
           name: "Security"
           command: "make security_tests"
@@ -202,7 +219,7 @@ jobs:
     executor: python-docker
     steps:
       - checkout-opta
-      - install-python-dependencies
+      - install-python-dependencies-development
       - terraform/install:
           arch: amd64
           os: linux
@@ -328,6 +345,117 @@ jobs:
           paths:
             - todo-api
             - todo-frontend
+
+  aws-generate-terraform-language-files:
+    executor: ubuntu-machine
+    steps:
+      - checkout-opta
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - run:
+          name: "Generate Terraform Language Files"
+          command: |
+            mkdir $HOME/generated-tf-files-aws
+            ./dist/opta/opta generate-terraform \
+            --config ./.circleci/ci-tests/terraform-generated-aws/environment.yaml \
+            --directory $HOME/generated-tf-files-aws \
+            --auto-approve
+            ./dist/opta/opta generate-terraform \
+            --config ./.circleci/ci-tests/terraform-generated-aws/service-http.yaml \
+            --directory $HOME/generated-tf-files-aws \
+            --auto-approve
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - generated-tf-files-aws
+
+  aws-tg-create-env:
+    executor: ubuntu-machine
+    steps:
+      - install-opta-dependencies
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: "Create Terraform Generated Environment"
+          command: |
+            cd $HOME/generated-tf-files-aws
+            terraform init
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base
+            terraform apply -compact-warnings -auto-approve tf.plan
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8scluster
+            terraform apply -compact-warnings -auto-approve tf.plan
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8sbase
+            terraform apply -compact-warnings -auto-approve tf.plan
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - generated-tf-files-aws/tfstate/awsenv-tg.tfstate
+      - store_artifacts:
+          path: ../generated-tf-files-aws/tfstate/awsenv-tg.tfstate
+          destination: tfstate-after-apply-env.tfstate
+
+
+  aws-tg-test-service-http:
+    executor: ubuntu-machine
+    steps:
+      - install-opta-dependencies
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: "Create Terraform Generated Http Service"
+          command: |
+            cd $HOME/generated-tf-files-aws
+            terraform init
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.app
+            terraform apply -compact-warnings -auto-approve tf.plan
+      - run:
+          name: "Sleep 120 seconds"
+          command: |
+            sleep 120
+      - run:
+          name: "Get Output and Test Load Balancer"
+          command: |
+            cd $HOME/generated-tf-files-aws
+            terraform output -json >> terraform_output.json
+            export LOAD_BALANCER=`cat terraform_output.json | jq -r '.load_balancer_raw_dns' |jq -r '.value'`
+            echo $LOAD_BALANCER
+            curl $LOAD_BALANCER
+            echo "1"
+      - run:
+          name: "Sleep 120 seconds"
+          command: |
+            sleep 120
+      - run:
+          name: "Destroy Terraform Generated Http Service"
+          command: |
+            cd $HOME/generated-tf-files-aws
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.app -destroy
+            terraform apply -compact-warnings -auto-approve tf.plan
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - generated-tf-files-aws/tfstate/awsenv-tg.tfstate
+      - store_artifacts:
+          path: ../generated-tf-files-aws/tfstate/awsenv-tg.tfstate
+          destination: tfstate-after-apply-svc-cnd.tfstate
+
+  aws-tg-destroy-env:
+    executor: ubuntu-machine
+    steps:
+      - install-opta-dependencies
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: "Destroy Terraform Generated Environment"
+          command: |
+            cd $HOME/generated-tf-files-aws
+            terraform init
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base -target=module.k8scluster -target=module.k8sbase -destroy
+            terraform apply -compact-warnings -auto-approve tf.plan
+      - store_artifacts:
+          path: ../generated-tf-files-aws/tfstate/awsenv-tg.tfstate
+          destination: tfstate-after-destroy.tfstate
 
   azure-create-env:
     executor: ubuntu-machine
@@ -1163,6 +1291,137 @@ jobs:
             --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml \
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
+  gcp-generate-terraform-language-files:
+    executor: ubuntu-machine
+    steps:
+      - checkout-opta
+      - attach_workspace:
+          at: ./
+      - install-opta-dependencies
+      - gcp-cli/install
+      - gcp-cli/initialize
+      - run:
+          name: "Setting up gcp envar"
+          command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+      - run:
+          name: "Generate Terraform Language Files"
+          command: |
+            mkdir $HOME/generated-tf-files-gcp
+            ./dist/opta/opta generate-terraform \
+            --config ./.circleci/ci-tests/terraform-generated-gcp/environment.yaml \
+            --directory $HOME/generated-tf-files-gcp \
+            --auto-approve
+            ./dist/opta/opta generate-terraform \
+            --config ./.circleci/ci-tests/terraform-generated-gcp/service-hello-opta.yaml \
+            --directory $HOME/generated-tf-files-gcp \
+            --auto-approve
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - generated-tf-files-gcp
+
+  gcp-tg-create-env:
+    executor: ubuntu-machine
+    steps:
+      - install-opta-dependencies
+      - gcp-cli/install
+      - gcp-cli/initialize
+      - run:
+          name: "Setting up gcp envar"
+          command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: "Create Terraform Generated Environment"
+          command: |
+            cd $HOME/generated-tf-files-gcp
+            terraform init
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base
+            terraform apply -compact-warnings -auto-approve tf.plan
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8scluster
+            terraform apply -compact-warnings -auto-approve tf.plan
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8sbase
+            terraform apply -compact-warnings -auto-approve tf.plan
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - generated-tf-files-gcp/tfstate/gcpenv-tg.tfstate
+      - store_artifacts:
+          path: ../generated-tf-files-gcp/tfstate/gcpenv-tg.tfstate
+          destination: tfstate-after-apply-env.tfstate
+
+
+  gcp-tg-test-service-http:
+    executor: ubuntu-machine
+    steps:
+      - install-opta-dependencies
+      - gcp-cli/install
+      - gcp-cli/initialize
+      - run:
+          name: "Setting up gcp envar"
+          command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: "Create Terraform Generated Hello Opta Service"
+          command: |
+            cd $HOME/generated-tf-files-gcp
+            terraform init
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello
+            terraform apply -compact-warnings -auto-approve tf.plan
+      - run:
+          name: "Sleep 120 seconds"
+          command: |
+            sleep 120
+      - run:
+          name: "Get Output and Test Load Balancer"
+          command: |
+            cd $HOME/generated-tf-files-gcp
+            terraform output -json >> terraform_output.json
+            export LOAD_BALANCER=`cat terraform_output.json | jq -r '.load_balancer_raw_ip' |jq -r '.value'`
+            echo $LOAD_BALANCER
+            curl "$LOAD_BALANCER/hello"
+            echo "1"
+      - run:
+          name: "Sleep 120 seconds"
+          command: |
+            sleep 120
+      - run:
+          name: "Destroy Terraform Generated Hello Opta Service"
+          command: |
+            cd $HOME/generated-tf-files-gcp
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello -destroy
+            terraform apply -compact-warnings -auto-approve tf.plan
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - generated-tf-files-gcp/tfstate/gcpenv-tg.tfstate
+      - store_artifacts:
+          path: ../generated-tf-files-gcp/tfstate/gcpenv-tg.tfstate
+          destination: tfstate-after-apply-hello-cnd.tfstate
+
+  gcp-tg-destroy-env:
+    executor: ubuntu-machine
+    steps:
+      - install-opta-dependencies
+      - gcp-cli/install
+      - gcp-cli/initialize
+      - run:
+          name: "Setting up gcp envar"
+          command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: "Destroy Terraform Generated Environment"
+          command: |
+            cd $HOME/generated-tf-files-gcp
+            terraform init
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base -target=module.k8scluster -target=module.k8sbase -destroy
+            terraform apply -compact-warnings -auto-approve tf.plan
+      - store_artifacts:
+          path: ../generated-tf-files-gcp/tfstate/gcpenv-tg.tfstate
+          destination: tfstate-after-destroy.tfstate
+
   gcp-create-env:
     executor: ubuntu-machine
     environment:
@@ -1904,7 +2163,6 @@ workflows:
       - azure-destroy-env:
           requires:
             - azure-test-service-http
-
   run-ci:
     when: << pipeline.parameters.run-ci >>
     jobs:
@@ -1915,6 +2173,22 @@ workflows:
       - terraform-formatter
       - regula-lint
       - pytest
+  run-create-and-destroy-azure:
+    when: << pipeline.parameters.run-create-and-destroy-azure >>
+    jobs:
+      - build-test-service-image
+      - build-opta-binary:
+          requires:
+            - build-test-service-image
+      - azure-create-env:
+          requires:
+            - build-opta-binary
+      - azure-test-service-http:
+          requires:
+            - azure-create-env
+      - azure-destroy-env:
+          requires:
+            - azure-test-service-http
 
   run-destroy-gcp-env:
     when: << pipeline.parameters.run-destroy-gcp-env >>
@@ -2096,17 +2370,35 @@ workflows:
           requires:
             - build-opta-binary
 
-  test:
-    when: << pipeline.parameters.test >>
+  run-opta-terraform-generate-test:
+    when: << pipeline.parameters.run-opta-terraform-generate-test >>
     jobs:
       - get-all-parameter-values
       - build-opta-binary
-      - aws-create-env:
+      - aws-generate-terraform-language-files:
           requires:
             - build-opta-binary
-      - aws-destroy-env:
+      - aws-tg-create-env:
           requires:
-            - aws-create-env
+            - aws-generate-terraform-language-files
+      - aws-tg-test-service-http:
+          requires:
+            - aws-tg-create-env
+      - aws-tg-destroy-env:
+          requires:
+            - aws-tg-test-service-http
+      - gcp-generate-terraform-language-files:
+          requires:
+            - build-opta-binary
+      - gcp-tg-create-env:
+          requires:
+            - gcp-generate-terraform-language-files
+      - gcp-tg-test-service-http:
+          requires:
+            - gcp-tg-create-env
+      - gcp-tg-destroy-env:
+          requires:
+            - gcp-tg-test-service-http
 
   nightly:
     triggers:

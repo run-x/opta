@@ -26,6 +26,10 @@ variable "layer_name" {
   type        = string
 }
 
+variable "cluster_name" {
+  type = string
+}
+
 variable "enable_metrics" {
   type = bool
 }

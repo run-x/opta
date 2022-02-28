@@ -5,11 +5,7 @@ from colored import attr
 
 from opta import gen_tf
 from opta.constants import TF_FILE_PATH
-from opta.core.kubernetes import (
-    current_image_digest_tag,
-    get_cluster_name,
-    set_kube_config,
-)
+from opta.core.kubernetes import cluster_exist, current_image_digest_tag, set_kube_config
 from opta.utils import deep_merge, logger
 
 if TYPE_CHECKING:
@@ -42,11 +38,7 @@ def gen(
         if not module.halt and module_idx + 1 != total_module_count:
             continue
         service_modules = layer.get_module_by_type("k8s-service", module_idx)
-        if (
-            check_image
-            and len(service_modules) > 0
-            and (get_cluster_name(layer.root()) is not None)
-        ):
+        if check_image and len(service_modules) > 0 and cluster_exist(layer.root()):
             set_kube_config(layer)
 
             for service_module in service_modules:

@@ -1,5 +1,4 @@
 import datetime
-from subprocess import DEVNULL
 
 import pytz
 from kubernetes.client import (
@@ -18,12 +17,10 @@ from kubernetes.watch import Watch
 from pytest_mock import MockFixture
 
 from opta.core.kubernetes import (
-    GENERATED_KUBE_CONFIG_DIR,
     delete_persistent_volume_claims,
     get_required_path_executables,
     list_persistent_volume_claims,
     restart_deployments,
-    set_kube_config,
     tail_module_log,
     tail_namespace_events,
     tail_pod_log,
@@ -32,118 +29,6 @@ from opta.layer import Layer
 
 
 class TestKubernetes:
-    def test_azure_set_kube_config(self, mocker: MockFixture) -> None:
-        mocked_ensure_installed = mocker.patch("opta.core.kubernetes.ensure_installed")
-        layer = mocker.Mock(spec=Layer)
-        layer.parent = None
-        layer.cloud = "azurerm"
-        layer.name = "blah"
-        layer.providers = {
-            "azurerm": {
-                "location": "centralus",
-                "tenant_id": "blahbc17-blah-blah-blah-blah291d395b",
-                "subscription_id": "blah99ae-blah-blah-blah-blahd2a04788",
-            }
-        }
-        layer.root.return_value = layer
-        layer.gen_providers.return_value = {
-            "terraform": {
-                "backend": {"azurerm": {"resource_group_name": "dummy_resource_group"}}
-            },
-            "provider": {
-                "azurerm": {
-                    "location": "centralus",
-                    "tenant_id": "blahbc17-blah-blah-blah-blah291d395b",
-                    "subscription_id": "blah99ae-blah-blah-blah-blahd2a04788",
-                }
-            },
-        }
-        mocked_terraform_output = mocker.patch(
-            "opta.core.kubernetes.get_terraform_outputs",
-            return_value={"k8s_cluster_name": "mocked_cluster_name"},
-        )
-        mocked_nice_run = mocker.patch("opta.core.kubernetes.nice_run",)
-
-        set_kube_config(layer)
-
-        mocked_terraform_output.assert_called_once_with(layer)
-        mocked_ensure_installed.assert_has_calls(
-            [mocker.call("kubectl"), mocker.call("az")]
-        )
-        mocked_nice_run.assert_has_calls(
-            [
-                mocker.call(
-                    [
-                        "az",
-                        "aks",
-                        "get-credentials",
-                        "--resource-group",
-                        "dummy_resource_group",
-                        "--name",
-                        "mocked_cluster_name",
-                        "--admin",
-                        "--overwrite-existing",
-                    ],
-                    stdout=DEVNULL,
-                    check=True,
-                ),
-            ]
-        )
-
-    def test_aws_set_kube_config(self, mocker: MockFixture) -> None:
-        mocked_ensure_installed = mocker.patch("opta.core.kubernetes.ensure_installed")
-        mocked_exist = mocker.patch("opta.core.kubernetes.exists")
-        mocked_exist.return_value = False
-        mock_eks_client = mocker.Mock()
-        mocker.patch("opta.core.kubernetes.boto3.client", return_value=mock_eks_client)
-        mock_eks_client.describe_cluster.return_value = {
-            "cluster": {
-                "certificateAuthority": {"data": "ca-data"},
-                "endpoint": "eks-endpoint",
-            }
-        }
-
-        layer = mocker.Mock(spec=Layer)
-        layer.parent = None
-        layer.cloud = "aws"
-        layer.name = "blah"
-        layer.providers = {"aws": {"region": "us-east-1", "account_id": "111111111111"}}
-        layer.root.return_value = layer
-        mocked_terraform_output = mocker.patch(
-            "opta.core.kubernetes.get_terraform_outputs",
-            return_value={"k8s_cluster_name": "mocked_cluster_name"},
-        )
-        mocked_file = mocker.patch(
-            "opta.core.kubernetes.open", mocker.mock_open(read_data="")
-        )
-        set_kube_config(layer)
-        config_file_name = f"{GENERATED_KUBE_CONFIG_DIR}/kubeconfig-{layer.root().name}-{layer.cloud}.yaml"
-        mocked_file.assert_called_once_with(config_file_name, "w")
-        mocked_file().write.assert_called_once_with(
-            "apiVersion: v1\n"
-            "clusters:\n"
-            "- cluster: {certificate-authority-data: ca-data, server: eks-endpoint}\n"
-            "  name: 111111111111_us-east-1_mocked_cluster_name\n"
-            "contexts:\n"
-            "- context: {cluster: 111111111111_us-east-1_mocked_cluster_name, user: "
-            "111111111111_us-east-1_mocked_cluster_name}\n"
-            "  name: 111111111111_us-east-1_mocked_cluster_name\n"
-            "current-context: 111111111111_us-east-1_mocked_cluster_name\n"
-            "kind: Config\n"
-            "preferences: {}\n"
-            "users:\n"
-            "- name: 111111111111_us-east-1_mocked_cluster_name\n"
-            "  user:\n"
-            "    exec:\n"
-            "      apiVersion: client.authentication.k8s.io/v1alpha1\n"
-            "      args: [--region, us-east-1, eks, get-token, --cluster-name, "
-            "mocked_cluster_name]\n"
-            "      command: aws\n"
-            "      env: null\n"
-        )
-        mocked_terraform_output.assert_called_once_with(layer)
-        mocked_ensure_installed.assert_called_once_with("kubectl")
-
     def test_get_required_path_executables(self) -> None:
         assert len(get_required_path_executables("local")) == 1
 

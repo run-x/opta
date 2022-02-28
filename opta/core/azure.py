@@ -1,6 +1,7 @@
 import base64
 from contextlib import redirect_stderr
 from io import StringIO
+from subprocess import DEVNULL  # nosec
 from typing import TYPE_CHECKING, Dict, Optional
 
 from azure.core.exceptions import ClientAuthenticationError, ResourceNotFoundError
@@ -9,7 +10,9 @@ from azure.storage.blob import BlobServiceClient, ContainerClient, StorageStream
 
 from opta.core.cloud_client import CloudClient
 from opta.exceptions import UserErrors
+from opta.nice_subprocess import nice_run
 from opta.utils import json, logger
+from opta.utils.dependencies import ensure_installed
 
 if TYPE_CHECKING:
     from opta.layer import StructuredConfig
@@ -149,28 +152,73 @@ class Azure(CloudClient):
         except Exception:
             return ""
 
-    def bucket_exists(self, bucket_name: str) -> bool:
-        providers = self.layer.gen_providers(0)
+    def bucket_exists(self, bucket_name: str, storage_account_name: str) -> bool:
         credentials = self.get_credentials()
-        resource_group_name = providers["terraform"]["backend"]["azurerm"][
-            "resource_group_name"
-        ]
-        storage_account_name = providers["terraform"]["backend"]["azurerm"][
-            "storage_account_name"
-        ]
-
         storage_client = ContainerClient(
             account_url=f"https://{storage_account_name}.blob.core.windows.net",
             container_name=bucket_name,
             credential=credentials,
         )
         try:
-            storage_client.blob_containers.get(
-                resource_group_name, storage_account_name, bucket_name
-            )
-            return True
-        except ResourceNotFoundError:
+            return storage_client.exists()
+        except Exception:
+            return False
+
+    def cluster_exist(self) -> bool:
+        providers = self.layer.root().gen_providers(0)
+
+        ensure_installed("az")
+
+        rg_name = providers["terraform"]["backend"]["azurerm"]["resource_group_name"]
+        subscription_id = providers["provider"]["azurerm"]["subscription_id"]
+        cluster_name = self.layer.get_cluster_name()
+        try:
+            output = nice_run(
+                [
+                    "az",
+                    "aks",
+                    "list",
+                    "--subscription",
+                    subscription_id,
+                    "--resource-group",
+                    rg_name,
+                ],
+                capture_output=True,
+                check=True,
+            ).stdout
+            output_list = json.loads(output)
+            return any([x.get("name") == cluster_name for x in output_list])
+        except Exception:
             return False
 
     def get_all_remote_configs(self) -> Dict[str, Dict[str, "StructuredConfig"]]:
         raise UserErrors("Feature Unsupported for Azure")
+
+    def set_kube_config(self) -> None:
+        providers = self.layer.root().gen_providers(0)
+
+        ensure_installed("az")
+
+        rg_name = providers["terraform"]["backend"]["azurerm"]["resource_group_name"]
+        cluster_name = self.layer.get_cluster_name()
+
+        if not self.cluster_exist():
+            raise Exception(
+                "The AKS cluster name could not be determined -- please make sure it has been applied in the environment."
+            )
+
+        nice_run(
+            [
+                "az",
+                "aks",
+                "get-credentials",
+                "--resource-group",
+                rg_name,
+                "--name",
+                cluster_name,
+                "--admin",
+                "--overwrite-existing",
+            ],
+            stdout=DEVNULL,
+            check=True,
+        )

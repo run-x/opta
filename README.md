@@ -83,7 +83,7 @@ Opta aims to be compatible with your existing Infrastructure setup. You can:
 * Import existing Terraform infrastructure into Opta
 * Write [custom Terraform modules](https://docs.opta.dev/reference/aws/environment_modules/custom-terraform/) (for services that Opta doesn't support yet)
 * Run Opta in existing VPCs (WIP)
-* Export the generated Terraform (WIP)
+* Export the generated Terraform
 
 # Try out Opta
 

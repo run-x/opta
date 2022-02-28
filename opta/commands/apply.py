@@ -20,7 +20,7 @@ from opta.core.azure import Azure
 from opta.core.cloud_client import CloudClient
 from opta.core.gcp import GCP
 from opta.core.generator import gen, gen_opta_resource_tags
-from opta.core.kubernetes import get_cluster_name, tail_module_log, tail_namespace_events
+from opta.core.kubernetes import cluster_exist, tail_module_log, tail_namespace_events
 from opta.core.local import Local
 from opta.core.plan_displayer import PlanDisplayer
 from opta.core.terraform import Terraform, get_terraform_outputs
@@ -28,8 +28,11 @@ from opta.error_constants import USER_ERROR_TF_LOCK
 from opta.exceptions import MissingState, UserErrors
 from opta.layer import Layer, StructuredConfig
 from opta.pre_check import pre_check
+from opta.process import ApplyOptions
+from opta.process import apply as apply2
 from opta.utils import check_opta_file_exists, fmt_msg, logger
 from opta.utils.clickoptions import local_option
+from opta.utils.features import is_module_api_enabled
 
 
 @click.command()
@@ -122,6 +125,11 @@ def _apply(
     stdout_logs: bool = True,
     detailed_plan: bool = False,
 ) -> None:
+    if is_module_api_enabled():
+        opts = ApplyOptions(auto_approve=auto_approve, config_path=config)
+        apply2(opts)
+        return
+
     pre_check()
     _clean_tf_folder()
     if local and not test:
@@ -251,7 +259,7 @@ def _apply(
                 )
                 if (
                     len(service_modules) != 0
-                    and get_cluster_name(layer.root()) is not None
+                    and cluster_exist(layer.root())
                     and stdout_logs
                 ):
                     service_module = service_modules[0]

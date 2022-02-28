@@ -50,7 +50,7 @@ resource "azurerm_role_assignment" "azurerm_container_registry_agent_pool" {
 
 
 resource "azurerm_kubernetes_cluster" "main" {
-  name                = "opta-${var.layer_name}"
+  name                = var.cluster_name
   location            = data.azurerm_resource_group.opta.location
   resource_group_name = data.azurerm_resource_group.opta.name
   dns_prefix          = "opta"
