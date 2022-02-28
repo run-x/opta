@@ -4,7 +4,7 @@ from click_didyoumean import DYMGroup
 from opta.core.aws import AWS
 from opta.core.cloud_client import CloudClient
 from opta.core.gcp import GCP
-from opta.exceptions import UserErrors
+from opta.exceptions import AzureNotImplemented
 from opta.utils import logger
 
 
@@ -33,7 +33,9 @@ def view(cloud: str) -> None:
     Use the current cloud credentials to fetch the remote opta config file
     """
     if cloud.lower() == "azurerm":
-        raise UserErrors("Currently AzureRM isn't supported.")
+        raise AzureNotImplemented(
+            "Currently AzureRM isn't supported for this command, as Opta's AzureRM support is in Beta"
+        )
     cloud_client: CloudClient = __get_cloud_client(cloud)
     detailed_config_map = cloud_client.get_all_remote_configs()
     if detailed_config_map:
