@@ -1,3 +1,4 @@
+from subprocess import DEVNULL
 from typing import Generator
 from unittest.mock import Mock
 
@@ -48,6 +49,7 @@ def azure_layer() -> Mock:
             }
         },
     }
+    layer.get_cluster_name.return_value = "mocked_cluster_name"
     return layer
 
 
@@ -58,6 +60,36 @@ def reset_azure_creds() -> Generator:
 
 
 class TestAzure:
+    def test_azure_set_kube_config(self, mocker: MockFixture, azure_layer: Mock) -> None:
+        mocked_ensure_installed = mocker.patch("opta.core.azure.ensure_installed")
+        mocker.patch(
+            "opta.core.azure.Azure.cluster_exist", return_value=True,
+        )
+        mocked_nice_run = mocker.patch("opta.core.azure.nice_run",)
+
+        Azure(azure_layer).set_kube_config()
+
+        mocked_ensure_installed.assert_has_calls([mocker.call("az")])
+        mocked_nice_run.assert_has_calls(
+            [
+                mocker.call(
+                    [
+                        "az",
+                        "aks",
+                        "get-credentials",
+                        "--resource-group",
+                        "dummy_resource_group",
+                        "--name",
+                        "mocked_cluster_name",
+                        "--admin",
+                        "--overwrite-existing",
+                    ],
+                    stdout=DEVNULL,
+                    check=True,
+                ),
+            ]
+        )
+
     def test_get_credentials(self, mocker: MockFixture) -> None:
         mocked_default_creds = mocker.patch("opta.core.azure.DefaultAzureCredential")
         Azure.get_credentials()

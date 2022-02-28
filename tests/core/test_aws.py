@@ -4,6 +4,7 @@ from mypy_boto3_dynamodb import DynamoDBClient
 from pytest import fixture
 from pytest_mock import MockFixture
 
+from opta.constants import GENERATED_KUBE_CONFIG_DIR
 from opta.core.aws import AWS
 from opta.layer import Layer
 
@@ -17,6 +18,9 @@ class TestAWS:
         layer.name = "mock_name"
         layer.org_name = "mock_org_name"
         layer.providers = {"aws": {"region": "us-east-1", "account_id": "111111111111"}}
+        layer.root.return_value = layer
+        layer.get_cluster_name.return_value = "mocked_cluster_name"
+        layer.get_kube_config_file_name.return_value = f"{GENERATED_KUBE_CONFIG_DIR}/kubeconfig-{layer.root().name}-{layer.cloud}.yaml"
 
         layer.root.return_value = layer
         layer.gen_providers.return_value = {
@@ -34,6 +38,48 @@ class TestAWS:
         }
 
         return layer
+
+    def test_aws_set_kube_config(self, mocker: MockFixture, aws_layer: Mock) -> None:
+        mocked_exist = mocker.patch("opta.core.aws.exists")
+        mocked_exist.return_value = False
+        mock_eks_client = mocker.Mock()
+        mocker.patch("opta.core.aws.boto3.client", return_value=mock_eks_client)
+        mock_eks_client.describe_cluster.return_value = {
+            "cluster": {
+                "certificateAuthority": {"data": "ca-data"},
+                "endpoint": "eks-endpoint",
+            }
+        }
+
+        mocker.patch(
+            "opta.core.aws.AWS.cluster_exist", return_value=True,
+        )
+        mocked_file = mocker.patch("opta.core.aws.open", mocker.mock_open(read_data=""))
+        AWS(aws_layer).set_kube_config()
+        config_file_name = f"{GENERATED_KUBE_CONFIG_DIR}/kubeconfig-{aws_layer.root().name}-{aws_layer.cloud}.yaml"
+        mocked_file.assert_called_once_with(config_file_name, "w")
+        mocked_file().write.assert_called_once_with(
+            "apiVersion: v1\n"
+            "clusters:\n"
+            "- cluster: {certificate-authority-data: ca-data, server: eks-endpoint}\n"
+            "  name: 111111111111_us-east-1_mocked_cluster_name\n"
+            "contexts:\n"
+            "- context: {cluster: 111111111111_us-east-1_mocked_cluster_name, user: "
+            "111111111111_us-east-1_mocked_cluster_name}\n"
+            "  name: 111111111111_us-east-1_mocked_cluster_name\n"
+            "current-context: 111111111111_us-east-1_mocked_cluster_name\n"
+            "kind: Config\n"
+            "preferences: {}\n"
+            "users:\n"
+            "- name: 111111111111_us-east-1_mocked_cluster_name\n"
+            "  user:\n"
+            "    exec:\n"
+            "      apiVersion: client.authentication.k8s.io/v1alpha1\n"
+            "      args: [--region, us-east-1, eks, get-token, --cluster-name, "
+            "mocked_cluster_name]\n"
+            "      command: aws\n"
+            "      env: null\n"
+        )
 
     def test_get_terraform_lock_id(self, mocker: MockFixture, aws_layer: Mock) -> None:
         mock_dynamodb_client_instance = mocker.Mock(spec=DynamoDBClient)
