@@ -1,0 +1,44 @@
+---
+exclude:
+  - aws-cloudfront-enable-logging
+  - aws-cloudfront-enable-waf
+  - aws-cloudfront-use-secure-tls-policy
+  - aws-cloudwatch-log-group-customer-key
+  - aws-documentdb-enable-log-export
+  - aws-documentdb-encryption-customer-key
+  - aws-eks-no-public-cluster-access
+  - aws-eks-no-public-cluster-access-to-cidr
+  - aws-iam-no-policy-wildcards
+  - aws-lambda-enable-tracing
+  - aws-rds-enable-performance-insights
+  - aws-s3-block-public-acls
+  - aws-s3-block-public-policy
+  - aws-s3-enable-bucket-logging
+  - aws-s3-encryption-customer-key
+  - aws-s3-ignore-public-acls
+  - aws-s3-no-public-buckets
+  - aws-s3-specify-public-access-block
+  - aws-sqs-no-wildcards-in-policy-documents
+  - aws-vpc-add-description-to-security-group-rule
+  - aws-vpc-no-public-egress-sgr
+  - azure-container-limit-authorized-ips
+  - azure-container-logging
+  - azure-database-postgres-configuration-connection-throttling
+  - azure-database-postgres-configuration-log-checkpoints
+  - azure-database-postgres-configuration-log-connections
+  - azure-keyvault-ensure-key-expiry
+  - azure-keyvault-no-purge
+  - azure-keyvault-specify-network-acl
+  - azure-network-no-public-egress
+  - azure-network-no-public-ingress
+  - azure-storage-queue-services-logging-enabled
+  - azure-storage-use-secure-tls-policy
+  - general-secrets-no-plaintext-exposure
+  - google-gke-enable-master-networks
+  - google-gke-enforce-pod-security-policy
+  - google-gke-metadata-endpoints-disabled
+  - google-gke-node-pool-uses-cos
+  - google-gke-no-legacy-authentication
+  - google-gke-use-cluster-labels
+  - google-sql-encrypt-in-transit-data
+
