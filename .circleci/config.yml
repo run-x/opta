@@ -124,31 +124,31 @@ commands:
             git config --global user.name "Runx CI"
       - checkout
 
+# Note: The below command is dependent on the Repo being checked out and should always have a checkout command in the pipeline.
+# Note: This command also requires aws-tg-create-env and gcp-tg-create-env to be run prior to calling this command.
   opta-module-with-terraform-generate:
+    description: "Command to Generate terraform files and plan those changes"
     parameters:
       module:
         default: ""
+        type: string
+      provider:
+        default: "aws"
         type: string
     steps:
       - run:
           name: Test command
           command: echo << parameters.module >>
       - run:
-          name: Generate Terraform Language Files for Opta Module
+          name: Generate Terraform Language Files for Opta Module and Terraform plan
           command: |
             ./dist/opta/opta generate-terraform \
-            --config ./.circleci/ci-tests/terraform-generated-aws/module-<< parameters.module >>.yaml \
-            --directory $HOME/generated-tf-files-aws \
+            --config ./.circleci/ci-tests/terraform-generated-<< parameters.provider >>/module-<< parameters.module >>.yaml \
+            --directory $HOME/generated-tf-files-<< parameters.provider >> \
             --auto-approve
-            cd $HOME/generated-tf-files-aws
+            cd $HOME/generated-tf-files-<< parameters.provider >>
             terraform init
             terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.<< parameters.module >>
-#      - run:
-#          name: Terraform Plan for Opta Module
-#          commamd: |
-#            cd $HOME/generated-tf-files-aws
-#            terraform init
-#            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.<< parameters.module >>
 
 # Note: The below command is dependent on the Repo being checked out and should always have a checkout command in the pipeline.
   remake-environment-configs:
@@ -477,6 +477,10 @@ jobs:
 #          at: ./
       - opta-module-with-terraform-generate:
           module: "s3"
+          provider: "aws"
+      - opta-module-with-terraform-generate:
+          module: sql
+          provider: "gcp"
 #      - run:
 #          name: "Generate Terraform Language Files for DocDB"
 #          command: |
