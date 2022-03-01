@@ -1455,6 +1455,31 @@ jobs:
           path: ../generated-tf-files-gcp/tfstate/gcpenv-tg.tfstate
           destination: tfstate-after-apply-hello-cnd.tfstate
 
+  gcp-tg-test-other-modules-plan:
+    executor: ubuntu-machine
+    steps:
+      - checkout-opta
+      - install-opta-dependencies
+      - attach_workspace:
+          at: ~/
+      - attach_workspace:
+          at: ./
+      - opta-module-with-terraform-generate:
+          module: "gcs"
+          provider: "gcp"
+      - opta-module-with-terraform-generate:
+          module: "mysql"
+          provider: "gcp"
+      - opta-module-with-terraform-generate:
+          module: "pg"
+          provider: "gcp"
+      - opta-module-with-terraform-generate:
+          module: "redis"
+          provider: "gcp"
+      - opta-module-with-terraform-generate:
+          module: "serviceaccount"
+          provider: "gcp"
+
   gcp-tg-destroy-env:
     executor: ubuntu-machine
     steps:

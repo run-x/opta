@@ -1,0 +1,10 @@
+environments:
+  - name: env-tg
+    path: "environment.yaml"
+    variables:
+      max_containers: 2
+name: module-mysql
+modules:
+  - name: mysql
+    type: mysql
+    safety: false
