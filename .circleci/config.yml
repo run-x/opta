@@ -475,12 +475,18 @@ jobs:
 #          at: ~/
 #      - attach_workspace:
 #          at: ./
-      - opta-module-with-terraform-generate:
-          module: "s3"
-          provider: "aws"
-      - opta-module-with-terraform-generate:
-          module: sql
-          provider: "gcp"
+      - when:
+          condition: true
+          steps:
+            - opta-module-with-terraform-generate:
+                module: "s3"
+                provider: "aws"
+      - when:
+          condition: true
+          steps:
+            - opta-module-with-terraform-generate:
+                module: "sql"
+                provider: "gcp"
 #      - run:
 #          name: "Generate Terraform Language Files for DocDB"
 #          command: |
