@@ -9,7 +9,5 @@ modules:
     type: aws-dynamodb
     hash_key: terraform
     attributes:
-      - name: attribute1
+      - name: terraform
         type: S
-      - name: attribute2
-        type: N
