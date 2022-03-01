@@ -1,6 +1,6 @@
 ---
-title: "AWS VPC Peering"
-linkTitle: "AWS VPC Peering"
+title: "VPC Peering"
+linkTitle: "VPC Peering"
 date: 2021-07-21
 draft: false
 weight: 1
