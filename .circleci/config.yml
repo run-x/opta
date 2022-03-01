@@ -480,7 +480,7 @@ jobs:
                 module: "s3"
                 provider: "aws"
       - when:
-          condition: true
+          condition: always
           steps:
             - opta-module-with-terraform-generate:
                 module: "sql"
