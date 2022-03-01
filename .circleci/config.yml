@@ -1460,6 +1460,11 @@ jobs:
     steps:
       - checkout-opta
       - install-opta-dependencies
+      - gcp-cli/install
+      - gcp-cli/initialize
+      - run:
+          name: "Setting up gcp envar"
+          command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
       - attach_workspace:
           at: ~/
       - attach_workspace:
