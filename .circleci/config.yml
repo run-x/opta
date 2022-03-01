@@ -139,7 +139,7 @@ commands:
       - run:
           name: Generate Terraform Language Files for Opta Module and Terraform plan
           command: |
-            echo "Testing Opta module: << parameters.provider >> - << paremeters.module >>"
+            echo "Testing Opta module: << parameters.provider >> - << parameters.module >>"
             ./dist/opta/opta generate-terraform \
             --config ./.circleci/ci-tests/terraform-generated-<< parameters.provider >>/module-<< parameters.module >>.yaml \
             --directory $HOME/generated-tf-files-<< parameters.provider >> \
