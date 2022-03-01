@@ -124,8 +124,16 @@ commands:
             git config --global user.name "Runx CI"
       - checkout
 
-# Note: The below command is dependent on the Repo being checked out and should always have a checkout command in the pipeline.
-# Note: This command also requires aws-tg-create-env and gcp-tg-create-env to be run prior to calling this command.
+# Note:
+#  The below command is dependent on the Repo being checked out and should always have a checkout command in the pipeline.
+#  This command also requires aws-tg-create-env and gcp-tg-create-env to be run prior to calling this command.
+# Usage:
+#  Following should always be checked when using this command:
+#    - Configuration file should always be present in the .circleci/ci-tests/terraform-generated-<provider-name> folder
+#    - Configuration file should me named module-<module-name>.yaml. This should be the same as the name of the module being defined inside.
+#    - Respective cloud creation jobs should be called before this command is invoked. (aws-tg-create-env / gcp-tg-create-env).
+#    - Always attach the `./` and `~/` workspaces.
+
   opta-module-with-terraform-generate:
     description: "Command to Generate terraform files and plan those changes"
     parameters:
