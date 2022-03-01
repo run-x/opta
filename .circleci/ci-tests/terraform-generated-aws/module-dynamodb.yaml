@@ -1,0 +1,15 @@
+environments:
+  - name: env-tg
+    path: "environment.yaml"
+    variables:
+      max_containers: 2
+name: module-dynamodb
+modules:
+  - name: dynamodb
+    type: aws-dynamodb
+    hash_key: terraform
+    attributes:
+      - name: attribute1
+        type: S
+      - name: attribute2
+        type: N

@@ -502,6 +502,8 @@ jobs:
           module: "sns"
       - opta-module-with-terraform-generate:
           module: "sqs"
+      - opta-module-with-terraform-generate:
+          module: "dynamodb"
 
   aws-tg-destroy-env:
     executor: ubuntu-machine
