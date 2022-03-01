@@ -68,7 +68,7 @@ def deploy(
 
     opta deploy -c my-service.yaml -i my-image:latest --local
 
-    Documentation: https://docs.opta.dev/tutorials/custom_image/
+    Documentation: https://docs.opta.dev/features/custom_image/
 
     """
 

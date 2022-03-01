@@ -70,9 +70,9 @@ Opta supports the 3 major clouds - AWS, GCP and Azure. It has modules for the mo
 * Object storage (S3, GCS)
 
 Additionally, we bake in best practices like:
-* [Observability](https://docs.opta.dev/observability/) (Datadog, LogDNA)
+* [Observability](https://docs.opta.dev/features/observability/) (Datadog, LogDNA)
 * [SOC2 compliance](https://docs.opta.dev/compliance/)
-* [Continuous Deployment](https://docs.opta.dev/tutorials/continuous_deployment/)
+* [Continuous Deployment](https://docs.opta.dev/features/continuous_deployment/)
 * Hardened network and security configurations ([AWS](https://docs.opta.dev/architecture/aws/), [GCP](https://docs.opta.dev/architecture/gcp/), [Azure](https://docs.opta.dev/architecture/azure))
 * Auto-scaling and high availability (HA)
 
@@ -81,7 +81,7 @@ Additionally, we bake in best practices like:
 Opta aims to be compatible with your existing Infrastructure setup. You can:
 
 * Import existing Terraform infrastructure into Opta
-* Write [custom Terraform modules](https://docs.opta.dev/reference/aws/environment_modules/custom-terraform/) (for services that Opta doesn't support yet)
+* Write [custom Terraform modules](https://docs.opta.dev/reference/aws/modules/custom-terraform/) (for services that Opta doesn't support yet)
 * Run Opta in existing VPCs (WIP)
 * Export the generated Terraform
 

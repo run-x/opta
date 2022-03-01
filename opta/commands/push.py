@@ -162,7 +162,7 @@ def push(image: str, config: str, env: Optional[str], tag: Optional[str]) -> Non
             fmt_msg(
                 """
             Opta push can only run on service yaml files. This is an environment yaml file.
-            ~See https://docs.runx.dev/docs/reference/service_modules/ for more details.
+            ~See https://docs.runx.dev/docs/reference/modules/ for more details.
             ~
             ~(We know that this is an environment yaml file, because service yaml must
             ~specify the "environments" field).

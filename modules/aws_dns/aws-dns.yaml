@@ -23,7 +23,7 @@ inputs:
   - name: delegated
     user_facing: true
     validator: bool(required=False)
-    description: Set to true once the extra [dns setup is complete](/tutorials/ingress) and it will add the ssl certs.
+    description: Set to true once the extra [dns setup is complete](/features/dns) and it will add the ssl certs.
     default: false
   - name: upload_cert
     user_facing: true

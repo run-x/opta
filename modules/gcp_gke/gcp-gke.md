@@ -12,4 +12,4 @@ node pool to host your applications in. This needs to be added in the environmen
 as Opta services run on Kubernetes.
 
 For information about the default IAM permissions given to the node pool please see 
-[here](/reference/google/environment_modules/gcp-nodepool).
+[here](/reference/google/modules/gcp-nodepool).
