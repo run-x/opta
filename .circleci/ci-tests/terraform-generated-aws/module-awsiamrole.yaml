@@ -1,0 +1,12 @@
+environments:
+  - name: env-tg
+    path: "environment.yaml"
+    variables:
+      max_containers: 2
+name: module-aws-iam-role
+modules:
+  - name: awsiamrole
+    type: aws-iam-role
+    allowed_k8s_services:
+      - namespace: "*"
+        service_name: "*"

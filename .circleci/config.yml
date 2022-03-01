@@ -486,6 +486,14 @@ jobs:
           module: "redis"
       - opta-module-with-terraform-generate:
           module: "pg"
+      - opta-module-with-terraform-generate:
+          module: "awsiamrole"
+      - opta-module-with-terraform-generate:
+          module: "awsiamuser"
+      - opta-module-with-terraform-generate:
+          module: "sns"
+      - opta-module-with-terraform-generate:
+          module: "sqs"
 
   aws-tg-destroy-env:
     executor: ubuntu-machine
