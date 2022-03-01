@@ -137,11 +137,9 @@ commands:
         type: string
     steps:
       - run:
-          name: Test command
-          command: echo << parameters.module >>
-      - run:
           name: Generate Terraform Language Files for Opta Module and Terraform plan
           command: |
+            echo "Testing Opta module: << parameters.provider >> - << paremeters.module >>"
             ./dist/opta/opta generate-terraform \
             --config ./.circleci/ci-tests/terraform-generated-<< parameters.provider >>/module-<< parameters.module >>.yaml \
             --directory $HOME/generated-tf-files-<< parameters.provider >> \
@@ -476,7 +474,7 @@ jobs:
 #      - attach_workspace:
 #          at: ./
       - when:
-          condition: true
+          condition: always
           steps:
             - opta-module-with-terraform-generate:
                 module: "s3"
