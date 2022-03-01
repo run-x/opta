@@ -137,7 +137,7 @@ commands:
           name: Generate Terraform Language Files for Opta Module
           command: |
             ./dist/opta/opta generate-terraform \
-            --config ./.circleci/ci-tests/terraform-generated-aws/module-<< parameter.module >>.yaml \
+            --config ./.circleci/ci-tests/terraform-generated-aws/module-<< parameters.module >>.yaml \
             --directory $HOME/generated-tf-files-aws \
             --auto-approve
 #      - run:
@@ -145,7 +145,7 @@ commands:
 #          commamd: |
 #            cd $HOME/generated-tf-files-aws
 #            terraform init
-#            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.<< parameter.module >>
+#            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.<< parameters.module >>
 
 # Note: The below command is dependent on the Repo being checked out and should always have a checkout command in the pipeline.
   remake-environment-configs:
