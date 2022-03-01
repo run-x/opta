@@ -137,6 +137,7 @@ commands:
         type: string
     steps:
       - run:
+          when: always
           name: Generate Terraform Language Files for Opta Module and Terraform plan
           command: |
             echo "Testing Opta module: << parameters.provider >> - << parameters.module >>"
