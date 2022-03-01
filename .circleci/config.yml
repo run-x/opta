@@ -468,102 +468,24 @@ jobs:
   aws-tg-test-other-modules-plan:
     executor: ubuntu-machine
     steps:
-#      - checkout-opta
-#      - install-opta-dependencies
-#      - attach_workspace:
-#          at: ~/
-#      - attach_workspace:
-#          at: ./
-      - when:
-          condition: always
-          steps:
-            - opta-module-with-terraform-generate:
-                module: "s3"
-                provider: "aws"
-      - when:
-          condition: always
-          steps:
-            - opta-module-with-terraform-generate:
-                module: "sql"
-                provider: "gcp"
-#      - run:
-#          name: "Generate Terraform Language Files for DocDB"
-#          command: |
-#            ./dist/opta/opta generate-terraform \
-#            --config ./.circleci/ci-tests/terraform-generated-aws/module-docdb.yaml \
-#            --directory $HOME/generated-tf-files-aws \
-#            --auto-approve
-#      - run:
-#          name: "Plan Terraform Generated for DocDB"
-#          command: |
-#            cd $HOME/generated-tf-files-aws
-#            terraform init
-#            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.tgdocdb
-#      - run:
-#          name: "Generate Terraform Language Files for Helm Chart"
-#          command: |
-#            ./dist/opta/opta generate-terraform \
-#            --config ./.circleci/ci-tests/terraform-generated-aws/module-helm-chart.yaml \
-#            --directory $HOME/generated-tf-files-aws \
-#            --auto-approve
-#      - run:
-#          name: "Plan Terraform Generated for Helm Chart"
-#          command: |
-#            cd $HOME/generated-tf-files-aws
-#            terraform init
-#            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.tghelmchart
-#      - run:
-#          name: "Generate Terraform Language Files for MySQL"
-#          command: |
-#            ./dist/opta/opta generate-terraform \
-#            --config ./.circleci/ci-tests/terraform-generated-aws/module-mysql.yaml \
-#            --directory $HOME/generated-tf-files-aws \
-#            --auto-approve
-#      - run:
-#          name: "Plan Terraform Generated for MySQL"
-#          command: |
-#            cd $HOME/generated-tf-files-aws
-#            terraform init
-#            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.tgmysql
-#      - run:
-#          name: "Generate Terraform Language Files for Postgres"
-#          command: |
-#            ./dist/opta/opta generate-terraform \
-#            --config ./.circleci/ci-tests/terraform-generated-aws/module-pg.yaml \
-#            --directory $HOME/generated-tf-files-aws \
-#            --auto-approve
-#      - run:
-#          name: "Plan Terraform Generated for Postgres"
-#          command: |
-#            cd $HOME/generated-tf-files-aws
-#            terraform init
-#            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.tgpg
-#      - run:
-#          name: "Generate Terraform Language Files for Redis"
-#          command: |
-#            ./dist/opta/opta generate-terraform \
-#            --config ./.circleci/ci-tests/terraform-generated-aws/module-redis.yaml \
-#            --directory $HOME/generated-tf-files-aws \
-#            --auto-approve
-#      - run:
-#          name: "Plan Terraform Generated for Redis"
-#          command: |
-#            cd $HOME/generated-tf-files-aws
-#            terraform init
-#            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.tgredis
-#      - run:
-#          name: "Generate Terraform Language Files for S3"
-#          command: |
-#            ./dist/opta/opta generate-terraform \
-#            --config ./.circleci/ci-tests/terraform-generated-aws/module-s3.yaml \
-#            --directory $HOME/generated-tf-files-aws \
-#            --auto-approve
-#      - run:
-#          name: "Plan Terraform Generated for S3"
-#          command: |
-#            cd $HOME/generated-tf-files-aws
-#            terraform init
-#            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.tgbucket
+      - checkout-opta
+      - install-opta-dependencies
+      - attach_workspace:
+          at: ~/
+      - attach_workspace:
+          at: ./
+      - opta-module-with-terraform-generate:
+          module: "bucket"
+      - opta-module-with-terraform-generate:
+          module: "docdb"
+      - opta-module-with-terraform-generate:
+          module: "helmchart"
+      - opta-module-with-terraform-generate:
+          module: "mysql"
+      - opta-module-with-terraform-generate:
+          module: "redis"
+      - opta-module-with-terraform-generate:
+          module: "pg"
 
   aws-tg-destroy-env:
     executor: ubuntu-machine
@@ -2498,25 +2420,24 @@ workflows:
   run-opta-terraform-generate-test:
     when: << pipeline.parameters.run-opta-terraform-generate-test >>
     jobs:
-      - aws-tg-test-other-modules-plan
-#      - get-all-parameter-values
-#      - build-opta-binary
-#      - aws-generate-terraform-language-files:
-#          requires:
-#            - build-opta-binary
-#      - aws-tg-create-env:
-#          requires:
-#            - aws-generate-terraform-language-files
-#      - aws-tg-test-service-http:
-#          requires:
-#            - aws-tg-create-env
-#      - aws-tg-test-other-modules-plan:
-#          requires:
-#            - aws-tg-create-env
-#      - aws-tg-destroy-env:
-#          requires:
-#            - aws-tg-test-service-http
-#            - aws-tg-test-other-modules-plan
+      - get-all-parameter-values
+      - build-opta-binary
+      - aws-generate-terraform-language-files:
+          requires:
+            - build-opta-binary
+      - aws-tg-create-env:
+          requires:
+            - aws-generate-terraform-language-files
+      - aws-tg-test-service-http:
+          requires:
+            - aws-tg-create-env
+      - aws-tg-test-other-modules-plan:
+          requires:
+            - aws-tg-create-env
+      - aws-tg-destroy-env:
+          requires:
+            - aws-tg-test-service-http
+            - aws-tg-test-other-modules-plan
 #      - gcp-generate-terraform-language-files:
 #          requires:
 #            - build-opta-binary

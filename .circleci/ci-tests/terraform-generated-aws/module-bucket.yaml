@@ -5,6 +5,6 @@ environments:
       max_containers: 2
 name: module-s3
 modules:
-  - name: tgbucket
+  - name: bucket
     type: aws-s3
     bucket_name: "runx-ci-terraform-generated"

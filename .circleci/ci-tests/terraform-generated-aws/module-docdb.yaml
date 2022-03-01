@@ -5,5 +5,5 @@ environments:
       max_containers: 2
 name: module-docdb
 modules:
-  - name: tgdocdb
+  - name: docdb
     type: aws-documentdb

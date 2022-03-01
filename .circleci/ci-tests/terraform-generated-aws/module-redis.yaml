@@ -5,6 +5,6 @@ environments:
       max_containers: 2
 name: module-redis
 modules:
-  - name: tgredis
+  - name: redis
     type: redis
     node_type: "cache.t3.micro"
