@@ -453,6 +453,14 @@ jobs:
             terraform init
             terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base -target=module.k8scluster -target=module.k8sbase -destroy
             terraform apply -compact-warnings -auto-approve tf.plan
+      - run:
+          name: "Destroy Terraform Generated Environment (retry)"
+          when: on_fail
+          command: |
+            cd $HOME/generated-tf-files-aws
+            terraform init
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base -target=module.k8scluster -target=module.k8sbase -destroy
+            terraform apply -compact-warnings -auto-approve tf.plan
       - store_artifacts:
           path: ../generated-tf-files-aws/tfstate/awsenv-tg.tfstate
           destination: tfstate-after-destroy.tfstate
