@@ -30,6 +30,7 @@ from opta.commands.version import version
 from opta.crash_reporter import CURRENT_CRASH_REPORTER
 from opta.exceptions import UserErrors
 from opta.one_time import one_time
+from opta.opta_run_check import opta_run_end, opta_run_start
 from opta.upgrade import check_version_upgrade
 from opta.utils import dd_handler, dd_listener, logger
 
@@ -74,6 +75,7 @@ if __name__ == "__main__":
         # else it may interfere with it.
         one_time()
         cleanup_files()
+        opta_run_start()
         cli()
     except UserErrors as e:
         logger.error(str(e))
@@ -94,6 +96,7 @@ if __name__ == "__main__":
         # NOTE: Statements after the cli() invocation in the try clause are not executed.
         # A quick glance at click documentation did not show why that is the case or any workarounds.
         # Therefore adding this version check in the finally clause for now.
+        opta_run_end()
         check_version_upgrade()
 
         dd_listener.stop()
