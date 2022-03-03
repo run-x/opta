@@ -124,6 +124,39 @@ commands:
             git config --global user.name "Runx CI"
       - checkout
 
+# Note:
+#  The below command is dependent on the Repo being checked out and should always have a checkout command in the pipeline.
+#  This command also requires aws-tg-create-env and gcp-tg-create-env to be run prior to calling this command.
+# Usage:
+#  Following should always be checked when using this command:
+#    - Configuration file should always be present in the .circleci/ci-tests/terraform-generated-<provider-name> folder
+#    - Configuration file should me named module-<module-name>.yaml. This should be the same as the name of the module being defined inside.
+#    - Respective cloud creation jobs should be called before this command is invoked. (aws-tg-create-env / gcp-tg-create-env).
+#    - Always attach the `./` and `~/` workspaces.
+
+  opta-module-with-terraform-generate:
+    description: "Command to Generate terraform files and plan those changes"
+    parameters:
+      module:
+        default: ""
+        type: string
+      provider:
+        default: "aws"
+        type: string
+    steps:
+      - run:
+          when: always
+          name: Generate Terraform Language Files for Opta Module and Terraform plan
+          command: |
+            echo "Testing Opta module: << parameters.provider >> - << parameters.module >>"
+            ./dist/opta/opta generate-terraform \
+            --config ./.circleci/ci-tests/terraform-generated-<< parameters.provider >>/module-<< parameters.module >>.yaml \
+            --directory $HOME/generated-tf-files-<< parameters.provider >> \
+            --auto-approve
+            cd $HOME/generated-tf-files-<< parameters.provider >>
+            terraform init
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.<< parameters.module >>
+
 # Note: The below command is dependent on the Repo being checked out and should always have a checkout command in the pipeline.
   remake-environment-configs:
     steps:
@@ -362,7 +395,7 @@ jobs:
             --directory $HOME/generated-tf-files-aws \
             --auto-approve
             ./dist/opta/opta generate-terraform \
-            --config ./.circleci/ci-tests/terraform-generated-aws/service-http.yaml \
+            --config ./.circleci/ci-tests/terraform-generated-aws/service-hello-opta.yaml \
             --directory $HOME/generated-tf-files-aws \
             --auto-approve
       - persist_to_workspace:
@@ -403,11 +436,11 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          name: "Create Terraform Generated Http Service"
+          name: "Create Terraform Generated Hello Opta Service"
           command: |
             cd $HOME/generated-tf-files-aws
             terraform init
-            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.app
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello
             terraform apply -compact-warnings -auto-approve tf.plan
       - run:
           name: "Sleep 120 seconds"
@@ -420,17 +453,17 @@ jobs:
             terraform output -json >> terraform_output.json
             export LOAD_BALANCER=`cat terraform_output.json | jq -r '.load_balancer_raw_dns' |jq -r '.value'`
             echo $LOAD_BALANCER
-            curl $LOAD_BALANCER
+            curl "$LOAD_BALANCER/hello"
             echo "1"
       - run:
           name: "Sleep 120 seconds"
           command: |
             sleep 120
       - run:
-          name: "Destroy Terraform Generated Http Service"
+          name: "Destroy Terraform Generated Hello Opta Service"
           command: |
             cd $HOME/generated-tf-files-aws
-            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.app -destroy
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello -destroy
             terraform apply -compact-warnings -auto-approve tf.plan
       - persist_to_workspace:
           root: ~/
@@ -438,8 +471,43 @@ jobs:
             - generated-tf-files-aws/tfstate/awsenv-tg.tfstate
       - store_artifacts:
           path: ../generated-tf-files-aws/tfstate/awsenv-tg.tfstate
-          destination: tfstate-after-apply-svc-cnd.tfstate
+          destination: tfstate-after-apply-hello-cnd.tfstate
 
+  aws-tg-test-other-modules-plan:
+    executor: ubuntu-machine
+    steps:
+      - checkout-opta
+      - install-opta-dependencies
+      - attach_workspace:
+          at: ~/
+      - attach_workspace:
+          at: ./
+      - opta-module-with-terraform-generate:
+          module: "bucket"
+      - opta-module-with-terraform-generate:
+          module: "docdb"
+      - opta-module-with-terraform-generate:
+          module: "helmchart"
+      - opta-module-with-terraform-generate:
+          module: "mysql"
+      - opta-module-with-terraform-generate:
+          module: "redis"
+      - opta-module-with-terraform-generate:
+          module: "pg"
+      - opta-module-with-terraform-generate:
+          module: "awsiamrole"
+      - opta-module-with-terraform-generate:
+          module: "awsiamuser"
+      - opta-module-with-terraform-generate:
+          module: "sns"
+      - opta-module-with-terraform-generate:
+          module: "sqs"
+      - opta-module-with-terraform-generate:
+          module: "dynamodb"
+
+# Note:
+# Added terraform refresh and terraform state rm before planning destroy 
+# because kms key is coming as a deposed object in terraform state,.
   aws-tg-destroy-env:
     executor: ubuntu-machine
     steps:
@@ -451,6 +519,8 @@ jobs:
           command: |
             cd $HOME/generated-tf-files-aws
             terraform init
+            terraform refresh
+            terraform state rm module.base.aws_ebs_default_kms_key.default
             terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base -target=module.k8scluster -target=module.k8sbase -destroy
             terraform apply -compact-warnings -auto-approve tf.plan
       - store_artifacts:
@@ -1400,6 +1470,36 @@ jobs:
           path: ../generated-tf-files-gcp/tfstate/gcpenv-tg.tfstate
           destination: tfstate-after-apply-hello-cnd.tfstate
 
+  gcp-tg-test-other-modules-plan:
+    executor: ubuntu-machine
+    steps:
+      - checkout-opta
+      - install-opta-dependencies
+      - gcp-cli/install
+      - gcp-cli/initialize
+      - run:
+          name: "Setting up gcp envar"
+          command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+      - attach_workspace:
+          at: ~/
+      - attach_workspace:
+          at: ./
+      - opta-module-with-terraform-generate:
+          module: "gcs"
+          provider: "gcp"
+      - opta-module-with-terraform-generate:
+          module: "mysql"
+          provider: "gcp"
+      - opta-module-with-terraform-generate:
+          module: "pg"
+          provider: "gcp"
+      - opta-module-with-terraform-generate:
+          module: "redis"
+          provider: "gcp"
+      - opta-module-with-terraform-generate:
+          module: "serviceaccount"
+          provider: "gcp"
+
   gcp-tg-destroy-env:
     executor: ubuntu-machine
     steps:
@@ -2163,6 +2263,38 @@ workflows:
       - azure-destroy-env:
           requires:
             - azure-test-service-http
+      - aws-generate-terraform-language-files:
+          requires:
+            - build-opta-binary
+      - aws-tg-create-env:
+          requires:
+            - aws-generate-terraform-language-files
+      - aws-tg-test-service-http:
+          requires:
+            - aws-tg-create-env
+      - aws-tg-test-other-modules-plan:
+          requires:
+            - aws-tg-create-env
+      - aws-tg-destroy-env:
+          requires:
+            - aws-tg-test-service-http
+            - aws-tg-test-other-modules-plan
+      - gcp-generate-terraform-language-files:
+          requires:
+            - build-opta-binary
+      - gcp-tg-create-env:
+          requires:
+            - gcp-generate-terraform-language-files
+      - gcp-tg-test-service-http:
+          requires:
+            - gcp-tg-create-env
+      - gcp-tg-test-other-modules-plan:
+          requires:
+            - gcp-tg-create-env
+      - gcp-tg-destroy-env:
+          requires:
+            - gcp-tg-test-service-http
+            - gcp-tg-test-other-modules-plan
   run-ci:
     when: << pipeline.parameters.run-ci >>
     jobs:
@@ -2384,9 +2516,13 @@ workflows:
       - aws-tg-test-service-http:
           requires:
             - aws-tg-create-env
+      - aws-tg-test-other-modules-plan:
+          requires:
+            - aws-tg-create-env
       - aws-tg-destroy-env:
           requires:
             - aws-tg-test-service-http
+            - aws-tg-test-other-modules-plan
       - gcp-generate-terraform-language-files:
           requires:
             - build-opta-binary
@@ -2396,9 +2532,13 @@ workflows:
       - gcp-tg-test-service-http:
           requires:
             - gcp-tg-create-env
+      - gcp-tg-test-other-modules-plan:
+          requires:
+            - gcp-tg-create-env
       - gcp-tg-destroy-env:
           requires:
             - gcp-tg-test-service-http
+            - gcp-tg-test-other-modules-plan
 
   nightly:
     triggers:

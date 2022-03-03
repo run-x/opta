@@ -1,0 +1,9 @@
+environments:
+  - name: env-tg
+    path: "environment.yaml"
+    variables:
+      max_containers: 2
+name: module-sqs
+modules:
+  - name: sqs
+    type: aws-sqs

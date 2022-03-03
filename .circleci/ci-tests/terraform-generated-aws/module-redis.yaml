@@ -1,0 +1,10 @@
+environments:
+  - name: env-tg
+    path: "environment.yaml"
+    variables:
+      max_containers: 2
+name: module-redis
+modules:
+  - name: redis
+    type: redis
+    node_type: "cache.t3.micro"

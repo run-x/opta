@@ -1,0 +1,10 @@
+environments:
+  - name: env-tg
+    path: "environment.yaml"
+    variables:
+      max_containers: 2
+name: module-gcp-gcs
+modules:
+  - name: gcs
+    type: gcp-gcs
+    bucket_name: "runx-ci-terraform-generated"
