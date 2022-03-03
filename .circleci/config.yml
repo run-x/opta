@@ -505,6 +505,9 @@ jobs:
       - opta-module-with-terraform-generate:
           module: "dynamodb"
 
+# Note:
+# Added terraform refresh and terraform state rm before planning destroy 
+# because kms key is coming as a deposed object in terraform state,.
   aws-tg-destroy-env:
     executor: ubuntu-machine
     steps:
