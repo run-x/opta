@@ -6,7 +6,7 @@ Quick "stub" classes that are added to provided needed functionality but will ne
 
 from __future__ import annotations
 
-from typing import Dict, List, Optional, Protocol, Type, TypeVar
+from typing import Dict, List, Optional, Protocol, Set, Type, TypeVar
 
 from opta.exceptions import UserErrors
 
@@ -46,13 +46,13 @@ class Provider(_Stub):
     pass
 
 
-class AWSProvider(Provider):
+class AWSProviderConfig(Provider):
     def __init__(self, region: str) -> None:
         self.region = region
         self.account_ids: Optional[List[str]] = None
 
     @classmethod
-    def from_dict(cls, raw: dict) -> AWSProvider:
+    def from_dict(cls, raw: dict) -> AWSProviderConfig:
 
         try:
             region = raw["region"]
@@ -72,13 +72,23 @@ class AWSProvider(Provider):
 
 class ProviderConfig:
     def __init__(self) -> None:
-        self.aws: Optional[AWSProvider] = None
+        self.aws: Optional[AWSProviderConfig] = None
+
+    @property
+    def cloud_id(self) -> Optional[str]:
+        """
+        The cloud id/type of the configured cloud provider, if any.
+        """
+        configured_providers = self._configured_providers
+
+        if not configured_providers:
+            return None
+
+        return next(iter(configured_providers))
 
     @classmethod
     def from_dict(cls, raw: dict) -> ProviderConfig:
-        type_mapping: Dict[str, Type[Provider]] = {
-            "aws": AWSProvider,
-        }
+        type_mapping = cls._cloud_type_mapping()
 
         providers = cls()
 
@@ -92,4 +102,18 @@ class ProviderConfig:
 
             setattr(providers, type, provider)
 
+        if len(providers._configured_providers) > 1:
+            raise ValueError("Cannot configure multiple cloud providers")
+
         return providers
+
+    @property
+    def _configured_providers(self) -> Set[str]:
+        return {id for id in self._cloud_type_mapping() if getattr(self, id) is not None}
+
+    @classmethod
+    def _cloud_type_mapping(cls) -> Dict[str, Type[Provider]]:
+        # TODO: In 3.9+, this method can be a @property (https://docs.python.org/3.9/library/functions.html#classmethod)
+        return {
+            "aws": AWSProviderConfig,
+        }
