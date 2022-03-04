@@ -1,0 +1,30 @@
+name: tfsec
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+jobs:
+  tfsec:
+    name: tfsec sarif report
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@master
+      - name: Remove File
+        uses: JesseTG/rm@v1.0.2
+        with:
+          path: modules/gcp_postgres
+      - name: tfsec
+        uses: tfsec/tfsec-sarif-action@master
+        with:
+          sarif_file: tfsec.sarif
+          tfsec_args: --force-all-dirs
+          config_file: config/tfsecconfig.yaml
+
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          # Path to SARIF file relative to the root of the repository
+          sarif_file: tfsec.sarif         
