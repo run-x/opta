@@ -10,8 +10,8 @@ from typing import Any, Dict
 
 import click
 
+from opta.cloud import cloud_provider_for_layer, default_state_store_for_layer
 from opta.constants import TF_FILE_PATH, TF_PLAN_PATH
-from opta.core.cloud2 import AWS
 from opta.core.plan_displayer import PlanDisplayer
 from opta.core.terraform2 import Terraform, TerraformFile
 from opta.loader import LayerLoader, ModuleSpecLoader
@@ -27,6 +27,7 @@ class ApplyOptions:
     auto_approve: bool
     config_path: str
     detailed_plan: bool = False
+    local: bool = False
 
 
 def apply(options: ApplyOptions) -> None:
@@ -49,11 +50,14 @@ def apply(options: ApplyOptions) -> None:
 
     tf = Terraform()
     # Pull local state into directory and load existing resource data
-    tf.download_state(layer)
     tf_config = TerraformFile()
 
-    cloud = AWS()
-    cloud.configure_providers(tf_config, layer)
+    cloud = cloud_provider_for_layer(layer)
+    cloud.configure_terraform_file(tf_config)
+
+    state_store = default_state_store_for_layer(layer, local=options.local)
+    state_store.configure_storage()
+    state_store.configure_terraform_file(tf_config)
 
     execution_order = [set([module.alias]) for module in layer.modules]
 
@@ -102,10 +106,7 @@ def apply(options: ApplyOptions) -> None:
         for module in modules:
             module.pre_terraform_apply()
 
-        try:
-            tf.apply(auto_approve=options.auto_approve, plan=TF_PLAN_PATH, quiet=False)
-        finally:
-            tf.upload_state(layer)
+        tf.apply(auto_approve=options.auto_approve, plan=TF_PLAN_PATH, quiet=False)
 
         for module in modules:
             module.post_terraform_apply()

@@ -24,3 +24,4 @@ Reference
 opta_crash_report.zip
 *.pem
 local
+!opta/cloud/local

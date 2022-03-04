@@ -134,7 +134,12 @@ def _apply(
     detailed_plan: bool = False,
 ) -> None:
     if is_module_api_enabled():
-        opts = ApplyOptions(auto_approve=auto_approve, config_path=config)
+        opts = ApplyOptions(
+            auto_approve=auto_approve,
+            config_path=config,
+            detailed_plan=detailed_plan,
+            local=local,
+        )
         apply2(opts)
         return
 
