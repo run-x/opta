@@ -6,9 +6,12 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, TypedDict
 import boto3
 from botocore.config import Config
 from botocore.exceptions import ClientError
-from mypy_boto3_dynamodb import DynamoDBClient
-from mypy_boto3_eks import EKSClient
-from mypy_boto3_s3 import S3Client
+
+if TYPE_CHECKING:
+    # Only present when dev dependencies installed
+    from mypy_boto3_dynamodb import DynamoDBClient
+    from mypy_boto3_eks import EKSClient
+    from mypy_boto3_s3 import S3Client
 
 import opta.constants as constants
 from opta.constants import ONE_WEEK_UNIX, yaml

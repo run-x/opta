@@ -1,9 +1,13 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 from unittest.mock import Mock
 
 from botocore.response import StreamingBody
-from mypy_boto3_dynamodb import DynamoDBClient
-from mypy_boto3_s3 import S3Client
+
+if TYPE_CHECKING:
+    from mypy_boto3_dynamodb import DynamoDBClient
+    from mypy_boto3_s3 import S3Client
+
 from pytest import fixture
 from pytest_mock import MockFixture
 
