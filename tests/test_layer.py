@@ -57,6 +57,7 @@ class TestLayer:
                 domain="${data.terraform_remote_state.parent.outputs.domain}",
                 cert_arn="${data.terraform_remote_state.parent.outputs.cert_arn}",
                 k8s_endpoint="${data.terraform_remote_state.parent.outputs.k8s_endpoint}",
+                k8s_version="${data.terraform_remote_state.parent.outputs.k8s_version}",
                 k8s_ca_data="${data.terraform_remote_state.parent.outputs.k8s_ca_data}",
                 k8s_cluster_name="${data.terraform_remote_state.parent.outputs.k8s_cluster_name}",
                 k8s_openid_provider_url="${data.terraform_remote_state.parent.outputs.k8s_openid_provider_url}",
