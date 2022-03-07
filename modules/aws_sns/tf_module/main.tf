@@ -1,5 +1,5 @@
 resource "aws_sns_topic" "topic" {
-  name                        = "${var.env_name}-${var.layer_name}-${var.module_name}"
+  name_prefix                 = "${var.env_name}-${var.layer_name}-${var.module_name}"
   kms_master_key_id           = aws_kms_key.key.id
   fifo_topic                  = var.fifo
   content_based_deduplication = var.content_based_deduplication
@@ -22,6 +22,9 @@ resource "aws_sns_topic" "topic" {
   }
 }
 EOF
+  lifecycle {
+    ignore_changes = [name, name_prefix]
+  }
 }
 
 ## SNS topic policy
