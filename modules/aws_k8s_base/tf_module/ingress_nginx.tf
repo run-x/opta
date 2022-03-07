@@ -3,7 +3,7 @@ resource "helm_release" "ingress-nginx" {
   chart            = "ingress-nginx"
   name             = "ingress-nginx"
   repository       = "https://kubernetes.github.io/ingress-nginx"
-  version          = data.aws_eks_cluster.current.version == "1.18" ? "3.40.0" : "4.0.17"
+  version          = contains(["1.19", "1.20", "1.21", "1.22"], var.k8s_version) ? "4.0.17" : "3.40.0"
   namespace        = "ingress-nginx"
   create_namespace = true
   atomic           = true

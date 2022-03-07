@@ -18,6 +18,10 @@ inputs:
     user_facing: false
     description: Name of k8s cluster we're building on.
     default: None
+  - name: k8s_version
+    user_facing: false
+    description: Version of k8s cluster we're building on.
+    default: None
   - name: eks_cluster_name
     user_facing: false
     description: The eks cluster name
