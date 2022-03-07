@@ -23,7 +23,7 @@ resource "aws_sns_topic" "topic" {
 }
 EOF
   lifecycle {
-    ignore_changes = [ name, name_prefix ]
+    ignore_changes = [name, name_prefix]
   }
 }
 
