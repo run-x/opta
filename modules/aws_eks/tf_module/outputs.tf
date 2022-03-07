@@ -21,3 +21,7 @@ output "k8s_openid_provider_arn" {
 output "k8s_node_group_security_id" {
   value = aws_eks_cluster.cluster.vpc_config[0].cluster_security_group_id
 }
+
+output "k8s_version" {
+  value = aws_eks_cluster.cluster.version
+}

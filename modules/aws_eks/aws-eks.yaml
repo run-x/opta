@@ -110,6 +110,9 @@ outputs:
   - name: k8s_node_group_security_id
     export: true
     description: The id of the security group of the cluster nodepools.
+  - name: k8s_version
+    export: true
+    description: The version of the K8s Cluster
 output_providers:
   helm:
     kubernetes:
