@@ -54,6 +54,10 @@ variable "k8s_cluster_name" {
   type = string
 }
 
+variable "k8s_version" {
+  type = string
+}
+
 variable "openid_provider_url" {
   type = string
 }

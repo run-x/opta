@@ -69,6 +69,9 @@ class AwsK8sBaseProcessor(AWSK8sModuleProcessor, K8sBaseModuleProcessor):
         self.module.data[
             "k8s_cluster_name"
         ] = f"${{{{module.{aws_eks_module.name}.k8s_cluster_name}}}}"
+        self.module.data[
+            "k8s_version"
+        ] = f"${{{{module.{aws_eks_module.name}.k8s_version}}}}"
 
         super(AwsK8sBaseProcessor, self).process(module_idx)
 
