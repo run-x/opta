@@ -22,7 +22,9 @@ variable "db_user" {
 variable "db_password" {
   description = "Database password"
   type        = string
-  default     = "pgpassword"
+  # Ignore since local is within PC, not designed to secure secrets.
+  #tfsec:ignore:general-secrets-no-plaintext-exposure
+  default = "pgpassword"
 }
 variable "db_name" {
   description = "Database name"
