@@ -28,6 +28,7 @@ def test_check_layer_and_image_xyz_image_image_flag(mocker: MockFixture) -> None
     mock_layer.modules = [mock_k8s_service_module]
     mock_layer.get_module_by_type.return_value = [mock_k8s_service_module]
 
+    mocker.patch("opta.commands.deploy.opta_acquire_lock")
     mocker.patch("opta.commands.deploy.pre_check")
     mocker.patch("opta.utils.os.path.exists", return_value=True)
 
@@ -40,6 +41,7 @@ def test_check_layer_and_image_xyz_image_image_flag(mocker: MockFixture) -> None
             "Do not pass any image. Image xyz already present in configuration."
         ),
     )
+    mocker.patch("opta.commands.deploy.opta_release_lock")
     runner = CliRunner()
     result = runner.invoke(cli, ["deploy", "-i", "app:main"])
 
@@ -55,6 +57,7 @@ def test_check_layer_and_image_xyz_image_image_flag(mocker: MockFixture) -> None
 
 
 def test_deploy_basic(mocker: MockFixture) -> None:
+    mocker.patch("opta.commands.deploy.opta_acquire_lock")
     mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
     mocked_os_path_exists.return_value = True
     mock_tf_download_state = mocker.patch(
@@ -78,6 +81,7 @@ def test_deploy_basic(mocker: MockFixture) -> None:
         "opta.commands.deploy.Terraform.get_outputs",
         return_value={"docker_repo_url": "blah"},
     )
+    mocker.patch("opta.commands.deploy.opta_release_lock")
     runner = CliRunner()
     result = runner.invoke(cli, ["deploy", "-i", "local_image:local_tag"])
 
@@ -103,6 +107,7 @@ def test_deploy_basic(mocker: MockFixture) -> None:
 
 
 def test_deploy_auto_approve(mocker: MockFixture) -> None:
+    mocker.patch("opta.commands.deploy.opta_acquire_lock")
     mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
     mocked_os_path_exists.return_value = True
     mock_tf_download_state = mocker.patch(
@@ -126,6 +131,7 @@ def test_deploy_auto_approve(mocker: MockFixture) -> None:
         "opta.commands.deploy.Terraform.get_outputs",
         return_value={"docker_repo_url": "blah"},
     )
+    mocker.patch("opta.commands.deploy.opta_release_lock")
     runner = CliRunner()
     result = runner.invoke(
         cli, ["deploy", "-i", "local_image:local_tag", "--auto-approve"]
@@ -152,6 +158,7 @@ def test_deploy_auto_approve(mocker: MockFixture) -> None:
 
 
 def test_deploy_all_flags(mocker: MockFixture) -> None:
+    mocker.patch("opta.commands.deploy.opta_acquire_lock")
     mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
     mocked_os_path_exists.return_value = True
     mock_tf_download_state = mocker.patch(
@@ -175,6 +182,7 @@ def test_deploy_all_flags(mocker: MockFixture) -> None:
         "opta.commands.deploy.Terraform.get_outputs",
         return_value={"docker_repo_url": "blah"},
     )
+    mocker.patch("opta.commands.deploy.opta_release_lock")
     runner = CliRunner()
     result = runner.invoke(
         cli,
@@ -211,6 +219,7 @@ def test_deploy_all_flags(mocker: MockFixture) -> None:
 
 
 def test_deploy_ecr_apply(mocker: MockFixture) -> None:
+    mocker.patch("opta.commands.deploy.opta_acquire_lock")
     mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
     mocked_os_path_exists.return_value = True
     mock_tf_download_state = mocker.patch(
@@ -233,6 +242,7 @@ def test_deploy_ecr_apply(mocker: MockFixture) -> None:
     mock_terraform_outputs = mocker.patch(
         "opta.commands.deploy.Terraform.get_outputs", return_value={},
     )
+    mocker.patch("opta.commands.deploy.opta_release_lock")
     runner = CliRunner()
     result = runner.invoke(
         cli,

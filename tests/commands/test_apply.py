@@ -58,6 +58,7 @@ def mocked_layer(mocker: MockFixture) -> Any:
 
 
 def test_apply(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None:
+    mocker.patch("opta.commands.apply.opta_acquire_lock")
     mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
     mocked_os_path_exists.return_value = True
     mocker.patch(
@@ -77,6 +78,7 @@ def test_apply(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None
     tf_create_storage = mocker.patch("opta.commands.apply.Terraform.create_state_storage")
     mocked_thread = mocker.patch("opta.commands.apply.Thread")
     mocked_layer.get_module_by_type.return_value = [mocker.Mock()]
+    mocker.patch("opta.commands.apply.opta_release_lock")
 
     # Terraform apply should be called with the configured module (fake_module) and the remote state
     # module (deleted_module) as targets.
@@ -121,6 +123,7 @@ def test_apply(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None
 
 
 def test_auto_approve(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) -> None:
+    mocker.patch("opta.commands.apply.opta_acquire_lock")
     mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
     mocked_os_path_exists.return_value = True
     mocker.patch(
@@ -140,6 +143,7 @@ def test_auto_approve(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) 
     tf_create_storage = mocker.patch("opta.commands.apply.Terraform.create_state_storage")
     mocked_thread = mocker.patch("opta.commands.apply.Thread")
     mocked_layer.get_module_by_type.return_value = [mocker.Mock()]
+    mocker.patch("opta.commands.apply.opta_release_lock")
 
     # Terraform apply should be called with the configured module (fake_module) and the remote state
     # module (deleted_module) as targets.
@@ -180,6 +184,7 @@ def test_auto_approve(mocker: MockFixture, mocked_layer: Any, basic_mocks: Any) 
 
 
 def test_fail_on_2_azs(mocker: MockFixture, mocked_layer: Any) -> None:
+    mocker.patch("opta.commands.apply.opta_acquire_lock")
     mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
     mocked_os_path_exists.return_value = True
     mock_tf_download_state = mocker.patch(
@@ -194,6 +199,7 @@ def test_fail_on_2_azs(mocker: MockFixture, mocked_layer: Any) -> None:
         "opta.commands.apply._fetch_availability_zones",
         return_value=["us-west-1a", "us-west-1c"],
     )
+    mocker.patch("opta.commands.apply.opta_release_lock")
     runner = CliRunner()
     result = runner.invoke(apply)
     mock_tf_download_state.assert_called_once_with(mocked_layer)
