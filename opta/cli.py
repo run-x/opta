@@ -30,7 +30,6 @@ from opta.commands.version import version
 from opta.crash_reporter import CURRENT_CRASH_REPORTER
 from opta.exceptions import UserErrors
 from opta.one_time import one_time
-from opta.opta_lock import opta_acquire_lock, opta_release_lock
 from opta.upgrade import check_version_upgrade
 from opta.utils import dd_handler, dd_listener, logger
 
