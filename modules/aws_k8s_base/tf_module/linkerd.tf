@@ -59,7 +59,7 @@ resource "helm_release" "linkerd" {
   chart      = "linkerd2"
   name       = "linkerd"
   repository = "https://helm.linkerd.io/stable"
-  version    = "2.10.2" // NOTE: Check https://linkerd.io/2.11/tasks/using-ingress/#nginx whenever we update linkerd
+  version    = "2.11.1" // NOTE: Check https://linkerd.io/2.11/tasks/using-ingress/#nginx whenever we update linkerd
 
   values = var.linkerd_high_availability ? [
     file("${path.module}/values-ha.yaml"), # Adding the high-availability default values.
