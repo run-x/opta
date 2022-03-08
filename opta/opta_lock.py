@@ -31,7 +31,7 @@ def remove_opta_lock_file() -> None:
         os.remove(f"{OPTA_LOCK_LOC_PREFIX}_{os.getpid()}")
         logger.debug(f"Removed Opta lock on Directory: {os.getcwd()}")
     except FileNotFoundError:
-        pass
+        return
 
 
 def opta_acquire_lock() -> None:
