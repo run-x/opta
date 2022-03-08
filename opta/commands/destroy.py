@@ -22,6 +22,7 @@ from opta.core.terraform import Terraform
 from opta.error_constants import USER_ERROR_TF_LOCK
 from opta.exceptions import UserErrors
 from opta.layer import Layer
+from opta.opta_lock import opta_acquire_lock, opta_release_lock
 from opta.pre_check import pre_check
 from opta.utils import check_opta_file_exists, logger
 from opta.utils.clickoptions import local_option
@@ -62,86 +63,89 @@ def destroy(
 
     opta destroy -c my-env.yaml --auto-approve
     """
+    try:
+        opta_acquire_lock()
+        pre_check()
 
-    pre_check()
-
-    config = check_opta_file_exists(config)
-    if local:
-        config, _ = _handle_local_flag(config, False)
-        _clean_tf_folder()
-    layer = Layer.load_from_yaml(config, env)
-    event_properties: Dict = layer.get_event_properties()
-    amplitude_client.send_event(
-        amplitude_client.DESTROY_EVENT, event_properties=event_properties,
-    )
-    layer.verify_cloud_credentials()
-    layer.validate_required_path_dependencies()
-    if not Terraform.download_state(layer):
-        logger.info(
-            "The opta state could not be found. This may happen if destroy ran successfully before."
+        config = check_opta_file_exists(config)
+        if local:
+            config, _ = _handle_local_flag(config, False)
+            _clean_tf_folder()
+        layer = Layer.load_from_yaml(config, env)
+        event_properties: Dict = layer.get_event_properties()
+        amplitude_client.send_event(
+            amplitude_client.DESTROY_EVENT, event_properties=event_properties,
         )
-        return
-
-    tf_lock_exists, _ = Terraform.tf_lock_details(layer)
-    if tf_lock_exists:
-        raise UserErrors(USER_ERROR_TF_LOCK)
-
-    # Any child layers should be destroyed first before the current layer.
-    children_layers = _fetch_children_layers(layer)
-    if children_layers:
-        # TODO: ideally we can just automatically destroy them but it's
-        # complicated...
-        logger.error(
-            "Found the following services that depend on this environment. Please run `opta destroy` on them first!\n"
-            + "\n".join(children_layers)
-        )
-        raise UserErrors("Dependant services found!")
-
-    tf_flags: List[str] = []
-    if auto_approve:
-        sleep_time = 5
-        logger.info(
-            f"{attr('bold')}Opta will now destroy the {attr('underlined')}{layer.name}{attr(0)}"
-            f"{attr('bold')} layer.{attr(0)}\n"
-            f"{attr('bold')}Sleeping for {attr('underlined')}{sleep_time} secs{attr(0)}"
-            f"{attr('bold')}, press Ctrl+C to Abort.{attr(0)}"
-        )
-        time.sleep(sleep_time)
-        tf_flags.append("-auto-approve")
-    modules = Terraform.get_existing_modules(layer)
-    layer.modules = [x for x in layer.modules if x.name in modules]
-    gen_all(layer)
-    Terraform.init(False, "-reconfigure", layer=layer)
-    Terraform.refresh(layer)
-
-    idx = len(layer.modules) - 1
-    for module in reversed(layer.modules):
-        try:
-            module_address_prefix = f"-target=module.{module.name}"
-            logger.info("Planning your changes (might take a minute)")
-            Terraform.plan(
-                "-lock=false",
-                "-input=false",
-                "-destroy",
-                f"-out={TF_PLAN_PATH}",
-                layer=layer,
-                *list([module_address_prefix]),
+        layer.verify_cloud_credentials()
+        layer.validate_required_path_dependencies()
+        if not Terraform.download_state(layer):
+            logger.info(
+                "The opta state could not be found. This may happen if destroy ran successfully before."
             )
-            PlanDisplayer.display(detailed_plan=detailed_plan)
-            tf_flags = []
-            if not auto_approve:
-                click.confirm(
-                    "The above are the planned changes for your opta run. Do you approve?",
-                    abort=True,
-                )
-            else:
-                tf_flags.append("-auto-approve")
-            Terraform.apply(layer, *tf_flags, TF_PLAN_PATH, no_init=True, quiet=False)
-            layer.post_delete(idx)
-        except Exception as e:
-            raise e
+            return
 
-    Terraform.delete_state_storage(layer)
+        tf_lock_exists, _ = Terraform.tf_lock_details(layer)
+        if tf_lock_exists:
+            raise UserErrors(USER_ERROR_TF_LOCK)
+
+        # Any child layers should be destroyed first before the current layer.
+        children_layers = _fetch_children_layers(layer)
+        if children_layers:
+            # TODO: ideally we can just automatically destroy them but it's
+            # complicated...
+            logger.error(
+                "Found the following services that depend on this environment. Please run `opta destroy` on them first!\n"
+                + "\n".join(children_layers)
+            )
+            raise UserErrors("Dependant services found!")
+
+        tf_flags: List[str] = []
+        if auto_approve:
+            sleep_time = 5
+            logger.info(
+                f"{attr('bold')}Opta will now destroy the {attr('underlined')}{layer.name}{attr(0)}"
+                f"{attr('bold')} layer.{attr(0)}\n"
+                f"{attr('bold')}Sleeping for {attr('underlined')}{sleep_time} secs{attr(0)}"
+                f"{attr('bold')}, press Ctrl+C to Abort.{attr(0)}"
+            )
+            time.sleep(sleep_time)
+            tf_flags.append("-auto-approve")
+        modules = Terraform.get_existing_modules(layer)
+        layer.modules = [x for x in layer.modules if x.name in modules]
+        gen_all(layer)
+        Terraform.init(False, "-reconfigure", layer=layer)
+        Terraform.refresh(layer)
+
+        idx = len(layer.modules) - 1
+        for module in reversed(layer.modules):
+            try:
+                module_address_prefix = f"-target=module.{module.name}"
+                logger.info("Planning your changes (might take a minute)")
+                Terraform.plan(
+                    "-lock=false",
+                    "-input=false",
+                    "-destroy",
+                    f"-out={TF_PLAN_PATH}",
+                    layer=layer,
+                    *list([module_address_prefix]),
+                )
+                PlanDisplayer.display(detailed_plan=detailed_plan)
+                tf_flags = []
+                if not auto_approve:
+                    click.confirm(
+                        "The above are the planned changes for your opta run. Do you approve?",
+                        abort=True,
+                    )
+                else:
+                    tf_flags.append("-auto-approve")
+                Terraform.apply(layer, *tf_flags, TF_PLAN_PATH, no_init=True, quiet=False)
+                layer.post_delete(idx)
+            except Exception as e:
+                raise e
+
+        Terraform.delete_state_storage(layer)
+    finally:
+        opta_release_lock()
 
 
 # Fetch all the children layers of the current layer.

@@ -10,6 +10,7 @@ from opta.error_constants import USER_ERROR_TF_LOCK
 from opta.exceptions import MissingState, UserErrors
 from opta.layer import Layer
 from opta.module import Module
+from opta.opta_lock import opta_acquire_lock, opta_release_lock
 from opta.pre_check import pre_check
 from opta.utils import check_opta_file_exists, fmt_msg, logger
 from opta.utils.clickoptions import local_option
@@ -72,72 +73,76 @@ def deploy(
 
     """
 
-    pre_check()
-
-    config = check_opta_file_exists(config)
-    if local:
-        config = _local_setup(config, image_tag=tag, refresh_local_env=True)
-    if not is_service_config(config):
-        raise UserErrors(
-            fmt_msg(
-                """
-            Opta deploy can only run on service yaml files. This is an environment yaml file.
-            ~See https://docs.opta.dev/getting-started/ for more details.
-            ~
-            ~(We think that this is an environment yaml file, because service yaml must
-            ~specify the "environments" field).
-            """
-            )
-        )
-
-    layer = Layer.load_from_yaml(config, env)
-    amplitude_client.send_event(
-        amplitude_client.DEPLOY_EVENT,
-        event_properties={"org_name": layer.org_name, "layer_name": layer.name},
-    )
-    is_auto = __check_layer_and_image(layer, image)
-    layer.verify_cloud_credentials()
-    layer.validate_required_path_dependencies()
-    if Terraform.download_state(layer):
-        tf_lock_exists, _ = Terraform.tf_lock_details(layer)
-        if tf_lock_exists:
-            raise UserErrors(USER_ERROR_TF_LOCK)
-
     try:
-        outputs = Terraform.get_outputs(layer)
-    except MissingState:
-        outputs = {}
+        opta_acquire_lock()
+        pre_check()
 
-    image_digest, image_tag = (None, None)
-    if is_auto:
-        if "docker_repo_url" not in outputs or outputs["docker_repo_url"] == "":
-            logger.info(
-                "Did not find docker repository in state, so applying once to create it before deployment"
+        config = check_opta_file_exists(config)
+        if local:
+            config = _local_setup(config, image_tag=tag, refresh_local_env=True)
+        if not is_service_config(config):
+            raise UserErrors(
+                fmt_msg(
+                    """
+                Opta deploy can only run on service yaml files. This is an environment yaml file.
+                ~See https://docs.opta.dev/getting-started/ for more details.
+                ~
+                ~(We think that this is an environment yaml file, because service yaml must
+                ~specify the "environments" field).
+                """
+                )
             )
-            _apply(
-                config=config,
-                env=env,
-                refresh=False,
-                image_tag=None,
-                test=False,
-                local=local,
-                auto_approve=auto_approve,
-                stdout_logs=False,
-                detailed_plan=detailed_plan,
-            )
-        if image is not None:
-            image_digest, image_tag = _push(image=image, config=config, env=env, tag=tag)
-    _apply(
-        config=config,
-        env=env,
-        refresh=False,
-        image_tag=None,
-        test=False,
-        local=local,
-        auto_approve=auto_approve,
-        image_digest=image_digest,
-        detailed_plan=detailed_plan,
-    )
+
+        layer = Layer.load_from_yaml(config, env)
+        amplitude_client.send_event(
+            amplitude_client.DEPLOY_EVENT,
+            event_properties={"org_name": layer.org_name, "layer_name": layer.name},
+        )
+        is_auto = __check_layer_and_image(layer, image)
+        layer.verify_cloud_credentials()
+        layer.validate_required_path_dependencies()
+        if Terraform.download_state(layer):
+            tf_lock_exists, _ = Terraform.tf_lock_details(layer)
+            if tf_lock_exists:
+                raise UserErrors(USER_ERROR_TF_LOCK)
+
+        try:
+            outputs = Terraform.get_outputs(layer)
+        except MissingState:
+            outputs = {}
+
+        image_digest, image_tag = (None, None)
+        if is_auto:
+            if "docker_repo_url" not in outputs or outputs["docker_repo_url"] == "":
+                logger.info(
+                    "Did not find docker repository in state, so applying once to create it before deployment"
+                )
+                _apply(
+                    config=config,
+                    env=env,
+                    refresh=False,
+                    image_tag=None,
+                    test=False,
+                    local=local,
+                    auto_approve=auto_approve,
+                    stdout_logs=False,
+                    detailed_plan=detailed_plan,
+                )
+            if image is not None:
+                image_digest, image_tag = _push(image=image, config=config, env=env, tag=tag)
+        _apply(
+            config=config,
+            env=env,
+            refresh=False,
+            image_tag=None,
+            test=False,
+            local=local,
+            auto_approve=auto_approve,
+            image_digest=image_digest,
+            detailed_plan=detailed_plan,
+        )
+    finally:
+        opta_release_lock()
 
 
 def __check_layer_and_image(layer: "Layer", option_image: str) -> bool:

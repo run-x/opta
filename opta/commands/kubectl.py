@@ -7,6 +7,7 @@ from opta.commands.apply import _local_setup
 from opta.core.kubernetes import load_opta_kube_config_to_default, purge_opta_kube_config
 from opta.core.kubernetes import set_kube_config as configure
 from opta.layer import Layer
+from opta.opta_lock import opta_acquire_lock, opta_release_lock
 from opta.utils import check_opta_file_exists
 from opta.utils.clickoptions import local_option
 
@@ -28,16 +29,19 @@ def configure_kubectl(config: str, env: Optional[str], local: Optional[bool]) ->
     If you have the KUBECONFIG environment variable set, then the resulting configuration file is created at that location.
     Otherwise, by default, the resulting configuration file is created at the default kubeconfig path (.kube/config) in your home directory.
     """
-
-    config = check_opta_file_exists(config)
-    if local:
-        config = _local_setup(config)
-    layer = Layer.load_from_yaml(config, env)
-    amplitude_client.send_event(
-        amplitude_client.CONFIGURE_KUBECTL_EVENT,
-        event_properties={"org_name": layer.org_name, "layer_name": layer.name},
-    )
-    layer.verify_cloud_credentials()
-    purge_opta_kube_config(layer)
-    configure(layer)
-    load_opta_kube_config_to_default(layer)
+    try:
+        opta_acquire_lock()
+        config = check_opta_file_exists(config)
+        if local:
+            config = _local_setup(config)
+        layer = Layer.load_from_yaml(config, env)
+        amplitude_client.send_event(
+            amplitude_client.CONFIGURE_KUBECTL_EVENT,
+            event_properties={"org_name": layer.org_name, "layer_name": layer.name},
+        )
+        layer.verify_cloud_credentials()
+        purge_opta_kube_config(layer)
+        configure(layer)
+        load_opta_kube_config_to_default(layer)
+    finally:
+        opta_release_lock()
