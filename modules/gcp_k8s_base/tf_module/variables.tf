@@ -73,7 +73,6 @@ variable "zone_names" {
 
 variable "private_key" {
   type    = string
-  default = ""
 }
 
 variable "certificate_body" {
