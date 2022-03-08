@@ -26,7 +26,7 @@
     "timeout": {
       "type": "number",
       "description": "Time in seconds to wait for deployment.",
-      "default": 600
+      "default": 300
     },
     "autoscaling_target_cpu_percentage": {
       "type": "integer",

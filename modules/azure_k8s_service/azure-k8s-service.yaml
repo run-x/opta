@@ -176,7 +176,7 @@ inputs: # (what users see)
     user_facing: true
     validator: int(required=False)
     description: Time in seconds to wait for deployment.
-    default: 600
+    default: 300
 extra_validators:
   persistent_storage:
     size: int(required=True)

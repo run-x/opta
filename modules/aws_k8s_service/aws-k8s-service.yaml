@@ -205,7 +205,7 @@ inputs:
     user_facing: true
     validator: int(required=False)
     description: Time in seconds to wait for deployment.
-    default: 600
+    default: 300
 extra_validators:
   cron_job:
     commands: list(required=True)
