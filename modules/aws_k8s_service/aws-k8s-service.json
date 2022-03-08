@@ -55,6 +55,11 @@
       "default": 3,
       "minimum": 0
     },
+    "timeout": {
+      "type": "number",
+      "description": "Time in seconds to wait for deployment.",
+      "default": 600
+    },
     "autoscaling_target_cpu_percentage": {
       "type": "integer",
       "description": "See the [autoscaling](https://docs.opta.dev/reference/aws/modules/aws-k8s-service/#autoscaling) section.",

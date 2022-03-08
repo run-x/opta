@@ -207,3 +207,7 @@ variable "pod_annotations" {
   default     = {}
   description = "values to add to the pod annotations for the k8s-service pods"
 }
+variable "timeout" {
+  type    = number
+  default = 300
+}

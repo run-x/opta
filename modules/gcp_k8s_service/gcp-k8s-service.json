@@ -21,6 +21,11 @@
       "default": 1,
       "minimum": 0
     },
+    "timeout": {
+      "type": "number",
+      "description": "Time in seconds to wait for deployment.",
+      "default": 600
+    },
     "max_containers": {
       "type": "integer",
       "description": "The maximum number of replicas your app can autoscale to.",
