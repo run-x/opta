@@ -24,7 +24,9 @@ resource "google_sql_database_instance" "instance" {
     ip_configuration {
       ipv4_enabled    = false
       private_network = data.google_compute_network.vpc.id
-      require_ssl     = false
+      # Ignore since this requires client certs, VPC is private in anycase
+      #tfsec:ignore:google-sql-encrypt-in-transit-data
+      require_ssl = false
     }
     backup_configuration {
       enabled            = true
