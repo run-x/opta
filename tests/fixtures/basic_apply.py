@@ -19,7 +19,7 @@ BASIC_APPLY = (
                 }
             },
             "required_providers": {
-                "aws": {"source": "hashicorp/aws", "version": "3.70.0"},
+                "aws": {"source": "hashicorp/aws", "version": "4.3.0"},
                 "helm": {"source": "hashicorp/helm", "version": "2.4.1"},
             },
         },
