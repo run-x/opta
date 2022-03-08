@@ -1,34 +1,29 @@
 """
 Usage: This file is used to check if Opta is already running in the current directory.
-This creates a file in opta directory with the name: opta_lock_<underscored-cwd>_<pid>
+This creates a file in opta directory with the name: .<pid>.opta.lock
 """
 
 
 import glob
 import os
 
-from opta.constants import HOME
 from opta.exceptions import UserErrors
 from opta.utils import logger
 
-OPTA_LOCK_LOC_PREFIX = os.path.join(
-    HOME, ".opta", f"opta_lock_{os.getcwd().replace(os.path.sep, '_')}_"
-)
-
 
 def check_opta_running_file_exists() -> bool:
-    return glob.glob(OPTA_LOCK_LOC_PREFIX + "*").__len__() > 0
+    return glob.glob(os.path.join(os.getcwd(), ".*.opta.lock")).__len__() > 0
 
 
 def create_opta_lock_file() -> None:
-    with open(f"{OPTA_LOCK_LOC_PREFIX}_{os.getpid()}", "w") as f:
+    with open(os.path.join(os.getcwd(), f".{os.getpid()}.opta.lock"), "w") as f:
         f.write("")
     logger.debug(f"Acquired Opta lock on Directory: {os.getcwd()}")
 
 
 def remove_opta_lock_file() -> None:
     try:
-        os.remove(f"{OPTA_LOCK_LOC_PREFIX}_{os.getpid()}")
+        os.remove(os.path.join(os.getcwd(), f".{os.getpid()}.opta.lock"))
         logger.debug(f"Removed Opta lock on Directory: {os.getcwd()}")
     except FileNotFoundError:
         return
@@ -36,7 +31,10 @@ def remove_opta_lock_file() -> None:
 
 def opta_acquire_lock() -> None:
     if check_opta_running_file_exists():
-        raise UserErrors("Opta already running in the current directory.")
+        raise UserErrors(
+            "Opta already running in the current directory.\n"
+            "If no opta instance is running, please delete file with mime type .opta.lock"
+        )
     create_opta_lock_file()
 
 
