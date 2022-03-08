@@ -129,7 +129,9 @@ def deploy(
                     detailed_plan=detailed_plan,
                 )
             if image is not None:
-                image_digest, image_tag = _push(image=image, config=config, env=env, tag=tag)
+                image_digest, image_tag = _push(
+                    image=image, config=config, env=env, tag=tag
+                )
         _apply(
             config=config,
             env=env,

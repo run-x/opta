@@ -60,7 +60,9 @@ def force_unlock(config: str, env: Optional[str], local: Optional[bool]) -> None
         if Terraform.download_state(layer):
             if layer.parent is not None or "k8scluster" in modules:
                 set_kube_config(layer)
-                pending_upgrade_release_list = Helm.get_helm_list(status="pending-upgrade")
+                pending_upgrade_release_list = Helm.get_helm_list(
+                    status="pending-upgrade"
+                )
                 click.confirm(
                     "Do you also wish to Rollback the Helm releases in Pending-Upgrade State?"
                     "\nPlease make sure that no other instance of opta command is running on this file."
