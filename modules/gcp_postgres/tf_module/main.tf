@@ -50,7 +50,7 @@ resource "google_sql_database_instance" "instance" {
     }
     database_flags {
       name  = "log_temp_files"
-      value = 0
+      value = "0"
     }
   }
 
