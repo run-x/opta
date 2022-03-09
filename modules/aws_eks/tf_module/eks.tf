@@ -20,6 +20,8 @@ resource "aws_security_group" "eks" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
+    # To be fixed - for now user can create an SG manually to override.
+    #tfsec:ignore:aws-vpc-no-public-egress-sgr
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
@@ -29,10 +31,13 @@ resource "aws_eks_cluster" "cluster" {
   role_arn = aws_iam_role.cluster_role.arn
   version  = var.k8s_version
 
+  # To be fixed, although early opta users need this - Cluster allows access from a public CIDR: 0.0.0.0/0
+  #tfsec:ignore:aws-eks-no-public-cluster-access-to-cidr
   vpc_config {
     subnet_ids              = var.private_subnet_ids
     security_group_ids      = [aws_security_group.eks.id]
     endpoint_private_access = false # TODO: make this true once we got VPN figured out
+    #tfsec:ignore:aws-eks-no-public-cluster-access
     endpoint_public_access  = true  # TODO: make this false once we got VPN figured out
   }
 

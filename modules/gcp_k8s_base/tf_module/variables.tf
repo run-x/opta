@@ -70,13 +70,17 @@ variable "zone_names" {
   type    = list(string)
   default = []
 }
-
 variable "private_key" {
+  # Ignore since this default value is never used, its for a logical if condition checking if user specified no private_key only.
+  #tfsec:ignore:general-secrets-no-plaintext-exposure
   type    = string
+  default = ""
 }
 
 variable "certificate_body" {
   type    = string
+  # Ignore since this default value is never used, its for a logical if condition checking if user specified no cert.
+  #tfsec:ignore:general-secrets-no-plaintext-exposure
   default = ""
 }
 
