@@ -217,7 +217,8 @@ class S3Store(StateStore):
     @property
     def _region(self) -> str:
         region = self.config.region
-        assert region is not None  # Checked by _validate_config
+        if region is None:  # Checked by _validate_config
+            raise ValueError("Unexpected region=None")
 
         return region
 

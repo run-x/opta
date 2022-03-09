@@ -12,14 +12,12 @@ def cloud_provider_for_layer(layer: Layer) -> CloudProvider:
     """
     Returns a new CloudProvider based on the layer configuration.
     """
+
     cloud_id = layer.providers.cloud_id
     if not cloud_id:
         raise ValueError("No cloud provider configured")
 
-    if cloud_id == "aws":
-        config = layer.providers.aws
-        assert config is not None
-
+    if config := layer.providers.aws:
         return AWSProvider(config)
 
     raise ValueError(f"Unknown cloud provider {cloud_id}")
@@ -29,6 +27,7 @@ def default_state_store_for_layer(layer: Layer, *, local: bool = False) -> State
     """
     Returns a new StateStore based on the layer configuration, or the local store if :local is True.
     """
+
     cloud_id = layer.providers.cloud_id
     if not cloud_id:
         raise ValueError("No cloud provider configured")
@@ -43,11 +42,8 @@ def default_state_store_for_layer(layer: Layer, *, local: bool = False) -> State
     if local:
         return LocalStore(config)
 
-    if cloud_id == "aws":
-        aws_config = layer.providers.aws
-        assert aws_config is not None
-
-        config.region = aws_config.region
+    if cloud_config := layer.providers.aws:
+        config.region = cloud_config.region
 
         return S3Store(config)
 
