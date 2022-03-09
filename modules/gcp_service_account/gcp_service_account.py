@@ -10,8 +10,8 @@ if TYPE_CHECKING:
 
 class GcpServiceAccountProcessor(ModuleProcessor):
     def __init__(self, module: "Module", layer: "Layer"):
-        self.read_buckets: list[str] = []
-        self.write_buckets: list[str] = []
+        self.read_buckets: List[str] = []
+        self.write_buckets: List[str] = []
         super(GcpServiceAccountProcessor, self).__init__(module, layer)
 
     def handle_gcs_link(

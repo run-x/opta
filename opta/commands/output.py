@@ -1,29 +1,35 @@
-from typing import Optional
+from typing import Dict, Optional
 
 import click
 
 from opta.amplitude import amplitude_client
-from opta.commands.apply import _local_setup
+from opta.commands.apply import local_setup
 from opta.core.generator import gen_all
 from opta.core.terraform import get_terraform_outputs
 from opta.layer import Layer
 from opta.utils import check_opta_file_exists, json
-from opta.utils.clickoptions import local_option
+from opta.utils.clickoptions import (
+    config_option,
+    env_option,
+    input_variable_option,
+    local_option,
+)
 
 
 @click.command(hidden=True)
-@click.option("-c", "--config", default="opta.yaml", help="Opta config file")
-@click.option(
-    "-e", "--env", default=None, help="The env to use when loading the config file"
-)
+@config_option
+@env_option
+@input_variable_option
 @local_option
-def output(config: str, env: Optional[str], local: Optional[bool]) -> None:
+def output(
+    config: str, env: Optional[str], local: Optional[bool], var: Dict[str, str],
+) -> None:
     """Print TF outputs"""
 
     config = check_opta_file_exists(config)
     if local:
-        config = _local_setup(config, None)
-    layer = Layer.load_from_yaml(config, env)
+        config = local_setup(config, var, None)
+    layer = Layer.load_from_yaml(config, env, input_variables=var)
     amplitude_client.send_event(
         amplitude_client.VIEW_OUTPUT_EVENT,
         event_properties={"org_name": layer.org_name, "layer_name": layer.name},

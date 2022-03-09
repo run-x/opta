@@ -222,7 +222,7 @@ class K8sServiceModuleProcessor(ModuleProcessor):
             self.module.data["public_uri"] = [self.module.data["public_uri"]]
 
         if "public_uri" in self.module.data:
-            new_uris: list[str] = []
+            new_uris: List[str] = []
             public_uri: str
             for public_uri in self.module.data["public_uri"]:
                 if public_uri.startswith("/"):
@@ -483,15 +483,15 @@ class LocalK8sModuleProcessor(ModuleProcessor):
 
 class AWSIamAssembler:
     def __init__(self, *args: Any, **kwargs: Any):
-        self.read_buckets: list[str] = []
-        self.write_buckets: list[str] = []
-        self.publish_queues: list[str] = []
-        self.subscribe_queues: list[str] = []
-        self.publish_topics: list[str] = []
-        self.kms_write_keys: list[str] = []
-        self.kms_read_keys: list[str] = []
-        self.dynamodb_write_tables: list[str] = []
-        self.dynamodb_read_tables: list[str] = []
+        self.read_buckets: List[str] = []
+        self.write_buckets: List[str] = []
+        self.publish_queues: List[str] = []
+        self.subscribe_queues: List[str] = []
+        self.publish_topics: List[str] = []
+        self.kms_write_keys: List[str] = []
+        self.kms_read_keys: List[str] = []
+        self.dynamodb_write_tables: List[str] = []
+        self.dynamodb_read_tables: List[str] = []
         super(AWSIamAssembler, self).__init__()
 
     def prepare_iam_statements(self) -> List[dict]:

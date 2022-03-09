@@ -32,21 +32,16 @@ from opta.pre_check import pre_check
 from opta.process import ApplyOptions
 from opta.process import apply as apply2
 from opta.utils import check_opta_file_exists, fmt_msg, logger
-from opta.utils.clickoptions import local_option
+from opta.utils.clickoptions import (
+    config_option,
+    env_option,
+    input_variable_option,
+    local_option,
+)
 from opta.utils.features import is_module_api_enabled
 
 
 @click.command()
-@click.option(
-    "-c", "--config", default="opta.yaml", help="Opta config file", show_default=True
-)
-@click.option(
-    "-e",
-    "--env",
-    default=None,
-    help="The env to use when loading the config file",
-    show_default=True,
-)
 @click.option(
     "--refresh",
     is_flag=True,
@@ -79,6 +74,9 @@ from opta.utils.features import is_module_api_enabled
     default=False,
     help="Show full terraform plan in detail, not the opta provided summary",
 )
+@config_option
+@env_option
+@input_variable_option
 @local_option
 def apply(
     config: str,
@@ -89,6 +87,7 @@ def apply(
     test: bool,
     auto_approve: bool,
     detailed_plan: bool,
+    var: Dict[str, str],
 ) -> None:
     """Create or update infrastructure
 
@@ -98,6 +97,8 @@ def apply(
     Examples:
 
     opta apply --auto-approve
+
+    opta apply --auto-approve --var variable1=value1
 
     opta apply -c my-config.yaml --image-tag=v1
     """
@@ -113,6 +114,7 @@ def apply(
             test,
             auto_approve,
             detailed_plan=detailed_plan,
+            input_variables=var,
         )
     finally:
         opta_release_lock()
@@ -126,6 +128,7 @@ def _apply(
     image_tag: Optional[str],
     test: bool,
     auto_approve: bool,
+    input_variables: Dict[str, str],
     image_digest: Optional[str] = None,
     stdout_logs: bool = True,
     detailed_plan: bool = False,
@@ -138,9 +141,9 @@ def _apply(
     pre_check()
     _clean_tf_folder()
     if local and not test:
-        config = _local_setup(config, image_tag, refresh_local_env=True)
+        config = local_setup(config, input_variables, image_tag, refresh_local_env=True)
 
-    layer = Layer.load_from_yaml(config, env)
+    layer = Layer.load_from_yaml(config, env, input_variables=input_variables)
     layer.verify_cloud_credentials()
     layer.validate_required_path_dependencies()
 
@@ -406,12 +409,16 @@ def _verify_parent_layer(layer: Layer, auto_approve: bool = False) -> None:
             image_tag=None,
             test=False,
             auto_approve=False,
+            input_variables={},
         )
         cleanup_files()
 
 
-def _local_setup(
-    config: str, image_tag: Optional[str] = "", refresh_local_env: bool = False
+def local_setup(
+    config: str,
+    input_variables: Dict[str, str],
+    image_tag: Optional[str] = "",
+    refresh_local_env: bool = False,
 ) -> str:
     adjusted_config, localopta_envfile = _handle_local_flag(config, False)
     if adjusted_config != config:  # Only do this for service opta files
@@ -426,6 +433,7 @@ def _local_setup(
                 refresh=True,
                 test=False,
                 detailed_plan=True,
+                input_variables=input_variables,
             )
             _clean_tf_folder()
     return config

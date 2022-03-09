@@ -31,7 +31,9 @@ def test_set_kube_config(mocker: MockFixture) -> None:
     runner = CliRunner()
     result = runner.invoke(configure_kubectl, [])
     assert result.exit_code == 0
-    mocked_layer_class.load_from_yaml.assert_called_with(mocker.ANY, None)
+    mocked_layer_class.load_from_yaml.assert_called_with(
+        mocker.ANY, None, input_variables={}
+    )
     mocked_layer.verify_cloud_credentials.assert_called_once_with()
     mocked_configure.assert_called_once_with(mocked_layer)
     mocked_purge_opta_kube_config.assert_called_once_with(mocked_layer)

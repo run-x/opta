@@ -49,7 +49,9 @@ class TestSecretManager:
         assert result.exit_code == 0
         mocked_create_namespace_if_not_exists.assert_called_once_with("dummy_layer")
         mocked_get_secrets.assert_called_once_with("dummy_layer")
-        mocked_layer.assert_called_once_with("dummyconfig", "dummyenv")
+        mocked_layer.assert_called_once_with(
+            "dummyconfig", "dummyenv", input_variables={}
+        )
         mocked_amplitude_client.send_event.assert_called_once_with(
             amplitude_client.VIEW_SECRET_EVENT,
             event_properties={"org_name": "dummy_org_name", "layer_name": "dummy_layer"},
@@ -82,7 +84,9 @@ class TestSecretManager:
         assert result.exit_code == 0
         mocked_create_namespace_if_not_exists.assert_called_once_with("dummy_layer")
         mocked_get_secrets.assert_called_once_with("dummy_layer")
-        mocked_layer.assert_called_once_with("dummyconfig", "dummyenv")
+        mocked_layer.assert_called_once_with(
+            "dummyconfig", "dummyenv", input_variables={}
+        )
         mocked_amplitude_client.send_event.assert_called_once_with(
             amplitude_client.LIST_SECRETS_EVENT
         )
@@ -131,7 +135,9 @@ class TestSecretManager:
         mocked_update_manual_secrets.assert_called_once_with(
             "dummy_layer", {"dummysecret": "dummysecretvalue"}
         )
-        mocked_layer.assert_called_once_with("dummyconfig", "dummyenv")
+        mocked_layer.assert_called_once_with(
+            "dummyconfig", "dummyenv", input_variables={}
+        )
         mocked_amplitude_client.send_event.assert_called_once_with(
             amplitude_client.UPDATE_SECRET_EVENT
         )
@@ -175,7 +181,9 @@ class TestSecretManager:
             {"FROM_FILE_SECRET1": "val1", "FROM_FILE_SECRET2": "1"},
         )
 
-        mocked_layer.assert_called_once_with("dummyconfig", "dummyenv")
+        mocked_layer.assert_called_once_with(
+            "dummyconfig", "dummyenv", input_variables={}
+        )
         mocked_amplitude_event.assert_called_once_with(
             amplitude_client.UPDATE_BULK_SECRET_EVENT
         )
