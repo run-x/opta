@@ -7,6 +7,7 @@ from opta.layer import Layer
 
 def test_set_kube_config(mocker: MockFixture) -> None:
     # Mock tf file generation
+    mocker.patch("opta.commands.kubectl.opta_acquire_lock")
     mocked_layer_class = mocker.patch("opta.commands.kubectl.Layer")
     mocked_layer = mocker.Mock(spec=Layer)
     mocked_layer.cloud = "aws"
@@ -25,6 +26,7 @@ def test_set_kube_config(mocker: MockFixture) -> None:
     mocked_load_opta_kube_config_to_default = mocker.patch(
         "opta.commands.kubectl.load_opta_kube_config_to_default"
     )
+    mocker.patch("opta.commands.kubectl.opta_release_lock")
 
     runner = CliRunner()
     result = runner.invoke(configure_kubectl, [])

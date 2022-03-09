@@ -24,6 +24,7 @@ FAKE_SERVICE_CONFIG_MULTIPLE_ENV = os.path.join(
 
 
 def test_destroy_env_with_children(mocker: MockFixture) -> None:
+    mocker.patch("opta.commands.destroy.opta_acquire_lock")
     mocker.patch(
         "opta.commands.destroy.Terraform.tf_lock_details", return_value=(False, ""),
     )
@@ -37,6 +38,7 @@ def test_destroy_env_with_children(mocker: MockFixture) -> None:
 
     mocked_gen_all = mocker.patch("opta.commands.destroy.gen_all")
     mocker.patch("opta.commands.destroy.Layer.verify_cloud_credentials")
+    mocker.patch("opta.commands.destroy.opta_release_lock")
 
     runner = CliRunner()
     result = runner.invoke(destroy, ["--config", FAKE_ENV_CONFIG])
@@ -48,6 +50,7 @@ def test_destroy_env_with_children(mocker: MockFixture) -> None:
 
 
 def test_destroy_env_without_children(mocker: MockFixture) -> None:
+    mocker.patch("opta.commands.destroy.opta_acquire_lock")
     mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
     mocked_os_path_exists.return_value = True
     mock_modules = [mocker.Mock(spec=Module) for _ in range(3)]
@@ -102,6 +105,7 @@ def test_destroy_env_without_children(mocker: MockFixture) -> None:
     )
 
     mocked_gen_all = mocker.patch("opta.commands.destroy.gen_all")
+    mocker.patch("opta.commands.destroy.opta_release_lock")
 
     runner = CliRunner()
     result = runner.invoke(destroy, ["--config", FAKE_ENV_CONFIG])
@@ -163,6 +167,7 @@ def test_destroy_env_without_children(mocker: MockFixture) -> None:
 
 
 def test_destroy_service(mocker: MockFixture) -> None:
+    mocker.patch("opta.commands.destroy.opta_acquire_lock")
     mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
     mocked_os_path_exists.return_value = True
     mock_modules = [mocker.Mock(spec=Module) for _ in range(3)]
@@ -217,6 +222,7 @@ def test_destroy_service(mocker: MockFixture) -> None:
     )
 
     mocked_gen_all = mocker.patch("opta.commands.destroy.gen_all")
+    mocker.patch("opta.commands.destroy.opta_release_lock")
 
     runner = CliRunner()
     result = runner.invoke(destroy, ["--config", FAKE_ENV_CONFIG])

@@ -117,6 +117,8 @@ class TestApply:
     def test_apply(
         self, env_path: str, tf_mocks: MockedTerraform, mocker: MockFixture
     ) -> None:
+        mocker.patch("opta.commands.apply.opta_acquire_lock")
+        mocker.patch("opta.commands.apply.opta_release_lock")
         mocked_logger = mocker.patch("opta.process.logger")
         mocked_warning: MagicMock = mocked_logger.warning
         mocked_displayer = mocker.patch("opta.core.plan_displayer.PlanDisplayer.display")

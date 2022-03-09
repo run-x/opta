@@ -27,6 +27,7 @@ from opta.core.terraform import Terraform, get_terraform_outputs
 from opta.error_constants import USER_ERROR_TF_LOCK
 from opta.exceptions import MissingState, UserErrors
 from opta.layer import Layer, StructuredConfig
+from opta.opta_lock import opta_acquire_lock, opta_release_lock
 from opta.pre_check import pre_check
 from opta.process import ApplyOptions
 from opta.process import apply as apply2
@@ -100,17 +101,21 @@ def apply(
 
     opta apply -c my-config.yaml --image-tag=v1
     """
-    config = check_opta_file_exists(config)
-    _apply(
-        config,
-        env,
-        refresh,
-        local,
-        image_tag,
-        test,
-        auto_approve,
-        detailed_plan=detailed_plan,
-    )
+    try:
+        opta_acquire_lock()
+        config = check_opta_file_exists(config)
+        _apply(
+            config,
+            env,
+            refresh,
+            local,
+            image_tag,
+            test,
+            auto_approve,
+            detailed_plan=detailed_plan,
+        )
+    finally:
+        opta_release_lock()
 
 
 def _apply(

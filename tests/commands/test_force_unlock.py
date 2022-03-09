@@ -15,6 +15,7 @@ FAKE_ENV_CONFIG = os.path.join(
 
 
 def test_force_unlock_env(mocker: MockFixture) -> None:
+    mocker.patch("opta.commands.force_unlock.opta_acquire_lock")
     mocked_click_confirm = mocker.patch(
         "opta.commands.apply.click.confirm", return_value="y"
     )
@@ -62,6 +63,7 @@ def test_force_unlock_env(mocker: MockFixture) -> None:
         ],
     )
     mocked_rollback_helm = mocker.patch("opta.commands.force_unlock.Helm.rollback_helm")
+    mocker.patch("opta.commands.force_unlock.opta_release_lock")
 
     runner = CliRunner()
     result = runner.invoke(cli, ["force-unlock", "--config", FAKE_ENV_CONFIG])
@@ -90,6 +92,7 @@ def test_force_unlock_env(mocker: MockFixture) -> None:
 
 
 def test_force_unlock_env_no_cluster(mocker: MockFixture) -> None:
+    mocker.patch("opta.commands.force_unlock.opta_acquire_lock")
     mocked_click_confirm = mocker.patch(
         "opta.commands.apply.click.confirm", return_value="y"
     )
@@ -138,6 +141,7 @@ def test_force_unlock_env_no_cluster(mocker: MockFixture) -> None:
         ],
     )
     mocked_rollback_helm = mocker.patch("opta.commands.force_unlock.Helm.rollback_helm")
+    mocker.patch("opta.commands.force_unlock.opta_release_lock")
 
     runner = CliRunner()
     result = runner.invoke(cli, ["force-unlock", "--config", FAKE_ENV_CONFIG])
@@ -154,6 +158,7 @@ def test_force_unlock_env_no_cluster(mocker: MockFixture) -> None:
 
 
 def test_force_unlock_env_no_rollback(mocker: MockFixture) -> None:
+    mocker.patch("opta.commands.force_unlock.opta_acquire_lock")
     mocked_click_confirm = mocker.patch(
         "opta.commands.apply.click.confirm", return_value="y"
     )
@@ -190,6 +195,7 @@ def test_force_unlock_env_no_rollback(mocker: MockFixture) -> None:
         "opta.commands.force_unlock.Helm.get_helm_list", return_value=[],
     )
     mocked_rollback_helm = mocker.patch("opta.commands.force_unlock.Helm.rollback_helm")
+    mocker.patch("opta.commands.force_unlock.opta_release_lock")
 
     runner = CliRunner()
     result = runner.invoke(cli, ["force-unlock", "--config", FAKE_ENV_CONFIG])
