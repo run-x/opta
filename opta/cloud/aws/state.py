@@ -116,14 +116,15 @@ class S3Store(StateStore):
 
         create_kwargs: Dict[str, Any] = {}
         if region != "us-east-1":
+            # S3 API doesn't allow specifying us-east-1 as a location constraint, so we need to handle this
+            # special case. When the constraint is not given, the bucket is created in us-east-1
             location = cast(BucketLocationConstraintType, region)
             create_kwargs["CreateBucketConfiguration"] = {"LocationConstraint": location}
 
-        s3
         s3.create_bucket(Bucket=bucket_name, **create_kwargs)
-        time.sleep(
-            10
-        )  # TODO: Change this for a "wait until bucket resource is available"
+
+        waiter = s3.get_waiter("bucket_exists")
+        waiter.wait(Bucket=bucket_name, WaiterConfig={"Delay": 5, "MaxAttempts": 10})
 
         s3.put_bucket_encryption(
             Bucket=bucket_name,
