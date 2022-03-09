@@ -1,5 +1,5 @@
 import base64
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Optional, Tuple
 
 import boto3
 import click
@@ -155,7 +155,7 @@ def is_service_config(config: str) -> bool:
     help="The image tag associated with your docker container. Defaults to your local image tag.",
 )
 def push(
-    image: str, config: str, env: Optional[str], tag: Optional[str], var: List[str],
+    image: str, config: str, env: Optional[str], tag: Optional[str], var: Dict[str, str],
 ) -> None:
     config = check_opta_file_exists(config)
     if not is_service_config(config):
