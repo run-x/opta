@@ -1,10 +1,10 @@
-from typing import Optional
+from typing import Dict, Optional
 
 import click
 from click_didyoumean import DYMGroup
 
 from opta.amplitude import amplitude_client
-from opta.commands.apply import _local_setup
+from opta.commands.apply import local_setup
 from opta.core.generator import gen_all
 from opta.core.kubernetes import (
     create_namespace_if_not_exists,
@@ -19,15 +19,13 @@ from opta.core.secrets import (
 from opta.exceptions import UserErrors
 from opta.layer import Layer
 from opta.utils import check_opta_file_exists
-from opta.utils.clickoptions import local_option
-
-env_option = click.option(
-    "-e", "--env", default=None, help="The env to use when loading the config file"
+from opta.utils.clickoptions import (
+    config_option,
+    env_option,
+    input_variable_option,
+    local_option,
 )
 
-config_option = click.option(
-    "-c", "--config", default="opta.yaml", help="Opta config file", show_default=True
-)
 restart_option = click.option(
     # this flag is under the form '--no' because the default behavior is to do a restart (no flag needed)
     "--no-restart",
@@ -67,8 +65,15 @@ def secret() -> None:
 @click.argument("secret")
 @env_option
 @config_option
+@input_variable_option
 @local_option
-def view(secret: str, env: Optional[str], config: str, local: Optional[bool]) -> None:
+def view(
+    secret: str,
+    env: Optional[str],
+    config: str,
+    local: Optional[bool],
+    var: Dict[str, str],
+) -> None:
     """View a given secret of a k8s service
 
     Examples:
@@ -78,9 +83,9 @@ def view(secret: str, env: Optional[str], config: str, local: Optional[bool]) ->
 
     config = check_opta_file_exists(config)
     if local:
-        config = _local_setup(config)
+        config = local_setup(config, input_variables=var)
         env = "localopta"
-    layer = Layer.load_from_yaml(config, env)
+    layer = Layer.load_from_yaml(config, env, input_variables=var)
     amplitude_client.send_event(
         amplitude_client.VIEW_SECRET_EVENT,
         event_properties={"org_name": layer.org_name, "layer_name": layer.name},
@@ -101,10 +106,13 @@ def view(secret: str, env: Optional[str], config: str, local: Optional[bool]) ->
 
 
 @secret.command(name="list")
-@env_option
 @config_option
+@env_option
+@input_variable_option
 @local_option
-def list_command(env: Optional[str], config: str, local: Optional[bool]) -> None:
+def list_command(
+    env: Optional[str], config: str, local: Optional[bool], var: Dict[str, str]
+) -> None:
     """List the secrets (names and values) for the given k8s service module
 
       It expects a file in the dotenv file format.
@@ -120,9 +128,9 @@ def list_command(env: Optional[str], config: str, local: Optional[bool]) -> None
     """
     config = check_opta_file_exists(config)
     if local:
-        config = _local_setup(config)
+        config = local_setup(config, input_variables=var)
         env = "localopta"
-    layer = Layer.load_from_yaml(config, env)
+    layer = Layer.load_from_yaml(config, env, input_variables=var)
     amplitude_client.send_event(amplitude_client.LIST_SECRETS_EVENT)
     gen_all(layer)
 
@@ -136,9 +144,10 @@ def list_command(env: Optional[str], config: str, local: Optional[bool]) -> None
 @secret.command()
 @click.argument("secret")
 @click.argument("value")
-@env_option
-@config_option
 @restart_option
+@config_option
+@env_option
+@input_variable_option
 @local_option
 def update(
     secret: str,
@@ -147,6 +156,7 @@ def update(
     config: str,
     no_restart: bool,
     local: Optional[bool],
+    var: Dict[str, str],
 ) -> None:
     """Update a given secret of a k8s service with a new value
 
@@ -157,9 +167,9 @@ def update(
 
     config = check_opta_file_exists(config)
     if local:
-        config = _local_setup(config)
+        config = local_setup(config, input_variables=var)
         env = "localopta"
-    layer = Layer.load_from_yaml(config, env)
+    layer = Layer.load_from_yaml(config, env, input_variables=var)
     gen_all(layer)
 
     set_kube_config(layer)
@@ -173,9 +183,10 @@ def update(
 
 @secret.command()
 @click.argument("env-file")
-@env_option
-@config_option
 @restart_option
+@config_option
+@env_option
+@input_variable_option
 @local_option
 def bulk_update(
     env_file: str,
@@ -183,6 +194,7 @@ def bulk_update(
     config: str,
     no_restart: bool,
     local: Optional[bool],
+    var: Dict[str, str],
 ) -> None:
     """Bulk update a list of secrets for a k8s service using a dotenv file as in input.
 
@@ -195,9 +207,9 @@ def bulk_update(
 
     config = check_opta_file_exists(config)
     if local:
-        config = _local_setup(config)
+        config = local_setup(config, input_variables=var)
         env = "localopta"
-    layer = Layer.load_from_yaml(config, env)
+    layer = Layer.load_from_yaml(config, env, input_variables=var)
     gen_all(layer)
 
     set_kube_config(layer)

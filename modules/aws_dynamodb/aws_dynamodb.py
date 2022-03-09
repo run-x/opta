@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from modules.base import AWSIamAssembler, ModuleProcessor
 from opta.exceptions import UserErrors
@@ -13,10 +13,10 @@ class AwsDynamodbProcessor(ModuleProcessor, AWSIamAssembler):
         super(AwsDynamodbProcessor, self).__init__(module, layer)
 
     def process(self, module_idx: int) -> None:
-        attributes: list[dict] = self.module.data["attributes"]
+        attributes: List[dict] = self.module.data["attributes"]
         range_key: Optional[str] = self.module.data.get("range_key", None)
         hash_key: str = self.module.data["hash_key"]
-        valid_keys: list[str] = (
+        valid_keys: List[str] = (
             [hash_key, range_key] if range_key is not None else [hash_key]
         )
         for attribute in attributes:

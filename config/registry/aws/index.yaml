@@ -19,6 +19,7 @@ validator:
       region: str()
       account_id: aws_id()
   modules: list(module())
+  input_variables: list(map(), required=False)
 service_validator:
   - environments: list(include('env'), required=False)
     name: str()

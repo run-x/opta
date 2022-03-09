@@ -1,11 +1,11 @@
 import datetime
-from typing import Optional
+from typing import Dict, Optional
 
 import click
 import pytz
 
 from opta.amplitude import amplitude_client
-from opta.commands.apply import _local_setup
+from opta.commands.apply import local_setup
 from opta.core.generator import gen_all
 from opta.core.kubernetes import (
     load_opta_kube_config,
@@ -13,16 +13,15 @@ from opta.core.kubernetes import (
     tail_namespace_events,
 )
 from opta.layer import Layer
-from opta.utils.clickoptions import local_option
+from opta.utils.clickoptions import (
+    config_option,
+    env_option,
+    input_variable_option,
+    local_option,
+)
 
 
 @click.command(hidden=True)
-@click.option(
-    "-e", "--env", default=None, help="The env to use when loading the config file"
-)
-@click.option(
-    "-c", "--config", default="opta.yaml", help="Opta config file", show_default=True
-)
 @click.option(
     "-s",
     "--seconds",
@@ -31,9 +30,16 @@ from opta.utils.clickoptions import local_option
     show_default=False,
     type=int,
 )
+@config_option
+@env_option
+@input_variable_option
 @local_option
 def events(
-    env: Optional[str], config: str, seconds: Optional[int], local: Optional[bool]
+    env: Optional[str],
+    config: str,
+    seconds: Optional[int],
+    local: Optional[bool],
+    var: Dict[str, str],
 ) -> None:
     """
     List the events for a service
@@ -44,7 +50,7 @@ def events(
 
     """
     if local:
-        config = _local_setup(config)
+        config = local_setup(config, input_variables=var)
     # Configure kubectl
     layer = Layer.load_from_yaml(config, env)
     amplitude_client.send_event(

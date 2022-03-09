@@ -33,8 +33,10 @@ from opta.core.local import Local
 from opta.core.validator import validate_yaml
 from opta.crash_reporter import CURRENT_CRASH_REPORTER
 from opta.exceptions import UserErrors
+from opta.input_variable import InputVariable
 from opta.module import Module
 from opta.plugins.derived_providers import DerivedProviders
+from opta.stubs import from_dict
 from opta.utils import check_opta_file_exists, deep_merge, hydrate, logger, yaml
 from opta.utils.dependencies import ensure_installed, validate_installed_path_executables
 
@@ -196,6 +198,7 @@ class Layer:
         local: bool = False,
         json_schema: bool = False,
         stateless_mode: bool = False,
+        input_variables: Optional[Dict[str, str]] = None,
     ) -> Layer:
         t = None
         if config.startswith("git@"):
@@ -236,7 +239,7 @@ class Layer:
         conf["original_spec"] = config_string
         conf["path"] = config_path
 
-        layer = cls.load_from_dict(conf, env, is_parent, stateless_mode)
+        layer = cls.load_from_dict(conf, env, is_parent, stateless_mode, input_variables)
         if local:
             pass
         validate_yaml(config_path, layer.cloud, json_schema)
@@ -263,7 +266,14 @@ class Layer:
         env: Optional[str],
         is_parent: bool = False,
         stateless_mode: bool = False,
+        input_variables: Optional[Dict[str, str]] = None,
     ) -> Layer:
+        input_variables = input_variables or {}
+        # Handle input variables
+        expected_input_variables = from_dict(InputVariable, conf, "input_variables")
+        current_variables = InputVariable.render_dict(
+            expected_input_variables, input_variables
+        )
         modules_data = conf.get("modules", [])
         environments = conf.pop("environments", None)
         original_spec = conf.pop("original_spec", "")
@@ -325,8 +335,11 @@ class Layer:
                 )
 
             current_parent, env_meta = potential_envs[env]
-            current_variables = env_meta.get("variables", {})
+            current_variables = deep_merge(
+                current_variables, env_meta.get("variables", {})
+            )
             current_variables = deep_merge(current_variables, env_meta.get("vars", {}))
+
             return cls(
                 name,
                 org_name,
@@ -344,6 +357,7 @@ class Layer:
             providers,
             modules_data,
             path,
+            variables=current_variables,
             original_spec=original_spec,
             stateless_mode=stateless_mode,
         )

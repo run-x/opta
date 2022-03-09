@@ -1,5 +1,5 @@
 import base64
-from typing import Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import boto3
 import click
@@ -14,6 +14,7 @@ from opta.exceptions import UserErrors
 from opta.layer import Layer
 from opta.nice_subprocess import nice_run
 from opta.utils import check_opta_file_exists, fmt_msg, yaml
+from opta.utils.clickoptions import config_option, env_option, input_variable_option
 from opta.utils.dependencies import ensure_installed
 
 
@@ -145,17 +146,17 @@ def is_service_config(config: str) -> bool:
 
 @click.command(hidden=True)
 @click.argument("image")
-@click.option("-c", "--config", default="opta.yaml", help="Opta config file.")
-@click.option(
-    "-e", "--env", default=None, help="The env to use when loading the config file."
-)
+@config_option
+@env_option
+@input_variable_option
 @click.option(
     "--tag",
     default=None,
     help="The image tag associated with your docker container. Defaults to your local image tag.",
 )
-def push(image: str, config: str, env: Optional[str], tag: Optional[str]) -> None:
-
+def push(
+    image: str, config: str, env: Optional[str], tag: Optional[str], var: List[str],
+) -> None:
     config = check_opta_file_exists(config)
     if not is_service_config(config):
         raise UserErrors(
@@ -170,14 +171,14 @@ def push(image: str, config: str, env: Optional[str], tag: Optional[str]) -> Non
             )
         )
 
-    _push(image, config, env, tag)
+    push_image(image, config, env, tag, var)
 
 
-def _push(
-    image: str, config: str, env: Optional[str], tag: Optional[str]
+def push_image(
+    image: str, config: str, env: Optional[str], tag: Optional[str], input_variables: Dict
 ) -> Tuple[str, str]:
     ensure_installed("docker")
-    layer = Layer.load_from_yaml(config, env)
+    layer = Layer.load_from_yaml(config, env, input_variables=input_variables)
     amplitude_client.send_event(
         amplitude_client.PUSH_EVENT,
         event_properties={"org_name": layer.org_name, "layer_name": layer.name},

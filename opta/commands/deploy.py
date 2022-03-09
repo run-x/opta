@@ -1,10 +1,10 @@
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import click
 
 from opta.amplitude import amplitude_client
-from opta.commands.apply import _apply, _local_setup
-from opta.commands.push import _push, is_service_config
+from opta.commands.apply import _apply, local_setup
+from opta.commands.push import is_service_config, push_image
 from opta.core.terraform import Terraform
 from opta.error_constants import USER_ERROR_TF_LOCK
 from opta.exceptions import MissingState, UserErrors
@@ -13,16 +13,17 @@ from opta.module import Module
 from opta.opta_lock import opta_acquire_lock, opta_release_lock
 from opta.pre_check import pre_check
 from opta.utils import check_opta_file_exists, fmt_msg, logger
-from opta.utils.clickoptions import local_option
+from opta.utils.clickoptions import (
+    config_option,
+    env_option,
+    input_variable_option,
+    local_option,
+)
 
 
 @click.command()
 @click.option(
     "-i", "--image", help="Your local image in the for myimage:tag", default=None
-)
-@click.option("-c", "--config", default="opta.yaml", help="Opta config file.")
-@click.option(
-    "-e", "--env", default=None, help="The env to use when loading the config file."
 )
 @click.option(
     "-t",
@@ -42,6 +43,9 @@ from opta.utils.clickoptions import local_option
     default=False,
     help="Show full terraform plan in detail, not the opta provided summary",
 )
+@config_option
+@env_option
+@input_variable_option
 @local_option
 def deploy(
     image: str,
@@ -51,6 +55,7 @@ def deploy(
     auto_approve: bool,
     detailed_plan: bool,
     local: Optional[bool],
+    var: Dict[str, str],
 ) -> None:
     """Deploys an image to Kubernetes
 
@@ -79,7 +84,7 @@ def deploy(
 
         config = check_opta_file_exists(config)
         if local:
-            config = _local_setup(config, image_tag=tag, refresh_local_env=True)
+            config = local_setup(config, image_tag=tag, refresh_local_env=True)
         if not is_service_config(config):
             raise UserErrors(
                 fmt_msg(
@@ -93,7 +98,7 @@ def deploy(
                 )
             )
 
-        layer = Layer.load_from_yaml(config, env)
+        layer = Layer.load_from_yaml(config, env, input_variables=var)
         amplitude_client.send_event(
             amplitude_client.DEPLOY_EVENT,
             event_properties={"org_name": layer.org_name, "layer_name": layer.name},
@@ -127,10 +132,11 @@ def deploy(
                     auto_approve=auto_approve,
                     stdout_logs=False,
                     detailed_plan=detailed_plan,
+                    input_variables=var,
                 )
             if image is not None:
-                image_digest, image_tag = _push(
-                    image=image, config=config, env=env, tag=tag
+                image_digest, image_tag = push_image(
+                    image=image, config=config, env=env, tag=tag, input_variables=var,
                 )
         _apply(
             config=config,
@@ -142,6 +148,7 @@ def deploy(
             auto_approve=auto_approve,
             image_digest=image_digest,
             detailed_plan=detailed_plan,
+            input_variables=var,
         )
     finally:
         opta_release_lock()

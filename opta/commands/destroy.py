@@ -25,14 +25,15 @@ from opta.layer import Layer
 from opta.opta_lock import opta_acquire_lock, opta_release_lock
 from opta.pre_check import pre_check
 from opta.utils import check_opta_file_exists, logger
-from opta.utils.clickoptions import local_option
+from opta.utils.clickoptions import (
+    config_option,
+    env_option,
+    input_variable_option,
+    local_option,
+)
 
 
 @click.command()
-@click.option("-c", "--config", default="opta.yaml", help="Opta config file.")
-@click.option(
-    "-e", "--env", default=None, help="The env to use when loading the config file."
-)
 @click.option(
     "--auto-approve",
     is_flag=True,
@@ -45,6 +46,9 @@ from opta.utils.clickoptions import local_option
     default=False,
     help="Show full terraform plan in detail, not the opta provided summary",
 )
+@config_option
+@env_option
+@input_variable_option
 @local_option
 def destroy(
     config: str,
@@ -52,6 +56,7 @@ def destroy(
     auto_approve: bool,
     detailed_plan: bool,
     local: Optional[bool],
+    var: Dict[str, str],
 ) -> None:
     """Destroy all opta resources from the current config
 
@@ -71,7 +76,7 @@ def destroy(
         if local:
             config, _ = _handle_local_flag(config, False)
             _clean_tf_folder()
-        layer = Layer.load_from_yaml(config, env)
+        layer = Layer.load_from_yaml(config, env, input_variables=var)
         event_properties: Dict = layer.get_event_properties()
         amplitude_client.send_event(
             amplitude_client.DESTROY_EVENT, event_properties=event_properties,

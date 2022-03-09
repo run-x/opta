@@ -1,24 +1,22 @@
-from typing import Optional
+from typing import Dict, Optional
 
 import click
 
 from opta.layer import Layer
 from opta.utils import check_opta_file_exists
+from opta.utils.clickoptions import config_option, env_option, input_variable_option
 
 
 @click.command(hidden=True)
-@click.option("-c", "--config", default="opta.yaml", help="Opta config file.")
-@click.option(
-    "-e",
-    "--env",
-    default=None,
-    help="The env to use when loading the config file",
-    show_default=True,
-)
+@config_option
+@env_option
+@input_variable_option
 @click.option(
     "--json-schema", default=False, help="Validate using JSON schema instead of Yamale"
 )
-def validate(config: str, json_schema: bool, env: Optional[str]) -> None:
+def validate(
+    config: str, json_schema: bool, env: Optional[str], var: Dict[str, str]
+) -> None:
     config = check_opta_file_exists(config)
 
-    Layer.load_from_yaml(config, env, json_schema)
+    Layer.load_from_yaml(config, env, json_schema, input_variables=var)

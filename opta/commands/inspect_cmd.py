@@ -1,9 +1,9 @@
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 import click
 
 from opta.amplitude import amplitude_client
-from opta.commands.apply import _local_setup
+from opta.commands.apply import local_setup
 from opta.constants import TF_FILE_PATH
 from opta.core.generator import gen_all
 from opta.core.terraform import fetch_terraform_state_resources
@@ -11,26 +11,30 @@ from opta.layer import Layer
 from opta.pre_check import pre_check
 from opta.resource import Resource
 from opta.utils import check_opta_file_exists, column_print, deep_merge, json
-from opta.utils.clickoptions import local_option
+from opta.utils.clickoptions import (
+    config_option,
+    env_option,
+    input_variable_option,
+    local_option,
+)
 
 
 @click.command(hidden=True)
-@click.option(
-    "-c", "--config", default="opta.yaml", help="Opta config file", show_default=True
-)
-@click.option(
-    "-e", "--env", default=None, help="The env to use when loading the config file"
-)
+@config_option
+@env_option
+@input_variable_option
 @local_option
-def inspect(config: str, env: Optional[str], local: Optional[bool]) -> None:
+def inspect(
+    config: str, env: Optional[str], local: Optional[bool], var: Dict[str, str],
+) -> None:
     """Displays important resources and AWS/Datadog links to them"""
 
     pre_check()
 
     config = check_opta_file_exists(config)
     if local:
-        config = _local_setup(config)
-    layer = Layer.load_from_yaml(config, env)
+        config = local_setup(config)
+    layer = Layer.load_from_yaml(config, env, input_variables=var)
     amplitude_client.send_event(
         amplitude_client.INSPECT_EVENT,
         event_properties={"org_name": layer.org_name, "layer_name": layer.name},

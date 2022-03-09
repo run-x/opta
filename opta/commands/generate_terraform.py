@@ -15,21 +15,16 @@ from opta.layer import Layer
 from opta.module import Module
 from opta.pre_check import pre_check
 from opta.utils import check_opta_file_exists, dicts, logger
-from opta.utils.clickoptions import str_options
+from opta.utils.clickoptions import (
+    config_option,
+    env_option,
+    input_variable_option,
+    str_options,
+)
 from opta.utils.markdown import Code, Markdown, Text, Title1, Title2
 
 
 @click.command()
-@click.option(
-    "-c", "--config", default="opta.yaml", help="Opta config file", show_default=True
-)
-@click.option(
-    "-e",
-    "--env",
-    default=None,
-    help="The env to use when loading the config file",
-    show_default=True,
-)
 @click.option(
     "-d",
     "--directory",
@@ -65,6 +60,9 @@ from opta.utils.markdown import Code, Markdown, Text, Title1, Title2
     help="Terraform backend type. If you have no underlying infrastructure, 'local' would get you started. If you have already provisonned your infrastructure with opta use 'remote' to import the current state.",
     show_default=True,
 )
+@config_option
+@env_option
+@input_variable_option
 @click.pass_context
 def generate_terraform(
     ctx: click.Context,
@@ -75,6 +73,7 @@ def generate_terraform(
     delete: bool,
     auto_approve: bool,
     backend: str,
+    var: Dict[str, str],
 ) -> None:
     """(beta) Generate Terraform language files
 
@@ -100,7 +99,7 @@ def generate_terraform(
     pre_check()
     _clean_tf_folder()
 
-    layer = Layer.load_from_yaml(config, env, stateless_mode=True)
+    layer = Layer.load_from_yaml(config, env, stateless_mode=True, input_variables=var)
 
     layer.validate_required_path_dependencies()
 
