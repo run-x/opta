@@ -38,7 +38,7 @@ resource "aws_eks_cluster" "cluster" {
     security_group_ids      = [aws_security_group.eks.id]
     endpoint_private_access = false # TODO: make this true once we got VPN figured out
     #tfsec:ignore:aws-eks-no-public-cluster-access
-    endpoint_public_access  = true  # TODO: make this false once we got VPN figured out
+    endpoint_public_access = true # TODO: make this false once we got VPN figured out
   }
 
   encryption_config {

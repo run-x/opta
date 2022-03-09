@@ -78,7 +78,7 @@ variable "private_key" {
 }
 
 variable "certificate_body" {
-  type    = string
+  type = string
   # Ignore since this default value is never used, its for a logical if condition checking if user specified no cert.
   #tfsec:ignore:general-secrets-no-plaintext-exposure
   default = ""
