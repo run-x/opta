@@ -53,7 +53,7 @@ resource "helm_release" "external-dns" {
   create_namespace = true
   atomic           = true
   cleanup_on_fail  = true
-  version          = "3.7.0"
+  version          = "6.1.8"
   values = [
     yamlencode({
       provider : "aws"
