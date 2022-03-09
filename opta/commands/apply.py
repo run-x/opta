@@ -97,7 +97,7 @@ def apply(
     Examples:
 
     opta apply --auto-approve
-    
+
     opta apply --auto-approve --var variable1=value1
 
     opta apply -c my-config.yaml --image-tag=v1
