@@ -1,69 +1,89 @@
 resource "aws_s3_bucket" "bucket" {
   bucket = var.bucket_name
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
-    }
-  }
   force_destroy = true
+}
 
-  versioning {
-    enabled = true
+resource "aws_s3_bucket_versioning" "bucket" {
+  bucket = aws_s3_bucket.bucket.id
+  versioning_configuration {
+    status = "Enabled"
   }
-  dynamic "logging" {
-    for_each = var.s3_log_bucket_name == null ? [] : [1]
-    content {
-      target_bucket = var.s3_log_bucket_name
-      target_prefix = "log/"
-    }
-  }
+}
 
-  lifecycle_rule {
-    enabled = true
+resource "aws_s3_bucket_lifecycle_configuration" "bucket" {
+  bucket = aws_s3_bucket.bucket.id
+
+  rule {
+    id     = "log_bucket_lifecycle_configuration"
+    status = "Enabled"
 
     noncurrent_version_transition {
-      days          = 30
-      storage_class = "STANDARD_IA"
+      newer_noncurrent_versions = null
+      noncurrent_days = 30
+      storage_class   = "STANDARD_IA"
     }
 
     noncurrent_version_transition {
-      days          = 60
-      storage_class = "GLACIER"
+      newer_noncurrent_versions = null
+      noncurrent_days = 60
+      storage_class   = "GLACIER"
     }
 
     noncurrent_version_expiration {
-      days = 90
+      noncurrent_days = 90
     }
   }
 
-  dynamic "cors_rule" {
-    for_each = var.cors_rule != null ? [var.cors_rule] : []
-    content {
-      allowed_headers = try(cors_rule.value["allowed_headers"], [])
-      allowed_methods = try(cors_rule.value["allowed_methods"], [])
-      allowed_origins = try(cors_rule.value["allowed_origins"], [])
-      expose_headers  = try(cors_rule.value["expose_headers"], [])
-      max_age_seconds = try(cors_rule.value["max_age_seconds"], 0)
+  depends_on = [aws_s3_bucket_versioning.bucket]
+}
+
+resource "aws_s3_bucket_replication_configuration" "bucket" {
+  count = var.same_region_replication ? 1 : 0
+  depends_on = [aws_s3_bucket_versioning.bucket]
+
+  role   = aws_iam_role.replication[0].arn
+  bucket = aws_s3_bucket.bucket.id
+
+  rule {
+    id     = "default"
+    status = "Enabled"
+
+    destination {
+      bucket        = aws_s3_bucket.replica[0].arn
+      storage_class = "STANDARD"
     }
   }
+}
 
-  dynamic "replication_configuration" {
-    for_each = var.same_region_replication ? [1] : []
-    content {
-      role = aws_iam_role.replication[0].arn
-      rules {
-        id     = "default"
-        status = "Enabled"
+resource "aws_s3_bucket_cors_configuration" "bucket" {
+  bucket = aws_s3_bucket.bucket.id
+  count = var.cors_rule != null ? 1 : 0
 
-        destination {
-          bucket        = aws_s3_bucket.replica[0].arn
-          storage_class = "STANDARD"
-        }
-      }
+  cors_rule {
+    allowed_headers = try(var.cors_rule.value["allowed_headers"], [])
+    allowed_methods = try(var.cors_rule.value["allowed_methods"], [])
+    allowed_origins = try(var.cors_rule.value["allowed_origins"], [])
+    expose_headers  = try(var.cors_rule.value["expose_headers"], [])
+    max_age_seconds = try(var.cors_rule.value["max_age_seconds"], 0)
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "bucket" {
+  bucket = aws_s3_bucket.bucket.id
+  rule {
+    bucket_key_enabled = false
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
     }
   }
+}
+
+resource "aws_s3_bucket_logging" "bucket" {
+  count = var.s3_log_bucket_name == null ? 0 : 1
+  bucket = aws_s3_bucket.bucket.id
+
+  target_bucket = var.s3_log_bucket_name
+  target_prefix = "log/"
 }
 
 # It's fine adding this as it's just creating something akin to an IAM role.

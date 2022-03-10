@@ -64,44 +64,62 @@ resource "aws_s3_bucket" "replica" {
   count  = var.same_region_replication ? 1 : 0
   bucket = "${var.bucket_name}-replica"
 
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
-    }
-  }
   force_destroy = true
+}
 
-  versioning {
-    enabled = true
+resource "aws_s3_bucket_versioning" "replica" {
+  count  = var.same_region_replication ? 1 : 0
+  bucket = aws_s3_bucket.replica[0].id
+  versioning_configuration {
+    status = "Enabled"
   }
+}
 
-  dynamic "logging" {
-    for_each = var.s3_log_bucket_name == null ? [] : [1]
-    content {
-      target_bucket = var.s3_log_bucket_name
-      target_prefix = "log/"
-    }
-  }
+resource "aws_s3_bucket_lifecycle_configuration" "replica" {
+  count  = var.same_region_replication ? 1 : 0
+  bucket = aws_s3_bucket.replica[0].id
 
-  lifecycle_rule {
-    enabled = true
+  rule {
+    id     = "log_bucket_lifecycle_configuration"
+    status = "Enabled"
 
     noncurrent_version_transition {
-      days          = 30
-      storage_class = "STANDARD_IA"
+      newer_noncurrent_versions = null
+      noncurrent_days = 30
+      storage_class   = "STANDARD_IA"
     }
 
     noncurrent_version_transition {
-      days          = 60
-      storage_class = "GLACIER"
+      newer_noncurrent_versions = null
+      noncurrent_days = 60
+      storage_class   = "GLACIER"
     }
 
     noncurrent_version_expiration {
-      days = 90
+      noncurrent_days = 90
     }
   }
+
+  depends_on = [aws_s3_bucket_versioning.replica[0]]
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "replica" {
+  count  = var.same_region_replication ? 1 : 0
+  bucket = aws_s3_bucket.replica[0].id
+  rule {
+    bucket_key_enabled = false
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_logging" "replica" {
+  count = var.same_region_replication && var.s3_log_bucket_name != null ? 1 : 0
+  bucket = aws_s3_bucket.replica[0].id
+
+  target_bucket = var.s3_log_bucket_name
+  target_prefix = "log/"
 }
 
 resource "aws_s3_bucket_public_access_block" "block_for_replica" {
