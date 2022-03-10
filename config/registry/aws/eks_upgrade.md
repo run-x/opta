@@ -3,7 +3,7 @@ title: "EKS Upgrade"
 linkTitle: "EKS Upgrade"
 date: 2022-01-03
 draft: false
-weight: 1
+weight: 2
 description: >
   How to upgrade the version of your EKS cluster created by opta.
 ---

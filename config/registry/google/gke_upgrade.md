@@ -3,7 +3,7 @@ title: "GKE Upgrade"
 linkTitle: "GKE Upgrade"
 date: 2022-01-03
 draft: false
-weight: 1
+weight: 2
 description: >
   How to upgrade the version of your GKE cluster created by opta.
 ---

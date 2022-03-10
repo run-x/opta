@@ -3,7 +3,7 @@ title: "VPC Peering"
 linkTitle: "VPC Peering"
 date: 2021-07-21
 draft: false
-weight: 1
+weight: 2
 description: Guide on how to peer AWS VPCs
 ---
 

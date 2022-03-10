@@ -2,7 +2,7 @@
 title: "Deploy to AWS Button"
 linkTitle: "Deploy to AWS Button"
 date: 2021-07-21
-weight: 1
+weight: 2
 description: >
   Allow your users to fill out their AWS Opta templates with the click of a button.
 ---
