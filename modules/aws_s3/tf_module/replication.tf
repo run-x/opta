@@ -85,14 +85,14 @@ resource "aws_s3_bucket_lifecycle_configuration" "replica" {
 
     noncurrent_version_transition {
       newer_noncurrent_versions = null
-      noncurrent_days = 30
-      storage_class   = "STANDARD_IA"
+      noncurrent_days           = 30
+      storage_class             = "STANDARD_IA"
     }
 
     noncurrent_version_transition {
       newer_noncurrent_versions = null
-      noncurrent_days = 60
-      storage_class   = "GLACIER"
+      noncurrent_days           = 60
+      storage_class             = "GLACIER"
     }
 
     noncurrent_version_expiration {
@@ -115,7 +115,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "replica" {
 }
 
 resource "aws_s3_bucket_logging" "replica" {
-  count = var.same_region_replication && var.s3_log_bucket_name != null ? 1 : 0
+  count  = var.same_region_replication && var.s3_log_bucket_name != null ? 1 : 0
   bucket = aws_s3_bucket.replica[0].id
 
   target_bucket = var.s3_log_bucket_name

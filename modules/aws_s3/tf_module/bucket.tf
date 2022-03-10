@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "bucket" {
-  bucket = var.bucket_name
+  bucket        = var.bucket_name
   force_destroy = true
 }
 
@@ -19,14 +19,14 @@ resource "aws_s3_bucket_lifecycle_configuration" "bucket" {
 
     noncurrent_version_transition {
       newer_noncurrent_versions = null
-      noncurrent_days = 30
-      storage_class   = "STANDARD_IA"
+      noncurrent_days           = 30
+      storage_class             = "STANDARD_IA"
     }
 
     noncurrent_version_transition {
       newer_noncurrent_versions = null
-      noncurrent_days = 60
-      storage_class   = "GLACIER"
+      noncurrent_days           = 60
+      storage_class             = "GLACIER"
     }
 
     noncurrent_version_expiration {
@@ -38,7 +38,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "bucket" {
 }
 
 resource "aws_s3_bucket_replication_configuration" "bucket" {
-  count = var.same_region_replication ? 1 : 0
+  count      = var.same_region_replication ? 1 : 0
   depends_on = [aws_s3_bucket_versioning.bucket]
 
   role   = aws_iam_role.replication[0].arn
@@ -57,7 +57,7 @@ resource "aws_s3_bucket_replication_configuration" "bucket" {
 
 resource "aws_s3_bucket_cors_configuration" "bucket" {
   bucket = aws_s3_bucket.bucket.id
-  count = var.cors_rule != null ? 1 : 0
+  count  = var.cors_rule != null ? 1 : 0
 
   cors_rule {
     allowed_headers = try(var.cors_rule.value["allowed_headers"], [])
@@ -79,7 +79,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "bucket" {
 }
 
 resource "aws_s3_bucket_logging" "bucket" {
-  count = var.s3_log_bucket_name == null ? 0 : 1
+  count  = var.s3_log_bucket_name == null ? 0 : 1
   bucket = aws_s3_bucket.bucket.id
 
   target_bucket = var.s3_log_bucket_name
