@@ -85,8 +85,8 @@ commands:
       - run:
           name: "Installing python version 3.8"
           command: |
-            pyenv install 3.8.0
-            pyenv global 3.8.0
+            pyenv install 3.8.12
+            pyenv global 3.8.12
   install-python-dependencies:
     steps:
       - run:
