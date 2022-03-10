@@ -20,12 +20,20 @@ from opta.exceptions import UserErrors
 # Checks when loading yaml
   # Git loading - needs git binary
   # Check opta file exists, support yml yaml
-  # --> Call load dict
+  # --> Call load dict (See next point)
+  # validate_yaml - schema/data validation of config and modules (recursive) using yamale
+  # validate layer - modules should be unique 1 per layer, dependency graph
+
 
 # Checks when loading dict
   # Check name key
-  # Check is_parent and also has environments 
-  
+  # Check is_parent and also has environments
+  # Check multi-levels (disallowed) parent of parent not allowed
+  # Check service and env names are different
+
+# After loading yaml
+  # Verify cloud credentials
+  # process
 
 # Class for validating a module
 
