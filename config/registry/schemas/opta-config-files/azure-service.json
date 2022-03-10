@@ -25,6 +25,9 @@
             "$ref": "https://app.runx.dev/modules/azure-redis"
           },
           {
+            "$ref": "https://app.runx.dev/modules/external-state"
+          },
+          {
             "$ref": "https://app.runx.dev/modules/helm-chart"
           },
           {

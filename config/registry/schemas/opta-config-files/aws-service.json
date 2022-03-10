@@ -52,6 +52,9 @@
             "$ref": "https://app.runx.dev/modules/cloudfront-distribution"
           },
           {
+            "$ref": "https://app.runx.dev/modules/external-state"
+          },
+          {
             "$ref": "https://app.runx.dev/modules/helm-chart"
           },
           {
