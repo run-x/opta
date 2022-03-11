@@ -34,5 +34,51 @@ modules:
     port:
       http: 80
     env_vars:
-      blah1: "${{module.external.outputs.s3_bucket_name}}"
+      SOURCE_BUCKET: "${{module.external.outputs.s3_bucket_name}}"
+```
+
+The service will now have an environment variables known as SOURCE_BUCKET which could be the name of the
+bucket they wish grab data from (assuming IAM permissions are configured externally for simplicity).
+
+{{% alert title="NOTE" color="orange" %}}
+Usage is reliant on what the external state outputs and names. Please make sure that the data you seek
+is both outputted and has the expected name. If the state is created by Opta you can find the outputs
+and name by running opta apply on that state's manifest yaml.
+{{% /alert %}}
+
+## How to Properly Configure
+This module takes just 2 inputs, `backend_type` and `config`, which directly map to an available terraform
+backend name and its configuration. For full details please see [here](https://www.terraform.io/language/settings/backends),
+but for convenience we have below some common examples:
+
+For S3 (Opta AWS)
+```yaml
+  - type: external-state
+    name: external
+    backend_type: s3
+    config:
+      bucket: my-bucket-name
+      key: my-key
+      region: us-east-1
+```
+
+For GCS (Opta GCP)
+```yaml
+  - type: external-state
+    name: external
+    backend_type: gcs
+    config:
+      bucket: my-bucket-name
+      prefix: my-prefix
+```
+
+For Azurerm (Opta Azure)
+```yaml
+  - type: external-state
+    name: external
+    backend_type: azurerm
+    config:
+      storage_account_name: my-storage-account
+      container_name: my-container
+      key: my-key
 ```

@@ -1,7 +1,7 @@
 {
   "$id": "https://app.runx.dev/modules/external-state",
   "type": "object",
-  "description": "Plugs a custom helm chart into your Opta k8s cluster",
+  "description": "Adds the ability to refer to external, preexisting terraform states in opta.",
   "properties": {
     "backend_type": {
       "type": "string",
