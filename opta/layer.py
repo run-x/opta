@@ -164,6 +164,7 @@ class Layer:
                     f"The module name {module.name} is used multiple time in the "
                     "layer. Module names must be unique per layer"
                 )
+            module_names.add(module.name)
         self.stateless_mode = stateless_mode
 
     def get_cluster_name(self) -> str:
