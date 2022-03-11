@@ -1,8 +1,9 @@
 from collections.abc import Mapping
 from tempfile import NamedTemporaryFile
 from typing import Any, List, Literal, Optional, Type
-
+import re
 import yamale
+from opta.layer2 import Layer
 from colored import attr, fg
 from yamale.validators import DefaultValidators, Validator
 
@@ -40,6 +41,25 @@ from opta.exceptions import UserErrors
 # Class for validating an opta file
 
 
+def validate_layer_init(layer_name:str, parent: Layer, org_name: str):
+    pattern = "^[A-Za-z0-9-]*$"
+    if not bool(re.match(pattern, layer_name)):
+        raise UserErrors(
+            "Invalid layer, can only contain letters, dashes and numbers!"
+        )
+    if parent is None and org_name is None:
+        raise UserErrors("Config must have org name or a parent who has an org name")
+    
+
+
+
+
+
+
+
+
+
+################## Original code ###############
 class Module(Validator):
     """Custom Module Validator"""
 

@@ -6,18 +6,21 @@ from typing import List, Optional
 
 from opta.module2 import Module
 from opta.stubs import Environment, ProviderConfig, from_dict
-
+from opta.core.validator2 import validate_layer_init
 
 class Layer:
     name: str
     org_name: Optional[str]
+    parent: Optional[Layer]
     modules: List[Module]
     providers: ProviderConfig
     environments: List[Environment]
 
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, parent: Optional[Layer] = None) -> None:
         self.name = name
         self.org_name = None
+        self.parent = parent
+        validate_layer_init(self.name, self.parent, self.org_name)
         self.modules = []
         self.providers = ProviderConfig()
         self.environments = []
@@ -35,6 +38,6 @@ class Layer:
         layer.providers = ProviderConfig.from_dict(raw.get("providers", {}))
 
         return layer
-
+    
 
 Layer2 = Layer
