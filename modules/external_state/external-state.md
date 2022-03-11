@@ -4,13 +4,14 @@ linkTitle: "external-state"
 date: 2021-07-21
 draft: false
 weight: 1
-description: Adds the ability to refer to external, preexisting terraform states in opta.
+description: Adds the ability to refer to external, preexisting terraform states in Opta.
 ---
 
 This module grants users the ability to import outputs from 
 [external terraform backends](https://www.terraform.io/language/settings/backends) (e.g. pre-existing
-or created outside of opta, or another Opta service/environment). All the terraform outputs of that state
-will be captured and referenceable under the `outputs` output for this module. 
+or created outside of Opta, or another Opta service/environment). All the terraform outputs of that state
+will be captured and referenceable under the `outputs` output for this module (Opta will error out if 
+the desired value is not found in the outputs). 
 
 For instance, you can refer values such as the name of an S3 bucket created in another Opta service like so:
 ```yaml
@@ -34,11 +35,11 @@ modules:
     port:
       http: 80
     env_vars:
-      SOURCE_BUCKET: "${{module.external.outputs.s3_bucket_name}}"
+      SOURCE_QUEUE: "${{module.external.outputs.sqs_queue_name}}"
 ```
 
-The service will now have an environment variables known as SOURCE_BUCKET which could be the name of the
-bucket they wish grab data from (assuming IAM permissions are configured externally for simplicity).
+The service will now have an environment variables known as SOURCE_BUCKET SOURCE_QUEUE could be the name of the
+queue they wish grab data from (assuming IAM permissions are configured externally for simplicity).
 
 {{% alert title="NOTE" color="orange" %}}
 Usage is reliant on what the external state outputs and names. Please make sure that the data you seek

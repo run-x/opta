@@ -17,7 +17,7 @@ inputs:
   - name: backend_type
     user_facing: true
     validator: str(required=True)
-    description: The type of backend this external state is using
+    description: The type of backend this external state is using (https://www.terraform.io/language/settings/backends)
     default: null
   - name: config
     user_facing: true

@@ -5,10 +5,10 @@
   "properties": {
     "backend_type": {
       "type": "string",
-      "description": "The type of backend this external state is using"
+      "description": "The type of backend this external state is using (https://www.terraform.io/language/settings/backends)"
     },
     "config": {
-      "type": "string",
+      "type": "object",
       "description": "The configuration to connect to this remote state",
       "default": {}
     },
