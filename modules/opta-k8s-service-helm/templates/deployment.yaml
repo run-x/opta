@@ -23,6 +23,9 @@ spec:
         tags.datadoghq.com/version: {{ .Values.version | quote }}
       annotations:
         cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+        # Outbound ports that should skip the proxy: datadog agent UDP (8126), postgres (5432), MySQL (3306)
+        # with latest version of linkerd the DB ports would be marked as opaque, we should try removing them from this list
+        # we will need to keep datadog since linkerd doesn't support UDP
         config.linkerd.io/skip-outbound-ports: "8126,5432,3306"
         linkerd-version: "2.10.2"
         ad.datadoghq.com/linkerd-proxy.check_names: '["linkerd"]'
