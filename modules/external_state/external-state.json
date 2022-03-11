@@ -1,0 +1,41 @@
+{
+  "$id": "https://app.runx.dev/modules/external-state",
+  "type": "object",
+  "description": "Adds the ability to refer to external, preexisting terraform states in opta.",
+  "properties": {
+    "backend_type": {
+      "type": "string",
+      "description": "The type of backend this external state is using (https://www.terraform.io/language/settings/backends)"
+    },
+    "config": {
+      "type": "object",
+      "description": "The configuration to connect to this remote state",
+      "default": {}
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "external-state"
+      ],
+      "default": "external-state",
+      "type": "string"
+    }
+  },
+  "required": [
+    "backend_type",
+    "config",
+    "type"
+  ],
+  "opta_metadata": {
+    "module_type": "service",
+    "clouds": [
+      "aws",
+      "azure",
+      "gcp",
+      "local"
+    ],
+    "name": "external-state",
+    "display_name": "external-state",
+    "tags": []
+  }
+}

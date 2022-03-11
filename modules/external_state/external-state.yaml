@@ -1,0 +1,37 @@
+halt: false
+environment_module: false
+metric_count: 0
+inputs:
+  - name: env_name
+    user_facing: false
+    description: Opta Environment name
+    default: None
+  - name: layer_name
+    user_facing: false
+    description: Opta Layer name
+    default: None
+  - name: module_name
+    user_facing: false
+    description: Opta Module name
+    default: None
+  - name: backend_type
+    user_facing: true
+    validator: str(required=True)
+    description: The type of backend this external state is using (https://www.terraform.io/language/settings/backends)
+    default: null
+  - name: config
+    user_facing: true
+    validator: any(required=True)
+    description: The configuration to connect to this remote state
+    default: {}
+outputs:
+  - name: output
+    export: false
+    description: The outputs of the remote state being referenced
+output_providers: { }
+output_data: { }
+clouds:
+  - azure
+  - aws
+  - gcp
+  - local
