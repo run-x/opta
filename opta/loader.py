@@ -6,25 +6,33 @@ Contains classes for loading objects from files
 from __future__ import annotations
 
 import os
+from tabnanny import check
 from typing import List, Optional
-
+from utils import check_opta_file_exists
 from opta.exceptions import UserErrors
 from opta.layer2 import Layer
 from opta.module_spec import SPEC_NAME, ModuleSpec
 from opta.utils import yaml
-
+from opta.layer import validate_yaml, Layer
 
 class LayerLoader:
     def from_path(self, path: str) -> Layer:
+        path = check_opta_file_exists(path)
         try:
             with open(path) as f:
                 data = yaml.load(f)
         except FileNotFoundError:
             raise UserErrors(f"File {path} not found")
 
-        return self.from_dict(data)
+        layer = self.from_dict(data)
+        validate_yaml(path, layer.cloud, False)
+        Layer.validate_layer(layer)
+        return layer
 
     def from_dict(self, raw: dict) -> Layer:
+        # Suggestion: We could use the original opta.layer.load_from_dict class here
+        # There is a lot of other functionality and validation there which we have not
+        # implmenented separately here.
         layer = Layer.from_dict(raw)
 
         return layer
