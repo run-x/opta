@@ -1,3 +1,6 @@
+# PSP is deprecated in Kubernetes, no point adding it.
+#tfsec:ignore:google-gke-enforce-pod-security-policy
+#tfsec:ignore:google-gke-enable-master-networks
 resource "google_container_cluster" "primary" {
   name           = var.cluster_name
   location       = data.google_client_config.current.region

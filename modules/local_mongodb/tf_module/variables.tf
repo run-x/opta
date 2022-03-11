@@ -22,7 +22,9 @@ variable "db_user" {
 variable "db_password" {
   description = "Database password"
   type        = string
-  default     = "mongodbpassword"
+  # Ignore since local is within PC, not designed to secure secrets.
+  #tfsec:ignore:general-secrets-no-plaintext-exposure
+  default = "mongodbpassword"
 }
 variable "db_name" {
   description = "Database name"

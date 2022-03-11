@@ -15,6 +15,7 @@ resource "google_container_node_pool" "default" {
   }
 
   node_config {
+    image_type   = "COS_CONTAINERD"
     preemptible  = var.preemptible
     machine_type = var.node_instance_type
     disk_size_gb = var.node_disk_size
