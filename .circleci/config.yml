@@ -526,6 +526,10 @@ jobs:
       - store_artifacts:
           path: ../generated-tf-files-aws/tfstate/awsenv-tg.tfstate
           destination: tfstate-after-destroy.tfstate
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - generated-tf-files-aws/tfstate/awsenv-tg.tfstate
 
   azure-create-env:
     executor: ubuntu-machine
@@ -1525,6 +1529,10 @@ jobs:
       - store_artifacts:
           path: ../generated-tf-files-gcp/tfstate/gcpenv-tg.tfstate
           destination: tfstate-after-destroy.tfstate
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - generated-tf-files-gcp/tfstate/gcpenv-tg.tfstate
 
   gcp-create-env:
     executor: ubuntu-machine
