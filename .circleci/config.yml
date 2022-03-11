@@ -1101,6 +1101,8 @@ jobs:
             - remake-environment-configs
       - attach_workspace:
           at: ./
+      - install-python
+      - install-python-dependencies
       - install-opta-dependencies
       - aws-cli/install
       - aws-cli/setup
@@ -1640,7 +1642,6 @@ jobs:
             - remake-environment-configs
       - attach_workspace:
           at: ./
-      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
