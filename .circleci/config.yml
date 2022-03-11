@@ -1100,7 +1100,6 @@ jobs:
       - install-opta-dependencies
       - aws-cli/install
       - aws-cli/setup
-      - install-python-dependencies
       - run:
           name: "Load test-service image"
           command: docker load -i test-service-image
@@ -1367,6 +1366,7 @@ jobs:
       - checkout-opta
       - attach_workspace:
           at: ./
+      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -1393,6 +1393,7 @@ jobs:
   gcp-tg-create-env:
     executor: ubuntu-machine
     steps:
+      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -1424,6 +1425,7 @@ jobs:
   gcp-tg-test-service-http:
     executor: ubuntu-machine
     steps:
+      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -1474,6 +1476,7 @@ jobs:
     executor: ubuntu-machine
     steps:
       - checkout-opta
+      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -1503,6 +1506,7 @@ jobs:
   gcp-tg-destroy-env:
     executor: ubuntu-machine
     steps:
+      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -1534,6 +1538,7 @@ jobs:
             - remake-environment-configs
       - attach_workspace:
           at: ./
+      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -1568,6 +1573,7 @@ jobs:
             - remake-environment-configs
       - attach_workspace:
           at: ~/
+      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -1594,6 +1600,7 @@ jobs:
             - remake-environment-configs
       - attach_workspace:
           at: ./
+      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -1625,6 +1632,7 @@ jobs:
             - remake-environment-configs
       - attach_workspace:
           at: ./
+      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -1671,6 +1679,7 @@ jobs:
             - remake-environment-configs
       - attach_workspace:
           at: ./
+      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -1707,6 +1716,7 @@ jobs:
             - remake-environment-configs
       - attach_workspace:
           at: ./
+      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -1745,6 +1755,7 @@ jobs:
             - remake-environment-configs
       - attach_workspace:
           at: ./
+      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -1783,6 +1794,7 @@ jobs:
             - remake-environment-configs
       - attach_workspace:
           at: ./
+      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -1887,6 +1899,7 @@ jobs:
           at: ~/
       - attach_workspace:
           at: ./
+      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -1959,6 +1972,7 @@ jobs:
             - remake-environment-configs
       - attach_workspace:
           at: ./
+      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -1984,6 +1998,7 @@ jobs:
             - remake-environment-configs
       - attach_workspace:
           at: ./
+      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -2039,6 +2054,7 @@ jobs:
             - remake-environment-configs
       - attach_workspace:
           at: ./
+      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
