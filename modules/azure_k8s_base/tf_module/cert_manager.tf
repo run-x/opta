@@ -10,6 +10,6 @@ resource "helm_release" "cert_manager" {
   values = [
     yamlencode({
       installCRDs : true
-    })
+    }), yamlencode(var.cert_manager_values)
   ]
 }

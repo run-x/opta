@@ -77,7 +77,7 @@ resource "helm_release" "linkerd" {
           }
         }
       }
-    })
+    }), yamlencode(var.linkerd_values)
     ] : [yamlencode({
       podAnnotations : {
         "cluster-autoscaler.kubernetes.io/safe-to-evict" : "true"
@@ -92,5 +92,5 @@ resource "helm_release" "linkerd" {
           }
         }
       }
-  })]
+  }), yamlencode(var.linkerd_values)]
 }

@@ -82,6 +82,6 @@ resource "helm_release" "linkerd" {
   }
 
   values = var.linkerd_high_availability ? [
-    file("${path.module}/values-ha.yaml") # Adding the high-availability default values.
-  ] : []
+    file("${path.module}/values-ha.yaml"), yamlencode(var.linkerd_values) # Adding the high-availability default values.
+  ] : [yamlencode(var.linkerd_values)]
 }
