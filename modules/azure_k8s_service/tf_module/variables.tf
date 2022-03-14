@@ -16,6 +16,7 @@ locals {
     pathPrefixName : replace((length(split("/", s)) > 1 ? "/${join("/", slice(split("/", s), 1, length(split("/", s))))}" : "/"), "/", "")
   }]
   uppercase_image = upper(var.image)
+  image           = local.uppercase_image == "AUTO" ? (var.digest != null ? "${var.acr_registry_name}.azurecr.io/${var.layer_name}/${var.module_name}@${var.digest}" : (var.tag == null ? "" : "${var.acr_registry_name}.azurecr.io/${var.layer_name}/${var.module_name}:${var.tag}")) : (var.tag == null ? var.image : "${var.image}:${var.tag}")
 }
 
 variable "env_name" {

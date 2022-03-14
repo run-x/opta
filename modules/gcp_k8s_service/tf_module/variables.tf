@@ -14,6 +14,7 @@ locals {
   module_short    = substr(var.module_name, 0, 12)
   get_buckets     = toset(concat(var.read_buckets, var.write_buckets))
   uppercase_image = upper(var.image)
+  image           = local.uppercase_image == "AUTO" ? (var.digest != null ? "${data.google_container_registry_repository.root.repository_url}/${var.layer_name}/${var.module_name}@${var.digest}" : (var.tag == null ? "" : "${data.google_container_registry_repository.root.repository_url}/${var.layer_name}/${var.module_name}:${var.tag}")) : (var.tag == null ? var.image : "${var.image}:${var.tag}")
 }
 
 variable "env_name" {

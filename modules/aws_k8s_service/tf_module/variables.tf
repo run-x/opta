@@ -7,6 +7,7 @@ locals {
     pathPrefixName : replace((length(split("/", s)) > 1 ? "/${join("/", slice(split("/", s), 1, length(split("/", s))))}" : "/"), "/", "")
   }]
   uppercase_image = upper(var.image)
+  image           = local.uppercase_image == "AUTO" ? (var.digest != null ? "${aws_ecr_repository.repo[0].repository_url}@${var.digest}" : (var.tag == null ? "" : "${aws_ecr_repository.repo[0].repository_url}:${var.tag}")) : (var.tag == null ? var.image : "${var.image}:${var.tag}")
 }
 
 variable "openid_provider_url" {
