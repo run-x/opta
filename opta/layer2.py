@@ -2,14 +2,15 @@
 
 from __future__ import annotations
 
-from typing import List, Optional
+import re
+from typing import List, Optional, Set
+
+from opta.constants import MODULE_DEPENDENCY
+from opta.exceptions import UserErrors
 from opta.module2 import Module
 from opta.stubs import Environment, ProviderConfig, from_dict
-import re
-from opta.exceptions import UserErrors
-from typing  import Set
-from opta.constants import MODULE_DEPENDENCY
-from opta.utils import deep_merge
+
+
 class Layer:
     name: str
     org_name: Optional[str]
@@ -45,7 +46,7 @@ class Layer:
         if layer.parent is None and layer.org_name is None:
             raise UserErrors("Config must have org name or a parent who has an org name")
         return layer
-    
+
     @classmethod
     def validate_layer(cls, layer: "Layer") -> None:
         # Check for Uniqueness of Modules

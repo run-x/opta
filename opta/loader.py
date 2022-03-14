@@ -8,12 +8,14 @@ from __future__ import annotations
 import os
 from tabnanny import check
 from typing import List, Optional
-from opta.utils import check_opta_file_exists
+
+from opta.core.validator import validate_yaml
 from opta.exceptions import UserErrors
 from opta.layer2 import Layer
 from opta.module_spec import SPEC_NAME, ModuleSpec
-from opta.utils import yaml
-from opta.core.validator import validate_yaml
+from opta.utils import check_opta_file_exists, yaml
+
+
 class LayerLoader:
     def from_path(self, path: str) -> Layer:
         path = check_opta_file_exists(path)
