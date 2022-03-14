@@ -1,6 +1,8 @@
 # PSP is deprecated in Kubernetes, no point adding it.
+# google gke legacy metadata endpoints  are disabled in the node group (see default_node_group.tf)
 #tfsec:ignore:google-gke-enforce-pod-security-policy
 #tfsec:ignore:google-gke-enable-master-networks
+#tfsec:ignore:google-gke-metadata-endpoints-disabled
 resource "google_container_cluster" "primary" {
   name           = var.cluster_name
   location       = data.google_client_config.current.region
