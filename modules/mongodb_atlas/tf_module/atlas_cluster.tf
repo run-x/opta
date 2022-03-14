@@ -1,7 +1,8 @@
 resource "mongodbatlas_cluster" "cluster" {
-  project_id   = var.mongodb_atlas_project_id
-  name         = "opta-${var.layer_name}-${var.module_name}"
-  cluster_type = "REPLICASET"
+  project_id             = var.mongodb_atlas_project_id
+  name                   = "opta-${var.layer_name}-${var.module_name}"
+  cluster_type           = "REPLICASET"
+  mongo_db_major_version = var.mongodbversion
   replication_specs {
     num_shards = 1
     regions_config {
