@@ -54,7 +54,4 @@ resource "google_container_cluster" "primary" {
   lifecycle {
     ignore_changes = [location, private_cluster_config, enable_shielded_nodes]
   }
-  metadata {
-    disable-legacy-endpoints = true
-  }
 }
