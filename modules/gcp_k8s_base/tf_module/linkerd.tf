@@ -59,7 +59,7 @@ resource "helm_release" "linkerd" {
   chart      = "linkerd2"
   name       = "linkerd"
   repository = "https://helm.linkerd.io/stable"
-  version    = "2.11.1"
+  version    = "2.10.2"
 
   values = var.linkerd_high_availability ? [
     file("${path.module}/values-ha.yaml"), # Adding the high-availability default values.
