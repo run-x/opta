@@ -8,7 +8,7 @@ from __future__ import annotations
 import os
 from tabnanny import check
 from typing import List, Optional
-from utils import check_opta_file_exists
+from opta.utils import check_opta_file_exists
 from opta.exceptions import UserErrors
 from opta.layer2 import Layer
 from opta.module_spec import SPEC_NAME, ModuleSpec
