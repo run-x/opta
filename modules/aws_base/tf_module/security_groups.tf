@@ -18,13 +18,6 @@ resource "aws_security_group" "db" {
     protocol    = "tcp"
     cidr_blocks = local.vpc_cidr_blocks
   }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 }
 
 resource "aws_security_group" "elasticache" {
@@ -32,6 +25,7 @@ resource "aws_security_group" "elasticache" {
   description = "For usage by elasticache to give access to resources in the vpc"
   vpc_id      = local.vpc_id
 
+# https://docs.aws.amazon.com/AmazonElastiCache/latest/mem-ug/elasticache-vpc-accessing.html
   ingress {
     description = "redis"
     from_port   = 6379
@@ -40,12 +34,6 @@ resource "aws_security_group" "elasticache" {
     cidr_blocks = local.vpc_cidr_blocks
   }
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 }
 
 resource "aws_security_group" "documentdb" {
@@ -53,18 +41,12 @@ resource "aws_security_group" "documentdb" {
   description = "For usage by documentdb to give access to resources in the vpc"
   vpc_id      = local.vpc_id
 
+  # https://docs.aws.amazon.com/documentdb/latest/developerguide/db-cluster-create.html
   ingress {
     description = "documentdb"
     from_port   = 27017
     to_port     = 27017
     protocol    = "tcp"
     cidr_blocks = local.vpc_cidr_blocks
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
   }
 }
