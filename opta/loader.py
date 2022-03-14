@@ -13,8 +13,7 @@ from opta.exceptions import UserErrors
 from opta.layer2 import Layer
 from opta.module_spec import SPEC_NAME, ModuleSpec
 from opta.utils import yaml
-from opta.layer import validate_yaml, Layer
-
+from opta.core.validator import validate_yaml
 class LayerLoader:
     def from_path(self, path: str) -> Layer:
         path = check_opta_file_exists(path)
@@ -25,16 +24,12 @@ class LayerLoader:
             raise UserErrors(f"File {path} not found")
 
         layer = self.from_dict(data)
-        validate_yaml(path, layer.cloud, False)
+        validate_yaml(path, layer.providers.cloud_id, False)
         Layer.validate_layer(layer)
         return layer
 
     def from_dict(self, raw: dict) -> Layer:
-        # Suggestion: We could use the original opta.layer.load_from_dict class here
-        # There is a lot of other functionality and validation there which we have not
-        # implmenented separately here.
         layer = Layer.from_dict(raw)
-
         return layer
 
 
