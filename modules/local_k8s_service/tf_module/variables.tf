@@ -6,6 +6,7 @@ locals {
     pathPrefix : (length(split("/", s)) > 1 ? "/${join("/", slice(split("/", s), 1, length(split("/", s))))}" : "/"),
     pathPrefixName : replace((length(split("/", s)) > 1 ? "/${join("/", slice(split("/", s), 1, length(split("/", s))))}" : "/"), "/", "")
   }]
+  image = local.uppercase_image == "AUTO" ? (var.digest != null ? "${var.local_registry_name}/${var.layer_name}/${var.module_name}@${var.digest}" : (var.tag == null ? "" : "${var.local_registry_name}/${var.layer_name}/${var.module_name}:${var.tag}")) : (var.tag == null ? var.image : "${var.image}:${var.tag}")
   uppercase_image = upper(var.image)
 }
 
