@@ -7,3 +7,7 @@ locals {
 output "docker_repo_url" {
   value = local.uppercase_image == "AUTO" ? local.get_ecr_repo_url : ""
 }
+
+output "current_image" {
+  value = local.image
+}
