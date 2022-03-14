@@ -37,6 +37,10 @@ resource "google_container_cluster" "primary" {
 
   master_auth {
     client_certificate_config {
+      # tfsec recomments using oauth or SA, we ignore this since opta currently
+      # uses client certificate for auth. 
+      # https://aquasecurity.github.io/tfsec/v1.8.0/checks/google/gke/no-legacy-authentication/
+      #tfsec:ignore:google-gke-no-legacy-authentication
       issue_client_certificate = true
     }
   }
@@ -49,5 +53,8 @@ resource "google_container_cluster" "primary" {
   }
   lifecycle {
     ignore_changes = [location, private_cluster_config, enable_shielded_nodes]
+  }
+  metadata {
+    disable-legacy-endpoints = true
   }
 }
