@@ -71,6 +71,21 @@ inputs:
     validator: bool(required=False)
     description: Expose self-signed SSL certs.
     default: false
+  - name: cert_manager_values
+    user_facing: true
+    validator: any(required=False)
+    description: Certificate Manager helm chart additional values.
+    default: {}
+  - name: linkerd_values
+    user_facing: true
+    validator: any(required=False)
+    description: Linkerd helm chart additional values.
+    default: {}
+  - name: ingress_nginx_values
+    user_facing: true
+    validator: any(required=False)
+    description: Ingress Nginx helm chart additional values.
+    default: {}
 outputs:
   - name: load_balancer_raw_ip
     export: bool

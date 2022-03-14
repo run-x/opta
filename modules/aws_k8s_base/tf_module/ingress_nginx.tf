@@ -92,7 +92,7 @@ resource "helm_release" "ingress-nginx" {
         }
       },
       tcp : var.nginx_extra_tcp_ports,
-    })
+    }), yamlencode(var.ingress_nginx_values)
   ]
   depends_on = [
     helm_release.linkerd,
