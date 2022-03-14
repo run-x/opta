@@ -20,10 +20,12 @@ validator:
       tenant_id: str()
       subscription_id: str()
   modules: list(module())
+  input_variables: list(map(), required=False)
 service_validator:
   - environments: list(include('env'), required=False)
     name: str()
     modules: list(module())
+    input_variables: list(map(), required=False)
   - env:
       name: str()
       path: str()
