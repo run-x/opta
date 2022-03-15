@@ -326,6 +326,6 @@ resource "helm_release" "load_balancer" {
   cleanup_on_fail  = true
   atomic           = true
   wait_for_jobs    = false
-  version          = "1.3.2"
+  version          = "1.4.0"
 }
 

@@ -45,6 +45,26 @@ waivers[waiver] {
     "rule_id": "FG_R00229",
     "resource_id": "aws_s3_bucket.log_bucket"
   }
+} {
+  waiver := {
+    "rule_id": "FG_R00099",
+    "resource_id": "aws_s3_bucket.log_bucket"
+  }
+}  {
+  waiver := {
+    "rule_id": "FG_R00101",
+    "resource_id": "aws_s3_bucket.log_bucket"
+  }
+} {
+  waiver := {
+    "rule_id": "FG_R00099",
+    "resource_id": "aws_s3_bucket.bucket"
+  }
+} {
+  waiver := {
+    "rule_id": "FG_R00101",
+    "resource_id": "aws_s3_bucket.bucket"
+  }
 }
 
 rules[rule] {

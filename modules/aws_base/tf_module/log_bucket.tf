@@ -2,44 +2,64 @@ resource "random_id" "bucket_suffix" {
   byte_length = 8
 }
 
+# Changes based on the AWS terraform provider upgrade from 3.70.0 to 4.3.0
+
 resource "aws_s3_bucket" "log_bucket" {
-  bucket = "opta-${var.env_name}-logging-bucket-${random_id.bucket_suffix.hex}"
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
-    }
-  }
+  bucket        = "opta-${var.env_name}-logging-bucket-${random_id.bucket_suffix.hex}"
   force_destroy = true
-
-  acl = "log-delivery-write"
-
-  versioning {
-    enabled = true
-  }
-
-  lifecycle_rule {
-    enabled = true
-
-    noncurrent_version_transition {
-      days          = 30
-      storage_class = "STANDARD_IA"
-    }
-
-    noncurrent_version_transition {
-      days          = 60
-      storage_class = "GLACIER"
-    }
-
-    noncurrent_version_expiration {
-      days = 90
-    }
-  }
 
   lifecycle {
     ignore_changes = [bucket]
   }
+}
+
+resource "aws_s3_bucket_acl" "log_bucket" {
+  bucket = aws_s3_bucket.log_bucket.id
+  acl    = "log-delivery-write"
+}
+
+resource "aws_s3_bucket_versioning" "log_bucket" {
+  bucket = aws_s3_bucket.log_bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "log_bucket" {
+  bucket = aws_s3_bucket.log_bucket.id
+  rule {
+    bucket_key_enabled = false
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "log_bucket" {
+  bucket = aws_s3_bucket.log_bucket.id
+
+  rule {
+    id     = "log_bucket_lifecycle_configuration"
+    status = "Enabled"
+
+    noncurrent_version_transition {
+      newer_noncurrent_versions = null
+      noncurrent_days           = 30
+      storage_class             = "STANDARD_IA"
+    }
+
+    noncurrent_version_transition {
+      newer_noncurrent_versions = null
+      noncurrent_days           = 60
+      storage_class             = "GLACIER"
+    }
+
+    noncurrent_version_expiration {
+      noncurrent_days = 90
+    }
+  }
+
+  depends_on = [aws_s3_bucket_versioning.log_bucket]
 }
 
 # Visit (https://run-x.atlassian.net/browse/RUNX-1125) for further reference
