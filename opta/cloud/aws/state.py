@@ -117,8 +117,10 @@ class S3Store(StateStore):
         if region != "us-east-1":
             # S3 API doesn't allow specifying us-east-1 as a location constraint, so we need to handle this
             # special case. When the constraint is not given, the bucket is created in us-east-1
-            location = cast(BucketLocationConstraintType, region)
-            create_kwargs["CreateBucketConfiguration"] = {"LocationConstraint": location}
+            if TYPE_CHECKING:
+                region = cast(BucketLocationConstraintType, region)
+
+            create_kwargs["CreateBucketConfiguration"] = {"LocationConstraint": region}
 
         s3.create_bucket(Bucket=bucket_name, **create_kwargs)
 
@@ -218,7 +220,7 @@ class S3Store(StateStore):
     def _region(self) -> str:
         region = self.config.region
         if region is None:  # Checked by _validate_config
-            raise ValueError("Unexpected region=None")
+            raise AssertionError("Unexpected region=None")
 
         return region
 

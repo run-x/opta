@@ -21,7 +21,7 @@ def cloud_provider_for_layer(layer: Layer) -> CloudProvider:
         # If cloud_id is not None, config is also not None,
         # but mypy isn't able to detect that situation,
         # so we have to validate it ourselves
-        raise RuntimeError("unexpected config is None")
+        raise AssertionError("unexpected config is None")
 
     return default_registry.get_provider(cloud_id, config)
 
