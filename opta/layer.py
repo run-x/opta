@@ -36,8 +36,14 @@ from opta.exceptions import UserErrors
 from opta.input_variable import InputVariable
 from opta.module import Module
 from opta.plugins.derived_providers import DerivedProviders
-from opta.stubs import from_dict
-from opta.utils import check_opta_file_exists, deep_merge, hydrate, logger, yaml
+from opta.utils import (
+    check_opta_file_exists,
+    deep_merge,
+    hydrate,
+    logger,
+    multi_from_dict,
+    yaml,
+)
 from opta.utils.dependencies import ensure_installed, validate_installed_path_executables
 
 PROCESSOR_DICT: Dict[str, str] = {
@@ -271,7 +277,7 @@ class Layer:
     ) -> Layer:
         input_variables = input_variables or {}
         # Handle input variables
-        expected_input_variables = from_dict(InputVariable, conf, "input_variables")
+        expected_input_variables = multi_from_dict(InputVariable, conf, "input_variables")
         current_variables = InputVariable.render_dict(
             expected_input_variables, input_variables
         )

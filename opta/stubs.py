@@ -6,7 +6,7 @@ Quick "stub" classes that are added to provided needed functionality but will ne
 
 from __future__ import annotations
 
-from typing import Dict, List, Optional, Protocol, Set, Tuple, Type, TypeVar, Union
+from typing import Dict, Optional, Set, Tuple, Type, TypeVar, Union
 
 from opta.cloud.aws.config import AWSProviderConfig
 from opta.cloud.provider import ProviderConfig
@@ -24,19 +24,6 @@ class _Stub:
         stub._raw = raw
 
         return stub
-
-
-T_FromDict = TypeVar("T_FromDict", bound="FromDict")
-
-
-class FromDict(Protocol):
-    @classmethod
-    def from_dict(cls: Type[T_FromDict], raw: dict) -> T_FromDict:
-        ...
-
-
-def from_dict(cls: Type[T_FromDict], data: dict, key: str) -> List[T_FromDict]:
-    return [cls.from_dict(raw) for raw in data.get(key, [])]
 
 
 class Environment(_Stub):
