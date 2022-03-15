@@ -6,7 +6,7 @@ resource "helm_release" "cert_manager" {
   create_namespace = true
   atomic           = true
   cleanup_on_fail  = true
-  version          = "1.3.1"
+  version          = "1.7.1"
   values = [
     yamlencode({
       installCRDs : true
