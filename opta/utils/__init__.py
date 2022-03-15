@@ -25,11 +25,11 @@ class SensitiveFormatter(Formatter):
     regex_and_replacements: List[Tuple[str, str]] = [
         (
             r"([\"\: \'\n])[0-9]{12}([\"\: \'\n])",
-            "\g<1>REDACTED\g<2>",  # noqa: W605
+            r"\g<1>REDACTED\g<2>",
         ),  # An AWS Account ID is always exactly 12 digits
         (
             r"([\"\: \'\n]?)project([\"\: \'\n]?): ([\"\: \'\n]?)[a-zA-Z0-9_\-]+([\"\: \'\n]?)",
-            "\g<1>project\g<2>: \g<3>REDACTED\g<4>",  # noqa: W605
+            r"\g<1>project\g<2>: \g<3>REDACTED\g<4>",
         ),
         (r"projects/[a-zA-Z0-9_\-]+/", "projects/REDACTED/"),
         (
