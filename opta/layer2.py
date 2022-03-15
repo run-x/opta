@@ -6,14 +6,14 @@ from typing import List, Optional
 
 from opta.input_variable import InputVariable
 from opta.module2 import Module
-from opta.stubs import Environment, ProviderConfig, from_dict
+from opta.stubs import Environment, LayerProviderConfig, from_dict
 
 
 class Layer:
     name: str
     org_name: Optional[str]
     modules: List[Module]
-    providers: ProviderConfig
+    providers: LayerProviderConfig
     environments: List[Environment]
     input_variables: List[InputVariable]
 
@@ -21,7 +21,7 @@ class Layer:
         self.name = name
         self.org_name = None
         self.modules = []
-        self.providers = ProviderConfig()
+        self.providers = LayerProviderConfig()
         self.environments = []
         self.input_variables = []
 
@@ -36,7 +36,7 @@ class Layer:
         layer.modules = from_dict(Module, raw, "modules")
         layer.input_variables = from_dict(InputVariable, raw, "input_variables")
         layer.environments = from_dict(Environment, raw, "environments")
-        layer.providers = ProviderConfig.from_dict(raw.get("providers", {}))
+        layer.providers = LayerProviderConfig.from_dict(raw.get("providers", {}))
 
         return layer
 

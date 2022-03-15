@@ -6,9 +6,10 @@ Quick "stub" classes that are added to provided needed functionality but will ne
 
 from __future__ import annotations
 
-from typing import Dict, List, Optional, Protocol, Set, Type, TypeVar
+from typing import Dict, List, Optional, Protocol, Set, Tuple, Type, TypeVar, Union
 
-from opta.exceptions import UserErrors
+from opta.cloud.aws.config import AWSProviderConfig
+from opta.cloud.provider import ProviderConfig
 
 T = TypeVar("T", bound="_Stub")
 
@@ -42,35 +43,7 @@ class Environment(_Stub):
     pass
 
 
-class Provider(_Stub):
-    pass
-
-
-class AWSProviderConfig(Provider):
-    def __init__(self, region: str) -> None:
-        self.region = region
-        self.account_ids: Optional[List[str]] = None
-
-    @classmethod
-    def from_dict(cls, raw: dict) -> AWSProviderConfig:
-
-        try:
-            region = raw["region"]
-        except KeyError:
-            raise UserErrors("AWS region must be provided when using the AWS provider")
-
-        p = cls(region)
-
-        account_ids = raw.get("account_id")
-        if isinstance(account_ids, list):
-            p.account_ids = [str(id) for id in account_ids]
-        elif account_ids:
-            p.account_ids = [str(account_ids)]
-
-        return p
-
-
-class ProviderConfig:
+class LayerProviderConfig:
     def __init__(self) -> None:
         self.aws: Optional[AWSProviderConfig] = None
 
@@ -86,8 +59,20 @@ class ProviderConfig:
 
         return next(iter(configured_providers))
 
+    @property
+    def cloud_id_and_config(self) -> Union[Tuple[None, None], Tuple[str, ProviderConfig]]:
+        providers = self._configured_providers
+
+        if not providers:
+            return None, None
+
+        cloud_id = next(iter(providers))
+        config = getattr(self, cloud_id)
+
+        return cloud_id, config
+
     @classmethod
-    def from_dict(cls, raw: dict) -> ProviderConfig:
+    def from_dict(cls, raw: dict) -> LayerProviderConfig:
         type_mapping = cls._cloud_type_mapping()
 
         providers = cls()
@@ -112,7 +97,7 @@ class ProviderConfig:
         return {id for id in self._cloud_type_mapping() if getattr(self, id) is not None}
 
     @classmethod
-    def _cloud_type_mapping(cls) -> Dict[str, Type[Provider]]:
+    def _cloud_type_mapping(cls) -> Dict[str, Type[ProviderConfig]]:
         # TODO: In 3.9+, this method can be a @property (https://docs.python.org/3.9/library/functions.html#classmethod)
         return {
             "aws": AWSProviderConfig,

@@ -1,11 +1,13 @@
 # new-module-api
 
+from __future__ import annotations
+
 from typing import Any, Dict
 
+from opta.cloud.provider import CloudProvider
 from opta.core.terraform2 import TerraformFile
-from opta.stubs import AWSProviderConfig
 
-from ..provider import CloudProvider
+from .config import AWSProviderConfig
 
 
 class AWSProvider(CloudProvider):
