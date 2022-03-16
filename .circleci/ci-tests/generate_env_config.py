@@ -2,7 +2,9 @@ import os
 import sys
 
 
-def create_config_from_template(provider, directory, template_file, output_file):
+def create_config_from_template(
+    provider, directory, template_file, output_file, is_tg=False
+):
     template_file = os.path.join(ABSOLUTE_FILE_PATH, directory, template_file)
     output_file = os.path.join(ABSOLUTE_FILE_PATH, directory, output_file)
     with open(template_file, "r") as f:
@@ -10,9 +12,12 @@ def create_config_from_template(provider, directory, template_file, output_file)
 
     if provider == "AWS":
         template = template.replace("AWS_REGION", AWS_REGION)
-        template = template.replace("ENV_NAME", ENV_NAME)
     elif provider == "GCP":
         template = template.replace("GCP_REGION", GCP_REGION)
+
+    if is_tg:
+        template = template.replace("ENV_NAME", f"{ENV_NAME}-tg")
+    else:
         template = template.replace("ENV_NAME", ENV_NAME)
 
     with open(output_file, "w") as f:
@@ -66,4 +71,18 @@ create_config_from_template(
 )
 create_config_from_template(
     "GCP", "todo-list", "template-provider-gcp.yml", "provider-gcp.yml"
+)
+create_config_from_template(
+    "AWS",
+    "terraform-generated-aws",
+    "template-environment.yaml",
+    "environment.yaml",
+    is_tg=True,
+)
+create_config_from_template(
+    "GCP",
+    "terraform-generated-gcp",
+    "template-environment.yaml",
+    "environment.yaml",
+    is_tg=True,
 )

@@ -388,6 +388,11 @@ jobs:
     executor: ubuntu-machine
     steps:
       - checkout-opta
+      - install-python
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
@@ -610,6 +615,7 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -641,6 +647,7 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -664,6 +671,7 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -690,6 +698,7 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -713,6 +722,7 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -893,6 +903,7 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -965,6 +976,7 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -995,6 +1007,7 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1030,6 +1043,7 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1065,6 +1079,7 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1100,13 +1115,13 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
             - remake-environment-configs
       - attach_workspace:
           at: ./
-      - install-python
       - install-python-dependencies
       - install-opta-dependencies
       - aws-cli/install
@@ -1200,6 +1215,7 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1252,6 +1268,7 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1289,6 +1306,7 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1311,6 +1329,7 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1333,6 +1352,7 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1355,6 +1375,7 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1375,6 +1396,11 @@ jobs:
     executor: ubuntu-machine
     steps:
       - checkout-opta
+      - install-python
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-python
@@ -1547,13 +1573,13 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
             - remake-environment-configs
       - attach_workspace:
           at: ./
-      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -1582,13 +1608,13 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
             - remake-environment-configs
       - attach_workspace:
           at: ~/
-      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -1609,13 +1635,13 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
             - remake-environment-configs
       - attach_workspace:
           at: ./
-      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -1687,13 +1713,13 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
             - remake-environment-configs
       - attach_workspace:
           at: ./
-      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -1724,13 +1750,13 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
             - remake-environment-configs
       - attach_workspace:
           at: ./
-      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -1763,13 +1789,13 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
             - remake-environment-configs
       - attach_workspace:
           at: ./
-      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -1802,13 +1828,13 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
             - remake-environment-configs
       - attach_workspace:
           at: ./
-      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -1905,6 +1931,7 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1913,7 +1940,6 @@ jobs:
           at: ~/
       - attach_workspace:
           at: ./
-      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -1980,13 +2006,13 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
             - remake-environment-configs
       - attach_workspace:
           at: ./
-      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -2006,13 +2032,13 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
             - remake-environment-configs
       - attach_workspace:
           at: ./
-      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -2062,13 +2088,13 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
             - remake-environment-configs
       - attach_workspace:
           at: ./
-      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -2103,6 +2129,7 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -2151,6 +2178,7 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
