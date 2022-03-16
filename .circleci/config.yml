@@ -314,11 +314,12 @@ jobs:
             $HOME/.opta/opta version
 
   build-opta-binary:
-    executor: python-docker
+    executor: ubuntu-machine
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - install-python-dependencies
       - run:
           name: "Build opta binary"
