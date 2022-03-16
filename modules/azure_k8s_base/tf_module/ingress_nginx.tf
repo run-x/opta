@@ -25,6 +25,8 @@ resource "azurerm_network_security_rule" "allow_http_to_lb" {
   direction                   = "Inbound"
   access                      = "Allow"
   protocol                    = "Tcp"
+  # ignore since clients from internet connect to LB
+  #tfsec:ignore:azure-network-no-public-ingress
   source_address_prefix       = "*"
   source_port_range           = "*"
   destination_port_range      = "80"
@@ -39,6 +41,8 @@ resource "azurerm_network_security_rule" "allow_https_to_lb" {
   direction                   = "Inbound"
   access                      = "Allow"
   protocol                    = "Tcp"
+  # ignore since clients from internet connect to LB
+  #tfsec:ignore:azure-network-no-public-ingress
   source_address_prefix       = "*"
   source_port_range           = "*"
   destination_port_range      = "443"
