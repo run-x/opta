@@ -314,12 +314,11 @@ jobs:
             $HOME/.opta/opta version
 
   build-opta-binary:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
-      - install-python
       - install-python-dependencies
       - run:
           name: "Build opta binary"
@@ -385,10 +384,9 @@ jobs:
             - todo-frontend
 
   aws-generate-terraform-language-files:
-    executor: ubuntu-machine
+    executor: python-docker
     steps:
       - checkout-opta
-      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -424,19 +422,19 @@ jobs:
           command: |
             cd $HOME/generated-tf-files-aws
             terraform init
-            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base
-            terraform apply -compact-warnings -auto-approve tf.plan
-            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8scluster
-            terraform apply -compact-warnings -auto-approve tf.plan
-            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8sbase
-            terraform apply -compact-warnings -auto-approve tf.plan
+            terraform refresh
+      #       terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base
+      #       terraform apply -compact-warnings -auto-approve tf.plan
+      #       terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8scluster
+      #       terraform apply -compact-warnings -auto-approve tf.plan
+      #       terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8sbase
+      #       terraform apply -compact-warnings -auto-approve tf.plan
       - persist_to_workspace:
           root: ~/
           paths:
-            - generated-tf-files-aws/tfstate/awsenv-tg.tfstate
+            - generated-tf-files-aws
       - store_artifacts:
-          path: ../generated-tf-files-aws/tfstate/awsenv-tg.tfstate
-          destination: tfstate-after-apply-env.tfstate
+          path: ../generated-tf-files-aws/tfstate
 
 
   aws-tg-test-service-http:
@@ -450,38 +448,38 @@ jobs:
           command: |
             cd $HOME/generated-tf-files-aws
             terraform init
-            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello
-            terraform apply -compact-warnings -auto-approve tf.plan
-      - run:
-          name: "Sleep 120 seconds"
-          command: |
-            sleep 120
-      - run:
-          name: "Get Output and Test Load Balancer"
-          command: |
-            cd $HOME/generated-tf-files-aws
-            terraform output -json >> terraform_output.json
-            export LOAD_BALANCER=`cat terraform_output.json | jq -r '.load_balancer_raw_dns' |jq -r '.value'`
-            echo $LOAD_BALANCER
-            curl "$LOAD_BALANCER/hello"
-            echo "1"
-      - run:
-          name: "Sleep 120 seconds"
-          command: |
-            sleep 120
-      - run:
-          name: "Destroy Terraform Generated Hello Opta Service"
-          command: |
-            cd $HOME/generated-tf-files-aws
-            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello -destroy
-            terraform apply -compact-warnings -auto-approve tf.plan
+            terraform refresh
+      #       terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello
+      #       terraform apply -compact-warnings -auto-approve tf.plan
+      # - run:
+      #     name: "Sleep 120 seconds"
+      #     command: |
+      #       sleep 120
+      # - run:
+      #     name: "Get Output and Test Load Balancer"
+      #     command: |
+      #       cd $HOME/generated-tf-files-aws
+      #       terraform output -json >> terraform_output.json
+      #       export LOAD_BALANCER=`cat terraform_output.json | jq -r '.load_balancer_raw_dns' |jq -r '.value'`
+      #       echo $LOAD_BALANCER
+      #       curl "$LOAD_BALANCER/hello"
+      #       echo "1"
+      # - run:
+      #     name: "Sleep 120 seconds"
+      #     command: |
+      #       sleep 120
+      # - run:
+      #     name: "Destroy Terraform Generated Hello Opta Service"
+      #     command: |
+      #       cd $HOME/generated-tf-files-aws
+      #       terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello -destroy
+      #       terraform apply -compact-warnings -auto-approve tf.plan
       - persist_to_workspace:
           root: ~/
           paths:
-            - generated-tf-files-aws/tfstate/awsenv-tg.tfstate
+            - generated-tf-files-aws
       - store_artifacts:
-          path: ../generated-tf-files-aws/tfstate/awsenv-tg.tfstate
-          destination: tfstate-after-apply-hello-cnd.tfstate
+          path: ../generated-tf-files-aws/tfstate
 
   aws-tg-test-other-modules-plan:
     executor: ubuntu-machine
@@ -492,28 +490,28 @@ jobs:
           at: ~/
       - attach_workspace:
           at: ./
-      - opta-module-with-terraform-generate:
-          module: "bucket"
-      - opta-module-with-terraform-generate:
-          module: "docdb"
-      - opta-module-with-terraform-generate:
-          module: "helmchart"
-      - opta-module-with-terraform-generate:
-          module: "mysql"
-      - opta-module-with-terraform-generate:
-          module: "redis"
-      - opta-module-with-terraform-generate:
-          module: "pg"
-      - opta-module-with-terraform-generate:
-          module: "awsiamrole"
-      - opta-module-with-terraform-generate:
-          module: "awsiamuser"
-      - opta-module-with-terraform-generate:
-          module: "sns"
-      - opta-module-with-terraform-generate:
-          module: "sqs"
-      - opta-module-with-terraform-generate:
-          module: "dynamodb"
+      # - opta-module-with-terraform-generate:
+      #     module: "bucket"
+      # - opta-module-with-terraform-generate:
+      #     module: "docdb"
+      # - opta-module-with-terraform-generate:
+      #     module: "helmchart"
+      # - opta-module-with-terraform-generate:
+      #     module: "mysql"
+      # - opta-module-with-terraform-generate:
+      #     module: "redis"
+      # - opta-module-with-terraform-generate:
+      #     module: "pg"
+      # - opta-module-with-terraform-generate:
+      #     module: "awsiamrole"
+      # - opta-module-with-terraform-generate:
+      #     module: "awsiamuser"
+      # - opta-module-with-terraform-generate:
+      #     module: "sns"
+      # - opta-module-with-terraform-generate:
+      #     module: "sqs"
+      # - opta-module-with-terraform-generate:
+      #     module: "dynamodb"
 
 # Note:
 # Added terraform refresh and terraform state rm before planning destroy 
@@ -530,19 +528,18 @@ jobs:
             cd $HOME/generated-tf-files-aws
             terraform init
             terraform refresh
-            terraform state rm module.base.aws_ebs_default_kms_key.default
-            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base -target=module.k8scluster -target=module.k8sbase -destroy
-            terraform apply -compact-warnings -auto-approve tf.plan
+      #       terraform state rm module.base.aws_ebs_default_kms_key.default
+      #       terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base -target=module.k8scluster -target=module.k8sbase -destroy
+      #       terraform apply -compact-warnings -auto-approve tf.plan
       - store_artifacts:
-          path: ../generated-tf-files-aws/tfstate/awsenv-tg.tfstate
-          destination: tfstate-after-destroy.tfstate
+          path: ../generated-tf-files-aws/tfstate
       - persist_to_workspace:
           root: ~/
           paths:
-            - generated-tf-files-aws/tfstate/awsenv-tg.tfstate
+            - generated-tf-files-aws
 
   azure-create-env:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
@@ -563,7 +560,7 @@ jobs:
             --refresh
 
   azure-test-service-http:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
@@ -590,7 +587,7 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   azure-destroy-env:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
@@ -610,12 +607,11 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-create-env:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
-      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -642,12 +638,11 @@ jobs:
             --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
 
   aws-create-env-dns-false:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
-      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -666,12 +661,11 @@ jobs:
             --refresh
 
   aws-create-env-set-ns:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
-      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -693,12 +687,11 @@ jobs:
           command: curl --fail http://testing.optaci.com || if [[ $? -eq 22 ]]; then true; else exit $?; fi
 
   aws-create-env-dns-true:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
-      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -717,12 +710,11 @@ jobs:
             --refresh
 
   aws-create-env-stable-version:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
-      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -898,12 +890,11 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-test-additional-nodegroup:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
-      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -971,12 +962,11 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-test-service-helm:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
-      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1002,12 +992,11 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-test-service-s3:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
-      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1038,12 +1027,11 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-test-service-redis:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
-      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1074,12 +1062,11 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-test-service-docdb:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
-      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1110,12 +1097,11 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-test-service-pg:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
-      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1210,12 +1196,11 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-opta-example-create-svcs:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
-      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1263,12 +1248,11 @@ jobs:
             curl $HOST_NAME/grafana --fail
 
   aws-opta-example-destroy-svcs:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
-      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1301,12 +1285,11 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-destroy-env:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
-      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1324,12 +1307,11 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-destroy-env-dns-false:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
-      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1347,12 +1329,11 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-destroy-env-dns-true:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
-      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1370,12 +1351,11 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-destroy-env-stable-version:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
-      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1393,17 +1373,15 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   gcp-generate-terraform-language-files:
-    executor: ubuntu-machine
+    executor: python-docker
     steps:
       - checkout-opta
-      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
             - remake-environment-configs
       - attach_workspace:
           at: ./
-      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -1428,9 +1406,8 @@ jobs:
             - generated-tf-files-gcp
 
   gcp-tg-create-env:
-    executor: ubuntu-machine
+    executor: python-docker
     steps:
-      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -1444,25 +1421,24 @@ jobs:
           command: |
             cd $HOME/generated-tf-files-gcp
             terraform init
-            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base
-            terraform apply -compact-warnings -auto-approve tf.plan
-            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8scluster
-            terraform apply -compact-warnings -auto-approve tf.plan
-            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8sbase
-            terraform apply -compact-warnings -auto-approve tf.plan
+            terraform refresh
+      #       terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base
+      #       terraform apply -compact-warnings -auto-approve tf.plan
+      #       terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8scluster
+      #       terraform apply -compact-warnings -auto-approve tf.plan
+      #       terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8sbase
+      #       terraform apply -compact-warnings -auto-approve tf.plan
       - persist_to_workspace:
           root: ~/
           paths:
-            - generated-tf-files-gcp/tfstate/gcpenv-tg.tfstate
+            - generated-tf-files-gcp
       - store_artifacts:
-          path: ../generated-tf-files-gcp/tfstate/gcpenv-tg.tfstate
-          destination: tfstate-after-apply-env.tfstate
+          path: ../generated-tf-files-gcp/tfstate
 
 
   gcp-tg-test-service-http:
-    executor: ubuntu-machine
+    executor: python-docker
     steps:
-      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -1476,44 +1452,43 @@ jobs:
           command: |
             cd $HOME/generated-tf-files-gcp
             terraform init
-            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello
-            terraform apply -compact-warnings -auto-approve tf.plan
-      - run:
-          name: "Sleep 120 seconds"
-          command: |
-            sleep 120
-      - run:
-          name: "Get Output and Test Load Balancer"
-          command: |
-            cd $HOME/generated-tf-files-gcp
-            terraform output -json >> terraform_output.json
-            export LOAD_BALANCER=`cat terraform_output.json | jq -r '.load_balancer_raw_ip' |jq -r '.value'`
-            echo $LOAD_BALANCER
-            curl "$LOAD_BALANCER/hello"
-            echo "1"
-      - run:
-          name: "Sleep 120 seconds"
-          command: |
-            sleep 120
-      - run:
-          name: "Destroy Terraform Generated Hello Opta Service"
-          command: |
-            cd $HOME/generated-tf-files-gcp
-            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello -destroy
-            terraform apply -compact-warnings -auto-approve tf.plan
+            terraform refresh
+      #       terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello
+      #       terraform apply -compact-warnings -auto-approve tf.plan
+      # - run:
+      #     name: "Sleep 120 seconds"
+      #     command: |
+      #       sleep 120
+      # - run:
+      #     name: "Get Output and Test Load Balancer"
+      #     command: |
+      #       cd $HOME/generated-tf-files-gcp
+      #       terraform output -json >> terraform_output.json
+      #       export LOAD_BALANCER=`cat terraform_output.json | jq -r '.load_balancer_raw_ip' |jq -r '.value'`
+      #       echo $LOAD_BALANCER
+      #       curl "$LOAD_BALANCER/hello"
+      #       echo "1"
+      # - run:
+      #     name: "Sleep 120 seconds"
+      #     command: |
+      #       sleep 120
+      # - run:
+      #     name: "Destroy Terraform Generated Hello Opta Service"
+      #     command: |
+      #       cd $HOME/generated-tf-files-gcp
+      #       terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello -destroy
+      #       terraform apply -compact-warnings -auto-approve tf.plan
       - persist_to_workspace:
           root: ~/
           paths:
-            - generated-tf-files-gcp/tfstate/gcpenv-tg.tfstate
+            - generated-tf-files-gcp
       - store_artifacts:
-          path: ../generated-tf-files-gcp/tfstate/gcpenv-tg.tfstate
-          destination: tfstate-after-apply-hello-cnd.tfstate
+          path: ../generated-tf-files-gcp/tfstate
 
   gcp-tg-test-other-modules-plan:
-    executor: ubuntu-machine
+    executor: python-docker
     steps:
       - checkout-opta
-      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -1524,26 +1499,25 @@ jobs:
           at: ~/
       - attach_workspace:
           at: ./
-      - opta-module-with-terraform-generate:
-          module: "gcs"
-          provider: "gcp"
-      - opta-module-with-terraform-generate:
-          module: "mysql"
-          provider: "gcp"
-      - opta-module-with-terraform-generate:
-          module: "pg"
-          provider: "gcp"
-      - opta-module-with-terraform-generate:
-          module: "redis"
-          provider: "gcp"
-      - opta-module-with-terraform-generate:
-          module: "serviceaccount"
-          provider: "gcp"
+      # - opta-module-with-terraform-generate:
+      #     module: "gcs"
+      #     provider: "gcp"
+      # - opta-module-with-terraform-generate:
+      #     module: "mysql"
+      #     provider: "gcp"
+      # - opta-module-with-terraform-generate:
+      #     module: "pg"
+      #     provider: "gcp"
+      # - opta-module-with-terraform-generate:
+      #     module: "redis"
+      #     provider: "gcp"
+      # - opta-module-with-terraform-generate:
+      #     module: "serviceaccount"
+      #     provider: "gcp"
 
   gcp-tg-destroy-env:
-    executor: ubuntu-machine
+    executor: python-docker
     steps:
-      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -1557,23 +1531,22 @@ jobs:
           command: |
             cd $HOME/generated-tf-files-gcp
             terraform init
-            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base -target=module.k8scluster -target=module.k8sbase -destroy
-            terraform apply -compact-warnings -auto-approve tf.plan
+            terraform refresh
+      #       terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base -target=module.k8scluster -target=module.k8sbase -destroy
+      #       terraform apply -compact-warnings -auto-approve tf.plan
       - store_artifacts:
-          path: ../generated-tf-files-gcp/tfstate/gcpenv-tg.tfstate
-          destination: tfstate-after-destroy.tfstate
+          path: ../generated-tf-files-gcp/tfstate
       - persist_to_workspace:
           root: ~/
           paths:
-            - generated-tf-files-gcp/tfstate/gcpenv-tg.tfstate
+            - generated-tf-files-gcp
 
   gcp-create-env:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
-      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1603,12 +1576,11 @@ jobs:
             --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml
 
   gcp-create-env-stable-version:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
-      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1630,12 +1602,11 @@ jobs:
             --refresh || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   gcp-test-additional-nodegroup:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
-      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1708,12 +1679,11 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   gcp-test-service-helm:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
-      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1745,12 +1715,11 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   gcp-test-service-redis:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
-      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1784,12 +1753,11 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   gcp-test-service-gcs:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
-      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1823,12 +1791,11 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   gcp-test-service-pg:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
-      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1926,12 +1893,11 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   gcp-test-service-pg-latest-version:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
-      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -2001,12 +1967,11 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   gcp-destroy-env:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
-      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -2027,12 +1992,11 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   gcp-opta-example-create-svcs:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
-      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -2083,12 +2047,11 @@ jobs:
             curl $HOST_NAME/grafana --fail
 
   gcp-opta-example-destroy-svcs:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
-      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -2124,12 +2087,11 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   local-opta-example-create-svcs:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
-      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -2173,12 +2135,11 @@ jobs:
             curl http://localhost:8080/grafana --fail
 
   local-opta-example-destroy-svcs:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
-      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:

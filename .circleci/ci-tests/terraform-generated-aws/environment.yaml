@@ -1,4 +1,4 @@
-name: awsenv-tg
+name: awsenv-ci-tg
 org_name: runx
 providers:
   aws:
