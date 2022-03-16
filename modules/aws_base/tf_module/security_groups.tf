@@ -25,7 +25,7 @@ resource "aws_security_group" "elasticache" {
   description = "For usage by elasticache to give access to resources in the vpc"
   vpc_id      = local.vpc_id
 
-# https://docs.aws.amazon.com/AmazonElastiCache/latest/mem-ug/elasticache-vpc-accessing.html
+  # https://docs.aws.amazon.com/AmazonElastiCache/latest/mem-ug/elasticache-vpc-accessing.html
   ingress {
     description = "redis"
     from_port   = 6379
