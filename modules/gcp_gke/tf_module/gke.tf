@@ -1,6 +1,8 @@
 # PSP is deprecated in Kubernetes, no point adding it.
+# google gke legacy metadata endpoints  are disabled in the node group (see default_node_group.tf)
 #tfsec:ignore:google-gke-enforce-pod-security-policy
 #tfsec:ignore:google-gke-enable-master-networks
+#tfsec:ignore:google-gke-metadata-endpoints-disabled
 resource "google_container_cluster" "primary" {
   name           = var.cluster_name
   location       = data.google_client_config.current.region
@@ -37,6 +39,10 @@ resource "google_container_cluster" "primary" {
 
   master_auth {
     client_certificate_config {
+      # tfsec recomments using oauth or SA, we ignore this since opta currently
+      # uses client certificate for auth. 
+      # https://aquasecurity.github.io/tfsec/v1.8.0/checks/google/gke/no-legacy-authentication/
+      #tfsec:ignore:google-gke-no-legacy-authentication
       issue_client_certificate = true
     }
   }
