@@ -9,7 +9,7 @@ resource "azurerm_storage_account" "infra_logging" {
   account_replication_type  = "LRS"
   account_tier              = "Standard"
   enable_https_traffic_only = true
-  min_tls_version          = "TLS1_2"
+  min_tls_version           = "TLS1_2"
   network_rules {
     default_action = "Deny"
     bypass         = ["AzureServices"]

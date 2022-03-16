@@ -30,8 +30,8 @@ resource "azurerm_network_security_rule" "allowoutbound" {
   source_port_range           = "*"
   # ignore since outbound is ok - e.g. connecting to 3rd party saas services
   #tfsec:ignore:azure-network-no-public-egress
-  destination_address_prefix  = "0.0.0.0/0"
-  destination_port_range      = "*"
+  destination_address_prefix = "0.0.0.0/0"
+  destination_port_range     = "*"
 }
 
 resource "azurerm_subnet_network_security_group_association" "opta" {

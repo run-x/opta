@@ -27,10 +27,10 @@ resource "azurerm_network_security_rule" "allow_http_to_lb" {
   protocol                    = "Tcp"
   # ignore since clients from internet connect to LB
   #tfsec:ignore:azure-network-no-public-ingress
-  source_address_prefix       = "*"
-  source_port_range           = "*"
-  destination_port_range      = "80"
-  destination_address_prefix  = azurerm_public_ip.opta.ip_address
+  source_address_prefix      = "*"
+  source_port_range          = "*"
+  destination_port_range     = "80"
+  destination_address_prefix = azurerm_public_ip.opta.ip_address
 }
 
 resource "azurerm_network_security_rule" "allow_https_to_lb" {
@@ -43,10 +43,10 @@ resource "azurerm_network_security_rule" "allow_https_to_lb" {
   protocol                    = "Tcp"
   # ignore since clients from internet connect to LB
   #tfsec:ignore:azure-network-no-public-ingress
-  source_address_prefix       = "*"
-  source_port_range           = "*"
-  destination_port_range      = "443"
-  destination_address_prefix  = azurerm_public_ip.opta.ip_address
+  source_address_prefix      = "*"
+  source_port_range          = "*"
+  destination_port_range     = "443"
+  destination_address_prefix = azurerm_public_ip.opta.ip_address
 }
 
 

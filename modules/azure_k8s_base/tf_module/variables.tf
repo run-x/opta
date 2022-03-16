@@ -42,7 +42,7 @@ variable "linkerd_high_availability" {
 }
 
 variable "private_key" {
-  type    = string
+  type = string
   # Ignore since this default value is never used, its for a logical if condition checking if user specified no private_key only.
   #tfsec:ignore:general-secrets-no-plaintext-exposure
   default = ""
