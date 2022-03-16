@@ -395,6 +395,8 @@ jobs:
       - attach_workspace:
           at: ./
       - install-opta-dependencies
+      - aws-cli/install
+      - aws-cli/setup
       - run:
           name: "Generate Terraform Language Files"
           command: |
@@ -403,10 +405,10 @@ jobs:
             --config ./.circleci/ci-tests/terraform-generated-aws/environment.yaml \
             --directory $HOME/generated-tf-files-aws \
             --auto-approve
-            ./dist/opta/opta generate-terraform \
-            --config ./.circleci/ci-tests/terraform-generated-aws/service-hello-opta.yaml \
-            --directory $HOME/generated-tf-files-aws \
-            --auto-approve
+      #       ./dist/opta/opta generate-terraform \
+      #       --config ./.circleci/ci-tests/terraform-generated-aws/service-hello-opta.yaml \
+      #       --directory $HOME/generated-tf-files-aws \
+      #       --auto-approve
       - persist_to_workspace:
           root: ~/
           paths:
@@ -993,11 +995,12 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-test-service-s3:
-    executor: python-docker
+    executor: ubuntu-machine
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1028,11 +1031,12 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-test-service-redis:
-    executor: python-docker
+    executor: ubuntu-machine
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1063,11 +1067,12 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-test-service-docdb:
-    executor: python-docker
+    executor: ubuntu-machine
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1098,11 +1103,12 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-test-service-pg:
-    executor: python-docker
+    executor: ubuntu-machine
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1197,11 +1203,12 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-opta-example-create-svcs:
-    executor: python-docker
+    executor: ubuntu-machine
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1397,10 +1404,10 @@ jobs:
             --config ./.circleci/ci-tests/terraform-generated-gcp/environment.yaml \
             --directory $HOME/generated-tf-files-gcp \
             --auto-approve
-            ./dist/opta/opta generate-terraform \
-            --config ./.circleci/ci-tests/terraform-generated-gcp/service-hello-opta.yaml \
-            --directory $HOME/generated-tf-files-gcp \
-            --auto-approve
+      #       ./dist/opta/opta generate-terraform \
+      #       --config ./.circleci/ci-tests/terraform-generated-gcp/service-hello-opta.yaml \
+      #       --directory $HOME/generated-tf-files-gcp \
+      #       --auto-approve
       - persist_to_workspace:
           root: ~/
           paths:
@@ -1680,11 +1687,12 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   gcp-test-service-helm:
-    executor: python-docker
+    executor: ubuntu-machine
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1716,11 +1724,12 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   gcp-test-service-redis:
-    executor: python-docker
+    executor: ubuntu-machine
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1754,11 +1763,12 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   gcp-test-service-gcs:
-    executor: python-docker
+    executor: ubuntu-machine
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1792,11 +1802,12 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   gcp-test-service-pg:
-    executor: python-docker
+    executor: ubuntu-machine
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1894,11 +1905,12 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   gcp-test-service-pg-latest-version:
-    executor: python-docker
+    executor: ubuntu-machine
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1993,11 +2005,12 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   gcp-opta-example-create-svcs:
-    executor: python-docker
+    executor: ubuntu-machine
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -2088,11 +2101,12 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   local-opta-example-create-svcs:
-    executor: python-docker
+    executor: ubuntu-machine
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
