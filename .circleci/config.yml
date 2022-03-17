@@ -425,7 +425,6 @@ jobs:
           command: |
             cd $HOME/generated-tf-files-aws
             terraform init
-            terraform refresh
             terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base
             terraform apply -compact-warnings -auto-approve tf.plan
             terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8scluster
@@ -1429,7 +1428,6 @@ jobs:
           command: |
             cd $HOME/generated-tf-files-gcp
             terraform init
-            terraform refresh
             terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base
             terraform apply -compact-warnings -auto-approve tf.plan
             terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8scluster
