@@ -405,10 +405,10 @@ jobs:
             --config ./.circleci/ci-tests/terraform-generated-aws/environment.yaml \
             --directory $HOME/generated-tf-files-aws \
             --auto-approve
-      #       ./dist/opta/opta generate-terraform \
-      #       --config ./.circleci/ci-tests/terraform-generated-aws/service-hello-opta.yaml \
-      #       --directory $HOME/generated-tf-files-aws \
-      #       --auto-approve
+            ./dist/opta/opta generate-terraform \
+            --config ./.circleci/ci-tests/terraform-generated-aws/service-hello-opta.yaml \
+            --directory $HOME/generated-tf-files-aws \
+            --auto-approve
       - persist_to_workspace:
           root: ~/
           paths:
@@ -426,18 +426,18 @@ jobs:
             cd $HOME/generated-tf-files-aws
             terraform init
             terraform refresh
-      #       terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base
-      #       terraform apply -compact-warnings -auto-approve tf.plan
-      #       terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8scluster
-      #       terraform apply -compact-warnings -auto-approve tf.plan
-      #       terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8sbase
-      #       terraform apply -compact-warnings -auto-approve tf.plan
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base
+            terraform apply -compact-warnings -auto-approve tf.plan
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8scluster
+            terraform apply -compact-warnings -auto-approve tf.plan
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8sbase
+            terraform apply -compact-warnings -auto-approve tf.plan
       - persist_to_workspace:
           root: ~/
           paths:
             - generated-tf-files-aws
       - store_artifacts:
-          path: ~/generated-tf-files-aws/tfstate
+          path: ~/generated-tf-files-aws
 
 
   aws-tg-test-service-http:
@@ -452,37 +452,37 @@ jobs:
             cd $HOME/generated-tf-files-aws
             terraform init
             terraform refresh
-      #       terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello
-      #       terraform apply -compact-warnings -auto-approve tf.plan
-      # - run:
-      #     name: "Sleep 120 seconds"
-      #     command: |
-      #       sleep 120
-      # - run:
-      #     name: "Get Output and Test Load Balancer"
-      #     command: |
-      #       cd $HOME/generated-tf-files-aws
-      #       terraform output -json >> terraform_output.json
-      #       export LOAD_BALANCER=`cat terraform_output.json | jq -r '.load_balancer_raw_dns' |jq -r '.value'`
-      #       echo $LOAD_BALANCER
-      #       curl "$LOAD_BALANCER/hello"
-      #       echo "1"
-      # - run:
-      #     name: "Sleep 120 seconds"
-      #     command: |
-      #       sleep 120
-      # - run:
-      #     name: "Destroy Terraform Generated Hello Opta Service"
-      #     command: |
-      #       cd $HOME/generated-tf-files-aws
-      #       terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello -destroy
-      #       terraform apply -compact-warnings -auto-approve tf.plan
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello
+            terraform apply -compact-warnings -auto-approve tf.plan
+      - run:
+          name: "Sleep 120 seconds"
+          command: |
+            sleep 120
+      - run:
+          name: "Get Output and Test Load Balancer"
+          command: |
+            cd $HOME/generated-tf-files-aws
+            terraform output -json >> terraform_output.json
+            export LOAD_BALANCER=`cat terraform_output.json | jq -r '.load_balancer_raw_dns' |jq -r '.value'`
+            echo $LOAD_BALANCER
+            curl "$LOAD_BALANCER/hello"
+            echo "1"
+      - run:
+          name: "Sleep 120 seconds"
+          command: |
+            sleep 120
+      - run:
+          name: "Destroy Terraform Generated Hello Opta Service"
+          command: |
+            cd $HOME/generated-tf-files-aws
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello -destroy
+            terraform apply -compact-warnings -auto-approve tf.plan
       - persist_to_workspace:
           root: ~/
           paths:
             - generated-tf-files-aws
       - store_artifacts:
-          path: ~/generated-tf-files-aws/tfstate
+          path: ~/generated-tf-files-aws
 
   aws-tg-test-other-modules-plan:
     executor: ubuntu-machine
@@ -493,28 +493,28 @@ jobs:
           at: ~/
       - attach_workspace:
           at: ./
-      # - opta-module-with-terraform-generate:
-      #     module: "bucket"
-      # - opta-module-with-terraform-generate:
-      #     module: "docdb"
-      # - opta-module-with-terraform-generate:
-      #     module: "helmchart"
-      # - opta-module-with-terraform-generate:
-      #     module: "mysql"
-      # - opta-module-with-terraform-generate:
-      #     module: "redis"
-      # - opta-module-with-terraform-generate:
-      #     module: "pg"
-      # - opta-module-with-terraform-generate:
-      #     module: "awsiamrole"
-      # - opta-module-with-terraform-generate:
-      #     module: "awsiamuser"
-      # - opta-module-with-terraform-generate:
-      #     module: "sns"
-      # - opta-module-with-terraform-generate:
-      #     module: "sqs"
-      # - opta-module-with-terraform-generate:
-      #     module: "dynamodb"
+      - opta-module-with-terraform-generate:
+          module: "bucket"
+      - opta-module-with-terraform-generate:
+          module: "docdb"
+      - opta-module-with-terraform-generate:
+          module: "helmchart"
+      - opta-module-with-terraform-generate:
+          module: "mysql"
+      - opta-module-with-terraform-generate:
+          module: "redis"
+      - opta-module-with-terraform-generate:
+          module: "pg"
+      - opta-module-with-terraform-generate:
+          module: "awsiamrole"
+      - opta-module-with-terraform-generate:
+          module: "awsiamuser"
+      - opta-module-with-terraform-generate:
+          module: "sns"
+      - opta-module-with-terraform-generate:
+          module: "sqs"
+      - opta-module-with-terraform-generate:
+          module: "dynamodb"
 
 # Note:
 # Added terraform refresh and terraform state rm before planning destroy 
@@ -531,11 +531,11 @@ jobs:
             cd $HOME/generated-tf-files-aws
             terraform init
             terraform refresh
-      #       terraform state rm module.base.aws_ebs_default_kms_key.default
-      #       terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base -target=module.k8scluster -target=module.k8sbase -destroy
-      #       terraform apply -compact-warnings -auto-approve tf.plan
+            terraform state rm module.base.aws_ebs_default_kms_key.default
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base -target=module.k8scluster -target=module.k8sbase -destroy
+            terraform apply -compact-warnings -auto-approve tf.plan
       - store_artifacts:
-          path: ~/generated-tf-files-aws/tfstate
+          path: ~/generated-tf-files-aws
       - persist_to_workspace:
           root: ~/
           paths:
@@ -1424,18 +1424,18 @@ jobs:
           command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
       - attach_workspace:
           at: ~/
-      # - run:
-      #     name: "Create Terraform Generated Environment"
-      #     command: |
-      #       cd $HOME/generated-tf-files-gcp
-      #       terraform init
-      #       terraform refresh
-      #       terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base
-      #       terraform apply -compact-warnings -auto-approve tf.plan
-      #       terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8scluster
-      #       terraform apply -compact-warnings -auto-approve tf.plan
-      #       terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8sbase
-      #       terraform apply -compact-warnings -auto-approve tf.plan
+      - run:
+          name: "Create Terraform Generated Environment"
+          command: |
+            cd $HOME/generated-tf-files-gcp
+            terraform init
+            terraform refresh
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base
+            terraform apply -compact-warnings -auto-approve tf.plan
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8scluster
+            terraform apply -compact-warnings -auto-approve tf.plan
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8sbase
+            terraform apply -compact-warnings -auto-approve tf.plan
       - persist_to_workspace:
           root: ~/
           paths:
@@ -1455,37 +1455,37 @@ jobs:
           command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
       - attach_workspace:
           at: ~/
-      # - run:
-      #     name: "Create Terraform Generated Hello Opta Service"
-      #     command: |
-      #       cd $HOME/generated-tf-files-gcp
-      #       terraform init
-      #       terraform refresh
-      #       terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello
-      #       terraform apply -compact-warnings -auto-approve tf.plan
-      # - run:
-      #     name: "Sleep 120 seconds"
-      #     command: |
-      #       sleep 120
-      # - run:
-      #     name: "Get Output and Test Load Balancer"
-      #     command: |
-      #       cd $HOME/generated-tf-files-gcp
-      #       terraform output -json >> terraform_output.json
-      #       export LOAD_BALANCER=`cat terraform_output.json | jq -r '.load_balancer_raw_ip' |jq -r '.value'`
-      #       echo $LOAD_BALANCER
-      #       curl "$LOAD_BALANCER/hello"
-      #       echo "1"
-      # - run:
-      #     name: "Sleep 120 seconds"
-      #     command: |
-      #       sleep 120
-      # - run:
-      #     name: "Destroy Terraform Generated Hello Opta Service"
-      #     command: |
-      #       cd $HOME/generated-tf-files-gcp
-      #       terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello -destroy
-      #       terraform apply -compact-warnings -auto-approve tf.plan
+      - run:
+          name: "Create Terraform Generated Hello Opta Service"
+          command: |
+            cd $HOME/generated-tf-files-gcp
+            terraform init
+            terraform refresh
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello
+            terraform apply -compact-warnings -auto-approve tf.plan
+      - run:
+          name: "Sleep 120 seconds"
+          command: |
+            sleep 120
+      - run:
+          name: "Get Output and Test Load Balancer"
+          command: |
+            cd $HOME/generated-tf-files-gcp
+            terraform output -json >> terraform_output.json
+            export LOAD_BALANCER=`cat terraform_output.json | jq -r '.load_balancer_raw_ip' |jq -r '.value'`
+            echo $LOAD_BALANCER
+            curl "$LOAD_BALANCER/hello"
+            echo "1"
+      - run:
+          name: "Sleep 120 seconds"
+          command: |
+            sleep 120
+      - run:
+          name: "Destroy Terraform Generated Hello Opta Service"
+          command: |
+            cd $HOME/generated-tf-files-gcp
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello -destroy
+            terraform apply -compact-warnings -auto-approve tf.plan
       - persist_to_workspace:
           root: ~/
           paths:
@@ -1507,21 +1507,21 @@ jobs:
           at: ~/
       - attach_workspace:
           at: ./
-      # - opta-module-with-terraform-generate:
-      #     module: "gcs"
-      #     provider: "gcp"
-      # - opta-module-with-terraform-generate:
-      #     module: "mysql"
-      #     provider: "gcp"
-      # - opta-module-with-terraform-generate:
-      #     module: "pg"
-      #     provider: "gcp"
-      # - opta-module-with-terraform-generate:
-      #     module: "redis"
-      #     provider: "gcp"
-      # - opta-module-with-terraform-generate:
-      #     module: "serviceaccount"
-      #     provider: "gcp"
+      - opta-module-with-terraform-generate:
+          module: "gcs"
+          provider: "gcp"
+      - opta-module-with-terraform-generate:
+          module: "mysql"
+          provider: "gcp"
+      - opta-module-with-terraform-generate:
+          module: "pg"
+          provider: "gcp"
+      - opta-module-with-terraform-generate:
+          module: "redis"
+          provider: "gcp"
+      - opta-module-with-terraform-generate:
+          module: "serviceaccount"
+          provider: "gcp"
 
   gcp-tg-destroy-env:
     executor: python-docker
@@ -1534,14 +1534,14 @@ jobs:
           command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
       - attach_workspace:
           at: ~/
-      # - run:
-      #     name: "Destroy Terraform Generated Environment"
-      #     command: |
-      #       cd $HOME/generated-tf-files-gcp
-      #       terraform init
-      #       terraform refresh
-      #       terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base -target=module.k8scluster -target=module.k8sbase -destroy
-      #       terraform apply -compact-warnings -auto-approve tf.plan
+      - run:
+          name: "Destroy Terraform Generated Environment"
+          command: |
+            cd $HOME/generated-tf-files-gcp
+            terraform init
+            terraform refresh
+            terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base -target=module.k8scluster -target=module.k8sbase -destroy
+            terraform apply -compact-warnings -auto-approve tf.plan
       - store_artifacts:
           path: ~/generated-tf-files-gcp
       - persist_to_workspace:
