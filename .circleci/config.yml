@@ -385,12 +385,18 @@ jobs:
             - todo-frontend
 
   aws-generate-terraform-language-files:
-    executor: ubuntu-machine
+    executor: python-docker
     steps:
       - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
       - install-opta-dependencies
+      - aws-cli/install
+      - aws-cli/setup
       - run:
           name: "Generate Terraform Language Files"
           command: |
@@ -428,10 +434,9 @@ jobs:
       - persist_to_workspace:
           root: ~/
           paths:
-            - generated-tf-files-aws/tfstate/awsenv-tg.tfstate
+            - generated-tf-files-aws
       - store_artifacts:
-          path: ../generated-tf-files-aws/tfstate/awsenv-tg.tfstate
-          destination: tfstate-after-apply-env.tfstate
+          path: ~/generated-tf-files-aws
 
 
   aws-tg-test-service-http:
@@ -445,6 +450,7 @@ jobs:
           command: |
             cd $HOME/generated-tf-files-aws
             terraform init
+            terraform refresh
             terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello
             terraform apply -compact-warnings -auto-approve tf.plan
       - run:
@@ -473,10 +479,9 @@ jobs:
       - persist_to_workspace:
           root: ~/
           paths:
-            - generated-tf-files-aws/tfstate/awsenv-tg.tfstate
+            - generated-tf-files-aws
       - store_artifacts:
-          path: ../generated-tf-files-aws/tfstate/awsenv-tg.tfstate
-          destination: tfstate-after-apply-hello-cnd.tfstate
+          path: ~/generated-tf-files-aws
 
   aws-tg-test-other-modules-plan:
     executor: ubuntu-machine
@@ -529,15 +534,14 @@ jobs:
             terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base -target=module.k8scluster -target=module.k8sbase -destroy
             terraform apply -compact-warnings -auto-approve tf.plan
       - store_artifacts:
-          path: ../generated-tf-files-aws/tfstate/awsenv-tg.tfstate
-          destination: tfstate-after-destroy.tfstate
+          path: ~/generated-tf-files-aws
       - persist_to_workspace:
           root: ~/
           paths:
-            - generated-tf-files-aws/tfstate/awsenv-tg.tfstate
+            - generated-tf-files-aws
 
   azure-create-env:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
@@ -558,7 +562,7 @@ jobs:
             --refresh
 
   azure-test-service-http:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
@@ -585,7 +589,7 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   azure-destroy-env:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
@@ -605,7 +609,7 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-create-env:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
@@ -636,7 +640,7 @@ jobs:
             --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
 
   aws-create-env-dns-false:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
@@ -659,7 +663,7 @@ jobs:
             --refresh
 
   aws-create-env-set-ns:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
@@ -685,7 +689,7 @@ jobs:
           command: curl --fail http://testing.optaci.com || if [[ $? -eq 22 ]]; then true; else exit $?; fi
 
   aws-create-env-dns-true:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
@@ -708,7 +712,7 @@ jobs:
             --refresh
 
   aws-create-env-stable-version:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
@@ -888,7 +892,7 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-test-additional-nodegroup:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
@@ -960,7 +964,7 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-test-service-helm:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
@@ -995,6 +999,7 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1030,6 +1035,7 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1065,6 +1071,7 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1100,13 +1107,13 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
             - remake-environment-configs
       - attach_workspace:
           at: ./
-      - install-python
       - install-python-dependencies
       - install-opta-dependencies
       - aws-cli/install
@@ -1200,6 +1207,7 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -1247,7 +1255,7 @@ jobs:
             curl $HOST_NAME/grafana --fail
 
   aws-opta-example-destroy-svcs:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
@@ -1284,7 +1292,7 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-destroy-env:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
@@ -1306,7 +1314,7 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-destroy-env-dns-false:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
@@ -1328,7 +1336,7 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-destroy-env-dns-true:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
@@ -1350,7 +1358,7 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-destroy-env-stable-version:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
@@ -1372,12 +1380,15 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   gcp-generate-terraform-language-files:
-    executor: ubuntu-machine
+    executor: python-docker
     steps:
       - checkout-opta
+      - when:
+          condition: << pipeline.parameters.ci-use-diff-env >>
+          steps:
+            - remake-environment-configs
       - attach_workspace:
           at: ./
-      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -1402,9 +1413,8 @@ jobs:
             - generated-tf-files-gcp
 
   gcp-tg-create-env:
-    executor: ubuntu-machine
+    executor: python-docker
     steps:
-      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -1427,16 +1437,14 @@ jobs:
       - persist_to_workspace:
           root: ~/
           paths:
-            - generated-tf-files-gcp/tfstate/gcpenv-tg.tfstate
+            - generated-tf-files-gcp
       - store_artifacts:
-          path: ../generated-tf-files-gcp/tfstate/gcpenv-tg.tfstate
-          destination: tfstate-after-apply-env.tfstate
+          path: ~/generated-tf-files-gcp
 
 
   gcp-tg-test-service-http:
-    executor: ubuntu-machine
+    executor: python-docker
     steps:
-      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -1450,6 +1458,7 @@ jobs:
           command: |
             cd $HOME/generated-tf-files-gcp
             terraform init
+            terraform refresh
             terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello
             terraform apply -compact-warnings -auto-approve tf.plan
       - run:
@@ -1478,16 +1487,14 @@ jobs:
       - persist_to_workspace:
           root: ~/
           paths:
-            - generated-tf-files-gcp/tfstate/gcpenv-tg.tfstate
+            - generated-tf-files-gcp
       - store_artifacts:
-          path: ../generated-tf-files-gcp/tfstate/gcpenv-tg.tfstate
-          destination: tfstate-after-apply-hello-cnd.tfstate
+          path: ~/generated-tf-files-gcp
 
   gcp-tg-test-other-modules-plan:
-    executor: ubuntu-machine
+    executor: python-docker
     steps:
       - checkout-opta
-      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -1515,9 +1522,8 @@ jobs:
           provider: "gcp"
 
   gcp-tg-destroy-env:
-    executor: ubuntu-machine
+    executor: python-docker
     steps:
-      - install-python
       - install-opta-dependencies
       - gcp-cli/install
       - gcp-cli/initialize
@@ -1531,18 +1537,18 @@ jobs:
           command: |
             cd $HOME/generated-tf-files-gcp
             terraform init
+            terraform refresh
             terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base -target=module.k8scluster -target=module.k8sbase -destroy
             terraform apply -compact-warnings -auto-approve tf.plan
       - store_artifacts:
-          path: ../generated-tf-files-gcp/tfstate/gcpenv-tg.tfstate
-          destination: tfstate-after-destroy.tfstate
+          path: ~/generated-tf-files-gcp
       - persist_to_workspace:
           root: ~/
           paths:
-            - generated-tf-files-gcp/tfstate/gcpenv-tg.tfstate
+            - generated-tf-files-gcp
 
   gcp-create-env:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
@@ -1577,7 +1583,7 @@ jobs:
             --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml
 
   gcp-create-env-stable-version:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
@@ -1604,7 +1610,7 @@ jobs:
             --refresh || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   gcp-test-additional-nodegroup:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
@@ -1976,7 +1982,7 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   gcp-destroy-env:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
@@ -2058,7 +2064,7 @@ jobs:
             curl $HOST_NAME/grafana --fail
 
   gcp-opta-example-destroy-svcs:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
@@ -2104,6 +2110,7 @@ jobs:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -2147,7 +2154,7 @@ jobs:
             curl http://localhost:8080/grafana --fail
 
   local-opta-example-destroy-svcs:
-    executor: ubuntu-machine
+    executor: python-docker
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
