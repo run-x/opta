@@ -8,7 +8,7 @@ from queue import Queue
 from shutil import which
 from textwrap import dedent
 from time import sleep
-from typing import Any, Dict, Generator, List, Optional, Tuple
+from typing import Any, Dict, Generator, List, Optional, Protocol, Tuple, Type, TypeVar
 
 import click
 from ruamel.yaml import YAML
@@ -290,3 +290,19 @@ def check_opta_file_exists(config_path: str, prompt: bool = True) -> str:
         config_path = prompt_config_path
 
     return config_path
+
+
+T_FromDict = TypeVar("T_FromDict", bound="FromDict")
+
+
+class FromDict(Protocol):
+    @classmethod
+    def from_dict(cls: Type[T_FromDict], raw: dict) -> T_FromDict:
+        ...
+
+
+def multi_from_dict(cls: Type[T_FromDict], data: dict, key: str) -> List[T_FromDict]:
+    """
+    Converts {"foo": [{"bar": ...}, {"bar": ...}]} into list of objects using the cls.from_dict method.
+    """
+    return [cls.from_dict(raw) for raw in data.get(key, [])]

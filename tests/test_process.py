@@ -64,11 +64,8 @@ def enable_module_api() -> Generator:
 @dataclass
 class MockedTerraform:
     apply: MagicMock
-    download_state: MagicMock
-    ensure_local_state_dir: MagicMock
     nice_run: MagicMock
     plan: MagicMock
-    upload_state: MagicMock
 
 
 @pytest.fixture(autouse=True)
@@ -78,10 +75,7 @@ def tf_mocks(mocker: MockFixture) -> Generator[MockedTerraform, None, None]:
 
     patch_targets = [
         "apply",
-        "download_state",
-        "ensure_local_state_dir",
         "plan",
-        "upload_state",
     ]
 
     patches = {
@@ -89,33 +83,53 @@ def tf_mocks(mocker: MockFixture) -> Generator[MockedTerraform, None, None]:
         for target in patch_targets
     }
 
-    # Special return values
-    patches["download_state"].return_value = False
-
     # Extra patches
     patches["nice_run"] = mocker.patch(f"{module}.nice_run", return_value=None)
 
-    mocked_copyfile = mocker.patch(f"{module}.copyfile", return_value=None)
-
     yield MockedTerraform(**patches)
-
-    mocked_copyfile.assert_not_called()
 
 
 @pytest.fixture(autouse=True)
-def temp_workdir(tmp_path: Path) -> Generator:
+def temp_workdir(tmp_path: Path) -> Generator[Path, None, None]:
     cwd = os.getcwd()
 
-    os.chdir(tmp_path)
+    workdir = tmp_path / "work"
+    os.makedirs(workdir)
 
-    yield
+    os.chdir(workdir)
+
+    yield workdir
 
     os.chdir(cwd)
 
 
+@pytest.fixture
+def local_config_dir(tmp_path: Path) -> Path:
+    config_dir = tmp_path / "config"
+    os.makedirs(config_dir)
+
+    return config_dir
+
+
+@pytest.fixture(autouse=True)
+def mock_local_state_store_dir(local_config_dir: Path, mocker: MockFixture) -> Generator:
+    mocked_storage_dir = mocker.patch(
+        "opta.cloud.local.state.LocalStore._storage_dir", new_callable=mocker.PropertyMock
+    )
+    mocked_storage_dir.return_value = local_config_dir
+
+    yield
+
+    mocked_storage_dir.assert_called()  # Make sure we are using local state
+
+
 class TestApply:
     def test_apply(
-        self, env_path: str, tf_mocks: MockedTerraform, mocker: MockFixture
+        self,
+        env_path: str,
+        local_config_dir: Path,
+        tf_mocks: MockedTerraform,
+        mocker: MockFixture,
     ) -> None:
         mocker.patch("opta.commands.apply.opta_acquire_lock")
         mocker.patch("opta.commands.apply.opta_release_lock")
@@ -125,16 +139,16 @@ class TestApply:
         mocked_write = mocker.patch("opta.process.write_tf", return_value=None)
 
         runner = CliRunner()
-        result = runner.invoke(cli, ["apply", "-c", env_path, "--auto-approve"])
+        result = runner.invoke(
+            cli, ["apply", "-c", env_path, "--auto-approve", "--local"]
+        )
 
         assert result.exit_code == 0
 
-        tf_mocks.ensure_local_state_dir.assert_called_once()
         tf_mocks.plan.assert_called_once()
         tf_mocks.apply.assert_called_once_with(
             auto_approve=True, plan="tf.plan", quiet=False
         )
-        tf_mocks.upload_state.assert_called_once()
 
         mocked_warning.assert_called_once_with(
             "Opta's module API mode is in preview and is NOT READY FOR PRODUCTION USE."
@@ -146,6 +160,9 @@ class TestApply:
         assert isinstance(mocked_write_args, TerraformFile)
 
         expected_tf_file = TerraformFile()
+        expected_tf_file.add_backend(
+            "local", {"path": str(local_config_dir / "tfstate" / "module-api-test")}
+        )
         expected_tf_file.add_provider(
             "aws", {"region": "us-east-1", "allowed_account_ids": ["652824372180"]}
         )
