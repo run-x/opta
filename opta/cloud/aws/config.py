@@ -21,12 +21,12 @@ class AWSProviderConfig(ProviderConfig):
         except KeyError:
             raise UserErrors("AWS region must be provided when using the AWS provider")
 
-        p = cls(region)
+        config = cls(region)
 
         account_ids = raw.get("account_id")
         if isinstance(account_ids, list):
-            p.account_ids = [str(id) for id in account_ids]
+            config.account_ids = [str(id) for id in account_ids]
         elif account_ids:
-            p.account_ids = [str(account_ids)]
+            config.account_ids = [str(account_ids)]
 
-        return p
+        return config

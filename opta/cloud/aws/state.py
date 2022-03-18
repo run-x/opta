@@ -75,6 +75,7 @@ class S3Store(StateStore):
     def _bucket(self) -> str:
         c = self.config
 
+        # TODO: Handle bucket suffixes, along with handling existing buckets without the suffix
         return f"opta-tf-state-{c.org_name}-{c.layer_name}"
 
     def _configure_bucket(self) -> None:

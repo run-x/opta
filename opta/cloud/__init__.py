@@ -38,7 +38,7 @@ def default_state_store_for_layer(layer: Layer, *, local: bool = False) -> State
 
     org_name = layer.org_name
     if not org_name:
-        # TODO: Can we pull this from the parent layer if it exists?
+        # TODO: Pull this from the parent layer if it exists, once we add support for layer-peering
         raise ValueError("Unknown org name")
 
     store_config = StoreConfig(org_name=org_name, layer_name=layer.name)
