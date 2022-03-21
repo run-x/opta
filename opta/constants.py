@@ -17,9 +17,13 @@ init_template_path: Final = os.path.join(
 version_path: Final = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), "config", "version.txt"
 )
-tf_modules_path: Final = os.path.join(os.path.dirname(os.path.dirname(__file__)), "modules")
+tf_modules_path: Final = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)), "modules"
+)
 
-one_time_run: Final = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".first_time_run")
+one_time_run: Final = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)), ".first_time_run"
+)
 
 REGISTRY: Final = make_registry_dict()
 VERSION: Final = open(version_path).read().strip()
@@ -53,7 +57,22 @@ MIN_TERRAFORM_VERSION: Final = "0.15.0"
 CI: Final = "CI"
 
 # List of chars to escape in regexes
-ESCAPE_REQUIRED: Final = ("\\", ".", "+", "*", "?", "[", "]", "$", "^", "(", ")", "{", "}", "|")
+ESCAPE_REQUIRED: Final = (
+    "\\",
+    ".",
+    "+",
+    "*",
+    "?",
+    "[",
+    "]",
+    "$",
+    "^",
+    "(",
+    ")",
+    "{",
+    "}",
+    "|",
+)
 
 SHELLS_ALLOWED: Final = ("bash", "sh")
 
