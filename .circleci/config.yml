@@ -749,7 +749,6 @@ jobs:
       - install-opta-dependencies
       - aws-cli/install
       - aws-cli/setup
-      - install-python-dependencies
       - run:
           name: "Apply Cloudfront Service with Opta"
           command: |
@@ -786,7 +785,6 @@ jobs:
       - install-opta-dependencies
       - aws-cli/install
       - aws-cli/setup
-      - install-python-dependencies
       - run:
           name: "Apply Cloudfront Service with Opta"
           command: |
@@ -934,7 +932,6 @@ jobs:
       - install-opta-dependencies
       - aws-cli/install
       - aws-cli/setup
-      - install-python-dependencies
       - run:
           name: "Update KUBECONFIG"
           command: echo 'export KUBECONFIG="$HOME/kube_config.yaml"' >> $BASH_ENV
