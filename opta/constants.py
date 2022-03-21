@@ -1,37 +1,37 @@
 import os
 import time
 from os.path import expanduser
-from typing import Dict, Optional, Tuple
+from typing import Dict, Final, Optional, Tuple
 
 from ruamel.yaml import YAML
 
 from opta.registry import make_registry_dict
 
-yaml = YAML(
+yaml: Final = YAML(
     typ="safe"
 )  # Duplicate because constants can't import utils and yaml really is a util
 
-init_template_path = os.path.join(
+init_template_path: Final = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), "config", "init_templates"
 )
-version_path = os.path.join(
+version_path: Final = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), "config", "version.txt"
 )
-tf_modules_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "modules")
+tf_modules_path: Final = os.path.join(os.path.dirname(os.path.dirname(__file__)), "modules")
 
-one_time_run = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".first_time_run")
+one_time_run: Final = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".first_time_run")
 
-REGISTRY = make_registry_dict()
-VERSION = open(version_path).read().strip()
-DEV_VERSION = "dev"
+REGISTRY: Final = make_registry_dict()
+VERSION: Final = open(version_path).read().strip()
+DEV_VERSION: Final = "dev"
 
-SESSION_ID = int(time.time() * 1000)
+SESSION_ID: Final = int(time.time() * 1000)
 
 # This dictionary is to be used to give warnings to users about potential outages/breaking changes
 # caused by opta version upgrade. The key is the first version that the warning is for. So if you have a
 # warning for versions 0.1.0, 0.2.0, 0.4.0, and 0.5.0, and the user used to have version 0.2.0, but now has version
 # 0.5.0, then they will see warnings for 0.4.0, and 0.5.0
-UPGRADE_WARNINGS: Dict[Tuple[str, str, str], str] = {
+UPGRADE_WARNINGS: Final[Dict[Tuple[str, str, str], str]] = {
     (
         "0.21.0",
         "aws",
@@ -44,36 +44,36 @@ UPGRADE_WARNINGS: Dict[Tuple[str, str, str], str] = {
 }
 
 # Path of the generated tf file.
-OPTA_DISABLE_REPORTING = "OPTA_DISABLE_REPORTING"
-TF_FILE_PATH = "main.tf.json"
-TF_PLAN_PATH = "tf.plan"
-MAX_TERRAFORM_VERSION = "2.0.0"
-MIN_TERRAFORM_VERSION = "0.15.0"
+OPTA_DISABLE_REPORTING: Final = "OPTA_DISABLE_REPORTING"
+TF_FILE_PATH: Final = "main.tf.json"
+TF_PLAN_PATH: Final = "tf.plan"
+MAX_TERRAFORM_VERSION: Final = "2.0.0"
+MIN_TERRAFORM_VERSION: Final = "0.15.0"
 
-CI = "CI"
+CI: Final = "CI"
 
 # List of chars to escape in regexes
-ESCAPE_REQUIRED = ["\\", ".", "+", "*", "?", "[", "]", "$", "^", "(", ")", "{", "}", "|"]
+ESCAPE_REQUIRED: Final = ("\\", ".", "+", "*", "?", "[", "]", "$", "^", "(", ")", "{", "}", "|")
 
-SHELLS_ALLOWED = ["bash", "sh"]
+SHELLS_ALLOWED: Final = ("bash", "sh")
 
 """
 Note: Key in Module Dependency should have all the dependencies present in the set.
 """
-MODULE_DEPENDENCY = {
+MODULE_DEPENDENCY: Final = {
     "aws-k8s-base": {"aws-eks"},
     "azure-kys-base": {"azure-aks"},
     "gcp-k8s-base": {"gcp-gke"},
 }
 
-REDS = [1, 9, 124, 160, 196]
+REDS: Final = (1, 9, 124, 160, 196)
 
-OPTA_INSTALL_URL = "https://docs.opta.dev/install.sh"
-successfull_upgrade = os.path.join(
+OPTA_INSTALL_URL: Final = "https://docs.opta.dev/install.sh"
+successfull_upgrade: Final = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), ".successfull_upgrade"
 )
 
-HOME = expanduser("~")
-GENERATED_KUBE_CONFIG_DIR = f"{HOME}/.opta/kubeconfigs"
+HOME: Final = expanduser("~")
+GENERATED_KUBE_CONFIG_DIR: Final = f"{HOME}/.opta/kubeconfigs"
 GENERATED_KUBE_CONFIG: Optional[str] = None
-ONE_WEEK_UNIX = 604800
+ONE_WEEK_UNIX: Final = 604800
