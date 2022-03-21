@@ -35,7 +35,7 @@
     },
     "ingress_nginx_values": {
       "type": "object",
-      "description": "Ingress Nginx helm chart additional values. [Available options](https://artifacthub.io/packages/helm/ingress-nginx/ingress-nginx/4.0.17?modal=values)",
+      "description": "Ingress Nginx helm chart additional values. [Available options](https://artifacthub.io/packages/helm/ingress-nginx/ingress-nginx?modal=values)",
       "default": {}
     },
     "type": {

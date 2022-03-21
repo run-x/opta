@@ -84,7 +84,7 @@ inputs:
   - name: ingress_nginx_values
     user_facing: true
     validator: any(required=False)
-    description: Ingress Nginx helm chart additional values. [Available options](https://artifacthub.io/packages/helm/ingress-nginx/ingress-nginx/4.0.17?modal=values)
+    description: Ingress Nginx helm chart additional values. [Available options](https://artifacthub.io/packages/helm/ingress-nginx/ingress-nginx?modal=values)
     default: {}
 outputs:
   - name: load_balancer_raw_ip
