@@ -56,24 +56,6 @@ MIN_TERRAFORM_VERSION: Final = "0.15.0"
 
 CI: Final = "CI"
 
-# List of chars to escape in regexes
-ESCAPE_REQUIRED: Final = (
-    "\\",
-    ".",
-    "+",
-    "*",
-    "?",
-    "[",
-    "]",
-    "$",
-    "^",
-    "(",
-    ")",
-    "{",
-    "}",
-    "|",
-)
-
 SHELLS_ALLOWED: Final = ("bash", "sh")
 
 """
