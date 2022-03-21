@@ -810,11 +810,13 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-test-websocket:
-    executor: python-docker
+    executor: ubuntu-machine
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
+      - install-python-dependencies
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
@@ -849,11 +851,13 @@ jobs:
             --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
   aws-test-websocket-stable-version:
-    executor: python-docker
+    executor: ubuntu-machine
     environment:
       OPTA_DISABLE_REPORTING: "true"
     steps:
       - checkout-opta
+      - install-python
+      - install-python-dependencies
       - when:
           condition: << pipeline.parameters.ci-use-diff-env >>
           steps:
