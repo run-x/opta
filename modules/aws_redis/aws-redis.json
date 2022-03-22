@@ -88,8 +88,7 @@
     },
     "identifier": {
       "type": "string",
-      "description": "The identifier for the Redis instance.",
-      "default": null
+      "description": "Identifier for the Redis instance."
     },
     "type": {
       "description": "The name of this module",

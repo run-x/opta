@@ -15,8 +15,7 @@
     },
     "identifier": {
       "type": "string",
-      "description": "Identifier for the RDS instance.",
-      "default": null
+      "description": "Identifier for the RDS instance."
     },
     "type": {
       "description": "The name of this module",
