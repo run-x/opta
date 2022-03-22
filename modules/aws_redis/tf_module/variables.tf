@@ -34,3 +34,8 @@ variable "snapshot_retention_limit" {
   type        = number
   default     = 0
 }
+
+variable "identifier" {
+  type    = string
+  default = null
+}

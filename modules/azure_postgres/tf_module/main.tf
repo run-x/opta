@@ -13,9 +13,13 @@ resource "random_password" "root_auth" {
   }
 }
 
+locals {
+  identifier = var.identifier == null ? "opta-${var.layer_name}-${var.module_name}-${random_id.key_suffix.hex}" : var.identifier
+}
+
 
 resource "azurerm_postgresql_server" "opta" {
-  name                = "opta-${var.layer_name}-${var.module_name}-${random_id.key_suffix.hex}"
+  name                = local.identifier
   location            = data.azurerm_resource_group.main.location
   resource_group_name = data.azurerm_resource_group.main.name
 

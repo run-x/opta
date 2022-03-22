@@ -17,8 +17,12 @@ resource "random_string" "db_name_hash" {
   upper   = false
 }
 
+locals {
+  identifier = var.identifier == null ? "opta-${var.layer_name}-${var.module_name}-${random_string.db_name_hash.result}" : var.identifier
+}
+
 resource "aws_rds_cluster" "db_cluster" {
-  cluster_identifier      = "opta-${var.layer_name}-${var.module_name}-${random_string.db_name_hash.result}"
+  cluster_identifier      = local.identifier
   db_subnet_group_name    = "opta-${var.env_name}"
   database_name           = "app"
   engine                  = "aurora-postgresql"
@@ -39,7 +43,7 @@ resource "aws_rds_cluster" "db_cluster" {
 
 resource "aws_rds_cluster_instance" "db_instance" {
   count                           = var.multi_az ? 2 : 1
-  identifier                      = "opta-${var.layer_name}-${var.module_name}-${random_string.db_name_hash.result}-${count.index}"
+  identifier                      = "${local.identifier}-${count.index}"
   cluster_identifier              = aws_rds_cluster.db_cluster.id
   instance_class                  = var.instance_class
   engine                          = aws_rds_cluster.db_cluster.engine

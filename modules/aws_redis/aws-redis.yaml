@@ -34,6 +34,11 @@ inputs:
     validator: str(required=False)
     description: Window during which the snapshot would be taken.
     default: "04:00-05:00"
+  - name: identifier
+    user_facing: true
+    validator: str(required=False)
+    description: Identifier for the Redis instance.
+    default: null
 outputs:
   - name: cache_host
     export: true

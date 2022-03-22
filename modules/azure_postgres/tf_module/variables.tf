@@ -32,3 +32,8 @@ variable "sku_name" {
   type    = string
   default = "GP_Gen5_2"
 }
+
+variable "identifier" {
+  type    = string
+  default = null
+}

@@ -31,3 +31,8 @@ variable "safety" {
   type    = bool
   default = false
 }
+
+variable "identifier" {
+  type    = string
+  default = null
+}

@@ -17,12 +17,16 @@ data "aws_kms_key" "main" {
   key_id = "alias/opta-${var.env_name}"
 }
 
+locals {
+  identifier = var.identifier == null ? "opta-${var.layer_name}-${var.module_name}-${random_string.redis_name_hash.result}" : var.identifier
+}
+
 resource "aws_elasticache_replication_group" "redis_cluster" {
   automatic_failover_enabled    = true
   auto_minor_version_upgrade    = true
   security_group_ids            = [data.aws_security_group.security_group.id]
   subnet_group_name             = "opta-${var.env_name}"
-  replication_group_id          = "opta-${var.layer_name}-${var.module_name}-${random_string.redis_name_hash.result}"
+  replication_group_id          = local.identifier
   replication_group_description = "Elasticache opta-${var.layer_name}-${var.module_name}-${random_string.redis_name_hash.result}"
   node_type                     = var.node_type
   engine_version                = var.redis_version

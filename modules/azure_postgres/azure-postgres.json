@@ -13,6 +13,11 @@
       "description": "The version of the database to use.",
       "default": "11"
     },
+    "identifier": {
+      "type": "string",
+      "description": "Identifier for the RDS instance.",
+      "default": null
+    },
     "type": {
       "description": "The name of this module",
       "enum": [

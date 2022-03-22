@@ -7,11 +7,15 @@ resource "random_password" "root_auth" {
   special = false
 }
 
+locals {
+  identifier = var.identifier == null ? "opta-${var.layer_name}-${var.module_name}-${random_id.key_suffix.hex}" : var.identifier
+}
+
 # TODO: currently we are not performing disk encryption as the feature is currently in beta. You may read more about it
 # here: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/sql_database_instance#encryption_key_name
 # We currently do not wish to tangle with the google-beta provider so we are skipping this feature for now.
 resource "google_sql_database_instance" "instance" {
-  name                = "opta-${var.layer_name}-${var.module_name}-${random_id.key_suffix.hex}"
+  name                = local.identifier
   database_version    = "MYSQL_${var.engine_version}"
   deletion_protection = var.safety
 
@@ -42,7 +46,7 @@ resource "google_sql_database_instance" "instance" {
 
 resource "google_sql_database" "main" {
   instance = google_sql_database_instance.instance.name
-  name     = "opta-${var.layer_name}-${var.module_name}-${random_id.key_suffix.hex}"
+  name     = local.identifier
 }
 
 resource "google_sql_user" "root" {

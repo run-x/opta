@@ -29,6 +29,11 @@ inputs:
     validator: int(required=False)
     description: The [size](https://azure.microsoft.com/en-us/pricing/details/cache/) (see the numbers following the C or P) of the Redis cache to deploy.
     default: 2
+  - name: identifier
+    user_facing: true
+    validator: str(required=False)
+    description: Identifier for the Redis instance.
+    default: null
 outputs:
   - name: cache_host
     export: true

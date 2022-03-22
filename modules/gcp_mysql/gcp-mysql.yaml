@@ -29,6 +29,11 @@ inputs:
     validator: str(required=False)
     description: The version of the database to use.
     default: "5_7"
+  - name: identifier
+    user_facing: true
+    validator: str(required=False)
+    description: Identifier for the RDS instance.
+    default: null
 outputs:
   - name: db_name
     export: false

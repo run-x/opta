@@ -2,8 +2,12 @@ resource "random_id" "key_suffix" {
   byte_length = 8
 }
 
+locals {
+  identifier = var.identifier == null ? "opta-${var.layer_name}-${var.module_name}-${random_id.key_suffix.hex}" : var.identifier
+}
+
 resource "azurerm_redis_cache" "opta" {
-  name                          = "opta-${var.layer_name}-${var.module_name}-${random_id.key_suffix.hex}"
+  name                          = local.identifier
   location                      = data.azurerm_resource_group.main.location
   resource_group_name           = data.azurerm_resource_group.main.name
   capacity                      = var.capacity

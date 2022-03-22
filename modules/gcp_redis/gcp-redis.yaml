@@ -29,6 +29,11 @@ inputs:
     validator: bool(required=False)
     description: the redis version to use for this instance
     default: true
+  - name: identifier
+    user_facing: true
+    validator: str(required=False)
+    description: Identifier for the Redis instance.
+    default: null
 outputs:
   - name: cache_host
     export: true

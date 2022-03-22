@@ -31,3 +31,8 @@ variable "memory_size_gb" {
   type    = number
   default = 2
 }
+
+variable "identifier" {
+  type    = string
+  default = null
+}

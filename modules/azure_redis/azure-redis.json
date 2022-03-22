@@ -28,6 +28,11 @@
       "minimum": 0,
       "default": 2
     },
+    "identifier": {
+      "type": "string",
+      "description": "Identifier for the Redis instance.",
+      "default": null
+    },
     "type": {
       "description": "The name of this module",
       "enum": [

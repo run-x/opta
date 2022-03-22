@@ -29,6 +29,11 @@
       "description": "Add deletion protection to stop accidental db deletions",
       "default": false
     },
+    "identifier": {
+      "type": "string",
+      "description": "Identifier for the RDS instance.",
+      "default": null
+    },
     "type": {
       "description": "The name of this module",
       "enum": [

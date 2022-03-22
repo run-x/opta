@@ -18,6 +18,11 @@
       "description": "the redis version to use for this instance",
       "default": true
     },
+    "identifier": {
+      "type": "string",
+      "description": "Identifier for the Redis instance.",
+      "default": null
+    },
     "type": {
       "description": "The name of this module",
       "enum": [

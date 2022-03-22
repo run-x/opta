@@ -37,3 +37,8 @@ variable "module_name" {
   description = "Module name"
   type        = string
 }
+
+variable "identifier" {
+  type    = string
+  default = null
+}
