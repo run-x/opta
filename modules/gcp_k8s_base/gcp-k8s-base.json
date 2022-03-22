@@ -28,6 +28,21 @@
       "description": "Expose self-signed SSL certs.",
       "default": false
     },
+    "cert_manager_values": {
+      "type": "object",
+      "description": "Certificate Manager helm chart additional values. [Available options](https://artifacthub.io/packages/helm/cert-manager/cert-manager?modal=values)",
+      "default": {}
+    },
+    "linkerd_values": {
+      "type": "object",
+      "description": "Linkerd helm chart additional values. [Available options](https://artifacthub.io/packages/helm/linkerd2/linkerd2/2.10.2?modal=values)",
+      "default": {}
+    },
+    "ingress_nginx_values": {
+      "type": "object",
+      "description": "Ingress Nginx helm chart additional values. [Available options](https://artifacthub.io/packages/helm/ingress-nginx/ingress-nginx?modal=values)",
+      "default": {}
+    },
     "type": {
       "description": "The name of this module",
       "enum": [
