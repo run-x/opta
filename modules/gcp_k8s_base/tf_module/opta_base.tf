@@ -69,7 +69,4 @@ resource "helm_release" "opta_base" {
       tls_key : var.private_key == "" && var.expose_self_signed_ssl ? base64encode(tls_private_key.default[0].private_key_pem) : base64encode(var.private_key),
     })
   ]
-  depends_on = [
-    helm_release.cert_manager
-  ]
 }

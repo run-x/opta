@@ -23,11 +23,6 @@
       "description": "Additional configuration for nginx ingress. [Available options](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/#configuration-options)",
       "default": {}
     },
-    "cert_manager_values": {
-      "type": "object",
-      "description": "Certificate Manager helm chart additional values. [Available options](https://artifacthub.io/packages/helm/cert-manager/cert-manager?modal=values)",
-      "default": {}
-    },
     "linkerd_values": {
       "type": "object",
       "description": "Linkerd helm chart additional values. [Available options](https://artifacthub.io/packages/helm/linkerd2/linkerd2/2.10.2?modal=values)",
