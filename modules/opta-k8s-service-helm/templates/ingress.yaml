@@ -51,7 +51,6 @@ metadata:
     {{ if eq (default "http" $.Values.httpPort.protocol) "grpc" }}
     nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
     {{- end }}
-    cert-manager.io/cluster-issuer: opta-selfsigned
     kubernetes.io/ingress.class: "nginx"
 {{- /*
 These headers will instruct Linkerd what service the request is destined for
