@@ -17,9 +17,13 @@ resource "random_string" "db_name_hash" {
   upper   = false
 }
 
+locals {
+  identifier = var.identifier == null ? "opta-${var.layer_name}-${var.module_name}-${random_string.db_name_hash.result}" : var.identifier
+}
+
 resource "aws_docdb_cluster_instance" "cluster_instances" {
   count                      = var.instance_count
-  identifier                 = "opta-${var.layer_name}-${var.module_name}-${random_string.db_name_hash.result}-${count.index}"
+  identifier                 = "${local.identifier}-${count.index}"
   cluster_identifier         = aws_docdb_cluster.cluster.id
   instance_class             = var.instance_class
   apply_immediately          = true
@@ -30,7 +34,7 @@ resource "aws_docdb_cluster_instance" "cluster_instances" {
 }
 
 resource "aws_docdb_cluster" "cluster" {
-  cluster_identifier      = "opta-${var.layer_name}-${var.module_name}-${random_string.db_name_hash.result}"
+  cluster_identifier      = local.identifier
   master_username         = "master_user"
   master_password         = random_password.documentdb_auth.result
   db_subnet_group_name    = "opta-${var.env_name}-docdb"

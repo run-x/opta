@@ -24,6 +24,11 @@
       "description": "A value that indicates whether the DB cluster has deletion protection enabled. The database can't be deleted when deletion protection is enabled. By default, deletion protection is disabled.",
       "default": false
     },
+    "identifier": {
+      "type": "string",
+      "description": "Name for the documentdb cluster.  If not specified, it will be look like opta-<layer_name>-<module_name>-<random_string>",
+      "default": "None"
+    },
     "type": {
       "description": "The name of this module",
       "enum": [

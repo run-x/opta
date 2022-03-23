@@ -44,3 +44,8 @@ variable "range_key" {
 variable "attributes" {
   type = list(map(string))
 }
+
+variable "identifier" {
+  type        = string
+  default     = null
+}

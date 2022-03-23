@@ -33,3 +33,8 @@ variable "deletion_protection" {
   default     = false
   description = "A value that indicates whether the DB cluster has deletion protection enabled. The database can't be deleted when deletion protection is enabled."
 }
+
+variable "identifier" {
+  type        = string
+  default     = null
+}

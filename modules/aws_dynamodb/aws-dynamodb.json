@@ -61,6 +61,11 @@
       },
       "default": "None"
     },
+    "identifier": {
+      "description": "Name for the dynamodb table. If not specified, it will be look like opta-<layer_name>-<module_name>-<random_string>",
+      "type": "string",
+      "default": "None"
+    },
     "type": {
       "description": "The name of this module",
       "enum": [
