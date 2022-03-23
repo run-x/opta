@@ -35,6 +35,6 @@ variable "deletion_protection" {
 }
 
 variable "identifier" {
-  type        = string
-  default     = null
+  type    = string
+  default = null
 }
