@@ -19,7 +19,6 @@ metadata:
     {{ if hasKey $.Values.port "grpc" }}
     nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
     {{- end }}
-    cert-manager.io/cluster-issuer: opta-selfsigned
     kubernetes.io/ingress.class: "nginx"
     nginx.ingress.kubernetes.io/configuration-snippet: |
       proxy_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;
