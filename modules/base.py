@@ -22,6 +22,7 @@ from dns.resolver import Answer, NoNameservers, query
 from opta.constants import REGISTRY
 from opta.core import kubernetes
 from opta.core.aws import AWS
+from opta.core.helm import Helm
 from opta.core.terraform import get_terraform_outputs
 from opta.exceptions import UserErrors
 from opta.utils import RawString, hydrate, json, logger
@@ -193,6 +194,17 @@ class PortSpec:
 class K8sServiceModuleProcessor(ModuleProcessor):
     # TODO(patrick): Remove this flag and references to it once all clouds support multiple ports
     FLAG_MULTIPLE_PORTS_SUPPORTED = False
+
+    def pre_hook(self, module_idx: int) -> None:
+        pending_upgrade_helm_chart = Helm.get_helm_list(
+            release=f"{self.layer.name}-{self.module.name}"
+        )  # , status="pending-upgrade")
+        if pending_upgrade_helm_chart:
+            raise UserErrors(
+                f"There is a pending upgrade for the helm chart: {self.layer.name}-{self.module.name}."
+                "\nPlease use `opta force-unlock` to rollback already existing module."
+            )
+        return super(K8sServiceModuleProcessor, self).pre_hook(module_idx)
 
     @property
     def required_path_dependencies(self) -> FrozenSet[str]:
@@ -450,6 +462,10 @@ class K8sBaseModuleProcessor:
 
 
 class AWSK8sModuleProcessor(ModuleProcessor):
+    def pre_hook(self, module_idx: int) -> None:
+        print("AWSK8sModuleProcessor.pre_hook")
+        return super(AWSK8sModuleProcessor, self).pre_hook(module_idx)
+
     def __init__(self, module: "Module", layer: "Layer"):
         super(AWSK8sModuleProcessor, self).__init__(module, layer)
 
