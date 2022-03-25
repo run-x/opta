@@ -29,8 +29,6 @@ from opta.exceptions import MissingState, UserErrors
 from opta.layer import Layer, StructuredConfig
 from opta.opta_lock import opta_acquire_lock, opta_release_lock
 from opta.pre_check import pre_check
-from opta.process import ApplyOptions
-from opta.process import apply as apply2
 from opta.utils import check_opta_file_exists, fmt_msg, logger
 from opta.utils.clickoptions import (
     config_option,
@@ -38,7 +36,6 @@ from opta.utils.clickoptions import (
     input_variable_option,
     local_option,
 )
-from opta.utils.features import is_module_api_enabled
 
 
 @click.command()
@@ -133,16 +130,6 @@ def _apply(
     stdout_logs: bool = True,
     detailed_plan: bool = False,
 ) -> None:
-    if is_module_api_enabled():
-        opts = ApplyOptions(
-            auto_approve=auto_approve,
-            config_path=config,
-            detailed_plan=detailed_plan,
-            local=local,
-        )
-        apply2(opts)
-        return
-
     pre_check()
     _clean_tf_folder()
     if local and not test:
