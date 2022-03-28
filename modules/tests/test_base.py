@@ -14,6 +14,7 @@ from modules.base import (
 )
 from opta.exceptions import UserErrors
 from opta.layer import Layer
+from opta.module import Module
 
 
 class TestBaseModuleProcessors:
@@ -262,6 +263,52 @@ class TestK8sServiceModuleProcessor:
         }
 
         self.process_ports_assert(processor, input, expected=expected)
+
+    def test_pre_hook_all_good(self, mocker: MockFixture) -> None:
+        layer = Layer.load_from_yaml(
+            os.path.join(
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "aws_service_getting_started.yaml",
+            ),
+            None,
+        )
+        idx = len(layer.modules)
+        module_name: str = "hello"
+        module: Optional[Module] = layer.get_module(module_name, idx)
+        mocked_helm_list = mocker.patch(
+            "modules.base.Helm.get_helm_list", return_value=[]
+        )
+        K8sServiceModuleProcessor(module, layer).pre_hook(idx)
+        mocked_helm_list.assert_called_once_with(
+            release=f"{layer.name}-{module_name}", status="pending-upgrade"
+        )
+
+    def test_pre_hook_pending_upgrade_service(self, mocker: MockFixture) -> None:
+        layer = Layer.load_from_yaml(
+            os.path.join(
+                os.getcwd(),
+                "tests",
+                "fixtures",
+                "dummy_data",
+                "aws_service_getting_started.yaml",
+            ),
+            None,
+        )
+        idx = len(layer.modules)
+        module_name: str = "hello"
+        module: Optional[Module] = layer.get_module(module_name, idx)
+        mocked_helm_list = mocker.patch(
+            "modules.base.Helm.get_helm_list",
+            return_value=[{"name": f"{layer.name}-{module_name}"}],
+        )
+        with pytest.raises(UserErrors):
+            K8sServiceModuleProcessor(module, layer).pre_hook(idx)
+        mocked_helm_list.assert_called_once_with(
+            release=f"{layer.name}-{module_name}", status="pending-upgrade"
+        )
 
     @staticmethod
     def transform_port(
