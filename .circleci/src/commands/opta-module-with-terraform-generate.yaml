@@ -1,0 +1,30 @@
+# Note:
+#  The below command is dependent on the Repo being checked out and should always have a checkout command in the pipeline.
+#  This command also requires aws-tg-create-env and gcp-tg-create-env to be run prior to calling this command.
+# Usage:
+#  Following should always be checked when using this command:
+#    - Configuration file should always be present in the .circleci/ci-tests/terraform-generated-<provider-name> folder
+#    - Configuration file should me named module-<module-name>.yaml. This should be the same as the name of the module being defined inside.
+#    - Respective cloud creation jobs should be called before this command is invoked. (aws-tg-create-env / gcp-tg-create-env).
+#    - Always attach the `./` and `~/` workspaces.
+description: "Command to Generate terraform files and plan those changes"
+parameters:
+  module:
+    default: ""
+    type: string
+  provider:
+    default: "aws"
+    type: string
+steps:
+  - run:
+      when: always
+      name: Generate Terraform Language Files for Opta Module and Terraform plan
+      command: |
+        echo "Testing Opta module: << parameters.provider >> - << parameters.module >>"
+        ./dist/opta/opta generate-terraform \
+        --config ./.circleci/ci-tests/terraform-generated-<< parameters.provider >>/module-<< parameters.module >>.yaml \
+        --directory $HOME/generated-tf-files-<< parameters.provider >> \
+        --auto-approve
+        cd $HOME/generated-tf-files-<< parameters.provider >>
+        terraform init
+        terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.<< parameters.module >>
