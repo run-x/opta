@@ -53,5 +53,6 @@ class TestAzureK8sServiceProcessor:
         mocked_create_namespace_if_not_exists = mocker.patch(
             "modules.azure_k8s_service.azure_k8s_service.create_namespace_if_not_exists"
         )
+        mocker.patch("modules.base.Helm.get_helm_list", return_value=[])
         AzureK8sServiceProcessor(app_module, layer).pre_hook(idx)
         mocked_create_namespace_if_not_exists.assert_called_once_with(layer.name)
