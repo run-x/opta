@@ -1,0 +1,21 @@
+executor: ubuntu-machine
+environment:
+  OPTA_DISABLE_REPORTING: "true"
+steps:
+  - run:
+      name: "Set git user"
+      command: |
+        git config --global user.email "runx-ci@runx.dev"
+        git config --global user.name "Runx CI"
+  - run:
+      name: "Download Latest Opta Binary"
+      command: /bin/bash -c "$(curl -fsSL https://docs.opta.dev/install.sh)"
+  - install-opta-dependencies
+  - run:
+      name: "Check Opta Version"
+      command: |
+        $HOME/.opta/opta version
+  - persist_to_workspace:
+      root: ~/
+      paths:
+        - .opta

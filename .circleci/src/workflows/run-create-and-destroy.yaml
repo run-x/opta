@@ -1,3 +1,0 @@
-when: << pipeline.parameters.run-create-and-destroy >>
-jobs: &fullsuite
-  - get-all-parameter-values

@@ -1,0 +1,13 @@
+when: << pipeline.parameters.test-aws-lambda >>
+jobs:
+  - get-all-parameter-values
+  - build-opta-binary
+  - aws-create-env:
+      requires:
+        - build-opta-binary
+  - aws-test-lambda-function:
+      requires:
+        - aws-create-env
+  - aws-destroy-env:
+      requires:
+        - aws-test-lambda-function

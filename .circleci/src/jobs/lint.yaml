@@ -1,0 +1,10 @@
+executor: python-docker
+steps:
+  - checkout-opta
+  - install-python-dependencies-development
+  - run:
+      name: "Lint"
+      command: |
+        source $(pipenv --venv)/bin/activate
+        export PYTHONPATH=$(pwd)
+        ./scripts/lint.py

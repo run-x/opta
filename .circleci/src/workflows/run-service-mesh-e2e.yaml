@@ -1,0 +1,31 @@
+when: << pipeline.parameters.run-service-mesh-e2e >>
+jobs:
+  - get-all-parameter-values
+  - build-opta-binary
+  - build-opta-example-images
+  - aws-create-env:
+      requires:
+        - build-opta-binary
+  - gcp-create-env:
+      requires:
+        - build-opta-binary
+  - aws-opta-example-create-svcs:
+      requires:
+        - aws-create-env
+        - build-opta-example-images
+  - aws-opta-example-destroy-svcs:
+      requires:
+        - aws-opta-example-create-svcs
+  - aws-destroy-env:
+      requires:
+        - aws-opta-example-destroy-svcs
+  - gcp-opta-example-create-svcs:
+      requires:
+        - gcp-create-env
+        - build-opta-example-images
+  - gcp-opta-example-destroy-svcs:
+      requires:
+        - gcp-opta-example-create-svcs
+  - gcp-destroy-env:
+      requires:
+        - gcp-opta-example-destroy-svcs

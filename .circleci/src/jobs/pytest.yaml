@@ -1,0 +1,16 @@
+executor: python-docker
+steps:
+  - checkout-opta
+  - install-python-dependencies-development
+  - terraform/install:
+      arch: amd64
+      os: linux
+      terraform_version: 1.0.0
+  - run:
+      name: "Test with pytest"
+      command: |
+        export PYTHONPATH=$(pwd)
+        pipenv run pytest --cov=./opta --cov=./modules --cov-report=xml
+  - codecov/upload:
+      flags: unittests
+      file: ./coverage.xml

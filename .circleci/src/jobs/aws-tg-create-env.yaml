@@ -1,0 +1,22 @@
+executor: ubuntu-machine
+steps:
+  - install-opta-dependencies
+  - attach_workspace:
+      at: ~/
+  - run:
+      name: "Create Terraform Generated Environment"
+      command: |
+        cd $HOME/generated-tf-files-aws
+        terraform init
+        terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base
+        terraform apply -compact-warnings -auto-approve tf.plan
+        terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8scluster
+        terraform apply -compact-warnings -auto-approve tf.plan
+        terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8sbase
+        terraform apply -compact-warnings -auto-approve tf.plan
+  - persist_to_workspace:
+      root: ~/
+      paths:
+        - generated-tf-files-aws
+  - store_artifacts:
+      path: ~/generated-tf-files-aws

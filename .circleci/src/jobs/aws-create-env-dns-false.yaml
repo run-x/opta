@@ -1,0 +1,21 @@
+executor: python-docker
+environment:
+  OPTA_DISABLE_REPORTING: "true"
+steps:
+  - checkout-opta
+  - when:
+      condition: << pipeline.parameters.ci-use-diff-env >>
+      steps:
+        - remake-environment-configs
+  - attach_workspace:
+      at: ./
+  - install-opta-dependencies
+  - aws-cli/install
+  - aws-cli/setup
+  - run:
+      name: "Deploy opta environment with DNS Delegated False"
+      command: |
+        ./dist/opta/opta apply \
+        --config ./.circleci/ci-tests/todo-list/provider-aws-dns-false.yml \
+        --auto-approve \
+        --refresh

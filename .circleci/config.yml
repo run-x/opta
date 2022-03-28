@@ -84,6 +84,1770 @@ executors:
         machine:
             image: ubuntu-2004:202111-01
 jobs:
+    aws-create-env:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: |
+                    ./dist/opta/opta apply \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml \
+                    --auto-approve \
+                    --refresh
+                name: Deploy opta environment
+            - run:
+                command: echo 'export KUBECONFIG="$HOME/kube_config.yaml"' >> $BASH_ENV
+                name: Update KUBECONFIG
+            - run:
+                command: |-
+                    ./dist/opta/opta configure-kubectl \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
+                name: Configure Kubectl
+    aws-create-env-dns-false:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: |-
+                    ./dist/opta/opta apply \
+                    --config ./.circleci/ci-tests/todo-list/provider-aws-dns-false.yml \
+                    --auto-approve \
+                    --refresh
+                name: Deploy opta environment with DNS Delegated False
+    aws-create-env-dns-true:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: |-
+                    ./dist/opta/opta apply \
+                    --config ./.circleci/ci-tests/todo-list/provider-aws-dns-true.yml \
+                    --auto-approve \
+                    --refresh
+                name: Deploy opta environment with DNS Delegated False
+    aws-create-env-set-ns:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: ./.circleci/ci-tests/todo-list/set-ns.sh ./.circleci/ci-tests/todo-list/provider-aws-dns-false.yml
+                name: Run the Script for Setting NS
+    aws-create-env-stable-version:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ~/
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: |-
+                    yes | $HOME/.opta/opta apply \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml \
+                    --auto-approve \
+                    --refresh || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Deploy opta environment
+    aws-destroy-env:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: |-
+                    yes | ./dist/opta/opta destroy \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy environment
+    aws-destroy-env-dns-false:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: |-
+                    yes | ./dist/opta/opta destroy \
+                    --config ./.circleci/ci-tests/todo-list/provider-aws-dns-false.yml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy environment with DNS Delegated True
+    aws-destroy-env-dns-true:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: |-
+                    yes | ./dist/opta/opta destroy \
+                    --config ./.circleci/ci-tests/todo-list/provider-aws-dns-true.yml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy environment with DNS Delegated True
+    aws-destroy-env-stable-version:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ~/
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: |-
+                    yes | $HOME/.opta/opta destroy \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy environment
+    aws-dns-test:
+        executor: ubuntu-machine
+        steps:
+            - run:
+                command: curl --fail http://testing.optaci.com || if [[ $? -eq 22 ]]; then true; else exit $?; fi
+                name: Curl Test for testing.optaci.com
+    aws-generate-terraform-language-files:
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: |
+                    mkdir $HOME/generated-tf-files-aws
+                    ./dist/opta/opta generate-terraform \
+                    --config ./.circleci/ci-tests/terraform-generated-aws/environment.yaml \
+                    --directory $HOME/generated-tf-files-aws \
+                    --auto-approve
+                    ./dist/opta/opta generate-terraform \
+                    --config ./.circleci/ci-tests/terraform-generated-aws/service-hello-opta.yaml \
+                    --directory $HOME/generated-tf-files-aws \
+                    --auto-approve
+                name: Generate Terraform Language Files
+            - persist_to_workspace:
+                paths:
+                    - generated-tf-files-aws
+                root: ~/
+    aws-opta-example-create-svcs:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: ubuntu-machine
+        steps:
+            - checkout-opta
+            - install-python
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: |
+                    docker load -i todo-api
+                    docker load -i todo-frontend
+                name: Load Opta Example images
+            - run:
+                command: |
+                    ./dist/opta/opta deploy \
+                    --image todo-api:v1 \
+                    --config ./.circleci/ci-tests/todo-list/api-service.yml \
+                    --env awsenv-ci \
+                    --auto-approve
+                name: Deploy Todo-Api Service
+            - run:
+                command: |
+                    ./dist/opta/opta deploy \
+                    --image todo-frontend:v1 \
+                    --config ./.circleci/ci-tests/todo-list/frontend-service.yml \
+                    --env awsenv-ci \
+                    --auto-approve
+                name: Deploy Todo-Frontend Service
+            - run:
+                command: |
+                    ./dist/opta/opta apply \
+                    --config ./.circleci/ci-tests/todo-list/monitoring-service.yml \
+                    --env awsenv-ci \
+                    --auto-approve
+                name: Deploy Monitoring Service
+            - run:
+                command: |-
+                    DIRTY_HOST_NAME="{`./dist/opta/opta output -c ./.circleci/ci-tests/create-and-destroy-aws/environment.yml | grep load_balancer_raw_dns`\"\":\"\"}"
+                    export HOST_NAME=`echo $DIRTY_HOST_NAME | jq -r '.load_balancer_raw_dns'`
+                    curl $HOST_NAME/frontend --fail
+                    curl $HOST_NAME/djangoapi/ht/ --fail
+                    curl $HOST_NAME/grafana --fail
+                name: Ping Tests
+    aws-opta-example-destroy-svcs:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: |
+                    yes | ./dist/opta/opta destroy \
+                    --config ./.circleci/ci-tests/todo-list/monitoring-service.yml \
+                    --env awsenv-ci \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy Monitoring Service
+            - run:
+                command: |
+                    yes | ./dist/opta/opta destroy \
+                    --config ./.circleci/ci-tests/todo-list/frontend-service.yml \
+                    --env awsenv-ci \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy Todo-Frontend Service
+            - run:
+                command: |-
+                    yes | ./dist/opta/opta destroy \
+                    --config ./.circleci/ci-tests/todo-list/api-service.yml \
+                    --env awsenv-ci \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy Todo-Api Service
+    aws-test-additional-nodegroup:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: |
+                    ./dist/opta/opta apply \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/environment-additional-nodegroup.yml \
+                    --auto-approve
+                name: Add additional Node Group to Opta Environment.
+            - run:
+                command: |-
+                    ./dist/opta/opta apply \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml \
+                    --auto-approve
+                name: Remove additional Node Group from Opta Environment
+    aws-test-cloudfront:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: |
+                    OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/service-cloudfront.yml \
+                    --auto-approve
+                name: Apply Cloudfront Service with Opta
+            - run:
+                command: |
+                    sleep 20
+                    export HOST=`./dist/opta/opta output --env awsenv-ci --config ./.circleci/ci-tests/create-and-destroy-aws/service-cloudfront.yml | jq -r '.cloudfront_domain'`
+                    curl --fail https://${HOST}
+                name: Test Cloudfront curl
+            - run:
+                command: |-
+                    yes | ./dist/opta/opta destroy \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/service-cloudfront.yml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy Cloudfront Service with Opta
+    aws-test-k8s-manifest:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: echo 'export KUBECONFIG="$HOME/kube_config.yaml"' >> $BASH_ENV
+                name: Update KUBECONFIG
+            - run:
+                command: |
+                    ./dist/opta/opta configure-kubectl \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
+                name: Configure Kubectl
+            - run:
+                command: |
+                    ./dist/opta/opta apply \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/k8s-manifest.yaml \
+                    --auto-approve
+                name: Apply K8s Manifest with Opta
+            - run:
+                command: |
+                    kubectl get pod -n default nginx
+                    exit $?
+                name: Test manifest pod creation
+            - run:
+                command: |-
+                    yes | ./dist/opta/opta destroy \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/k8s-manifest.yaml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy K8s Manifest with Opta
+    aws-test-lambda-function:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: |
+                    OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/service-lambda.yml \
+                    --auto-approve
+                name: Apply Cloudfront Service with Opta
+            - run:
+                command: |
+                    sleep 20
+                    export LAMBDA_NAME=`./dist/opta/opta output --env awsenv-ci --config ./.circleci/ci-tests/create-and-destroy-aws/service-lambda.yml | jq -r '.function_name'`
+                    export AWS_DEFAULT_REGION="us-east-2"
+                    aws lambda invoke --function-name $LAMBDA_NAME  ./.circleci/ci-tests/create-and-destroy-aws/service-lambda.txt
+                    export RESPONSE=`cat ./.circleci/ci-tests/create-and-destroy-aws/service-lambda.txt`
+                name: Test Lambda Invocation
+            - run:
+                command: |-
+                    yes | ./dist/opta/opta destroy \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/service-lambda.yml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy Cloudfront Service with Opta
+    aws-test-service-docdb:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: ubuntu-machine
+        steps:
+            - checkout-opta
+            - install-python
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: docker load -i test-service-image
+                name: Load test-service image
+            - run:
+                command: |
+                    ./dist/opta/opta deploy \
+                    --image app:latest \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/service-docdb.yml \
+                    --tag $CIRCLE_SHA1 \
+                    --auto-approve
+                name: Deploy test-service-redis
+            - run:
+                command: |-
+                    yes | ./dist/opta/opta destroy \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/service-docdb.yml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy test-service-redis
+    aws-test-service-helm:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: |
+                    ./dist/opta/opta apply \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/service-helm.yml \
+                    --auto-approve
+                name: Deploy test-service-helm
+            - run:
+                command: |-
+                    yes | ./dist/opta/opta destroy \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/service-helm.yml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy test-service-helm
+    aws-test-service-pg:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: ubuntu-machine
+        steps:
+            - checkout-opta
+            - install-python
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - install-python-dependencies
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: docker load -i test-service-image
+                name: Load test-service image
+            - run:
+                command: |
+                    ./dist/opta/opta secret update \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/service-pg.yml \
+                    FAKE_SECRET foo
+                name: Set secret
+            - run:
+                command: |
+                    ./dist/opta/opta deploy \
+                    --image app:latest \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/service-pg.yml \
+                    --tag $CIRCLE_SHA1 \
+                    --auto-approve
+                name: Deploy test-service
+            - run:
+                command: echo 'export KUBECONFIG="$HOME/kube_config.yaml"' >> $BASH_ENV
+                name: Update KUBECONFIG
+            - run:
+                command: |
+                    ./dist/opta/opta configure-kubectl \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/service-pg.yml
+                name: Configure Kubectl
+            - run:
+                command: |
+                    source $(pipenv --venv)/bin/activate
+                    export PYTHONPATH=$(pwd)
+                    python ./.circleci/ci-tests/opta-shell-test.py \
+                    ./.circleci/ci-tests/create-and-destroy-aws/service-pg.yml
+                name: Test Opta Shell
+            - run:
+                background: true
+                command: |
+                    ./dist/opta/opta logs \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/service-pg.yml >> logs.log
+                name: Opta logs
+            - run:
+                command: |
+                    sleep 90
+                    pkill -SIGQUIT opta
+                    cat logs.log | grep "\"GET /healthcheck HTTP/1.1\" 200"
+                    exit $?
+                name: Check opta logs
+            - run:
+                command: |
+                    ./dist/opta/opta deploy \
+                    --image app:latest \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/service-additional-pg.yml \
+                    --tag $CIRCLE_SHA1 \
+                    --auto-approve
+                name: Deploy test-service with Additional PG
+            - run:
+                command: |
+                    ./dist/opta/opta deploy \
+                    --image app:latest \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/service-pg.yml \
+                    --tag $CIRCLE_SHA1 \
+                    --auto-approve
+                name: Deploy test-service remove Additional PG
+            - run:
+                command: |
+                    secret_value=$(./dist/opta/opta secret view \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/service-pg.yml \
+                    FAKE_SECRET | grep foo)
+                    echo "This was the found secret value: ${secret_value}"
+                    [[ "$secret_value" =~ .*"foo".* ]] || exit 1
+                name: View secret and check value
+            - run:
+                command: |-
+                    yes | ./dist/opta/opta destroy \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/service-pg.yml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy test service
+    aws-test-service-redis:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: ubuntu-machine
+        steps:
+            - checkout-opta
+            - install-python
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: docker load -i test-service-image
+                name: Load test-service image
+            - run:
+                command: |
+                    ./dist/opta/opta deploy \
+                    --image app:latest \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/service-redis.yml \
+                    --tag $CIRCLE_SHA1 \
+                    --auto-approve
+                name: Deploy test-service-redis
+            - run:
+                command: |-
+                    yes | ./dist/opta/opta destroy \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/service-redis.yml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy test-service-redis
+    aws-test-service-s3:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: ubuntu-machine
+        steps:
+            - checkout-opta
+            - install-python
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: docker load -i test-service-image
+                name: Load test-service image
+            - run:
+                command: |
+                    ./dist/opta/opta deploy \
+                    --image app:latest \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/service-s3.yml \
+                    --tag $CIRCLE_SHA1 \
+                    --auto-approve
+                name: Deploy test-service-s3
+            - run:
+                command: |-
+                    yes | ./dist/opta/opta destroy \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/service-s3.yml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy test-service-s3
+    aws-test-websocket:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: ubuntu-machine
+        steps:
+            - checkout-opta
+            - install-python
+            - install-python-dependencies
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: |
+                    OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/websocket-service.yml \
+                    --auto-approve
+                name: Apply Websocket Service with Opta
+            - run:
+                command: |
+                    sleep 20
+                    source $(pipenv --venv)/bin/activate
+                    DIRTY_HOST_NAME="{`./dist/opta/opta output --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml | grep load_balancer_raw_dns`\"\":\"\"}"
+                    export HOST=`echo $DIRTY_HOST_NAME | jq -r '.load_balancer_raw_dns'`
+                    python ./.circleci/ci-tests/create-and-destroy-aws/websocket-validate.py
+                    exit $?
+                name: Test Websocket
+            - run:
+                command: |-
+                    yes | ./dist/opta/opta destroy \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/websocket-service.yml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy Websocket Service with Opta
+    aws-test-websocket-stable-version:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: ubuntu-machine
+        steps:
+            - checkout-opta
+            - install-python
+            - install-python-dependencies
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ~/
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: |
+                    yes | $HOME/.opta/opta apply \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/websocket-service.yml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Apply Websocket Service with Stable Opta
+            - run:
+                command: |
+                    sleep 20
+                    source $(pipenv --venv)/bin/activate
+                    DIRTY_HOST_NAME="{`$HOME/.opta/opta output --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml | grep load_balancer_raw_dns`\"\":\"\"}"
+                    export HOST=`echo $DIRTY_HOST_NAME | jq -r '.load_balancer_raw_dns'`
+                    python ./.circleci/ci-tests/create-and-destroy-aws/websocket-validate.py
+                    exit $?
+                name: Test Websocket
+            - run:
+                command: |-
+                    yes | $HOME/.opta/opta destroy \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/websocket-service.yml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy Websocket Service with Opta
+    aws-tg-create-env:
+        executor: ubuntu-machine
+        steps:
+            - install-opta-dependencies
+            - attach_workspace:
+                at: ~/
+            - run:
+                command: |
+                    cd $HOME/generated-tf-files-aws
+                    terraform init
+                    terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base
+                    terraform apply -compact-warnings -auto-approve tf.plan
+                    terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8scluster
+                    terraform apply -compact-warnings -auto-approve tf.plan
+                    terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8sbase
+                    terraform apply -compact-warnings -auto-approve tf.plan
+                name: Create Terraform Generated Environment
+            - persist_to_workspace:
+                paths:
+                    - generated-tf-files-aws
+                root: ~/
+            - store_artifacts:
+                path: ~/generated-tf-files-aws
+    aws-tg-destroy-env:
+        executor: ubuntu-machine
+        steps:
+            - install-opta-dependencies
+            - attach_workspace:
+                at: ~/
+            - run:
+                command: |
+                    cd $HOME/generated-tf-files-aws
+                    terraform init
+                    terraform refresh
+                    terraform state rm module.base.aws_ebs_default_kms_key.default
+                    terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base -target=module.k8scluster -target=module.k8sbase -destroy
+                    terraform apply -compact-warnings -auto-approve tf.plan
+                name: Destroy Terraform Generated Environment
+            - store_artifacts:
+                path: ~/generated-tf-files-aws
+            - persist_to_workspace:
+                paths:
+                    - generated-tf-files-aws
+                root: ~/
+    aws-tg-test-other-modules-plan:
+        executor: ubuntu-machine
+        steps:
+            - checkout-opta
+            - install-opta-dependencies
+            - attach_workspace:
+                at: ~/
+            - attach_workspace:
+                at: ./
+            - opta-module-with-terraform-generate:
+                module: bucket
+            - opta-module-with-terraform-generate:
+                module: docdb
+            - opta-module-with-terraform-generate:
+                module: helmchart
+            - opta-module-with-terraform-generate:
+                module: mysql
+            - opta-module-with-terraform-generate:
+                module: redis
+            - opta-module-with-terraform-generate:
+                module: pg
+            - opta-module-with-terraform-generate:
+                module: awsiamrole
+            - opta-module-with-terraform-generate:
+                module: awsiamuser
+            - opta-module-with-terraform-generate:
+                module: sns
+            - opta-module-with-terraform-generate:
+                module: sqs
+            - opta-module-with-terraform-generate:
+                module: dynamodb
+    aws-tg-test-service-http:
+        executor: ubuntu-machine
+        steps:
+            - install-opta-dependencies
+            - attach_workspace:
+                at: ~/
+            - run:
+                command: |
+                    cd $HOME/generated-tf-files-aws
+                    terraform init
+                    terraform refresh
+                    terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello
+                    terraform apply -compact-warnings -auto-approve tf.plan
+                name: Create Terraform Generated Hello Opta Service
+            - run:
+                command: |
+                    sleep 120
+                name: Sleep 120 seconds
+            - run:
+                command: |
+                    cd $HOME/generated-tf-files-aws
+                    terraform output -json >> terraform_output.json
+                    export LOAD_BALANCER=`cat terraform_output.json | jq -r '.load_balancer_raw_dns' |jq -r '.value'`
+                    echo $LOAD_BALANCER
+                    curl "$LOAD_BALANCER/hello"
+                    echo "1"
+                name: Get Output and Test Load Balancer
+            - run:
+                command: |
+                    sleep 120
+                name: Sleep 120 seconds
+            - run:
+                command: |
+                    cd $HOME/generated-tf-files-aws
+                    terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello -destroy
+                    terraform apply -compact-warnings -auto-approve tf.plan
+                name: Destroy Terraform Generated Hello Opta Service
+            - persist_to_workspace:
+                paths:
+                    - generated-tf-files-aws
+                root: ~/
+            - store_artifacts:
+                path: ~/generated-tf-files-aws
+    az-test-user:
+        executor: ubuntu-machine
+        steps:
+            - azure-cli/install
+            - azure-cli/login-with-service-principal
+            - run:
+                command: az resource list
+                name: Azure Resources
+    azure-create-env:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout
+            - attach_workspace:
+                at: ./
+            - attach_workspace:
+                at: ~/
+            - install-opta-dependencies
+            - azure-cli/install
+            - azure-cli/login-with-service-principal
+            - run:
+                command: |-
+                    ./dist/opta/opta apply \
+                    --config ./.circleci/ci-tests/create-and-destroy-azure/environment.yaml \
+                    --auto-approve \
+                    --refresh
+                name: Run opta apply on environment configuration
+    azure-destroy-env:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout
+            - attach_workspace:
+                at: ./
+            - attach_workspace:
+                at: ~/
+            - install-opta-dependencies
+            - azure-cli/install
+            - azure-cli/login-with-service-principal
+            - run:
+                command: |-
+                    ./dist/opta/opta destroy \
+                    --config ./.circleci/ci-tests/create-and-destroy-azure/environment.yaml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Run opta destroy on environment configuration
+    azure-test-service-http:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout
+            - attach_workspace:
+                at: ./
+            - attach_workspace:
+                at: ~/
+            - install-opta-dependencies
+            - azure-cli/install
+            - azure-cli/login-with-service-principal
+            - run:
+                command: |
+                    ./dist/opta/opta apply \
+                    --config ./.circleci/ci-tests/create-and-destroy-azure/service-http.yaml \
+                    --auto-approve \
+                    --refresh
+                name: Run opta apply on HTTP service configuration
+            - run:
+                command: |-
+                    ./dist/opta/opta destroy \
+                    --config ./.circleci/ci-tests/create-and-destroy-azure/service-http.yaml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Run opta destroy on HTTP service configuration
+    build-opta-binary:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: ubuntu-machine
+        steps:
+            - checkout-opta
+            - install-python
+            - install-python-dependencies
+            - run:
+                command: |
+                    source $(pipenv --venv)/bin/activate
+                    export PYTHONPATH=$(pwd)
+                    make build-binary
+                name: Build opta binary
+            - persist_to_workspace:
+                paths:
+                    - dist
+                root: ./
+    build-opta-example-images:
+        executor: ubuntu-machine
+        steps:
+            - checkout-opta
+            - run:
+                command: git clone git@github.com:run-x/opta-examples.git
+                name: Git clone Opta Example
+            - run:
+                command: |
+                    docker build --tag todo-api:v1 -f opta-examples/full-stack-example/api/todo-python-django/Dockerfile opta-examples/full-stack-example/api/todo-python-django/
+                    docker build --tag todo-frontend:v1 -f opta-examples/full-stack-example/frontend/todo-vuejs/Dockerfile opta-examples/full-stack-example/frontend/todo-vuejs/
+                name: Build example images
+            - run:
+                command: |
+                    docker save -o todo-api todo-api:v1
+                    docker save -o todo-frontend todo-frontend:v1
+                name: Save Opta examples
+            - persist_to_workspace:
+                paths:
+                    - todo-api
+                    - todo-frontend
+                root: ./
+    build-test-service-image:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: ubuntu-machine
+        steps:
+            - checkout-opta
+            - run:
+                command: git clone git@github.com:run-x/test-service.git
+                name: Git clone the test service
+            - run:
+                command: docker build -t app:latest -f test-service/Dockerfile test-service/
+                name: Build test-service image
+            - run:
+                command: docker save -o test-service-image app:latest
+                name: Save test service
+            - persist_to_workspace:
+                paths:
+                    - test-service-image
+                root: ./
+    check-version:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: ubuntu-machine
+        steps:
+            - attach_workspace:
+                at: ~/
+            - run:
+                command: $HOME/.opta/opta version
+                name: Check Opta Version
+    download-opta:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: ubuntu-machine
+        steps:
+            - run:
+                command: |
+                    git config --global user.email "runx-ci@runx.dev"
+                    git config --global user.name "Runx CI"
+                name: Set git user
+            - run:
+                command: /bin/bash -c "$(curl -fsSL https://docs.opta.dev/install.sh)"
+                name: Download Latest Opta Binary
+            - install-opta-dependencies
+            - run:
+                command: |
+                    $HOME/.opta/opta version
+                name: Check Opta Version
+            - persist_to_workspace:
+                paths:
+                    - .opta
+                root: ~/
+    gcp-create-env:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - install-python
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - gcp-cli/install
+            - gcp-cli/initialize
+            - run:
+                command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+                name: Setting up gcp envar
+            - run:
+                command: |
+                    ./dist/opta/opta apply \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml \
+                    --auto-approve \
+                    --refresh
+                name: Deploy opta environment
+            - run:
+                command: echo 'export KUBECONFIG="$HOME/kube_config.yaml"' >> $BASH_ENV
+                name: Update KUBECONFIG
+            - run:
+                command: |-
+                    ./dist/opta/opta configure-kubectl \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml
+                name: Configure Kubectl
+    gcp-create-env-stable-version:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - install-python
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ~/
+            - install-opta-dependencies
+            - gcp-cli/install
+            - gcp-cli/initialize
+            - run:
+                command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+                name: Setting up gcp envar
+            - run:
+                command: |-
+                    yes | $HOME/.opta/opta apply \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml \
+                    --auto-approve \
+                    --refresh || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Deploy opta environment
+    gcp-destroy-env:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - install-python
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - gcp-cli/install
+            - gcp-cli/initialize
+            - run:
+                command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+                name: Setting up gcp envar
+            - run:
+                command: |-
+                    yes | ./dist/opta/opta destroy \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy environment
+    gcp-generate-terraform-language-files:
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - gcp-cli/install
+            - gcp-cli/initialize
+            - run:
+                command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+                name: Setting up gcp envar
+            - run:
+                command: |
+                    mkdir $HOME/generated-tf-files-gcp
+                    ./dist/opta/opta generate-terraform \
+                    --config ./.circleci/ci-tests/terraform-generated-gcp/environment.yaml \
+                    --directory $HOME/generated-tf-files-gcp \
+                    --auto-approve
+                    ./dist/opta/opta generate-terraform \
+                    --config ./.circleci/ci-tests/terraform-generated-gcp/service-hello-opta.yaml \
+                    --directory $HOME/generated-tf-files-gcp \
+                    --auto-approve
+                name: Generate Terraform Language Files
+            - persist_to_workspace:
+                paths:
+                    - generated-tf-files-gcp
+                root: ~/
+    gcp-opta-example-create-svcs:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: ubuntu-machine
+        steps:
+            - checkout-opta
+            - install-python
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - gcp-cli/install
+            - gcp-cli/initialize
+            - run:
+                command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+                name: Setting up GCP Credentials
+            - run:
+                command: |
+                    docker load -i todo-api
+                    docker load -i todo-frontend
+                name: Load Opta Example images
+            - run:
+                command: |
+                    ./dist/opta/opta deploy \
+                    --image todo-api:v1 \
+                    --config ./.circleci/ci-tests/todo-list/api-service.yml \
+                    --env gcpenv-ci \
+                    --auto-approve
+                name: Deploy Todo-Api Service
+            - run:
+                command: |
+                    ./dist/opta/opta deploy \
+                    --image todo-frontend:v1 \
+                    --config ./.circleci/ci-tests/todo-list/frontend-service.yml \
+                    --env gcpenv-ci \
+                    --auto-approve
+                name: Deploy Todo-Frontend Service
+            - run:
+                command: |
+                    ./dist/opta/opta apply \
+                    --config ./.circleci/ci-tests/todo-list/monitoring-service.yml \
+                    --env gcpenv-ci \
+                    --auto-approve
+                name: Deploy Monitoring Service
+            - run:
+                command: |-
+                    DIRTY_HOST_NAME="{`./dist/opta/opta output -c ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml | grep load_balancer_raw_ip`\"\":\"\"}"
+                    export HOST_NAME=`echo $DIRTY_HOST_NAME | jq -r '.load_balancer_raw_ip'`
+                    curl $HOST_NAME/frontend --fail
+                    curl $HOST_NAME/djangoapi/ht/ --fail
+                    curl $HOST_NAME/grafana --fail
+                name: Ping Tests
+    gcp-opta-example-destroy-svcs:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - install-python
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - gcp-cli/install
+            - gcp-cli/initialize
+            - run:
+                command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+                name: Setting up GCP Credentials
+            - run:
+                command: |
+                    yes | ./dist/opta/opta destroy \
+                    --config ./.circleci/ci-tests/todo-list/monitoring-service.yml \
+                    --env gcpenv-ci \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy Monitoring Service
+            - run:
+                command: |
+                    yes | ./dist/opta/opta destroy \
+                    --config ./.circleci/ci-tests/todo-list/frontend-service.yml \
+                    --env gcpenv-ci \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy Todo-Frontend Service
+            - run:
+                command: |-
+                    yes | ./dist/opta/opta destroy \
+                    --config ./.circleci/ci-tests/todo-list/api-service.yml \
+                    --env gcpenv-ci \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy Todo-Api Service
+    gcp-test-additional-nodegroup:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - install-python
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - gcp-cli/install
+            - gcp-cli/initialize
+            - run:
+                command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+                name: Setting up gcp envar
+            - run:
+                command: |
+                    ./dist/opta/opta apply \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/environment-additional-nodepool.yml \
+                    --auto-approve
+                name: Add additional Node Group to Opta Environment.
+            - run:
+                command: |-
+                    ./dist/opta/opta apply \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml \
+                    --auto-approve
+                name: Remove additional Node Group from Opta Environment
+    gcp-test-k8s-manifest:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - install-python
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - gcp-cli/install
+            - gcp-cli/initialize
+            - run:
+                command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+                name: Setting up gcp envar
+            - run:
+                command: echo 'export KUBECONFIG="$HOME/kube_config.yaml"' >> $BASH_ENV
+                name: Update KUBECONFIG
+            - run:
+                command: |
+                    ./dist/opta/opta configure-kubectl \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml
+                name: Configure Kubectl
+            - run:
+                command: |
+                    ./dist/opta/opta apply \
+                    --env gcpenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/k8s-manifest.yaml \
+                    --auto-approve
+                name: Apply K8s Manifest with Opta
+            - run:
+                command: |
+                    kubectl get pod -n default nginx
+                    exit $?
+                name: Test manifest pod creation
+            - run:
+                command: |-
+                    yes | ./dist/opta/opta destroy \
+                    --env gcpenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/k8s-manifest.yaml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy K8s Manifest with Opta
+    gcp-test-service-gcs:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: ubuntu-machine
+        steps:
+            - checkout-opta
+            - install-python
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - gcp-cli/install
+            - gcp-cli/initialize
+            - run:
+                command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+                name: Setting up gcp envar
+            - run:
+                command: docker load -i test-service-image
+                name: Load test-service image
+            - run:
+                command: |
+                    ./dist/opta/opta deploy \
+                    --image app:latest \
+                    --env gcpenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/service-gcs.yml \
+                    --tag $CIRCLE_SHA1 \
+                    --auto-approve
+                name: Deploy test-service-gcs
+            - run:
+                command: |-
+                    yes | ./dist/opta/opta destroy \
+                    --env gcpenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/service-gcs.yml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy test-service-gcs
+    gcp-test-service-helm:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: ubuntu-machine
+        steps:
+            - checkout-opta
+            - install-python
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - gcp-cli/install
+            - gcp-cli/initialize
+            - run:
+                command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+                name: Setting up gcp envar
+            - run:
+                command: docker load -i test-service-image
+                name: Load test-service image
+            - run:
+                command: |
+                    ./dist/opta/opta apply \
+                    --env gcpenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/service-helm.yml \
+                    --auto-approve
+                name: Deploy test-service-helm
+            - run:
+                command: |-
+                    yes | ./dist/opta/opta destroy \
+                    --env gcpenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/service-helm.yml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy test-service-helm
+    gcp-test-service-pg:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: ubuntu-machine
+        steps:
+            - checkout-opta
+            - install-python
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - gcp-cli/install
+            - gcp-cli/initialize
+            - install-python-dependencies
+            - run:
+                command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+                name: Setting up gcp envar
+            - run:
+                command: docker load -i test-service-image
+                name: Load test-service image
+            - run:
+                command: |
+                    ./dist/opta/opta secret update \
+                    --env gcpenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/service-pg.yml \
+                    FAKE_SECRET foo
+                name: Set secret
+            - run:
+                command: |
+                    ./dist/opta/opta deploy \
+                    --image app:latest \
+                    --env gcpenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/service-pg.yml \
+                    --tag $CIRCLE_SHA1 \
+                    --auto-approve
+                name: Deploy test-service-pg
+            - run:
+                command: echo 'export KUBECONFIG="$HOME/kube_config.yaml"' >> $BASH_ENV
+                name: Update KUBECONFIG
+            - run:
+                command: |
+                    ./dist/opta/opta configure-kubectl \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/service-pg.yml
+                name: Configure Kubectl
+            - run:
+                command: |
+                    source $(pipenv --venv)/bin/activate
+                    export PYTHONPATH=$(pwd)
+                    python ./.circleci/ci-tests/opta-shell-test.py \
+                    ./.circleci/ci-tests/create-and-destroy-gcp/service-pg.yml
+                name: Test Opta Shell
+            - run:
+                background: true
+                command: |
+                    ./dist/opta/opta logs \
+                    --env gcpenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/service-pg.yml >> logs.log
+                name: Opta logs
+            - run:
+                command: |
+                    sleep 90
+                    pkill -SIGQUIT opta
+                    cat logs.log | grep "\"GET /healthcheck HTTP/1.1\" 200"
+                    exit $?
+                name: Check opta logs
+            - run:
+                command: |
+                    ./dist/opta/opta deploy \
+                    --image app:latest \
+                    --env gcpenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/service-additional-pg.yml \
+                    --tag $CIRCLE_SHA1 \
+                    --auto-approve
+                name: Deploy test-service with Additional PG
+            - run:
+                command: |
+                    ./dist/opta/opta deploy \
+                    --image app:latest \
+                    --env gcpenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/service-pg.yml \
+                    --tag $CIRCLE_SHA1 \
+                    --auto-approve
+                name: Deploy test-service remove Additional PG
+            - run:
+                command: |
+                    secret_value=$(./dist/opta/opta secret view \
+                    --env gcpenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/service-pg.yml \
+                    FAKE_SECRET | grep foo)
+                    echo "This was the found secret value: ${secret_value}"
+                    [[ "$secret_value" =~ .*"foo".* ]] || exit 1
+                name: View secret and check value
+            - run:
+                command: |-
+                    yes | ./dist/opta/opta destroy \
+                    --env gcpenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/service-pg.yml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy test-service-pg
+    gcp-test-service-pg-latest-version:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: ubuntu-machine
+        steps:
+            - checkout-opta
+            - install-python
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ~/
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - gcp-cli/install
+            - gcp-cli/initialize
+            - run:
+                command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+                name: Setting up gcp envar
+            - run:
+                command: docker load -i test-service-image
+                name: Load test-service image
+            - run:
+                command: |
+                    yes | $HOME/.opta/opta secret update \
+                    --env gcpenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/service-pg.yml \
+                    FAKE_SECRET foo || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Set secret
+            - run:
+                command: |
+                    yes | $HOME/.opta/opta deploy \
+                    --image app:latest \
+                    --env gcpenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/service-pg.yml \
+                    --tag $CIRCLE_SHA1 \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Deploy test-service-pg
+            - run:
+                command: |
+                    yes | $HOME/.opta/opta deploy \
+                    --image app:latest \
+                    --env gcpenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/service-additional-pg.yml \
+                    --tag $CIRCLE_SHA1 \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Deploy test-service with Additional PG
+            - run:
+                command: |
+                    yes | $HOME/.opta/opta deploy \
+                    --image app:latest \
+                    --env gcpenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/service-pg.yml \
+                    --tag $CIRCLE_SHA1 \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Deploy test-service remove Additional PG
+            - run:
+                command: |
+                    secret_value=$($HOME/.opta/opta secret view \
+                    --env gcpenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/service-pg.yml \
+                    FAKE_SECRET | grep foo)
+                    echo "This was the found secret value: ${secret_value}"
+                    [[ "$secret_value" =~ .*"foo".* ]] || exit 1
+                name: View secret and check value
+            - run:
+                command: |-
+                    yes | $HOME/.opta/opta destroy \
+                    --env gcpenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/service-pg.yml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy test-service-pg
+    gcp-test-service-redis:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: ubuntu-machine
+        steps:
+            - checkout-opta
+            - install-python
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - gcp-cli/install
+            - gcp-cli/initialize
+            - run:
+                command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+                name: Setting up gcp envar
+            - run:
+                command: docker load -i test-service-image
+                name: Load test-service image
+            - run:
+                command: |
+                    ./dist/opta/opta deploy \
+                    --image app:latest \
+                    --env gcpenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/service-redis.yml \
+                    --tag $CIRCLE_SHA1 \
+                    --auto-approve
+                name: Deploy test-service-redis
+            - run:
+                command: |-
+                    yes | ./dist/opta/opta destroy \
+                    --env gcpenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/service-redis.yml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy test-service-redis
+    gcp-tg-create-env:
+        executor: python-docker
+        steps:
+            - install-opta-dependencies
+            - gcp-cli/install
+            - gcp-cli/initialize
+            - run:
+                command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+                name: Setting up gcp envar
+            - attach_workspace:
+                at: ~/
+            - run:
+                command: |
+                    cd $HOME/generated-tf-files-gcp
+                    terraform init
+                    terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base
+                    terraform apply -compact-warnings -auto-approve tf.plan
+                    terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8scluster
+                    terraform apply -compact-warnings -auto-approve tf.plan
+                    terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8sbase
+                    terraform apply -compact-warnings -auto-approve tf.plan
+                name: Create Terraform Generated Environment
+            - persist_to_workspace:
+                paths:
+                    - generated-tf-files-gcp
+                root: ~/
+            - store_artifacts:
+                path: ~/generated-tf-files-gcp
+    gcp-tg-destroy-env:
+        executor: python-docker
+        steps:
+            - install-opta-dependencies
+            - gcp-cli/install
+            - gcp-cli/initialize
+            - run:
+                command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+                name: Setting up gcp envar
+            - attach_workspace:
+                at: ~/
+            - run:
+                command: |
+                    cd $HOME/generated-tf-files-gcp
+                    terraform init
+                    terraform refresh
+                    terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base -target=module.k8scluster -target=module.k8sbase -destroy
+                    terraform apply -compact-warnings -auto-approve tf.plan
+                name: Destroy Terraform Generated Environment
+            - store_artifacts:
+                path: ~/generated-tf-files-gcp
+            - persist_to_workspace:
+                paths:
+                    - generated-tf-files-gcp
+                root: ~/
+    gcp-tg-test-other-modules-plan:
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - install-opta-dependencies
+            - gcp-cli/install
+            - gcp-cli/initialize
+            - run:
+                command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+                name: Setting up gcp envar
+            - attach_workspace:
+                at: ~/
+            - attach_workspace:
+                at: ./
+            - opta-module-with-terraform-generate:
+                module: gcs
+                provider: gcp
+            - opta-module-with-terraform-generate:
+                module: mysql
+                provider: gcp
+            - opta-module-with-terraform-generate:
+                module: pg
+                provider: gcp
+            - opta-module-with-terraform-generate:
+                module: redis
+                provider: gcp
+            - opta-module-with-terraform-generate:
+                module: serviceaccount
+                provider: gcp
+    gcp-tg-test-service-http:
+        executor: python-docker
+        steps:
+            - install-opta-dependencies
+            - gcp-cli/install
+            - gcp-cli/initialize
+            - run:
+                command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+                name: Setting up gcp envar
+            - attach_workspace:
+                at: ~/
+            - run:
+                command: |
+                    cd $HOME/generated-tf-files-gcp
+                    terraform init
+                    terraform refresh
+                    terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello
+                    terraform apply -compact-warnings -auto-approve tf.plan
+                name: Create Terraform Generated Hello Opta Service
+            - run:
+                command: |
+                    sleep 120
+                name: Sleep 120 seconds
+            - run:
+                command: |
+                    cd $HOME/generated-tf-files-gcp
+                    terraform output -json >> terraform_output.json
+                    export LOAD_BALANCER=`cat terraform_output.json | jq -r '.load_balancer_raw_ip' |jq -r '.value'`
+                    echo $LOAD_BALANCER
+                    curl "$LOAD_BALANCER/hello"
+                    echo "1"
+                name: Get Output and Test Load Balancer
+            - run:
+                command: |
+                    sleep 120
+                name: Sleep 120 seconds
+            - run:
+                command: |
+                    cd $HOME/generated-tf-files-gcp
+                    terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello -destroy
+                    terraform apply -compact-warnings -auto-approve tf.plan
+                name: Destroy Terraform Generated Hello Opta Service
+            - persist_to_workspace:
+                paths:
+                    - generated-tf-files-gcp
+                root: ~/
+            - store_artifacts:
+                path: ~/generated-tf-files-gcp
     get-all-parameter-values:
         executor: ubuntu-machine
         steps:
@@ -108,6 +1872,159 @@ jobs:
                     echo "ci-env-region-gcp:          " << pipeline.parameters.ci-env-region-gcp >>
                     echo "run-opta-terraform-generate-test: " << pipeline.parameters.run-opta-terraform-generate-test >>
                 name: Get all parameter values.
+    lint:
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - install-python-dependencies-development
+            - run:
+                command: |-
+                    source $(pipenv --venv)/bin/activate
+                    export PYTHONPATH=$(pwd)
+                    ./scripts/lint.py
+                name: Lint
+    local-opta-example-create-svcs:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: ubuntu-machine
+        steps:
+            - checkout-opta
+            - install-python
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - run:
+                command: |
+                    docker load -i todo-api
+                    docker load -i todo-frontend
+                name: Load Opta Example images
+            - run:
+                command: |
+                    ./dist/opta/opta deploy \
+                    --image todo-api:v1 \
+                    --config ./.circleci/ci-tests/todo-list/api-service.yml \
+                    --auto-approve \
+                    --local
+                name: Deploy Todo-Api Service
+            - run:
+                command: |
+                    ./dist/opta/opta deploy \
+                    --image todo-frontend:v1 \
+                    --config ./.circleci/ci-tests/todo-list/frontend-service.yml \
+                    --auto-approve \
+                    --local
+                name: Deploy Todo-Frontend Service
+            - run:
+                command: |
+                    ./dist/opta/opta apply \
+                    --config ./.circleci/ci-tests/todo-list/monitoring-service.yml \
+                    --auto-approve \
+                    --local
+                name: Deploy Monitoring Service
+            - run:
+                command: |-
+                    curl http://localhost:8080/frontend --fail
+                    curl http://localhost:8080/djangoapi/ht/ --fail
+                    curl http://localhost:8080/grafana --fail
+                name: Ping Tests
+    local-opta-example-destroy-svcs:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - run:
+                command: |
+                    yes | ./dist/opta/opta destroy \
+                    --config ./.circleci/ci-tests/todo-list/monitoring-service.yml \
+                    --auto-approve \
+                    --local || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy Monitoring Service
+            - run:
+                command: |
+                    yes | ./dist/opta/opta destroy \
+                    --config ./.circleci/ci-tests/todo-list/frontend-service.yml \
+                    --auto-approve \
+                    --local || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy Todo-Frontend Service
+            - run:
+                command: |-
+                    yes | ./dist/opta/opta destroy \
+                    --config ./.circleci/ci-tests/todo-list/api-service.yml \
+                    --auto-approve \
+                    --local || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy Todo-Api Service
+    no-pdb:
+        executor: ubuntu-machine
+        steps:
+            - checkout-opta
+            - run:
+                command: |-
+                    cd scripts
+                    ./no_pdb.sh
+                name: No PDB
+    pytest:
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - install-python-dependencies-development
+            - terraform/install:
+                arch: amd64
+                os: linux
+                terraform_version: 1.0.0
+            - run:
+                command: |
+                    export PYTHONPATH=$(pwd)
+                    pipenv run pytest --cov=./opta --cov=./modules --cov-report=xml
+                name: Test with pytest
+            - codecov/upload:
+                file: ./coverage.xml
+                flags: unittests
+    python-security:
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - install-python-dependencies-development
+            - run:
+                command: make security_tests
+                name: Security
+    regula-lint:
+        executor: ubuntu-machine
+        steps:
+            - checkout-opta
+            - run:
+                command: |
+                    cd config
+                    wget -O regula_1.0.0_Linux_x86_64.tar.gz https://github.com/fugue/regula/releases/download/v1.0.0/regula_1.0.0_Linux_x86_64.tar.gz
+                    tar -xvf regula_1.0.0_Linux_x86_64.tar.gz
+                name: Install regula
+            - run:
+                command: |-
+                    cd config
+                    ./regula run --include config.rego tf_modules
+                name: Run regula
+    terraform-formatter:
+        executor: ubuntu-machine
+        steps:
+            - checkout-opta
+            - terraform/install:
+                arch: amd64
+                os: linux
+                terraform_version: 1.0.0
+            - run:
+                command: terraform fmt -recursive -check ./config/tf_modules
+                name: Run terraform format
 orbs:
     aws-cli: circleci/aws-cli@2.0
     azure-cli: circleci/azure-cli@1.2.0
@@ -176,8 +2093,505 @@ parameters:
         type: boolean
 version: 2.1
 workflows:
+    nightly:
+        jobs:
+            - get-all-parameter-values
+            - build-test-service-image
+            - build-opta-example-images
+            - build-opta-binary:
+                requires:
+                    - build-test-service-image
+            - aws-create-env:
+                requires:
+                    - build-opta-binary
+            - aws-test-cloudfront:
+                requires:
+                    - aws-create-env
+            - aws-test-lambda-function:
+                requires:
+                    - aws-create-env
+            - aws-test-websocket:
+                requires:
+                    - aws-create-env
+            - aws-test-additional-nodegroup:
+                requires:
+                    - aws-create-env
+            - aws-test-service-pg:
+                requires:
+                    - aws-create-env
+            - aws-test-service-redis:
+                requires:
+                    - aws-create-env
+            - aws-test-service-docdb:
+                requires:
+                    - aws-create-env
+            - aws-test-service-s3:
+                requires:
+                    - aws-create-env
+            - aws-test-service-helm:
+                requires:
+                    - aws-create-env
+            - aws-test-k8s-manifest:
+                requires:
+                    - aws-create-env
+            - aws-destroy-env:
+                requires:
+                    - aws-test-websocket
+                    - aws-test-cloudfront
+                    - aws-test-lambda-function
+                    - aws-test-additional-nodegroup
+                    - aws-test-service-pg
+                    - aws-test-service-s3
+                    - aws-test-service-docdb
+                    - aws-test-service-redis
+                    - aws-test-service-helm
+                    - aws-test-k8s-manifest
+            - gcp-create-env:
+                requires:
+                    - build-opta-binary
+            - gcp-test-additional-nodegroup:
+                requires:
+                    - gcp-create-env
+            - gcp-test-service-pg:
+                requires:
+                    - gcp-create-env
+            - gcp-test-service-redis:
+                requires:
+                    - gcp-create-env
+            - gcp-test-service-helm:
+                requires:
+                    - gcp-create-env
+            - gcp-test-service-gcs:
+                requires:
+                    - gcp-create-env
+            - gcp-test-k8s-manifest:
+                requires:
+                    - gcp-create-env
+            - gcp-destroy-env:
+                requires:
+                    - gcp-test-additional-nodegroup
+                    - gcp-test-service-pg
+                    - gcp-test-service-redis
+                    - gcp-test-service-helm
+                    - gcp-test-service-gcs
+                    - gcp-test-k8s-manifest
+            - local-opta-example-create-svcs:
+                requires:
+                    - build-opta-binary
+                    - build-opta-example-images
+            - local-opta-example-destroy-svcs:
+                requires:
+                    - local-opta-example-create-svcs
+            - azure-create-env:
+                requires:
+                    - build-opta-binary
+            - azure-test-service-http:
+                requires:
+                    - azure-create-env
+            - azure-destroy-env:
+                requires:
+                    - azure-test-service-http
+            - aws-generate-terraform-language-files:
+                requires:
+                    - build-opta-binary
+            - aws-tg-create-env:
+                requires:
+                    - aws-generate-terraform-language-files
+            - aws-tg-test-service-http:
+                requires:
+                    - aws-tg-create-env
+            - aws-tg-test-other-modules-plan:
+                requires:
+                    - aws-tg-create-env
+            - aws-tg-destroy-env:
+                requires:
+                    - aws-tg-test-service-http
+                    - aws-tg-test-other-modules-plan
+            - gcp-generate-terraform-language-files:
+                requires:
+                    - build-opta-binary
+            - gcp-tg-create-env:
+                requires:
+                    - gcp-generate-terraform-language-files
+            - gcp-tg-test-service-http:
+                requires:
+                    - gcp-tg-create-env
+            - gcp-tg-test-other-modules-plan:
+                requires:
+                    - gcp-tg-create-env
+            - gcp-tg-destroy-env:
+                requires:
+                    - gcp-tg-test-service-http
+                    - gcp-tg-test-other-modules-plan
+        triggers:
+            - schedule:
+                cron: 0 2 * * *
+                filters:
+                    branches:
+                        only:
+                            - main
+    run-aws-dns:
+        jobs:
+            - get-all-parameter-values
+            - build-opta-binary
+            - aws-create-env-dns-false:
+                requires:
+                    - build-opta-binary
+            - aws-create-env-set-ns:
+                requires:
+                    - aws-create-env-dns-false
+            - aws-create-env-dns-true:
+                requires:
+                    - aws-create-env-set-ns
+            - aws-dns-test:
+                requires:
+                    - aws-create-env-dns-true
+            - aws-destroy-env-dns-true:
+                requires:
+                    - aws-dns-test
+        when: << pipeline.parameters.test-aws-dns >>
+    run-aws-lambda:
+        jobs:
+            - get-all-parameter-values
+            - build-opta-binary
+            - aws-create-env:
+                requires:
+                    - build-opta-binary
+            - aws-test-lambda-function:
+                requires:
+                    - aws-create-env
+            - aws-destroy-env:
+                requires:
+                    - aws-test-lambda-function
+        when: << pipeline.parameters.test-aws-lambda >>
+    run-ci:
+        jobs:
+            - no-pdb
+            - lint
+            - python-security
+            - terraform-formatter
+            - regula-lint
+            - pytest
+        when: << pipeline.parameters.run-ci >>
     run-create-and-destroy:
         jobs:
             - get-all-parameter-values
+            - build-test-service-image
+            - build-opta-example-images
+            - build-opta-binary:
+                requires:
+                    - build-test-service-image
+            - aws-create-env:
+                requires:
+                    - build-opta-binary
+            - aws-test-cloudfront:
+                requires:
+                    - aws-create-env
+            - aws-test-lambda-function:
+                requires:
+                    - aws-create-env
+            - aws-test-websocket:
+                requires:
+                    - aws-create-env
+            - aws-test-additional-nodegroup:
+                requires:
+                    - aws-create-env
+            - aws-test-service-pg:
+                requires:
+                    - aws-create-env
+            - aws-test-service-redis:
+                requires:
+                    - aws-create-env
+            - aws-test-service-docdb:
+                requires:
+                    - aws-create-env
+            - aws-test-service-s3:
+                requires:
+                    - aws-create-env
+            - aws-test-service-helm:
+                requires:
+                    - aws-create-env
+            - aws-test-k8s-manifest:
+                requires:
+                    - aws-create-env
+            - aws-destroy-env:
+                requires:
+                    - aws-test-websocket
+                    - aws-test-cloudfront
+                    - aws-test-lambda-function
+                    - aws-test-additional-nodegroup
+                    - aws-test-service-pg
+                    - aws-test-service-s3
+                    - aws-test-service-docdb
+                    - aws-test-service-redis
+                    - aws-test-service-helm
+                    - aws-test-k8s-manifest
+            - gcp-create-env:
+                requires:
+                    - build-opta-binary
+            - gcp-test-additional-nodegroup:
+                requires:
+                    - gcp-create-env
+            - gcp-test-service-pg:
+                requires:
+                    - gcp-create-env
+            - gcp-test-service-redis:
+                requires:
+                    - gcp-create-env
+            - gcp-test-service-helm:
+                requires:
+                    - gcp-create-env
+            - gcp-test-service-gcs:
+                requires:
+                    - gcp-create-env
+            - gcp-test-k8s-manifest:
+                requires:
+                    - gcp-create-env
+            - gcp-destroy-env:
+                requires:
+                    - gcp-test-additional-nodegroup
+                    - gcp-test-service-pg
+                    - gcp-test-service-redis
+                    - gcp-test-service-helm
+                    - gcp-test-service-gcs
+                    - gcp-test-k8s-manifest
+            - local-opta-example-create-svcs:
+                requires:
+                    - build-opta-binary
+                    - build-opta-example-images
+            - local-opta-example-destroy-svcs:
+                requires:
+                    - local-opta-example-create-svcs
+            - azure-create-env:
+                requires:
+                    - build-opta-binary
+            - azure-test-service-http:
+                requires:
+                    - azure-create-env
+            - azure-destroy-env:
+                requires:
+                    - azure-test-service-http
+            - aws-generate-terraform-language-files:
+                requires:
+                    - build-opta-binary
+            - aws-tg-create-env:
+                requires:
+                    - aws-generate-terraform-language-files
+            - aws-tg-test-service-http:
+                requires:
+                    - aws-tg-create-env
+            - aws-tg-test-other-modules-plan:
+                requires:
+                    - aws-tg-create-env
+            - aws-tg-destroy-env:
+                requires:
+                    - aws-tg-test-service-http
+                    - aws-tg-test-other-modules-plan
+            - gcp-generate-terraform-language-files:
+                requires:
+                    - build-opta-binary
+            - gcp-tg-create-env:
+                requires:
+                    - gcp-generate-terraform-language-files
+            - gcp-tg-test-service-http:
+                requires:
+                    - gcp-tg-create-env
+            - gcp-tg-test-other-modules-plan:
+                requires:
+                    - gcp-tg-create-env
+            - gcp-tg-destroy-env:
+                requires:
+                    - gcp-tg-test-service-http
+                    - gcp-tg-test-other-modules-plan
         when: << pipeline.parameters.run-create-and-destroy >>
+    run-create-and-destroy-azure:
+        jobs:
+            - build-test-service-image
+            - build-opta-binary:
+                requires:
+                    - build-test-service-image
+            - azure-create-env:
+                requires:
+                    - build-opta-binary
+            - azure-test-service-http:
+                requires:
+                    - azure-create-env
+            - azure-destroy-env:
+                requires:
+                    - azure-test-service-http
+        when: << pipeline.parameters.run-create-and-destroy-azure >>
+    run-create-destroy-local-example:
+        jobs:
+            - get-all-parameter-values
+            - build-opta-binary
+            - build-opta-example-images
+            - local-opta-example-create-svcs:
+                requires:
+                    - build-opta-binary
+                    - build-opta-example-images
+            - local-opta-example-destroy-svcs:
+                requires:
+                    - local-opta-example-create-svcs
+        when: << pipeline.parameters.run-create-destroy-local >>
+    run-destroy-all-envs:
+        jobs:
+            - get-all-parameter-values
+            - build-opta-binary
+            - gcp-destroy-env:
+                requires:
+                    - build-opta-binary
+            - aws-destroy-env:
+                requires:
+                    - build-opta-binary
+        when: << pipeline.parameters.run-destroy-all-envs >>
+    run-destroy-aws-dns-false:
+        jobs:
+            - get-all-parameter-values
+            - build-opta-binary
+            - aws-destroy-env-dns-false:
+                requires:
+                    - build-opta-binary
+        when: << pipeline.parameters.run-destroy-aws-dns-false >>
+    run-destroy-aws-dns-true:
+        jobs:
+            - get-all-parameter-values
+            - build-opta-binary
+            - aws-destroy-env-dns-true:
+                requires:
+                    - build-opta-binary
+        when: << pipeline.parameters.run-destroy-aws-dns-true >>
+    run-destroy-aws-env:
+        jobs:
+            - get-all-parameter-values
+            - build-opta-binary
+            - aws-destroy-env:
+                requires:
+                    - build-opta-binary
+        when: << pipeline.parameters.run-destroy-aws-env >>
+    run-destroy-gcp-env:
+        jobs:
+            - get-all-parameter-values
+            - build-opta-binary
+            - gcp-destroy-env:
+                requires:
+                    - build-opta-binary
+        when: << pipeline.parameters.run-destroy-gcp-env >>
+    run-opta-terraform-generate-test:
+        jobs:
+            - get-all-parameter-values
+            - build-opta-binary
+            - aws-generate-terraform-language-files:
+                requires:
+                    - build-opta-binary
+            - aws-tg-create-env:
+                requires:
+                    - aws-generate-terraform-language-files
+            - aws-tg-test-service-http:
+                requires:
+                    - aws-tg-create-env
+            - aws-tg-test-other-modules-plan:
+                requires:
+                    - aws-tg-create-env
+            - aws-tg-destroy-env:
+                requires:
+                    - aws-tg-test-service-http
+                    - aws-tg-test-other-modules-plan
+            - gcp-generate-terraform-language-files:
+                requires:
+                    - build-opta-binary
+            - gcp-tg-create-env:
+                requires:
+                    - gcp-generate-terraform-language-files
+            - gcp-tg-test-service-http:
+                requires:
+                    - gcp-tg-create-env
+            - gcp-tg-test-other-modules-plan:
+                requires:
+                    - gcp-tg-create-env
+            - gcp-tg-destroy-env:
+                requires:
+                    - gcp-tg-test-service-http
+                    - gcp-tg-test-other-modules-plan
+        when: << pipeline.parameters.run-opta-terraform-generate-test >>
+    run-release-vs-stable:
+        jobs:
+            - get-all-parameter-values
+            - build-opta-binary
+            - build-test-service-image
+            - download-opta
+            - check-version:
+                requires:
+                    - download-opta
+            - aws-create-env-stable-version:
+                requires:
+                    - download-opta
+                    - check-version
+            - aws-create-env:
+                requires:
+                    - build-opta-binary
+                    - aws-create-env-stable-version
+            - aws-test-websocket-stable-version:
+                requires:
+                    - aws-create-env-stable-version
+                    - aws-create-env
+            - aws-test-websocket:
+                requires:
+                    - aws-test-websocket-stable-version
+            - aws-destroy-env:
+                requires:
+                    - aws-test-websocket
+                    - build-opta-binary
+            - gcp-create-env-stable-version:
+                requires:
+                    - download-opta
+                    - check-version
+            - gcp-create-env:
+                requires:
+                    - build-opta-binary
+                    - gcp-create-env-stable-version
+            - gcp-test-service-pg-latest-version:
+                requires:
+                    - gcp-create-env-stable-version
+                    - gcp-create-env
+                    - build-test-service-image
+            - gcp-test-service-pg:
+                requires:
+                    - gcp-test-service-pg-latest-version
+            - gcp-destroy-env:
+                requires:
+                    - gcp-test-service-pg
+        when: << pipeline.parameters.run-release-vs-stable >>
+    run-service-mesh-e2e:
+        jobs:
+            - get-all-parameter-values
+            - build-opta-binary
+            - build-opta-example-images
+            - aws-create-env:
+                requires:
+                    - build-opta-binary
+            - gcp-create-env:
+                requires:
+                    - build-opta-binary
+            - aws-opta-example-create-svcs:
+                requires:
+                    - aws-create-env
+                    - build-opta-example-images
+            - aws-opta-example-destroy-svcs:
+                requires:
+                    - aws-opta-example-create-svcs
+            - aws-destroy-env:
+                requires:
+                    - aws-opta-example-destroy-svcs
+            - gcp-opta-example-create-svcs:
+                requires:
+                    - gcp-create-env
+                    - build-opta-example-images
+            - gcp-opta-example-destroy-svcs:
+                requires:
+                    - gcp-opta-example-create-svcs
+            - gcp-destroy-env:
+                requires:
+                    - gcp-opta-example-destroy-svcs
+        when: << pipeline.parameters.run-service-mesh-e2e >>
+    version: 2
 

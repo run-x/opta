@@ -1,0 +1,10 @@
+executor: ubuntu-machine
+steps:
+  - checkout-opta
+  - terraform/install:
+      arch: amd64
+      os: linux
+      terraform_version: 1.0.0
+  - run:
+      name: "Run terraform format"
+      command: "terraform fmt -recursive -check ./config/tf_modules"

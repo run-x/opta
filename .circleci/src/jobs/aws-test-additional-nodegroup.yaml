@@ -1,0 +1,26 @@
+executor: python-docker
+environment:
+  OPTA_DISABLE_REPORTING: "true"
+steps:
+  - checkout-opta
+  - when:
+      condition: << pipeline.parameters.ci-use-diff-env >>
+      steps:
+        - remake-environment-configs
+  - attach_workspace:
+      at: ./
+  - install-opta-dependencies
+  - aws-cli/install
+  - aws-cli/setup
+  - run:
+      name: "Add additional Node Group to Opta Environment."
+      command: |
+        ./dist/opta/opta apply \
+        --config ./.circleci/ci-tests/create-and-destroy-aws/environment-additional-nodegroup.yml \
+        --auto-approve
+  - run:
+      name: "Remove additional Node Group from Opta Environment"
+      command: |
+        ./dist/opta/opta apply \
+        --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml \
+        --auto-approve

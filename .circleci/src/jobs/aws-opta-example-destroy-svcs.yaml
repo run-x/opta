@@ -1,0 +1,35 @@
+executor: python-docker
+environment:
+  OPTA_DISABLE_REPORTING: "true"
+steps:
+  - checkout-opta
+  - when:
+      condition: << pipeline.parameters.ci-use-diff-env >>
+      steps:
+        - remake-environment-configs
+  - attach_workspace:
+      at: ./
+  - install-opta-dependencies
+  - aws-cli/install
+  - aws-cli/setup
+  - run:
+      name: "Destroy Monitoring Service"
+      command: |
+        yes | ./dist/opta/opta destroy \
+        --config ./.circleci/ci-tests/todo-list/monitoring-service.yml \
+        --env awsenv-ci \
+        --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+  - run:
+      name: "Destroy Todo-Frontend Service"
+      command: |
+        yes | ./dist/opta/opta destroy \
+        --config ./.circleci/ci-tests/todo-list/frontend-service.yml \
+        --env awsenv-ci \
+        --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+  - run:
+      name: "Destroy Todo-Api Service"
+      command: |
+        yes | ./dist/opta/opta destroy \
+        --config ./.circleci/ci-tests/todo-list/api-service.yml \
+        --env awsenv-ci \
+        --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi

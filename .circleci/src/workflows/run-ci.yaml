@@ -1,0 +1,8 @@
+when: << pipeline.parameters.run-ci >>
+jobs:
+  - no-pdb
+  - lint
+  - python-security
+  - terraform-formatter
+  - regula-lint
+  - pytest
