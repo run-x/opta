@@ -782,10 +782,9 @@ jobs:
     aws-test-websocket:
         environment:
             OPTA_DISABLE_REPORTING: "true"
-        executor: ubuntu-machine
+        executor: python-docker
         steps:
             - checkout-opta
-            - install-python
             - install-python-dependencies
             - when:
                 condition: << pipeline.parameters.ci-use-diff-env >>
@@ -822,10 +821,9 @@ jobs:
     aws-test-websocket-stable-version:
         environment:
             OPTA_DISABLE_REPORTING: "true"
-        executor: ubuntu-machine
+        executor: python-docker
         steps:
             - checkout-opta
-            - install-python
             - install-python-dependencies
             - when:
                 condition: << pipeline.parameters.ci-use-diff-env >>
@@ -1065,10 +1063,9 @@ jobs:
     build-opta-binary:
         environment:
             OPTA_DISABLE_REPORTING: "true"
-        executor: ubuntu-machine
+        executor: python-docker
         steps:
             - checkout-opta
-            - install-python
             - install-python-dependencies
             - run:
                 command: |
@@ -1483,10 +1480,9 @@ jobs:
     gcp-test-service-helm:
         environment:
             OPTA_DISABLE_REPORTING: "true"
-        executor: ubuntu-machine
+        executor: python-docker
         steps:
             - checkout-opta
-            - install-python
             - when:
                 condition: << pipeline.parameters.ci-use-diff-env >>
                 steps:
@@ -1499,9 +1495,6 @@ jobs:
             - run:
                 command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
                 name: Setting up gcp envar
-            - run:
-                command: docker load -i test-service-image
-                name: Load test-service image
             - run:
                 command: |
                     ./dist/opta/opta apply \

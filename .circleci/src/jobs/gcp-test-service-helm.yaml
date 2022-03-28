@@ -1,9 +1,8 @@
-executor: ubuntu-machine
+executor: python-docker
 environment:
   OPTA_DISABLE_REPORTING: "true"
 steps:
   - checkout-opta
-  - install-python
   - when:
       condition: << pipeline.parameters.ci-use-diff-env >>
       steps:
@@ -16,9 +15,6 @@ steps:
   - run:
       name: "Setting up gcp envar"
       command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
-  - run:
-      name: "Load test-service image"
-      command: docker load -i test-service-image
   - run:
       name: "Deploy test-service-helm"
       command: |
