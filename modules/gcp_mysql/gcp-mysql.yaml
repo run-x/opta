@@ -32,7 +32,7 @@ inputs:
   - name: identifier
     user_facing: true
     validator: str(required=False)
-    description: Name for the RDS instance. If not specified, it will be look like opta-<layer_name>-<module_name>-<random_string>
+    description: Name for the RDS instance. If not specified, it will default to opta-<layer_name>-<module_name>-<random_string>
     default: null
 outputs:
   - name: db_name

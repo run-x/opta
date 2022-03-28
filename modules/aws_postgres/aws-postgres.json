@@ -31,7 +31,7 @@
     },
     "identifier": {
       "type": "string",
-      "description": "Name for the RDS instance. If not specified, it will be look like opta-<layer_name>-<module_name>-<random_string>"
+      "description": "Name for the RDS instance. If not specified, it will default to opta-<layer_name>-<module_name>-<random_string>"
     },
     "type": {
       "description": "The name of this module",

@@ -20,7 +20,7 @@
     },
     "identifier": {
       "type": "string",
-      "description": "Name for the Redis instance. If not specified, it will be look like opta-<layer_name>-<module_name>"
+      "description": "Name for the Redis instance. If not specified, it will default to opta-<layer_name>-<module_name>"
     },
     "type": {
       "description": "The name of this module",

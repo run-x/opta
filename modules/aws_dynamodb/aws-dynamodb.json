@@ -62,7 +62,7 @@
       "default": "None"
     },
     "identifier": {
-      "description": "Name for the dynamodb table. If not specified, it will be look like opta-<layer_name>-<module_name>-<random_string>",
+      "description": "Name for the dynamodb table. If not specified, it will default to opta-<layer_name>-<module_name>-<random_string>",
       "type": "string",
       "default": "None"
     },
