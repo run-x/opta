@@ -3,6 +3,10 @@ environment:
   OPTA_DISABLE_REPORTING: "true"
 steps:
   - checkout
+  - when:
+      condition: << pipeline.parameters.ci-use-diff-env >>
+      steps:
+        - remake-environment-configs
   - attach_workspace:
       at: ./
   - attach_workspace:

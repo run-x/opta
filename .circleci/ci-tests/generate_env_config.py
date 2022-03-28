@@ -86,3 +86,6 @@ create_config_from_template(
     "environment.yaml",
     is_tg=True,
 )
+create_config_from_template(
+    "AZURE", "create-and-destroy-aws", "template-environment.yml", "environment.yml"
+)
