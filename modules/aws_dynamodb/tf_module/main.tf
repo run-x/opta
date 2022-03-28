@@ -28,6 +28,9 @@ resource "aws_dynamodb_table" "table_no_range" {
       type = attribute.value["type"]
     }
   }
+  lifecycle {
+    ignore_changes = [name]
+  }
 }
 
 resource "aws_dynamodb_table" "table_with_range" {

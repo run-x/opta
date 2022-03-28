@@ -42,7 +42,7 @@ resource "azurerm_postgresql_server" "opta" {
   }
 
   lifecycle {
-    ignore_changes = [storage_mb]
+    ignore_changes = [storage_mb, name]
   }
 }
 

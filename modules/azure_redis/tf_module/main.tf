@@ -18,6 +18,9 @@ resource "azurerm_redis_cache" "opta" {
   minimum_tls_version           = "1.2"
 
   redis_configuration {}
+  lifecycle {
+    ignore_changes = [name]
+  }
 }
 
 resource "azurerm_private_endpoint" "opta" {

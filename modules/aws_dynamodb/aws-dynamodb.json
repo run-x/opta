@@ -63,8 +63,7 @@
     },
     "identifier": {
       "description": "Name for the dynamodb table. If not specified, it will default to opta-<layer_name>-<module_name>-<random_string>",
-      "type": "string",
-      "default": "None"
+      "type": "string"
     },
     "type": {
       "description": "The name of this module",

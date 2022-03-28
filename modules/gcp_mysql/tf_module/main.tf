@@ -40,7 +40,7 @@ resource "google_sql_database_instance" "instance" {
   }
 
   lifecycle {
-    ignore_changes = [settings[0].disk_size]
+    ignore_changes = [settings[0].disk_size, name]
   }
 }
 

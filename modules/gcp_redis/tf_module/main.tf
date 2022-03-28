@@ -12,4 +12,7 @@ resource "google_redis_instance" "main" {
   connect_mode       = "PRIVATE_SERVICE_ACCESS"
   redis_version      = var.redis_version
   auth_enabled       = true
+  lifecycle {
+    ignore_changes = [name, display_name]
+  }
 }
