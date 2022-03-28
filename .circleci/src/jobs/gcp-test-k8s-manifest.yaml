@@ -3,7 +3,6 @@ environment:
   OPTA_DISABLE_REPORTING: "true"
 steps:
   - checkout-opta
-  - install-python
   - when:
       condition: << pipeline.parameters.ci-use-diff-env >>
       steps:
