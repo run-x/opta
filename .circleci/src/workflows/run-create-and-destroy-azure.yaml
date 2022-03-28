@@ -1,5 +1,6 @@
 when: << pipeline.parameters.run-create-and-destroy-azure >>
 jobs:
+  - get-all-parameter-values
   - build-test-service-image
   - build-opta-binary:
       requires:

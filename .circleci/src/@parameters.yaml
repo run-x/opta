@@ -5,10 +5,19 @@ parameters:
   run-create-and-destroy-azure:
     type: boolean
     default: false
+  run-create-and-destroy-aws:
+    type: boolean
+    default: false
+  run-create-and-destroy-gcp:
+    type: boolean
+    default: false
   run-destroy-gcp-env:
     type: boolean
     default: false
   run-destroy-aws-env:
+    type: boolean
+    default: false
+  run-destroy-azure-env:
     type: boolean
     default: false
   run-destroy-all-envs:
