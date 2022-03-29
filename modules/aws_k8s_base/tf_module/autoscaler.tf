@@ -1,4 +1,6 @@
 data "aws_iam_policy_document" "autoscaler" {
+#Ignore 
+#tfsec:ignore:aws-iam-no-policy-wildcards
   statement {
     actions = [
       "autoscaling:DescribeAutoScalingGroups",

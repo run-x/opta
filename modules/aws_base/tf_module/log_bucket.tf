@@ -13,6 +13,16 @@ resource "aws_s3_bucket" "log_bucket" {
   }
 }
 
+resource "aws_s3_bucket_public_access_block" "log_bucket" {
+  bucket = aws_s3_bucket.log_bucket.id
+
+  block_public_acls   = true
+  block_public_policy = true
+  restrict_public_buckets = true
+  ignore_public_acls = true
+
+}
+
 resource "aws_s3_bucket_acl" "log_bucket" {
   bucket = aws_s3_bucket.log_bucket.id
   acl    = "log-delivery-write"
@@ -25,6 +35,10 @@ resource "aws_s3_bucket_versioning" "log_bucket" {
   }
 }
 
+# Opta makes a design choice and uses public cloud provider managed encryption keys
+# They are very well administered by the cloud providers, and save the user from
+# a lot of key management overhead.
+#tfsec:ignore:aws-s3-encryption-customer-key
 resource "aws_s3_bucket_server_side_encryption_configuration" "log_bucket" {
   bucket = aws_s3_bucket.log_bucket.id
   rule {
