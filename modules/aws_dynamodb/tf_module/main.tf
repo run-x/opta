@@ -54,4 +54,7 @@ resource "aws_dynamodb_table" "table_with_range" {
       type = attribute.value["type"]
     }
   }
+  lifecycle {
+    ignore_changes = [name]
+  }
 }
