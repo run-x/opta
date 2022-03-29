@@ -2027,23 +2027,6 @@ jobs:
             - run:
                 command: terraform fmt -recursive -check ./config/tf_modules
                 name: Run terraform format
-    test:
-        executor: python-docker
-        steps:
-            - run:
-                command: echo "Dummy Step"
-            - when:
-                condition:
-                    or:
-                        - equal:
-                            - all
-                            - << pipeline.parameters.modules-to-test >>
-                        - equal:
-                            - test
-                            - << pipeline.parameters.modules-to-test >>
-                steps:
-                    - run:
-                        command: echo << pipeline.parameters.modules-to-test >>
 orbs:
     aws-cli: circleci/aws-cli@2.0
     azure-cli: circleci/azure-cli@1.2.0
@@ -2065,9 +2048,6 @@ parameters:
     ci-use-diff-env:
         default: false
         type: boolean
-    modules-to-test:
-        default: all
-        type: string
     run-ci:
         default: false
         type: boolean
@@ -2724,9 +2704,5 @@ workflows:
                 requires:
                     - gcp-opta-example-destroy-svcs
         when: << pipeline.parameters.run-service-mesh-e2e >>
-    test:
-        jobs:
-            - test
-        when: << pipeline.parameters.test >>
     version: 2
 

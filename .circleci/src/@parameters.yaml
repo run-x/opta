@@ -65,6 +65,3 @@ parameters:
   run-opta-terraform-generate-test:
     type: boolean
     default: false
-  modules-to-test:
-    type: string
-    default: 'all'
