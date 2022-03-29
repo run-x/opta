@@ -1,0 +1,10 @@
+executor: python-docker
+steps:
+  - when:
+      condition:
+        or:
+          - equal: [ "all", << pipeline.parameters.modules-to-test >> ]
+          - equal: [ "test", << pipeline.parameters.modules-to-test >> ]
+      steps:
+        - run: 
+            command: echo << pipeline.parameters.modules-to-test >>
