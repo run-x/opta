@@ -2030,6 +2030,8 @@ jobs:
     test:
         executor: python-docker
         steps:
+            - run:
+                command: echo "Dummy Step"
             - when:
                 condition:
                     or:
