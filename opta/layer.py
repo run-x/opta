@@ -383,18 +383,18 @@ class Layer:
             unique_modules.add(module.type)
 
         # Checks the Dependency Graph for Unresolved Dependencies.
-        previous_modules: Set[str] = set()
-        for module in layer.modules:
-            dependency_modules = MODULE_DEPENDENCY.get(
-                module.aliased_type or module.type, set()
-            )
-            for dependency_module in dependency_modules:
-                if not previous_modules.__contains__(dependency_module):
-                    raise UserErrors(
-                        f'Module: "{module.type}" has it\'s dependency on a missing Module: "{dependency_module}". '
-                        f"Please rectify the configuration before using it."
-                    )
-            previous_modules.add(module.aliased_type or module.type)
+        # previous_modules: Set[str] = set()
+        # for module in layer.modules:
+        #     dependency_modules = MODULE_DEPENDENCY.get(
+        #         module.aliased_type or module.type, set()
+        #     )
+        #     for dependency_module in dependency_modules:
+        #         if not previous_modules.__contains__(dependency_module):
+        #             raise UserErrors(
+        #                 f'Module: "{module.type}" has it\'s dependency on a missing Module: "{dependency_module}". '
+        #                 f"Please rectify the configuration before using it."
+        #             )
+        #     previous_modules.add(module.aliased_type or module.type)
 
     @staticmethod
     def valid_name(name: str) -> bool:
@@ -435,9 +435,9 @@ class Layer:
     def get_module_by_type(
         self, module_type: str, module_idx: Optional[int] = None
     ) -> list[Module]:
-        module_idx = len(self.modules) - 1 if module_idx is None else module_idx
+        module_idx = len(self.modules) if module_idx is None else module_idx
         modules = []
-        for module in self.modules[0 : module_idx + 1]:
+        for module in self.modules[0 : module_idx]:
             if module.type == module_type or module.aliased_type == module_type:
                 modules.append(module)
         return modules
