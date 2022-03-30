@@ -202,7 +202,7 @@ class K8sServiceModuleProcessor(ModuleProcessor):
         if pending_upgrade_helm_chart:
             raise UserErrors(
                 f"There is a pending upgrade for the helm chart: {self.layer.name}-{self.module.name}."
-                "\nPlease use `opta force-unlock` to rollback already existing module."
+                "\nIt will cause this command to fail. Please use `opta force-unlock` to rollback to a consistent state first."
             )
         return super().pre_hook(module_idx)
 
