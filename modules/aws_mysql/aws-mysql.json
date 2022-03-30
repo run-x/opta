@@ -29,6 +29,11 @@
       "description": "Add deletion protection to stop accidental db deletions",
       "default": false
     },
+    "db_name": {
+      "type": "string",
+      "description": "The name of the database to create.",
+      "default": "app"
+    },
     "type": {
       "description": "The name of this module",
       "enum": [

@@ -39,6 +39,11 @@ inputs:
     validator: bool(required=False)
     description: Add deletion protection to stop accidental db deletions
     default: false
+  - name: db_name
+    user_facing: true
+    validator: str(required=False)
+    description: The name of the database to create.
+    default: app
 outputs:
   - name: db_user
     export: false

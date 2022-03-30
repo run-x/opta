@@ -20,7 +20,7 @@ resource "random_string" "db_name_hash" {
 resource "aws_rds_cluster" "db_cluster" {
   cluster_identifier      = "opta-${var.layer_name}-${var.module_name}-${random_string.db_name_hash.result}"
   db_subnet_group_name    = "opta-${var.env_name}"
-  database_name           = "app"
+  database_name           = var.db_name
   engine                  = "aurora-mysql"
   engine_version          = var.engine_version
   master_username         = "mysqldb"

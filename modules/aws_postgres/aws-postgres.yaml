@@ -39,6 +39,11 @@ inputs:
     validator: int(required=False)
     description: How many days to keep the backup retention
     default: 7
+  - name: db_name
+    user_facing: true
+    validator: str(required=False)
+    description: The name of the database to create.
+    default: app
 outputs:
   - name: db_user
     export: false

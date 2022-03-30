@@ -39,3 +39,9 @@ variable "multi_az" {
   type    = bool
   default = false
 }
+
+
+variable "db_name" {
+  type    = string
+  default = "app"
+}
