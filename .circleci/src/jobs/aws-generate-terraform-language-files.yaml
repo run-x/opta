@@ -1,0 +1,28 @@
+executor: python-docker
+steps:
+  - checkout-opta
+  - when:
+      condition: << pipeline.parameters.ci-use-diff-env >>
+      steps:
+        - remake-environment-configs
+  - attach_workspace:
+      at: ./
+  - install-opta-dependencies
+  - aws-cli/install
+  - aws-cli/setup
+  - run:
+      name: "Generate Terraform Language Files"
+      command: |
+        mkdir $HOME/generated-tf-files-aws
+        ./dist/opta/opta generate-terraform \
+        --config ./.circleci/ci-tests/terraform-generated-aws/environment.yaml \
+        --directory $HOME/generated-tf-files-aws \
+        --auto-approve
+        ./dist/opta/opta generate-terraform \
+        --config ./.circleci/ci-tests/terraform-generated-aws/service-hello-opta.yaml \
+        --directory $HOME/generated-tf-files-aws \
+        --auto-approve
+  - persist_to_workspace:
+      root: ~/
+      paths:
+        - generated-tf-files-aws

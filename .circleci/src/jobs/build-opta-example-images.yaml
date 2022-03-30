@@ -1,0 +1,21 @@
+executor: ubuntu-machine
+steps:
+  - checkout-opta
+  - run:
+      name: "Git clone Opta Example"
+      command: "git clone git@github.com:run-x/opta-examples.git"
+  - run:
+      name: "Build example images"
+      command: |
+        docker build --tag todo-api:v1 -f opta-examples/full-stack-example/api/todo-python-django/Dockerfile opta-examples/full-stack-example/api/todo-python-django/
+        docker build --tag todo-frontend:v1 -f opta-examples/full-stack-example/frontend/todo-vuejs/Dockerfile opta-examples/full-stack-example/frontend/todo-vuejs/
+  - run:
+      name: "Save Opta examples"
+      command: |
+        docker save -o todo-api todo-api:v1
+        docker save -o todo-frontend todo-frontend:v1
+  - persist_to_workspace:
+      root: ./
+      paths:
+        - todo-api
+        - todo-frontend

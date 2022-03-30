@@ -1,0 +1,32 @@
+executor: python-docker
+environment:
+  OPTA_DISABLE_REPORTING: "true"
+steps:
+  - checkout-opta
+  - when:
+      condition: << pipeline.parameters.ci-use-diff-env >>
+      steps:
+        - remake-environment-configs
+  - attach_workspace:
+      at: ./
+  - install-opta-dependencies
+  - gcp-cli/install
+  - gcp-cli/initialize
+  - run:
+      name: "Setting up gcp envar"
+      command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+  - run:
+      name: "Deploy opta environment"
+      command: |
+        ./dist/opta/opta apply \
+        --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml \
+        --auto-approve \
+        --refresh
+  - run:
+      name: "Update KUBECONFIG"
+      command: echo 'export KUBECONFIG="$HOME/kube_config.yaml"' >> $BASH_ENV
+  - run:
+      name: "Configure Kubectl"
+      command: |
+        ./dist/opta/opta configure-kubectl \
+        --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml

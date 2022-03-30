@@ -1,0 +1,20 @@
+executor: python-docker
+environment:
+  OPTA_DISABLE_REPORTING: "true"
+steps:
+  - checkout-opta
+  - when:
+      condition: << pipeline.parameters.ci-use-diff-env >>
+      steps:
+        - remake-environment-configs
+  - attach_workspace:
+      at: ./
+  - install-opta-dependencies
+  - aws-cli/install
+  - aws-cli/setup
+  - run:
+      name: "Destroy environment with DNS Delegated True"
+      command: |
+        yes | ./dist/opta/opta destroy \
+        --config ./.circleci/ci-tests/todo-list/provider-aws-dns-true.yml \
+        --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi

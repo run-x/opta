@@ -1,0 +1,22 @@
+executor: python-docker
+environment:
+  OPTA_DISABLE_REPORTING: "true"
+steps:
+  - checkout
+  - when:
+      condition: << pipeline.parameters.ci-use-diff-env >>
+      steps:
+        - remake-environment-configs
+  - attach_workspace:
+      at: ./
+  - attach_workspace:
+      at: ~/
+  - install-opta-dependencies
+  - azure-cli/install
+  - azure-cli/login-with-service-principal
+  - run:
+      name: Run opta destroy on environment configuration
+      command: |
+        ./dist/opta/opta destroy \
+        --config ./.circleci/ci-tests/create-and-destroy-azure/environment.yaml \
+        --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi

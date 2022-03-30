@@ -1,0 +1,18 @@
+executor: ubuntu-machine
+environment:
+  OPTA_DISABLE_REPORTING: "true"
+steps:
+  - checkout-opta
+  - run:
+      name: "Git clone the test service"
+      command: "git clone git@github.com:run-x/test-service.git"
+  - run:
+      name: "Build test-service image"
+      command: docker build -t app:latest -f test-service/Dockerfile test-service/
+  - run:
+      name: "Save test service"
+      command: docker save -o test-service-image app:latest
+  - persist_to_workspace:
+      root: ./
+      paths:
+        - test-service-image

@@ -1,0 +1,17 @@
+executor: ubuntu-machine
+environment:
+  OPTA_DISABLE_REPORTING: "true"
+steps:
+  - checkout-opta
+  - install-python
+  - install-python-dependencies
+  - run:
+      name: "Build opta binary"
+      command: |
+        source $(pipenv --venv)/bin/activate
+        export PYTHONPATH=$(pwd)
+        make build-binary
+  - persist_to_workspace:
+      root: ./
+      paths:
+        - dist

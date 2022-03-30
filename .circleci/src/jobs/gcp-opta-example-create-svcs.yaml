@@ -1,0 +1,54 @@
+executor: ubuntu-machine
+environment:
+  OPTA_DISABLE_REPORTING: "true"
+steps:
+  - checkout-opta
+  - install-python
+  - when:
+      condition: << pipeline.parameters.ci-use-diff-env >>
+      steps:
+        - remake-environment-configs
+  - attach_workspace:
+      at: ./
+  - install-opta-dependencies
+  - gcp-cli/install
+  - gcp-cli/initialize
+  - run:
+      name: "Setting up GCP Credentials"
+      command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+  - run:
+      name: "Load Opta Example images"
+      command: |
+        docker load -i todo-api
+        docker load -i todo-frontend
+  - run:
+      name: "Deploy Todo-Api Service"
+      command: |
+        ./dist/opta/opta deploy \
+        --image todo-api:v1 \
+        --config ./.circleci/ci-tests/todo-list/api-service.yml \
+        --env gcpenv-ci \
+        --auto-approve
+  - run:
+      name: "Deploy Todo-Frontend Service"
+      command: |
+        ./dist/opta/opta deploy \
+        --image todo-frontend:v1 \
+        --config ./.circleci/ci-tests/todo-list/frontend-service.yml \
+        --env gcpenv-ci \
+        --auto-approve
+  - run:
+      name: "Deploy Monitoring Service"
+      command: |
+        ./dist/opta/opta apply \
+        --config ./.circleci/ci-tests/todo-list/monitoring-service.yml \
+        --env gcpenv-ci \
+        --auto-approve
+  - run:
+      name: "Ping Tests"
+      command: |
+        DIRTY_HOST_NAME="{`./dist/opta/opta output -c ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml | grep load_balancer_raw_ip`\"\":\"\"}"
+        export HOST_NAME=`echo $DIRTY_HOST_NAME | jq -r '.load_balancer_raw_ip'`
+        curl $HOST_NAME/frontend --fail
+        curl $HOST_NAME/djangoapi/ht/ --fail
+        curl $HOST_NAME/grafana --fail

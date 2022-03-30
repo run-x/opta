@@ -1,0 +1,7 @@
+executor: ubuntu-machine
+steps:
+  - azure-cli/install
+  - azure-cli/login-with-service-principal
+  - run:
+      name: "Azure Resources"
+      command: "az resource list"

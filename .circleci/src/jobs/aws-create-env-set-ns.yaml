@@ -1,0 +1,17 @@
+executor: python-docker
+environment:
+  OPTA_DISABLE_REPORTING: "true"
+steps:
+  - checkout-opta
+  - when:
+      condition: << pipeline.parameters.ci-use-diff-env >>
+      steps:
+        - remake-environment-configs
+  - attach_workspace:
+      at: ./
+  - install-opta-dependencies
+  - aws-cli/install
+  - aws-cli/setup
+  - run:
+      name: "Run the Script for Setting NS"
+      command: ./.circleci/ci-tests/todo-list/set-ns.sh ./.circleci/ci-tests/todo-list/provider-aws-dns-false.yml

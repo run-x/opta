@@ -1,0 +1,7 @@
+when: << pipeline.parameters.run-destroy-aws-dns-false >>
+jobs:
+  - get-all-parameter-values
+  - build-opta-binary
+  - aws-destroy-env-dns-false:
+      requires:
+        - build-opta-binary

@@ -1,0 +1,47 @@
+when: << pipeline.parameters.run-release-vs-stable >>
+jobs:
+  - get-all-parameter-values
+  - build-opta-binary
+  - build-test-service-image
+  - download-opta
+  - check-version:
+      requires:
+        - download-opta
+  - aws-create-env-stable-version:
+      requires:
+        - download-opta
+        - check-version
+  - aws-create-env:
+      requires:
+        - build-opta-binary
+        - aws-create-env-stable-version
+  - aws-test-websocket-stable-version:
+      requires:
+        - aws-create-env-stable-version
+        - aws-create-env
+  - aws-test-websocket:
+      requires:
+        - aws-test-websocket-stable-version
+  - aws-destroy-env:
+      requires:
+        - aws-test-websocket
+        - build-opta-binary
+  - gcp-create-env-stable-version:
+      requires:
+        - download-opta
+        - check-version
+  - gcp-create-env:
+      requires:
+        - build-opta-binary
+        - gcp-create-env-stable-version
+  - gcp-test-service-pg-latest-version:
+      requires:
+        - gcp-create-env-stable-version
+        - gcp-create-env
+        - build-test-service-image
+  - gcp-test-service-pg:
+      requires:
+        - gcp-test-service-pg-latest-version
+  - gcp-destroy-env:
+      requires:
+        - gcp-test-service-pg

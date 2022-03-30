@@ -1,0 +1,6 @@
+steps:
+  - run:
+      name: "Installing python version 3.8"
+      command: |
+        pyenv install 3.8.12
+        pyenv global 3.8.12

@@ -1,0 +1,15 @@
+# Note: The below command is dependent on the Repo being checked out and should always have a checkout command in the pipeline.
+steps:
+  - run:
+      name: Remake configs.
+      command: python ./.circleci/ci-tests/generate_env_config.py << pipeline.parameters.ci-env-name >> << pipeline.parameters.ci-env-region-aws >> << pipeline.parameters.ci-env-region-gcp >>
+  - run:
+      name: Show configs.
+      command: |
+        cat ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
+        cat ./.circleci/ci-tests/create-and-destroy-aws/environment-additional-nodegroup.yml
+        cat ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml
+        cat ./.circleci/ci-tests/create-and-destroy-gcp/environment-additional-nodepool.yml
+        cat ./.circleci/ci-tests/todo-list/provider-aws-dns-false.yml
+        cat ./.circleci/ci-tests/todo-list/provider-aws-dns-true.yml
+        cat ./.circleci/ci-tests/todo-list/provider-gcp.yml

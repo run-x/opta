@@ -1,0 +1,98 @@
+executor: ubuntu-machine
+environment:
+  OPTA_DISABLE_REPORTING: "true"
+steps:
+  - checkout-opta
+  - install-python
+  - when:
+      condition: << pipeline.parameters.ci-use-diff-env >>
+      steps:
+        - remake-environment-configs
+  - attach_workspace:
+      at: ./
+  - install-python-dependencies
+  - install-opta-dependencies
+  - aws-cli/install
+  - aws-cli/setup
+  - run:
+      name: "Load test-service image"
+      command: docker load -i test-service-image
+  - run:
+      name: "Set secret"
+      command: |
+        ./dist/opta/opta secret update \
+        --env awsenv-ci \
+        --config ./.circleci/ci-tests/create-and-destroy-aws/service-pg.yml \
+        FAKE_SECRET foo
+  - run:
+      name: "Deploy test-service"
+      command: |
+        ./dist/opta/opta deploy \
+        --image app:latest \
+        --env awsenv-ci \
+        --config ./.circleci/ci-tests/create-and-destroy-aws/service-pg.yml \
+        --tag $CIRCLE_SHA1 \
+        --auto-approve
+  - run:
+      name: "Update KUBECONFIG"
+      command: echo 'export KUBECONFIG="$HOME/kube_config.yaml"' >> $BASH_ENV
+  - run:
+      name: "Configure Kubectl"
+      command: |
+        ./dist/opta/opta configure-kubectl \
+        --config ./.circleci/ci-tests/create-and-destroy-aws/service-pg.yml
+  - run:
+      name: "Test Opta Shell"
+      command: |
+        source $(pipenv --venv)/bin/activate
+        export PYTHONPATH=$(pwd)
+        python ./.circleci/ci-tests/opta-shell-test.py \
+        ./.circleci/ci-tests/create-and-destroy-aws/service-pg.yml
+  - run:
+      name: "Opta logs"
+      command: |
+        ./dist/opta/opta logs \
+        --env awsenv-ci \
+        --config ./.circleci/ci-tests/create-and-destroy-aws/service-pg.yml >> logs.log
+      background: true
+  - run:
+      name: "Check opta logs"
+      command: |
+        sleep 90
+        pkill -SIGQUIT opta
+        cat logs.log | grep "\"GET /healthcheck HTTP/1.1\" 200"
+        exit $?
+  - run:
+      name: "Deploy test-service with Additional PG"
+      command: |
+        ./dist/opta/opta deploy \
+        --image app:latest \
+        --env awsenv-ci \
+        --config ./.circleci/ci-tests/create-and-destroy-aws/service-additional-pg.yml \
+        --tag $CIRCLE_SHA1 \
+        --auto-approve
+  - run:
+      name: "Deploy test-service remove Additional PG"
+      command: |
+        ./dist/opta/opta deploy \
+        --image app:latest \
+        --env awsenv-ci \
+        --config ./.circleci/ci-tests/create-and-destroy-aws/service-pg.yml \
+        --tag $CIRCLE_SHA1 \
+        --auto-approve
+  - run:
+      name: "View secret and check value"
+      command: |
+        secret_value=$(./dist/opta/opta secret view \
+        --env awsenv-ci \
+        --config ./.circleci/ci-tests/create-and-destroy-aws/service-pg.yml \
+        FAKE_SECRET | grep foo)
+        echo "This was the found secret value: ${secret_value}"
+        [[ "$secret_value" =~ .*"foo".* ]] || exit 1
+  - run:
+      name: "Destroy test service"
+      command: |
+        yes | ./dist/opta/opta destroy \
+        --env awsenv-ci \
+        --config ./.circleci/ci-tests/create-and-destroy-aws/service-pg.yml \
+        --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi

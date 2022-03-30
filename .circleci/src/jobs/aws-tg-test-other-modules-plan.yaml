@@ -1,0 +1,30 @@
+executor: ubuntu-machine
+steps:
+  - checkout-opta
+  - install-opta-dependencies
+  - attach_workspace:
+      at: ~/
+  - attach_workspace:
+      at: ./
+  - opta-module-with-terraform-generate:
+      module: "bucket"
+  - opta-module-with-terraform-generate:
+      module: "docdb"
+  - opta-module-with-terraform-generate:
+      module: "helmchart"
+  - opta-module-with-terraform-generate:
+      module: "mysql"
+  - opta-module-with-terraform-generate:
+      module: "redis"
+  - opta-module-with-terraform-generate:
+      module: "pg"
+  - opta-module-with-terraform-generate:
+      module: "awsiamrole"
+  - opta-module-with-terraform-generate:
+      module: "awsiamuser"
+  - opta-module-with-terraform-generate:
+      module: "sns"
+  - opta-module-with-terraform-generate:
+      module: "sqs"
+  - opta-module-with-terraform-generate:
+      module: "dynamodb"

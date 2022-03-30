@@ -1,0 +1,27 @@
+executor: python-docker
+steps:
+  - install-opta-dependencies
+  - gcp-cli/install
+  - gcp-cli/initialize
+  - run:
+      name: "Setting up gcp envar"
+      command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+  - attach_workspace:
+      at: ~/
+  - run:
+      name: "Create Terraform Generated Environment"
+      command: |
+        cd $HOME/generated-tf-files-gcp
+        terraform init
+        terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base
+        terraform apply -compact-warnings -auto-approve tf.plan
+        terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8scluster
+        terraform apply -compact-warnings -auto-approve tf.plan
+        terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8sbase
+        terraform apply -compact-warnings -auto-approve tf.plan
+  - persist_to_workspace:
+      root: ~/
+      paths:
+        - generated-tf-files-gcp
+  - store_artifacts:
+      path: ~/generated-tf-files-gcp

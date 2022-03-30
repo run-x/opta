@@ -1,0 +1,39 @@
+executor: python-docker
+environment:
+  OPTA_DISABLE_REPORTING: "true"
+steps:
+  - checkout-opta
+  - install-python
+  - when:
+      condition: << pipeline.parameters.ci-use-diff-env >>
+      steps:
+        - remake-environment-configs
+  - attach_workspace:
+      at: ./
+  - install-opta-dependencies
+  - gcp-cli/install
+  - gcp-cli/initialize
+  - run:
+      name: "Setting up GCP Credentials"
+      command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+  - run:
+      name: "Destroy Monitoring Service"
+      command: |
+        yes | ./dist/opta/opta destroy \
+        --config ./.circleci/ci-tests/todo-list/monitoring-service.yml \
+        --env gcpenv-ci \
+        --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+  - run:
+      name: "Destroy Todo-Frontend Service"
+      command: |
+        yes | ./dist/opta/opta destroy \
+        --config ./.circleci/ci-tests/todo-list/frontend-service.yml \
+        --env gcpenv-ci \
+        --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+  - run:
+      name: "Destroy Todo-Api Service"
+      command: |
+        yes | ./dist/opta/opta destroy \
+        --config ./.circleci/ci-tests/todo-list/api-service.yml \
+        --env gcpenv-ci \
+        --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi

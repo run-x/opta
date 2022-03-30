@@ -1,0 +1,8 @@
+executor: ubuntu-machine
+steps:
+  - checkout-opta
+  - run:
+      name: "No PDB"
+      command: |
+        cd scripts
+        ./no_pdb.sh

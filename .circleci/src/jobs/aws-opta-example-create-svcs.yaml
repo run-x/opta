@@ -1,0 +1,51 @@
+executor: ubuntu-machine
+environment:
+  OPTA_DISABLE_REPORTING: "true"
+steps:
+  - checkout-opta
+  - install-python
+  - when:
+      condition: << pipeline.parameters.ci-use-diff-env >>
+      steps:
+        - remake-environment-configs
+  - attach_workspace:
+      at: ./
+  - install-opta-dependencies
+  - aws-cli/install
+  - aws-cli/setup
+  - run:
+      name: "Load Opta Example images"
+      command: |
+        docker load -i todo-api
+        docker load -i todo-frontend
+  - run:
+      name: "Deploy Todo-Api Service"
+      command: |
+        ./dist/opta/opta deploy \
+        --image todo-api:v1 \
+        --config ./.circleci/ci-tests/todo-list/api-service.yml \
+        --env awsenv-ci \
+        --auto-approve
+  - run:
+      name: "Deploy Todo-Frontend Service"
+      command: |
+        ./dist/opta/opta deploy \
+        --image todo-frontend:v1 \
+        --config ./.circleci/ci-tests/todo-list/frontend-service.yml \
+        --env awsenv-ci \
+        --auto-approve
+  - run:
+      name: "Deploy Monitoring Service"
+      command: |
+        ./dist/opta/opta apply \
+        --config ./.circleci/ci-tests/todo-list/monitoring-service.yml \
+        --env awsenv-ci \
+        --auto-approve
+  - run:
+      name: "Ping Tests"
+      command: |
+        DIRTY_HOST_NAME="{`./dist/opta/opta output -c ./.circleci/ci-tests/create-and-destroy-aws/environment.yml | grep load_balancer_raw_dns`\"\":\"\"}"
+        export HOST_NAME=`echo $DIRTY_HOST_NAME | jq -r '.load_balancer_raw_dns'`
+        curl $HOST_NAME/frontend --fail
+        curl $HOST_NAME/djangoapi/ht/ --fail
+        curl $HOST_NAME/grafana --fail

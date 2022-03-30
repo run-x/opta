@@ -1,0 +1,12 @@
+when: << pipeline.parameters.run-create-destroy-local >>
+jobs:
+  - get-all-parameter-values
+  - build-opta-binary
+  - build-opta-example-images
+  - local-opta-example-create-svcs:
+      requires:
+        - build-opta-binary
+        - build-opta-example-images
+  - local-opta-example-destroy-svcs:
+      requires:
+        - local-opta-example-create-svcs

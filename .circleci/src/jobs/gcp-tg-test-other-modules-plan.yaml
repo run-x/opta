@@ -1,0 +1,28 @@
+executor: python-docker
+steps:
+  - checkout-opta
+  - install-opta-dependencies
+  - gcp-cli/install
+  - gcp-cli/initialize
+  - run:
+      name: "Setting up gcp envar"
+      command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+  - attach_workspace:
+      at: ~/
+  - attach_workspace:
+      at: ./
+  - opta-module-with-terraform-generate:
+      module: "gcs"
+      provider: "gcp"
+  - opta-module-with-terraform-generate:
+      module: "mysql"
+      provider: "gcp"
+  - opta-module-with-terraform-generate:
+      module: "pg"
+      provider: "gcp"
+  - opta-module-with-terraform-generate:
+      module: "redis"
+      provider: "gcp"
+  - opta-module-with-terraform-generate:
+      module: "serviceaccount"
+      provider: "gcp"

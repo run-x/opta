@@ -1,0 +1,53 @@
+when: << pipeline.parameters.run-create-and-destroy-aws >>
+jobs:
+  - get-all-parameter-values
+  - build-test-service-image
+  - build-opta-example-images
+  - build-opta-binary:
+      requires:
+        - build-test-service-image
+  - aws-create-env:
+      requires:
+        - build-opta-binary
+  - aws-test-cloudfront:
+      requires:
+        - aws-create-env
+  - aws-test-lambda-function:
+      requires:
+        - aws-create-env
+  - aws-test-websocket:
+      requires:
+        -  aws-create-env
+  - aws-test-additional-nodegroup:
+      requires:
+        - aws-create-env
+  - aws-test-service-pg:
+      requires:
+        - aws-create-env
+  - aws-test-service-redis:
+      requires:
+        - aws-create-env
+  - aws-test-service-docdb:
+      requires:
+        - aws-create-env
+  - aws-test-service-s3:
+      requires:
+        - aws-create-env
+  - aws-test-service-helm:
+      requires:
+        - aws-create-env
+  - aws-test-k8s-manifest:
+      requires:
+        - aws-create-env
+  - aws-destroy-env:
+      requires:
+        - aws-test-websocket
+        - aws-test-cloudfront
+        - aws-test-lambda-function
+        - aws-test-additional-nodegroup
+        - aws-test-service-pg
+        - aws-test-service-s3
+        - aws-test-service-docdb
+        - aws-test-service-redis
+        - aws-test-service-helm
+        - aws-test-k8s-manifest

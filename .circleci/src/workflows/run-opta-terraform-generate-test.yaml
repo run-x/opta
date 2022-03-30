@@ -1,0 +1,36 @@
+when: << pipeline.parameters.run-opta-terraform-generate-test >>
+jobs:
+  - get-all-parameter-values
+  - build-opta-binary
+  - aws-generate-terraform-language-files:
+      requires:
+        - build-opta-binary
+  - aws-tg-create-env:
+      requires:
+        - aws-generate-terraform-language-files
+  - aws-tg-test-service-http:
+      requires:
+        - aws-tg-create-env
+  - aws-tg-test-other-modules-plan:
+      requires:
+        - aws-tg-create-env
+  - aws-tg-destroy-env:
+      requires:
+        - aws-tg-test-service-http
+        - aws-tg-test-other-modules-plan
+  - gcp-generate-terraform-language-files:
+      requires:
+        - build-opta-binary
+  - gcp-tg-create-env:
+      requires:
+        - gcp-generate-terraform-language-files
+  - gcp-tg-test-service-http:
+      requires:
+        - gcp-tg-create-env
+  - gcp-tg-test-other-modules-plan:
+      requires:
+        - gcp-tg-create-env
+  - gcp-tg-destroy-env:
+      requires:
+        - gcp-tg-test-service-http
+        - gcp-tg-test-other-modules-plan

@@ -1,0 +1,7 @@
+when: << pipeline.parameters.run-destroy-aws-env >>
+jobs:
+  - get-all-parameter-values
+  - build-opta-binary
+  - aws-destroy-env:
+      requires:
+        - build-opta-binary
