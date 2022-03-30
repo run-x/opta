@@ -62,7 +62,7 @@ class AwsK8sBaseProcessor(AWSK8sModuleProcessor, K8sBaseModuleProcessor):
             "s3_log_bucket_name"
         ] = f"${{{{module.{aws_base_module.name}.s3_log_bucket_name}}}}"
 
-        aws_eks_modules = self.layer.get_module_by_type("aws-eks", module_idx)
+        aws_eks_modules = self.layer.get_module_by_type("aws-eks", module_idx - 1)
         if len(aws_eks_modules) == 0:
             raise UserErrors(
                 "Must have the k8s-cluster/aws-eks module in before the k8s-base/aws-k8s-base"
