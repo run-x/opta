@@ -13,7 +13,7 @@ Opta's Deploy to AWS button allows users to deploy complex applications using Op
 
 Below is an example button that deploys an open source tool called Retool.
 
-[![Deploy to AWS Button](https://raw.githubusercontent.com/run-x/opta/main/assets/deploy-to-aws-button.svg)](http://app.runx.dev/deploy-with-aws?url=https%3A%2F%2Fgithub.com%2Frun-x%2Ftest-opta-template%2Fblob%2Fmain%2Fopta%2Ftemplate.yaml&name=Retool)
+[![Deploy to AWS Button](https://raw.githubusercontent.com/run-x/opta/main/assets/deploy-to-aws-button.svg)](https://app.runx.dev/deploy-with-aws?url=https%3A%2F%2Fgithub.com%2Frun-x%2Ftest-opta-template%2Fblob%2Fmain%2Fopta%2Ftemplate.yaml&name=Retool)
 
 ## Creating a button
 
@@ -84,7 +84,7 @@ Below is a list of all of the types currently available to use in your Opta temp
 
 ### Step 2: Generating Button HTML and Testing
 
-To create your button, simply go to [our button creation UI](http://app.runx.dev/make-aws-button) and enter what you would like to name your template as well as the URL of your opta template. The UI will render your button. Click on the button and make sure that the resulting form looks like you expect it to.
+To create your button, simply go to [our button creation UI](https://app.runx.dev/make-aws-button) and enter what you would like to name your template as well as the URL of your opta template. The UI will render your button. Click on the button and make sure that the resulting form looks like you expect it to.
 
 ### Step 3: Putting the button everywhere!
 
