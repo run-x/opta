@@ -1,0 +1,8 @@
+orbs:
+  terraform: circleci/terraform@3.0.0
+  codecov: codecov/codecov@3.1.1
+  aws-cli: circleci/aws-cli@2.0
+  kubernetes: circleci/kubernetes@0.12.1
+  helm: circleci/helm@1.2.0
+  gcp-cli: circleci/gcp-cli@2.4.0
+  azure-cli: circleci/azure-cli@1.2.0

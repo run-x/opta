@@ -1,0 +1,16 @@
+when: << pipeline.parameters.run-create-and-destroy-azure >>
+jobs:
+  - get-all-parameter-values
+  - build-test-service-image
+  - build-opta-binary:
+      requires:
+        - build-test-service-image
+  - azure-create-env:
+      requires:
+        - build-opta-binary
+  - azure-test-service-http:
+      requires:
+        - azure-create-env
+  - azure-destroy-env:
+      requires:
+        - azure-test-service-http

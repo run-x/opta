@@ -1,0 +1,47 @@
+executor: python-docker
+steps:
+  - install-opta-dependencies
+  - gcp-cli/install
+  - gcp-cli/initialize
+  - run:
+      name: "Setting up gcp envar"
+      command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+  - attach_workspace:
+      at: ~/
+  - run:
+      name: "Create Terraform Generated Hello Opta Service"
+      command: |
+        cd $HOME/generated-tf-files-gcp
+        terraform init
+        terraform refresh
+        terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello
+        terraform apply -compact-warnings -auto-approve tf.plan
+  - run:
+      name: "Sleep 120 seconds"
+      command: |
+        sleep 120
+  - run:
+      name: "Get Output and Test Load Balancer"
+      command: |
+        cd $HOME/generated-tf-files-gcp
+        terraform output -json >> terraform_output.json
+        export LOAD_BALANCER=`cat terraform_output.json | jq -r '.load_balancer_raw_ip' |jq -r '.value'`
+        echo $LOAD_BALANCER
+        curl "$LOAD_BALANCER/hello"
+        echo "1"
+  - run:
+      name: "Sleep 120 seconds"
+      command: |
+        sleep 120
+  - run:
+      name: "Destroy Terraform Generated Hello Opta Service"
+      command: |
+        cd $HOME/generated-tf-files-gcp
+        terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.hello -destroy
+        terraform apply -compact-warnings -auto-approve tf.plan
+  - persist_to_workspace:
+      root: ~/
+      paths:
+        - generated-tf-files-gcp
+  - store_artifacts:
+      path: ~/generated-tf-files-gcp

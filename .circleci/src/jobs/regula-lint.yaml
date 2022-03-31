@@ -1,0 +1,14 @@
+executor: ubuntu-machine
+steps:
+  - checkout-opta
+  - run:
+      name: "Install regula"
+      command: |
+        cd config
+        wget -O regula_1.0.0_Linux_x86_64.tar.gz https://github.com/fugue/regula/releases/download/v1.0.0/regula_1.0.0_Linux_x86_64.tar.gz
+        tar -xvf regula_1.0.0_Linux_x86_64.tar.gz
+  - run:
+      name: "Run regula"
+      command: |
+        cd config
+        ./regula run --include config.rego tf_modules

@@ -124,7 +124,7 @@ resource "helm_release" "ingress-nginx" {
           }
         }
       }
-    })
+    }), yamlencode(var.ingress_nginx_values)
   ]
   depends_on = [
     helm_release.linkerd,

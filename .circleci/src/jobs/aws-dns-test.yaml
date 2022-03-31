@@ -1,0 +1,5 @@
+executor: ubuntu-machine
+steps:
+  - run:
+      name: "Curl Test for testing.optaci.com"
+      command: curl --fail http://testing.optaci.com || if [[ $? -eq 22 ]]; then true; else exit $?; fi

@@ -60,3 +60,15 @@ variable "certificate_chain" {
 variable "nginx_config" {
   default = {}
 }
+
+variable "cert_manager_values" {
+  default = {}
+}
+
+variable "linkerd_values" {
+  default = {}
+}
+
+variable "ingress_nginx_values" {
+  default = {}
+}

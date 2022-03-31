@@ -119,3 +119,15 @@ variable "expose_self_signed_ssl" {
   type    = bool
   default = false
 }
+
+variable "cert_manager_values" {
+  default = {}
+}
+
+variable "linkerd_values" {
+  default = {}
+}
+
+variable "ingress_nginx_values" {
+  default = {}
+}

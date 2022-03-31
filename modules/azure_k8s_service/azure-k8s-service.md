@@ -49,7 +49,7 @@ _NOTE_ We expose the resource requests and set the limits to twice the request v
 ### Ingress
 
 You can control if and how you want to expose your app to the world! Check out
-the [Ingress](/features/dns) docs for more details.
+the [Ingress](/features/dns-and-cert/dns/) docs for more details.
 
 ### Persistent Storage
 A user can now specify persistent storage to be provisioned for your servers and kept intact over your different

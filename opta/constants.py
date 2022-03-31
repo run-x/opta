@@ -58,15 +58,6 @@ CI: Final = "CI"
 
 SHELLS_ALLOWED: Final = ("bash", "sh")
 
-"""
-Note: Key in Module Dependency should have all the dependencies present in the set.
-"""
-MODULE_DEPENDENCY: Final = {
-    "aws-k8s-base": {"aws-eks"},
-    "azure-kys-base": {"azure-aks"},
-    "gcp-k8s-base": {"gcp-gke"},
-}
-
 REDS: Final = (1, 9, 124, 160, 196)
 
 OPTA_INSTALL_URL: Final = "https://docs.opta.dev/install.sh"

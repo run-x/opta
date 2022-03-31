@@ -1,0 +1,29 @@
+executor: python-docker
+environment:
+  OPTA_DISABLE_REPORTING: "true"
+steps:
+  - checkout-opta
+  - when:
+      condition: << pipeline.parameters.ci-use-diff-env >>
+      steps:
+        - remake-environment-configs
+  - attach_workspace:
+      at: ./
+  - install-opta-dependencies
+  - gcp-cli/install
+  - gcp-cli/initialize
+  - run:
+      name: "Setting up gcp envar"
+      command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+  - run:
+      name: "Add additional Node Group to Opta Environment."
+      command: |
+        ./dist/opta/opta apply \
+        --config ./.circleci/ci-tests/create-and-destroy-gcp/environment-additional-nodepool.yml \
+        --auto-approve
+  - run:
+      name: "Remove additional Node Group from Opta Environment"
+      command: |
+        ./dist/opta/opta apply \
+        --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml \
+        --auto-approve

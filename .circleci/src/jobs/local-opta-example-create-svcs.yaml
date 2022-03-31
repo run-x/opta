@@ -1,0 +1,47 @@
+executor: ubuntu-machine
+environment:
+  OPTA_DISABLE_REPORTING: "true"
+steps:
+  - checkout-opta
+  - install-python
+  - when:
+      condition: << pipeline.parameters.ci-use-diff-env >>
+      steps:
+        - remake-environment-configs
+  - attach_workspace:
+      at: ./
+  - install-opta-dependencies
+  - run:
+      name: "Load Opta Example images"
+      command: |
+        docker load -i todo-api
+        docker load -i todo-frontend
+  - run:
+      name: "Deploy Todo-Api Service"
+      command: |
+        ./dist/opta/opta deploy \
+        --image todo-api:v1 \
+        --config ./.circleci/ci-tests/todo-list/api-service.yml \
+        --auto-approve \
+        --local
+  - run:
+      name: "Deploy Todo-Frontend Service"
+      command: |
+        ./dist/opta/opta deploy \
+        --image todo-frontend:v1 \
+        --config ./.circleci/ci-tests/todo-list/frontend-service.yml \
+        --auto-approve \
+        --local
+  - run:
+      name: "Deploy Monitoring Service"
+      command: |
+        ./dist/opta/opta apply \
+        --config ./.circleci/ci-tests/todo-list/monitoring-service.yml \
+        --auto-approve \
+        --local
+  - run:
+      name: "Ping Tests"
+      command: |
+        curl http://localhost:8080/frontend --fail
+        curl http://localhost:8080/djangoapi/ht/ --fail
+        curl http://localhost:8080/grafana --fail

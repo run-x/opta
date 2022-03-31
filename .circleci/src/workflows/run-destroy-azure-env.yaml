@@ -1,0 +1,6 @@
+when: << pipeline.parameters.run-destroy-azure-env >>
+jobs:
+  - get-all-parameter-values
+  - azure-destroy-env:
+      requires:
+        - build-opta-binary

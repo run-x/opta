@@ -60,11 +60,11 @@ resource "aws_s3_bucket_cors_configuration" "bucket" {
   count  = var.cors_rule != null ? 1 : 0
 
   cors_rule {
-    allowed_headers = try(var.cors_rule.value["allowed_headers"], [])
-    allowed_methods = try(var.cors_rule.value["allowed_methods"], [])
-    allowed_origins = try(var.cors_rule.value["allowed_origins"], [])
-    expose_headers  = try(var.cors_rule.value["expose_headers"], [])
-    max_age_seconds = try(var.cors_rule.value["max_age_seconds"], 0)
+    allowed_headers = try(var.cors_rule["allowed_headers"], [])
+    allowed_methods = try(var.cors_rule["allowed_methods"], [])
+    allowed_origins = try(var.cors_rule["allowed_origins"], [])
+    expose_headers  = try(var.cors_rule["expose_headers"], [])
+    max_age_seconds = try(var.cors_rule["max_age_seconds"], 0)
   }
 }
 

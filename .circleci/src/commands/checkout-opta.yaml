@@ -1,0 +1,7 @@
+steps:
+  - run:
+      name: "Set git user"
+      command: |
+        git config --global user.email "runx-ci@runx.dev"
+        git config --global user.name "Runx CI"
+  - checkout

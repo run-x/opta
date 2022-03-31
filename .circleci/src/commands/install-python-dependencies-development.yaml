@@ -1,0 +1,7 @@
+steps:
+  - run:
+      name: "Install python development dependencies"
+      command: |
+        pip install pipenv
+        pipenv install --deploy --dev
+        source $(pipenv --venv)/bin/activate

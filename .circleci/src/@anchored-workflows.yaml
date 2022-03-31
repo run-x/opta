@@ -1,0 +1,142 @@
+workflows:
+  version: 2
+  run-create-and-destroy:
+    when: << pipeline.parameters.run-create-and-destroy >>
+    jobs: &fullsuite
+      - get-all-parameter-values
+      - build-test-service-image
+      - build-opta-example-images
+      - build-opta-binary:
+          requires:
+            - build-test-service-image
+      - aws-create-env:
+          requires:
+            - build-opta-binary
+      - aws-test-cloudfront:
+          requires:
+            - aws-create-env
+      - aws-test-lambda-function:
+          requires:
+            - aws-create-env
+      - aws-test-websocket:
+          requires:
+            -  aws-create-env
+      - aws-test-additional-nodegroup:
+          requires:
+            - aws-create-env
+      - aws-test-service-pg:
+          requires:
+            - aws-create-env
+      - aws-test-service-redis:
+          requires:
+            - aws-create-env
+      - aws-test-service-docdb:
+          requires:
+            - aws-create-env
+      - aws-test-service-s3:
+          requires:
+            - aws-create-env
+      - aws-test-service-helm:
+          requires:
+            - aws-create-env
+      - aws-test-k8s-manifest:
+          requires:
+            - aws-create-env
+      - aws-destroy-env:
+          requires:
+            - aws-test-websocket
+            - aws-test-cloudfront
+            - aws-test-lambda-function
+            - aws-test-additional-nodegroup
+            - aws-test-service-pg
+            - aws-test-service-s3
+            - aws-test-service-docdb
+            - aws-test-service-redis
+            - aws-test-service-helm
+            - aws-test-k8s-manifest
+      - gcp-create-env:
+          requires:
+            - build-opta-binary
+      - gcp-test-additional-nodegroup:
+          requires:
+            - gcp-create-env
+      - gcp-test-service-pg:
+          requires:
+            - gcp-create-env
+      - gcp-test-service-redis:
+          requires:
+            - gcp-create-env
+      - gcp-test-service-helm:
+          requires:
+            - gcp-create-env
+      - gcp-test-service-gcs:
+          requires:
+            - gcp-create-env
+      - gcp-test-k8s-manifest:
+          requires:
+            - gcp-create-env
+      - gcp-destroy-env:
+          requires:
+            - gcp-test-additional-nodegroup
+            - gcp-test-service-pg
+            - gcp-test-service-redis
+            - gcp-test-service-helm
+            - gcp-test-service-gcs
+            - gcp-test-k8s-manifest
+      - local-opta-example-create-svcs:
+          requires:
+            - build-opta-binary
+            - build-opta-example-images
+      - local-opta-example-destroy-svcs:
+          requires:
+            - local-opta-example-create-svcs
+      - azure-create-env:
+          requires:
+            - build-opta-binary
+      - azure-test-service-http:
+          requires:
+            - azure-create-env
+      - azure-destroy-env:
+          requires:
+            - azure-test-service-http
+      - aws-generate-terraform-language-files:
+          requires:
+            - build-opta-binary
+      - aws-tg-create-env:
+          requires:
+            - aws-generate-terraform-language-files
+      - aws-tg-test-service-http:
+          requires:
+            - aws-tg-create-env
+      - aws-tg-test-other-modules-plan:
+          requires:
+            - aws-tg-create-env
+      - aws-tg-destroy-env:
+          requires:
+            - aws-tg-test-service-http
+            - aws-tg-test-other-modules-plan
+      - gcp-generate-terraform-language-files:
+          requires:
+            - build-opta-binary
+      - gcp-tg-create-env:
+          requires:
+            - gcp-generate-terraform-language-files
+      - gcp-tg-test-service-http:
+          requires:
+            - gcp-tg-create-env
+      - gcp-tg-test-other-modules-plan:
+          requires:
+            - gcp-tg-create-env
+      - gcp-tg-destroy-env:
+          requires:
+            - gcp-tg-test-service-http
+            - gcp-tg-test-other-modules-plan
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 2 * * *"
+          filters:
+            branches:
+              only:
+                - main
+    jobs: *fullsuite

@@ -1,0 +1,37 @@
+when: << pipeline.parameters.run-create-and-destroy-gcp >>
+jobs:
+  - get-all-parameter-values
+  - build-test-service-image
+  - build-opta-example-images
+  - build-opta-binary:
+      requires:
+        - build-test-service-image
+  - gcp-create-env:
+      requires:
+        - build-opta-binary
+  - gcp-test-additional-nodegroup:
+      requires:
+        - gcp-create-env
+  - gcp-test-service-pg:
+      requires:
+        - gcp-create-env
+  - gcp-test-service-redis:
+      requires:
+        - gcp-create-env
+  - gcp-test-service-helm:
+      requires:
+        - gcp-create-env
+  - gcp-test-service-gcs:
+      requires:
+        - gcp-create-env
+  - gcp-test-k8s-manifest:
+      requires:
+        - gcp-create-env
+  - gcp-destroy-env:
+      requires:
+        - gcp-test-additional-nodegroup
+        - gcp-test-service-pg
+        - gcp-test-service-redis
+        - gcp-test-service-helm
+        - gcp-test-service-gcs
+        - gcp-test-k8s-manifest

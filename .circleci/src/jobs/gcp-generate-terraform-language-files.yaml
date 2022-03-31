@@ -1,0 +1,31 @@
+executor: python-docker
+steps:
+  - checkout-opta
+  - when:
+      condition: << pipeline.parameters.ci-use-diff-env >>
+      steps:
+        - remake-environment-configs
+  - attach_workspace:
+      at: ./
+  - install-opta-dependencies
+  - gcp-cli/install
+  - gcp-cli/initialize
+  - run:
+      name: "Setting up gcp envar"
+      command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+  - run:
+      name: "Generate Terraform Language Files"
+      command: |
+        mkdir $HOME/generated-tf-files-gcp
+        ./dist/opta/opta generate-terraform \
+        --config ./.circleci/ci-tests/terraform-generated-gcp/environment.yaml \
+        --directory $HOME/generated-tf-files-gcp \
+        --auto-approve
+        ./dist/opta/opta generate-terraform \
+        --config ./.circleci/ci-tests/terraform-generated-gcp/service-hello-opta.yaml \
+        --directory $HOME/generated-tf-files-gcp \
+        --auto-approve
+  - persist_to_workspace:
+      root: ~/
+      paths:
+        - generated-tf-files-gcp

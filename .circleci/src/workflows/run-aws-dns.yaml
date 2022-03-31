@@ -1,0 +1,19 @@
+when: << pipeline.parameters.test-aws-dns >>
+jobs:
+  - get-all-parameter-values
+  - build-opta-binary
+  - aws-create-env-dns-false:
+      requires:
+        - build-opta-binary
+  - aws-create-env-set-ns:
+      requires:
+        - aws-create-env-dns-false
+  - aws-create-env-dns-true:
+      requires:
+        - aws-create-env-set-ns
+  - aws-dns-test:
+      requires:
+        - aws-create-env-dns-true
+  - aws-destroy-env-dns-true:
+      requires:
+        - aws-dns-test

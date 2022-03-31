@@ -1,0 +1,37 @@
+executor: ubuntu-machine
+environment:
+  OPTA_DISABLE_REPORTING: "true"
+steps:
+  - checkout-opta
+  - install-python
+  - when:
+      condition: << pipeline.parameters.ci-use-diff-env >>
+      steps:
+        - remake-environment-configs
+  - attach_workspace:
+      at: ./
+  - install-opta-dependencies
+  - gcp-cli/install
+  - gcp-cli/initialize
+  - run:
+      name: "Setting up gcp envar"
+      command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+  - run:
+      name: "Load test-service image"
+      command: docker load -i test-service-image
+  - run:
+      name: "Deploy test-service-gcs"
+      command: |
+        ./dist/opta/opta deploy \
+        --image app:latest \
+        --env gcpenv-ci \
+        --config ./.circleci/ci-tests/create-and-destroy-gcp/service-gcs.yml \
+        --tag $CIRCLE_SHA1 \
+        --auto-approve
+  - run:
+      name: "Destroy test-service-gcs"
+      command: |
+        yes | ./dist/opta/opta destroy \
+        --env gcpenv-ci \
+        --config ./.circleci/ci-tests/create-and-destroy-gcp/service-gcs.yml \
+        --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi

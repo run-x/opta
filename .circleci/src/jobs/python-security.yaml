@@ -1,0 +1,7 @@
+executor: python-docker
+steps:
+  - checkout-opta
+  - install-python-dependencies-development
+  - run:
+      name: "Security"
+      command: "make security_tests"

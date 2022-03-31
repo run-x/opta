@@ -1,0 +1,37 @@
+executor: python-docker
+environment:
+  OPTA_DISABLE_REPORTING: "true"
+steps:
+  - checkout-opta
+  - when:
+      condition: << pipeline.parameters.ci-use-diff-env >>
+      steps:
+        - remake-environment-configs
+  - attach_workspace:
+      at: ./
+  - install-opta-dependencies
+  - aws-cli/install
+  - aws-cli/setup
+  - run:
+      name: "Apply Cloudfront Service with Opta"
+      command: |
+        OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
+        --env awsenv-ci \
+        --config ./.circleci/ci-tests/create-and-destroy-aws/service-lambda.yml \
+        --auto-approve
+  - run:
+      name: "Test Lambda Invocation"
+      command: |
+        sleep 20
+        export LAMBDA_NAME=`./dist/opta/opta output --env awsenv-ci --config ./.circleci/ci-tests/create-and-destroy-aws/service-lambda.yml | jq -r '.function_name'`
+        export AWS_DEFAULT_REGION="us-east-2"
+        aws lambda invoke --function-name $LAMBDA_NAME  ./.circleci/ci-tests/create-and-destroy-aws/service-lambda.txt
+        export RESPONSE=`cat ./.circleci/ci-tests/create-and-destroy-aws/service-lambda.txt`
+
+  - run:
+      name: "Destroy Cloudfront Service with Opta"
+      command: |
+        yes | ./dist/opta/opta destroy \
+        --env awsenv-ci \
+        --config ./.circleci/ci-tests/create-and-destroy-aws/service-lambda.yml \
+        --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi

@@ -1,0 +1,34 @@
+executor: ubuntu-machine
+environment:
+  OPTA_DISABLE_REPORTING: "true"
+steps:
+  - checkout-opta
+  - install-python
+  - when:
+      condition: << pipeline.parameters.ci-use-diff-env >>
+      steps:
+        - remake-environment-configs
+  - attach_workspace:
+      at: ./
+  - install-opta-dependencies
+  - aws-cli/install
+  - aws-cli/setup
+  - run:
+      name: "Load test-service image"
+      command: docker load -i test-service-image
+  - run:
+      name: "Deploy test-service-redis"
+      command: |
+        ./dist/opta/opta deploy \
+        --image app:latest \
+        --env awsenv-ci \
+        --config ./.circleci/ci-tests/create-and-destroy-aws/service-redis.yml \
+        --tag $CIRCLE_SHA1 \
+        --auto-approve
+  - run:
+      name: "Destroy test-service-redis"
+      command: |
+        yes | ./dist/opta/opta destroy \
+        --env awsenv-ci \
+        --config ./.circleci/ci-tests/create-and-destroy-aws/service-redis.yml \
+        --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
