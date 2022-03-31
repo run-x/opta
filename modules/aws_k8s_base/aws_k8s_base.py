@@ -1,9 +1,13 @@
+from __future__ import annotations
+
+from io import StringIO
 from typing import TYPE_CHECKING, Optional
 
-import mypy_boto3_elbv2.type_defs
 from kubernetes.client import CoreV1Api, V1ConfigMap
-from mypy_boto3_elbv2 import ElasticLoadBalancingv2Client
-from ruamel.yaml.compat import StringIO
+
+if TYPE_CHECKING:
+    import mypy_boto3_elbv2.type_defs
+    from mypy_boto3_elbv2 import ElasticLoadBalancingv2Client
 
 from modules.base import AWSK8sModuleProcessor, K8sBaseModuleProcessor
 from opta.core.aws import AWS

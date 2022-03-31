@@ -3,13 +3,8 @@ from copy import deepcopy
 from os.path import dirname, exists, join
 from typing import List
 
-from ruamel.yaml import YAML
-
 from opta.registry import _get_all_module_info
-
-yaml = YAML(
-    typ="safe"
-)  # Duplicate because constants can't import utils and yaml really is a util
+from opta.utils import yaml
 
 registry_path = join(dirname(dirname(__file__)), "config", "registry")
 schemas_path = join(dirname(dirname(__file__)), "config", "registry", "schemas")

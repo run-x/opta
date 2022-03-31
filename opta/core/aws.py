@@ -16,10 +16,10 @@ if TYPE_CHECKING:
     from mypy_boto3_s3 import S3Client
 
 import opta.constants as constants
-from opta.constants import ONE_WEEK_UNIX, yaml
+from opta.constants import ONE_WEEK_UNIX
 from opta.core.cloud_client import CloudClient
 from opta.exceptions import UserErrors
-from opta.utils import fmt_msg, json, logger
+from opta.utils import fmt_msg, json, logger, yaml
 
 if TYPE_CHECKING:
     from opta.layer import Layer, StructuredConfig

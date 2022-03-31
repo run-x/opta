@@ -3,9 +3,9 @@ import json
 import os
 
 from pytest_mock import MockFixture
-from ruamel import yaml
 
 from opta.core.plan_displayer import PlanDisplayer
+from opta.utils import yaml
 
 
 class TestPlanDisplayer:

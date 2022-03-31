@@ -48,7 +48,7 @@ class Local(CloudClient):
             os.remove(self.config_file_path)
             logger.info("Deleted opta config from local")
         else:
-            logger.warn(f"Did not find opta config {self.config_file_path} to delete")
+            logger.warning(f"Did not find opta config {self.config_file_path} to delete")
 
     def delete_remote_state(self) -> None:
 
@@ -59,7 +59,7 @@ class Local(CloudClient):
             os.remove(self.tf_file + ".backup")
             logger.info("Deleted opta tf backup config from local")
         else:
-            logger.warn(f"Did not find opta tf state {self.tf_file} to delete")
+            logger.warning(f"Did not find opta tf state {self.tf_file} to delete")
 
     def get_terraform_lock_id(self) -> str:
         return ""

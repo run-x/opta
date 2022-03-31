@@ -17,10 +17,10 @@ from google.oauth2 import service_account
 from googleapiclient import discovery
 
 import opta.constants as constants
-from opta.constants import ONE_WEEK_UNIX, yaml
+from opta.constants import ONE_WEEK_UNIX
 from opta.core.cloud_client import CloudClient
 from opta.exceptions import UserErrors
-from opta.utils import fmt_msg, json, logger
+from opta.utils import fmt_msg, json, logger, yaml
 from opta.utils.dependencies import ensure_installed
 
 if TYPE_CHECKING:
