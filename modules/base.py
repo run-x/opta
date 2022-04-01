@@ -22,6 +22,7 @@ from dns.resolver import Answer, NoNameservers, query
 from opta.constants import REGISTRY
 from opta.core import kubernetes
 from opta.core.aws import AWS
+from opta.core.helm import Helm
 from opta.core.terraform import get_terraform_outputs
 from opta.exceptions import UserErrors
 from opta.utils import RawString, hydrate, json, logger
@@ -193,6 +194,18 @@ class PortSpec:
 class K8sServiceModuleProcessor(ModuleProcessor):
     # TODO(patrick): Remove this flag and references to it once all clouds support multiple ports
     FLAG_MULTIPLE_PORTS_SUPPORTED = False
+
+    def pre_hook(self, module_idx: int) -> None:
+        release_name = f"{self.layer.name}-{self.module.name}"
+        pending_upgrade_helm_chart = Helm.get_helm_list(
+            release=release_name, status="pending-upgrade"
+        )
+        if pending_upgrade_helm_chart:
+            raise UserErrors(
+                f"There is a pending upgrade for the helm chart: {release_name}."
+                "\nIt will cause this command to fail. Please use `opta force-unlock` to rollback to a consistent state first."
+            )
+        return super().pre_hook(module_idx)
 
     @property
     def required_path_dependencies(self) -> FrozenSet[str]:

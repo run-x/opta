@@ -40,6 +40,10 @@ class Helm:
 
     @classmethod
     def get_helm_list(cls, **kwargs) -> List:  # type: ignore # nosec
+        """
+        Returns a list of helm releases.
+        The releases can be filtered by namespace, release name and status.
+        """
         cls.validate_helm_installed()
         namespaces: List[str] = []
         if kwargs.get("namespace") is not None:
