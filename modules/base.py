@@ -196,12 +196,13 @@ class K8sServiceModuleProcessor(ModuleProcessor):
     FLAG_MULTIPLE_PORTS_SUPPORTED = False
 
     def pre_hook(self, module_idx: int) -> None:
+        release_name = f"{self.layer.name}-{self.module.name}"
         pending_upgrade_helm_chart = Helm.get_helm_list(
-            release=f"{self.layer.name}-{self.module.name}", status="pending-upgrade"
+            release=release_name, status="pending-upgrade"
         )
         if pending_upgrade_helm_chart:
             raise UserErrors(
-                f"There is a pending upgrade for the helm chart: {self.layer.name}-{self.module.name}."
+                f"There is a pending upgrade for the helm chart: {release_name}."
                 "\nIt will cause this command to fail. Please use `opta force-unlock` to rollback to a consistent state first."
             )
         return super().pre_hook(module_idx)
