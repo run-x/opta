@@ -1,3 +1,13 @@
+resource "time_sleep" "wait_for_db" {
+  create_duration = "1s"
+
+  triggers = {
+    # This sets up a proper dependency on the RAM association
+    primary   = var.existing_global_database_id == null ? aws_rds_cluster_instance.db_instance[0].id : ""
+    secondary = var.existing_global_database_id == null ? "" : aws_rds_cluster_instance.secondary[0].id
+  }
+}
+
 output "db_user" {
   value      = var.existing_global_database_id == null ? aws_rds_cluster.db_cluster[0].master_username : "UNKNOWN_SEE_PRIMARY_DB"
   depends_on = [time_sleep.wait_for_db]
