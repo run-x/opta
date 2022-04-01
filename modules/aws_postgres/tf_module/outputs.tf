@@ -1,10 +1,10 @@
 output "db_user" {
-  value      = var.existing_global_database_id == null ? aws_rds_cluster.db_cluster[0].master_username : "UNKNOWN_SEE_MASTER_DB"
+  value      = var.existing_global_database_id == null ? aws_rds_cluster.db_cluster[0].master_username : "UNKNOWN_SEE_PRIMARY_DB"
   depends_on = [time_sleep.wait_for_db]
 }
 
 output "db_password" {
-  value      = var.existing_global_database_id == null ? aws_rds_cluster.db_cluster[0].master_password : "UNKNOWN_SEE_MASTER_DB"
+  value      = var.existing_global_database_id == null ? aws_rds_cluster.db_cluster[0].master_password : "UNKNOWN_SEE_PRIMARY_DB"
   sensitive  = true
   depends_on = [time_sleep.wait_for_db]
 }
@@ -15,7 +15,7 @@ output "db_host" {
 }
 
 output "db_name" {
-  value      = var.existing_global_database_id == null ? aws_rds_cluster.db_cluster[0].database_name : "UNKNOWN_SEE_MASTER_DB"
+  value      = var.existing_global_database_id == null ? aws_rds_cluster.db_cluster[0].database_name : "UNKNOWN_SEE_PRIMARY_DB"
   depends_on = [time_sleep.wait_for_db]
 }
 
