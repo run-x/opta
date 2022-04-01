@@ -26,7 +26,7 @@ resource "aws_rds_cluster" "db_cluster" {
   engine_version          = var.engine_version
   master_username         = "postgres"
   master_password         = random_password.pg_password.result
-  vpc_security_group_ids  = [data.aws_security_group.security_group.id]
+  vpc_security_group_ids  = concat([data.aws_security_group.security_group.id], var.extra_security_groups_ids)
   backup_retention_period = var.backup_retention_days
   apply_immediately       = true
   skip_final_snapshot     = true
@@ -68,7 +68,7 @@ resource "aws_rds_cluster" "secondary" {
   global_cluster_identifier = var.existing_global_database_id
   engine                    = "aurora-postgresql"
   engine_version            = var.engine_version
-  vpc_security_group_ids    = [data.aws_security_group.security_group.id]
+  vpc_security_group_ids    = concat([data.aws_security_group.security_group.id], var.extra_security_groups_ids)
   backup_retention_period   = var.backup_retention_days
   apply_immediately         = true
   skip_final_snapshot       = true

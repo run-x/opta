@@ -40,7 +40,7 @@ variable "multi_az" {
   default = false
 }
 
-variable "extra_security_groups" {
+variable "extra_security_groups_ids" {
   type = list(string)
 }
 
