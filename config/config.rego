@@ -13,7 +13,7 @@ waivers[waiver] {
 } {
   waiver := {
     "rule_id": "FG_R00209",
-    "resource_id": "aws_rds_cluster.db_cluster"
+    "resource_id": "aws_rds_cluster.secondary"
   }
 } {
   waiver := {
