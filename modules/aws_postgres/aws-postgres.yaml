@@ -57,7 +57,7 @@ inputs:
   - name: database_name
     user_facing: true
     validator: str(required=False)
-    description: Name of the database to create within the instance
+    description: The name of the database to create. Follow naming conventions [here](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Limits.html#RDS_Limits.Constraints)
     default: app
 outputs:
   - name: db_user
