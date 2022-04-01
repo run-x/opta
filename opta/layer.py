@@ -54,6 +54,7 @@ PROCESSOR_DICT: Dict[str, str] = {
     "gcp-k8s-service": "GcpK8sServiceProcessor",
     "gcp-gke": "GcpGkeProcessor",
     "aws-dns": "AwsDnsProcessor",
+    "aws-postgres": "AwsPostgresProcessor",
     "aws-documentdb": "AwsDocumentDbProcessor",
     "runx": "RunxProcessor",
     "helm-chart": "HelmChartProcessor",
