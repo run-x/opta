@@ -34,6 +34,25 @@
       "description": "The name of the database to create. Follow naming conventions [here](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Limits.html#RDS_Limits.Constraints)",
       "default": "app"
     },
+    "extra_security_groups_ids": {
+      "type": "list",
+      "description": "Ids of extra AWS security groups to add to the database",
+      "default": []
+    },
+    "create_global_database": {
+      "type": "bool",
+      "description": "Create an Aurora Global database with this db as the master/writer",
+      "default": false
+    },
+    "existing_global_database_id": {
+      "type": "string",
+      "description": "ID of the Aurora global database to attach"
+    },
+    "database_name": {
+      "type": "string",
+      "description": "The name of the database to create. Follow naming conventions [here](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Limits.html#RDS_Limits.Constraints)",
+      "default": "app"
+    },
     "type": {
       "description": "The name of this module",
       "enum": [

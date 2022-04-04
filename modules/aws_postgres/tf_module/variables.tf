@@ -40,8 +40,18 @@ variable "multi_az" {
   default = false
 }
 
+variable "extra_security_groups_ids" {
+  type = list(string)
+}
 
-variable "db_name" {
-  type    = string
-  default = "app"
+variable "create_global_database" {
+  type = bool
+}
+
+variable "existing_global_database_id" {
+  type = string
+}
+
+variable "database_name" {
+  type = string
 }

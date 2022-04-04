@@ -12,6 +12,11 @@ waivers[waiver] {
   }
 } {
   waiver := {
+    "rule_id": "FG_R00209",
+    "resource_id": "aws_rds_cluster.secondary"
+  }
+} {
+  waiver := {
     "rule_id": "FG_R00274",
     "resource_id": "aws_s3_bucket.log_bucket"
   }

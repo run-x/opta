@@ -18,14 +18,15 @@ resource "random_string" "db_name_hash" {
 }
 
 resource "aws_rds_cluster" "db_cluster" {
+  count                   = var.existing_global_database_id == null ? 1 : 0
   cluster_identifier      = "opta-${var.layer_name}-${var.module_name}-${random_string.db_name_hash.result}"
   db_subnet_group_name    = "opta-${var.env_name}"
-  database_name           = var.db_name
+  database_name           = var.database_name
   engine                  = "aurora-postgresql"
   engine_version          = var.engine_version
   master_username         = "postgres"
   master_password         = random_password.pg_password.result
-  vpc_security_group_ids  = [data.aws_security_group.security_group.id]
+  vpc_security_group_ids  = concat([data.aws_security_group.security_group.id], var.extra_security_groups_ids)
   backup_retention_period = var.backup_retention_days
   apply_immediately       = true
   skip_final_snapshot     = true
@@ -33,17 +34,17 @@ resource "aws_rds_cluster" "db_cluster" {
   kms_key_id              = data.aws_kms_key.main.arn
   deletion_protection     = var.safety
   lifecycle {
-    ignore_changes = [storage_encrypted, kms_key_id, cluster_identifier]
+    ignore_changes = [storage_encrypted, kms_key_id, cluster_identifier, global_cluster_identifier]
   }
 }
 
 resource "aws_rds_cluster_instance" "db_instance" {
-  count                           = var.multi_az ? 2 : 1
+  count                           = var.existing_global_database_id == null ? (var.multi_az ? 2 : 1) : 0
   identifier                      = "opta-${var.layer_name}-${var.module_name}-${random_string.db_name_hash.result}-${count.index}"
-  cluster_identifier              = aws_rds_cluster.db_cluster.id
+  cluster_identifier              = aws_rds_cluster.db_cluster[0].id
   instance_class                  = var.instance_class
-  engine                          = aws_rds_cluster.db_cluster.engine
-  engine_version                  = aws_rds_cluster.db_cluster.engine_version
+  engine                          = aws_rds_cluster.db_cluster[0].engine
+  engine_version                  = aws_rds_cluster.db_cluster[0].engine_version
   apply_immediately               = true
   auto_minor_version_upgrade      = false
   performance_insights_enabled    = true

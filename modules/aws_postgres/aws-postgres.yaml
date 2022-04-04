@@ -39,7 +39,22 @@ inputs:
     validator: int(required=False)
     description: How many days to keep the backup retention
     default: 7
-  - name: db_name
+  - name: extra_security_groups_ids
+    user_facing: true
+    validator: list(str(), required=False)
+    description: Ids of extra AWS security groups to add to the database
+    default: []
+  - name: create_global_database
+    user_facing: true
+    validator: bool(required=False)
+    description: Create an Aurora Global database with this db as the master/writer
+    default: false
+  - name: existing_global_database_id
+    user_facing: true
+    validator: str(required=False)
+    description: ID of the Aurora global database to attach
+    default: null
+  - name: database_name
     user_facing: true
     validator: str(required=False)
     description: The name of the database to create. Follow naming conventions [here](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Limits.html#RDS_Limits.Constraints)
@@ -57,6 +72,9 @@ outputs:
   - name: db_name
     export: false
     description: The database ip
+  - name: global_database_id
+    export: true
+    description: The id of the global database, if created
 output_providers: { }
 output_data: { }
 clouds:

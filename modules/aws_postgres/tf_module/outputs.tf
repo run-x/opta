@@ -1,20 +1,35 @@
+resource "time_sleep" "wait_for_db" {
+  create_duration = "1s"
+
+  triggers = {
+    # This sets up a proper dependency on the RAM association
+    primary   = var.existing_global_database_id == null ? aws_rds_cluster_instance.db_instance[0].id : ""
+    secondary = var.existing_global_database_id == null ? "" : aws_rds_cluster_instance.secondary[0].id
+  }
+}
+
 output "db_user" {
-  value      = aws_rds_cluster.db_cluster.master_username
-  depends_on = [aws_rds_cluster_instance.db_instance[0]]
+  value      = var.existing_global_database_id == null ? aws_rds_cluster.db_cluster[0].master_username : "UNKNOWN_SEE_PRIMARY_DB"
+  depends_on = [time_sleep.wait_for_db]
 }
 
 output "db_password" {
-  value      = aws_rds_cluster.db_cluster.master_password
+  value      = var.existing_global_database_id == null ? aws_rds_cluster.db_cluster[0].master_password : "UNKNOWN_SEE_PRIMARY_DB"
   sensitive  = true
-  depends_on = [aws_rds_cluster_instance.db_instance[0]]
+  depends_on = [time_sleep.wait_for_db]
 }
 
 output "db_host" {
-  value      = aws_rds_cluster.db_cluster.endpoint
-  depends_on = [aws_rds_cluster_instance.db_instance[0]]
+  value      = var.existing_global_database_id == null ? aws_rds_cluster.db_cluster[0].endpoint : aws_rds_cluster.secondary[0].reader_endpoint
+  depends_on = [time_sleep.wait_for_db]
 }
 
 output "db_name" {
-  value      = aws_rds_cluster.db_cluster.database_name
-  depends_on = [aws_rds_cluster_instance.db_instance[0]]
+  value      = var.existing_global_database_id == null ? aws_rds_cluster.db_cluster[0].database_name : "UNKNOWN_SEE_PRIMARY_DB"
+  depends_on = [time_sleep.wait_for_db]
+}
+
+
+output "global_database_id" {
+  value = var.create_global_database ? aws_rds_global_cluster.global_cluster[0].id : "N/A"
 }
