@@ -204,3 +204,9 @@ variable "tolerations" {
 variable "cron_jobs" {
   default = []
 }
+
+variable "pod_annotations" {
+  type        = map(string)
+  default     = {}
+  description = "values to add to the pod annotations for the k8s-service pods"
+}
