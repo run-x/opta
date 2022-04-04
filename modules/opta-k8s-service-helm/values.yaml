@@ -19,6 +19,7 @@ persistentStorage: []
 ingressExtraAnnotations: {}
 tolerations: []
 cron_jobs: []
+podAnnotations: {}
 
 serviceAccount:
   # The name of the service account to use.

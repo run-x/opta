@@ -190,3 +190,9 @@ variable "ingress_extra_annotations" {
   type    = map(string)
   default = {}
 }
+
+variable "pod_annotations" {
+  type        = map(string)
+  default     = {}
+  description = "values to add to the pod annotations for the k8s-service pods"
+}

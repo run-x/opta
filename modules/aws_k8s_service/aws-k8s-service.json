@@ -175,6 +175,11 @@
       "description": "These are extra annotations to add to ingress objects\n",
       "default": {}
     },
+    "pod_annotations": {
+      "type": "object",
+      "description": "These are extra annotations to add to k8s-service pod objects \n",
+      "default": {}
+    },
     "type": {
       "description": "The name of this module",
       "enum": [

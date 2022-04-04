@@ -51,6 +51,7 @@ resource "helm_release" "k8s-service" {
       keepPathPrefix : var.keep_path_prefix
       persistentStorage : var.persistent_storage
       ingressExtraAnnotations : var.ingress_extra_annotations
+      podAnnotations : var.pod_annotations
     })
   ]
   atomic          = true

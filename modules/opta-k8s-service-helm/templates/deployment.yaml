@@ -36,6 +36,9 @@ spec:
         config.linkerd.io/proxy-cpu-request: "0.05"
         config.linkerd.io/proxy-memory-limit: "20Mi"
         config.linkerd.io/proxy-memory-request: "10Mi"
+        {{- range $k, $v := $.Values.podAnnotations }}
+        {{ $k | quote }}: {{ $v | quote }}
+        {{- end }}
     spec:
       serviceAccountName: {{ include "k8s-service.serviceAccountName" . }}
       containers:

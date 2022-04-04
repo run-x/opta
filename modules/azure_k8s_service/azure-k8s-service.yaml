@@ -166,6 +166,12 @@ inputs: # (what users see)
     default: {}
     description: |
       These are extra annotations to add to ingress objects
+  - name: pod_annotations
+    user_facing: true
+    validator: map(required=False)
+    default: {}
+    description: |
+      These are extra annotations to add to k8s-service pod objects
 extra_validators:
   persistent_storage:
     size: int(required=True)

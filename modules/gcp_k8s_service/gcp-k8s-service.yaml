@@ -186,6 +186,12 @@ inputs:
     validator: list(include('cron_job'), required=False)
     description: A list of cronjobs to execute as part of this service
     default: []
+  - name: pod_annotations
+    user_facing: true
+    validator: map(required=False)
+    default: {}
+    description: |
+      These are extra annotations to add to k8s-service pod objects
 extra_validators:
   cron_job:
     commands: list(required=True)
