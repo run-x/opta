@@ -41,6 +41,28 @@
       "description": "This is the total cidr block for the VPC.",
       "default": "10.0.0.0/16"
     },
+    "vpc_id": {
+      "type": "string",
+      "description": "The ID of an existing VPC to import. If not provided, Opta will create a new VPC.",
+      "$ref": "/common-types/aws-vpc-id",
+      "default": null
+    },
+    "public_subnet_ids": {
+      "type": "array",
+      "description": "When importing an existing VPC, the IDs of the public subnets",
+      "items": {
+        "$ref": "/common-types/aws-subnet-id"
+      },
+      "default": []
+    },
+    "private_subnet_ids": {
+      "type": "array",
+      "description": "When importing an existing VPC, the IDs of the private subnets",
+      "items": {
+        "$ref": "/common-types/aws-subnet-id"
+      },
+      "default": []
+    },
     "type": {
       "description": "The name of this module",
       "enum": [
