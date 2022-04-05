@@ -7,7 +7,7 @@ metadata:
   namespace: ingress-nginx
 spec:
   ports:
-    - port: 80
+    - port: 443
       targetPort: healthcheck
       protocol: TCP
       name: healthcheck
@@ -39,10 +39,10 @@ spec:
               service:
                 name: opta-ingress-healthcheck
                 port:
-                  number: 80
+                  number: 443
         {{- else if $.Capabilities.APIVersions.Has "networking.k8s.io/v1beta1/Ingress" }}
           - path: "/healthz"
             backend:
               serviceName: opta-ingress-healthcheck
-              servicePort: 80
+              servicePort: 443
         {{ end }}
