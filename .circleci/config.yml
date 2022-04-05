@@ -1459,6 +1459,14 @@ jobs:
                 command: docker load -i test-service-image
                 name: Load test-service image
             - run:
+                command: echo 'export KUBECONFIG="$HOME/kube_config.yaml"' >> $BASH_ENV
+                name: Update KUBECONFIG
+            - run:
+                command: |
+                    ./dist/opta/opta configure-kubectl \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml
+                name: Configure Kubectl
+            - run:
                 command: |
                     ./dist/opta/opta deploy \
                     --image app:latest \
@@ -1529,6 +1537,14 @@ jobs:
             - run:
                 command: docker load -i test-service-image
                 name: Load test-service image
+            - run:
+                command: echo 'export KUBECONFIG="$HOME/kube_config.yaml"' >> $BASH_ENV
+                name: Update KUBECONFIG
+            - run:
+                command: |
+                    ./dist/opta/opta configure-kubectl \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml
+                name: Configure Kubectl
             - run:
                 command: |
                     ./dist/opta/opta secret update \
@@ -1704,6 +1720,16 @@ jobs:
             - run:
                 command: docker load -i test-service-image
                 name: Load test-service image
+            - run:
+                command: |
+                    echo 'export KUBECONFIG="$HOME/kube_config.yaml"' >> $BASH_ENV
+                    echo $KUBECONFIG
+                name: Update KUBECONFIG
+            - run:
+                command: |
+                    ./dist/opta/opta configure-kubectl \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml
+                name: Configure Kubectl
             - run:
                 command: |
                     ./dist/opta/opta deploy \
