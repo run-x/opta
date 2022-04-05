@@ -22,7 +22,7 @@ steps:
         ./dist/opta/opta configure-kubectl \
         --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
   - run:
-      name: "Deploy test-service-redis"
+      name: "Deploy test-service-docdb"
       command: |
         ./dist/opta/opta deploy \
         --image app:latest \

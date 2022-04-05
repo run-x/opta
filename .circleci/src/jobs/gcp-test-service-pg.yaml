@@ -21,9 +21,6 @@ steps:
       name: "Load test-service image"
       command: docker load -i test-service-image
   - run:
-      name: "Update KUBECONFIG"
-      command: echo 'export KUBECONFIG="$HOME/kube_config.yaml"' >> $BASH_ENV
-  - run:
       name: "Configure Kubectl"
       command: |
         ./dist/opta/opta configure-kubectl \

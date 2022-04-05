@@ -16,9 +16,6 @@ steps:
       name: "Setting up gcp envar"
       command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
   - run:
-      name: "Update KUBECONFIG"
-      command: echo 'export KUBECONFIG="$HOME/kube_config.yaml"' >> $BASH_ENV
-  - run:
       name: "Configure Kubectl"
       command: |
         ./dist/opta/opta configure-kubectl \
