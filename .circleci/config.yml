@@ -567,11 +567,6 @@ jobs:
                 name: Load test-service image
             - run:
                 command: |
-                    ./dist/opta/opta configure-kubectl \
-                    --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
-                name: Configure Kubectl
-            - run:
-                command: |
                     ./dist/opta/opta deploy \
                     --image app:latest \
                     --env awsenv-ci \
@@ -635,11 +630,6 @@ jobs:
             - run:
                 command: docker load -i test-service-image
                 name: Load test-service image
-            - run:
-                command: |
-                    ./dist/opta/opta configure-kubectl \
-                    --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
-                name: Configure Kubectl
             - run:
                 command: |
                     ./dist/opta/opta secret update \
@@ -740,11 +730,6 @@ jobs:
                 name: Load test-service image
             - run:
                 command: |
-                    ./dist/opta/opta configure-kubectl \
-                    --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
-                name: Configure Kubectl
-            - run:
-                command: |
                     ./dist/opta/opta deploy \
                     --image app:latest \
                     --env awsenv-ci \
@@ -780,11 +765,6 @@ jobs:
                 name: Load test-service image
             - run:
                 command: |
-                    ./dist/opta/opta configure-kubectl \
-                    --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
-                name: Configure Kubectl
-            - run:
-                command: |
                     ./dist/opta/opta deploy \
                     --image app:latest \
                     --env awsenv-ci \
@@ -815,11 +795,6 @@ jobs:
             - install-opta-dependencies
             - aws-cli/install
             - aws-cli/setup
-            - run:
-                command: |
-                    ./dist/opta/opta configure-kubectl \
-                    --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
-                name: Configure Kubectl
             - run:
                 command: |
                     OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
