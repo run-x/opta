@@ -17,7 +17,12 @@ steps:
       name: "Load test-service image"
       command: docker load -i test-service-image
   - run:
-      name: "Deploy test-service-redis"
+      name: "Configure Kubectl"
+      command: |
+        ./dist/opta/opta configure-kubectl \
+        --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
+  - run:
+      name: "Deploy test-service-docdb"
       command: |
         ./dist/opta/opta deploy \
         --image app:latest \

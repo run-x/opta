@@ -107,9 +107,6 @@ jobs:
                     --refresh
                 name: Deploy opta environment
             - run:
-                command: echo 'export KUBECONFIG="$HOME/kube_config.yaml"' >> $BASH_ENV
-                name: Update KUBECONFIG
-            - run:
                 command: |-
                     ./dist/opta/opta configure-kubectl \
                     --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
@@ -340,6 +337,11 @@ jobs:
                 name: Load Opta Example images
             - run:
                 command: |
+                    ./dist/opta/opta configure-kubectl \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
+                name: Configure Kubectl
+            - run:
+                command: |
                     ./dist/opta/opta deploy \
                     --image todo-api:v1 \
                     --config ./.circleci/ci-tests/todo-list/api-service.yml \
@@ -384,6 +386,11 @@ jobs:
             - install-opta-dependencies
             - aws-cli/install
             - aws-cli/setup
+            - run:
+                command: |
+                    ./dist/opta/opta configure-kubectl \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
+                name: Configure Kubectl
             - run:
                 command: |
                     yes | ./dist/opta/opta destroy \
@@ -483,9 +490,6 @@ jobs:
             - aws-cli/install
             - aws-cli/setup
             - run:
-                command: echo 'export KUBECONFIG="$HOME/kube_config.yaml"' >> $BASH_ENV
-                name: Update KUBECONFIG
-            - run:
                 command: |
                     ./dist/opta/opta configure-kubectl \
                     --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
@@ -567,13 +571,18 @@ jobs:
                 name: Load test-service image
             - run:
                 command: |
+                    ./dist/opta/opta configure-kubectl \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
+                name: Configure Kubectl
+            - run:
+                command: |
                     ./dist/opta/opta deploy \
                     --image app:latest \
                     --env awsenv-ci \
                     --config ./.circleci/ci-tests/create-and-destroy-aws/service-docdb.yml \
                     --tag $CIRCLE_SHA1 \
                     --auto-approve
-                name: Deploy test-service-redis
+                name: Deploy test-service-docdb
             - run:
                 command: |-
                     yes | ./dist/opta/opta destroy \
@@ -630,6 +639,11 @@ jobs:
             - run:
                 command: docker load -i test-service-image
                 name: Load test-service image
+            - run:
+                command: |
+                    ./dist/opta/opta configure-kubectl \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
+                name: Configure Kubectl
             - run:
                 command: |
                     ./dist/opta/opta secret update \
@@ -730,6 +744,11 @@ jobs:
                 name: Load test-service image
             - run:
                 command: |
+                    ./dist/opta/opta configure-kubectl \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
+                name: Configure Kubectl
+            - run:
+                command: |
                     ./dist/opta/opta deploy \
                     --image app:latest \
                     --env awsenv-ci \
@@ -765,6 +784,11 @@ jobs:
                 name: Load test-service image
             - run:
                 command: |
+                    ./dist/opta/opta configure-kubectl \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
+                name: Configure Kubectl
+            - run:
+                command: |
                     ./dist/opta/opta deploy \
                     --image app:latest \
                     --env awsenv-ci \
@@ -795,6 +819,11 @@ jobs:
             - install-opta-dependencies
             - aws-cli/install
             - aws-cli/setup
+            - run:
+                command: |
+                    ./dist/opta/opta configure-kubectl \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
+                name: Configure Kubectl
             - run:
                 command: |
                     OPTA_DISABLE_REPORTING=true ./dist/opta/opta apply \
@@ -834,6 +863,11 @@ jobs:
             - install-opta-dependencies
             - aws-cli/install
             - aws-cli/setup
+            - run:
+                command: |
+                    $HOME/.opta/opta configure-kubectl \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
+                name: Configure Kubectl
             - run:
                 command: |
                     yes | $HOME/.opta/opta apply \
@@ -1177,9 +1211,6 @@ jobs:
                     --refresh
                 name: Deploy opta environment
             - run:
-                command: echo 'export KUBECONFIG="$HOME/kube_config.yaml"' >> $BASH_ENV
-                name: Update KUBECONFIG
-            - run:
                 command: |-
                     ./dist/opta/opta configure-kubectl \
                     --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml
@@ -1292,6 +1323,11 @@ jobs:
                 name: Load Opta Example images
             - run:
                 command: |
+                    ./dist/opta/opta configure-kubectl \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml
+                name: Configure Kubectl
+            - run:
+                command: |
                     ./dist/opta/opta deploy \
                     --image todo-api:v1 \
                     --config ./.circleci/ci-tests/todo-list/api-service.yml \
@@ -1340,6 +1376,11 @@ jobs:
             - run:
                 command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
                 name: Setting up GCP Credentials
+            - run:
+                command: |
+                    ./dist/opta/opta configure-kubectl \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml
+                name: Configure Kubectl
             - run:
                 command: |
                     yes | ./dist/opta/opta destroy \
@@ -1410,9 +1451,6 @@ jobs:
                 command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
                 name: Setting up gcp envar
             - run:
-                command: echo 'export KUBECONFIG="$HOME/kube_config.yaml"' >> $BASH_ENV
-                name: Update KUBECONFIG
-            - run:
                 command: |
                     ./dist/opta/opta configure-kubectl \
                     --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml
@@ -1458,6 +1496,11 @@ jobs:
             - run:
                 command: docker load -i test-service-image
                 name: Load test-service image
+            - run:
+                command: |
+                    ./dist/opta/opta configure-kubectl \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml
+                name: Configure Kubectl
             - run:
                 command: |
                     ./dist/opta/opta deploy \
@@ -1529,6 +1572,11 @@ jobs:
             - run:
                 command: docker load -i test-service-image
                 name: Load test-service image
+            - run:
+                command: |
+                    ./dist/opta/opta configure-kubectl \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml
+                name: Configure Kubectl
             - run:
                 command: |
                     ./dist/opta/opta secret update \
@@ -1634,6 +1682,11 @@ jobs:
                 name: Load test-service image
             - run:
                 command: |
+                    $HOME/.opta/opta configure-kubectl \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml
+                name: Configure Kubectl
+            - run:
+                command: |
                     yes | $HOME/.opta/opta secret update \
                     --env gcpenv-ci \
                     --config ./.circleci/ci-tests/create-and-destroy-gcp/service-pg.yml \
@@ -1704,6 +1757,11 @@ jobs:
             - run:
                 command: docker load -i test-service-image
                 name: Load test-service image
+            - run:
+                command: |
+                    ./dist/opta/opta configure-kubectl \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml
+                name: Configure Kubectl
             - run:
                 command: |
                     ./dist/opta/opta deploy \
