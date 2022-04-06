@@ -20,11 +20,6 @@ steps:
       name: "Load test-service image"
       command: docker load -i test-service-image
   - run:
-      name: "Configure Kubectl"
-      command: |
-        ./dist/opta/opta configure-kubectl \
-        --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml
-  - run:
       name: "Deploy test-service-gcs"
       command: |
         ./dist/opta/opta deploy \
