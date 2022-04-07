@@ -63,7 +63,8 @@ inputs:
     user_facing: true
     validator: str(required=False)
     description: The ACM certificate arn you wish to use to handle ssl (needed if you want https for your site)
-    default: null
+    force_update_default_counter: 2
+    default: ""
   - name: domains
     user_facing: true
     validator: list(str(), required=False)
@@ -84,6 +85,16 @@ inputs:
     validator: list(str(), required=False)
     description: CloudFront caches the response to the specified HTTP method requests.
     default: ["GET", "HEAD", "OPTIONS"]
+  - name: enable_auto_dns
+    user_facing: true
+    validator: bool(required=False)
+    description: Should dns records automatically be added to the hosted zone created within this opta yaml, if present (redundant if domain and zone id are added manually)?
+    default: true
+  - name: zone_id
+    user_facing: true
+    validator: str(required=False)
+    description: ID of Route53 hosted zone to add a record for. By default uses the one created by the DNS module if the module is found.
+    default: ""
 extra_validators: { }
 outputs:
   - name: cloudfront_domain

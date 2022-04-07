@@ -1,4 +1,5 @@
 data "aws_iam_policy_document" "external_dns" {
+  count = var.enable_external_dns ? 1 : 0
   statement {
     sid       = "ChangeResourceRecordSets"
     resources = ["arn:aws:route53:::hostedzone/*"]
@@ -15,11 +16,13 @@ data "aws_iam_policy_document" "external_dns" {
 }
 
 resource "aws_iam_policy" "external_dns" {
+  count = var.enable_external_dns ? 1 : 0
   name   = "opta-${var.env_name}-external-dns"
-  policy = data.aws_iam_policy_document.external_dns.json
+  policy = data.aws_iam_policy_document.external_dns[0].json
 }
 
 data "aws_iam_policy_document" "external_dns_trust" {
+  count = var.enable_external_dns ? 1 : 0
   statement {
     actions = ["sts:AssumeRoleWithWebIdentity"]
     condition {
@@ -35,17 +38,19 @@ data "aws_iam_policy_document" "external_dns_trust" {
 }
 
 resource "aws_iam_role" "external_dns" {
+  count = var.enable_external_dns ? 1 : 0
   name               = "opta-${var.env_name}-external-dns"
-  assume_role_policy = data.aws_iam_policy_document.external_dns_trust.json
+  assume_role_policy = data.aws_iam_policy_document.external_dns_trust[0].json
 }
 
 resource "aws_iam_role_policy_attachment" "external_dns" {
-  policy_arn = aws_iam_policy.external_dns.arn
-  role       = aws_iam_role.external_dns.name
+  count = var.enable_external_dns ? 1 : 0
+  policy_arn = aws_iam_policy.external_dns[0].arn
+  role       = aws_iam_role.external_dns[0].name
 }
 
 resource "helm_release" "external-dns" {
-  count            = var.domain == "" ? 0 : 1
+  count            = var.enable_external_dns ? 1 : 0
   chart            = "external-dns"
   name             = "external-dns"
   repository       = "https://charts.bitnami.com/bitnami"
@@ -64,7 +69,7 @@ resource "helm_release" "external-dns" {
       serviceAccount : {
         name : "external-dns"
         annotations : {
-          "eks.amazonaws.com/role-arn" : aws_iam_role.external_dns.arn
+          "eks.amazonaws.com/role-arn" : aws_iam_role.external_dns[0].arn
         }
       }
     })

@@ -15,6 +15,7 @@ locals {
     ssl-redirect : true
     force-ssl-redirect : true
   }), var.nginx_config)
+  load_balancer_name = "opta-${substr(var.layer_name, 0, 22)}-lb"
 }
 
 variable "eks_cluster_name" {
@@ -38,11 +39,6 @@ variable "layer_name" {
 variable "module_name" {
   description = "Module name"
   type        = string
-}
-
-variable "domain" {
-  type    = string
-  default = ""
 }
 
 variable "cert_arn" {
@@ -130,4 +126,20 @@ variable "linkerd_values" {
 
 variable "ingress_nginx_values" {
   default = {}
+}
+
+variable "enable_external_dns" {
+  type = bool
+}
+
+variable "enable_auto_dns" {
+  type = bool
+}
+
+variable "domain" {
+  type    = string
+}
+
+variable "zone_id" {
+  type    = string
 }
