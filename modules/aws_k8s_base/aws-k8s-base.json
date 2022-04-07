@@ -23,6 +23,26 @@
       "description": "Enable the linkerd service mesh installation.",
       "default": true
     },
+    "enable_external_dns": {
+      "type": "boolean",
+      "description": "Install external dns helm chart on this cluster?",
+      "default": true
+    },
+    "enable_auto_dns": {
+      "type": "boolean",
+      "description": "Should dns records automatically be added to the hosted zone created within this opta yaml, if present (redundant if domain and zone id are added manually)?",
+      "default": true
+    },
+    "domain": {
+      "type": "string",
+      "description": "Domain to setup the ingress with. By default uses the one specified in the DNS module if the module is found.",
+      "default": ""
+    },
+    "zone_id": {
+      "type": "string",
+      "description": "ID of Route53 hosted zone to add a record for. By default uses the one created by the DNS module if the module is found.",
+      "default": ""
+    },
     "admin_arns": {
       "type": "array",
       "description": "ARNs for users/roles who should be K8s admins. The user running Opta is by default an admin.",

@@ -1,0 +1,76 @@
+{
+  "$id": "https://app.runx.dev/modules/global-accelerator",
+  "type": "object",
+  "description": "Adds dns to your environment",
+  "properties": {
+    "flow_logs_enabled": {
+      "type": "bool",
+      "description": "Enable flow logs?",
+      "default": false
+    },
+    "flow_logs_bucket": {
+      "type": "string",
+      "description": "Flow logs bucket",
+      "default": ""
+    },
+    "flow_logs_prefix": {
+      "type": "string",
+      "description": "Flow logs prefix",
+      "items": {
+        "type": "string"
+      },
+      "default": "global-accelerator-flow-logs/"
+    },
+    "endpoint_id": {
+      "type": "string",
+      "description": "The id of the endpoint to direct traffic to. If it's an NLB or ALB, then it's the arn. If it's an EIP, then it's the allocation id.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "enable_auto_dns": {
+      "type": "bool",
+      "description": "Should dns records automatically be added to the hosted zone created within this opta yaml, if present (redundant if domain and zone id are added manually)?",
+      "items": {
+        "type": "string"
+      },
+      "default": true
+    },
+    "domain": {
+      "type": "string",
+      "description": "Domain to setup the ingress with. By default uses the one specified in the DNS module if the module is found.",
+      "items": {
+        "type": "string"
+      },
+      "default": ""
+    },
+    "zone_id": {
+      "type": "string",
+      "description": "ID of Route53 hosted zone to add a record for. By default uses the one created by the DNS module if the module is found.",
+      "items": {
+        "type": "string"
+      },
+      "default": ""
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "global-accelerator"
+      ],
+      "default": "global-accelerator",
+      "type": "string"
+    }
+  },
+  "required": [
+    "type"
+  ],
+  "opta_metadata": {
+    "module_type": "env",
+    "clouds": [
+      "aws"
+    ],
+    "name": "global-accelerator",
+    "display_name": "global-accelerator",
+    "tags": []
+  }
+}
