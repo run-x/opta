@@ -137,9 +137,9 @@ variable "enable_auto_dns" {
 }
 
 variable "domain" {
-  type    = string
+  type = string
 }
 
 variable "zone_id" {
-  type    = string
+  type = string
 }

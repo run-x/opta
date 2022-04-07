@@ -108,10 +108,10 @@ resource "aws_cloudfront_distribution" "distribution" {
 }
 
 resource "aws_route53_record" "domain" {
-  count = length(var.domains)
-  name    = var.domains[count.index]
-  type    = "A"
-  zone_id = var.zone_id
+  count           = length(var.domains)
+  name            = var.domains[count.index]
+  type            = "A"
+  zone_id         = var.zone_id
   allow_overwrite = true
   alias {
     name                   = aws_cloudfront_distribution.distribution.domain_name
@@ -121,10 +121,10 @@ resource "aws_route53_record" "domain" {
 }
 
 resource "aws_route53_record" "sub_domain" {
-  count = length(var.domains)
-  name    = "*.${var.domains[count.index]}"
-  type    = "A"
-  zone_id = var.zone_id
+  count           = length(var.domains)
+  name            = "*.${var.domains[count.index]}"
+  type            = "A"
+  zone_id         = var.zone_id
   allow_overwrite = true
   alias {
     name                   = aws_cloudfront_distribution.distribution.domain_name

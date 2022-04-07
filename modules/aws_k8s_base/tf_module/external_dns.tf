@@ -16,7 +16,7 @@ data "aws_iam_policy_document" "external_dns" {
 }
 
 resource "aws_iam_policy" "external_dns" {
-  count = var.enable_external_dns ? 1 : 0
+  count  = var.enable_external_dns ? 1 : 0
   name   = "opta-${var.env_name}-external-dns"
   policy = data.aws_iam_policy_document.external_dns[0].json
 }
@@ -38,13 +38,13 @@ data "aws_iam_policy_document" "external_dns_trust" {
 }
 
 resource "aws_iam_role" "external_dns" {
-  count = var.enable_external_dns ? 1 : 0
+  count              = var.enable_external_dns ? 1 : 0
   name               = "opta-${var.env_name}-external-dns"
   assume_role_policy = data.aws_iam_policy_document.external_dns_trust[0].json
 }
 
 resource "aws_iam_role_policy_attachment" "external_dns" {
-  count = var.enable_external_dns ? 1 : 0
+  count      = var.enable_external_dns ? 1 : 0
   policy_arn = aws_iam_policy.external_dns[0].arn
   role       = aws_iam_role.external_dns[0].name
 }

@@ -84,5 +84,5 @@ variable "enable_auto_dns" {
 }
 
 variable "zone_id" {
-  type    = string
+  type = string
 }

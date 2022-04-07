@@ -14,19 +14,19 @@ variable "module_name" {
 }
 
 variable "flow_logs_enabled" {
-  type        = bool
+  type = bool
 }
 
 variable "flow_logs_bucket" {
-  type        = string
+  type = string
 }
 
 variable "flow_logs_prefix" {
-  type        = string
+  type = string
 }
 
 variable "endpoint_id" {
-  type        = string
+  type = string
 }
 
 variable "enable_auto_dns" {
@@ -34,9 +34,9 @@ variable "enable_auto_dns" {
 }
 
 variable "domain" {
-  type    = string
+  type = string
 }
 
 variable "zone_id" {
-  type    = string
+  type = string
 }

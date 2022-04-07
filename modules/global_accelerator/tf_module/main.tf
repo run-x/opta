@@ -36,10 +36,10 @@ resource "aws_globalaccelerator_endpoint_group" "endpoint" {
 }
 
 resource "aws_route53_record" "domain" {
-  count = var.domain == "" ? 0 : 1
-  name    = var.domain
-  type    = "A"
-  zone_id = var.zone_id
+  count           = var.domain == "" ? 0 : 1
+  name            = var.domain
+  type            = "A"
+  zone_id         = var.zone_id
   allow_overwrite = true
   alias {
     evaluate_target_health = false
@@ -49,10 +49,10 @@ resource "aws_route53_record" "domain" {
 }
 
 resource "aws_route53_record" "sub_domain" {
-  count = var.domain == "" ? 0 : 1
-  name    = "*.${var.domain}"
-  type    = "A"
-  zone_id = var.zone_id
+  count           = var.domain == "" ? 0 : 1
+  name            = "*.${var.domain}"
+  type            = "A"
+  zone_id         = var.zone_id
   allow_overwrite = true
   alias {
     evaluate_target_health = false
