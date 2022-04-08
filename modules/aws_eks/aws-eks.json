@@ -63,6 +63,11 @@
       "default": {},
       "description": "Custom launch template for the underlying ec2s."
     },
+    "ami_type": {
+      "type": "boolean",
+      "description": "The AMI type to use for the nodes.\nFor more information about this, please visit [here](https://docs.aws.amazon.com/eks/latest/APIReference/API_Nodegroup.html#AmazonEKS-Type-Nodegroup-amiType)\nNote: Currently, \"CUSTOM\" ami type is not supported.\n",
+      "default": "AL2_x86_64"
+    },
     "type": {
       "description": "The name of this module",
       "enum": [

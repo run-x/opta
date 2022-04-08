@@ -51,10 +51,7 @@ resource "aws_eks_node_group" "node_group" {
   subnet_ids      = data.aws_eks_cluster.main.vpc_config[0].subnet_ids
   capacity_type   = var.spot_instances ? "SPOT" : "ON_DEMAND"
 
-  # Yes, Graviton2 AL2_ARM_64 option is available, but I'm not considering it right now because it's really new, and
-  # the release post mentioned the need to be multi-arched ready, which I'm not dealing with.
-  # https://aws.amazon.com/blogs/containers/eks-on-graviton-generally-available/
-  ami_type = var.use_gpu ? "AL2_x86_64_GPU" : "AL2_x86_64"
+  ami_type = var.ami_type
 
   disk_size      = var.node_disk_size
   instance_types = [var.node_instance_type]

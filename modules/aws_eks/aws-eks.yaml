@@ -88,6 +88,14 @@ inputs:
     validator: any(include('node_launch_template'), required=False)
     description: Custom launch template for the underlying ec2s.
     default: {}
+  - name: ami_type
+    user_facing: true
+    validator: enum("AL2_x86_64", "AL2_x86_64_GPU", "AL2_ARM_64", "BOTTLEROCKET_ARM_64", "BOTTLEROCKET_x86_64", required=False)
+    description: |
+      The AMI type to use for the nodes.
+      For more information about this, please visit [here](https://docs.aws.amazon.com/eks/latest/APIReference/API_Nodegroup.html#AmazonEKS-Type-Nodegroup-amiType)
+      Note: Currently, "CUSTOM" ami type is not supported.
+    default: "AL2_x86_64"
 extra_validators:
   node_launch_template:
     user_data: str(required=False)

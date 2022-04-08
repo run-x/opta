@@ -71,10 +71,7 @@ resource "aws_eks_node_group" "node_group" {
   capacity_type   = var.spot_instances ? "SPOT" : "ON_DEMAND"
 
 
-  # Yes, Graviton2 AL2_ARM_64 option is available, but I'm not considering it right now because it's really new, and
-  # the release post mentioned the need to be multi-arched ready, which I'm not dealing with.
-  # https://aws.amazon.com/blogs/containers/eks-on-graviton-generally-available/
-  ami_type = "AL2_x86_64"
+  ami_type = var.ami_type
 
   disk_size      = (length(var.node_launch_template) > 0) ? null : var.node_disk_size
   instance_types = (length(var.node_launch_template) > 0) ? [] : [var.node_instance_type]

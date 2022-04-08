@@ -53,11 +53,6 @@ variable "spot_instances" {
   default = false
 }
 
-variable "use_gpu" {
-  type    = bool
-  default = false
-}
-
 variable "labels" {
   type    = map(string)
   default = {}
@@ -68,3 +63,7 @@ variable "taints" {
   default = []
 }
 
+variable "ami_type" {
+  type    = string
+  default = "AL2_x86_64"
+}
