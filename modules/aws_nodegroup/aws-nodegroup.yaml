@@ -38,11 +38,6 @@ inputs:
     validator: str(required=False)
     description: The [ec2 instance type](https://aws.amazon.com/ec2/instance-types/) for the nodes.
     default: "t3.medium"
-  - name: use_gpu
-    user_facing: true
-    validator: bool(required=False)
-    description: Should we expect and use the gpus present in the ec2?
-    default: false
   - name: spot_instances
     user_facing: true
     validator: bool(required=False)
@@ -61,6 +56,14 @@ inputs:
     validator: list(include('taint'), required=False)
     description: Taints to add to the nodes in this nodegroup.
     default: []
+  - name: ami_type
+    user_facing: true
+    validator: enum("AL2_x86_64", "AL2_x86_64_GPU", "AL2_ARM_64", "BOTTLEROCKET_ARM_64", "BOTTLEROCKET_x86_64", required=False)
+    description: |
+      The AMI type to use for the nodes.
+      For more information about this, please visit [here](https://docs.aws.amazon.com/eks/latest/APIReference/API_Nodegroup.html#AmazonEKS-Type-Nodegroup-amiType)
+      Note: Currently, "CUSTOM" ami type is not supported.
+    default: "AL2_x86_64"
 outputs: {}
 output_providers: {}
 extra_validators:

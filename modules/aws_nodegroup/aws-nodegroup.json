@@ -33,10 +33,10 @@
       "default": "t3.medium",
       "description": "The [ec2 instance type](https://aws.amazon.com/ec2/instance-types/) for the nodes."
     },
-    "use_gpu": {
+    "ami_type": {
       "type": "boolean",
-      "description": "Should we expect and use the gpus present in the ec2?",
-      "default": false
+      "description": "The AMI type to use for the nodes.\nFor more information about this, please visit [here](https://docs.aws.amazon.com/eks/latest/APIReference/API_Nodegroup.html#AmazonEKS-Type-Nodegroup-amiType)\nNote: Currently, \"CUSTOM\" ami type is not supported.\n",
+      "default": "AL2_x86_64"
     },
     "spot_instances": {
       "type": "boolean",
