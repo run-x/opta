@@ -12,7 +12,6 @@ description: Creates base infrastructure for k8s environments
 This module is responsible for all the base infrastructure we package into the Opta K8s environments. This includes:
 
 - [Autoscaler](https://github.com/kubernetes/autoscaler) for scaling up and down the ec2s as needed
-- [External DNS](https://github.com/kubernetes-sigs/external-dns) to automatically hook up the ingress to the hosted zone and its domain
 - [Ingress Nginx](https://github.com/kubernetes/ingress-nginx) to expose services to the public
 - [Metrics server](https://github.com/kubernetes-sigs/metrics-server) for scaling different deployments based on cpu/memory usage
 - [Linkerd](https://linkerd.io/) as our service mesh.

@@ -105,11 +105,6 @@ inputs:
     validator: any(required=False)
     description: Ingress Nginx helm chart additional values. [Available options](https://artifacthub.io/packages/helm/ingress-nginx/ingress-nginx/4.0.17?modal=values)
     default: {}
-  - name: enable_external_dns
-    user_facing: true
-    validator: bool(required=False)
-    description: Install external dns helm chart on this cluster?
-    default: true
   - name: enable_auto_dns
     user_facing: true
     validator: bool(required=False)

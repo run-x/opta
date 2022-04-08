@@ -128,10 +128,6 @@ variable "ingress_nginx_values" {
   default = {}
 }
 
-variable "enable_external_dns" {
-  type = bool
-}
-
 variable "enable_auto_dns" {
   type = bool
 }
