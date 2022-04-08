@@ -17,6 +17,14 @@ Opta will provision your database with 7 days of automatic daily backups in the 
 You can find them either programmatically via the aws cli, or through the AWS web console (they will be called
 system snapshots, and they have a different tab than the manual ones).
 
+### Performance and Scaling
+
+You can modify the DB instance class with the field `instance_class` in the module configuration.
+
+Storage scaling is automatically managed by AWS Aurora, see the [official documentation](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Managing.Performance.html).
+
+To add replicas to an existing cluser, follow the [official guide](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-replicas-adding.html).
+
 ### Linking
 
 When linked to a k8s-service, it adds connection credentials to your container's environment variables as:
