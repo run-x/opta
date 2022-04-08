@@ -60,9 +60,7 @@ class AwsK8sBaseProcessor(AWSK8sModuleProcessor, K8sBaseModuleProcessor):
         if (self.module.data.get("domain") is None) != (
             self.module.data.get("zone_id") is None
         ):
-            raise UserErrors(
-                "Either both domain and zone_id are mentioned at the same time, or none at all."
-            )
+            raise UserErrors("You need to specify domain and zone_id together.")
 
         aws_base_modules = self.layer.get_module_by_type("aws-base", module_idx)
         if len(aws_base_modules) == 0:
