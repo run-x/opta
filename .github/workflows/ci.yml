@@ -24,7 +24,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install shellcheck
         run: |
-          apt install shellcheck
+          sudo apt update
+          sudo apt install shellcheck
       - name: Lint
         run: |
           shellcheck **/*.sh
