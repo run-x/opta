@@ -18,8 +18,31 @@ jobs:
         run: |
           cd scripts
           ./no_pdb.sh
-
-  lint:
+  shell-check:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install shellcheck
+        run: |
+          sudo apt update
+          sudo apt install shellcheck
+      - name: Lint
+        run: |
+          shellcheck **/*.sh
+  shell-fmt:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '^1.18' # The Go version to download (if necessary) and use.
+      - name: Install shell fmt
+        run: |
+          go install mvdan.cc/sh/v3/cmd/shfmt@latest
+      - name: Lint
+        run: |
+          shfmt -d ./
+  python-lint:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
