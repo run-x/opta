@@ -5,11 +5,9 @@ data "aws_eks_cluster" "main" {
 }
 
 locals {
-  default_labels = var.use_gpu ? {
+  default_labels = {
     node_group_name = "opta-${var.layer_name}-${var.module_name}"
-    gpu : "true"
-    } : {
-    node_group_name = "opta-${var.layer_name}-${var.module_name}"
+    ami_type = var.ami_type
   }
 }
 
