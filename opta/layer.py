@@ -471,6 +471,7 @@ class Layer:
                 raise e
             if module.desc.get("halt"):
                 previous_module_reference = [f"module.{module.name}"]
+        ret["output"]["state_storage"] = {"value": self.state_storage()}
 
         return hydrate(ret, self.metadata_hydration())
 
