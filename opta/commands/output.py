@@ -16,7 +16,7 @@ from opta.utils.clickoptions import (
 )
 
 
-@click.command(hidden=True)
+@click.command()
 @config_option
 @env_option
 @input_variable_option
