@@ -65,3 +65,8 @@ variable "ami_type" {
   type    = string
   default = "AL2_x86_64"
 }
+
+variable "use_gpu" {
+  type = bool
+  default = false
+}
