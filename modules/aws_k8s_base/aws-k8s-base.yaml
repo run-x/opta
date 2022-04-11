@@ -38,15 +38,6 @@ inputs:
     user_facing: false
     description: The arn for the open id for the eks cluster.
     default: false
-  - name: domain
-    user_facing: false
-    description: Domain to setup the ingress with
-    default: ""
-  - name: cert_arn
-    user_facing: true
-    validator: str(required=False)
-    description: "The arn of the ACM certificate to use for SSL. By default uses the one created by the DNS module if the module is found and delegation enabled."
-    default: ""
   - name: private_key
     user_facing: false
     description: Private key for external ssl cert
@@ -114,10 +105,32 @@ inputs:
     validator: any(required=False)
     description: Ingress Nginx helm chart additional values. [Available options](https://artifacthub.io/packages/helm/ingress-nginx/ingress-nginx/4.0.17?modal=values)
     default: {}
+  - name: enable_auto_dns
+    user_facing: false
+    description: Should dns records automatically be added to the hosted zone created within this opta yaml, if present (redundant if domain and zone id are added manually)?
+    default: false
+  - name: domain
+    user_facing: true
+    validator: str(required=False)
+    description: Domain to setup the ingress with. By default uses the one specified in the DNS module if the module is found.
+    default: ""
+  - name: zone_id
+    user_facing: true
+    validator: str(required=False)
+    description: ID of Route53 hosted zone to add a record for. By default uses the one created by the DNS module if the module is found.
+    default: ""
+  - name: cert_arn
+    user_facing: true
+    validator: str(required=False)
+    description: The arn of the ACM certificate to use for SSL. By default uses the one created by the DNS module if the module is found and delegation enabled.
+    default: ""
 outputs:
   - name: load_balancer_raw_dns
     export: true
     description: The dns of the network load balancer provisioned to handle ingress to your environment
+  - name: load_balancer_arn
+    export: true
+    description: The arn of the network load balancer provisioned to handle ingress to your environment
 output_providers: {}
 output_data: {}
 clouds:

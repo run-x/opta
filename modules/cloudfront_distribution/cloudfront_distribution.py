@@ -39,6 +39,25 @@ class CloudfrontDistributionProcessor(ModuleProcessor):
                 "s3_log_bucket_name", f"${{{{{module_source}.s3_log_bucket_name}}}}"
             )
 
+        aws_dns_modules = self.layer.get_module_by_type("aws-dns", module_idx)
+        if len(aws_dns_modules) != 0 and aws_dns_modules[0].data.get("linked_module") in [
+            self.module.type,
+            self.module.name,
+        ]:
+            aws_dns_module = aws_dns_modules[0]
+            self.module.data["enable_auto_dns"] = True
+            self.module.data["zone_id"] = (
+                self.module.data.get("zone_id")
+                or f"${{{{module.{aws_dns_module.name}.zone_id}}}}"
+            )
+            self.module.data["acm_cert_arn"] = (
+                self.module.data.get("acm_cert_arn")
+                or f"${{{{module.{aws_dns_module.name}.cert_arn}}}}"
+            )
+            self.module.data["domains"] = self.module.data.get("domains") or [
+                f"${{{{module.{aws_dns_module.name}.domain}}}}"
+            ]
+
         links = self.module.data.get("links", [])
         if links == [] and (
             "bucket_name" not in self.module.data

@@ -78,3 +78,11 @@ variable "cached_methods" {
   type    = list(string)
   default = ["GET", "HEAD", "OPTIONS"]
 }
+
+variable "enable_auto_dns" {
+  type = bool
+}
+
+variable "zone_id" {
+  type = string
+}

@@ -79,6 +79,7 @@ PROCESSOR_DICT: Dict[str, str] = {
     "lambda-function": "LambdaFunctionProcessor",
     "k8s-manifest": "K8smanifestProcessor",
     "azure-aks": "AzureAksProcessor",
+    "global-accelerator": "GlobalAcceleratorsProcessor",
 }
 
 

@@ -22,14 +22,14 @@ providers:
     account_id: XXXXXXXXXX
 modules:
   - type: aws-s3
-    name: testmodule
     bucket_name: "a-unique-s3-bucket-name"
-    files: "./my-site-files" # See S3 module for more info about uploading your files t S3
+    files: "./my-site-files" # See S3 module for more info about uploading your files to S3
+    name: testmodule
+  - type: dns 
+    domain: staging.startup.com # Fill in with your desired domain, or remove this whole entry if handling dns outside of Opta
+    delegated: false # Set to true when ready -- see the "Configure DNS" page
+    linked_module: cloudfront-distribution
   - type: cloudfront-distribution
-    # Uncomment the following and fill in to support your domain with ssl
-#    acm_cert_arn: "arn:aws:acm:us-east-1:XXXXXXXXXX:certificate/cert-id"
-#    domains:
-#      - "your.domain.com"
     links:
       - testmodule
 ```
@@ -45,14 +45,15 @@ providers:
     account_id: XXXXXXXXXX
 modules:
   - type: base
+  - type: dns
+    domain: staging.startup.com # Fill in with your desired domain, or remove this whole entry if handling dns outside of Opta
+    delegated: false # Set to true when ready -- see the "Configure DNS" page
+    linked_module: cloudfront-distribution
   - type: k8s-cluster
   - type: k8s-base
     name: testbase
+    expose_self_signed_ssl: true
   - type: cloudfront-distribution
-#    Uncomment the following and fill in to support your domain with ssl
-#    acm_cert_arn: "arn:aws:acm:us-east-1:XXXXXXXXXX:certificate/cert-id"
-#    domains:
-#      - "your.domain.com"
     links:
       - testbase
 ```
@@ -68,12 +69,19 @@ caching capabilities. That means that while delivery speeds are significantly fa
 (~1hr) to reflect changes into your static site deployment. Please keep this in mind when deploying such changes. You
 may immediately verify the latest copy by downloading from your S3 bucket directly.
 
-### Using your own domain
-If you are ready to start hosting your site with your domain via the cloudfront distribution, then proceed as follows:
-1. Get an [AWS ACM certificate](https://docs.aws.amazon.com/acm/latest/userguide/gs-acm-request-public.html) for your site. 
+### Domain / DNS
+If you are ready to start hosting your site with your domain via the cloudfront distribution, then go ahead and follow 
+the [configuring dns guide](/features/dns-and-cert/dns), which will also set up your SSL. Traffic should
+start flowing from your domain to your cloudfront distribution and on towards your S3 bucket / K8s cluster. You could
+also manually configure DNS / SSL from outside of Opta using the following steps:
+1. Remove the dns module entirely from your yaml, if you haven't already.
+2. Get an [AWS ACM certificate](https://docs.aws.amazon.com/acm/latest/userguide/gs-acm-request-public.html) for your site. 
    Make sure that you get it in region us-east-1. If you already have one at hand in your account (e.g. from another 
    active Opta deployment), then feel free to reuse that.
-2. [Validate](https://docs.aws.amazon.com/acm/latest/userguide/dns-validation.html) the certificate by adding the correct CNAME entries in your domain's DNS settings. 
-3. Create a new separate CNAME record for the domain you wish to use for cloudfront and point it at the `cloudfront_domain` gotten above.
-3. Set the acm_cert_arn and domains fields in opta accordingly
-4. Opta apply and you're done!
+3. [Validate](https://docs.aws.amazon.com/acm/latest/userguide/dns-validation.html) the certificate by adding the correct CNAME entries in your domain's DNS settings. 
+4. Fill in the `acm_cert_arn` field for the cloudfront module with the arn of your cert.
+5. In your hosted zone, create either an A record (if it's on the same AWS account) or a CNAME pointing to the cloudfront
+   distribution url (the `cloudfront_domain` output). Alternatively, if it's a hosted zone on the same AWS account you could pass the `zone_id` to the
+   cloudfront module to have Opta automatically take care of this for you.
+6. Fill in the `domains` field to include the domains for which you have the certificate for (no need to include wildcard repetition, that's automatic).
+7. Opta apply and you're done!

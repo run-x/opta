@@ -42,6 +42,11 @@ inputs:
     user_facing: false
     description: Deprecated
     default: ""
+  - name: linked_module
+    user_facing: true
+    validator: str(required=False)
+    description: The module type (or name if given) to automatically add root dns records for.
+    default: ""
 outputs:
   - name: zone_id
     export: true

@@ -1,0 +1,67 @@
+halt: false
+environment_module: true
+is_unique: true
+inputs:
+  - name: env_name
+    user_facing: false
+    description: Opta Environment name
+    default: None
+  - name: layer_name
+    user_facing: false
+    description: Opta Layer name
+    default: None
+  - name: module_name
+    user_facing: false
+    description: Opta Module name
+    default: None
+  - name: flow_logs_enabled
+    user_facing: true
+    validator: bool(required=False)
+    description: Enable flow logs?
+    default: false
+  - name: flow_logs_bucket
+    user_facing: true
+    validator: str(required=False)
+    description: Flow logs bucket
+    default: ""
+  - name: flow_logs_prefix
+    user_facing: true
+    validator: str(required=False)
+    description: Flow logs prefix
+    default: "global-accelerator-flow-logs/"
+  - name: endpoint_id
+    user_facing: true
+    validator: str(required=False)
+    description: The id of the endpoint to direct traffic to. If it's an NLB or ALB, then it's the arn. If it's an EIP, then it's the allocation id.
+    default: null
+  - name: enable_auto_dns
+    user_facing: false
+    description: Should dns records automatically be added to the hosted zone created within this opta yaml, if present (redundant if domain and zone id are added manually)?
+    default: false
+  - name: domain
+    user_facing: true
+    validator: str(required=False)
+    description: Domain to setup the ingress with. By default uses the one specified in the DNS module if the module is found.
+    default: ""
+  - name: zone_id
+    user_facing: true
+    validator: str(required=False)
+    description: ID of Route53 hosted zone to add a record for. By default uses the one created by the DNS module if the module is found.
+    default: ""
+outputs:
+  - name: global_accelerator_arn
+    export: true
+    description: The arn of the global accelerator created.
+  - name: global_accelerator_dns_name
+    export: true
+    description: The public dns name of the global accelerator created.
+  - name: global_accelerator_ip_addresses
+    export: true
+    description: The public ip addresses of the global accelerator created.
+  - name: global_accelerator_endpoint_arns
+    export: true
+    description: The arns of the global accelerator endpoint groups created.
+output_providers: {}
+output_data: {}
+clouds:
+  - aws

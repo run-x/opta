@@ -79,14 +79,13 @@ resource "helm_release" "ingress-nginx" {
             "service.beta.kubernetes.io/aws-load-balancer-healthcheck-protocol" : "HTTP"
             "service.beta.kubernetes.io/aws-load-balancer-healthcheck-path" : "/healthz"
             "service.beta.kubernetes.io/aws-load-balancer-backend-protocol" : "ssl"
-            "service.beta.kubernetes.io/aws-load-balancer-name" : "opta-${var.layer_name}-lb"
+            "service.beta.kubernetes.io/aws-load-balancer-name" : local.load_balancer_name
             "service.beta.kubernetes.io/aws-load-balancer-access-log-enabled" : true
             "service.beta.kubernetes.io/aws-load-balancer-access-log-s3-bucket-name" : var.s3_log_bucket_name
             "service.beta.kubernetes.io/aws-load-balancer-access-log-s3-bucket-prefix" : "opta-k8s-cluster"
             "service.beta.kubernetes.io/aws-load-balancer-ssl-ports" : local.nginx_tls_ports
             "service.beta.kubernetes.io/aws-load-balancer-ssl-negotiation-policy" : "ELBSecurityPolicy-TLS-1-2-2017-01"
             "service.beta.kubernetes.io/aws-load-balancer-ssl-cert" : var.cert_arn
-            "external-dns.alpha.kubernetes.io/hostname" : var.domain == "" ? "" : join(",", [var.domain, "*.${var.domain}"])
             "service.beta.kubernetes.io/aws-load-balancer-alpn-policy" : "HTTP2Preferred"
           }
         }
@@ -102,6 +101,32 @@ resource "helm_release" "ingress-nginx" {
 }
 
 data "aws_lb" "ingress-nginx" {
-  name       = "opta-${var.layer_name}-lb"
+  name       = local.load_balancer_name
   depends_on = [helm_release.ingress-nginx]
+}
+
+resource "aws_route53_record" "domain" {
+  count           = var.domain == "" ? 0 : 1
+  name            = var.domain
+  type            = "A"
+  zone_id         = var.zone_id
+  allow_overwrite = true
+  alias {
+    evaluate_target_health = true
+    name                   = data.aws_lb.ingress-nginx.dns_name
+    zone_id                = data.aws_lb.ingress-nginx.zone_id
+  }
+}
+
+resource "aws_route53_record" "sub_domain" {
+  count           = var.domain == "" ? 0 : 1
+  name            = "*.${var.domain}"
+  type            = "A"
+  zone_id         = var.zone_id
+  allow_overwrite = true
+  alias {
+    evaluate_target_health = true
+    name                   = data.aws_lb.ingress-nginx.dns_name
+    zone_id                = data.aws_lb.ingress-nginx.zone_id
+  }
 }

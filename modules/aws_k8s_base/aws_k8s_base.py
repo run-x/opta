@@ -25,12 +25,9 @@ class AwsK8sBaseProcessor(AWSK8sModuleProcessor, K8sBaseModuleProcessor):
         super(AwsK8sBaseProcessor, self).__init__(module, layer)
 
     def process(self, module_idx: int) -> None:
-        byo_cert_module = None
-        for module in self.layer.modules:
-            if (module.aliased_type or module.type) == "external-ssl-cert":
-                byo_cert_module = module
-                break
-        if byo_cert_module is not None:
+        byo_cert_modules = self.layer.get_module_by_type("external-ssl-cert")
+        if len(byo_cert_modules) != 0:
+            byo_cert_module = byo_cert_modules[0]
             self.module.data[
                 "private_key"
             ] = f"${{{{module.{byo_cert_module.name}.private_key}}}}"
@@ -43,16 +40,32 @@ class AwsK8sBaseProcessor(AWSK8sModuleProcessor, K8sBaseModuleProcessor):
 
         self._process_nginx_extra_ports(self.layer, self.module.data)
 
-        aws_dns_module = None
-        for module in self.layer.modules:
-            if (module.aliased_type or module.type) == "aws-dns":
-                aws_dns_module = module
-                break
-        if aws_dns_module is not None:
-            self.module.data["domain"] = f"${{{{module.{aws_dns_module.name}.domain}}}}"
-            self.module.data[
-                "cert_arn"
-            ] = f"${{{{module.{aws_dns_module.name}.cert_arn}}}}"
+        aws_dns_modules = self.layer.get_module_by_type("aws-dns")
+        self.module.data["enable_auto_dns"] = False
+        if len(aws_dns_modules) != 0 and aws_dns_modules[0].data.get("linked_module") in [
+            None,
+            self.module.type,
+            self.module.name,
+        ]:
+            aws_dns_module = aws_dns_modules[0]
+            self.module.data["enable_auto_dns"] = True
+            self.module.data["domain"] = (
+                self.module.data.get("domain")
+                or f"${{{{module.{aws_dns_module.name}.domain}}}}"
+            )
+            self.module.data["cert_arn"] = (
+                self.module.data.get("cert_arn")
+                or f"${{{{module.{aws_dns_module.name}.cert_arn}}}}"
+            )
+            self.module.data["zone_id"] = (
+                self.module.data.get("zone_id")
+                or f"${{{{module.{aws_dns_module.name}.zone_id}}}}"
+            )
+
+        if (self.module.data.get("domain") is None) != (
+            self.module.data.get("zone_id") is None
+        ):
+            raise UserErrors("You need to specify domain and zone_id together.")
 
         aws_base_modules = self.layer.get_module_by_type("aws-base", module_idx)
         if len(aws_base_modules) == 0:

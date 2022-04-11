@@ -19,7 +19,7 @@ resource "aws_cloudfront_distribution" "distribution" {
   enabled         = true
   is_ipv6_enabled = true
   price_class     = var.price_class
-  aliases         = var.domains
+  aliases         = var.acm_cert_arn == "" ? [] : var.domains
 
   dynamic "logging_config" {
     for_each = var.s3_log_bucket_name == null ? [] : [1]
@@ -39,7 +39,7 @@ resource "aws_cloudfront_distribution" "distribution" {
   }
 
   viewer_certificate {
-    cloudfront_default_certificate = var.acm_cert_arn == null ? true : false
+    cloudfront_default_certificate = var.acm_cert_arn == "" ? true : false
     acm_certificate_arn            = var.acm_cert_arn
     ssl_support_method             = "sni-only"
   }
@@ -104,5 +104,31 @@ resource "aws_cloudfront_distribution" "distribution" {
       response_code         = 500
       response_page_path    = var.status_500_page_file
     }
+  }
+}
+
+resource "aws_route53_record" "domain" {
+  count           = length(var.domains)
+  name            = var.domains[count.index]
+  type            = "A"
+  zone_id         = var.zone_id
+  allow_overwrite = true
+  alias {
+    name                   = aws_cloudfront_distribution.distribution.domain_name
+    zone_id                = aws_cloudfront_distribution.distribution.hosted_zone_id
+    evaluate_target_health = true
+  }
+}
+
+resource "aws_route53_record" "sub_domain" {
+  count           = length(var.domains)
+  name            = "*.${var.domains[count.index]}"
+  type            = "A"
+  zone_id         = var.zone_id
+  allow_overwrite = true
+  alias {
+    name                   = aws_cloudfront_distribution.distribution.domain_name
+    zone_id                = aws_cloudfront_distribution.distribution.hosted_zone_id
+    evaluate_target_health = true
   }
 }

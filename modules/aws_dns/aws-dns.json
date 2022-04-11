@@ -7,6 +7,11 @@
       "type": "string",
       "description": "The domain you want (you will also get the subdomains for your use)"
     },
+    "linked_module": {
+      "type": "string",
+      "description": "The module type (or name if given) to automatically add root dns records for.",
+      "default": ""
+    },
     "delegated": {
       "type": "boolean",
       "description": "Set to true once the extra [dns setup is complete](/features/dns-and-cert/dns/) and it will add the ssl certs.",

@@ -140,6 +140,19 @@ class AwsDnsProcessor(DNSModuleProcessor):
                     f"Inputted certificate is for domains of {cert_domains}, but the main domain "
                     f"{self.module.data['domain']} is not one of them"
                 )
+
+        linked_module_name = self.module.data.get("linked_module")
+        if linked_module_name is not None:
+            x: Module
+            linked_modules = list(
+                filter(
+                    lambda x: linked_module_name in [x.name, x.type], self.layer.modules
+                )
+            )
+            if len(linked_modules) != 1:
+                raise UserErrors(
+                    f"Could not find DNS' linked_module of {linked_module_name}-- it must be the name or type of a single module"
+                )
         super(AwsDnsProcessor, self).process(module_idx)
 
     def fetch_private_key(self) -> Tuple[PKey, str]:

@@ -22,6 +22,16 @@
       "type": "string",
       "description": "The name of the existing s3 object in your bucket which will serve as the 404 page."
     },
+    "enable_auto_dns": {
+      "type": "bool",
+      "description": "Should dns records automatically be added to the hosted zone created within this opta yaml, if present (redundant if domain and zone id are added manually)?",
+      "default": true
+    },
+    "zone_id": {
+      "type": "string",
+      "description": "ID of Route53 hosted zone to add a record for. By default uses the one created by the DNS module if the module is found.",
+      "default": ""
+    },
     "status_500_page_file": {
       "type": "string",
       "description": "The name of the existing s3 object in your bucket which will serve as the 500 page."
@@ -33,7 +43,8 @@
     },
     "acm_cert_arn": {
       "type": "string",
-      "description": "The ACM certificate arn you wish to use to handle ssl (needed if you want https for your site)"
+      "description": "The ACM certificate arn you wish to use to handle ssl (needed if you want https for your site)",
+      "default": ""
     },
     "domains": {
       "type": "array",
