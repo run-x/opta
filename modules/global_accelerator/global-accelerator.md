@@ -29,7 +29,6 @@ modules:
     linked_module: global-accelerator
   - type: k8s-cluster
   - type: k8s-base
-    name: testbase
     # Uncomment when enabling dns to get ssl
 #    cert_arn: "${{module.dns.cert_arn}}" # Or add your own cert if not using Opta's dns module
   - type: global-accelerator
