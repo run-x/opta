@@ -23,11 +23,6 @@
       "description": "Enable the linkerd service mesh installation.",
       "default": true
     },
-    "enable_external_dns": {
-      "type": "boolean",
-      "description": "Install external dns helm chart on this cluster?",
-      "default": true
-    },
     "enable_auto_dns": {
       "type": "boolean",
       "description": "Should dns records automatically be added to the hosted zone created within this opta yaml, if present (redundant if domain and zone id are added manually)?",
