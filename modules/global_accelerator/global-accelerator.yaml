@@ -35,10 +35,9 @@ inputs:
     description: The id of the endpoint to direct traffic to. If it's an NLB or ALB, then it's the arn. If it's an EIP, then it's the allocation id.
     default: null
   - name: enable_auto_dns
-    user_facing: true
-    validator: bool(required=False)
+    user_facing: false
     description: Should dns records automatically be added to the hosted zone created within this opta yaml, if present (redundant if domain and zone id are added manually)?
-    default: true
+    default: false
   - name: domain
     user_facing: true
     validator: str(required=False)

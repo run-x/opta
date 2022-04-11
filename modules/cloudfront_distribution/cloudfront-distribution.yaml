@@ -86,10 +86,9 @@ inputs:
     description: CloudFront caches the response to the specified HTTP method requests.
     default: ["GET", "HEAD", "OPTIONS"]
   - name: enable_auto_dns
-    user_facing: true
-    validator: bool(required=False)
+    user_facing: false
     description: Should dns records automatically be added to the hosted zone created within this opta yaml, if present (redundant if domain and zone id are added manually)?
-    default: true
+    default: false
   - name: zone_id
     user_facing: true
     validator: str(required=False)

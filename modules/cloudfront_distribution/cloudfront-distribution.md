@@ -22,13 +22,12 @@ providers:
     account_id: XXXXXXXXXX
 modules:
   - type: aws-s3
-    name: testmodule
     bucket_name: "a-unique-s3-bucket-name"
     files: "./my-site-files" # See S3 module for more info about uploading your files to S3
-     # Uncomment to create a DNS with the given domain and all traffic flowing to the cloudfront distribution
-#  - type: dns 
-#    domain: staging.startup.com
-#    delegated: false # Set to true when ready -- see the "Configure DNS" page
+  - type: dns 
+    domain: staging.startup.com
+    delegated: false # Set to true when ready -- see the "Configure DNS" page
+    linked_module: cloudfront-distribution
   - type: cloudfront-distribution
     links:
       - testmodule
@@ -45,15 +44,13 @@ providers:
     account_id: XXXXXXXXXX
 modules:
   - type: base
-     # Uncomment to create a DNS with the given domain and all traffic flowing to the cloudfront distribution
-#  - type: dns 
-#    name: dns
-#    domain: staging.startup.com
-#    delegated: false # Set to true when ready -- see the "Configure DNS" page
+  - type: dns
+    domain: staging.startup.com
+    delegated: false # Set to true when ready -- see the "Configure DNS" page
+    linked_module: cloudfront-distribution
   - type: k8s-cluster
   - type: k8s-base
     name: testbase
-    enable_auto_dns: false  # Need this to drive dns traffic to cloudfront
     expose_self_signed_ssl: true
   - type: cloudfront-distribution
     links:

@@ -106,10 +106,9 @@ inputs:
     description: Ingress Nginx helm chart additional values. [Available options](https://artifacthub.io/packages/helm/ingress-nginx/ingress-nginx/4.0.17?modal=values)
     default: {}
   - name: enable_auto_dns
-    user_facing: true
-    validator: bool(required=False)
+    user_facing: false
     description: Should dns records automatically be added to the hosted zone created within this opta yaml, if present (redundant if domain and zone id are added manually)?
-    default: true
+    default: false
   - name: domain
     user_facing: true
     validator: str(required=False)

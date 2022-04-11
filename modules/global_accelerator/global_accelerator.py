@@ -14,9 +14,12 @@ class GlobalAcceleratorsProcessor(ModuleProcessor):
 
     def process(self, module_idx: int) -> None:
         aws_dns_modules = self.layer.get_module_by_type("aws-dns")
-        enable_auto_dns = self.module.data.get("enable_auto_dns", True)
-        if len(aws_dns_modules) != 0 and enable_auto_dns:
+        if len(aws_dns_modules) != 0 and aws_dns_modules[0].data.get("linked_module") in [
+            self.module.type,
+            self.module.name,
+        ]:
             aws_dns_module = aws_dns_modules[0]
+            self.module.data["enable_auto_dns"] = True
             self.module.data["domain"] = (
                 self.module.data.get("domain")
                 or f"${{{{module.{aws_dns_module.name}.domain}}}}"

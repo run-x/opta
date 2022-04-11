@@ -42,6 +42,10 @@ variable "external_cert_arn" {
   default = ""
 }
 
+variable "linked_module" {
+  type    = string
+}
+
 data "aws_ssm_parameter" "private_key" {
   count           = var.upload_cert ? 1 : 0
   name            = "/opta-${var.env_name}/dns-private-key.pem"

@@ -22,15 +22,14 @@ providers:
     account_id: XXXXXXXXXX
 modules:
   - type: base
-     # Uncomment to create a DNS with the given domain and all traffic flowing to the cloudfront distribution
-#  - type: dns 
-#    name: dns
-#    domain: staging.startup.com
-#    delegated: false # Set to true when ready -- see the "Configure DNS" page
+  - type: dns 
+    name: dns
+    domain: staging.startup.com
+    delegated: false # Set to true when ready -- see the "Configure DNS" page
+    linked_module: global-accelerator
   - type: k8s-cluster
   - type: k8s-base
     name: testbase
-    enable_auto_dns: false  # Need this to drive dns traffic to cloudfront
     # Uncomment when enabling dns to get ssl
 #    cert_arn: "${{module.dns.cert_arn}}" # Or add your own cert if not using Opta's dns module
   - type: global-accelerator
