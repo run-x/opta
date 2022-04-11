@@ -24,6 +24,7 @@ modules:
   - type: aws-s3
     bucket_name: "a-unique-s3-bucket-name"
     files: "./my-site-files" # See S3 module for more info about uploading your files to S3
+    name: testmodule
   - type: dns 
     domain: staging.startup.com
     delegated: false # Set to true when ready -- see the "Configure DNS" page
