@@ -312,6 +312,7 @@ resource "helm_release" "load_balancer" {
   values = [
     yamlencode({
       clusterName : var.eks_cluster_name,
+      region : data.aws_region.current.id,
       serviceAccount : {
         annotations : {
           "eks.amazonaws.com/role-arn" : aws_iam_role.load_balancer.arn
@@ -326,6 +327,9 @@ resource "helm_release" "load_balancer" {
   cleanup_on_fail  = true
   atomic           = true
   wait_for_jobs    = false
-  version          = "1.4.0"
+  version          = "1.4.1"
+  depends_on = [
+    aws_iam_role_policy_attachment.load_balancer
+  ]
 }
 
