@@ -64,6 +64,7 @@ class TestLayer:
                 k8s_openid_provider_arn="${data.terraform_remote_state.parent.outputs.k8s_openid_provider_arn}",
                 k8s_node_group_security_id="${data.terraform_remote_state.parent.outputs.k8s_node_group_security_id}",
                 load_balancer_raw_dns="${data.terraform_remote_state.parent.outputs.load_balancer_raw_dns}",
+                load_balancer_arn="${data.terraform_remote_state.parent.outputs.load_balancer_arn}",
             ),
             "parent_name": "dummy-parent",
             "state_storage": "opta-tf-state-opta-tests-dummy-parent-195d",
