@@ -47,6 +47,7 @@ BASIC_APPLY = (
             "public_subnets_ids": {"value": "${module.core.public_subnets_ids }"},
             "s3_log_bucket_name": {"value": "${module.core.s3_log_bucket_name }"},
             "public_nat_ips": {"value": "${module.core.public_nat_ips }"},
+            "state_storage": {"value": "opta-tf-state-test-dev1-98f2"},
         },
     },
 )
