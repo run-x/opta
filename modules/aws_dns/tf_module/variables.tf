@@ -43,7 +43,7 @@ variable "external_cert_arn" {
 }
 
 variable "linked_module" {
-  type    = string
+  type = string
 }
 
 data "aws_ssm_parameter" "private_key" {
