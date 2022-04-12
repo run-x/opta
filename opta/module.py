@@ -138,7 +138,8 @@ class Module:
         # If there are no outputs, don't set the output key. Terraform doesn't like an
         # empty output block.
         if module_blk["output"] == {}:
-            del module_blk["output"]
+            # del module_blk["output"]
+            pass
 
         return module_blk
 
