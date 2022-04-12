@@ -1964,6 +1964,7 @@ jobs:
                 name: Load Opta Example images
             - run:
                 command: |
+                    unset KUBECONFIG
                     ./dist/opta/opta deploy \
                     --image todo-api:v1 \
                     --config ./.circleci/ci-tests/todo-list/api-service.yml \
