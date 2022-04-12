@@ -1973,6 +1973,7 @@ jobs:
                 name: Deploy Todo-Api Service
             - run:
                 command: |
+                    unset KUBECONFIG
                     ./dist/opta/opta deploy \
                     --image todo-frontend:v1 \
                     --config ./.circleci/ci-tests/todo-list/frontend-service.yml \
@@ -1981,6 +1982,7 @@ jobs:
                 name: Deploy Todo-Frontend Service
             - run:
                 command: |
+                    unset KUBECONFIG
                     ./dist/opta/opta apply \
                     --config ./.circleci/ci-tests/todo-list/monitoring-service.yml \
                     --auto-approve \
