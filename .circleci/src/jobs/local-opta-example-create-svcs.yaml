@@ -19,6 +19,7 @@ steps:
   - run:
       name: "Deploy Todo-Api Service"
       command: |
+        unset KUBECONFIG
         ./dist/opta/opta deploy \
         --image todo-api:v1 \
         --config ./.circleci/ci-tests/todo-list/api-service.yml \
@@ -27,6 +28,7 @@ steps:
   - run:
       name: "Deploy Todo-Frontend Service"
       command: |
+        unset KUBECONFIG
         ./dist/opta/opta deploy \
         --image todo-frontend:v1 \
         --config ./.circleci/ci-tests/todo-list/frontend-service.yml \
@@ -35,6 +37,7 @@ steps:
   - run:
       name: "Deploy Monitoring Service"
       command: |
+        unset KUBECONFIG
         ./dist/opta/opta apply \
         --config ./.circleci/ci-tests/todo-list/monitoring-service.yml \
         --auto-approve \
