@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
-set -o errexit
+# set -o errexit
 echo "Installing kind"
 echo "Checking if Opta kind cluster is already running..."
 kindrunning="$(docker inspect -f '{{.State.Running}}' "opta-local-cluster-control-plane" 2>/dev/null || true)"
 if [ "${kindrunning}" == 'true' ]; then
 	echo "You already have a docker container named opta-local-cluster-control-plane, exiting"
-	exit 1
+	exit 0
 fi
 mkdir -p $HOME/.opta/local
 
