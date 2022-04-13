@@ -83,6 +83,8 @@ class TestAzure:
                         "mocked_cluster_name",
                         "--admin",
                         "--overwrite-existing",
+                        "--context",
+                        "dummy_resource_group-mocked_cluster_name",
                     ],
                     stdout=DEVNULL,
                     check=True,

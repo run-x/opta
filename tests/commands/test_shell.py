@@ -18,9 +18,6 @@ def test_shell(mocker: MockFixture) -> None:
     layer_gen_all = mocker.patch("opta.commands.shell.gen_all")
     set_kube_config = mocker.patch("opta.commands.shell.set_kube_config")
     load_kube_config = mocker.patch("opta.commands.shell.load_opta_kube_config")
-    load_opta_kube_config_to_default = mocker.patch(
-        "opta.commands.shell.load_opta_kube_config_to_default"
-    )
 
     mocked_core_v1_api_class = mocker.patch("opta.commands.shell.CoreV1Api")
     mocked_core_v1_api = mocker.Mock(spec=CoreV1Api)
@@ -41,7 +38,6 @@ def test_shell(mocker: MockFixture) -> None:
     layer_gen_all.assert_called_once_with(mocked_layer)
     set_kube_config.assert_called_once_with(mocked_layer)
     load_kube_config.assert_called_once()
-    load_opta_kube_config_to_default.assert_called_once()
     mocked_core_v1_api.list_namespaced_pod.assert_called_once_with("layer_name")
 
     mocked_nice_run.assert_called_once_with(
@@ -52,6 +48,8 @@ def test_shell(mocker: MockFixture) -> None:
             "layer_name",
             "-c",
             "k8s-service",
+            "--context",
+            mocker.ANY,
             "pod_name",
             "-it",
             "--",
@@ -73,9 +71,6 @@ def test_shell_with_sh(mocker: MockFixture) -> None:
     layer_gen_all = mocker.patch("opta.commands.shell.gen_all")
     set_kube_config = mocker.patch("opta.commands.shell.set_kube_config")
     load_kube_config = mocker.patch("opta.commands.shell.load_opta_kube_config")
-    load_opta_kube_config_to_default = mocker.patch(
-        "opta.commands.shell.load_opta_kube_config_to_default"
-    )
 
     mocked_core_v1_api_class = mocker.patch("opta.commands.shell.CoreV1Api")
     mocked_core_v1_api = mocker.Mock(spec=CoreV1Api)
@@ -96,7 +91,6 @@ def test_shell_with_sh(mocker: MockFixture) -> None:
     layer_gen_all.assert_called_once_with(mocked_layer)
     set_kube_config.assert_called_once_with(mocked_layer)
     load_kube_config.assert_called_once()
-    load_opta_kube_config_to_default.assert_called_once()
     mocked_core_v1_api.list_namespaced_pod.assert_called_once_with("layer_name")
 
     mocked_nice_run.assert_called_once_with(
@@ -107,6 +101,8 @@ def test_shell_with_sh(mocker: MockFixture) -> None:
             "layer_name",
             "-c",
             "k8s-service",
+            "--context",
+            mocker.ANY,
             "pod_name",
             "-it",
             "--",
