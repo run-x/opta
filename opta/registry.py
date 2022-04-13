@@ -149,6 +149,15 @@ def _make_module_registry_dict(directory: str, cloud: str = "") -> Dict[Any, Any
                 input["user_facing"] and "required=True" in input["validator"]
             )
         module_dict["validators"] = _make_module_validators(module_dict)
+        image_types = ("png", "jpg", "jpeg")
+        module_image_files = []
+        for image_type in image_types:
+            module_image_files.extend(
+                glob.glob(
+                    os.path.dirname(a_md_path) + "/**/*." + image_type, recursive=True
+                )
+            )
+        module_dict["image_files"] = module_image_files
         module_name = module_dict.get("name_override", module_name)
         modules_dict[module_name] = module_dict
     return modules_dict
@@ -179,6 +188,10 @@ def make_registry_docs(directory: str) -> None:
     if os.path.exists(base_path):
         shutil.rmtree(base_path)
     os.makedirs(base_path)
+    image_path = os.path.join(directory, "static", "reference_images")
+    if os.path.exists(image_path):
+        shutil.rmtree(image_path)
+    os.makedirs(image_path)
     with open(os.path.join(base_path, "_index.md"), "w") as f:
         f.write(registry_dict["text"])
     for cloud in ["aws", "google", "azurerm"]:
@@ -203,6 +216,11 @@ def make_registry_docs(directory: str) -> None:
         for module_name, module_dict in cloud_dict["modules"].items():
             with open(os.path.join(module_path, f"{module_name}.md"), "w") as f:
                 f.write(module_dict["text"])
+            image_destination = os.path.join(image_path, cloud, module_name)
+            if not os.path.exists(image_destination):
+                os.makedirs(image_destination)
+            for image_file in module_dict["image_files"]:
+                shutil.copy(image_file, image_destination)
 
 
 def _registry_path() -> str:
