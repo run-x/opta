@@ -222,6 +222,12 @@ class GCP(CloudClient):
         googl_provider = self.layer.root().providers["google"]
         return googl_provider["region"], googl_provider["project"]
 
+    def get_kube_context_name(self) -> str:
+        region, project_id = self.get_cluster_env()
+        # Get the environment's account details from the opta config
+        cluster_name = self.layer.get_cluster_name()
+        return f"{project_id}_{region}_{cluster_name}"
+
     def set_kube_config(self) -> None:
         ensure_installed("gcloud")
         kube_config_file_name = self.layer.get_kube_config_file_name()
@@ -249,7 +255,7 @@ class GCP(CloudClient):
         cluster_ca_certificate = cluster_data.master_auth.cluster_ca_certificate
         cluster_endpoint = f"https://{cluster_data.endpoint}"
         gcloud_path = which("gcloud")
-        kube_config_resource_name = f"{project_id}_{region}_{cluster_name}"
+        kube_context_name = self.get_kube_context_name()
 
         cluster_config = {
             "apiVersion": "v1",
@@ -260,23 +266,20 @@ class GCP(CloudClient):
                         "server": cluster_endpoint,
                         "certificate-authority-data": cluster_ca_certificate,
                     },
-                    "name": kube_config_resource_name,
+                    "name": kube_context_name,
                 }
             ],
             "contexts": [
                 {
-                    "context": {
-                        "cluster": kube_config_resource_name,
-                        "user": kube_config_resource_name,
-                    },
-                    "name": kube_config_resource_name,
+                    "context": {"cluster": kube_context_name, "user": kube_context_name},
+                    "name": kube_context_name,
                 }
             ],
-            "current-context": kube_config_resource_name,
+            "current-context": kube_context_name,
             "preferences": {},
             "users": [
                 {
-                    "name": kube_config_resource_name,
+                    "name": kube_context_name,
                     "user": {
                         "auth-provider": {
                             "name": "gcp",

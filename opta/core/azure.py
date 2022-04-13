@@ -194,6 +194,12 @@ class Azure(CloudClient):
     def get_all_remote_configs(self) -> Dict[str, Dict[str, "StructuredConfig"]]:
         raise AzureNotImplemented("Feature Unsupported for Azure")
 
+    def get_kube_context_name(self) -> str:
+        providers = self.layer.root().gen_providers(0)
+        rg_name = providers["terraform"]["backend"]["azurerm"]["resource_group_name"]
+        cluster_name = self.layer.get_cluster_name()
+        return f"{rg_name}-{cluster_name}-admin"
+
     def set_kube_config(self) -> None:
         providers = self.layer.root().gen_providers(0)
 
@@ -201,6 +207,7 @@ class Azure(CloudClient):
 
         rg_name = providers["terraform"]["backend"]["azurerm"]["resource_group_name"]
         cluster_name = self.layer.get_cluster_name()
+        kube_context_name = self.get_kube_context_name()
 
         if not self.cluster_exist():
             raise Exception(
@@ -218,6 +225,8 @@ class Azure(CloudClient):
                 cluster_name,
                 "--admin",
                 "--overwrite-existing",
+                "--context",
+                kube_context_name.replace("-admin", ""),
             ],
             stdout=DEVNULL,
             check=True,

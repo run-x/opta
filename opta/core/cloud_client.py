@@ -41,3 +41,7 @@ class CloudClient(ABC):
     @abstractmethod
     def set_kube_config(self) -> None:
         raise NotImplementedError()
+
+    @abstractmethod
+    def get_kube_context_name(self) -> str:
+        pass
