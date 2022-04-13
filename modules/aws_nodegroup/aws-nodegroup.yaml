@@ -61,7 +61,8 @@ inputs:
     validator: bool(required=False)
     description: |
       Should we expect and use the gpus present in the ec2?
-      Note: This input would be deprecated in the coming releases. Please switch to using `ami_type`
+      Note: This input would be deprecated in the coming releases. Please switch to using `ami_type`.
+      Usage: If using, `use_gpu: false`, just remove it. If using `use_gpu: true` replace it with `ami_type: AL2_x86_64_GPU`
     default: false
   - name: ami_type
     user_facing: true

@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 
 from modules.base import ModuleProcessor
+from opta.utils import logger
 
 if TYPE_CHECKING:
     from opta.layer import Layer
@@ -17,4 +18,7 @@ class AwsNodegroup(ModuleProcessor):
 
     def __back_compat_use_gpu(self) -> None:
         if self.module.data.get("use_gpu", False):
+            logger.warn(
+                "Using deprecated input use_gpu. Please use ami_type input to avoid the warning in future."
+            )
             self.module.data["ami_type"] = "AL2_x86_64_GPU"
