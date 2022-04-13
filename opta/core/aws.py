@@ -435,7 +435,7 @@ class AWS(CloudClient):
         except client.exceptions.ResourceNotFoundException:
             return False
 
-    def get_kubectl_context_name(self) -> str:
+    def get_kube_context_name(self) -> str:
         region, account_id = self.get_cluster_env()
         # Get the environment's account details from the opta config
         cluster_name = self.layer.get_cluster_name()
@@ -465,7 +465,7 @@ class AWS(CloudClient):
         cluster = client.describe_cluster(name=cluster_name)
         cluster_cert = cluster["cluster"]["certificateAuthority"]["data"]
         cluster_ep = cluster["cluster"]["endpoint"]
-        kubectl_context_name = self.get_kubectl_context_name()
+        kube_context_name = self.get_kube_context_name()
 
         cluster_config = {
             "apiVersion": "v1",
@@ -476,23 +476,20 @@ class AWS(CloudClient):
                         "server": str(cluster_ep),
                         "certificate-authority-data": str(cluster_cert),
                     },
-                    "name": kubectl_context_name,
+                    "name": kube_context_name,
                 }
             ],
             "contexts": [
                 {
-                    "context": {
-                        "cluster": kubectl_context_name,
-                        "user": kubectl_context_name,
-                    },
-                    "name": kubectl_context_name,
+                    "context": {"cluster": kube_context_name, "user": kube_context_name,},
+                    "name": kube_context_name,
                 }
             ],
-            "current-context": kubectl_context_name,
+            "current-context": kube_context_name,
             "preferences": {},
             "users": [
                 {
-                    "name": kubectl_context_name,
+                    "name": kube_context_name,
                     "user": {
                         "exec": {
                             "apiVersion": "client.authentication.k8s.io/v1alpha1",

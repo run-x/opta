@@ -74,7 +74,7 @@ class Local(CloudClient):
             capture_output=True,
         )
 
-    def get_kubectl_context_name(self) -> str:
+    def get_kube_context_name(self) -> str:
         return "kind-opta-local-cluster"
 
     def cluster_exist(self) -> bool:

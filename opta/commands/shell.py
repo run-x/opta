@@ -58,7 +58,7 @@ def shell(
     gen_all(layer)
     set_kube_config(layer)
     load_opta_kube_config()
-    context_name = layer.get_cloud_client().get_kubectl_context_name()
+    context_name = layer.get_cloud_client().get_kube_context_name()
 
     # Get a random pod in the service
     v1 = CoreV1Api()

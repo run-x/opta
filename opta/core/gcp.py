@@ -222,7 +222,7 @@ class GCP(CloudClient):
         googl_provider = self.layer.root().providers["google"]
         return googl_provider["region"], googl_provider["project"]
 
-    def get_kubectl_context_name(self) -> str:
+    def get_kube_context_name(self) -> str:
         region, project_id = self.get_cluster_env()
         # Get the environment's account details from the opta config
         cluster_name = self.layer.get_cluster_name()
@@ -255,7 +255,7 @@ class GCP(CloudClient):
         cluster_ca_certificate = cluster_data.master_auth.cluster_ca_certificate
         cluster_endpoint = f"https://{cluster_data.endpoint}"
         gcloud_path = which("gcloud")
-        kubectl_context_name = self.get_kubectl_context_name()
+        kube_context_name = self.get_kube_context_name()
 
         cluster_config = {
             "apiVersion": "v1",
@@ -266,23 +266,20 @@ class GCP(CloudClient):
                         "server": cluster_endpoint,
                         "certificate-authority-data": cluster_ca_certificate,
                     },
-                    "name": kubectl_context_name,
+                    "name": kube_context_name,
                 }
             ],
             "contexts": [
                 {
-                    "context": {
-                        "cluster": kubectl_context_name,
-                        "user": kubectl_context_name,
-                    },
-                    "name": kubectl_context_name,
+                    "context": {"cluster": kube_context_name, "user": kube_context_name,},
+                    "name": kube_context_name,
                 }
             ],
-            "current-context": kubectl_context_name,
+            "current-context": kube_context_name,
             "preferences": {},
             "users": [
                 {
-                    "name": kubectl_context_name,
+                    "name": kube_context_name,
                     "user": {
                         "auth-provider": {
                             "name": "gcp",
