@@ -63,6 +63,7 @@ def shell(
     set_kube_config(layer)
     load_opta_kube_config()
     load_opta_kube_config_to_default(layer)
+    context_name = layer.get_cloud_client().get_kubectl_context_name()
 
     # Get a random pod in the service
     v1 = CoreV1Api()
@@ -78,6 +79,8 @@ def shell(
             layer.name,
             "-c",
             "k8s-service",
+            "--context",
+            context_name,
             pod_list[0].metadata.name,
             "-it",
             "--",

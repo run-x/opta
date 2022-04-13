@@ -435,16 +435,21 @@ class AWS(CloudClient):
         except client.exceptions.ResourceNotFoundException:
             return False
 
+    def get_kubectl_context_name(self) -> str:
+        region, account_id = self.get_cluster_env()
+        # Get the environment's account details from the opta config
+        cluster_name = self.layer.get_cluster_name()
+        return f"{account_id}_{region}_{cluster_name}"
+
     def set_kube_config(self) -> None:
         kube_config_file_name = self.layer.get_kube_config_file_name()
+        region, account_id = self.get_cluster_env()
         if exists(kube_config_file_name):
             if getmtime(kube_config_file_name) > time() - ONE_WEEK_UNIX:
                 constants.GENERATED_KUBE_CONFIG = kube_config_file_name
                 return
             else:
                 remove(kube_config_file_name)
-
-        region, account_id = self.get_cluster_env()
 
         # Get the environment's account details from the opta config
         cluster_name = self.layer.get_cluster_name()
@@ -460,7 +465,7 @@ class AWS(CloudClient):
         cluster = client.describe_cluster(name=cluster_name)
         cluster_cert = cluster["cluster"]["certificateAuthority"]["data"]
         cluster_ep = cluster["cluster"]["endpoint"]
-        kube_config_resource_name = f"{account_id}_{region}_{cluster_name}"
+        kubectl_context_name = self.get_kubectl_context_name()
 
         cluster_config = {
             "apiVersion": "v1",
@@ -471,23 +476,23 @@ class AWS(CloudClient):
                         "server": str(cluster_ep),
                         "certificate-authority-data": str(cluster_cert),
                     },
-                    "name": kube_config_resource_name,
+                    "name": kubectl_context_name,
                 }
             ],
             "contexts": [
                 {
                     "context": {
-                        "cluster": kube_config_resource_name,
-                        "user": kube_config_resource_name,
+                        "cluster": kubectl_context_name,
+                        "user": kubectl_context_name,
                     },
-                    "name": kube_config_resource_name,
+                    "name": kubectl_context_name,
                 }
             ],
-            "current-context": kube_config_resource_name,
+            "current-context": kubectl_context_name,
             "preferences": {},
             "users": [
                 {
-                    "name": kube_config_resource_name,
+                    "name": kubectl_context_name,
                     "user": {
                         "exec": {
                             "apiVersion": "client.authentication.k8s.io/v1alpha1",
