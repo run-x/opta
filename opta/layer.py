@@ -64,6 +64,7 @@ PROCESSOR_DICT: Dict[str, str] = {
     "aws-ses": "AwsEmailProcessor",
     "aws-sqs": "AwsSqsProcessor",
     "aws-sns": "AwsSnsProcessor",
+    "aws-nodegroup": "AwsNodegroup",
     "azure-base": "AzureBaseProcessor",
     "azure-k8s-base": "AzureK8sBaseProcessor",
     "azure-k8s-service": "AzureK8sServiceProcessor",

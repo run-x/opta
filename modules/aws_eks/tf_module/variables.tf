@@ -84,3 +84,8 @@ variable "node_launch_template" {
   default = {}
   type    = map(string)
 }
+
+variable "ami_type" {
+  type    = string
+  default = "AL2_x86_64"
+}

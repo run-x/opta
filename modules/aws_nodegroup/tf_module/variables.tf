@@ -5,11 +5,9 @@ data "aws_eks_cluster" "main" {
 }
 
 locals {
-  default_labels = var.use_gpu ? {
+  default_labels = {
     node_group_name = "opta-${var.layer_name}-${var.module_name}"
-    gpu : "true"
-    } : {
-    node_group_name = "opta-${var.layer_name}-${var.module_name}"
+    ami_type        = var.ami_type
   }
 }
 
@@ -53,11 +51,6 @@ variable "spot_instances" {
   default = false
 }
 
-variable "use_gpu" {
-  type    = bool
-  default = false
-}
-
 variable "labels" {
   type    = map(string)
   default = {}
@@ -68,3 +61,12 @@ variable "taints" {
   default = []
 }
 
+variable "ami_type" {
+  type    = string
+  default = "AL2_x86_64"
+}
+
+variable "use_gpu" {
+  type    = bool
+  default = false
+}
