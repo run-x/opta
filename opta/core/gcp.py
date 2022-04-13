@@ -271,7 +271,7 @@ class GCP(CloudClient):
             ],
             "contexts": [
                 {
-                    "context": {"cluster": kube_context_name, "user": kube_context_name,},
+                    "context": {"cluster": kube_context_name, "user": kube_context_name},
                     "name": kube_context_name,
                 }
             ],
