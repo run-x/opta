@@ -14,9 +14,9 @@ variable "module_name" {
 }
 
 variable "deploy_k8s_listener" {
-  type        = bool
+  type = bool
 }
 
 variable "api_key" {
-  type        = string
+  type = string
 }

@@ -1,13 +1,13 @@
 resource "helm_release" "opta-agent" {
-  count = var.deploy_k8s_listener ? 1 : 0
+  count      = var.deploy_k8s_listener ? 1 : 0
   repository = "https://helm-repo.opta.dev/"
-  chart = "opta-agent"
-  name  = "opta-agent"
-  version = "0.1.3"
+  chart      = "opta-agent"
+  name       = "opta-agent"
+  version    = "0.1.3"
   values = [
     yamlencode({
-      optaAgent: {
-        token: var.api_key
+      optaAgent : {
+        token : var.api_key
       }
     })
   ]
