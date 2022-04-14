@@ -32,8 +32,6 @@ else:
 
 class RunxProcessor(ModuleProcessor):
     def __init__(self, module: "Module", layer: "Layer"):
-        if module.data["type"] != "runx":
-            raise Exception(f"The module {module.name} was expected to be of type runx")
         self.user_id = GitConfigParser().get_value("user", "email", "no_user")
         self.device_id = get_mac_address()
         self.os_name = os.name
@@ -50,9 +48,18 @@ class RunxProcessor(ModuleProcessor):
         logger.debug("Checking for runx api key secret")
         current_api_key = self.fetch_secret()
         if current_api_key is None:
-            self.set_secret()
+            current_api_key = self.set_secret()
         else:
             self.fetch_jwt(current_api_key)
+
+        self.module.data["api_key"] = current_api_key
+        k8s_modules = self.layer.get_module_by_type("k8s-cluster", module_idx)
+        if len(k8s_modules) == 0 and self.module.data.get("deploy_k8s_listener") is True:
+            raise UserErrors("Can't deploy_k8s_listener if there's no k8s-cluster module")
+        self.module.data["deploy_k8s_listener"] = self.module.data.get(
+            "deploy_k8s_listener", len(k8s_modules) == 1
+        )
+        super(RunxProcessor, self).process(module_idx)
 
     def fetch_secret(self) -> Optional[str]:
         if self.layer.cloud == "aws":
@@ -87,7 +94,7 @@ class RunxProcessor(ModuleProcessor):
         except NotFound:
             return None
 
-    def set_secret(self) -> None:
+    def set_secret(self) -> str:
         while True:
             value = click.prompt("Please enter your runx api key", type=click.STRING,)
             try:
@@ -99,9 +106,11 @@ class RunxProcessor(ModuleProcessor):
             else:
                 break
         if self.layer.cloud == "aws":
-            return self._set_aws_secret(value)
+            self._set_aws_secret(value)
+            return value
         elif self.layer.cloud == "google":
-            return self._set_gcp_secret(value)
+            self._set_gcp_secret(value)
+            return value
         else:
             raise Exception("Can not handle secrets of type")
 
@@ -170,6 +179,7 @@ class RunxProcessor(ModuleProcessor):
             raise Exception(
                 f"Invalid response when attempting to send data to backend: {resp.json()}"
             )
+        super(RunxProcessor, self).post_hook(module_idx, exception)
 
     def fetch_jwt(self, api_key: str) -> Tuple[dict, str]:
         resp = requests.post(

@@ -202,9 +202,7 @@ def _apply(
                 # This is set during the first iteration, since the tf file must exist.
                 existing_modules = Terraform.get_existing_modules(layer)
                 first_loop = False
-            configured_modules = set([x.name for x in current_modules]) - {
-                "runx"
-            }  # Ignore runx module
+            configured_modules = set([x.name for x in current_modules])
             is_last_module = module_idx == total_block_count - 1
             has_new_modules = not configured_modules.issubset(existing_modules)
             if not is_last_module and not has_new_modules and not refresh:
