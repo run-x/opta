@@ -84,7 +84,6 @@ resource "helm_release" "opta_base" {
 
 resource "time_sleep" "wait_a_bit" {
   depends_on = [
-    helm_release.cert_manager,
     helm_release.autoscaler,
     helm_release.load_balancer
   ]
