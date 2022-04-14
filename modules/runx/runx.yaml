@@ -14,7 +14,7 @@ inputs:
     user_facing: false
     description: Opta Module name
     default: None
-  - name: deploy_k8s_listener
+  - name: deploy_opta_agent
     user_facing: true
     validator: bool(required=False)
     description: Deploy opta agent helm chart to monitor opta activity in your cluster.

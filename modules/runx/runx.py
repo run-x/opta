@@ -54,10 +54,10 @@ class RunxProcessor(ModuleProcessor):
 
         self.module.data["api_key"] = current_api_key
         k8s_modules = self.layer.get_module_by_type("k8s-cluster", module_idx)
-        if len(k8s_modules) == 0 and self.module.data.get("deploy_k8s_listener") is True:
-            raise UserErrors("Can't deploy_k8s_listener if there's no k8s-cluster module")
-        self.module.data["deploy_k8s_listener"] = self.module.data.get(
-            "deploy_k8s_listener", len(k8s_modules) == 1
+        if len(k8s_modules) == 0 and self.module.data.get("deploy_opta_agent") is True:
+            raise UserErrors("Can't deploy_opta_agent if there's no k8s-cluster module")
+        self.module.data["deploy_opta_agent"] = self.module.data.get(
+            "deploy_opta_agent", len(k8s_modules) == 1
         )
         super(RunxProcessor, self).process(module_idx)
 

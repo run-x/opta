@@ -13,7 +13,7 @@ variable "module_name" {
   type        = string
 }
 
-variable "deploy_k8s_listener" {
+variable "deploy_opta_agent" {
   type = bool
 }
 

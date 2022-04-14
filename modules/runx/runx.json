@@ -22,7 +22,7 @@
       "default": "runx",
       "type": "string"
     },
-    "deploy_k8s_listener": {
+    "deploy_opta_agent": {
       "description": "Deploy opta agent helm chart to monitor opta activity in your cluster.",
       "default": true,
       "type": "string"
