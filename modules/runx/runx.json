@@ -21,6 +21,11 @@
       ],
       "default": "runx",
       "type": "string"
+    },
+    "deploy_opta_agent": {
+      "description": "Deploy opta agent helm chart to monitor opta activity in your cluster.",
+      "default": true,
+      "type": "string"
     }
   },
   "required": [

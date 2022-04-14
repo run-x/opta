@@ -14,8 +14,15 @@ inputs:
     user_facing: false
     description: Opta Module name
     default: None
+  - name: deploy_opta_agent
+    user_facing: true
+    validator: bool(required=False)
+    description: Deploy opta agent helm chart to monitor opta activity in your cluster.
+    default: true
+  - name: api_key
+    user_facing: false
+    default: "true"
 outputs: { }
-terraform_module: ""
 output_providers: { }
 output_data: { }
 clouds:
