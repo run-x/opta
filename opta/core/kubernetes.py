@@ -630,9 +630,3 @@ def restart_deployments(namespace: str) -> None:
     deployments = list_deployment(namespace)
     for deploy in deployments:
         restart_deployment(namespace, deploy.metadata.name)
-
-
-def check_kubeconfig() -> None:
-    """check_kubeconfig verifies if there is a kubeconfig file defined, raises an error if not found"""
-    if not exists(expanduser(KUBE_CONFIG_DEFAULT_LOCATION)):
-        raise UserErrors(f"Could not find file '{KUBE_CONFIG_DEFAULT_LOCATION}'")

@@ -30,7 +30,7 @@ from opta.core.azure import Azure
 from opta.core.cloud_client import CloudClient
 from opta.core.gcp import GCP
 from opta.core.helm_cloud_client import HelmCloudClient
-from opta.core.kubernetes import KUBE_CONFIG_DEFAULT_LOCATION, check_kubeconfig
+from opta.core.kubernetes import KUBE_CONFIG_DEFAULT_LOCATION
 from opta.core.local import Local
 from opta.core.validator import validate_yaml
 from opta.crash_reporter import CURRENT_CRASH_REPORTER
@@ -142,7 +142,6 @@ class Layer:
         if parent is None:
             if len(providers) == 0:
                 # no parent, no provider = we are in helm (byok) mode
-                check_kubeconfig()
                 self.cloud = "helm"
                 # read the provider from the registry instead - the opta file doesn't define any with byok
                 providers = REGISTRY[self.cloud]["output_providers"]
