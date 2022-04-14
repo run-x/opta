@@ -1,5 +1,10 @@
 {{- range $index, $cron := .Values.cron_jobs }}
 apiVersion: batch/v1
+{{- if $.Capabilities.APIVersions.Has "batch/v1/CronJob" }}
+apiVersion: batch/v1
+{{- else if $.Capabilities.APIVersions.Has "batch/v1beta1/CronJob" }}
+apiVersion: batch/v1beta1
+{{ end }}
 kind: CronJob
 metadata:
   name: {{ include "k8s-service.fullname" $ }}-{{ $index }}
