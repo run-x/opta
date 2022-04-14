@@ -1,0 +1,24 @@
+required_providers:
+  helm:
+    source: "hashicorp/helm"
+    version: "2.4.1"
+backend:
+  local:
+    # this is consistent with terraform generator
+    path: "./tfstate/{layer_name}.tfstate"
+validator:
+  name: str()
+  org_name: regex('^[a-z0-9-]{,15}$', name="Valid identifier, regex='[a-z0-9-]{,15}'")
+  modules: list(module())
+  input_variables: list(map(), required=False)
+service_validator:
+  - name: str()
+    modules: list(module())
+    input_variables: list(map(), required=False)
+module_aliases:
+  k8s-service: local-k8s-service
+
+output_providers:
+  helm:
+    kubernetes:
+      config_path: "{kubeconfig}"

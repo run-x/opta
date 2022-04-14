@@ -20,6 +20,7 @@ from opta.core.azure import Azure
 from opta.core.cloud_client import CloudClient
 from opta.core.gcp import GCP
 from opta.core.generator import gen, gen_opta_resource_tags
+from opta.core.helm_cloud_client import HelmCloudClient
 from opta.core.kubernetes import cluster_exist, tail_module_log, tail_namespace_events
 from opta.core.local import Local
 from opta.core.plan_displayer import PlanDisplayer
@@ -180,6 +181,8 @@ def _apply(
         if local:  # boolean passed via cli
             pass
         cloud_client = Local(layer)
+    elif layer.cloud == "helm":
+        cloud_client = HelmCloudClient(layer)
     else:
         raise Exception(f"Cannot handle upload config for cloud {layer.cloud}")
 

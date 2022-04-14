@@ -29,6 +29,8 @@ from opta.core.aws import AWS
 from opta.core.azure import Azure
 from opta.core.cloud_client import CloudClient
 from opta.core.gcp import GCP
+from opta.core.helm_cloud_client import HelmCloudClient
+from opta.core.kubernetes import KUBE_CONFIG_DEFAULT_LOCATION, check_kubeconfig
 from opta.core.local import Local
 from opta.core.validator import validate_yaml
 from opta.crash_reporter import CURRENT_CRASH_REPORTER
@@ -136,8 +138,18 @@ class Layer:
         self.original_spec = original_spec
         self.parent = parent
         self.path = path
-        if parent is None and org_name is None:
-            raise UserErrors("Config must have org name or a parent who has an org name")
+        self.cloud: str
+        if parent is None:
+            if len(providers) == 0:
+                # no parent, no provider = we are in helm (byok) mode
+                check_kubeconfig()
+                self.cloud = "helm"
+                # read the provider from the registry instead - the opta file doesn't define any with byok
+                providers = REGISTRY[self.cloud]["output_providers"]
+            elif org_name is None:
+                raise UserErrors(
+                    "Config must have org name or a parent who has an org name"
+                )
         self.org_name = org_name
         if self.parent and self.org_name is None:
             self.org_name = self.parent.org_name
@@ -145,7 +157,6 @@ class Layer:
         total_base_providers = deep_merge(
             self.providers, self.parent.providers if self.parent else {}
         )
-        self.cloud: str
         if "google" in total_base_providers and "aws" in total_base_providers:
             raise UserErrors(
                 "You can have AWS as the cloud provider, or google, but not both"
@@ -158,7 +169,8 @@ class Layer:
             self.cloud = "azurerm"
         elif "local" in total_base_providers:
             self.cloud = "local"
-        else:
+
+        if not hasattr(self, "cloud"):
             raise UserErrors(
                 "No cloud provider (AWS, GCP, or Azure) found, \n"
                 + " or did you miss providing the --local flag for local deployment?"
@@ -195,6 +207,8 @@ class Layer:
             return Azure(self)
         elif self.cloud == "local":
             return Local(self)
+        elif self.cloud == "helm":
+            return HelmCloudClient(self)
         else:
             raise Exception(
                 f"Unknown cloud {self.cloud}. Can not handle getting the cloud client"
@@ -532,6 +546,7 @@ class Layer:
             "layer_name": self.name,
             "state_storage": self.state_storage(),
             "env": self.get_env(),
+            "kubeconfig": KUBE_CONFIG_DEFAULT_LOCATION,
             **provider_hydration,
         }
 
@@ -639,7 +654,7 @@ class Layer:
             providers = deep_merge(providers, self.parent.providers)
         for cloud, provider in providers.items():
             provider = self.handle_special_providers(cloud, provider, clean)
-            ret["provider"][cloud] = provider
+            ret["provider"][cloud] = hydrate(provider, hydration)
             if cloud in REGISTRY:
                 ret["terraform"] = hydrate(
                     {x: REGISTRY[cloud][x] for x in ["required_providers", "backend"]},

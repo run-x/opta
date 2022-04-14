@@ -195,6 +195,8 @@ class Terraform:
             return cls._azure_verify_storage(layer)
         elif layer.cloud == "local":
             return cls._local_verify_storage(layer)
+        elif layer.cloud == "helm":
+            return True
         else:
             raise Exception(f"Can not verify state storage for cloud {layer.cloud}")
 
@@ -389,6 +391,16 @@ class Terraform:
             except Exception:
                 UserErrors(f"Could copy local state file to {state_file}")
 
+        elif layer.cloud == "helm":
+            if "local" in providers["terraform"]["backend"]:
+                try:
+                    tf_file = providers["terraform"]["backend"]["local"]["path"]
+                    if os.path.exists(tf_file):
+                        copyfile(tf_file, state_file)
+                    else:
+                        return False
+                except Exception:
+                    UserErrors(f"Could copy terraform state file to {state_file}")
         else:
             raise UserErrors("Need to get state from S3 or GCS or Azure storage")
 
@@ -830,6 +842,9 @@ class Terraform:
             cloud_client = Azure(layer)
         elif layer.cloud == "local":
             cloud_client = Local(layer)
+        elif layer.cloud == "helm":
+            # There is no opta managed storage to delete
+            return
         else:
             raise Exception(
                 f"Can not handle opta config deletion for cloud {layer.cloud}"
