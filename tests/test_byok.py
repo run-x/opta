@@ -35,7 +35,6 @@ class TestByok:
         }
         os.environ["KUBECONFIG"] = "~/.kube/custom-config"
         gen_provider = layer.gen_providers(0)
-        print(gen_provider)
         assert gen_provider["provider"] == {
             "helm": {"kubernetes": {"config_path": "~/.kube/config"}}
         }

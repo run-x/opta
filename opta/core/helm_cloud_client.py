@@ -10,7 +10,6 @@ if TYPE_CHECKING:
 
 class HelmCloudClient(CloudClient):
     def __init__(self, layer: "Layer"):
-        print(layer.root().providers)
         super().__init__(layer)
 
     def get_remote_config(self) -> Optional["StructuredConfig"]:
