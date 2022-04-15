@@ -8,20 +8,20 @@ data "aws_subnet" "public_subnets" {
   for_each = local.create_vpc ? toset([]) : toset(var.public_subnet_ids)
   id       = each.key
   vpc_id   = var.vpc_id
-  # state    = "available"
+  state    = "available"
 }
 
 data "aws_subnet" "private_subnets" {
   for_each = local.create_vpc ? toset([]) : toset(var.private_subnet_ids)
   id       = each.key
   vpc_id   = var.vpc_id
-  # state    = "available"
+  state    = "available"
 }
 
 data "aws_nat_gateway" "nat_gateways" {
   for_each = data.aws_route.private_nat_routes
   id       = each.value.nat_gateway_id
-  # state     = "available"
+  state    = "available"
 }
 
 data "aws_route_table" "private_subnet_routes" {

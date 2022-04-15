@@ -47,6 +47,7 @@ from opta.utils import (
 from opta.utils.dependencies import ensure_installed, validate_installed_path_executables
 
 PROCESSOR_DICT: Dict[str, str] = {
+    "aws-base": "AwsBaseProcessor",
     "aws-k8s-service": "AwsK8sServiceProcessor",
     "aws-k8s-base": "AwsK8sBaseProcessor",
     "datadog": "DatadogProcessor",
