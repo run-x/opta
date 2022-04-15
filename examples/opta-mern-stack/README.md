@@ -21,7 +21,7 @@ Our MERN stack example is based on the application code created by The MongoDB A
 You can choose to deploy the MERN stack application on Kubernetes running in AWS (EKS cluster) or Locally on your laptop ([Kind cluster](https://kind.sigs.k8s.io/docs/user/quick-start/)). AWS will incur cloud charges, but the local Kubernetes setup is completely free. We also use a MongoDB Atlas database, we will sign up for their service and use their a small database (could cost upto $3 per day); you can always scale up the MongoDB deployment for your production code later.
 
 
-1. Clone the [Opta Examples repo](https://github.com/run-x/opta-examples); the MERN stack example is located in the `opta-mern-stack` sub-directory of this repository.
+1. Clone the [Opta repo](https://github.com/run-x/opta); the MERN stack example is located in the `opta-mern-stack` sub-directory of the examples directory of this repository.
 2. Install Opta, as mentioned above, using [these instructions](https://docs.opta.dev/installation/).
 3. Make a MongoDB Atlas account and obtain their [API credentials](https://docs.atlas.mongodb.com/tutorial/manage-programmatic-access?utm_source=runx_opta&utm_campaign=pla&utm_medium=referral); you will need these in your terminal environment to allow Opta to spin up a MongoDB cluster for your application.
 4. If you don't already have your cloud credentials (AWS), you can follow the Opta instructions for [AWS](https://docs.opta.dev/getting-started/aws/). If you plan on deploying with Opta [locally](https://docs.opta.dev/getting-started/local/) on your PC, this step is not needed.
@@ -48,8 +48,8 @@ __Note: If you are only trying this out on your local machine, append the — lo
 Second, we create Docker images for the Nodejs+Express backend and the React frontend, like so:
 
 ```
-docker build opta-examples/opta-mern-stack/server -t mernapi:latest
-docker build opta-examples/opta-mern-stack/client -t mernfrontend:latest
+docker build opta/examples/opta-mern-stack/server -t mernapi:latest
+docker build opta/examples/opta-mern-stack/client -t mernfrontend:latest
 ```
 
 As a developer you will build the images containing your application as shown above whenever you want to deploy your application. 
@@ -58,12 +58,12 @@ As a developer you will build the images containing your application as shown ab
 
 ```
 # For AWS
-opta deploy --image=mernapi:latest -c opta-examples/opta-mern-stack/server/opta-mern-server.yaml 
-opta deploy --image=mernfrontend:latest -c opta-examples/opta-mern-stack/client/opta-frontend-server.yaml 
+opta deploy --image=mernapi:latest -c opta/examples/opta-mern-stack/server/opta-mern-server.yaml 
+opta deploy --image=mernfrontend:latest -c opta/examples/opta-mern-stack/client/opta-frontend-server.yaml 
 
 # OR, For local
-opta deploy --local --image=mernapi:latest -c opta-examples/opta-mern-stack/server/opta-mern-server.yaml 
-opta deploy --local --image=mernfrontend:latest -c opta-examples/opta-mern-stack/client/opta-frontend-server.yaml  
+opta deploy --local --image=mernapi:latest -c opta/examples/opta-mern-stack/server/opta-mern-server.yaml 
+opta deploy --local --image=mernfrontend:latest -c opta/examples/opta-mern-stack/client/opta-frontend-server.yaml  
 ```
 
 After about ~15 minutes Opta should report that your changes have been deployed. 
@@ -72,7 +72,7 @@ After about ~15 minutes Opta should report that your changes have been deployed.
 If you are running in either of the clouds, lets get the load-balancer endpoint:
 
 ```
-opta output -c opta-examples/opta-mern-stack/server/opta-mern-server.yaml
+opta output -c opta/examples/opta-mern-stack/server/opta-mern-server.yaml
 
 # You will see the load_balancer_raw_dns entry at the end: 
     "load_balancer_raw_dns": "opta-atlassearchenv3-lb-abcdefghijklm.elb.us-east-1.amazonaws.com"
@@ -97,12 +97,12 @@ As a side note, you can always configure DNS and TLS certificates using Opta for
 First, destroy the application
 ```
 # For AWS
-opta destroy -c opta-examples/opta-mern-stack/server/opta-mern-server.yaml 
-opta destroy -c opta-examples/opta-mern-stack/client/opta-frontend-server.yaml 
+opta destroy -c opta/examples/opta-mern-stack/server/opta-mern-server.yaml 
+opta destroy -c opta/examples/opta-mern-stack/client/opta-frontend-server.yaml 
 
 # OR, For local
-opta destroy --local -c opta-examples/opta-mern-stack/server/opta-mern-server.yaml 
-opta deestroy --local-c opta-examples/opta-mern-stack/client/opta-frontend-server.yaml  
+opta destroy --local -c opta/examples/opta-mern-stack/server/opta-mern-server.yaml 
+opta deestroy --local-c opta/examples/opta-mern-stack/client/opta-frontend-server.yaml  
 ```
 
 

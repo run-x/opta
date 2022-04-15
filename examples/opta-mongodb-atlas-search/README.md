@@ -36,16 +36,16 @@ Once we have the Kubernetes cluster, we can create the MongoDB application by ru
 First, lets crate the docker image that contains our application code:
 
 ```bash
-# in the opta-examples directory cloned from Github (https://github.com/run-x/opta-examples.git)
+# in the examples directory cloned from Github (https://github.com/run-x/opta.git)
 docker build -t mongodbapp:latest ./opta-mongodb-atlas-search
 ```
 Next up, we use Opta to deploy the application's docker image into the Kubernetes cluster that Opta created already:
 
 ```bash
 # For aws
-opta deploy --image=mongodbapp:latest -c opta-examples/opta-mongodb-atlas-search/opta/atlasmongodbservice.yaml
+opta deploy --image=mongodbapp:latest -c opta/examples/opta-mongodb-atlas-search/opta/atlasmongodbservice.yaml
 # OR, For local
-opta deploy --image=mongodbapp:latest --local -c opta-examples/opta-mongodb-atlas-search/opta/atlasmongodbservice.yaml
+opta deploy --image=mongodbapp:latest --local -c opta/examples/opta-mongodb-atlas-search/opta/atlasmongodbservice.yaml
 
 ```
 
