@@ -4,6 +4,7 @@ This directory holds a compiled list of advanced, standalone, usages of Opta, mo
 
 - [airflow](/examples/airflow): Deploy Apache Airflow on AWS
 - [aws-lambda](/examples/aws-lambda): Deploy Apache Airflow on AWS
+- [byok-eks](/examples/byok-eks): Bring Your Own Kubernetes, use Opta with an existing EKS
 - [flyte](/examples/flyte): Deploy Flyte on AWS
 - [full-stack-example](/examples/full-stack-example): Deploy a a todo list (including frontend, api, database, monitoring) locally or on AWS
 - [ghost](/examples/ghost): Deploy Ghost app on AWS
