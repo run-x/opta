@@ -5,7 +5,7 @@ import logging
 import os
 import subprocess
 import sys
-from typing import Collection
+from typing import Collection, List
 
 from opta.json_schema import check_schemas
 
@@ -57,18 +57,25 @@ def py_check(files_changed: Collection[str], precommit: bool, apply: bool) -> in
         flake8 = "pipenv run flake8 --exclude examples"
         mypy = "pipenv run mypy --exclude examples"
 
-    cmd = f"{isort} {' '.join(files_changed)}\
-        && {black} {' '.join(files_changed)}\
-        && {flake8} {' '.join(files_changed)}\
-        && {mypy} {' '.join(files_changed)}"
+    linters = [
+        f"{linter} {' '.join(files_changed)}" for linter in [isort, black, flake8, mypy]
+    ]
 
     logging.info("Running JSON schema check...")
     check_schemas(write=precommit or apply)
 
     logging.info("Running py checks...")
-    logging.info(cmd)
+    return execute_commands(linters)
 
-    return os.system(cmd)
+
+def execute_commands(commands: List[str]) -> int:
+    if len(commands) == 0:
+        return 0
+    cmd = commands[0]
+    logging.info(cmd)
+    result = os.system(cmd)
+    logging.info("Success" if result == 0 else f"Error when running: {cmd}")
+    return result if result > 0 else execute_commands(commands[1:])
 
 
 if __name__ == "__main__":
