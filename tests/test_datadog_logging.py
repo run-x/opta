@@ -4,7 +4,8 @@ import os
 import time
 from logging import LogRecord
 
-from pytest_mock import MockFixture, mocker  # noqa
+import pytest
+from pytest_mock import MockFixture
 from requests import Response, codes
 
 from opta.constants import OPTA_DISABLE_REPORTING
@@ -12,7 +13,7 @@ from opta.datadog_logging import CLIENT_TOKEN, DEFAULT_CACHE_SIZE, DatadogLogHan
 
 
 class TestDatadogLogHandler:
-    def test_emit(self, mocker: MockFixture):  # noqa
+    def test_emit(self, mocker: MockFixture) -> None:
         mocked_record = mocker.Mock(spec=LogRecord)
         mocked_cache_entry = mocker.Mock()
         mocked_transform_record = mocker.patch(
@@ -26,7 +27,7 @@ class TestDatadogLogHandler:
         mocked_flush.assert_not_called()
         mocked_transform_record.assert_called_once_with(mocked_record)
 
-    def test_emit_with_flush(self, mocker: MockFixture):  # noqa
+    def test_emit_with_flush(self, mocker: MockFixture) -> None:
         mocked_record = mocker.Mock(spec=LogRecord)
         mocked_cache_entry = mocker.Mock()
         mocked_transform_record = mocker.patch(
@@ -42,7 +43,8 @@ class TestDatadogLogHandler:
         mocked_flush.assert_called_once_with()
         mocked_transform_record.assert_called_once_with(mocked_record)
 
-    def test_flush(self, mocker: MockFixture):  # noqa
+    @pytest.mark.usefixtures("hide_debug_mode")
+    def test_flush(self, mocker: MockFixture) -> None:
         mocked_response = mocker.Mock(spec=Response)
         mocked_response.status_code = codes.ok
         mocked_post = mocker.patch(
@@ -70,7 +72,8 @@ class TestDatadogLogHandler:
             timeout=5,
         )
 
-    def test_dont_flush(self, mocker: MockFixture):  # noqa
+    @pytest.mark.usefixtures("hide_debug_mode")
+    def test_dont_flush(self, mocker: MockFixture) -> None:
         mocked_response = mocker.Mock(spec=Response)
         mocked_response.status_code = codes.ok
         mocked_post = mocker.patch(
@@ -85,6 +88,5 @@ class TestDatadogLogHandler:
         handler.cache = [cache_entry]
         os.environ[OPTA_DISABLE_REPORTING] = "1"
         handler.flush()
-        del os.environ[OPTA_DISABLE_REPORTING]
         assert handler.cache == []
         mocked_post.assert_not_called()
