@@ -400,7 +400,7 @@ class Terraform:
                     else:
                         return False
                 except Exception:
-                    UserErrors(f"Could copy terraform state file to {state_file}")
+                    UserErrors(f"Could not copy terraform state file to {state_file}")
         else:
             raise UserErrors("Need to get state from S3 or GCS or Azure storage")
 
