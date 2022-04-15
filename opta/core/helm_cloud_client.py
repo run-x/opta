@@ -40,3 +40,8 @@ class HelmCloudClient(CloudClient):
         # "kubectl version" returns an error code if it can't connect to a cluster
         nice_run(["kubectl", "version"], check=True)
         return True
+
+    def get_kube_context_name(self) -> str:
+        return nice_run(
+            ["kubectl", "config", "current-context"], check=True, capture_output=True
+        ).stdout.strip()
