@@ -76,7 +76,10 @@ if __name__ == "__main__":
         cleanup_files()
         cli()
     except UserErrors as e:
-        logger.error(str(e))
+        if os.environ.get("OPTA_DEBUG") is None:
+            logger.error(str(e))
+        else:
+            logger.exception(str(e))
         logger.info(
             f"{fg('magenta')}If you need more help please reach out to the contributors in our slack channel at: https://slack.opta.dev{attr(0)}"
         )
