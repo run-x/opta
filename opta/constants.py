@@ -3,13 +3,7 @@ import time
 from os.path import expanduser
 from typing import Dict, Final, Optional, Tuple
 
-from ruamel.yaml import YAML
-
 from opta.registry import make_registry_dict
-
-yaml: Final = YAML(
-    typ="safe"
-)  # Duplicate because constants can't import utils and yaml really is a util
 
 init_template_path: Final = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), "config", "init_templates"

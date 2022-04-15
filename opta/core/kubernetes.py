@@ -36,9 +36,9 @@ from kubernetes.config.kube_config import (
 from kubernetes.watch import Watch
 
 import opta.constants as constants
-from opta.constants import GENERATED_KUBE_CONFIG_DIR, REDS, yaml
+from opta.constants import GENERATED_KUBE_CONFIG_DIR, REDS
 from opta.exceptions import UserErrors
-from opta.utils import logger
+from opta.utils import logger, yaml
 from opta.utils.dependencies import ensure_installed
 
 if TYPE_CHECKING:

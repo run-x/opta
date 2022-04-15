@@ -11,14 +11,11 @@ from time import sleep
 from typing import Any, Dict, Generator, List, Optional, Protocol, Tuple, Type, TypeVar
 
 import click
-from ruamel.yaml import YAML
 
 from opta.constants import DEV_VERSION, VERSION
 from opta.datadog_logging import DatadogLogHandler
 from opta.exceptions import UserErrors
 from opta.special_formatter import PartialFormatter
-
-yaml = YAML(typ="safe")
 
 
 class SensitiveFormatter(Formatter):

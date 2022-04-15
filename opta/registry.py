@@ -5,9 +5,8 @@ from typing import Any, Dict, List
 
 from ruamel.yaml import YAML
 
-yaml = YAML(
-    typ="safe"
-)  # Duplicate because constants can't import utils and yaml really is a util
+# Not using opta.utils.yaml since that would cause circular ref issues
+yaml = YAML(typ="safe")
 
 MODULE_INDEX = """---
 title: "Modules"

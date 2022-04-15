@@ -6,8 +6,9 @@ import yamale
 from colored import attr, fg
 from yamale.validators import DefaultValidators, Validator
 
-from opta.constants import REGISTRY, yaml
+from opta.constants import REGISTRY
 from opta.exceptions import UserErrors
+from opta.utils import yaml
 
 
 class Module(Validator):

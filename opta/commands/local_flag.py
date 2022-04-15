@@ -3,13 +3,13 @@ from pathlib import Path
 from shutil import rmtree
 from typing import Tuple
 
-from ruamel import yaml
+from opta.utils.yaml import YAML
 
 
 def _handle_local_flag(config: str, test: bool = False) -> Tuple[str, str]:
 
     with open(config, "r") as fr:
-        yamlcontent = yaml.round_trip_load(fr, preserve_quotes=True)
+        yamlcontent = YAML.round_trip().load(fr)
         if "org_name" in yamlcontent:
             org_name = yamlcontent["org_name"]
         else:
@@ -23,7 +23,7 @@ def _handle_local_flag(config: str, test: bool = False) -> Tuple[str, str]:
     if not os.path.exists(env_yaml_path):
         os.makedirs(os.path.abspath(env_yaml_path))
     with open(env_yaml_path + "/localopta.yaml", "w") as fw:
-        yaml.safe_dump(
+        YAML().dump(
             {
                 "name": "localopta",
                 "org_name": org_name,
@@ -39,7 +39,9 @@ def _handle_local_flag(config: str, test: bool = False) -> Tuple[str, str]:
     yamlpath = Path(config)
     config = os.path.join(yamlpath.parent, "opta-local-" + yamlpath.name)
     with open(config, "w") as fw:
-        yaml.round_trip_dump(yamlcontent, fw, explicit_start=True)
+        yaml = YAML.round_trip()
+        yaml.explicit_start = True
+        yaml.dump(yamlcontent, fw)
 
     return config, env_yaml_path + "/localopta.yaml"
 

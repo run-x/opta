@@ -1,7 +1,6 @@
 import os
+from io import StringIO
 from typing import TYPE_CHECKING, FrozenSet
-
-from ruamel.yaml.compat import StringIO
 
 from modules.base import ModuleProcessor
 from opta.core.helm import Helm
