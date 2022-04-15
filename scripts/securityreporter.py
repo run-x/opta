@@ -1,8 +1,43 @@
+# This program uses tfsec to generate an HTML
+# file containing a list of security issues found
+# in all terraform files in the current working directory
+# and all subdirectories (recursive). 
+
+# To run it, change directory to where your terraform files are
+# and then run
+# python3 /path/to/securityreporter.py
+
+# This will create an HTML file opta-tfsec-report.html in the
+# current directory.
+
+# You don't need to install tfsec, this program assumes you have
+# docker so it will pull the latest tfsec container and run the
+# tfsec program via docker.
+
 import csv
 import os
 import string
 import traceback
-from inspect import trace
+
+
+def maintain_tallies(passed: str, severity: str) -> None:
+    if passed == "false":
+        tallies["failed"] = tallies["failed"] + 1
+        if severity == "CRITICAL":
+            tallies["critical_failed"] = tallies["critical_failed"] + 1
+        elif severity == "HIGH":
+            tallies["high_failed"] = tallies["high_failed"] + 1
+        else:
+            tallies["other_failed"] = tallies["other_failed"] + 1
+    else:
+        tallies["passed"] = tallies["passed"] + 1
+        if severity == "CRITICAL":
+            tallies["critical_passed"] = tallies["critical_passed"] + 1
+        elif severity == "HIGH":
+            tallies["high_passed"] = tallies["high_passed"] + 1
+        else:
+            tallies["other_passed"] = tallies["other_passed"] + 1
+
 
 csvtfsec_output = os.popen(
     'docker run --rm -it -v "$(pwd):/src" aquasec/tfsec /src -f csv --no-colour  --include-passed'
@@ -12,10 +47,22 @@ content = ""
 
 reader = csv.DictReader(csvtfsec_output)
 ii = 0
+tallies = {
+    "passed": 0,
+    "failed": 0,
+    "critical_failed": 0,
+    "high_failed": 0,
+    "other_failed": 0,
+    "critical_passed": 0,
+    "high_passed": 0,
+    "other_passed": 0,
+}
 for row in reader:
     try:
+        maintain_tallies(row["passed"], row["severity"])
         if row["passed"] == "true":
             rowclass = "table-success"
+            tallies["passed"]
         else:
             if row["severity"] == "CRITICAL":
                 rowclass = "table-danger"
@@ -33,17 +80,35 @@ for row in reader:
         content += f"<td class=\"{rowclass}\">{row['link']}</td>"
         content += "</tr>"
         ii = ii + 1
-    except:
+    except:  # noqa
         print("Error in row \n{}\nTraceback:{}".format(row, traceback.format_exc()))
 
 template = string.Template(
     """
-
-
-
 <body>
     <div class="container">
         <h1>Tfsec Terraform Code Analysis</h1>
+        <table id="summaryTable" class="table">
+        <tr>
+            <td> Total Failed </td>
+            <td> $failed/$total </td>
+        </tr>
+        <tr>
+            <td> Critical Failed </td>
+            <td> $crit_failed/$crit_total </td>
+        </tr>
+        <tr>
+            <td> High Failed </td>
+            <td> $high_failed/$high_total </td>
+        </tr>
+        <tr>
+            <td> Other Failed </td>
+            <td> $other_failed/$other_total </td>
+        </tr>
+        </table>
+
+
+
         <table id="myTable" class="table">
             <thead class="thead-dark">
                 <tr>
@@ -66,7 +131,17 @@ template = string.Template(
 )
 
 
-final_output = template.substitute(elements=content)
+final_output = template.substitute(
+    elements=content,
+    crit_failed=tallies["critical_failed"],
+    crit_total=tallies["critical_passed"] + tallies["critical_failed"],
+    high_failed=tallies["high_failed"],
+    high_total=tallies["high_passed"] + tallies["high_failed"],
+    other_failed=tallies["other_failed"],
+    other_total=tallies["other_passed"] + tallies["other_failed"],
+    failed=tallies["failed"],
+    total=tallies["passed"] + tallies["failed"],
+)
 filepath = "opta-tfsec-report.html"
 with open(filepath, "w") as output:
     output.write(final_output)
