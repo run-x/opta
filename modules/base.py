@@ -197,8 +197,9 @@ class K8sServiceModuleProcessor(ModuleProcessor):
 
     def pre_hook(self, module_idx: int) -> None:
         release_name = f"{self.layer.name}-{self.module.name}"
+        kube_context = self.layer.get_cloud_client().get_kube_context_name()
         pending_upgrade_helm_chart = Helm.get_helm_list(
-            release=release_name, status="pending-upgrade"
+            kube_context=kube_context, release=release_name, status="pending-upgrade"
         )
         if pending_upgrade_helm_chart:
             raise UserErrors(

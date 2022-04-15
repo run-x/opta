@@ -66,8 +66,9 @@ def force_unlock(
         if Terraform.download_state(layer):
             if layer.parent is not None or "k8scluster" in modules:
                 set_kube_config(layer)
+                kube_context = layer.get_cloud_client().get_kube_context_name()
                 pending_upgrade_release_list = Helm.get_helm_list(
-                    status="pending-upgrade"
+                    kube_context=kube_context, status="pending-upgrade"
                 )
                 click.confirm(
                     "Do you also wish to Rollback the Helm releases in Pending-Upgrade State?"
@@ -78,6 +79,7 @@ def force_unlock(
 
                 for release in pending_upgrade_release_list:
                     Helm.rollback_helm(
+                        kube_context,
                         release["name"],
                         namespace=release["namespace"],
                         revision=release["revision"],
