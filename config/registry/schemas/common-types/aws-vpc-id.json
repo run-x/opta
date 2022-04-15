@@ -1,0 +1,6 @@
+{
+    "$id": "https://app.runx.dev/common-types/aws-vpc-id",
+    "type": "string",
+    "description": "Format for an AWS VPC ID",
+    "pattern": "^vpc-([0-9a-z]{8}|[0-9a-z]{17})$"
+}

@@ -1,0 +1,6 @@
+{
+    "$id": "https://app.runx.dev/common-types/aws-subnet-id",
+    "type": "string",
+    "description": "Format for an AWS Subnet ID",
+    "pattern": "^subnet-([0-9a-z]{8}|[0-9a-z]{17})$"
+}

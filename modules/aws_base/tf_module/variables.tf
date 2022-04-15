@@ -47,3 +47,21 @@ variable "public_ipv4_cidr_blocks" {
     "10.0.16.0/21"
   ]
 }
+
+variable "vpc_id" {
+  description = "The ID of an pre-existing VPC to use instead of creating a new VPC for opta"
+  type        = string
+  default     = null
+}
+
+variable "public_subnet_ids" {
+  description = "List of pre-existing public subnets to use instead of creating new subnets for opta. Required when var.vpc_id is set."
+  type        = list(string)
+  default     = null
+}
+
+variable "private_subnet_ids" {
+  description = "List of pre-existing private subnets to use instead of creating new subnets for opta. Required when var.vpc_id is set."
+  type        = list(string)
+  default     = null
+}

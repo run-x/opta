@@ -11,17 +11,17 @@ output "kms_account_key_id" {
 }
 
 output "vpc_id" {
-  value = aws_vpc.vpc.id
+  value = local.vpc_id
 }
 
 output "private_subnet_ids" {
-  value = aws_subnet.private_subnets.*.id
+  value = local.private_subnet_ids
 }
 
 output "public_subnets_ids" {
-  value = aws_subnet.public_subnets.*.id
+  value = local.public_subnet_ids
 }
 
 output "public_nat_ips" {
-  value = aws_eip.nat_eips.*.public_ip
+  value = local.public_nat_ips
 }

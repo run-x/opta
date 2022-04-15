@@ -42,6 +42,21 @@ inputs:
         "10.0.8.0/21",
         "10.0.16.0/21"
     ]
+  - name: vpc_id
+    user_facing: true
+    validator: regex(r'^vpc-([0-9a-z]{8}|[0-9a-z]{17})$', required=False)
+    description: The ID of an existing VPC to import. If not provided, Opta will create a new VPC.
+    default: null
+  - name: public_subnet_ids
+    user_facing: true
+    validator: list(regex(r'^subnet-([0-9a-z]{8}|[0-9a-z]{17})$'), min=1, required=False)
+    description: When importing an existing VPC, the IDs of the public subnets
+    default: null
+  - name: private_subnet_ids
+    user_facing: true
+    validator: list(regex(r'^subnet-([0-9a-z]{8}|[0-9a-z]{17})$'), min=2, required=False)
+    description: When importing an existing VPC, the IDs of the private subnets
+    default: null
 outputs:
   - name: kms_account_key_arn
     export: true

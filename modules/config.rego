@@ -70,6 +70,12 @@ waivers[waiver] {
     "rule_id": "FG_R00101",
     "resource_id": "aws_s3_bucket.bucket"
   }
+} {
+  waiver := {
+    # TODO: Remove this waiver once we upgrade to a rego version that properly handles `count`
+    "rule_id": "FG_R00054",
+    "resource_id": "aws_vpc.vpc"
+  }
 }
 
 rules[rule] {
