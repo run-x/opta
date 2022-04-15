@@ -20,12 +20,25 @@ class TestHelm:
         mock_nice_run_helm_uninstall = mocker.patch("opta.core.helm.nice_run")
 
         Helm.rollback_helm(
-            self.MOCK_RELEASE, self.MOCK_NAMESPACE, revision=self.MOCK_REVISION_1
+            "test-kube-context",
+            self.MOCK_RELEASE,
+            self.MOCK_NAMESPACE,
+            revision=self.MOCK_REVISION_1,
         )
 
         mock_validate_helm_installed.assert_called_once()
         mock_nice_run_helm_uninstall.assert_called_once_with(
-            ["helm", "uninstall", self.MOCK_RELEASE, "--namespace", self.MOCK_NAMESPACE],
+            [
+                "helm",
+                "uninstall",
+                self.MOCK_RELEASE,
+                "--kube-context",
+                "test-kube-context",
+                "--kubeconfig",
+                mocker.ANY,
+                "--namespace",
+                self.MOCK_NAMESPACE,
+            ],
             check=True,
         )
 
@@ -36,7 +49,10 @@ class TestHelm:
         mock_nice_run_helm_rollback = mocker.patch("opta.core.helm.nice_run")
 
         Helm.rollback_helm(
-            self.MOCK_RELEASE, self.MOCK_NAMESPACE, revision=self.MOCK_REVISION_X
+            "test-kube-context",
+            self.MOCK_RELEASE,
+            self.MOCK_NAMESPACE,
+            revision=self.MOCK_REVISION_X,
         )
 
         mock_validate_helm_installed.assert_called_once()
@@ -46,6 +62,10 @@ class TestHelm:
                 "rollback",
                 self.MOCK_RELEASE,
                 self.MOCK_REVISION_X,
+                "--kube-context",
+                "test-kube-context",
+                "--kubeconfig",
+                mocker.ANY,
                 "--namespace",
                 self.MOCK_NAMESPACE,
             ],
@@ -61,10 +81,21 @@ class TestHelm:
 
         mock_json_loads = mocker.patch("opta.core.helm.json.loads")
 
-        Helm.get_helm_list()
+        Helm.get_helm_list("test-kube-context")
         mock_validate_helm_installed.assert_called_once()
         mock_nice_run_helm_list_process.assert_called_once_with(
-            ["helm", "list", "--all", *mock_namespace_placeholder, "-o", "json"],
+            [
+                "helm",
+                "list",
+                "--all",
+                "--kube-context",
+                "test-kube-context",
+                "--kubeconfig",
+                mocker.ANY,
+                *mock_namespace_placeholder,
+                "-o",
+                "json",
+            ],
             capture_output=True,
             check=True,
         )
@@ -79,10 +110,21 @@ class TestHelm:
 
         mock_json_loads = mocker.patch("opta.core.helm.json.loads")
 
-        Helm.get_helm_list(namespace=self.MOCK_NAMESPACE)
+        Helm.get_helm_list("test-kube-context", namespace=self.MOCK_NAMESPACE)
         mock_validate_helm_installed.assert_called_once()
         mock_nice_run_helm_list_process.assert_called_once_with(
-            ["helm", "list", "--all", *mock_namespace_placeholder, "-o", "json"],
+            [
+                "helm",
+                "list",
+                "--all",
+                "--kube-context",
+                "test-kube-context",
+                "--kubeconfig",
+                mocker.ANY,
+                *mock_namespace_placeholder,
+                "-o",
+                "json",
+            ],
             capture_output=True,
             check=True,
         )

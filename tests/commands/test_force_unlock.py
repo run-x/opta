@@ -85,9 +85,11 @@ def test_force_unlock_env(mocker: MockFixture) -> None:
             ),
         ]
     )
-    mocked_helm_list.assert_called_once_with(status="pending-upgrade")
+    mocked_helm_list.assert_called_once_with(
+        kube_context=mocker.ANY, status="pending-upgrade"
+    )
     mocked_rollback_helm.assert_called_once_with(
-        "mocked-app", namespace="mocked-namespace", revision="1"
+        mocker.ANY, "mocked-app", namespace="mocked-namespace", revision="1"
     )
 
 
@@ -217,5 +219,7 @@ def test_force_unlock_env_no_rollback(mocker: MockFixture) -> None:
             ),
         ]
     )
-    mocked_helm_list.assert_called_once_with(status="pending-upgrade")
+    mocked_helm_list.assert_called_once_with(
+        kube_context=mocker.ANY, status="pending-upgrade"
+    )
     mocked_rollback_helm.assert_not_called()
