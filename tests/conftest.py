@@ -1,13 +1,16 @@
 import os
 import sys
 from typing import Any, Dict, Generator
+
 from pytest import fixture
 from pytest_mock import MockFixture
+
 
 # Most commands require terraform init. Mock it here.
 @fixture(autouse=True)
 def mock_terraform_init(mocker: MockFixture) -> None:
     mocker.patch("opta.core.terraform.Terraform.init")
+
 
 @fixture
 def hide_debug_mode() -> Generator:
@@ -22,11 +25,11 @@ def hide_debug_mode() -> Generator:
     for key in unset_environs:
         original_environs[key] = os.environ.pop(key, None)
 
-    del sys._called_from_test
+    del sys._called_from_test  # type: ignore
 
     yield
 
-    sys._called_from_test = True
+    sys._called_from_test = True  # type: ignore
 
     # Restore original values
     for key, value in original_environs.items():

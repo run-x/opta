@@ -9,6 +9,7 @@ from requests import Response, codes
 from opta.amplitude import AmplitudeClient
 from opta.constants import OPTA_DISABLE_REPORTING
 
+
 @pytest.mark.usefixtures("hide_debug_mode")
 class TestAmplitudeClient:
     def test_send_event(self, mocker: MockFixture):
