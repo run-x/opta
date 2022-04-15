@@ -23,7 +23,7 @@ class TestByok:
 
         assert app_module.data["type"] == "k8s-service"
         assert app_module.data["name"] == "hello"
-        assert app_module.data["image"] == "ghcr.io/run-x/opta-examples/hello-app:main"
+        assert app_module.data["image"] == "ghcr.io/run-x/hello-opta/hello-opta:main"
         assert app_module.data["public_uri"] == ["all/hello"]
         assert app_module.data["env_name"] == "hello"
         assert app_module.data["module_name"] == "hello"
