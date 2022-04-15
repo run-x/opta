@@ -17,6 +17,7 @@ Set `public_subnet_ids` to the list of IDs of the public subnets in the VPC.
 Public subnets must have a route that connects to an internet gateway, and must be configured to assign public IP addresses.
 Set `private_subnet_ids` to the list of IDs of the private subnets in the VPC.
 Private subnets must have a route with a destination of `0.0.0.0/0` that points to a NAT gateway with a public IP address.
+If the private subnet routes are not configured correctly, you may see an error output by Terraform that looks like "No routes matching supplied arguments found in Route Table".
 
 IPv6 is not supported on VPCs that you bring.
 Those VPCs may work, but we do not verify Opta works properly with IPv6-only or dual-stack VPCs.
