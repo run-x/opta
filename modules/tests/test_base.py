@@ -283,7 +283,9 @@ class TestK8sServiceModuleProcessor:
         )
         K8sServiceModuleProcessor(module, layer).pre_hook(idx)
         mocked_helm_list.assert_called_once_with(
-            release=f"{layer.name}-{module_name}", status="pending-upgrade"
+            kube_context=mocker.ANY,
+            release=f"{layer.name}-{module_name}",
+            status="pending-upgrade",
         )
 
     def test_pre_hook_pending_upgrade_service(self, mocker: MockFixture) -> None:
@@ -307,7 +309,9 @@ class TestK8sServiceModuleProcessor:
         with pytest.raises(UserErrors):
             K8sServiceModuleProcessor(module, layer).pre_hook(idx)
         mocked_helm_list.assert_called_once_with(
-            release=f"{layer.name}-{module_name}", status="pending-upgrade"
+            kube_context=mocker.ANY,
+            release=f"{layer.name}-{module_name}",
+            status="pending-upgrade",
         )
 
     @staticmethod
