@@ -191,3 +191,7 @@ variable "tolerations" {
 variable "cron_jobs" {
   default = []
 }
+
+variable "max_history" {
+  type = number
+}

@@ -82,3 +82,6 @@ variable "dependency_update" {
   default = true
 }
 
+variable "max_history" {
+  type = number
+}

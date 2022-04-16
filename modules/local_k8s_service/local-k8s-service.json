@@ -24,6 +24,11 @@
       },
       "default": []
     },
+    "max_history": {
+      "type": "number",
+      "description": "The max amount of helm revisions to keep track of (0 for infinite)",
+      "default": 25
+    },
     "tolerations": {
       "type": "list",
       "description": "Taint tolerations to add to the pods.",

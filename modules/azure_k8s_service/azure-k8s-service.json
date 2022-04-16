@@ -23,6 +23,11 @@
       "default": 3,
       "minimum": 0
     },
+    "max_history": {
+      "type": "number",
+      "description": "The max amount of helm revisions to keep track of (0 for infinite)",
+      "default": 25
+    },
     "timeout": {
       "type": "number",
       "description": "Time in seconds to wait for deployment.",

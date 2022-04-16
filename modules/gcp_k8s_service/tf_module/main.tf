@@ -59,4 +59,5 @@ resource "helm_release" "k8s-service" {
   atomic          = true
   cleanup_on_fail = true
   timeout         = var.timeout
+  max_history     = var.max_history
 }
