@@ -22,11 +22,6 @@ steps:
       name: "Load test-service image"
       command: docker load -i test-service-image
   - run:
-      name: "Configure Kubectl"
-      command: |
-        $HOME/.opta/opta configure-kubectl \
-        --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml
-  - run:
       name: "Set secret"
       command: |
         yes | $HOME/.opta/opta secret update \

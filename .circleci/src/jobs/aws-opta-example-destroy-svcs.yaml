@@ -13,11 +13,6 @@ steps:
   - aws-cli/install
   - aws-cli/setup
   - run:
-      name: "Configure Kubectl"
-      command: |
-        ./dist/opta/opta configure-kubectl \
-        --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
-  - run:
       name: "Destroy Monitoring Service"
       command: |
         yes | ./dist/opta/opta destroy \
