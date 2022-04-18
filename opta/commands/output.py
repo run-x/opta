@@ -6,6 +6,7 @@ from opta.amplitude import amplitude_client
 from opta.commands.apply import local_setup
 from opta.core.generator import gen_all
 from opta.core.terraform import get_terraform_outputs
+from opta.core.upgrade import disable_version_upgrade
 from opta.layer import Layer
 from opta.utils import check_opta_file_exists, json
 from opta.utils.clickoptions import (
@@ -25,7 +26,7 @@ def output(
     config: str, env: Optional[str], local: Optional[bool], var: Dict[str, str],
 ) -> None:
     """Print TF outputs"""
-
+    disable_version_upgrade()
     config = check_opta_file_exists(config)
     if local:
         config = local_setup(config, var, None)

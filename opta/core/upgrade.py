@@ -1,3 +1,4 @@
+import os
 import random
 
 import requests
@@ -8,7 +9,9 @@ from opta.utils import logger
 from opta.utils.globals import OptaUpgrade
 
 LATEST_VERSION_FILE_URL = "https://dev-runx-opta-binaries.s3.amazonaws.com/latest"
-UPGRADE_CHECK_PROBABILITY = 0.2
+UPGRADE_CHECK_PROBABILITY: float = float(
+    os.environ.get("OPTA_UPGRADE_CHECK_PROBABILITY", "0.2")
+)
 # TODO: Change this to the actual upgrade URL.
 UPGRADE_INSTRUCTIONS_URL = "https://docs.opta.dev/installation/"
 
@@ -24,6 +27,11 @@ def _get_latest_version() -> str:
     resp = requests.get(LATEST_VERSION_FILE_URL)
     resp.raise_for_status()
     return resp.text.strip().strip("v")
+
+
+def disable_version_upgrade() -> None:
+    global UPGRADE_CHECK_PROBABILITY
+    UPGRADE_CHECK_PROBABILITY = 0
 
 
 def check_version_upgrade(is_upgrade_call: bool = False) -> bool:

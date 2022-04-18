@@ -5,8 +5,8 @@ import requests
 from colored import attr, fg
 
 from opta.constants import OPTA_INSTALL_URL
+from opta.core.upgrade import check_version_upgrade
 from opta.nice_subprocess import nice_run
-from opta.upgrade import check_version_upgrade
 from opta.utils import logger
 from opta.utils.globals import OptaUpgrade
 
