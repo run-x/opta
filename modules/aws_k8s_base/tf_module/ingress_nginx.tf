@@ -1,3 +1,43 @@
+resource "tls_private_key" "self_signed" {
+  count     = var.expose_self_signed_ssl ? 1 : 0
+  algorithm = "RSA"
+  rsa_bits  = "2048"
+}
+
+resource "tls_self_signed_cert" "self_signed" {
+  count           = var.expose_self_signed_ssl ? 1 : 0
+  key_algorithm   = "RSA"
+  private_key_pem = tls_private_key.self_signed[0].private_key_pem
+  dns_names       = ["*.elb.${data.aws_region.current.name}.amazonaws.com"]
+
+  subject {
+    common_name    = "*.elb.${data.aws_region.current.name}.amazonaws.com"
+    organization   = "Opta"
+    street_address = []
+  }
+
+  validity_period_hours = 87600
+
+  allowed_uses = [
+    "key_encipherment",
+    "digital_signature",
+    "server_auth",
+    "client_auth"
+  ]
+}
+
+resource "aws_acm_certificate" "self_signed" {
+  count            = var.expose_self_signed_ssl ? 1 : 0
+  private_key      = tls_private_key.self_signed[0].private_key_pem
+  certificate_body = tls_self_signed_cert.self_signed[0].cert_pem
+}
+
+resource "aws_acm_certificate" "user_provided" {
+  count            = var.private_key != "" ? 1 : 0
+  private_key      = var.private_key
+  certificate_body = join("\n", [var.certificate_body, var.certificate_chain])
+}
+
 // NOTE: following this solution for http -> https redirect: https://github.com/kubernetes/ingress-nginx/issues/2724#issuecomment-593769295
 resource "helm_release" "ingress-nginx" {
   chart            = "ingress-nginx"
@@ -14,7 +54,7 @@ resource "helm_release" "ingress-nginx" {
         podLabels : {
           "opta-ingress-healthcheck" : "yes"
         }
-        extraArgs : var.private_key != "" || var.expose_self_signed_ssl ? { default-ssl-certificate : "ingress-nginx/secret-tls" } : {}
+        extraArgs : {}
         config : local.config
         podAnnotations : {
           "linkerd.io/inject" : "enabled"
@@ -85,7 +125,7 @@ resource "helm_release" "ingress-nginx" {
             "service.beta.kubernetes.io/aws-load-balancer-access-log-s3-bucket-prefix" : "opta-k8s-cluster"
             "service.beta.kubernetes.io/aws-load-balancer-ssl-ports" : local.nginx_tls_ports
             "service.beta.kubernetes.io/aws-load-balancer-ssl-negotiation-policy" : "ELBSecurityPolicy-TLS-1-2-2017-01"
-            "service.beta.kubernetes.io/aws-load-balancer-ssl-cert" : var.cert_arn
+            "service.beta.kubernetes.io/aws-load-balancer-ssl-cert" : var.expose_self_signed_ssl ? aws_acm_certificate.self_signed[0].arn : (var.private_key != "" ? aws_acm_certificate.user_provided[0].arn : var.cert_arn)
             "service.beta.kubernetes.io/aws-load-balancer-alpn-policy" : "HTTP2Preferred"
           }
         }
