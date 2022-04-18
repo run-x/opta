@@ -21,6 +21,11 @@
         "$ref": "/common-types/port"
       }
     },
+    "max_history": {
+      "type": "number",
+      "description": "The max amount of helm revisions to keep track of (0 for infinite)",
+      "default": 25
+    },
     "cron_jobs": {
       "type": "array",
       "description": "A list of cronjobs to execute as part of this service",

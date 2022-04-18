@@ -197,6 +197,11 @@ inputs:
     validator: int(required=False)
     description: Time in seconds to wait for deployment.
     default: 300
+  - name: max_history
+    user_facing: true
+    validator: int(required=False)
+    description: The max amount of helm revisions to keep track of (0 for infinite)
+    default: 25
 extra_validators:
   cron_job:
     commands: list(required=True)

@@ -214,3 +214,7 @@ variable "timeout" {
   type    = number
   default = 300
 }
+
+variable "max_history" {
+  type = number
+}

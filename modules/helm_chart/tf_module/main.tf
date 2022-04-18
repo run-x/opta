@@ -12,6 +12,7 @@ resource "helm_release" "remote_chart" {
   timeout           = var.timeout
   dependency_update = var.dependency_update
   wait              = var.wait
+  max_history       = var.max_history
 }
 
 
@@ -26,4 +27,5 @@ resource "helm_release" "local_chart" {
   values            = var.values_files == [] ? [yamlencode(var.values)] : concat(local.values_from_files, [yamlencode(var.values)])
   timeout           = var.timeout
   dependency_update = var.dependency_update
+  max_history       = var.max_history
 }
