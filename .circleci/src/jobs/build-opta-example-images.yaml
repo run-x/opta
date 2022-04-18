@@ -4,8 +4,8 @@ steps:
   - run:
       name: "Build example images"
       command: |
-        docker build --tag todo-api:v1 -f opta/examples/full-stack-example/api/todo-python-django/Dockerfile opta/examples/full-stack-example/api/todo-python-django/
-        docker build --tag todo-frontend:v1 -f opta/examples/full-stack-example/frontend/todo-vuejs/Dockerfile opta/examples/full-stack-example/frontend/todo-vuejs/
+        docker build --tag todo-api:v1 -f ./examples/full-stack-example/api/todo-python-django/Dockerfile ./examples/full-stack-example/api/todo-python-django/
+        docker build --tag todo-frontend:v1 -f ./examples/full-stack-example/frontend/todo-vuejs/Dockerfile ./examples/full-stack-example/frontend/todo-vuejs/
   - run:
       name: "Save Opta examples"
       command: |
