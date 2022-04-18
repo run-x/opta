@@ -1,7 +1,7 @@
 # This program uses tfsec to generate an HTML
 # file containing a list of security issues found
 # in all terraform files in the current working directory
-# and all subdirectories (recursive). 
+# and all subdirectories (recursive).
 
 # To run it, change directory to where your terraform files are
 # and then run
