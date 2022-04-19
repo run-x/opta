@@ -47,9 +47,9 @@ class TestGetLatestVersion:
 class TestCheckVersionUpgrade:
     def test_does_not_check_if_should_check_false(self, mocker: MockFixture) -> None:
         mocked_should_check = mocker.patch(
-            "opta.upgrade._should_check_for_version_upgrade", return_value=False
+            "opta.core.upgrade._should_check_for_version_upgrade", return_value=False
         )
-        mocked_get_latest_version = mocker.patch("opta.upgrade._get_latest_version")
+        mocked_get_latest_version = mocker.patch("opta.core.upgrade._get_latest_version")
         check_version_upgrade()
         mocked_should_check.assert_called_once()
         mocked_get_latest_version.assert_not_called()
@@ -57,10 +57,14 @@ class TestCheckVersionUpgrade:
     def test_logs_update_instructions_if_newer_version_available(
         self, mocker: MockFixture
     ) -> None:
-        mocker.patch("opta.upgrade._should_check_for_version_upgrade", return_value=True)
-        mocker.patch("opta.upgrade._get_latest_version", return_value=TEST_LATEST_VERSION)
-        mocker.patch("opta.upgrade.VERSION", TEST_OLD_VERSION)
-        mocked_logger_warning = mocker.patch("opta.upgrade.logger.warning")
+        mocker.patch(
+            "opta.core.upgrade._should_check_for_version_upgrade", return_value=True
+        )
+        mocker.patch(
+            "opta.core.upgrade._get_latest_version", return_value=TEST_LATEST_VERSION
+        )
+        mocker.patch("opta.core.upgrade.VERSION", TEST_OLD_VERSION)
+        mocked_logger_warning = mocker.patch("opta.core.upgrade.logger.warning")
         check_version_upgrade()
         mocked_logger_warning.assert_called_once()
         warning_message: str = mocked_logger_warning.call_args.args[0]
@@ -68,9 +72,11 @@ class TestCheckVersionUpgrade:
         assert warning_message.find(TEST_LATEST_VERSION) > -1
 
     def test_handles_get_latest_version_exceptions(self, mocker: MockFixture) -> None:
-        mocker.patch("opta.upgrade._should_check_for_version_upgrade", return_value=True)
+        mocker.patch(
+            "opta.core.upgrade._should_check_for_version_upgrade", return_value=True
+        )
         mocked_get_latest_version = mocker.patch(
-            "opta.upgrade._get_latest_version",
+            "opta.core.upgrade._get_latest_version",
             side_effect=requests.exceptions.ConnectTimeout,
         )
         check_version_upgrade()
