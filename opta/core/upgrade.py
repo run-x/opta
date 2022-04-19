@@ -17,7 +17,7 @@ UPGRADE_INSTRUCTIONS_URL = "https://docs.opta.dev/installation/"
 
 
 def _should_check_for_version_upgrade() -> bool:
-    return (VERSION != DEV_VERSION) and (
+    return (VERSION not in [DEV_VERSION, "", None]) and (
         random.random() < UPGRADE_CHECK_PROBABILITY  # nosec
     )
 
