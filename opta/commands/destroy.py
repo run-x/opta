@@ -145,6 +145,7 @@ def destroy(
                     tf_flags.append("-auto-approve")
                 Terraform.apply(layer, *tf_flags, TF_PLAN_PATH, no_init=True, quiet=False)
                 layer.post_delete(idx)
+                idx -= 1
             except Exception as e:
                 raise e
 
