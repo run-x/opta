@@ -1,7 +1,8 @@
 data "aws_iam_policy_document" "load_balancer" {
   statement {
-    sid       = "0"
-    effect    = "Allow"
+    sid    = "0"
+    effect = "Allow"
+    #tfsec:ignore:aws-iam-no-policy-wildcards
     resources = ["*"]
     actions   = ["iam:CreateServiceLinkedRole"]
 
@@ -11,7 +12,7 @@ data "aws_iam_policy_document" "load_balancer" {
       values   = ["elasticloadbalancing.amazonaws.com"]
     }
   }
-
+  #tfsec:ignore:aws-iam-no-policy-wildcards
   statement {
     sid       = "1"
     effect    = "Allow"
@@ -45,8 +46,9 @@ data "aws_iam_policy_document" "load_balancer" {
   }
 
   statement {
-    sid       = "2"
-    effect    = "Allow"
+    sid    = "2"
+    effect = "Allow"
+    #tfsec:ignore:aws-iam-no-policy-wildcards
     resources = ["*"]
 
     actions = [
@@ -71,8 +73,9 @@ data "aws_iam_policy_document" "load_balancer" {
   }
 
   statement {
-    sid       = "3"
-    effect    = "Allow"
+    sid    = "3"
+    effect = "Allow"
+    #tfsec:ignore:aws-iam-no-policy-wildcards
     resources = ["*"]
 
     actions = [
@@ -82,15 +85,17 @@ data "aws_iam_policy_document" "load_balancer" {
   }
 
   statement {
-    sid       = "4"
-    effect    = "Allow"
+    sid    = "4"
+    effect = "Allow"
+    #tfsec:ignore:aws-iam-no-policy-wildcards
     resources = ["*"]
     actions   = ["ec2:CreateSecurityGroup"]
   }
 
   statement {
-    sid       = "5"
-    effect    = "Allow"
+    sid    = "5"
+    effect = "Allow"
+    #tfsec:ignore:aws-iam-no-policy-wildcards
     resources = ["arn:aws:ec2:*:*:security-group/*"]
     actions   = ["ec2:CreateTags"]
 
@@ -108,8 +113,9 @@ data "aws_iam_policy_document" "load_balancer" {
   }
 
   statement {
-    sid       = "6"
-    effect    = "Allow"
+    sid    = "6"
+    effect = "Allow"
+    #tfsec:ignore:aws-iam-no-policy-wildcards
     resources = ["arn:aws:ec2:*:*:security-group/*"]
 
     actions = [
@@ -131,8 +137,9 @@ data "aws_iam_policy_document" "load_balancer" {
   }
 
   statement {
-    sid       = "7"
-    effect    = "Allow"
+    sid    = "7"
+    effect = "Allow"
+    #tfsec:ignore:aws-iam-no-policy-wildcards
     resources = ["*"]
 
     actions = [
@@ -149,8 +156,9 @@ data "aws_iam_policy_document" "load_balancer" {
   }
 
   statement {
-    sid       = "8"
-    effect    = "Allow"
+    sid    = "8"
+    effect = "Allow"
+    #tfsec:ignore:aws-iam-no-policy-wildcards
     resources = ["*"]
 
     actions = [
@@ -164,10 +172,11 @@ data "aws_iam_policy_document" "load_balancer" {
       values   = ["false"]
     }
   }
-
+  #tfsec:ignore:aws-iam-no-policy-wildcards
   statement {
-    sid       = "9"
-    effect    = "Allow"
+    sid    = "9"
+    effect = "Allow"
+
     resources = ["*"]
 
     actions = [
@@ -181,7 +190,7 @@ data "aws_iam_policy_document" "load_balancer" {
   statement {
     sid    = "10"
     effect = "Allow"
-
+    #tfsec:ignore:aws-iam-no-policy-wildcards
     resources = [
       "arn:aws:elasticloadbalancing:*:*:targetgroup/*/*",
       "arn:aws:elasticloadbalancing:*:*:loadbalancer/net/*/*",
@@ -209,7 +218,7 @@ data "aws_iam_policy_document" "load_balancer" {
   statement {
     sid    = "11"
     effect = "Allow"
-
+    #tfsec:ignore:aws-iam-no-policy-wildcards
     resources = [
       "arn:aws:elasticloadbalancing:*:*:listener/net/*/*/*",
       "arn:aws:elasticloadbalancing:*:*:listener/app/*/*/*",
@@ -224,8 +233,9 @@ data "aws_iam_policy_document" "load_balancer" {
   }
 
   statement {
-    sid       = "12"
-    effect    = "Allow"
+    sid    = "12"
+    effect = "Allow"
+    #tfsec:ignore:aws-iam-no-policy-wildcards
     resources = ["*"]
 
     actions = [
@@ -245,7 +255,7 @@ data "aws_iam_policy_document" "load_balancer" {
       values   = ["false"]
     }
   }
-
+  #tfsec:ignore:aws-iam-no-policy-wildcards
   statement {
     sid       = "13"
     effect    = "Allow"
@@ -258,8 +268,9 @@ data "aws_iam_policy_document" "load_balancer" {
   }
 
   statement {
-    sid       = "14"
-    effect    = "Allow"
+    sid    = "14"
+    effect = "Allow"
+    #tfsec:ignore:aws-iam-no-policy-wildcards
     resources = ["*"]
 
     actions = [
