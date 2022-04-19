@@ -3,6 +3,8 @@ import time
 from os.path import expanduser
 from typing import Dict, Final, Optional, Tuple
 
+from kubernetes.config.kube_config import KUBE_CONFIG_DEFAULT_LOCATION
+
 from opta.registry import make_registry_dict
 
 init_template_path: Final = os.path.join(
@@ -60,6 +62,7 @@ successfull_upgrade: Final = os.path.join(
 )
 
 HOME: Final = expanduser("~")
+DEFAULT_KUBECONFIG = expanduser(KUBE_CONFIG_DEFAULT_LOCATION)
 GENERATED_KUBE_CONFIG_DIR: Final = f"{HOME}/.opta/kubeconfigs"
 GENERATED_KUBE_CONFIG: Optional[str] = None
 ONE_WEEK_UNIX: Final = 604800

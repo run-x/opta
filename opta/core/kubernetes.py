@@ -29,10 +29,7 @@ from kubernetes.client import (
     V1ServiceList,
 )
 from kubernetes.config import load_kube_config
-from kubernetes.config.kube_config import (
-    ENV_KUBECONFIG_PATH_SEPARATOR,
-    KUBE_CONFIG_DEFAULT_LOCATION,
-)
+from kubernetes.config.kube_config import ENV_KUBECONFIG_PATH_SEPARATOR
 from kubernetes.watch import Watch
 
 import opta.constants as constants
@@ -84,7 +81,7 @@ def purge_opta_kube_config(layer: "Layer") -> None:
         return
 
     default_kube_config_filename = expanduser(
-        KUBE_CONFIG_DEFAULT_LOCATION.split(ENV_KUBECONFIG_PATH_SEPARATOR)[0]
+        constants.DEFAULT_KUBECONFIG.split(ENV_KUBECONFIG_PATH_SEPARATOR)[0]
     )
     if not exists(default_kube_config_filename):
         return
@@ -121,7 +118,7 @@ def load_opta_kube_config_to_default(layer: "Layer") -> None:
         return
     opta_config = yaml.load(open(kube_config_file_name))
     default_kube_config_filename = expanduser(
-        KUBE_CONFIG_DEFAULT_LOCATION.split(ENV_KUBECONFIG_PATH_SEPARATOR)[0]
+        constants.DEFAULT_KUBECONFIG.split(ENV_KUBECONFIG_PATH_SEPARATOR)[0]
     )
     if not exists(default_kube_config_filename):
         with open(expanduser(default_kube_config_filename), "w") as f:
@@ -184,7 +181,7 @@ def cluster_exist(layer: "Layer") -> bool:
 
 def load_opta_kube_config() -> None:
     load_kube_config(
-        config_file=constants.GENERATED_KUBE_CONFIG or KUBE_CONFIG_DEFAULT_LOCATION
+        config_file=constants.GENERATED_KUBE_CONFIG or constants.DEFAULT_KUBECONFIG
     )
 
 

@@ -1,8 +1,6 @@
 from subprocess import CalledProcessError  # nosec
 from typing import FrozenSet, List, Optional
 
-from kubernetes.config.kube_config import KUBE_CONFIG_DEFAULT_LOCATION
-
 import opta.constants as constants
 from opta.exceptions import UserErrors
 from opta.nice_subprocess import nice_run
@@ -34,7 +32,7 @@ class Helm:
                         "--kube-context",
                         kube_context,
                         "--kubeconfig",
-                        constants.GENERATED_KUBE_CONFIG or KUBE_CONFIG_DEFAULT_LOCATION,
+                        constants.GENERATED_KUBE_CONFIG or constants.DEFAULT_KUBECONFIG,
                         "--namespace",
                         namespace,
                     ],
@@ -50,7 +48,7 @@ class Helm:
                         "--kube-context",
                         kube_context,
                         "--kubeconfig",
-                        constants.GENERATED_KUBE_CONFIG or KUBE_CONFIG_DEFAULT_LOCATION,
+                        constants.GENERATED_KUBE_CONFIG or constants.DEFAULT_KUBECONFIG,
                         "--namespace",
                         namespace,
                     ],
@@ -88,7 +86,7 @@ class Helm:
                     "--kube-context",
                     kube_context,
                     "--kubeconfig",
-                    constants.GENERATED_KUBE_CONFIG or KUBE_CONFIG_DEFAULT_LOCATION,
+                    constants.GENERATED_KUBE_CONFIG or constants.DEFAULT_KUBECONFIG,
                     *namespaces,
                     "-o",
                     "json",
