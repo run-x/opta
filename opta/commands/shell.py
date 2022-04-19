@@ -3,6 +3,7 @@ from typing import Dict, Optional
 import click
 from kubernetes.client import CoreV1Api
 
+import opta.constants as constants
 from opta.amplitude import amplitude_client
 from opta.commands.apply import local_setup
 from opta.constants import SHELLS_ALLOWED
@@ -74,6 +75,8 @@ def shell(
             layer.name,
             "-c",
             "k8s-service",
+            "--kubeconfig",
+            constants.GENERATED_KUBE_CONFIG or constants.DEFAULT_KUBECONFIG,
             "--context",
             context_name,
             pod_list[0].metadata.name,
