@@ -27,10 +27,10 @@ from opta.commands.ui import ui
 from opta.commands.upgrade import upgrade
 from opta.commands.validate import validate
 from opta.commands.version import version
+from opta.core.upgrade import check_version_upgrade
 from opta.crash_reporter import CURRENT_CRASH_REPORTER
 from opta.exceptions import UserErrors
 from opta.one_time import one_time
-from opta.upgrade import check_version_upgrade
 from opta.utils import dd_handler, dd_listener, logger
 
 
