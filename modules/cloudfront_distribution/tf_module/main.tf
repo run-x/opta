@@ -15,12 +15,12 @@ locals {
 
 resource "aws_cloudfront_distribution" "distribution" {
 
-  comment         = "Opta managed cloudfront distribution ${var.layer_name}-${var.module_name}"
-  enabled         = true
-  is_ipv6_enabled = true
-  price_class     = var.price_class
-  aliases         = var.acm_cert_arn == "" ? [] : var.domains
-
+  comment                  = "Opta managed cloudfront distribution ${var.layer_name}-${var.module_name}"
+  enabled                  = true
+  is_ipv6_enabled          = true
+  price_class              = var.price_class
+  aliases                  = var.acm_cert_arn == "" ? [] : var.domains
+  minimum_protocol_version = "TLSv1.2_2021"
   dynamic "logging_config" {
     for_each = var.s3_log_bucket_name == null ? [] : [1]
     content {
