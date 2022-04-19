@@ -19,6 +19,7 @@ resource "helm_release" "ingress-nginx" {
           "config.linkerd.io/skip-inbound-ports" : "80,443" // NOTE: should be removed when this is fixed: https://github.com/linkerd/linkerd2/issues/4219
           "linkerd.io/inject" : "enabled"
           "cluster-autoscaler.kubernetes.io/safe-to-evict" : "true"
+          "viz.linkerd.io/tap-enabled" : "true"
         }
         resources : {
           requests : {

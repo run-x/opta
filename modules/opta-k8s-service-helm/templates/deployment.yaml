@@ -36,6 +36,7 @@ spec:
         config.linkerd.io/proxy-cpu-request: "0.05"
         config.linkerd.io/proxy-memory-limit: "20Mi"
         config.linkerd.io/proxy-memory-request: "10Mi"
+        viz.linkerd.io/tap-enabled: "true"
         {{- range $k, $v := $.Values.podAnnotations }}
         {{ $k | quote }}: {{ $v | quote }}
         {{- end }}
