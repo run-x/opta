@@ -13,6 +13,8 @@ locals {
   s3_distribution_count = var.s3_load_balancer_enabled == true ? 1 : 0
 }
 
+# This is optional, see Opta docs for this here: https://docs.opta.dev/reference/aws/modules/cloudfront-distribution/
+#tfsec:ignore:aws-cloudfront-enable-waf
 resource "aws_cloudfront_distribution" "distribution" {
 
   comment         = "Opta managed cloudfront distribution ${var.layer_name}-${var.module_name}"
@@ -37,7 +39,8 @@ resource "aws_cloudfront_distribution" "distribution" {
       restriction_type = "none"
     }
   }
-
+  # Ignored this because https://github.com/run-x/opta/pull/841#issuecomment-1102915968
+  #tfsec:ignore:aws-cloudfront-use-secure-tls-policy
   viewer_certificate {
     cloudfront_default_certificate = var.acm_cert_arn == "" ? true : false
     acm_certificate_arn            = var.acm_cert_arn
