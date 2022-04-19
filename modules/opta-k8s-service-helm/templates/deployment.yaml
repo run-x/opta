@@ -64,17 +64,12 @@ spec:
             - name: {{ .name | quote }}
               value: {{ .value | quote }}
             {{ end }}
-            {{ range $val := .Values.linkSecrets }}
-            - name: {{ $val.name | quote }}
-              valueFrom:
-                secretKeyRef:
-                  name: secret
-                  key: {{ $val.name | quote }}
-                  optional: true
-            {{ end }}
           envFrom:
           - secretRef:
               name: manual-secrets
+              optional: true
+          - secretRef:
+              name: secrets
               optional: true
           {{- if .Values.livenessProbePath }}
           livenessProbe:
