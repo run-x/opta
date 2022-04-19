@@ -192,13 +192,13 @@ extra_validators:
   port_definition:
     name: regex('^[a-z0-9-]+$', name='valid service name')
     type: regex('^(http|tcp)$', name='http or tcp')
-    port: int(min=1, max=65535)
-    service_port: int(min=1, max=65535, required=False)
+    port: any(int(min=1, max=65535), regex('^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$'), required=False)
+    service_port: any(int(min=1, max=65535), regex('^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$'), required=False)
     protocol: regex('^(grpc|websocket)$', name='grpc or websocket', required=False)
   service_port:
-    http: int(required=False)
-    tcp: int(required=False)
-    grpc: int(required=False)
+    http: any(int(min=1, max=65535), regex('^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$'), required=False)
+    tcp: any(int(min=1, max=65535), regex('^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$'), required=False)
+    grpc: any(int(min=1, max=65535), regex('^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$'), required=False)
 outputs:
   - name: docker_repo_url
     export: true
