@@ -3,7 +3,7 @@ import requests
 import requests_mock
 from pytest_mock import MockFixture
 
-from opta.upgrade import (
+from opta.core.upgrade import (
     LATEST_VERSION_FILE_URL,
     _get_latest_version,
     check_version_upgrade,
