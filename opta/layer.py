@@ -21,6 +21,7 @@ from botocore.exceptions import ClientError, NoCredentialsError
 from google.auth import default
 from google.auth.exceptions import DefaultCredentialsError
 from google.oauth2 import service_account
+from kubernetes.config.kube_config import KUBE_CONFIG_DEFAULT_LOCATION
 
 from modules.base import ModuleProcessor
 from modules.runx.runx import RunxProcessor
@@ -30,7 +31,6 @@ from opta.core.azure import Azure
 from opta.core.cloud_client import CloudClient
 from opta.core.gcp import GCP
 from opta.core.helm_cloud_client import HelmCloudClient
-from opta.core.kubernetes import KUBE_CONFIG_DEFAULT_LOCATION
 from opta.core.local import Local
 from opta.core.validator import validate_yaml
 from opta.crash_reporter import CURRENT_CRASH_REPORTER
