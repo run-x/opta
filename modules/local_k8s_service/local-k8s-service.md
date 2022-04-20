@@ -41,13 +41,26 @@ The autoscaler then uses this logic to try and balance the cpu/memory usage at t
 if the target memory is 80% and we requested 100mb, then it'll try to keep the memory usage at 80mb. If it finds that
 the average memory usage was 160mb, it would logically try to double the number of replicas.
 
-### Container Resources
+### Resource Requests
 
-One of the other benefits of kubernetes is that a user can have fine control over the [resources used by each of their containers](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/).
-A user can control the cpu, memory and disk usage with which scheduling is made, and the max limit after which the container is killed.
-With Opta, we expose such settings to the user, while keeping sensible defaults.
+One of the other benefits of kubernetes is that a user can have fine control over the
+[resources used by each of their containers](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/).
+A user can control the cpu, memory and disk usage with which scheduling is made. With Opta, we expose such settings to
+the user, while keeping sensible defaults.
 
-_NOTE_ We expose the resource requests and set the limits to twice the request values.
+
+### Resource Limits
+
+While the Container Resources specify the "planned" amount of resource allocation (and thereby which pods are deployed
+to which nodes given the available CPU and memory), a pod can go over their requested CPU/memory if there is more available
+on its running node. The resource limits, however, specify the max amount of resources allocated to a pod at any time.
+These limits exist for (obvious) safety measures (e.g. preventing one app from starving the whole cluster). By default,
+this limit is set in Opta to twice the resource request value, but is exposed to users for further configuration.
+
+Please refer to the official
+[kubernetes resource management page](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)
+for more info.
+
 
 ### Ingress
 

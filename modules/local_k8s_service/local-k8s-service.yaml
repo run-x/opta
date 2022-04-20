@@ -126,17 +126,20 @@ inputs:
     default: 86400
   - name: resource_request
     user_facing: true
-    validator: any(required=False)
+    validator: any(include('resources'), required=False)
     description: |
-      See the [container resources]({{< relref "#container-resources" >}}) section. Default
-      ```yaml
-      cpu: 100 # in millicores
-      memory: 128 # in megabytes
-      ```
+      See the [container resources]({{< relref "#container-resources" >}}) section.
       CPU is given in millicores, and Memory is in megabytes.
     default:
-      cpu : 100
-      memory : 128
+      cpu: 100
+      memory: 128
+  - name: resource_limits
+    user_facing: true
+    validator: any(include('resources'), required=False)
+    description: |
+      See the [container resources]({{< relref "#container-resources" >}}) section.
+      CPU is given in millicores, and Memory is in megabytes.
+    default: null
   - name: public_uri
     user_facing: true
     validator: any(str(), list(), required=False)
@@ -172,6 +175,9 @@ inputs:
     description: The max amount of helm revisions to keep track of (0 for infinite)
     default: 25
 extra_validators:
+  resources:
+    cpu: any(int(min=1), regex('^[1-9][0-9]{0,3}$'), required=True)
+    memory: any(int(min=1), regex('^[1-9][0-9]{0,3}$'), required=True)
   cron_job:
     commands: list(required=True)
     schedule: str(required=True)
