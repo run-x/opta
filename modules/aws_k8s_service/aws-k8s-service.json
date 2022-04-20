@@ -129,7 +129,7 @@
       "default": 86400
     },
     "resource_request": {
-      "description": "See the [container resources](https://docs.opta.dev/reference/aws/modules/aws-k8s-service/#container-resources) section. Default\n```yaml\ncpu: 100 # in millicores\nmemory: 128 # in megabytes\n```\nCPU is given in millicores, and Memory is in megabytes.\n",
+      "description": "See the [container resources](https://docs.opta.dev/reference/aws/modules/aws-k8s-service/#resource-requests) section.\nCPU is given in millicores, and Memory is in megabytes.\n",
       "type": "object",
       "properties": {
         "cpu": {
@@ -148,6 +148,24 @@
       "default": {
         "cpu": 100,
         "memory": 128
+      }
+    },
+    "resource_limits": {
+      "description": "See the [container resources](https://docs.opta.dev/reference/aws/modules/aws-k8s-service/#resource-limits) section.\nCPU is given in millicores, and Memory is in megabytes.\n",
+      "type": "object",
+      "properties": {
+        "cpu": {
+          "type": "integer",
+          "description": "The number of CPU units to allocate.",
+          "default": 100,
+          "minimum": 0
+        },
+        "memory": {
+          "type": "integer",
+          "description": "The amount of memory to allocate in megabytes.",
+          "default": 128,
+          "minimum": 0
+        }
       }
     },
     "public_uri": {
