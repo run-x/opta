@@ -149,10 +149,10 @@ inputs:
       memory: 128
   - name: resource_limits
     user_facing: true
-    validator: any(include('resources'), required=False)
+    validator: any(include('limits'), required=False)
     description: |
-      See the [container resources](https://docs.opta.dev/reference/aws/modules/aws-k8s-service/#resource-limits) section.
-      CPU is given in millicores, and Memory is in megabytes.
+      See the [container resources]({{< relref "#container-resources" >}}) section.
+      Memory is in megabytes..
     default: null
   - name: public_uri
     user_facing: true
@@ -215,6 +215,8 @@ inputs:
     description: The max amount of helm revisions to keep track of (0 for infinite)
     default: 25
 extra_validators:
+  limits:
+    memory: any(int(min=1), regex('^[1-9][0-9]{0,4}$'), required=True)
   resources:
     cpu: any(int(min=1), regex('^[1-9][0-9]{0,4}$'), required=True)
     memory: any(int(min=1), regex('^[1-9][0-9]{0,4}$'), required=True)

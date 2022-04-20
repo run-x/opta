@@ -58,6 +58,9 @@ Please refer to the official
 [kubernetes resource management page](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)
 for more info.
 
+**NOTE**: Based on reasons outlined [here](https://github.com/robusta-dev/alert-explanations/wiki/CPUThrottlingHigh-(Prometheus-Alert)#why-you-dont-need-cpu-limits)
+Opta does not add CPU limits, only memory.
+
 ### Ingress
 
 You can control if and how you want to expose your app to the world! Check out
