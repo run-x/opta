@@ -136,7 +136,7 @@
       }
     },
     "resource_limits": {
-      "description": "See the [container resources](https://docs.opta.dev/reference/google/modules/gcp-k8s-service/#container-resources) section.\nCPU is given in millicores, and Memory is in megabytes.\n",
+      "description": "See the [container resources]({{< relref \"#container-resources\" >}}) section.\nMemory is in megabytes..\n",
       "type": "object",
       "properties": {
         "cpu": {

@@ -151,7 +151,7 @@
       }
     },
     "resource_limits": {
-      "description": "See the [container resources](https://docs.opta.dev/reference/aws/modules/aws-k8s-service/#resource-limits) section.\nCPU is given in millicores, and Memory is in megabytes.\n",
+      "description": "See the [container resources]({{< relref \"#container-resources\" >}}) section.\nMemory is in megabytes..\n",
       "type": "object",
       "properties": {
         "cpu": {
