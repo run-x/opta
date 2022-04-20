@@ -178,8 +178,8 @@ data "aws_iam_policy_document" "load_balancer" {
   }
   #tfsec:ignore:aws-iam-no-policy-wildcards
   statement {
-    sid    = "9"
-    effect = "Allow"
+    sid       = "9"
+    effect    = "Allow"
     resources = ["*"]
 
     actions = [
