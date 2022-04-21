@@ -12,7 +12,7 @@ jobs:
   - download-opta-version-v2:
       requires:
         - download-opta-version-v1
-        - aws-create-env-stable-version
+        - aws-create-env-v1
   - check-version:
       requires:
         - download-opta-version-v2
