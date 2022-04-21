@@ -4,7 +4,7 @@ import time
 import traceback
 from logging import DEBUG
 from os import makedirs, remove
-from os.path import exists, expanduser
+from os.path import dirname, exists, expanduser
 from threading import Thread
 from typing import TYPE_CHECKING, Dict, FrozenSet, List, Optional, Set
 
@@ -121,6 +121,7 @@ def load_opta_kube_config_to_default(layer: "Layer") -> None:
         constants.DEFAULT_KUBECONFIG.split(ENV_KUBECONFIG_PATH_SEPARATOR)[0]
     )
     if not exists(default_kube_config_filename):
+        makedirs(dirname(default_kube_config_filename), exist_ok=True)
         with open(default_kube_config_filename, "w") as f:
             yaml.dump(opta_config, f)
         return
