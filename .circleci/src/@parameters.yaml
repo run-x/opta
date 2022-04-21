@@ -71,6 +71,9 @@ parameters:
   opta-version-v2:
     type: string
     default: ''
-  run-version-compare:
+  run-cnd-version-compare:
+    type: boolean
+    default: false
+  run-destroy-stable-version:
     type: boolean
     default: false

@@ -19,7 +19,8 @@ steps:
         echo "run-destroy-azure-env:              " << pipeline.parameters.run-destroy-azure-env >>
         echo "run-create-destroy-local:           " << pipeline.parameters.run-create-destroy-local >>
         echo "run-opta-terraform-generate-test:   " << pipeline.parameters.run-opta-terraform-generate-test >>
-        echo "run-version-compare:                " << pipeline.parameters.run-version-compare >>
+        echo "run-cnd-version-compare:            " << pipeline.parameters.run-cnd-version-compare >>
+        echo "run-destroy-stable-version:         " << pipeline.parameters.run-destroy-stable-version >>
         echo "run-ci:                             " << pipeline.parameters.run-ci >>
         echo "test:                               " << pipeline.parameters.test >>
         echo "ci-use-diff-env:                    " << pipeline.parameters.ci-use-diff-env >>

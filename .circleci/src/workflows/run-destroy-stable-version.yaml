@@ -1,0 +1,11 @@
+when: << pipeline.parameters.run-destroy-stable-version >>
+jobs:
+  - get-all-parameter-values
+  - download-opta-version-v1
+  - check-version:
+      requires:
+        - download-opta-version-v1
+  - aws-destroy-env-stable-version:
+      name: "aws-create-env-v1"
+      requires:
+        - download-opta-version-v1

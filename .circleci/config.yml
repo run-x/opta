@@ -1149,6 +1149,31 @@ jobs:
                 paths:
                     - .opta
                 root: ~/
+    download-opta-version:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: ubuntu-machine
+        parameters:
+            opta-version:
+                type: string
+        steps:
+            - run:
+                command: |
+                    git config --global user.email "runx-ci@runx.dev"
+                    git config --global user.name "Runx CI"
+                name: Set git user
+            - run:
+                command: VERSION=<< parameters.opta-version >> /bin/bash -c "$(curl -fsSL https://docs.opta.dev/install.sh)"
+                name: Download Latest Opta Binary
+            - install-opta-dependencies
+            - run:
+                command: |
+                    $HOME/.opta/opta version
+                name: Check Opta Version
+            - persist_to_workspace:
+                paths:
+                    - .opta
+                root: ~/
     download-opta-version-v1:
         environment:
             OPTA_DISABLE_REPORTING: "true"
@@ -1913,7 +1938,8 @@ jobs:
                     echo "run-destroy-azure-env:              " << pipeline.parameters.run-destroy-azure-env >>
                     echo "run-create-destroy-local:           " << pipeline.parameters.run-create-destroy-local >>
                     echo "run-opta-terraform-generate-test:   " << pipeline.parameters.run-opta-terraform-generate-test >>
-                    echo "run-version-compare:                " << pipeline.parameters.run-version-compare >>
+                    echo "run-cnd-version-compare:            " << pipeline.parameters.run-cnd-version-compare >>
+                    echo "run-destroy-stable-version:         " << pipeline.parameters.run-destroy-stable-version >>
                     echo "run-ci:                             " << pipeline.parameters.run-ci >>
                     echo "test:                               " << pipeline.parameters.test >>
                     echo "ci-use-diff-env:                    " << pipeline.parameters.ci-use-diff-env >>
@@ -2094,6 +2120,9 @@ parameters:
     run-ci:
         default: false
         type: boolean
+    run-cnd-version-compare:
+        default: false
+        type: boolean
     run-create-and-destroy:
         default: false
         type: boolean
@@ -2127,6 +2156,9 @@ parameters:
     run-destroy-gcp-env:
         default: false
         type: boolean
+    run-destroy-stable-version:
+        default: false
+        type: boolean
     run-opta-terraform-generate-test:
         default: false
         type: boolean
@@ -2134,9 +2166,6 @@ parameters:
         default: false
         type: boolean
     run-service-mesh-e2e:
-        default: false
-        type: boolean
-    run-version-compare:
         default: false
         type: boolean
     test:
@@ -2297,6 +2326,29 @@ workflows:
             - terraform-formatter
             - pytest
         when: << pipeline.parameters.run-ci >>
+    run-cnd-version-compare:
+        jobs:
+            - get-all-parameter-values
+            - download-opta-version-v1
+            - check-version:
+                requires:
+                    - download-opta-version-v1
+            - aws-create-env-stable-version:
+                name: aws-create-env-v1
+                requires:
+                    - download-opta-version-v1
+            - download-opta-version-v2:
+                requires:
+                    - download-opta-version-v1
+                    - aws-create-env-v1
+            - check-version:
+                requires:
+                    - download-opta-version-v2
+            - aws-create-env-stable-version:
+                name: aws-create-env-v2
+                requires:
+                    - download-opta-version-v2
+        when: << pipeline.parameters.run-cnd-version-compare >>
     run-create-and-destroy:
         jobs:
             - get-all-parameter-values
@@ -2568,6 +2620,18 @@ workflows:
                 requires:
                     - build-opta-binary
         when: << pipeline.parameters.run-destroy-gcp-env >>
+    run-destroy-stable-version:
+        jobs:
+            - get-all-parameter-values
+            - download-opta-version-v1
+            - check-version:
+                requires:
+                    - download-opta-version-v1
+            - aws-destroy-env-stable-version:
+                name: aws-create-env-v1
+                requires:
+                    - download-opta-version-v1
+        when: << pipeline.parameters.run-destroy-stable-version >>
     run-opta-terraform-generate-test:
         jobs:
             - get-all-parameter-values
@@ -2685,28 +2749,22 @@ workflows:
                 requires:
                     - gcp-opta-example-destroy-svcs
         when: << pipeline.parameters.run-service-mesh-e2e >>
-    run-version-compare:
+    test:
         jobs:
-            - get-all-parameter-values
-            - download-opta-version-v1
+            - download-opta-version:
+                name: download-opta-version-v1
+                opta-version: << pipeline.parameters.opta-version-v1 >>
             - check-version:
                 requires:
                     - download-opta-version-v1
-            - aws-create-env-stable-version:
-                name: aws-create-env-v1
+            - download-opta-version:
+                name: download-opta-version-v2
+                opta-version: << pipeline.parameters.opta-version-v2 >>
                 requires:
                     - download-opta-version-v1
-            - download-opta-version-v2:
-                requires:
-                    - download-opta-version-v1
-                    - aws-create-env-v1
             - check-version:
                 requires:
                     - download-opta-version-v2
-            - aws-create-env-stable-version:
-                name: aws-create-env-v2
-                requires:
-                    - download-opta-version-v2
-        when: << pipeline.parameters.run-version-compare >>
+        when: << pipeline.parameters.test >>
     version: 2
 

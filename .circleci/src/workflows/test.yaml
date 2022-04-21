@@ -1,0 +1,16 @@
+when: << pipeline.parameters.test >>
+jobs:
+  - download-opta-version:
+      name: "download-opta-version-v1"
+      opta-version: << pipeline.parameters.opta-version-v1 >>
+  - check-version:
+      requires:
+        - download-opta-version-v1
+  - download-opta-version:
+      name: "download-opta-version-v2"
+      opta-version: << pipeline.parameters.opta-version-v2 >>
+      requires:
+        - download-opta-version-v1
+  - check-version:
+      requires:
+        - download-opta-version-v2
