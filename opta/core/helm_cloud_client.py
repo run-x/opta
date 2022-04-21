@@ -1,8 +1,11 @@
+import os
 from typing import TYPE_CHECKING, Dict, Optional
 
+from opta.constants import REGISTRY
 from opta.core.cloud_client import CloudClient
 from opta.exceptions import LocalNotImplemented
 from opta.nice_subprocess import nice_run
+from opta.utils import logger
 
 if TYPE_CHECKING:
     from opta.layer import Layer, StructuredConfig
@@ -16,6 +19,13 @@ class HelmCloudClient(CloudClient):
         return None
 
     def upload_opta_config(self) -> None:
+        if "local" in REGISTRY[self.layer.cloud]["backend"]:
+            providers = self.layer.gen_providers(0)
+            local_path = providers["terraform"]["backend"]["local"]["path"]
+            real_path = os.path.dirname(os.path.realpath(local_path))
+            logger.warning(
+                f"The terraform state is stored locally, make sure to keep the files in {real_path}"
+            )
         return None
 
     def delete_opta_config(self) -> None:
