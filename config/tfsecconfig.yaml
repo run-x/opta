@@ -1,8 +1,7 @@
 ---
-exclude-path: 
-  - examples/
+exclude-path: examples/
 
-minimum-severity string:
+minimum-severity:
   - HIGH
 
 exclude:
