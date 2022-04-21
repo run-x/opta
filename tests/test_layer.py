@@ -43,6 +43,7 @@ class TestLayer:
         assert layer.metadata_hydration() == {
             "aws": SimpleNamespace(region="us-east-1", account_id="011111111111"),
             "env": "dummy-parent",
+            "kubeconfig": "~/.kube/config",
             "layer_name": "dummy-config-1",
             "parent": SimpleNamespace(
                 kms_account_key_arn="${data.terraform_remote_state.parent.outputs.kms_account_key_arn}",
@@ -83,6 +84,7 @@ class TestLayer:
         )
         assert layer.metadata_hydration() == {
             "env": "gcp-dummy-parent",
+            "kubeconfig": "~/.kube/config",
             "google": SimpleNamespace(region="us-central1", project="jds-throwaway-1"),
             "layer_name": "gcp-dummy-config",
             "parent": SimpleNamespace(

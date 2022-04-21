@@ -1,0 +1,10 @@
+name: hello
+org_name: opta-tests
+modules:
+  - type: k8s-service
+    name: hello
+    port:
+      http: 80
+    image: ghcr.io/run-x/hello-opta/hello-opta:main
+    healthcheck_path: "/"
+    public_uri: "/hello"

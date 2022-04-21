@@ -170,6 +170,8 @@ def _fetch_children_layers(layer: "Layer") -> List[str]:
         opta_configs = _azure_get_configs(layer)
     elif layer.cloud == "local":
         opta_configs = _local_get_configs(layer)
+    elif layer.cloud == "helm":
+        return []
     else:
         raise Exception(f"Not handling deletion for cloud {layer.cloud}")
 

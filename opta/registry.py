@@ -25,7 +25,7 @@ def make_registry_dict() -> Dict[Any, Any]:
     with open(os.path.join(registry_path, "index.md"), "r") as f:
         registry_dict["text"] = f.read()
     module_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "modules")
-    for cloud in ["aws", "azurerm", "google", "local"]:
+    for cloud in ["aws", "azurerm", "google", "local", "helm"]:
         cloud_path = os.path.join(registry_path, cloud)
         cloud_dict = yaml.load(open(os.path.join(cloud_path, "index.yaml")))
         cloud_dict["modules"] = {}
@@ -35,6 +35,9 @@ def make_registry_dict() -> Dict[Any, Any]:
             alt_cloudname = "azure"
         elif cloud == "google":
             alt_cloudname = "gcp"
+        elif cloud == "helm":
+            # use the local modules since byok is cloud agnostic, we don't want to create resources like IAM and such
+            alt_cloudname = "local"
         else:
             alt_cloudname = cloud
         cloud_dict["modules"] = {**_make_module_registry_dict(module_path, alt_cloudname)}

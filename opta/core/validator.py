@@ -58,6 +58,10 @@ class LocalModule(Module):
     cloud = "local"
 
 
+class HelmModule(Module):
+    cloud = "helm"
+
+
 class Opta(Validator):
     """Opta Yaml Validator"""
 
@@ -126,6 +130,12 @@ class LocalOpta(Opta):
     service_schema_dicts = REGISTRY["local"]["service_validator"]
 
 
+class HelmOpta(Opta):
+    extra_validators = [HelmModule]
+    environment_schema_dict = REGISTRY["helm"]["validator"]
+    service_schema_dicts = REGISTRY["helm"]["service_validator"]
+
+
 def _get_yamale_errors(
     data: Any, schema_path: str, extra_validators: Optional[List[Type[Validator]]] = None
 ) -> List[str]:
@@ -157,6 +167,8 @@ azure_validators = DefaultValidators.copy()
 azure_validators[AureOpta.tag] = AureOpta
 local_validators = DefaultValidators.copy()
 local_validators[LocalOpta.tag] = LocalOpta
+helm_validators = DefaultValidators.copy()
+helm_validators[HelmOpta.tag] = HelmOpta
 
 with NamedTemporaryFile(mode="w") as f:
     yaml.dump(REGISTRY["validator"], f)
@@ -175,6 +187,9 @@ with NamedTemporaryFile(mode="w") as f:
     )
     local_main_schema = yamale.make_schema(
         f.name, validators=local_validators, parser="ruamel"
+    )
+    helm_main_schema = yamale.make_schema(
+        f.name, validators=helm_validators, parser="ruamel"
     )
 
 
@@ -201,6 +216,7 @@ def validate_yaml(
             "google": gcp_main_schema,
             "azurerm": azure_main_schema,
             "local": local_main_schema,
+            "helm": helm_main_schema,
         }
         DEFAULT_SCHEMA = vanilla_main_schema
         data = yamale.make_data(config_file_path, parser="ruamel")
