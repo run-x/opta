@@ -1,8 +1,4 @@
 ---
-exclude-path: ../../examples/
-
-minimum-severity:
-  - HIGH
 
 exclude:
   # - aws-cloudfront-enable-logging
