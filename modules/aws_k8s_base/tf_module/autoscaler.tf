@@ -56,10 +56,16 @@ resource "helm_release" "autoscaler" {
   repository = "https://kubernetes.github.io/autoscaler"
   values = [
     yamlencode({
-      extraArgs : { "skip-nodes-with-local-storage" : false }
+      extraArgs : { "skip-nodes-with-local-storage" : false, "scale-down-utilization-threshold" : "0.75" }
       autoDiscovery : {
         clusterName : var.eks_cluster_name
       },
+      resources : {
+        requests : {
+          cpu : "100m",
+          memory : "200Mi"
+        }
+      }
       rbac : {
         serviceAccount : {
           annotations : {

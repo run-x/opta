@@ -67,11 +67,14 @@ resource "helm_release" "ingress-nginx" {
           "config.linkerd.io/skip-inbound-ports" : "80,443" // NOTE: should be removed when this is fixed: https://github.com/linkerd/linkerd2/issues/4219
           "linkerd.io/inject" : "enabled"
           "viz.linkerd.io/tap-enabled" : "true"
+          "config.linkerd.io/proxy-cpu-request" : "0.05"
+          "config.linkerd.io/proxy-memory-limit" : "20Mi"
+          "config.linkerd.io/proxy-memory-request" : "10Mi"
         }
         resources : {
           requests : {
-            cpu : "200m"
-            memory : "250Mi"
+            cpu : "100m"
+            memory : "150Mi"
           }
         }
         autoscaling : {
