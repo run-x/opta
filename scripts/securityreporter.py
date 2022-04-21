@@ -40,7 +40,7 @@ def maintain_tallies(passed: str, severity: str) -> None:
 
 
 csvtfsec_output = os.popen(
-    'docker run --pull --rm -it -v "$(pwd):/src" aquasec/tfsec /src -f csv --no-colour  --include-passed'
+    'docker run --pull --rm -it -v "$(pwd):/src" aquasec/tfsec /src -f csv --no-colour  --include-passed --exclude-path examples/'
 )
 # csvtfsec_output = os.popen('tfsec --no-colour -f csv')
 content = ""
