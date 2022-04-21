@@ -1,12 +1,14 @@
 when: << pipeline.parameters.run-cnd-version-compare >>
 jobs:
   - get-all-parameter-values
+  - build-test-service-image
   - download-opta-version:
       name: "download-opta-version-v1"
       opta-version: << pipeline.parameters.opta-version-v1 >>
   - aws-create-env-stable-version:
       name: "aws-create-env-v1"
       requires:
+        - build-test-service-image
         - download-opta-version-v1
   - aws-test-k8s-manifest-apply-stable-version:
       name: "aws-test-k8s-manifest-apply-v1"
