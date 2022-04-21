@@ -1,0 +1,31 @@
+executor: python-docker
+environment:
+  OPTA_DISABLE_REPORTING: "true"
+steps:
+  - checkout-opta
+  - install-python-dependencies
+  - when:
+      condition: << pipeline.parameters.ci-use-diff-env >>
+      steps:
+        - remake-environment-configs
+  - attach_workspace:
+      at: ~/
+  - install-opta-dependencies
+  - aws-cli/install
+  - aws-cli/setup
+  - run:
+      name: "Apply Websocket Service with Stable Opta"
+      command: |
+        yes | $HOME/.opta/opta apply \
+        --env awsenv-ci \
+        --config ./.circleci/ci-tests/create-and-destroy-aws/websocket-service.yml \
+        --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+  - run:
+      name: "Test Websocket"
+      command: |
+        sleep 20
+        source $(pipenv --venv)/bin/activate
+        DIRTY_HOST_NAME="{`$HOME/.opta/opta output --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml | grep load_balancer_raw_dns`\"\":\"\"}"
+        export HOST=`echo $DIRTY_HOST_NAME | jq -r '.load_balancer_raw_dns'`
+        python ./.circleci/ci-tests/create-and-destroy-aws/websocket-validate.py
+        exit $?

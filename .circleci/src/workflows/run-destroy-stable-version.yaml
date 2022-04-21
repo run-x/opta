@@ -2,9 +2,34 @@ when: << pipeline.parameters.run-destroy-stable-version >>
 jobs:
   - get-all-parameter-values
   - download-opta-version:
-      name: "download-opta-version-v1"
       opta-version: << pipeline.parameters.opta-version-v1 >>
-  - aws-destroy-env-stable-version:
-      name: "aws-create-env-v1"
+  - aws-test-cloudfront-destroy-stable-version:
       requires:
-        - download-opta-version-v1
+        - download-opta-version
+  - aws-test-lambda-function-destroy-stable-version:
+      requires:
+        - download-opta-version
+  - aws-test-service-helm-destroy-stable-version:
+      requires:
+        - download-opta-version
+  - aws-test-service-redis-destroy-stable-version:
+      requires:
+        - download-opta-version
+  - aws-test-service-docdb-destroy-stable-version:
+      requires:
+        - download-opta-version
+  - aws-test-service-s3-destroy-stable-version:
+      requires:
+        - download-opta-version
+  - aws-test-websocket-destroy-stable-version:
+      requires:
+        - download-opta-version
+  - aws-destroy-env-stable-version:
+      requires:
+        - aws-test-cloudfront-destroy-stable-version
+        - aws-test-lambda-function-destroy-stable-version
+        - aws-test-service-helm-destroy-stable-version
+        - aws-test-service-redis-destroy-stable-version
+        - aws-test-service-docdb-destroy-stable-version
+        - aws-test-service-s3-destroy-stable-version
+        - aws-test-websocket-destroy-stable-version

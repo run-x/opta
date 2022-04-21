@@ -12,6 +12,34 @@ jobs:
       name: "aws-test-k8s-manifest-apply-v1"
       requires:
         -  aws-create-env-v1
+  - aws-test-cloudfront-apply-stable-version:
+      name: "aws-test-cloudfront-apply-v1"
+      requires:
+        - aws-create-env-v1
+  - aws-test-lambda-function-apply-stable-version:
+      name: "aws-test-lambda-function-apply-v1"
+      requires:
+        - aws-create-env-v1
+  - aws-test-service-helm-apply-stable-version:
+      name: "aws-test-service-helm-apply-v1"
+      requires:
+        - aws-create-env-v1
+  - aws-test-service-redis-apply-stable-version:
+      name: "aws-test-service-redis-apply-v1"
+      requires:
+        - aws-create-env-v1
+  - aws-test-service-docdb-apply-stable-version:
+      name: "aws-test-service-docdb-apply-v1"
+      requires:
+        - aws-create-env-v1
+  - aws-test-service-s3-apply-stable-version:
+      name: "aws-test-service-s3-apply-v1"
+      requires:
+        - aws-create-env-v1
+  - aws-test-websocket-apply-stable-version:
+      name: "aws-test-websocket-apply-v1"
+      requires:
+        - aws-create-env-v1
   - download-opta-version:
       name: "download-opta-version-v2"
       opta-version: << pipeline.parameters.opta-version-v2 >>
@@ -28,6 +56,55 @@ jobs:
       name: "aws-test-k8s-manifest-apply-v2"
       requires:
         - aws-create-env-v2
+  - aws-test-cloudfront-apply-stable-version:
+      name: "aws-test-cloudfront-apply-v2"
+      requires:
+        - aws-create-env-v2
+  - aws-test-lambda-function-apply-stable-version:
+      name: "aws-test-lambda-function-apply-v2"
+      requires:
+        - aws-create-env-v2
+  - aws-test-service-helm-apply-stable-version:
+      name: "aws-test-service-helm-apply-v2"
+      requires:
+        - aws-create-env-v2
+  - aws-test-service-redis-apply-stable-version:
+      name: "aws-test-service-redis-apply-v2"
+      requires:
+        - aws-create-env-v2
+  - aws-test-service-docdb-apply-stable-version:
+      name: "aws-test-service-docdb-apply-v2"
+      requires:
+        - aws-create-env-v2
+  - aws-test-service-s3-apply-stable-version:
+      name: "aws-test-service-s3-apply-v2"
+      requires:
+        - aws-create-env-v2
+  - aws-test-websocket-apply-stable-version:
+      name: "aws-test-websocket-apply-v2"
+      requires:
+        - aws-create-env-v2
   - aws-test-k8s-manifest-destroy-stable-version:
       requires:
         - aws-test-k8s-manifest-apply-v2
+  - aws-test-cloudfront-destroy-stable-version:
+      requires:
+        - aws-test-cloudfront-apply-v2
+  - aws-test-lambda-function-destroy-stable-version:
+      requires:
+        - aws-test-lambda-function-apply-v2
+  - aws-test-service-helm-destroy-stable-version:
+      requires:
+        - aws-test-service-helm-apply-v2
+  - aws-test-service-redis-destroy-stable-version:
+      requires:
+        - aws-test-service-redis-apply-v2
+  - aws-test-service-docdb-destroy-stable-version:
+      requires:
+        - aws-test-service-docdb-apply-v2
+  - aws-test-service-s3-destroy-stable-version:
+      requires:
+        - aws-test-service-s3-apply-v2
+  - aws-test-websocket-destroy-stable-version:
+      requires:
+        - aws-test-websocket-apply-v2

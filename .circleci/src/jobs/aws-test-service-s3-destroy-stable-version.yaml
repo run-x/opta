@@ -1,0 +1,25 @@
+executor: ubuntu-machine
+environment:
+  OPTA_DISABLE_REPORTING: "true"
+steps:
+  - checkout-opta
+  - install-python
+  - when:
+      condition: << pipeline.parameters.ci-use-diff-env >>
+      steps:
+        - remake-environment-configs
+  - attach_workspace:
+      at: ~/
+  - install-opta-dependencies
+  - aws-cli/install
+  - aws-cli/setup
+  - run:
+      name: "Load test-service image"
+      command: docker load -i test-service-image
+  - run:
+      name: "Destroy test-service-s3"
+      command: |
+        $HOME/.opta/opta destroy \
+        --env awsenv-ci \
+        --config ./.circleci/ci-tests/create-and-destroy-aws/service-s3.yml \
+        --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
