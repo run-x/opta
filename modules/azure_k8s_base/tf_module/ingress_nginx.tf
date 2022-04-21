@@ -73,8 +73,8 @@ resource "helm_release" "ingress-nginx" {
         }
         resources : {
           requests : {
-            cpu : "200m"
-            memory : "250Mi"
+            cpu : "100m"
+            memory : "150Mi"
           }
         }
         autoscaling : {
