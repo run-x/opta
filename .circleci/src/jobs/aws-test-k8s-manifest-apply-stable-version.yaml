@@ -1,0 +1,31 @@
+executor: python-docker
+environment:
+  OPTA_DISABLE_REPORTING: "true"
+steps:
+  - checkout-opta
+  - when:
+      condition: << pipeline.parameters.ci-use-diff-env >>
+      steps:
+        - remake-environment-configs
+  - attach_workspace:
+      at: ~/
+  - install-opta-dependencies
+  - aws-cli/install
+  - aws-cli/setup
+  - run:
+      name: "Configure Kubectl"
+      command: |
+        $HOME/.opta/opta configure-kubectl \
+        --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
+  - run:
+      name: "Apply K8s Manifest with Opta"
+      command: |
+        $HOME/.opta/opta apply \
+        --env awsenv-ci \
+        --config ./.circleci/ci-tests/create-and-destroy-aws/k8s-manifest.yaml \
+        --auto-approve
+  - run:
+      name: "Test manifest pod creation"
+      command: |
+        kubectl get pod -n default nginx
+        exit $?

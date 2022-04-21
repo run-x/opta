@@ -1,18 +1,22 @@
 when: << pipeline.parameters.run-cnd-version-compare >>
 jobs:
   - get-all-parameter-values
-  - download-opta-version-v1
-  - check-version:
-      requires:
-        - download-opta-version-v1
+  - download-opta-version:
+      name: "download-opta-version-v1"
+      opta-version: << pipeline.parameters.opta-version-v1 >>
   - aws-create-env-stable-version:
       name: "aws-create-env-v1"
       requires:
         - download-opta-version-v1
-  - download-opta-version-v2:
+  - aws-test-k8s-manifest-apply-stable-version:
+      name: "aws-test-k8s-manifest-apply-v1"
       requires:
-        - download-opta-version-v1
-        - aws-create-env-v1
+        -  aws-create-env-v1
+  - download-opta-version:
+      name: "download-opta-version-v2"
+      opta-version: << pipeline.parameters.opta-version-v2 >>
+      requires:
+        - aws-test-k8s-manifest-apply-v1
   - check-version:
       requires:
         - download-opta-version-v2
@@ -20,3 +24,10 @@ jobs:
       name: "aws-create-env-v2"
       requires:
         - download-opta-version-v2
+  - aws-test-k8s-manifest-apply-stable-version:
+      name: "aws-test-k8s-manifest-apply-v2"
+      requires:
+        - aws-create-env-v2
+  - aws-test-k8s-manifest-destroy-stable-version:
+      requires:
+        - aws-test-k8s-manifest-apply-v2
