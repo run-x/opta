@@ -121,7 +121,7 @@ def load_opta_kube_config_to_default(layer: "Layer") -> None:
         constants.DEFAULT_KUBECONFIG.split(ENV_KUBECONFIG_PATH_SEPARATOR)[0]
     )
     if not exists(default_kube_config_filename):
-        with open(expanduser(default_kube_config_filename), "w") as f:
+        with open(default_kube_config_filename, "w") as f:
             yaml.dump(opta_config, f)
         return
     default_kube_config = yaml.load(open(default_kube_config_filename))
