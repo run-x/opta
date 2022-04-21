@@ -3,21 +3,28 @@ steps:
   - run:
       name: Get all parameter values.
       command: |
-        echo "run-create-and-destroy:     " << pipeline.parameters.run-create-and-destroy >>
-        echo "run-create-and-destroy-azure:     " << pipeline.parameters.run-create-and-destroy-azure >>
-        echo "run-destroy-gcp-env:        " << pipeline.parameters.run-destroy-gcp-env >>
-        echo "run-destroy-aws-env:        " << pipeline.parameters.run-destroy-aws-env >>
-        echo "run-destroy-all-envs:       " << pipeline.parameters.run-destroy-all-envs >>
-        echo "run-ci:                     "  << pipeline.parameters.run-ci >>
-        echo "run-create-destroy-local:   " << pipeline.parameters.run-create-destroy-local >>
-        echo "run-service-mesh-e2e:       " << pipeline.parameters.run-service-mesh-e2e >>
-        echo "test-aws-lambda:            " << pipeline.parameters.test-aws-lambda >>
-        echo "run-release-vs-stable:      " << pipeline.parameters.run-release-vs-stable >>
-        echo "test-aws-dns:               " << pipeline.parameters.test-aws-dns >>
-        echo "run-destroy-aws-dns-false:  " << pipeline.parameters.run-destroy-aws-dns-false >>
-        echo "run-destroy-aws-dns-true:   " << pipeline.parameters.run-destroy-aws-dns-true >>
-        echo "ci-use-diff-env:            " << pipeline.parameters.ci-use-diff-env >>
-        echo "ci-env-name:                " << pipeline.parameters.ci-env-name >>
-        echo "ci-env-region-aws:          " << pipeline.parameters.ci-env-region-aws >>
-        echo "ci-env-region-gcp:          " << pipeline.parameters.ci-env-region-gcp >>
-        echo "run-opta-terraform-generate-test: " << pipeline.parameters.run-opta-terraform-generate-test >>
+        echo "run-create-and-destroy:             " << pipeline.parameters.run-create-and-destroy >>
+        echo "run-destroy-all-envs:               " << pipeline.parameters.run-destroy-all-envs >>
+        echo "run-service-mesh-e2e:               " << pipeline.parameters.run-service-mesh-e2e >>
+        echo "run-release-vs-stable:              " << pipeline.parameters.run-release-vs-stable >>
+        echo "run-create-and-destroy-aws:         " << pipeline.parameters.run-create-and-destroy-aws >>
+        echo "run-destroy-aws-env:                " << pipeline.parameters.run-destroy-aws-env >>
+        echo "run-destroy-aws-dns-false:          " << pipeline.parameters.run-destroy-aws-dns-false >>
+        echo "run-destroy-aws-dns-true:           " << pipeline.parameters.run-destroy-aws-dns-true >>
+        echo "test-aws-lambda:                    " << pipeline.parameters.test-aws-lambda >>
+        echo "test-aws-dns:                       " << pipeline.parameters.test-aws-dns >>
+        echo "run-create-and-destroy-gcp:         " << pipeline.parameters.run-create-and-destroy-gcp >>
+        echo "run-destroy-gcp-env:                " << pipeline.parameters.run-destroy-gcp-env >>
+        echo "run-create-and-destroy-azure:       " << pipeline.parameters.run-create-and-destroy-azure >>
+        echo "run-destroy-azure-env:              " << pipeline.parameters.run-destroy-azure-env >>
+        echo "run-create-destroy-local:           " << pipeline.parameters.run-create-destroy-local >>
+        echo "run-opta-terraform-generate-test:   " << pipeline.parameters.run-opta-terraform-generate-test >>
+        echo "run-version-compare:                " << pipeline.parameters.run-version-compare >>
+        echo "run-ci:                             " << pipeline.parameters.run-ci >>
+        echo "test:                               " << pipeline.parameters.test >>
+        echo "ci-use-diff-env:                    " << pipeline.parameters.ci-use-diff-env >>
+        echo "ci-env-name:                        " << pipeline.parameters.ci-env-name >>
+        echo "ci-env-region-aws:                  " << pipeline.parameters.ci-env-region-aws >>
+        echo "ci-env-region-gcp:                  " << pipeline.parameters.ci-env-region-gcp >>
+        echo "opta-version-v1:                    " << pipeline.parameters.opta-version-v1 >>
+        echo "opta-version-v2:                    " << pipeline.parameters.opta-version-v2 >>

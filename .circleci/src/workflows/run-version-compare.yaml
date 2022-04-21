@@ -2,4 +2,19 @@ when: << pipeline.parameters.run-version-compare >>
 jobs:
   - get-all-parameter-values
   - download-opta-version-v1
-  - download-opta-version-v2
+  - check-version:
+      requires:
+        - download-opta-version-v1
+  - aws-create-env-stable-version:
+      requires:
+        - download-opta-version-v1
+  - download-opta-version-v2:
+      requires:
+        - download-opta-version-v1
+        - aws-create-env-stable-version
+  - check-version:
+      requires:
+        - download-opta-version-v2
+  - aws-create-env-stable-version:
+      requires:
+        - download-opta-version-v2
