@@ -1,4 +1,3 @@
-from posixpath import expanduser
 from subprocess import CalledProcessError  # nosec
 from typing import FrozenSet, List, Optional
 
