@@ -4,7 +4,7 @@ from dotenv import dotenv_values
 
 from opta.core.kubernetes import get_namespaced_secrets, update_secrets
 from opta.exceptions import UserErrors
-from opta.utils import deep_merge
+from opta.utils import deep_merge, logger
 
 MANUAL_SECRET_NAME = "manual-secrets"  # nosec
 LINKED_SECRET_NAME = "secret"  # nosec
@@ -14,6 +14,12 @@ def get_secrets(layer_name: str) -> dict:
     """:return: manual and linked secrets"""
     manual_secrets = get_namespaced_secrets(layer_name, MANUAL_SECRET_NAME)
     linked_secrets = get_namespaced_secrets(layer_name, LINKED_SECRET_NAME)
+    for secret_name in manual_secrets.keys():
+        if secret_name in linked_secrets:
+            logger.warning(
+                f"# Secret {secret_name} found manually overwritten from linked value."
+            )
+            del linked_secrets[secret_name]
     return deep_merge(manual_secrets, linked_secrets)
 
 
