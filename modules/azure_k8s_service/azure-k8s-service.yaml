@@ -126,17 +126,20 @@ inputs: # (what users see)
     default: 86400
   - name: resource_request
     user_facing: true
-    validator: any(required=False)
+    validator: any(include('resources'), required=False)
     description: |
-      See the [container resources](https://docs.opta.dev/reference/azurerm/modules/azure-k8s-service/#container-resources) section. Default
-      ```yaml
-      cpu: 100 # in millicores
-      memory: 128 # in megabytes
-      ```
+      See the [container resources](https://docs.opta.dev/reference/azurerm/modules/azure-k8s-service/#container-resources) section.
       CPU is given in millicores, and Memory is in megabytes.
     default:
       cpu: 100
       memory: 128
+  - name: resource_limits
+    user_facing: true
+    validator: any(include('limits'), required=False)
+    description: |
+      See the [container resources]({{< relref "#container-resources" >}}) section.
+      Memory is in megabytes..
+    default: null
   - name: public_uri
     user_facing: true
     validator: any(str(), list(), required=False)
@@ -183,6 +186,11 @@ inputs: # (what users see)
     description: The max amount of helm revisions to keep track of (0 for infinite)
     default: 25
 extra_validators:
+  limits:
+    memory: any(int(min=1), regex('^[1-9][0-9]{0,4}$'), required=True)
+  resources:
+    cpu: any(int(min=1), regex('^[1-9][0-9]{0,4}$'), required=True)
+    memory: any(int(min=1), regex('^[1-9][0-9]{0,4}$'), required=True)
   persistent_storage:
     size: int(required=True)
     path: str(required=True)

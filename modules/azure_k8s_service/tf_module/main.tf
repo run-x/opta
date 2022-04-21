@@ -24,8 +24,7 @@ resource "helm_release" "k8s-service" {
       ports : var.ports,
       serviceAnnotations : var.service_annotations,
       containerResourceLimits : {
-        cpu : "${var.resource_request["cpu"] * 2}m"
-        memory : "${var.resource_request["memory"] * 2}Mi"
+        memory : var.resource_limits == null ? "${var.resource_request["memory"] * 2}Mi" : "${var.resource_limits["memory"]}Mi"
       },
       containerResourceRequests : {
         cpu : "${var.resource_request["cpu"]}m"

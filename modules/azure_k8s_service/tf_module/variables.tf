@@ -134,6 +134,10 @@ variable "resource_request" {
   }
 }
 
+variable "resource_limits" {
+  type = map(any)
+}
+
 variable "env_vars" {
   description = "Environment variables to pass to the container"
   type = list(object({
