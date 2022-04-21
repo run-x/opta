@@ -60,8 +60,10 @@ resource "aws_route53_record" "amazonses_dkim_record" {
 
 data "aws_iam_policy_document" "sender" {
   statement {
-    sid       = "SendEmail"
-    actions   = ["ses:Send*"]
+    sid = "SendEmail"
+    #tfsec:ignore:aws-iam-no-policy-wildcards
+    actions = ["ses:Send*"]
+    #tfsec:ignore:aws-iam-no-policy-wildcards
     resources = ["*"]
     condition {
       test     = "StringLike"

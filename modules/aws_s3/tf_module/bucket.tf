@@ -68,6 +68,9 @@ resource "aws_s3_bucket_cors_configuration" "bucket" {
   }
 }
 
+#Ignore this because in Opta we made a user-friendly
+#choice of automatic cloud-provider key management
+#tfsec:ignore:aws-s3-encryption-customer-key
 resource "aws_s3_bucket_server_side_encryption_configuration" "bucket" {
   bucket = aws_s3_bucket.bucket.id
   rule {
