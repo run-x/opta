@@ -3,6 +3,9 @@ jobs:
   - get-all-parameter-values
   - download-opta-version:
       opta-version: << pipeline.parameters.opta-version-v1 >>
+  - aws-test-k8s-manifest-destroy-stable-version:
+      requires:
+        - download-opta-version
   - aws-test-cloudfront-destroy-stable-version:
       requires:
         - download-opta-version
@@ -26,6 +29,7 @@ jobs:
         - download-opta-version
   - aws-destroy-env-stable-version:
       requires:
+        - aws-test-k8s-manifest-destroy-stable-version
         - aws-test-cloudfront-destroy-stable-version
         - aws-test-lambda-function-destroy-stable-version
         - aws-test-service-helm-destroy-stable-version
