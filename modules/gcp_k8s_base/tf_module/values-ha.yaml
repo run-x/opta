@@ -4,24 +4,25 @@
 
 enablePodAntiAffinity: true
 
-global:
-  # proxy configuration
-  proxy:
-    resources:
-      cpu:
-        request: 100m
-      memory:
-        limit: 250Mi
-        request: 20Mi
+# We explicitly set the annotations in ingress-nginx and k8s service, but leaving this here for whatever else a user
+# may add.
+proxy:
+  resources:
+    cpu:
+      request: 50m
+      limit: ""
+    memory:
+      limit: 100Mi
+      request: 20Mi
 
 # controller configuration
 controllerReplicas: 3
 controllerResources: &controller_resources
   cpu: &controller_resources_cpu
     limit: ""
-    request: 100m
+    request: 50m
   memory:
-    limit: 250Mi
+    limit: ""
     request: 50Mi
 destinationResources: *controller_resources
 publicAPIResources: *controller_resources
@@ -30,29 +31,8 @@ publicAPIResources: *controller_resources
 identityResources:
   cpu: *controller_resources_cpu
   memory:
-    limit: 250Mi
+    limit: ""
     request: 10Mi
-
-# grafana configuration
-grafana:
-  resources:
-    cpu: *controller_resources_cpu
-    memory:
-      limit: 1024Mi
-      request: 50Mi
-
-# heartbeat configuration
-heartbeatResources: *controller_resources
-
-# prometheus configuration
-prometheus:
-  resources:
-    cpu:
-      limit: ""
-      request: 300m
-    memory:
-      limit: 8192Mi
-      request: 300Mi
 
 # proxy injector configuration
 proxyInjectorResources: *controller_resources
@@ -61,12 +41,6 @@ webhookFailurePolicy: Fail
 # service profile validator configuration
 spValidatorResources: *controller_resources
 
-# tap configuration
-tapResources: *controller_resources
-
-# web configuration
-webResources: *controller_resources
-
 # proxy injector configuration
 proxyInjector:
   # -- Namespace selector used by admission webhook. If not set defaults to all
@@ -74,12 +48,12 @@ proxyInjector:
   # config.linkerd.io/admission-webhooks=disabled
   namespaceSelector:
     matchExpressions:
-    - key: config.linkerd.io/admission-webhooks
-      operator: NotIn
-      values:
-      - disabled
-    - key: kubernetes.io/metadata.name
-      operator: NotIn
-      values:
-      - kube-system
+      - key: config.linkerd.io/admission-webhooks
+        operator: NotIn
+        values:
+          - disabled
+      - key: kubernetes.io/metadata.name
+        operator: NotIn
+        values:
+          - kube-system
     

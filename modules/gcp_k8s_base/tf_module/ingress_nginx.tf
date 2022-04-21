@@ -20,6 +20,9 @@ resource "helm_release" "ingress-nginx" {
           "linkerd.io/inject" : "enabled"
           "viz.linkerd.io/tap-enabled" : "true"
           "cluster-autoscaler.kubernetes.io/safe-to-evict" : "true"
+          "config.linkerd.io/proxy-cpu-request" : "0.05"
+          "config.linkerd.io/proxy-memory-limit" : "20Mi"
+          "config.linkerd.io/proxy-memory-request" : "10Mi"
         }
         resources : {
           requests : {
