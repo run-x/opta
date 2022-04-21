@@ -24,6 +24,8 @@ data "aws_iam_policy_document" "sqs_queue_policy" {
 
   statement {
     actions = [
+      # Accept the risk
+      #tfsec:ignore:aws-sqs-no-wildcards-in-policy-documents
       "SQS:*"
     ]
 
@@ -42,10 +44,11 @@ data "aws_iam_policy_document" "sqs_queue_policy" {
   }
 
   statement {
+    # Accept the risk
+    #tfsec:ignore:aws-sqs-no-wildcards-in-policy-documents
     actions = [
       "SQS:*"
     ]
-
     effect = "Allow"
 
     principals {
@@ -61,10 +64,11 @@ data "aws_iam_policy_document" "sqs_queue_policy" {
   }
 
   statement {
+    # Accept the risk
+    #tfsec:ignore:aws-sqs-no-wildcards-in-policy-documents
     actions = [
       "SQS:*"
     ]
-
     effect = "Allow"
 
     principals {

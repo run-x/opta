@@ -20,7 +20,7 @@ jobs:
         uses: tfsec/tfsec-sarif-action@master
         with:
           sarif_file: tfsec.sarif
-          tfsec_args: --force-all-dirs
+          tfsec_args: --force-all-dirs --exclude-path examples/ --exclude-path modules/azure_base --exclude-path modules/azure_k8s_base --exclude-path modules/azure_aks --minimum-severity  HIGH
           config_file: config/tfsecconfig.yaml
 
       - name: Upload SARIF file
