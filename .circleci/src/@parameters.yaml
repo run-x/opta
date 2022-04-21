@@ -65,3 +65,12 @@ parameters:
   run-opta-terraform-generate-test:
     type: boolean
     default: false
+  opta-version-v1:
+    type: string
+    default: ''
+  opta-version-v2:
+    type: string
+    default: ''
+  run-version-compare:
+    type: boolean
+    default: false
