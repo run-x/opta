@@ -66,10 +66,10 @@ spec:
             {{ end }}
           envFrom:
           - secretRef:
-              name: manual-secrets
+              name: secret
               optional: true
           - secretRef:
-              name: secrets
+              name: manual-secrets
               optional: true
           {{- if .Values.livenessProbePath }}
           livenessProbe:
