@@ -6,6 +6,7 @@ jobs:
       requires:
         - download-opta-version-v1
   - aws-create-env-stable-version:
+      name: "aws-create-env-v1"
       requires:
         - download-opta-version-v1
   - download-opta-version-v2:
@@ -16,5 +17,6 @@ jobs:
       requires:
         - download-opta-version-v2
   - aws-create-env-stable-version:
+      name: "aws-create-env-v2"
       requires:
         - download-opta-version-v2
