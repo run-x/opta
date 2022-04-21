@@ -120,11 +120,14 @@ def load_opta_kube_config_to_default(layer: "Layer") -> None:
     default_kube_config_filename = expanduser(
         constants.DEFAULT_KUBECONFIG.split(ENV_KUBECONFIG_PATH_SEPARATOR)[0]
     )
+    logger.debug(f"Checking kube config file of {default_kube_config_filename}")
     if not exists(default_kube_config_filename):
+        logger.debug("The kube config file did not exist")
         makedirs(dirname(default_kube_config_filename), exist_ok=True)
         with open(default_kube_config_filename, "w") as f:
             yaml.dump(opta_config, f)
         return
+    logger.debug("Loading kube config file")
     default_kube_config = yaml.load(open(default_kube_config_filename))
     opta_config_user = opta_config["users"][0]
     opta_config_context = opta_config["contexts"][0]
