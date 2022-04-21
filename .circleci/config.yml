@@ -756,6 +756,8 @@ jobs:
                     - remake-environment-configs
             - attach_workspace:
                 at: ~/
+            - attach_workspace:
+                at: ./
             - install-opta-dependencies
             - aws-cli/install
             - aws-cli/setup
@@ -838,6 +840,8 @@ jobs:
                     - remake-environment-configs
             - attach_workspace:
                 at: ~/
+            - attach_workspace:
+                at: ./
             - install-opta-dependencies
             - aws-cli/install
             - aws-cli/setup
@@ -1017,6 +1021,8 @@ jobs:
                     - remake-environment-configs
             - attach_workspace:
                 at: ~/
+            - attach_workspace:
+                at: ./
             - install-opta-dependencies
             - aws-cli/install
             - aws-cli/setup
@@ -1106,6 +1112,8 @@ jobs:
                     - remake-environment-configs
             - attach_workspace:
                 at: ~/
+            - attach_workspace:
+                at: ./
             - install-opta-dependencies
             - aws-cli/install
             - aws-cli/setup
