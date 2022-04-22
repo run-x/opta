@@ -19,7 +19,10 @@ class AwsPostgresProcessor(ModuleProcessor):
         existing_global_database_id: Optional[str] = self.module.data.get(
             "existing_global_database_id", None
         )
-        database_name: Optional[str] = self.module.data.get("database_name", None)
+        restore_from_snapshot: Optional[str] = self.module.data.get(
+            "restore_from_snapshot"
+        )
+        database_name: Optional[str] = self.module.data.get("database_name")
         if database_name is not None and existing_global_database_id is not None:
             raise UserErrors(
                 "You can not specify a database name when creating a read replica for an existing Aurora "
@@ -30,5 +33,9 @@ class AwsPostgresProcessor(ModuleProcessor):
             raise UserErrors(
                 "If you want to create a new global database, then you can't input the id of a "
                 "pre-existing one to use."
+            )
+        if restore_from_snapshot and existing_global_database_id is not None:
+            raise UserErrors(
+                "You can't attach to existing global database and restore from snapshot. It's one or the other."
             )
         super(AwsPostgresProcessor, self).process(module_idx)

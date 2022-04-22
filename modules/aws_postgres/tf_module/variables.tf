@@ -20,6 +20,10 @@ variable "backup_retention_days" {
 }
 
 
+variable "restore_from_snapshot" {
+  type = string
+}
+
 variable "engine_version" {
   type    = string
   default = "11.9"
