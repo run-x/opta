@@ -649,4 +649,5 @@ def restart_deployments(namespace: str) -> None:
     """
     deployments = list_deployment(namespace)
     for deploy in deployments:
+        logger.info(f"Restarting deployment {deploy.metadata.name}")
         restart_deployment(namespace, deploy.metadata.name)

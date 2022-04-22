@@ -19,7 +19,7 @@ from opta.core.secrets import (
 )
 from opta.exceptions import UserErrors
 from opta.layer import Layer
-from opta.utils import check_opta_file_exists
+from opta.utils import check_opta_file_exists, logger
 from opta.utils.clickoptions import (
     config_option,
     env_option,
@@ -103,7 +103,7 @@ def view(
             f" already there - update it via secret update."
         )
 
-    print(secrets[secret])
+    logger.info(secrets[secret])
 
 
 @secret.command(name="list")
@@ -179,7 +179,7 @@ def update(
     update_manual_secrets(layer.name, {secret: str(value)})
     __restart_deployments(no_restart, layer.name)
 
-    print("Success")
+    logger.info("Success")
 
 
 @secret.command()
@@ -217,7 +217,7 @@ def remove(
     remove_manual_secrets(layer.name, secret)
     __restart_deployments(no_restart, layer.name)
 
-    print("Success")
+    logger.info("Success")
 
 
 @secret.command()
@@ -258,4 +258,4 @@ def bulk_update(
     bulk_update_manual_secrets(layer.name, env_file)
     __restart_deployments(no_restart, layer.name)
 
-    print("Success")
+    logger.info("Success")

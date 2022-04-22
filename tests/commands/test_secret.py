@@ -6,7 +6,7 @@ from pytest import fixture
 from pytest_mock import MockFixture
 
 from opta.amplitude import AmplitudeClient, amplitude_client
-from opta.commands.secret import bulk_update, list_command, update, view
+from opta.commands.secret import bulk_update, list_command, remove, update, view
 from opta.layer import Layer
 
 
@@ -93,6 +93,50 @@ class TestSecretManager:
         mocked_print.assert_has_calls(
             [mocker.call("dummysecret=1"), mocker.call("b=2"), mocker.call("c=3")]
         )
+
+    def test_remove(self, mocker: MockFixture, mocked_layer: Any) -> None:
+        # Opta file check
+        mocked_os_path_exists = mocker.patch("opta.utils.os.path.exists")
+        mocked_os_path_exists.return_value = os.path.join(
+            os.getcwd(), "tests", "fixtures", "dummy_data", "dummy_config1.yaml"
+        )
+
+        mocker.patch("opta.commands.secret.gen_all")
+        mocked_create_namespace_if_not_exists = mocker.patch(
+            "opta.commands.secret.create_namespace_if_not_exists"
+        )
+        mocked_remove_manual_secrets = mocker.patch(
+            "opta.commands.secret.remove_manual_secrets"
+        )
+        mocked_restart_deployments = mocker.patch(
+            "opta.commands.secret.restart_deployments"
+        )
+        mocker.patch("opta.commands.secret.set_kube_config")
+
+        mocked_amplitude_client = mocker.patch(
+            "opta.commands.secret.amplitude_client", spec=AmplitudeClient
+        )
+        mocked_amplitude_client.UPDATE_SECRET_EVENT = amplitude_client.UPDATE_SECRET_EVENT
+
+        runner = CliRunner()
+        result = runner.invoke(
+            remove, ["dummysecret", "--env", "dummyenv", "--config", "dummyconfig"]
+        )
+        assert result.exit_code == 0
+        mocked_create_namespace_if_not_exists.assert_called_once_with("dummy_layer")
+        mocked_remove_manual_secrets.assert_called_once_with("dummy_layer", "dummysecret")
+        mocked_layer.assert_called_once_with(
+            "dummyconfig", "dummyenv", input_variables={}
+        )
+        mocked_amplitude_client.send_event.assert_called_once_with(
+            amplitude_client.UPDATE_SECRET_EVENT
+        )
+        mocked_restart_deployments.assert_called_once_with("dummy_layer")
+
+        # test updating a secret that is not listed in the config file - should work
+        result = runner.invoke(remove, ["unlistedsecret"])
+        assert result.exit_code == 0
+        mocked_remove_manual_secrets.assert_called_with("dummy_layer", "unlistedsecret")
 
     def test_update(self, mocker: MockFixture, mocked_layer: Any) -> None:
         # Opta file check
