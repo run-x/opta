@@ -38,6 +38,9 @@ be set to those of the original database. If you try to link this module to a k8
 secrets will be set to `UNKNOWN_SEE_ORIGINAL_DB`. To overcome this limitation, please use `opta secret update`
 on the your k8s-service yaml to manually populate the secrets in with the original values.
 
+__NOTE__: Do not remove the `restore_from_snapshot` input after creation, even if the snapshot is created as it
+will cause the database to recreate.
+
 ### Adding to Global Database
 
 Opta supports distributed databases via AWS' Aurora Global database. This subject is talked in detail in the 
