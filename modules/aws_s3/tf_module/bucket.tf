@@ -96,7 +96,7 @@ resource "aws_cloudfront_origin_access_identity" "read" {
 
 
 data "aws_iam_policy_document" "s3_policy" {
-  source_json = var.bucket_policy == null ? "" : jsonencode(var.bucket_policy)
+  source_policy_documents = var.bucket_policy == null ? [] : [jsonencode(var.bucket_policy)]
   statement {
     sid       = "Cloudfront Reading"
     actions   = ["s3:ListBucket", "s3:GetObject"]
