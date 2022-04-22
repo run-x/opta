@@ -57,4 +57,4 @@ modules:
         #     secret: gitlab-postgres
         #     key: psql-password
       certmanager-issuer:
-        email: nilesh@runx.dev
+        email: foo@bar.com

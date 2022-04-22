@@ -40,14 +40,14 @@ Your domain should now be pointing to the Ghost deployment with secure TLS
 * To find the password for the root user:
 ```shell
 $> echo $(kubectl get secrets -n gitlab gitlab-gitlab-gitlab-initial-root-password -o json | jq '.data.password')
-"OTdjNklub0wzOFlYVWRRSENhRWJhMzRZeHRkNEFmV0NoWjVZcmw0VDlMTXp5eDlBYldrZXBvenJERWxwM2pxcQ=="
-$> echo "OTdjNklub0wzOFlYVWRRSENhRWJhMzRZeHRkNEFmV0NoWjVZcmw0VDlMTXp5eDlBYldrZXBvenJERWxwM2pxcQ==" | base64 -D
-97c6InoL38YXUdQHCaEba34Yxtd4AfWChZ5Yrl4T9LMzyx9AbWkepozrDElp3jqq
+"dummy_password_base64_encoded"
+$> echo "dummy_password_base64_encoded" | base64 -D
+dummy_password
 ```
 
-![Alt text](gitlab-login.png?raw=true "Login Screen")
+![Login Screen](gitlab-login.png?raw=true "Login Screen")
 
-![Alt text](gitlab-dashboard.png?raw=true "What it should look like")
+![Gitlab Dashboard](gitlab-dashboard.png?raw=true "Gitlab Dashboard")
 
 # [FAQ](../FAQ.md)
 
