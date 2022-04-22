@@ -14,6 +14,7 @@ from opta.core.kubernetes import (
 from opta.core.secrets import (
     bulk_update_manual_secrets,
     get_secrets,
+    remove_manual_secrets,
     update_manual_secrets,
 )
 from opta.exceptions import UserErrors
@@ -176,6 +177,44 @@ def update(
     create_namespace_if_not_exists(layer.name)
     amplitude_client.send_event(amplitude_client.UPDATE_SECRET_EVENT)
     update_manual_secrets(layer.name, {secret: str(value)})
+    __restart_deployments(no_restart, layer.name)
+
+    print("Success")
+
+
+@secret.command()
+@click.argument("secret")
+@restart_option
+@config_option
+@env_option
+@input_variable_option
+@local_option
+def remove(
+    secret: str,
+    env: Optional[str],
+    config: str,
+    no_restart: bool,
+    local: Optional[bool],
+    var: Dict[str, str],
+) -> None:
+    """Update a given secret of a k8s service by removing a manual entry
+
+    Examples:
+
+    opta secret remove -c my-service.yaml "MY_SECRET_1"
+    """
+
+    config = check_opta_file_exists(config)
+    if local:
+        config = local_setup(config, input_variables=var)
+        env = "localopta"
+    layer = Layer.load_from_yaml(config, env, input_variables=var)
+    gen_all(layer)
+
+    set_kube_config(layer)
+    create_namespace_if_not_exists(layer.name)
+    amplitude_client.send_event(amplitude_client.UPDATE_SECRET_EVENT)
+    remove_manual_secrets(layer.name, secret)
     __restart_deployments(no_restart, layer.name)
 
     print("Success")

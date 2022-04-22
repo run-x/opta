@@ -273,6 +273,22 @@ def update_secrets(namespace: str, secret_name: str, new_values: dict) -> None:
     v1.replace_namespaced_secret(secret_name, namespace, current_secret_object)
 
 
+def remove_secrets(namespace: str, secret_name: str, entry_name: str) -> None:
+    """
+    remove secret from secret store.
+
+    create the secret if it doesn't exist yet.
+    """
+    load_opta_kube_config()
+    v1 = CoreV1Api()
+    create_secret_if_not_exists(namespace, secret_name)
+    current_secret_object: V1Secret = v1.read_namespaced_secret(secret_name, namespace)
+    current_secret_object.data = current_secret_object.data or {}
+    if entry_name in current_secret_object.data:
+        del current_secret_object.data[entry_name]
+    v1.replace_namespaced_secret(secret_name, namespace, current_secret_object)
+
+
 def list_namespaces() -> None:
     load_opta_kube_config()
     v1 = CoreV1Api()

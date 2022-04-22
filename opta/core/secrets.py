@@ -2,7 +2,7 @@ import os
 
 from dotenv import dotenv_values
 
-from opta.core.kubernetes import get_namespaced_secrets, update_secrets
+from opta.core.kubernetes import get_namespaced_secrets, remove_secrets, update_secrets
 from opta.exceptions import UserErrors
 from opta.utils import deep_merge, logger
 
@@ -30,6 +30,15 @@ def update_manual_secrets(layer_name: str, new_values: dict) -> None:
     create the secret if it doesn't exist yet.
     """
     update_secrets(layer_name, MANUAL_SECRET_NAME, new_values)
+
+
+def remove_manual_secrets(layer_name: str, secret_name: str) -> None:
+    """
+    append the new values to the existing data for this manual secret.
+
+    create the secret if it doesn't exist yet.
+    """
+    remove_secrets(layer_name, MANUAL_SECRET_NAME, secret_name)
 
 
 def bulk_update_manual_secrets(layer_name: str, env_file: str) -> None:
