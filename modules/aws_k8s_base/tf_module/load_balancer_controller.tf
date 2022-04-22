@@ -2,7 +2,6 @@ data "aws_iam_policy_document" "load_balancer" {
   statement {
     sid    = "0"
     effect = "Allow"
-    #tfsec:ignore:aws-iam-no-policy-wildcards
     resources = ["*"]
     actions   = ["iam:CreateServiceLinkedRole"]
 
@@ -12,12 +11,9 @@ data "aws_iam_policy_document" "load_balancer" {
       values   = ["elasticloadbalancing.amazonaws.com"]
     }
   }
-  #tfsec:ignore:aws-iam-no-policy-wildcards
   statement {
     sid    = "1"
     effect = "Allow"
-    #Ignore 
-    #tfsec:ignore:aws-iam-no-policy-wildcards
     resources = ["*"]
 
     actions = [
@@ -50,7 +46,6 @@ data "aws_iam_policy_document" "load_balancer" {
   statement {
     sid    = "2"
     effect = "Allow"
-    #tfsec:ignore:aws-iam-no-policy-wildcards
     resources = ["*"]
 
     actions = [
@@ -77,7 +72,6 @@ data "aws_iam_policy_document" "load_balancer" {
   statement {
     sid    = "3"
     effect = "Allow"
-    #tfsec:ignore:aws-iam-no-policy-wildcards
     resources = ["*"]
 
     actions = [
