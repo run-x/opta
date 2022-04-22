@@ -22,7 +22,7 @@ That's it. Gitlab is deployed on AWS. You can find the AWS load balancer URL to 
 
 # Getting DNS to work
 * Run `opta output -c gitlab-aws.yaml` to get the nameservers. You will see a section like this:
-```yaml
+```text
 name_servers = tolist([
   “ns-1384.awsdns-45.org”,
   “ns-2001.awsdns-58.co.uk”,
@@ -39,9 +39,9 @@ Your domain should now be pointing to the Ghost deployment with secure TLS
 * The admin dashboard would be available at https://gitlab.{your-domain}/
 * To find the password for the root user:
 ```shell
-(opta) nileshsarupriya@Nileshs-MacBook-Pro ~/D/r/opta (main)> echo $(kubectl get secrets -n gitlab gitlab-gitlab-gitlab-initial-root-password -o json | jq '.data.password')
+$> echo $(kubectl get secrets -n gitlab gitlab-gitlab-gitlab-initial-root-password -o json | jq '.data.password')
 "OTdjNklub0wzOFlYVWRRSENhRWJhMzRZeHRkNEFmV0NoWjVZcmw0VDlMTXp5eDlBYldrZXBvenJERWxwM2pxcQ=="
-(opta) nileshsarupriya@Nileshs-MacBook-Pro ~/D/r/opta (main)> echo "OTdjNklub0wzOFlYVWRRSENhRWJhMzRZeHRkNEFmV0NoWjVZcmw0VDlMTXp5eDlBYldrZXBvenJERWxwM2pxcQ==" | base64 -D
+$> echo "OTdjNklub0wzOFlYVWRRSENhRWJhMzRZeHRkNEFmV0NoWjVZcmw0VDlMTXp5eDlBYldrZXBvenJERWxwM2pxcQ==" | base64 -D
 97c6InoL38YXUdQHCaEba34Yxtd4AfWChZ5Yrl4T9LMzyx9AbWkepozrDElp3jqq
 ```
 
