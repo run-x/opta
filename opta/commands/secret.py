@@ -14,8 +14,8 @@ from opta.core.kubernetes import (
 )
 from opta.core.secrets import (
     bulk_update_manual_secrets,
+    delete_manual_secret,
     get_secrets,
-    remove_manual_secrets,
     update_manual_secrets,
 )
 from opta.exceptions import UserErrors
@@ -214,7 +214,7 @@ def delete(
 
     set_kube_config(layer)
     if check_if_namespace_exists(layer.name):
-        remove_manual_secrets(layer.name, secret)
+        delete_manual_secret(layer.name, secret)
         __restart_deployments(no_restart, layer.name)
     amplitude_client.send_event(amplitude_client.UPDATE_SECRET_EVENT)
     logger.info("Success")

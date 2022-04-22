@@ -290,7 +290,7 @@ def update_secrets(namespace: str, secret_name: str, new_values: dict) -> None:
     v1.replace_namespaced_secret(secret_name, namespace, current_secret_object)
 
 
-def remove_secrets(namespace: str, secret_name: str, entry_name: str) -> None:
+def delete_secret_key(namespace: str, secret_name: str, entry_name: str) -> None:
     """
     remove secret from secret store.
 
