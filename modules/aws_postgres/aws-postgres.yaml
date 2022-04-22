@@ -59,6 +59,11 @@ inputs:
     validator: str(required=False)
     description: The name of the database to create. Follow naming conventions [here](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Limits.html#RDS_Limits.Constraints)
     default: app
+  - name: restore_from_snapshot
+    user_facing: true
+    validator: str(required=False)
+    description: The arn of the snapshot to "restore" this database from.
+    default: null
 outputs:
   - name: db_user
     export: false
