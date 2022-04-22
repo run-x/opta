@@ -26,6 +26,29 @@ Storage scaling is automatically managed by AWS Aurora, see the [official docume
 To add replicas to an existing cluser, follow the [official guide](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-replicas-adding.html).
 
 
+### Restoring from Snapshot
+
+Opta supports creating a new database not just from scratch, but from database snapshots you have in your
+desired account + region. To do this, simply set the `restore_from_snapshot` to the ARN of said snapshot you
+wish to restore from.
+
+There is a big caveat: as Opta has no knowledge of the initial db setup from which the snapshot was created, we
+do not know what database name, username, or password the database would be created with-- these will always
+be set to those of the original database. If you try to link this module to a k8s-service, the db name/username/password
+secrets will be set to `UNKNOWN_SEE_ORIGINAL_DB`. To overcome this limitation, please use `opta secret update`
+on the your k8s-service yaml to manually populate the secrets in with the original values.
+
+### Adding to Global Database
+
+Opta supports distributed databases via AWS' Aurora Global database. This subject is talked in detail in the 
+[multi-region section of the docs](/features/multi-region/multi-region-dbs/)
+
+There is a big caveat: as the execution of Opta has no knowledge of the initial db serving as the primary, we
+do not know what database name, username, or password the database would be created with-- these will always
+be set to those of the original database. If you try to link this module to a k8s-service, the db name/username/password
+secrets will be set to `UNKNOWN_SEE_PRIMARY_DB`. To overcome this limitation, please use `opta secret update`
+on the your k8s-service yaml to manually populate the secrets in with the original values.
+
 ### Linking
 
 When linked to a k8s-service, it adds connection credentials to your container's environment variables as:
