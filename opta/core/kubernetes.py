@@ -284,8 +284,7 @@ def remove_secrets(namespace: str, secret_name: str, entry_name: str) -> None:
     create_secret_if_not_exists(namespace, secret_name)
     current_secret_object: V1Secret = v1.read_namespaced_secret(secret_name, namespace)
     current_secret_object.data = current_secret_object.data or {}
-    if entry_name in current_secret_object.data:
-        del current_secret_object.data[entry_name]
+    current_secret_object.data.pop(entry_name, None)
     v1.replace_namespaced_secret(secret_name, namespace, current_secret_object)
 
 
