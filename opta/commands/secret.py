@@ -7,6 +7,7 @@ from opta.amplitude import amplitude_client
 from opta.commands.apply import local_setup
 from opta.core.generator import gen_all
 from opta.core.kubernetes import (
+    check_if_namespace_exists,
     create_namespace_if_not_exists,
     restart_deployments,
     set_kube_config,
@@ -103,7 +104,7 @@ def view(
             f" already there - update it via secret update."
         )
 
-    logger.info(secrets[secret])
+    print(secrets[secret])
 
 
 @secret.command(name="list")
@@ -189,7 +190,7 @@ def update(
 @env_option
 @input_variable_option
 @local_option
-def remove(
+def delete(
     secret: str,
     env: Optional[str],
     config: str,
@@ -197,11 +198,11 @@ def remove(
     local: Optional[bool],
     var: Dict[str, str],
 ) -> None:
-    """Update a given secret of a k8s service by removing a manual entry
+    """Delete a secret key from a k8s service
 
     Examples:
 
-    opta secret remove -c my-service.yaml "MY_SECRET_1"
+    opta secret delete -c my-service.yaml "MY_SECRET_1"
     """
 
     config = check_opta_file_exists(config)
@@ -212,11 +213,10 @@ def remove(
     gen_all(layer)
 
     set_kube_config(layer)
-    create_namespace_if_not_exists(layer.name)
+    if check_if_namespace_exists(layer.name):
+        remove_manual_secrets(layer.name, secret)
+        __restart_deployments(no_restart, layer.name)
     amplitude_client.send_event(amplitude_client.UPDATE_SECRET_EVENT)
-    remove_manual_secrets(layer.name, secret)
-    __restart_deployments(no_restart, layer.name)
-
     logger.info("Success")
 
 
