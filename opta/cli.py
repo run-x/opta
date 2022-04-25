@@ -16,6 +16,7 @@ from opta.commands.destroy import destroy
 from opta.commands.events import events
 from opta.commands.force_unlock import force_unlock
 from opta.commands.generate_terraform import generate_terraform
+from opta.commands.help import help
 from opta.commands.inspect_cmd import inspect
 from opta.commands.kubectl import configure_kubectl
 from opta.commands.logs import logs
@@ -64,6 +65,7 @@ cli.add_command(force_unlock)
 cli.add_command(upgrade)
 cli.add_command(generate_terraform)
 cli.add_command(config)
+cli.add_command(help)
 
 
 if __name__ == "__main__":
