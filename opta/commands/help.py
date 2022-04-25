@@ -14,10 +14,16 @@ from opta.exceptions import UserErrors
 def help(context: Context, command: Optional[str]) -> None:
     """
     Get help for Opta.
+
+    Example:
+
+    opta help
+
+    opta help apply
     """
     command_context: DYMGroup = context.parent.command
     if command is not None and not context.parent.command.commands.__contains__(command):
         raise UserErrors("Invalid Command")
     if command:
-        command_context = context.parent.commands.get(command)
+        command_context = context.parent.command.commands.get(command)
     print(command_context.get_help(context))
