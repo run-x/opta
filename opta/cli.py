@@ -90,6 +90,7 @@ if __name__ == "__main__":
             f"{fg('red')}Unhandled error encountered -- a crash report zipfile has been created for you. "
             "If you need more help please reach out (passing the crash report) to the contributors in our "
             f"slack channel at: https://slack.opta.dev{attr(0)}"
+            "\nHint: As a first step in debugging, try rerunning the command and seeing if it still fails."
         )
         CURRENT_CRASH_REPORTER.generate_report()
         sys.exit(1)
