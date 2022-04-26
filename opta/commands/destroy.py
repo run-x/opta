@@ -7,7 +7,7 @@ import boto3
 import click
 from azure.storage.blob import ContainerClient
 from botocore.config import Config
-from colored import attr
+from colored import attr, fg
 from google.cloud import storage  # type: ignore
 from google.cloud.exceptions import NotFound
 
@@ -71,6 +71,14 @@ def destroy(
     try:
         opta_acquire_lock()
         pre_check()
+        logger.warn(
+            f"You are destroying your cloud infra state. {fg('magenta')}DO NOT, I REPEAT, DO NOT{attr(0)} do this as "
+            "an attempt to debug a weird/errored apply. What you have created is not some ephemeral object that can be "
+            "tossed arbitrarily (perhaps some day) and destroying unnecessarily just to reapply typically makes it "
+            "worse. If you're doing this cause you are really trying to destroy the environment entirely, then that's"
+            "perfectly fine-- if not then please reach out to the opta team in the slack workspace "
+            "(https://slack.opta.dev) and I promise that they'll be happy to help debug."
+        )
 
         config = check_opta_file_exists(config)
         if local:
