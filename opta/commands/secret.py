@@ -7,18 +7,20 @@ from opta.amplitude import amplitude_client
 from opta.commands.apply import local_setup
 from opta.core.generator import gen_all
 from opta.core.kubernetes import (
+    check_if_namespace_exists,
     create_namespace_if_not_exists,
     restart_deployments,
     set_kube_config,
 )
 from opta.core.secrets import (
     bulk_update_manual_secrets,
+    delete_manual_secret,
     get_secrets,
     update_manual_secrets,
 )
 from opta.exceptions import UserErrors
 from opta.layer import Layer
-from opta.utils import check_opta_file_exists
+from opta.utils import check_opta_file_exists, logger
 from opta.utils.clickoptions import (
     config_option,
     env_option,
@@ -178,7 +180,44 @@ def update(
     update_manual_secrets(layer.name, {secret: str(value)})
     __restart_deployments(no_restart, layer.name)
 
-    print("Success")
+    logger.info("Success")
+
+
+@secret.command()
+@click.argument("secret")
+@restart_option
+@config_option
+@env_option
+@input_variable_option
+@local_option
+def delete(
+    secret: str,
+    env: Optional[str],
+    config: str,
+    no_restart: bool,
+    local: Optional[bool],
+    var: Dict[str, str],
+) -> None:
+    """Delete a secret key from a k8s service
+
+    Examples:
+
+    opta secret delete -c my-service.yaml "MY_SECRET_1"
+    """
+
+    config = check_opta_file_exists(config)
+    if local:
+        config = local_setup(config, input_variables=var)
+        env = "localopta"
+    layer = Layer.load_from_yaml(config, env, input_variables=var)
+    gen_all(layer)
+
+    set_kube_config(layer)
+    if check_if_namespace_exists(layer.name):
+        delete_manual_secret(layer.name, secret)
+        __restart_deployments(no_restart, layer.name)
+    amplitude_client.send_event(amplitude_client.UPDATE_SECRET_EVENT)
+    logger.info("Success")
 
 
 @secret.command()
@@ -219,4 +258,4 @@ def bulk_update(
     bulk_update_manual_secrets(layer.name, env_file)
     __restart_deployments(no_restart, layer.name)
 
-    print("Success")
+    logger.info("Success")

@@ -209,6 +209,13 @@ def current_image_digest_tag(layer: "Layer") -> dict:
     return image_info
 
 
+def check_if_namespace_exists(layer_name: str) -> bool:
+    load_opta_kube_config()
+    v1 = CoreV1Api()
+    namespaces = v1.list_namespace(field_selector=f"metadata.name={layer_name}")
+    return len(namespaces.items) != 0
+
+
 def create_namespace_if_not_exists(layer_name: str) -> None:
     load_opta_kube_config()
     v1 = CoreV1Api()
@@ -221,6 +228,16 @@ def create_namespace_if_not_exists(layer_name: str) -> None:
                 )
             )
         )
+
+
+def check_if_secret_exists(namespace: str, secret_name: str) -> bool:
+    """create the secret in the namespace if it doesn't exist"""
+    load_opta_kube_config()
+    v1 = CoreV1Api()
+    secrets: V1SecretList = v1.list_namespaced_secret(
+        namespace, field_selector=f"metadata.name={secret_name}"
+    )
+    return len(secrets.items) != 0
 
 
 def create_secret_if_not_exists(namespace: str, secret_name: str) -> None:
@@ -270,6 +287,22 @@ def update_secrets(namespace: str, secret_name: str, new_values: dict) -> None:
         current_secret_object.data[k] = base64.b64encode(v.encode("utf-8")).decode(
             "utf-8"
         )
+    v1.replace_namespaced_secret(secret_name, namespace, current_secret_object)
+
+
+def delete_secret_key(namespace: str, secret_name: str, entry_name: str) -> None:
+    """
+    remove secret from secret store.
+
+    create the secret if it doesn't exist yet.
+    """
+    load_opta_kube_config()
+    v1 = CoreV1Api()
+    if not check_if_secret_exists(namespace, secret_name):
+        return
+    current_secret_object: V1Secret = v1.read_namespaced_secret(secret_name, namespace)
+    current_secret_object.data = current_secret_object.data or {}
+    current_secret_object.data.pop(entry_name, None)
     v1.replace_namespaced_secret(secret_name, namespace, current_secret_object)
 
 
@@ -633,4 +666,5 @@ def restart_deployments(namespace: str) -> None:
     """
     deployments = list_deployment(namespace)
     for deploy in deployments:
+        logger.info(f"Restarting deployment {deploy.metadata.name}")
         restart_deployment(namespace, deploy.metadata.name)
