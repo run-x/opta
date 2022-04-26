@@ -11,10 +11,6 @@ modules:
     delegated: false
   - type: k8s-cluster
   - type: k8s-base
-  # - type: postgres
-  #   name: gitlabpg
-  # - type: redis
-  #   name: gitlabredis
   - name: gitlab
     type: helm-chart
     chart: gitlab
@@ -23,21 +19,6 @@ modules:
     repository: "https://charts.gitlab.io"
     chart_version: "5.8.2"
     values:
-      postgresql:
-        master:
-          podAnnotations:
-            linkerd.io/inject: enabled
-            config.linkerd.io/proxy-cpu-limit: "0.1"
-            config.linkerd.io/proxy-cpu-request: "0.05"
-            config.linkerd.io/proxy-memory-limit: "20Mi"
-            config.linkerd.io/proxy-memory-request: "10Mi"
-      gitlab-runner:
-        podAnnotations:
-          linkerd.io/inject: enabled
-          config.linkerd.io/proxy-cpu-limit: "0.1"
-          config.linkerd.io/proxy-cpu-request: "0.05"
-          config.linkerd.io/proxy-memory-limit: "20Mi"
-          config.linkerd.io/proxy-memory-request: "10Mi"
       prometheus:
         install: false
       nginx-ingress:
@@ -47,14 +28,5 @@ modules:
           domain: "${{module.dns.domain}}"
         ingress:
           class: nginx
-        # psql:
-        #   host: "db_host"
-        #   port: 5432
-        #   username: "db_user"
-        #   database: "db_name"
-        #   password:
-        #     useSecret: true
-        #     secret: gitlab-postgres
-        #     key: psql-password
       certmanager-issuer:
         email: foo@bar.com
