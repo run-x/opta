@@ -1,0 +1,32 @@
+name: gitlab
+org_name: <<org_name::org_name::Your Organization Name>>
+providers:
+  aws:
+    region: <<region::aws_region::Your AWS Region>>
+    account_id: <<account_id::aws_account_id::Your AWS Account ID>>
+modules:
+  - type: base
+  - type: dns
+    domain: <<domain::string::The dns domain for your airflow deployment>>
+    delegated: false
+  - type: k8s-cluster
+  - type: k8s-base
+  - name: gitlab
+    type: helm-chart
+    chart: gitlab
+    create_namespace: true
+    namespace: "gitlab"
+    repository: "https://charts.gitlab.io"
+    chart_version: "5.8.2"
+    values:
+      prometheus:
+        install: false
+      nginx-ingress:
+        enabled: false
+      global:
+        hosts:
+          domain: "${{module.dns.domain}}"
+        ingress:
+          class: nginx
+      certmanager-issuer:
+        email: foo@bar.com
