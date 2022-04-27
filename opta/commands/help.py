@@ -22,8 +22,11 @@ def help(context: Context, command: Optional[str]) -> None:
     opta help apply
     """
     command_context: DYMGroup = context.parent.command
-    if command is not None and not context.parent.command.commands.__contains__(command):
-        raise UserErrors("Invalid Command")
-    if command:
-        command_context = context.parent.command.commands.get(command)
+    if command is not None:
+        try:
+            command_context = command_context.commands[command]
+        except KeyError:
+            raise UserErrors(
+                "Invalid Command. Please use correct commands mentioned in `opta help|-h|--help "
+            )
     print(command_context.get_help(context))
