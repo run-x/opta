@@ -1,9 +1,7 @@
-# type: ignore
 from typing import Optional
 
 import click
 from click import Context
-from click_didyoumean import DYMGroup
 
 from opta.exceptions import UserErrors
 
@@ -21,10 +19,10 @@ def help(context: Context, command: Optional[str]) -> None:
 
     opta help apply
     """
-    command_context: DYMGroup = context.parent.command
+    command_context = context.parent.command  # type: ignore
     if command is not None:
         try:
-            command_context = command_context.commands[command]
+            command_context = command_context.commands[command]  # type: ignore
         except KeyError:
             raise UserErrors(
                 "Invalid Command. Please use correct commands mentioned in `opta help|-h|--help "
