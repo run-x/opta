@@ -15,7 +15,6 @@ class AwsVPNProcessor(ModuleProcessor):
     def process(self, module_idx: int) -> None:
         aws_base_modules = self.layer.get_module_by_type("aws-base", module_idx)
         vpc_id = self.module.data.get("vpc_id")
-        vpn_sg_id = self.module.data.get("vpn_sg_id")
         public_subnets_ids = self.module.data.get("public_subnets_ids")
         kms_account_key_arn = self.module.data.get("kms_account_key_arn")
         from_parent = False
@@ -24,10 +23,7 @@ class AwsVPNProcessor(ModuleProcessor):
             aws_base_modules = self.layer.parent.get_module_by_type("aws-base")
 
         if len(aws_base_modules) == 0 and (
-            vpc_id is None
-            or vpn_sg_id is None
-            or public_subnets_ids is None
-            or kms_account_key_arn is None
+            vpc_id is None or public_subnets_ids is None or kms_account_key_arn is None
         ):
             raise UserErrors(
                 "You either need to have the base module present or specify a VPC id, security group to give to the"
@@ -41,9 +37,6 @@ class AwsVPNProcessor(ModuleProcessor):
         )
         self.module.data["vpc_id"] = self.module.data.get(
             "vpc_id", f"${{{{{base_module_source}.vpc_id}}}}"
-        )
-        self.module.data["vpn_sg_id"] = self.module.data.get(
-            "vpn_sg_id", f"${{{{{base_module_source}.vpn_sg_id}}}}"
         )
         self.module.data["public_subnets_ids"] = self.module.data.get(
             "public_subnets_ids", f"${{{{{base_module_source}.public_subnets_ids}}}}"

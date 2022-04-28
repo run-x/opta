@@ -29,11 +29,6 @@ inputs:
     validator: str(required=False)
     description: The version of the database to use.
     default: "10.2.0.0/22"
-  - name: vpn_sg_id
-    user_facing: true
-    validator: str(required=False)
-    description: The version of the database to use.
-    default: ""
   - name: public_subnets_ids
     user_facing: true
     validator: str(required=False)
@@ -45,10 +40,10 @@ outputs:
     description: The dns name of the vpn created
   - name: vpn_client_cert
     export: false
-    description: The dns name of the vpn created
+    description: The cert of the intermediate CA used to make client requests
   - name: vpn_client_key
     export: false
-    description: The dns name of the vpn created
+    description: The key of the intermediate CA used to make client requests
   - name: ovpn_profile_parameter_arn
     export: true
     description: The arn of the SSM parameter holding the ovpn profile for this VPN

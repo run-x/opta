@@ -50,32 +50,3 @@ resource "aws_security_group" "documentdb" {
     cidr_blocks = local.vpc_cidr_blocks
   }
 }
-
-
-resource "aws_security_group" "vpn" {
-  name_prefix = "opta-${var.env_name}-vpn"
-  description = "VPN security group."
-  vpc_id      = local.vpc_id
-
-  tags = {
-    "Name" = "opta-${var.env_name}-vpn"
-  }
-
-  ingress {
-    description = "allowssh"
-    from_port   = 443
-    protocol    = "tcp"
-    to_port     = 443
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    description = "alloutbound"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    # To be fixed - for now user can create an SG manually to override.
-    #tfsec:ignore:aws-vpc-no-public-egress-sgr
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}

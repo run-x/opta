@@ -6,8 +6,24 @@ data "aws_kms_key" "env_key" {
   key_id = var.kms_account_key_arn
 }
 
-data "aws_security_group" "vpn" {
-  id = var.vpn_sg_id
+resource "aws_security_group" "vpn" {
+  name_prefix = "opta-${var.env_name}-vpn"
+  description = "VPN security group."
+  vpc_id      = var.vpc_id
+
+  tags = {
+    "Name" = "opta-${var.env_name}-vpn"
+  }
+
+  egress {
+    description = "alloutbound"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    # To be fixed - for now user can create an SG manually to override.
+    #tfsec:ignore:aws-vpc-no-public-egress-sgr
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
 resource "random_id" "vpn_log_suffix" {
@@ -32,7 +48,7 @@ resource "aws_ec2_client_vpn_endpoint" "vpn" {
   #  server_certificate_arn = "arn:aws:acm:us-east-1:445935066876:certificate/877f3c93-61bc-4b19-90c3-137b1e6f24bc"
   client_cidr_block  = var.client_cidr_block
   vpc_id             = var.vpc_id
-  security_group_ids = [data.aws_security_group.vpn.id]
+  security_group_ids = [aws_security_group.vpn.id]
   split_tunnel       = true
 
   authentication_options {
