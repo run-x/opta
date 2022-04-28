@@ -25,3 +25,7 @@ output "public_subnets_ids" {
 output "public_nat_ips" {
   value = local.public_nat_ips
 }
+
+output "vpn_sg_id" {
+  value = aws_security_group.vpn.id
+}

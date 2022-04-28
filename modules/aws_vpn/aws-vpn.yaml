@@ -1,0 +1,58 @@
+halt: false
+environment_module: false
+metric_count: 1
+inputs:
+  - name: env_name
+    user_facing: false
+    description: Opta Environment name
+    default: None
+  - name: layer_name
+    user_facing: false
+    description: Opta Layer name
+    default: None
+  - name: module_name
+    user_facing: false
+    description: Opta Module name
+    default: None
+  - name: vpc_id
+    user_facing: true
+    validator: str(required=False)
+    description: This is the RDS instance type used for the Aurora cluster [instances](https://aws.amazon.com/rds/instance-types/).
+    default: db.t3.medium
+  - name: kms_account_key_arn
+    user_facing: true
+    validator: str(required=False)
+    description: The version of the database to use.
+    default: ""
+  - name: client_cidr_block
+    user_facing: true
+    validator: str(required=False)
+    description: The version of the database to use.
+    default: "10.2.0.0/22"
+  - name: vpn_sg_id
+    user_facing: true
+    validator: str(required=False)
+    description: The version of the database to use.
+    default: ""
+  - name: public_subnets_ids
+    user_facing: true
+    validator: str(required=False)
+    description: The version of the database to use.
+    default: ""
+outputs:
+  - name: vpn_dns_name
+    export: true
+    description: The dns name of the vpn created
+  - name: vpn_client_cert
+    export: false
+    description: The dns name of the vpn created
+  - name: vpn_client_key
+    export: false
+    description: The dns name of the vpn created
+  - name: ovpn_profile_parameter_arn
+    export: true
+    description: The arn of the SSM parameter holding the ovpn profile for this VPN
+output_providers: { }
+output_data: { }
+clouds:
+  - aws

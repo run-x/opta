@@ -49,6 +49,9 @@
             "$ref": "https://app.runx.dev/modules/aws-sqs"
           },
           {
+            "$ref": "https://app.runx.dev/modules/aws-vpn"
+          },
+          {
             "$ref": "https://app.runx.dev/modules/cloudfront-distribution"
           },
           {

@@ -1,0 +1,47 @@
+{
+  "$id": "https://app.runx.dev/modules/aws-vpn",
+  "description": "Creates base infrastructure for k8s environments",
+  "type": "object",
+  "properties": {
+    "vpc_id": {
+      "type": "string",
+      "description": "This is the RDS instance type used for the Aurora cluster [instances](https://aws.amazon.com/rds/instance-types/).",
+      "default": "db.t3.medium"
+    },
+    "kms_account_key_arn": {
+      "type": "string",
+      "description": "The version of the database to use.",
+      "default": ""
+    },
+    "client_cidr_block": {
+      "type": "string",
+      "description": "The version of the database to use.",
+      "default": "10.2.0.0/22"
+    },
+    "vpn_sg_id": {
+      "type": "string",
+      "description": "The version of the database to use.",
+      "default": ""
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "aws-vpn"
+      ],
+      "default": "aws-vpn",
+      "type": "string"
+    }
+  },
+  "opta_metadata": {
+    "module_type": "service",
+    "clouds": [
+      "aws"
+    ],
+    "name": "aws-vpn",
+    "display_name": "aws-vpn",
+    "tags": []
+  },
+  "required": [
+    "type"
+  ]
+}

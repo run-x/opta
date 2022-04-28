@@ -79,6 +79,9 @@ outputs:
   - name: "public_nat_ips"
     export: true
     description: Public static IP of nat gateway(s)
+  - name: vpn_sg_id
+    export: true
+    description: The security group to be given to VPNs.
 output_providers: { }
 output_data:
   aws_caller_identity:
