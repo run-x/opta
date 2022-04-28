@@ -4,10 +4,11 @@ import pytz
 from kubernetes.client import (
     ApiException,
     CoreV1Api,
+    EventsV1Api,
+    EventsV1Event,
+    EventsV1EventList,
     V1Deployment,
     V1DeploymentList,
-    V1Event,
-    V1EventList,
     V1PersistentVolumeClaim,
     V1PersistentVolumeClaimList,
     V1Pod,
@@ -212,9 +213,9 @@ class TestKubernetes:
 
     def test_tail_namespace_events(self, mocker: MockFixture) -> None:
         mocker.patch("opta.core.kubernetes.load_kube_config")
-        mocked_core_v1_api = mocker.Mock(spec=CoreV1Api)
-        mocked_core_v1_api_call = mocker.patch(
-            "opta.core.kubernetes.CoreV1Api", return_value=mocked_core_v1_api
+        mocked_events_v1_api = mocker.Mock(spec=EventsV1Api)
+        mocked_events_v1_api_call = mocker.patch(
+            "opta.core.kubernetes.EventsV1Api", return_value=mocked_events_v1_api
         )
         mocked_watch = mocker.Mock(spec=Watch)
         mocked_watch_call = mocker.patch(
@@ -224,35 +225,40 @@ class TestKubernetes:
         layer.name = "mocked_layer"
         layer.parent = None
         layer.providers = {"aws": {"region": "us-east-1", "account_id": "111111111111"}}
-        mocked_old_events = mocker.Mock(spec=V1EventList)
-        mocked_event_1 = mocker.Mock(spec=V1Event)
-        mocked_event_1.last_timestamp = datetime.datetime.now(
-            pytz.utc
-        ) - datetime.timedelta(seconds=1)
-        mocked_event_1.message = "blah1"
-        mocked_event_2 = mocker.Mock(spec=V1Event)
-        mocked_event_2.last_timestamp = datetime.datetime.now(
-            pytz.utc
-        ) - datetime.timedelta(seconds=100)
-        mocked_event_2.message = "blah2"
-        mocked_event_3 = mocker.Mock(spec=V1Event)
-        mocked_event_3.last_timestamp = datetime.datetime.now(
-            pytz.utc
-        ) - datetime.timedelta(seconds=10)
-        mocked_event_3.message = "blah3"
+        mocked_event_1 = mocker.Mock(spec=EventsV1Event)
+        mocked_event_1.series = None
+        mocked_event_1.event_time = datetime.datetime.now(pytz.utc) - datetime.timedelta(
+            seconds=1
+        )
+        mocked_event_1.note = "blah1"
+        mocked_event_2 = mocker.Mock(spec=EventsV1Event)
+        mocked_event_2.series = None
+        mocked_event_2.event_time = datetime.datetime.now(pytz.utc) - datetime.timedelta(
+            seconds=100
+        )
+        mocked_event_2.note = "blah2"
+        mocked_event_3 = mocker.Mock(spec=EventsV1Event)
+        mocked_event_3.series = None
+        mocked_event_3.event_time = datetime.datetime.now(pytz.utc) - datetime.timedelta(
+            seconds=10
+        )
+        mocked_event_3.note = "blah3"
+        mocked_old_events = mocker.Mock(spec=EventsV1EventList)
         mocked_old_events.items = [mocked_event_1, mocked_event_2, mocked_event_3]
-        mocked_core_v1_api.list_namespaced_event.return_value = mocked_old_events
+        mocked_events_v1_api.list_namespaced_event.return_value = mocked_old_events
 
-        mocked_event_4 = mocker.Mock(spec=V1Event)
-        mocked_event_4.last_timestamp = datetime.datetime.now(
-            pytz.utc
-        ) - datetime.timedelta(seconds=100)
-        mocked_event_4.message = "blah2"
-        mocked_event_5 = mocker.Mock(spec=V1Event)
-        mocked_event_5.last_timestamp = datetime.datetime.now(
-            pytz.utc
-        ) - datetime.timedelta(seconds=10)
-        mocked_event_5.message = "blah3"
+        mocked_event_4 = mocker.Mock(spec=EventsV1Event)
+        mocked_event_4.series = None
+        mocked_event_4.event_time = datetime.datetime.now(pytz.utc) - datetime.timedelta(
+            seconds=100
+        )
+        mocked_event_4.note = "blah2"
+        mocked_event_5 = mocker.Mock(spec=EventsV1Event)
+        mocked_event_5.series = None
+        mocked_event_5.event_time = datetime.datetime.now(pytz.utc) - datetime.timedelta(
+            seconds=10
+        )
+        mocked_event_5.note = "blah3"
 
         mocked_watch.stream.side_effect = [
             [{"object": mocked_event_4}],
@@ -268,11 +274,11 @@ class TestKubernetes:
 
         tail_namespace_events(layer, start_time, 3)
 
-        mocked_core_v1_api.list_namespaced_event.assert_called_once_with(
+        mocked_events_v1_api.list_namespaced_event.assert_called_once_with(
             namespace="mocked_layer"
         )
         mocked_watch_call.assert_called_once_with()
-        mocked_core_v1_api_call.assert_called_once_with()
+        mocked_events_v1_api_call.assert_called_once_with()
         mocked_time.sleep.assert_has_calls(
             [
                 mocker.call(1),
