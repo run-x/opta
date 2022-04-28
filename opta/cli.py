@@ -10,7 +10,6 @@ from colored import attr, fg
 import opta.sentry  # noqa: F401 This leads to initialization of sentry sdk
 from opta.cleanup_files import cleanup_files
 from opta.commands.apply import apply
-from opta.commands.config import config
 from opta.commands.deploy import deploy
 from opta.commands.destroy import destroy
 from opta.commands.events import events
@@ -24,6 +23,7 @@ from opta.commands.output import output
 from opta.commands.push import push
 from opta.commands.secret import secret
 from opta.commands.shell import shell
+from opta.commands.show import show
 from opta.commands.ui import ui
 from opta.commands.upgrade import upgrade
 from opta.commands.validate import validate
@@ -64,8 +64,8 @@ cli.add_command(events)
 cli.add_command(force_unlock)
 cli.add_command(upgrade)
 cli.add_command(generate_terraform)
-cli.add_command(config)
 cli.add_command(help)
+cli.add_command(show)
 
 
 if __name__ == "__main__":
