@@ -9,9 +9,9 @@ from opta.utils import logger
 
 
 @click.group(cls=DYMGroup)
-def config() -> None:
+def show() -> None:
     """
-    Manage opta configurations
+    Show opta related project details such as configurations and many more to be added soon.
     """
     pass
 
@@ -24,9 +24,9 @@ cloud_option = click.option(
 )
 
 
-@config.command()
+@show.command()
 @cloud_option
-def view(cloud: str) -> None:
+def config(cloud: str) -> None:
     """
     View the opta configuration file for a given cloud provider
 
