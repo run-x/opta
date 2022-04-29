@@ -363,7 +363,7 @@ class TestK8sServiceModuleProcessor:
             release=f"{layer.name}-{module_name}",
             status="pending-upgrade",
         )
-        mocked_check_byok_ready.assert_called_once()
+        mocked_check_byok_ready.assert_not_called()
 
     def test_pre_hook_pending_upgrade_service(self, mocker: MockFixture) -> None:
         layer = Layer.load_from_yaml(
@@ -393,7 +393,7 @@ class TestK8sServiceModuleProcessor:
             release=f"{layer.name}-{module_name}",
             status="pending-upgrade",
         )
-        mocked_check_byok_ready.assert_called_once()
+        mocked_check_byok_ready.assert_not_called()
 
     @staticmethod
     def transform_port(
