@@ -122,7 +122,6 @@ def test_generate_terraform_env(mocker: MockFixture) -> None:
             '"source": "./modules/aws_eks/tf_module"',
             '"env_name": "staging"',
             '"vpc_id": "${module.base.vpc_id}"',
-            "depends_on",
             "module.base",
         ],
     )
@@ -132,7 +131,6 @@ def test_generate_terraform_env(mocker: MockFixture) -> None:
             "k8sbase",
             '"source": "./modules/aws_k8s_base/tf_module"',
             '"module_name": "k8sbase"',
-            "depends_on",
             "module.k8scluster",
         ],
     )
