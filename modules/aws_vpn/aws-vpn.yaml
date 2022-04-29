@@ -38,10 +38,10 @@ outputs:
   - name: vpn_dns_name
     export: true
     description: The dns name of the vpn created
-  - name: vpn_client_cert
+  - name: vpn_ca_cert_parameter_arn
     export: false
     description: The cert of the intermediate CA used to make client requests
-  - name: vpn_client_key
+  - name: vpn_ca_key_parameter_arn
     export: false
     description: The key of the intermediate CA used to make client requests
   - name: ovpn_profile_parameter_arn

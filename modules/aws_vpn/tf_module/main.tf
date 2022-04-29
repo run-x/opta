@@ -45,7 +45,6 @@ resource "aws_cloudwatch_log_stream" "logs" {
 resource "aws_ec2_client_vpn_endpoint" "vpn" {
   description            = "opta-${var.env_name}-${var.module_name}"
   server_certificate_arn = aws_acm_certificate.server.arn
-  #  server_certificate_arn = "arn:aws:acm:us-east-1:445935066876:certificate/877f3c93-61bc-4b19-90c3-137b1e6f24bc"
   client_cidr_block  = var.client_cidr_block
   vpc_id             = var.vpc_id
   security_group_ids = [aws_security_group.vpn.id]
@@ -53,8 +52,7 @@ resource "aws_ec2_client_vpn_endpoint" "vpn" {
 
   authentication_options {
     type                       = "certificate-authentication"
-    root_certificate_chain_arn = aws_acm_certificate.client.arn
-    #    root_certificate_chain_arn = "arn:aws:acm:us-east-1:445935066876:certificate/f552e3da-0c41-407b-8108-da2c8053930f"
+    root_certificate_chain_arn = aws_acm_certificate.server.arn
   }
 
   connection_log_options {
