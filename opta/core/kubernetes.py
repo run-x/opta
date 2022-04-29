@@ -13,11 +13,13 @@ from kubernetes.client import (
     ApiException,
     AppsV1Api,
     CoreV1Api,
+    EventsV1Api,
+    EventsV1Event,
+    EventsV1EventSeries,
     V1ConfigMap,
     V1DeleteOptions,
     V1Deployment,
     V1DeploymentList,
-    V1Event,
     V1Namespace,
     V1ObjectMeta,
     V1ObjectReference,
@@ -535,11 +537,22 @@ def tail_pod_log(
                 return
 
 
-def do_not_show_event(event: V1Event) -> bool:
+def do_not_show_event(event: EventsV1Event) -> bool:
     return (
-        "unable to get metrics" in event.message
-        or "did not receive metrics" in event.message
+        "unable to get metrics" in event.note or "did not receive metrics" in event.note
     )
+
+
+def _event_last_observed(event: EventsV1Event) -> datetime.datetime:
+    """
+    Returns the last time an event was observed
+    """
+
+    if event.series:
+        series_data: EventsV1EventSeries = event.series
+        return series_data.last_observed_time
+
+    return event.event_time
 
 
 def tail_namespace_events(
@@ -548,28 +561,28 @@ def tail_namespace_events(
     color_idx: int = 15,  # White Color
 ) -> None:
     load_opta_kube_config()
-    v1 = CoreV1Api()
+    v1 = EventsV1Api()
     watch = Watch()
     print(f"{fg(color_idx)}Showing events for namespace {layer.name}{attr(0)}")
     retry_count = 0
-    old_events: List[V1Event] = v1.list_namespaced_event(namespace=layer.name).items
+    old_events: List[EventsV1Event] = v1.list_namespaced_event(namespace=layer.name).items
     # Filter by time
     if earliest_event_start_time is not None:
+        # Redefine so mypy doesn't complain about earliest_event_start_time being Optional during lambda call
+        filter_start_time = earliest_event_start_time
+
         old_events = list(
-            filter(
-                lambda x: (x.last_timestamp or x.event_time) > earliest_event_start_time,
-                old_events,
-            )
+            filter(lambda x: _event_last_observed(x) > filter_start_time, old_events,)
         )
     # Sort by timestamp
-    old_events = sorted(old_events, key=lambda x: (x.last_timestamp or x.event_time))
-    event: V1Event
+    old_events = sorted(old_events, key=lambda x: _event_last_observed(x))
+    event: EventsV1Event
     for event in old_events:
         if do_not_show_event(event):
             continue
-        earliest_event_start_time = event.last_timestamp or event.event_time
+        earliest_event_start_time = _event_last_observed(event)
         print(
-            f"{fg(color_idx)}{event.last_timestamp or event.event_time} Namespace {layer.name} event: {event.message}{attr(0)}"
+            f"{fg(color_idx)}{earliest_event_start_time} Namespace {layer.name} event: {event.note}{attr(0)}"
         )
     deleted_pods = set()
     while True:
@@ -578,14 +591,14 @@ def tail_namespace_events(
                 v1.list_namespaced_event, namespace=layer.name,
             ):
                 event = stream_obj["object"]
+                event_time = _event_last_observed(event)
                 if (
                     earliest_event_start_time is None
-                    or (event.last_timestamp or event.event_time)
-                    > earliest_event_start_time
+                    or event_time > earliest_event_start_time
                 ):
-                    if "Deleted pod:" in event.message:
-                        deleted_pods.add(event.message.split(" ")[-1])
-                    involved_object: Optional[V1ObjectReference] = event.involved_object
+                    if "Deleted pod:" in event.note:
+                        deleted_pods.add(event.note.split(" ")[-1])
+                    involved_object: Optional[V1ObjectReference] = event.regarding
                     if (
                         involved_object is not None
                         and involved_object.kind == "Pod"
@@ -595,7 +608,7 @@ def tail_namespace_events(
                     if do_not_show_event(event):
                         continue
                     print(
-                        f"{fg(color_idx)}{event.last_timestamp or event.event_time} Namespace {layer.name} event: {event.message}{attr(0)}"
+                        f"{fg(color_idx)}{event_time} Namespace {layer.name} event: {event.note}{attr(0)}"
                     )
         except ApiException as e:
             if retry_count < 5:
