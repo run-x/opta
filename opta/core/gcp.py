@@ -95,7 +95,7 @@ class GCP(CloudClient):
         credentials, project_id = self.get_credentials()
         gcs_client = storage.Client(project=project_id, credentials=credentials)
         bucket_object = gcs_client.get_bucket(bucket)
-        return self._download_remote_config(bucket_object, config_path)
+        return self._download_remote_blob(bucket_object, config_path)
 
     # Upload the current opta config to the state bucket, under opta_config/.
     def upload_opta_config(self) -> None:
@@ -187,7 +187,7 @@ class GCP(CloudClient):
             for response in storage_client.list_blobs(
                 bucket.name, prefix=prefix, delimiter="/"
             ):
-                structured_config = self._download_remote_config(bucket, response.name)
+                structured_config = self._download_remote_blob(bucket, response.name)
                 if structured_config:
                     config[response.name[len(prefix) :]] = structured_config
             if config:
@@ -195,7 +195,7 @@ class GCP(CloudClient):
         return opta_configs
 
     @staticmethod
-    def _download_remote_config(bucket: Bucket, key: str) -> Optional["StructuredConfig"]:
+    def _download_remote_blob(bucket: Bucket, key: str) -> Optional["StructuredConfig"]:
         try:
             blob = storage.Blob(key, bucket)
             return json.loads(blob.download_as_text())
@@ -298,3 +298,12 @@ class GCP(CloudClient):
             yaml.dump(cluster_config, f)
         constants.GENERATED_KUBE_CONFIG = kube_config_file_name
         return
+
+    def get_remote_state(self) -> str:
+        bucket = self.layer.state_storage()
+        tfstate_path = f"{self.layer.name}/default.tfstate"
+        credentials, project_id = self.get_credentials()
+        gcs_client = storage.Client(project=project_id, credentials=credentials)
+        bucket_object = gcs_client.get_bucket(bucket)
+        tf_state = self._download_remote_blob(bucket_object, tfstate_path)
+        return json.dumps(tf_state)

@@ -1,11 +1,16 @@
+from typing import Optional
+
 import click
 from click_didyoumean import DYMGroup
 
 from opta.core.aws import AWS
 from opta.core.cloud_client import CloudClient
 from opta.core.gcp import GCP
+from opta.core.terraform import Terraform
 from opta.exceptions import AzureNotImplemented
+from opta.layer import Layer
 from opta.utils import logger
+from opta.utils.clickoptions import config_option, env_option
 
 
 @click.group(cls=DYMGroup)
@@ -46,11 +51,24 @@ def config(cloud: str) -> None:
                 )
 
 
-def __get_cloud_client(cloud: str) -> CloudClient:
+@show.command()
+@config_option
+@env_option
+def tf_state(config: str, env: Optional[str]) -> None:
+    """
+    Show terraform state
+    """
+    layer = Layer.load_from_yaml(config, env)
+    cloud_client = __get_cloud_client(layer.cloud, layer=layer)
+    x = cloud_client.get_remote_state()
+    print(x)
+
+
+def __get_cloud_client(cloud: str, layer: Layer = None) -> CloudClient:
     cloud_client: CloudClient
     if cloud.lower() == "aws":
-        cloud_client = AWS()
+        cloud_client = AWS(layer=layer)
     elif cloud.lower() == "google":
-        cloud_client = GCP()
+        cloud_client = GCP(layer=layer)
 
     return cloud_client
