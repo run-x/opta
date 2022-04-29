@@ -6,7 +6,6 @@ from click_didyoumean import DYMGroup
 from opta.core.aws import AWS
 from opta.core.cloud_client import CloudClient
 from opta.core.gcp import GCP
-from opta.core.terraform import Terraform
 from opta.exceptions import AzureNotImplemented
 from opta.layer import Layer
 from opta.utils import logger
@@ -64,7 +63,7 @@ def tf_state(config: str, env: Optional[str]) -> None:
     print(x)
 
 
-def __get_cloud_client(cloud: str, layer: Layer = None) -> CloudClient:
+def __get_cloud_client(cloud: str, layer: Optional[Layer] = None) -> CloudClient:
     cloud_client: CloudClient
     if cloud.lower() == "aws":
         cloud_client = AWS(layer=layer)

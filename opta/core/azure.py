@@ -232,5 +232,5 @@ class Azure(CloudClient):
             check=True,
         )
 
-    def get_remote_state(self) -> None:
-        AzureNotImplemented("Feature Unsupported for Azure")
+    def get_remote_state(self) -> str:
+        raise AzureNotImplemented("Feature Unsupported for Azure")

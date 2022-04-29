@@ -144,7 +144,7 @@ class AWS(CloudClient):
             s3_client.delete_object(Bucket=bucket, Key=self.layer.name, VersionId=version)
         logger.info(f"Deleted opta tf state for {self.layer.name}")
 
-    def get_remote_state(self) -> None:
+    def get_remote_state(self) -> str:
         bucket = self.layer.state_storage()
         s3_client = boto3.client("s3", config=Config(region_name=self.region))
         tf_state = self._download_remote_blob(s3_client, bucket, self.layer.name)

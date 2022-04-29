@@ -47,5 +47,5 @@ class CloudClient(ABC):
         pass
 
     @abstractmethod
-    def get_remote_state(self) -> None:
+    def get_remote_state(self) -> str:
         pass
