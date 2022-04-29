@@ -22,7 +22,8 @@ one_time_run: Final = os.path.join(
 )
 
 REGISTRY: Final = make_registry_dict()
-VERSION: Final = open(version_path).read().strip()
+with open(version_path) as f:
+    VERSION: Final = f.read().strip()
 DEV_VERSION: Final = "dev"
 
 SESSION_ID: Final = int(time.time() * 1000)

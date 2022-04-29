@@ -81,7 +81,8 @@ def purge_opta_kube_config(layer: "Layer") -> None:
     kube_config_file_name = layer.get_kube_config_file_name()
     opta_config: dict
     if exists(kube_config_file_name):
-        opta_config = yaml.load(open(kube_config_file_name))
+        with open(kube_config_file_name) as f:
+            opta_config = yaml.load(f)
         remove(kube_config_file_name)
     else:
         return
@@ -92,7 +93,9 @@ def purge_opta_kube_config(layer: "Layer") -> None:
     if not exists(default_kube_config_filename):
         return
 
-    default_kube_config = yaml.load(open(default_kube_config_filename)) or {}
+    with open(default_kube_config_filename) as f:
+        default_kube_config = yaml.load(f) or {}
+
     opta_config_user = opta_config["users"][0]
     opta_config_context = opta_config["contexts"][0]
     opta_config_cluster = opta_config["clusters"][0]
@@ -122,7 +125,10 @@ def load_opta_kube_config_to_default(layer: "Layer") -> None:
             f"Can not find opta managed kube config, {kube_config_file_name}, to load to user default"
         )
         return
-    opta_config = yaml.load(open(kube_config_file_name))
+
+    with open(kube_config_file_name) as f:
+        opta_config = yaml.load(f)
+
     default_kube_config_filename = expanduser(
         constants.DEFAULT_KUBECONFIG.split(ENV_KUBECONFIG_PATH_SEPARATOR)[0]
     )
@@ -134,7 +140,9 @@ def load_opta_kube_config_to_default(layer: "Layer") -> None:
             yaml.dump(opta_config, f)
         return
     logger.debug("Loading kube config file")
-    default_kube_config = yaml.load(open(default_kube_config_filename))
+    with open(default_kube_config_filename) as f:
+        default_kube_config = yaml.load(f)
+
     opta_config_user = opta_config["users"][0]
     opta_config_context = opta_config["contexts"][0]
     opta_config_cluster = opta_config["clusters"][0]

@@ -233,7 +233,8 @@ class Module:
 
         # Read and parse each terraform file.
         for tf_file in tf_files:
-            tf_file_config = hcl2.load(open(tf_file))
+            with open(tf_file) as f:
+                tf_file_config = hcl2.load(f)
             tf_module_config[tf_file.name] = tf_file_config
 
         return tf_module_config

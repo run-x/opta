@@ -19,15 +19,15 @@ description: This section provides the list of module types for the user to use 
 
 def make_registry_dict() -> Dict[Any, Any]:
     registry_path = _registry_path()
-    registry_dict: Dict[Any, Any] = yaml.load(
-        open(os.path.join(registry_path, "index.yaml"))
-    )
+    with open(os.path.join(registry_path, "index.yaml")) as f:
+        registry_dict: Dict[Any, Any] = yaml.load(f)
     with open(os.path.join(registry_path, "index.md"), "r") as f:
         registry_dict["text"] = f.read()
     module_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "modules")
     for cloud in ["aws", "azurerm", "google", "local", "helm"]:
         cloud_path = os.path.join(registry_path, cloud)
-        cloud_dict = yaml.load(open(os.path.join(cloud_path, "index.yaml")))
+        with open(os.path.join(cloud_path, "index.yaml")) as f:
+            cloud_dict = yaml.load(f)
         cloud_dict["modules"] = {}
         with open(os.path.join(cloud_path, "index.md"), "r") as f:
             cloud_dict["text"] = f.read()
@@ -102,7 +102,8 @@ def _get_all_module_info(directory: str, cloud: str) -> list:
     all_md_files = glob.glob(directory + "/**/*.md", recursive=True)
     for a_yaml_path in all_yaml_files:
         try:
-            module_dict = yaml.load(open(a_yaml_path))
+            with open(a_yaml_path) as f:
+                module_dict = yaml.load(f)
             if not module_dict:
                 continue
         except:  # nosec # noqa
@@ -139,7 +140,8 @@ def _make_module_registry_dict(directory: str, cloud: str = "") -> Dict[Any, Any
     cloud_yamls_module_names = _get_all_module_info(directory, cloud)
     for module_name, a_yaml_path, a_md_path in cloud_yamls_module_names:
         try:
-            module_dict = yaml.load(open(a_yaml_path))
+            with open(a_yaml_path) as f:
+                module_dict = yaml.load(f)
             if not module_dict:
                 continue
         except:  # nosec # noqa

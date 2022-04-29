@@ -52,7 +52,8 @@ class LocalTests(unittest.TestCase):
 
     def test_upload_opta_config(self) -> None:
         self.local.upload_opta_config()
-        dict = json.load(open(self.local.config_file_path, "r"))
+        with open(self.local.config_file_path) as f:
+            dict = json.load(f)
         assert set(dict.keys()) == set(
             ["opta_version", "original_spec", "date", "defaults"]
         )

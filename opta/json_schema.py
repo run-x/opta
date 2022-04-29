@@ -54,8 +54,9 @@ def _get_module_json(module_name: str, directory: str) -> dict:
             f"No JSON Schema file detected for module {module_name}. Please create a file named {module_name}.json in the modules' subdirectory for this module."
         )
 
-    json_schema_file = open(json_schema_file_path)
-    module_json = json.load(json_schema_file)
+    with open(json_schema_file_path) as json_schema_file:
+        module_json = json.load(json_schema_file)
+
     module_json["name"] = module_name
     return module_json
 
@@ -77,8 +78,8 @@ def _check_opta_config_schemas(write: bool = False) -> None:
                 opta_config_schemas_path, f"{cloudjs}-{config_type}.json",
             )
 
-            json_schema_file = open(json_schema_file_path)
-            json_schema = json.load(json_schema_file)
+            with open(json_schema_file_path) as json_schema_file:
+                json_schema = json.load(json_schema_file)
             new_json_schema = deepcopy(json_schema)
 
             allowed_module_ids = sorted(
@@ -112,15 +113,17 @@ def _check_opta_config_schemas(write: bool = False) -> None:
 
 def _check_module_schemas(write: bool = False) -> None:
     for cloud in ["aws", "azurerm", "google", "local"]:
-        if cloud != "common":
-            index_yaml = yaml.load(open(join(registry_path, cloud, "index.yaml")))
+        with open(join(registry_path, cloud, "index.yaml")) as f:
+            index_yaml = yaml.load(f)
 
         module_info = _get_all_module_info(
             modules_path, CLOUD_NAME_TO_JSON_SCHEMA_NAME[cloud]
         )
 
         for module_name, yaml_path, _ in module_info:
-            module_registry_dict = yaml.load(open(yaml_path))
+            with open(yaml_path) as f:
+                module_registry_dict = yaml.load(f)
+
             json_schema = _get_module_json(module_name, dirname(yaml_path))
 
             new_json_schema = deepcopy(json_schema)

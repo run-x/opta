@@ -13,6 +13,8 @@ def one_time() -> None:
         return
 
     try:
-        open(one_time_run, "w").close()
+        with open(one_time_run, "w"):
+            # Just opening to create the file
+            pass
     except:  # noqa: E722
         sys.exit(1)
