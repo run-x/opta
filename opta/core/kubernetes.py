@@ -6,7 +6,7 @@ from logging import DEBUG
 from os import makedirs, remove
 from os.path import dirname, exists, expanduser
 from threading import Thread
-from typing import TYPE_CHECKING, Dict, FrozenSet, List, Optional, Set
+from typing import TYPE_CHECKING, Any, Dict, FrozenSet, List, Optional, Set
 
 from colored import attr, fg
 from kubernetes.client import (
@@ -16,11 +16,15 @@ from kubernetes.client import (
     EventsV1Api,
     EventsV1Event,
     EventsV1EventSeries,
+    NetworkingV1Api,
     V1ConfigMap,
     V1DeleteOptions,
     V1Deployment,
     V1DeploymentList,
+    V1IngressClass,
+    V1IngressClassList,
     V1Namespace,
+    V1NamespaceList,
     V1ObjectMeta,
     V1ObjectReference,
     V1PersistentVolumeClaim,
@@ -308,14 +312,18 @@ def delete_secret_key(namespace: str, secret_name: str, entry_name: str) -> None
     v1.replace_namespaced_secret(secret_name, namespace, current_secret_object)
 
 
-def list_namespaces() -> None:
+def list_namespaces() -> List[V1Namespace]:
     load_opta_kube_config()
     v1 = CoreV1Api()
     try:
-        v1.list_namespace()
+        namespaces: V1NamespaceList = v1.list_namespace()
     except ApiException as e:
         if e.reason == "Unauthorized" or e.status == 401:
             raise UserErrors("User does not have access to Kubernetes Cluster.")
+
+        raise
+
+    return namespaces.items
 
 
 def list_persistent_volume_claims(
@@ -552,7 +560,11 @@ def _event_last_observed(event: EventsV1Event) -> datetime.datetime:
         series_data: EventsV1EventSeries = event.series
         return series_data.last_observed_time
 
-    return event.event_time
+    if event.event_time:
+        return event.event_time
+
+    # Fall back to event creation
+    return event.metadata.creation_timestamp
 
 
 def tail_namespace_events(
@@ -623,9 +635,11 @@ def tail_namespace_events(
                 )
                 return
         except Exception as e:
+            # print(sys.exc_info()[2])
             logger.error(
                 f"{fg(color_idx)}Got the following error while trying to fetch the events in namespace {layer.name}: {e}{attr(0)}"
             )
+            logger.debug("Event watch exception", exc_info=True)
             return
 
 
@@ -681,3 +695,27 @@ def restart_deployments(namespace: str) -> None:
     for deploy in deployments:
         logger.info(f"Restarting deployment {deploy.metadata.name}")
         restart_deployment(namespace, deploy.metadata.name)
+
+
+def list_ingress_classes() -> List[V1IngressClass]:
+    load_opta_kube_config()
+    networking_client = NetworkingV1Api()
+
+    logger.debug("Listing ingress classes")
+    ingress_classes: V1IngressClassList = networking_client.list_ingress_class()
+    return ingress_classes.items
+
+
+# Monkey patch EventsV1Event.event_time to skip `not None` validation in setter.
+# See https://github.com/kubernetes-client/python/issues/1616
+def event_time_property_get_patch(self: EventsV1Event) -> Any:
+    return self._event_time
+
+
+def event_time_property_set_patch(self: EventsV1Event, value: Any) -> Any:
+    self._event_time = value
+
+
+EventsV1Event.event_time = property(
+    fget=event_time_property_get_patch, fset=event_time_property_set_patch
+)
