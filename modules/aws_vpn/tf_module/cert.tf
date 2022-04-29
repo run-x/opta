@@ -91,7 +91,7 @@ resource "tls_locally_signed_cert" "client_issuer_cert" {
   ca_key_algorithm      = tls_private_key.ca_key.algorithm
   ca_private_key_pem    = tls_private_key.ca_key.private_key_pem
   ca_cert_pem           = tls_self_signed_cert.ca_cert.cert_pem
-  validity_period_hours = 4380  # Half a year
+  validity_period_hours = 4380 # Half a year
   is_ca_certificate     = true
 
   allowed_uses = [

@@ -45,10 +45,10 @@ resource "aws_cloudwatch_log_stream" "logs" {
 resource "aws_ec2_client_vpn_endpoint" "vpn" {
   description            = "opta-${var.env_name}-${var.module_name}"
   server_certificate_arn = aws_acm_certificate.server.arn
-  client_cidr_block  = var.client_cidr_block
-  vpc_id             = var.vpc_id
-  security_group_ids = [aws_security_group.vpn.id]
-  split_tunnel       = true
+  client_cidr_block      = var.client_cidr_block
+  vpc_id                 = var.vpc_id
+  security_group_ids     = [aws_security_group.vpn.id]
+  split_tunnel           = true
 
   authentication_options {
     type                       = "certificate-authentication"
