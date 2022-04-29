@@ -30,6 +30,16 @@ resource "azurerm_monitor_diagnostic_setting" "infra_logging" {
     }
   }
 
+  log {
+    category = "AzurePolicyEvaluationDetails"
+    enabled  = false
+
+    retention_policy {
+      days    = 0
+      enabled = false
+    }
+  }
+
   metric {
     category = "AllMetrics"
 
@@ -53,6 +63,8 @@ resource "azurerm_log_analytics_workspace" "watcher" {
 }
 
 resource "azurerm_network_watcher_flow_log" "vpc_flow_log" {
+  name                 = "opta-${var.env_name}"
+  location             = data.azurerm_resource_group.opta.location
   network_watcher_name = data.azurerm_network_watcher.default.name
   resource_group_name  = "NetworkWatcherRG"
 

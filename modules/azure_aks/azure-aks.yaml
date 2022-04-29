@@ -68,19 +68,19 @@ inputs:
     default: "10.0.128.10"
 outputs:
   - name: k8s_endpoint
-    export: true
+    export: false
     description: The endpoint to communicate to the kubernetes cluster through.
   - name: k8s_ca_data
-    export: true
+    export: false
     description: The certificate authority used by the kubernetes cluster for ssl.
   - name: k8s_cluster_name
     export: true
     description: The name of the kubernetes cluster.
   - name: client_cert
-    export: true
+    export: false
     description: Base64 encoded public certificate used by clients to authenticate to the Kubernetes cluster.
   - name: client_key
-    export: true
+    export: false
     description: Base64 encoded private key used by clients to authenticate to the Kubernetes cluster.
 output_providers:
   helm:
