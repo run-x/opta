@@ -1,3 +1,8 @@
+data "azurerm_nat_gateway" "nat" {
+  name                = "opta-${var.env_name}-nat-gateway"
+  resource_group_name = data.azurerm_resource_group.opta.name
+}
+
 resource "azurerm_user_assigned_identity" "opta" {
   name                = "opta-${var.env_name}-aks"
   location            = data.azurerm_resource_group.opta.location
@@ -63,15 +68,13 @@ resource "azurerm_kubernetes_cluster" "main" {
     service_cidr       = var.service_cidr
     dns_service_ip     = var.dns_service_ip
     docker_bridge_cidr = "172.17.0.1/16"
+    outbound_type      = "userAssignedNATGateway"
   }
 
-  role_based_access_control {
-    enabled = true
-    azure_active_directory {
-      managed                = true
-      tenant_id              = data.azurerm_client_config.current.tenant_id
-      admin_group_object_ids = var.admin_group_object_ids
-    }
+  azure_active_directory_role_based_access_control {
+    managed                = true
+    tenant_id              = data.azurerm_client_config.current.tenant_id
+    admin_group_object_ids = var.admin_group_object_ids
   }
 
   default_node_pool {
@@ -86,8 +89,8 @@ resource "azurerm_kubernetes_cluster" "main" {
   }
 
   identity {
-    type                      = "UserAssigned"
-    user_assigned_identity_id = azurerm_user_assigned_identity.opta.id
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.opta.id]
   }
 
   kubelet_identity {
