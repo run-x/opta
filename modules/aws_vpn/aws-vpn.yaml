@@ -17,22 +17,22 @@ inputs:
   - name: vpc_id
     user_facing: true
     validator: str(required=False)
-    description: This is the RDS instance type used for the Aurora cluster [instances](https://aws.amazon.com/rds/instance-types/).
-    default: db.t3.medium
+    description: The id of the VPC to deploy the vpn to
+    default: ""
   - name: kms_account_key_arn
     user_facing: true
     validator: str(required=False)
-    description: The version of the database to use.
+    description: The arn of the kms key to use for encryption
     default: ""
   - name: client_cidr_block
     user_facing: true
     validator: str(required=False)
-    description: The version of the database to use.
+    description: The cidr block to use for provisiong client connections.
     default: "10.2.0.0/22"
   - name: public_subnets_ids
     user_facing: true
-    validator: str(required=False)
-    description: The version of the database to use.
+    validator: list(str(), required=False)
+    description: The public subnet ids to consider to do network association with.
     default: ""
 outputs:
   - name: vpn_dns_name

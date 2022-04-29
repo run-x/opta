@@ -5,17 +5,22 @@
   "properties": {
     "vpc_id": {
       "type": "string",
-      "description": "This is the RDS instance type used for the Aurora cluster [instances](https://aws.amazon.com/rds/instance-types/).",
-      "default": "db.t3.medium"
+      "description": "The id of the VPC to deploy the vpn to",
+      "default": ""
     },
     "kms_account_key_arn": {
       "type": "string",
-      "description": "The version of the database to use.",
+      "description": "The arn of the kms key to use for encryption",
+      "default": ""
+    },
+    "public_subnets_ids": {
+      "type": "list",
+      "description": "The public subnet ids to consider to do network association with.",
       "default": ""
     },
     "client_cidr_block": {
       "type": "string",
-      "description": "The version of the database to use.",
+      "description": "The cidr block to use for provisiong client connections.",
       "default": "10.2.0.0/22"
     },
     "type": {
