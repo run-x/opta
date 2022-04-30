@@ -1,25 +1,21 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, Tuple
 
 import click
 from click_didyoumean import DYMGroup
 
 from opta.amplitude import amplitude_client
 from opta.commands.apply import local_setup
-from opta.core.generator import gen_all
 from opta.core.kubernetes import (
     check_if_namespace_exists,
     create_namespace_if_not_exists,
+    delete_secret_key,
     restart_deployments,
     set_kube_config,
+    update_secrets,
 )
-from opta.core.secrets import (
-    bulk_update_manual_secrets,
-    delete_manual_secret,
-    get_secrets,
-    update_manual_secrets,
-)
+from opta.core.secrets import bulk_update_manual_secrets, get_secrets
 from opta.exceptions import UserErrors
-from opta.layer import Layer
+from opta.layer import Layer, Module
 from opta.utils import check_opta_file_exists, logger
 from opta.utils.clickoptions import (
     config_option,
@@ -39,9 +35,42 @@ restart_option = click.option(
     show_default=True,
 )
 
+module_option = click.option(
+    "-m", "--module", default=None, help="The module to get the secret for"
+)
 
-def __restart_deployments(no_restart: bool, layer_name: str) -> None:
-    restart_deployments(layer_name) if not no_restart else None
+
+def get_secret_name_and_namespace(
+    layer: Layer, module_name: Optional[str]
+) -> Tuple[str, str]:
+    k8s_services = layer.get_module_by_type("k8s-service")
+    helm_charts = layer.get_module_by_type("helm-chart")
+    total_modules = k8s_services + helm_charts
+    if module_name is None and len(total_modules) > 1:
+        module_name = click.prompt(
+            "Multiple k8s-service/helm chart modules found. Please specify which one do you want the secret for.",
+            type=click.Choice([x.name for x in total_modules]),
+        )
+    if module_name is None:
+        module: Module = total_modules[0]
+    else:
+        module = layer.get_module(module_name)  # type: ignore
+        if module is None:
+            raise UserErrors(
+                f"Could not find helm/k8s-service module with name {module_name}"
+            )
+
+    if module.type == "k8s-service":
+        return "manual-secrets", layer.name
+    else:
+        return (
+            f"opta-{layer.name}-{module.name}-secret",
+            module.data.get("namespace", "default"),
+        )
+
+
+def __restart_deployments(no_restart: bool, namespace: str) -> None:
+    restart_deployments(namespace) if not no_restart else None
 
 
 @click.group(cls=DYMGroup)
@@ -69,12 +98,14 @@ def secret() -> None:
 @config_option
 @input_variable_option
 @local_option
+@module_option
 def view(
     secret: str,
     env: Optional[str],
     config: str,
     local: Optional[bool],
     var: Dict[str, str],
+    module: Optional[str],
 ) -> None:
     """View a given secret of a k8s service
 
@@ -93,11 +124,11 @@ def view(
         event_properties={"org_name": layer.org_name, "layer_name": layer.name},
     )
     layer.verify_cloud_credentials()
-    gen_all(layer)
+    secret_name, namespace = get_secret_name_and_namespace(layer, module)
 
     set_kube_config(layer)
-    create_namespace_if_not_exists(layer.name)
-    secrets = get_secrets(layer.name)
+    create_namespace_if_not_exists(namespace)
+    secrets = get_secrets(namespace, secret_name)
     if secret not in secrets:
         raise UserErrors(
             f"We couldn't find a secret named {secret}. You either need to add it to your opta.yaml file or if it's"
@@ -112,8 +143,13 @@ def view(
 @env_option
 @input_variable_option
 @local_option
+@module_option
 def list_command(
-    env: Optional[str], config: str, local: Optional[bool], var: Dict[str, str]
+    env: Optional[str],
+    config: str,
+    local: Optional[bool],
+    var: Dict[str, str],
+    module: Optional[str],
 ) -> None:
     """List the secrets (names and values) for the given k8s service module
 
@@ -134,11 +170,11 @@ def list_command(
         env = "localopta"
     layer = Layer.load_from_yaml(config, env, input_variables=var)
     amplitude_client.send_event(amplitude_client.LIST_SECRETS_EVENT)
-    gen_all(layer)
+    secret_name, namespace = get_secret_name_and_namespace(layer, module)
 
     set_kube_config(layer)
-    create_namespace_if_not_exists(layer.name)
-    secrets = get_secrets(layer.name)
+    create_namespace_if_not_exists(namespace)
+    secrets = get_secrets(namespace, secret_name)
     for key, value in secrets.items():
         print(f"{key}={value}")
 
@@ -151,6 +187,7 @@ def list_command(
 @env_option
 @input_variable_option
 @local_option
+@module_option
 def update(
     secret: str,
     value: str,
@@ -159,6 +196,7 @@ def update(
     no_restart: bool,
     local: Optional[bool],
     var: Dict[str, str],
+    module: Optional[str],
 ) -> None:
     """Update a given secret of a k8s service with a new value
 
@@ -172,13 +210,13 @@ def update(
         config = local_setup(config, input_variables=var)
         env = "localopta"
     layer = Layer.load_from_yaml(config, env, input_variables=var)
-    gen_all(layer)
+    secret_name, namespace = get_secret_name_and_namespace(layer, module)
 
     set_kube_config(layer)
-    create_namespace_if_not_exists(layer.name)
+    create_namespace_if_not_exists(namespace)
     amplitude_client.send_event(amplitude_client.UPDATE_SECRET_EVENT)
-    update_manual_secrets(layer.name, {secret: str(value)})
-    __restart_deployments(no_restart, layer.name)
+    update_secrets(namespace, secret_name, {secret: str(value)})
+    __restart_deployments(no_restart, namespace)
 
     logger.info("Success")
 
@@ -190,6 +228,7 @@ def update(
 @env_option
 @input_variable_option
 @local_option
+@module_option
 def delete(
     secret: str,
     env: Optional[str],
@@ -197,6 +236,7 @@ def delete(
     no_restart: bool,
     local: Optional[bool],
     var: Dict[str, str],
+    module: Optional[str],
 ) -> None:
     """Delete a secret key from a k8s service
 
@@ -210,12 +250,12 @@ def delete(
         config = local_setup(config, input_variables=var)
         env = "localopta"
     layer = Layer.load_from_yaml(config, env, input_variables=var)
-    gen_all(layer)
+    secret_name, namespace = get_secret_name_and_namespace(layer, module)
 
     set_kube_config(layer)
-    if check_if_namespace_exists(layer.name):
-        delete_manual_secret(layer.name, secret)
-        __restart_deployments(no_restart, layer.name)
+    if check_if_namespace_exists(namespace):
+        delete_secret_key(namespace, secret_name, secret)
+        __restart_deployments(no_restart, namespace)
     amplitude_client.send_event(amplitude_client.UPDATE_SECRET_EVENT)
     logger.info("Success")
 
@@ -227,6 +267,7 @@ def delete(
 @env_option
 @input_variable_option
 @local_option
+@module_option
 def bulk_update(
     env_file: str,
     env: Optional[str],
@@ -234,6 +275,7 @@ def bulk_update(
     no_restart: bool,
     local: Optional[bool],
     var: Dict[str, str],
+    module: Optional[str],
 ) -> None:
     """Bulk update a list of secrets for a k8s service using a dotenv file as in input.
 
@@ -249,13 +291,13 @@ def bulk_update(
         config = local_setup(config, input_variables=var)
         env = "localopta"
     layer = Layer.load_from_yaml(config, env, input_variables=var)
-    gen_all(layer)
+    secret_name, namespace = get_secret_name_and_namespace(layer, module)
 
     set_kube_config(layer)
-    create_namespace_if_not_exists(layer.name)
+    create_namespace_if_not_exists(namespace)
     amplitude_client.send_event(amplitude_client.UPDATE_BULK_SECRET_EVENT)
 
-    bulk_update_manual_secrets(layer.name, env_file)
-    __restart_deployments(no_restart, layer.name)
+    bulk_update_manual_secrets(namespace, secret_name, env_file)
+    __restart_deployments(no_restart, namespace)
 
     logger.info("Success")
