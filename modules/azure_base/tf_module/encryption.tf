@@ -16,10 +16,6 @@ resource "azurerm_key_vault" "opta" {
   lifecycle {
     ignore_changes = [location]
   }
-  # network_acls {
-  #   bypass         = "AzureServices"
-  #   default_action = "Deny"
-  # }
 }
 
 resource "azurerm_key_vault_key" "acr" {
