@@ -42,8 +42,7 @@ variable "linkerd_high_availability" {
 }
 
 variable "private_key" {
-  type    = string
-  default = ""
+  type = string
 }
 
 variable "certificate_body" {

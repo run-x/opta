@@ -53,7 +53,8 @@ resource "azurerm_role_assignment" "azurerm_container_registry_agent_pool" {
   lifecycle { ignore_changes = [scope] }
 }
 
-
+# Ignore because we dont know which containers of users need to access API server
+# tfsec:ignore:azure-container-limit-authorized-ips
 resource "azurerm_kubernetes_cluster" "main" {
   name                = var.cluster_name
   location            = data.azurerm_resource_group.opta.location
