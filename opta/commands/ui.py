@@ -5,7 +5,7 @@ import click
 UI_URL = "https://app.runx.dev/yaml-generator"
 
 
-@click.command()
+@click.command(hidden=True)
 def ui() -> None:
     """
     Open the interactive UI
