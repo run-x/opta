@@ -48,7 +48,7 @@ def get_secret_name_and_namespace(
     total_modules = k8s_services + helm_charts
 
     if not total_modules:
-        raise UserErrors(f"No helm/k8s-service modules were configured")
+        raise UserErrors("No helm/k8s-service modules were configured")
     if module_name is None and len(total_modules) > 1:
         module_name = click.prompt(
             "Multiple k8s-service/helm chart modules found. Please specify which one do you want the secret for.",
