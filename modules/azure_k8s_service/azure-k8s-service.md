@@ -12,6 +12,35 @@ can even expose it to the world, complete with load balancing both internally an
 
 ## Features
 
+### Set custom environment variables
+
+Opta allows you to pass in custom environment variables to your k8s-service.
+
+Just use the `env_vars` field:
+
+```yaml
+name: hello
+environments:
+- name: staging
+  path: "opta.yaml"
+  modules:
+- name: hello
+  type: k8s-service
+  port:
+  http: 80
+  image: ghcr.io/run-x/hello-opta/hello-opta:main
+  healthcheck_path: "/"
+  public_uri: "/hello"
+  env_vars:
+    - name: "API_KEY"
+      value: "value"
+```
+
+With this configuration, your container will get an env var named `API_KEY` with
+the value `value`!
+
+You can also use [Opta's interpolation variables]((/features/variables)) features to refer to other values.
+
 ### External/Internal Image
 
 This module supports deploying from an "external" image repository (currently only public ones supported)
