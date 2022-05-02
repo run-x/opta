@@ -46,7 +46,7 @@ def get_secret_name_and_namespace(
     k8s_services = layer.get_module_by_type("k8s-service")
     helm_charts = layer.get_module_by_type("helm-chart")
     total_modules = k8s_services + helm_charts
-    
+
     if not total_modules:
         raise UserErrors(f"No helm/k8s-service modules were configured")
     if module_name is None and len(total_modules) > 1:
@@ -58,7 +58,9 @@ def get_secret_name_and_namespace(
         module: Module = total_modules[0]
     else:
         try:
-            module = next(module for module in total_modules if module.name == module_name)
+            module = next(
+                module for module in total_modules if module.name == module_name
+            )
         except StopIteration:
             raise UserErrors(
                 f"Could not find helm/k8s-service module with name {module_name}"
