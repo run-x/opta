@@ -39,9 +39,9 @@ resource "tls_private_key" "server_key" {
   rsa_bits  = "2048"
 }
 
-resource "tls_cert_request" "server_issuer_req" {
-  key_algorithm   = tls_private_key.server_issuer_key.algorithm
-  private_key_pem = tls_private_key.server_issuer_key.private_key_pem
+resource "tls_cert_request" "server_req" {
+  key_algorithm   = tls_private_key.server_key.algorithm
+  private_key_pem = tls_private_key.server_key.private_key_pem
   dns_names       = ["server"]
 
   subject {
