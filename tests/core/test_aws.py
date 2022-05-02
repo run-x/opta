@@ -1,6 +1,7 @@
 from datetime import datetime
 from unittest.mock import Mock
 
+import pytest
 from botocore.response import StreamingBody
 from mypy_boto3_dynamodb import DynamoDBClient
 from mypy_boto3_s3 import S3Client
@@ -9,6 +10,7 @@ from pytest_mock import MockFixture
 
 from opta.constants import GENERATED_KUBE_CONFIG_DIR
 from opta.core.aws import AWS
+from opta.exceptions import MissingState
 from opta.layer import Layer
 
 
@@ -187,6 +189,20 @@ class TestAWS:
             "opta.core.aws.AWS._download_remote_blob", return_value="""{"test": "test"}"""
         )
         AWS(layer=aws_layer).get_remote_state()
+        mock_download_remote_blob.assert_called_once_with(
+            mock_s3_client_instance, aws_layer.state_storage(), aws_layer.name
+        )
+
+    def test_get_remote_state_state_does_not_exist(
+        self, mocker: MockFixture, aws_layer: Mock
+    ) -> None:
+        mock_s3_client_instance = mocker.Mock(spec=S3Client)
+        mocker.patch("opta.core.aws.boto3.client", return_value=mock_s3_client_instance)
+        mock_download_remote_blob = mocker.patch(
+            "opta.core.aws.AWS._download_remote_blob", return_value=None
+        )
+        with pytest.raises(MissingState):
+            AWS(layer=aws_layer).get_remote_state()
         mock_download_remote_blob.assert_called_once_with(
             mock_s3_client_instance, aws_layer.state_storage(), aws_layer.name
         )

@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 import opta.constants as constants
 from opta.constants import ONE_WEEK_UNIX
 from opta.core.cloud_client import CloudClient
-from opta.exceptions import UserErrors
+from opta.exceptions import MissingState, UserErrors
 from opta.utils import fmt_msg, json, logger, yaml
 
 if TYPE_CHECKING:
@@ -148,6 +148,8 @@ class AWS(CloudClient):
         bucket = self.layer.state_storage()
         s3_client = boto3.client("s3", config=Config(region_name=self.region))
         tf_state = self._download_remote_blob(s3_client, bucket, self.layer.name)
+        if tf_state is None:
+            raise MissingState("TF state does not exist.")
         return json.dumps(tf_state, indent=4)
 
     def get_terraform_lock_id(self) -> str:

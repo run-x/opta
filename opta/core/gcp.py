@@ -19,7 +19,7 @@ from googleapiclient import discovery
 import opta.constants as constants
 from opta.constants import ONE_WEEK_UNIX
 from opta.core.cloud_client import CloudClient
-from opta.exceptions import UserErrors
+from opta.exceptions import MissingState, UserErrors
 from opta.utils import fmt_msg, json, logger, yaml
 from opta.utils.dependencies import ensure_installed
 
@@ -306,4 +306,6 @@ class GCP(CloudClient):
         gcs_client = storage.Client(project=project_id, credentials=credentials)
         bucket_object = gcs_client.get_bucket(bucket)
         tf_state = self._download_remote_blob(bucket_object, tfstate_path)
-        return json.dumps(tf_state)
+        if tf_state is None:
+            raise MissingState("TF state does not exist.")
+        return json.dumps(tf_state, indent=4)

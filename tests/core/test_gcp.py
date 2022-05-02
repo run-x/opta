@@ -1,11 +1,13 @@
 from unittest.mock import Mock
 
+import pytest
 from google.auth.credentials import Credentials
 from google.cloud.storage import Blob, Bucket, Client
 from pytest import fixture
 from pytest_mock import MockFixture
 
 from opta.core.gcp import GCP
+from opta.exceptions import MissingState
 from opta.layer import Layer
 
 
@@ -199,6 +201,26 @@ class TestGcp:
             "opta.core.gcp.GCP._download_remote_blob", return_value="""{"test": "test}"""
         )
         GCP(layer=gcp_layer).get_remote_state()
+        mock_download_remote_blob.assert_called_once_with(
+            mock_bucket_instance, f"{gcp_layer.name}/default.tfstate"
+        )
+
+    def test_get_remote_state_state_does_not_exist(
+        self, mocker: MockFixture, gcp_layer: Mock
+    ) -> None:
+        mocker.patch(
+            "opta.core.gcp.default",
+            return_value=(mocker.Mock(spec=Credentials), "dummy_project_id"),
+        )
+        mock_bucket_instance = mocker.Mock(spec=Bucket)
+        mocker.patch(
+            "opta.core.gcp.storage.Client.get_bucket", return_value=mock_bucket_instance
+        )
+        mock_download_remote_blob = mocker.patch(
+            "opta.core.gcp.GCP._download_remote_blob", return_value=None
+        )
+        with pytest.raises(MissingState):
+            GCP(layer=gcp_layer).get_remote_state()
         mock_download_remote_blob.assert_called_once_with(
             mock_bucket_instance, f"{gcp_layer.name}/default.tfstate"
         )
