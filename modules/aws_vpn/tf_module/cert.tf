@@ -34,7 +34,7 @@ resource "aws_ssm_parameter" "ca_key" {
   value       = tls_private_key.ca_key.private_key_pem
 }
 
-resource "tls_private_key" "server_issuer_key" {
+resource "tls_private_key" "server_key" {
   algorithm = "RSA"
   rsa_bits  = "2048"
 }
