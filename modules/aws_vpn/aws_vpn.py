@@ -41,4 +41,4 @@ class AwsVPNProcessor(ModuleProcessor):
         self.module.data["kms_account_key_arn"] = self.module.data.get(
             "kms_account_key_arn", f"${{{{{base_module_source}.kms_account_key_arn}}}}"
         )
-        super(AwsVPNProcessor, self).process(module_idx)
+        super().process(module_idx)
