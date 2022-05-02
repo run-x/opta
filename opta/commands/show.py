@@ -6,7 +6,7 @@ from click_didyoumean import DYMGroup
 from opta.core.aws import AWS
 from opta.core.cloud_client import CloudClient
 from opta.core.gcp import GCP
-from opta.exceptions import AzureNotImplemented
+from opta.exceptions import AzureNotImplemented, UserErrors
 from opta.layer import Layer
 from opta.utils import logger
 from opta.utils.clickoptions import config_option, env_option
@@ -58,7 +58,7 @@ def tf_state(config: str, env: Optional[str]) -> None:
     Show terraform state
     """
     layer = Layer.load_from_yaml(config, env)
-    cloud_client = __get_cloud_client(layer.cloud, layer=layer)
+    cloud_client = layer.get_cloud_client()
     x = cloud_client.get_remote_state()
     print(x)
 
@@ -69,5 +69,7 @@ def __get_cloud_client(cloud: str, layer: Optional[Layer] = None) -> CloudClient
         cloud_client = AWS(layer=layer)
     elif cloud.lower() == "google":
         cloud_client = GCP(layer=layer)
+    else:
+        raise UserErrors(f"Can't get client for cloud {cloud}")
 
     return cloud_client
