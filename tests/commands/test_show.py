@@ -7,7 +7,7 @@ from opta.commands.show import config
 from opta.layer import StructuredConfig
 
 
-def test_show_config_view(mocker: MockFixture) -> None:
+def test_show_config(mocker: MockFixture) -> None:
     mock_bucket = "test-bucket"
     mock_config = "test-config"
     mock_yaml_config = "test-yaml-config"

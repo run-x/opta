@@ -179,3 +179,14 @@ class TestAWS:
         AWS().get_all_remote_configs()
         mock_s3_client_instance.list_objects.assert_not_called()
         mock_download_remote_blob.assert_not_called()
+
+    def test_get_remote_state(self, mocker: MockFixture, aws_layer: Mock) -> None:
+        mock_s3_client_instance = mocker.Mock(spec=S3Client)
+        mocker.patch("opta.core.aws.boto3.client", return_value=mock_s3_client_instance)
+        mock_download_remote_blob = mocker.patch(
+            "opta.core.aws.AWS._download_remote_blob", return_value="""{"test": "test"}"""
+        )
+        AWS(layer=aws_layer).get_remote_state()
+        mock_download_remote_blob.assert_called_once_with(
+            mock_s3_client_instance, aws_layer.state_storage(), aws_layer.name
+        )

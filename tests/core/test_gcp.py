@@ -185,3 +185,20 @@ class TestGcp:
         mocker_list_bucket_call.assert_called_once()
         mocker_list_blob_call.assert_not_called()
         mock_download_remote_blob.assert_not_called()
+
+    def test_get_remote_state(self, mocker: MockFixture, gcp_layer: Mock) -> None:
+        mocker.patch(
+            "opta.core.gcp.default",
+            return_value=(mocker.Mock(spec=Credentials), "dummy_project_id"),
+        )
+        mock_bucket_instance = mocker.Mock(spec=Bucket)
+        mocker.patch(
+            "opta.core.gcp.storage.Client.get_bucket", return_value=mock_bucket_instance
+        )
+        mock_download_remote_blob = mocker.patch(
+            "opta.core.gcp.GCP._download_remote_blob", return_value="""{"test": "test}"""
+        )
+        GCP(layer=gcp_layer).get_remote_state()
+        mock_download_remote_blob.assert_called_once_with(
+            mock_bucket_instance, f"{gcp_layer.name}/default.tfstate"
+        )
