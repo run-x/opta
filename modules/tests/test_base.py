@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional, Tuple, Type
 
 import pytest
 from dns.resolver import NoNameservers
+from kubernetes.client import V1Namespace, V1NamespaceStatus, V1ObjectMeta
 from pytest_mock import MockFixture
 
 from modules.base import (
@@ -205,6 +206,29 @@ class TestK8sBaseModuleProcessor:
         assert actual == expected
 
 
+# Not a method of TestK8sServiceModuleProcessor since we need it in decorators before TestK8sServiceModuleProcessor is complete
+def make_linkerd_ns(
+    *,
+    no_labels: bool = False,
+    linkerd_label: Optional[str] = None,
+    phase: Optional[str] = None,
+) -> V1Namespace:
+    meta = V1ObjectMeta()
+    ns = V1Namespace(metadata=meta)
+    if not no_labels:
+        labels: Dict[str, str] = {"foo": "bar"}
+        meta.labels = labels
+
+        if linkerd_label is not None:
+            labels["linkerd.io/is-control-plane"] = linkerd_label
+
+    if phase:
+        status = V1NamespaceStatus(phase=phase)
+        ns.status = status
+
+    return ns
+
+
 class TestK8sServiceModuleProcessor:
     @pytest.fixture
     def processor(self) -> K8sServiceModuleProcessor:
@@ -214,6 +238,55 @@ class TestK8sServiceModuleProcessor:
         processor.FLAG_MULTIPLE_PORTS_SUPPORTED = True
 
         return processor
+
+    def test_is_linkerd_installed_not_installed(
+        self, mocker: MockFixture, processor: K8sServiceModuleProcessor
+    ) -> None:
+        mock_list_namespaces = mocker.patch("modules.base.kubernetes.list_namespaces")
+        mock_list_namespaces.return_value = [
+            make_linkerd_ns(),
+            make_linkerd_ns(no_labels=True),
+            make_linkerd_ns(linkerd_label="true", phase="Terminating"),
+        ]
+
+        assert processor._is_linkerd_installed() is False
+        mock_list_namespaces.assert_called_once()
+
+    def test_is_linkerd_installed(
+        self, mocker: MockFixture, processor: K8sServiceModuleProcessor
+    ) -> None:
+        mock_list_namespaces = mocker.patch("modules.base.kubernetes.list_namespaces")
+        mock_list_namespaces.return_value = [
+            make_linkerd_ns(),
+            make_linkerd_ns(no_labels=True),
+            make_linkerd_ns(linkerd_label="true", phase="Terminating"),
+            make_linkerd_ns(linkerd_label="true", phase="Active"),
+        ]
+
+        assert processor._is_linkerd_installed() is True
+        mock_list_namespaces.assert_called_once()
+
+    @pytest.mark.parametrize(
+        ["ns", "expected"],
+        [
+            [make_linkerd_ns(), False],
+            [make_linkerd_ns(no_labels=True), False],
+            [make_linkerd_ns(linkerd_label="false"), False],
+            [make_linkerd_ns(linkerd_label="foo"), False],
+            [make_linkerd_ns(linkerd_label=""), False],
+            [make_linkerd_ns(linkerd_label="TRUE", phase="Terminating"), False],
+            [make_linkerd_ns(linkerd_label="true", phase="Terminating"), False],
+            [make_linkerd_ns(linkerd_label="TRUE", phase="Active"), True],
+            [make_linkerd_ns(linkerd_label="true", phase="Active"), True],
+        ],
+    )
+    def test_is_linkerd_ns(self, ns: V1Namespace, expected: bool) -> None:
+        assert self.is_linkerd_ns(ns) == expected
+
+    @staticmethod
+    def is_linkerd_ns(ns: V1Namespace) -> bool:
+        # Call mangled method since
+        return K8sServiceModuleProcessor._K8sServiceModuleProcessor__is_linkerd_ns(ns)  # type: ignore
 
     def process_ports_assert(
         self,
@@ -281,12 +354,16 @@ class TestK8sServiceModuleProcessor:
         mocked_helm_list = mocker.patch(
             "modules.base.Helm.get_helm_list", return_value=[]
         )
+        mocked_check_byok_ready = mocker.patch(
+            "modules.base.K8sServiceModuleProcessor._check_byok_ready"
+        )
         K8sServiceModuleProcessor(module, layer).pre_hook(idx)
         mocked_helm_list.assert_called_once_with(
             kube_context=mocker.ANY,
             release=f"{layer.name}-{module_name}",
             status="pending-upgrade",
         )
+        mocked_check_byok_ready.assert_not_called()
 
     def test_pre_hook_pending_upgrade_service(self, mocker: MockFixture) -> None:
         layer = Layer.load_from_yaml(
@@ -306,6 +383,9 @@ class TestK8sServiceModuleProcessor:
             "modules.base.Helm.get_helm_list",
             return_value=[{"name": f"{layer.name}-{module_name}"}],
         )
+        mocked_check_byok_ready = mocker.patch(
+            "modules.base.K8sServiceModuleProcessor._check_byok_ready"
+        )
         with pytest.raises(UserErrors):
             K8sServiceModuleProcessor(module, layer).pre_hook(idx)
         mocked_helm_list.assert_called_once_with(
@@ -313,6 +393,7 @@ class TestK8sServiceModuleProcessor:
             release=f"{layer.name}-{module_name}",
             status="pending-upgrade",
         )
+        mocked_check_byok_ready.assert_not_called()
 
     @staticmethod
     def transform_port(

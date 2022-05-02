@@ -23,6 +23,7 @@ from opta.constants import REGISTRY
 from opta.core import kubernetes
 from opta.core.aws import AWS
 from opta.core.helm import Helm
+from opta.core.helm_cloud_client import HelmCloudClient
 from opta.core.terraform import get_terraform_outputs
 from opta.exceptions import UserErrors
 from opta.utils import RawString, hydrate, json, logger
@@ -197,7 +198,14 @@ class K8sServiceModuleProcessor(ModuleProcessor):
 
     def pre_hook(self, module_idx: int) -> None:
         release_name = f"{self.layer.name}-{self.module.name}"
-        kube_context = self.layer.get_cloud_client().get_kube_context_name()
+        cloud_client = self.layer.get_cloud_client()
+
+        # TODO(patrick): We could probably just always run this check
+        # If we are running a BYOK cluster, make sure linkerd and nginx are installed.
+        if isinstance(cloud_client, HelmCloudClient):
+            self._check_byok_ready()
+
+        kube_context = cloud_client.get_kube_context_name()
         pending_upgrade_helm_chart = Helm.get_helm_list(
             kube_context=kube_context, release=release_name, status="pending-upgrade"
         )
@@ -289,6 +297,47 @@ class K8sServiceModuleProcessor(ModuleProcessor):
             )
 
         super(K8sServiceModuleProcessor, self).post_delete(module_idx)
+
+    def _check_byok_ready(self) -> None:
+        errors = []
+        if not self._is_linkerd_installed():
+            errors.append("Linkerd2 is not installed on the cluster")
+
+        if not self._is_nginx_ingress_installed():
+            errors.append("NGINX ingress controller is not installed on the cluster")
+
+        if not errors:
+            return
+
+        # If we have more than 2 checks, we need to make this join smarter so the message isn't "foo and bar and spam"
+        msg = " and ".join(errors)
+
+        raise UserErrors(msg)
+
+    def _is_linkerd_installed(self) -> bool:
+        # Check if linkerd namespace exists
+        namespaces = kubernetes.list_namespaces()
+
+        return any(self.__is_linkerd_ns(ns) for ns in namespaces)
+
+    @staticmethod
+    def __is_linkerd_ns(ns: kubernetes.V1Namespace) -> bool:
+        meta: kubernetes.V1ObjectMeta = ns.metadata
+        if not meta.labels:
+            return False
+
+        is_control_plane: str = meta.labels.get("linkerd.io/is-control-plane", "false")
+
+        if is_control_plane.lower() != "true":
+            return False
+
+        # Fail check if the linkerd namespace is being deleted
+        return ns.status.phase == "Active"
+
+    def _is_nginx_ingress_installed(self) -> bool:
+        ingress_classes = kubernetes.list_ingress_classes()
+
+        return any(cls.metadata.name == "nginx" for cls in ingress_classes)
 
     def _extra_ports_controller(self) -> None:
         reconcile_nginx_extra_ports()
