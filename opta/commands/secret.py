@@ -54,11 +54,12 @@ def get_secret_name_and_namespace(
     if module_name is None:
         module: Module = total_modules[0]
     else:
-        module = layer.get_module(module_name)  # type: ignore
-        if module is None:
+        try:
+            module = next(module for module in total_modules if module.name == module_name)
+        except StopIteration:
             raise UserErrors(
                 f"Could not find helm/k8s-service module with name {module_name}"
-            )
+            ) from None
 
     if module.type == "k8s-service":
         return "manual-secrets", layer.name
