@@ -9,9 +9,6 @@ if TYPE_CHECKING:
 
 
 class AwsVPNProcessor(ModuleProcessor):
-    def __init__(self, module: "Module", layer: "Layer"):
-        super().__init__(module, layer)
-
     def process(self, module_idx: int) -> None:
         aws_base_modules = self.layer.get_module_by_type("aws-base", module_idx)
         vpc_id = self.module.data.get("vpc_id")
