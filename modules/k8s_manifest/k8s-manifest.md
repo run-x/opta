@@ -1,6 +1,6 @@
 ---
-title: "kubernetes-manifest"
-linkTitle: "kubernetes-manifest"
+title: "k8s-manifest"
+linkTitle: "k8s-manifest"
 date: 2022-01-11
 draft: false
 weight: 1
