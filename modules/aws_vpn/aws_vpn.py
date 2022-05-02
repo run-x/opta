@@ -1,11 +1,5 @@
-from typing import TYPE_CHECKING
-
 from modules.base import ModuleProcessor
 from opta.exceptions import UserErrors
-
-if TYPE_CHECKING:
-    from opta.layer import Layer
-    from opta.module import Module
 
 
 class AwsVPNProcessor(ModuleProcessor):
