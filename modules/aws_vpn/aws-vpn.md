@@ -4,7 +4,7 @@ linkTitle: "aws-vpn"
 date: 2022-04-28
 draft: false
 weight: 1
-description: Creates an AWS VPN endpoint for folks to access your private Opta network
+description: Creates an AWS VPN endpoint for folks to access their private Opta network
 ---
 
 This module sets up an [AWS Client VPN Endpoint](https://aws.amazon.com/vpn/client-vpn/) for you. For those new to
@@ -36,17 +36,16 @@ For upcoming work, it's best to place it just after the base module instead of a
 Run `opta apply` and you should be good to go!
 
 ## Setting Up the Client
-Short story:
 AWS VPN uses the OpenVPN client and the ovpn file format to set up the configuration for the connection profile. Opta
-makes a default profile for you and store is in an SSM parameter which you can fetch it from (refer to the 
+makes a default profile for you and stores it in an SSM parameter which you can fetch it from (refer to the 
 `ovpn_profile_parameter_arn` output). Simply fetch the value from this parameter, write it into a .ovpn file locally
-and tell your OpenVPN client to import a new profile from said file. And that's it!
+and tell your OpenVPN client to import a new profile from said file.
 
-Long Story:
 Our VPN uses mTLS to handle the network encryption and validation of both the server and each client connecting to it.
 Opta creates a brand new Certificate Authority to provision the certs for both the servers and clients. As in larger
 companies it's an important security consideration to revoke VPN access on a per-person use case, it's highly 
-recommended to generate a new client key/cert for each user. This can be done in the following steps:
+recommended to generate a new client key/cert for each user. This can be done in the following steps (steps 2-5
+will be repeated for each new user):
 
 1. Download the certificate and key of the CA created for your VPN. Again, we store them as SSM parameters whose 
    arns are the outputs `vpn_ca_cert_parameter_arn` and `vpn_ca_key_parameter_arn`. Name them `rootCA.crt` and
@@ -78,6 +77,6 @@ with the new key and cert just created. Create a new OpenVPN profile from it and
 * You can monitor current connections from thr AWS console by going to the VPN endpoint resource.
 
 ## Caveats
-* Note that the default client certificate and the one displayed above is set to expire after 6 months. This short
+* Note that the default client certificate and the one displayed above is set to expire after 2 years. This short
   lifetime is intentional due to the security risk of having a VPN profile be valid for too long.
 * You will need to use certificate revocation lists to revoke individual certificates.
