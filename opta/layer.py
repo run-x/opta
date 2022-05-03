@@ -84,6 +84,7 @@ PROCESSOR_DICT: Dict[str, str] = {
     "k8s-manifest": "K8smanifestProcessor",
     "azure-aks": "AzureAksProcessor",
     "global-accelerator": "GlobalAcceleratorsProcessor",
+    "aws-vpn": "AwsVPNProcessor",
 }
 
 
@@ -463,30 +464,19 @@ class Layer:
             RunxProcessor(self.parent.get_module("runx"), self).process(  # type:ignore
                 module_idx
             )
-        previous_module_reference = None
         for module in self.modules[0 : module_idx + 1]:
             output_prefix = (
                 None if len(self.get_module_by_type(module.type)) == 1 else module.name
             )
-            try:
-                existing_defaults: Optional[List[StructuredDefault]] = None
-                if existing_config is not None:
-                    existing_defaults = existing_config.get("defaults", {}).get(
-                        module.name
-                    )
-                ret = deep_merge(
-                    module.gen_tf(
-                        depends_on=previous_module_reference,
-                        output_prefix=output_prefix,
-                        existing_defaults=existing_defaults,
-                    ),
-                    ret,
-                )
-            except Exception as e:
-                # I dunno why we were swallowing this
-                raise e
-            if module.desc.get("halt"):
-                previous_module_reference = [f"module.{module.name}"]
+            existing_defaults: Optional[List[StructuredDefault]] = None
+            if existing_config is not None:
+                existing_defaults = existing_config.get("defaults", {}).get(module.name)
+            ret = deep_merge(
+                module.gen_tf(
+                    output_prefix=output_prefix, existing_defaults=existing_defaults,
+                ),
+                ret,
+            )
         ret["output"] = ret.get("output", {})
         ret["output"]["state_storage"] = {"value": self.state_storage()}
 

@@ -1,0 +1,47 @@
+{
+  "$id": "https://app.runx.dev/modules/aws-vpn",
+  "description": "Creates base infrastructure for k8s environments",
+  "type": "object",
+  "properties": {
+    "vpc_id": {
+      "type": "string",
+      "description": "The id of the VPC to deploy the vpn to",
+      "default": ""
+    },
+    "kms_account_key_arn": {
+      "type": "string",
+      "description": "The arn of the kms key to use for encryption",
+      "default": ""
+    },
+    "public_subnets_ids": {
+      "type": "list",
+      "description": "The public subnet ids to consider to do network association with.",
+      "default": ""
+    },
+    "client_cidr_block": {
+      "type": "string",
+      "description": "The cidr block to use for provisiong client connections.",
+      "default": "10.2.0.0/22"
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "aws-vpn"
+      ],
+      "default": "aws-vpn",
+      "type": "string"
+    }
+  },
+  "opta_metadata": {
+    "module_type": "service",
+    "clouds": [
+      "aws"
+    ],
+    "name": "aws-vpn",
+    "display_name": "aws-vpn",
+    "tags": []
+  },
+  "required": [
+    "type"
+  ]
+}
