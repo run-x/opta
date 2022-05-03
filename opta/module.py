@@ -126,6 +126,8 @@ class Module:
                 entry: Dict[Any, Any] = {
                     "value": f"${{{{module.{self.name}.{output_name} }}}}"
                 }
+                if output.get("sensitive"):
+                    entry["sensitive"] = True
                 output_key = (
                     output_name
                     if output_prefix is None
