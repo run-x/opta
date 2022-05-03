@@ -20,9 +20,7 @@ resource "aws_security_group" "vpn" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    # To be fixed - for now user can create an SG manually to override.
-    #tfsec:ignore:aws-vpc-no-public-egress-sgr
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [data.aws_vpc.vpc.cidr_block]
   }
 }
 
