@@ -36,6 +36,10 @@ def upgrade() -> None:
     """
     Upgrade Opta to the latest version available
     """
+    _upgrade()
+
+
+def _upgrade() -> None:
     try:
         upgrade_present = check_version_upgrade(is_upgrade_call=True)
         if upgrade_present:
