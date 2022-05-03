@@ -45,3 +45,7 @@ class CloudClient(ABC):
     @abstractmethod
     def get_kube_context_name(self) -> str:
         pass
+
+    @abstractmethod
+    def get_remote_state(self) -> str:
+        pass

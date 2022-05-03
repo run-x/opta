@@ -67,6 +67,9 @@ class Local(CloudClient):
     def get_all_remote_configs(self) -> Dict[str, Dict[str, "StructuredConfig"]]:
         raise LocalNotImplemented("Feature Unsupported for Local")
 
+    def get_remote_state(self) -> str:
+        raise LocalNotImplemented("Feature Unsupported for Local")
+
     def set_kube_config(self) -> None:
         nice_run(
             ["kubectl", "config", "use-context", "kind-opta-local-cluster"],

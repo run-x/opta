@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 import opta.constants as constants
 from opta.constants import ONE_WEEK_UNIX
 from opta.core.cloud_client import CloudClient
-from opta.exceptions import UserErrors
+from opta.exceptions import MissingState, UserErrors
 from opta.utils import fmt_msg, json, logger, yaml
 
 if TYPE_CHECKING:
@@ -92,7 +92,7 @@ class AWS(CloudClient):
         config_path = f"opta_config/{self.layer.name}"
 
         s3_client = boto3.client("s3", config=Config(region_name=self.region))
-        return self._download_remote_config(s3_client, bucket, config_path)
+        return self._download_remote_blob(s3_client, bucket, config_path)
 
     # Upload the current opta config to the state bucket, under opta_config/.
     def upload_opta_config(self) -> None:
@@ -144,6 +144,14 @@ class AWS(CloudClient):
             s3_client.delete_object(Bucket=bucket, Key=self.layer.name, VersionId=version)
         logger.info(f"Deleted opta tf state for {self.layer.name}")
 
+    def get_remote_state(self) -> str:
+        bucket = self.layer.state_storage()
+        s3_client = boto3.client("s3", config=Config(region_name=self.region))
+        tf_state = self._download_remote_blob(s3_client, bucket, self.layer.name)
+        if tf_state is None:
+            raise MissingState("TF state does not exist.")
+        return json.dumps(tf_state, indent=4)
+
     def get_terraform_lock_id(self) -> str:
         bucket = self.layer.state_storage()
         providers = self.layer.gen_providers(0)
@@ -181,7 +189,7 @@ class AWS(CloudClient):
             response = s3.list_objects(Bucket=aws_bucket, Prefix=prefix, Delimiter="/")
             if "Contents" in response:
                 for data in response["Contents"]:
-                    structured_config = self._download_remote_config(
+                    structured_config = self._download_remote_blob(
                         s3, aws_bucket, data["Key"]
                     )
                     if structured_config:
@@ -406,7 +414,7 @@ class AWS(CloudClient):
         return True
 
     @staticmethod
-    def _download_remote_config(
+    def _download_remote_blob(
         s3_client: S3Client, bucket: str, key: str
     ) -> Optional["StructuredConfig"]:
         try:

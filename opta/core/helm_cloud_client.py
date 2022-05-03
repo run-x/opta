@@ -55,3 +55,6 @@ class HelmCloudClient(CloudClient):
         return nice_run(
             ["kubectl", "config", "current-context"], check=True, capture_output=True
         ).stdout.strip()
+
+    def get_remote_state(self) -> str:
+        pass
