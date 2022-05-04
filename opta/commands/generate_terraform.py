@@ -133,7 +133,7 @@ def generate_terraform(
         for module in layer.modules:
             src_path = module.module_dir_path
             if not os.path.exists(src_path):
-                logger.warn(
+                logger.warning(
                     f"Could not find source directory for module '{module.name}', ignoring it"
                 )
                 # dynamically mark it as not exportable

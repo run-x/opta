@@ -132,7 +132,7 @@ class PlanDisplayer:
             address: str = resource_change["address"]
 
             if not address.startswith("module."):
-                logger.warn(
+                logger.warning(
                     f"Unable to determine risk of changes to resource {address}. "
                     "Please run in detailed plan mode for more info"
                 )

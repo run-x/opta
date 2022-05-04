@@ -18,7 +18,7 @@ class AwsNodegroup(ModuleProcessor):
 
     def __back_compat_use_gpu(self) -> None:
         if self.module.data.get("use_gpu", False):
-            logger.warn(
+            logger.warning(
                 "Using deprecated input use_gpu. Please use ami_type input to avoid the warning in future."
             )
             self.module.data["ami_type"] = "AL2_x86_64_GPU"

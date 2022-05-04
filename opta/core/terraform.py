@@ -442,7 +442,7 @@ class Terraform:
             bucket_obj.delete(force=True)
             logger.info("Successfully deleted GCP state storage")
         except NotFound:
-            logger.warn("State bucket was already deleted")
+            logger.warning("State bucket was already deleted")
 
     @classmethod
     def _local_delete_state_storage(cls, layer: "Layer") -> None:
@@ -452,7 +452,7 @@ class Terraform:
         try:
             rmtree(os.path.join(cls.get_local_opta_dir()))
         except Exception:
-            logger.warn("Local state delete did not work?")
+            logger.warning("Local state delete did not work?")
 
     @classmethod
     def _create_local_state_storage(cls, providers: dict) -> None:

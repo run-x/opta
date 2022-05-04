@@ -2,7 +2,6 @@ import os
 
 import click
 import requests
-from colored import attr, fg
 
 from opta.constants import OPTA_INSTALL_URL
 from opta.core.upgrade import check_version_upgrade
@@ -44,10 +43,8 @@ def upgrade() -> None:
             _upgrade_successful()
     except Exception:
         logger.error(
-            f"{fg('red')}"
             "\nUnable to install latest version of Opta."
             "\nPlease follow the instructions on https://docs.opta.dev/installation"
-            f"{attr(0)}"
         )
     finally:
         _cleanup_installation_file()

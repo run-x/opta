@@ -100,7 +100,7 @@ class RunxProcessor(ModuleProcessor):
             try:
                 self.fetch_jwt(value)
             except UserErrors:
-                logger.warn(
+                logger.warning(
                     "The api key which you passed was invalid, please provide a valid api key from runx"
                 )
             else:
