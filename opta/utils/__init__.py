@@ -2,7 +2,7 @@ import logging
 import os
 import re
 import sys
-from logging import Formatter, Logger, LogRecord
+from logging import Formatter, LogRecord
 from logging.handlers import QueueHandler, QueueListener
 from queue import Queue
 from shutil import which
@@ -16,6 +16,7 @@ from opta.constants import DEV_VERSION, VERSION
 from opta.datadog_logging import DatadogLogHandler
 from opta.exceptions import UserErrors
 from opta.special_formatter import PartialFormatter
+from opta.utils.logger import Logger
 
 
 class SensitiveFormatter(Formatter):
@@ -85,8 +86,6 @@ def ansi_scrub(text: str) -> str:
 
 
 def initialize_logger() -> Tuple[Logger, QueueListener, DatadogLogHandler]:
-    logger = logging.getLogger("opta")
-    logger.setLevel(logging.DEBUG)
     ch = logging.StreamHandler(sys.stdout)
     if os.environ.get("OPTA_DEBUG") is None:
         ch.setLevel(logging.INFO)
@@ -102,9 +101,9 @@ def initialize_logger() -> Tuple[Logger, QueueListener, DatadogLogHandler]:
     dd_handler.setFormatter(SensitiveFormatter())
     dd_listener = QueueListener(dd_queue, dd_handler)
     ch.setFormatter(formatter)
+    logger = Logger()
     logger.addHandler(queue_handler)
     logger.addHandler(ch)
-    logger.propagate = False
     dd_listener.start()
     return logger, dd_listener, dd_handler
 

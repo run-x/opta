@@ -7,7 +7,7 @@ import boto3
 import click
 from azure.storage.blob import ContainerClient
 from botocore.config import Config
-from colored import attr, fg
+from colored import attr
 from google.cloud import storage  # type: ignore
 from google.cloud.exceptions import NotFound
 
@@ -71,8 +71,8 @@ def destroy(
     try:
         opta_acquire_lock()
         pre_check()
-        logger.warn(
-            f"You are destroying your cloud infra state. {fg('magenta')}DO NOT, I REPEAT, DO NOT{attr(0)} do this as "
+        logger.warning(
+            "You are destroying your cloud infra state. DO NOT, I REPEAT, DO NOT do this as "
             "an attempt to debug a weird/errored apply. What you have created is not some ephemeral object that can be "
             "tossed arbitrarily (perhaps some day) and destroying unnecessarily just to reapply typically makes it "
             "worse. If you're doing this cause you are really trying to destroy the environment entirely, then that's"
@@ -233,7 +233,7 @@ def _gcp_get_configs(layer: "Layer") -> List[str]:
     try:
         bucket_object = gcs_client.get_bucket(bucket_name)
     except NotFound:
-        logger.warn(
+        logger.warning(
             "Couldn't find the state bucket, must have already been destroyed in a previous destroy run"
         )
         return []

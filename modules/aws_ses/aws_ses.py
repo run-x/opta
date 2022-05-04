@@ -69,7 +69,7 @@ class AwsEmailProcessor(ModuleProcessor):
                 or ses_account["Details"]["ReviewDetails"]["Status"] == "DENIED"
             ):
                 logger.warning(
-                    f"{fg(5)}{attr(1)}Looks like your request to move out of the SES sandbox has been "
+                    f"{attr(1)}Looks like your request to move out of the SES sandbox has been "
                     f"denied/failed-- you're gonna need to go resolve this manually in your support case. This is how "
                     f"you do it: go to our AWS Support Cases (e.g. go to the AWS UI aka console and at the top search "
                     f"bar look for \"support\")-- your case id is {ses_account['Details']['ReviewDetails']['CaseId']}. "

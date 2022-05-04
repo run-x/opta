@@ -117,7 +117,7 @@ class GCP(CloudClient):
         try:
             bucket_object.delete_blob(config_path)
         except NotFound:
-            logger.warn(f"Did not find opta config {config_path} to delete")
+            logger.warning(f"Did not find opta config {config_path} to delete")
         logger.info("Deleted opta config from gcs")
 
     def delete_remote_state(self) -> None:
@@ -129,7 +129,7 @@ class GCP(CloudClient):
         try:
             bucket_object.delete_blob(tfstate_path)
         except NotFound:
-            logger.warn(f"Did not find opta tf state {tfstate_path} to delete")
+            logger.warning(f"Did not find opta tf state {tfstate_path} to delete")
         logger.info(f"Deleted opta tf state for {self.layer.name}")
 
     def get_current_zones(self, max_number: int = 3) -> List[str]:
