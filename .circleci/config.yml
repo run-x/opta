@@ -13,7 +13,8 @@ commands:
                 arch: amd64
                 os: linux
                 terraform_version: 1.0.0
-            - kubernetes/install-kubectl
+            - kubernetes/install-kubectl:
+                kubectl-version: v1.22.0
             - helm/install-helm-client:
                 version: v3.7.1
     install-python:
