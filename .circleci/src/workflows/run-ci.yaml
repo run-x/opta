@@ -4,5 +4,4 @@ jobs:
   - lint
   - python-security
   - terraform-formatter
-  - regula-lint
   - pytest
