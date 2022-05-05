@@ -334,7 +334,7 @@ def _verify_semver(
     old_semver = semver.VersionInfo.parse(old_semver_string)
     current_semver = semver.VersionInfo.parse(current_semver_string)
     if old_semver > current_semver:
-        logger.warn(
+        logger.warning(
             f"You're trying to run an older version ({current_semver}) of opta (last run with version {old_semver})."
         )
         if not auto_approve:
