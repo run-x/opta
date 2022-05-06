@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, Tuple
 
 from modules.base import ModuleProcessor
+from opta.core.kubernetes import set_kube_config
 
 if TYPE_CHECKING:
     from opta.layer import Layer
@@ -31,6 +32,7 @@ class K8smanifestProcessor(ModuleProcessor):
         super(K8smanifestProcessor, self).process(module_idx)
 
     def get_k8s_config_context(self, layer: "Layer") -> Tuple[str, str]:
+        set_kube_config(layer)
         if layer.cloud == "local":
             return "~/.kube/config", "kind-opta-local-cluster"
         else:
