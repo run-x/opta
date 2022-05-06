@@ -22,12 +22,12 @@ inputs:
   - name: kubeconfig
     user_facing: false
     validator: str(required=False)
-    description: Kubernetes config path
+    description: Deprecated
     default: null
   - name: kubecontext
     user_facing: false
     validator: str(required=False)
-    description: Kubernetes context to use
+    description: Deprecated
     default: null
 
 

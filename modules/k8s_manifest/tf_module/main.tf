@@ -3,11 +3,10 @@ provider "kubernetes" {
   config_context = var.kubecontext
 }
 
-resource "kubernetes_manifest" "manifest" {
-  manifest = yamldecode(file(var.file_path))
-  timeouts {
-    update = "5m"
-    create = "5m"
-    delete = "5m"
-  }
+resource "helm_release" "manifest" {
+  name       = "${var.layer_name}-${var.module_name}"
+  repository = "https://charts.itscontained.io"
+  chart      = "raw"
+  version    = "0.2.5"
+  values = [file(var.file_path)]
 }
