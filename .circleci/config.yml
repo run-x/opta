@@ -13,7 +13,8 @@ commands:
                 arch: amd64
                 os: linux
                 terraform_version: 1.0.0
-            - kubernetes/install-kubectl
+            - kubernetes/install-kubectl:
+                kubectl-version: v1.22.0
             - helm/install-helm-client:
                 version: v3.7.1
     install-python:
@@ -2001,21 +2002,6 @@ jobs:
             - run:
                 command: make security_tests
                 name: Security
-    regula-lint:
-        executor: ubuntu-machine
-        steps:
-            - checkout-opta
-            - run:
-                command: |
-                    cd config
-                    wget -O regula_1.0.0_Linux_x86_64.tar.gz https://github.com/fugue/regula/releases/download/v1.0.0/regula_1.0.0_Linux_x86_64.tar.gz
-                    tar -xvf regula_1.0.0_Linux_x86_64.tar.gz
-                name: Install regula
-            - run:
-                command: |-
-                    cd config
-                    ./regula run --include config.rego tf_modules
-                name: Run regula
     terraform-formatter:
         executor: ubuntu-machine
         steps:
@@ -2202,38 +2188,6 @@ workflows:
             - azure-destroy-env:
                 requires:
                     - azure-test-service-http
-            - aws-generate-terraform-language-files:
-                requires:
-                    - build-opta-binary
-            - aws-tg-create-env:
-                requires:
-                    - aws-generate-terraform-language-files
-            - aws-tg-test-service-http:
-                requires:
-                    - aws-tg-create-env
-            - aws-tg-test-other-modules-plan:
-                requires:
-                    - aws-tg-create-env
-            - aws-tg-destroy-env:
-                requires:
-                    - aws-tg-test-service-http
-                    - aws-tg-test-other-modules-plan
-            - gcp-generate-terraform-language-files:
-                requires:
-                    - build-opta-binary
-            - gcp-tg-create-env:
-                requires:
-                    - gcp-generate-terraform-language-files
-            - gcp-tg-test-service-http:
-                requires:
-                    - gcp-tg-create-env
-            - gcp-tg-test-other-modules-plan:
-                requires:
-                    - gcp-tg-create-env
-            - gcp-tg-destroy-env:
-                requires:
-                    - gcp-tg-test-service-http
-                    - gcp-tg-test-other-modules-plan
         triggers:
             - schedule:
                 cron: 0 2 * * *
@@ -2281,7 +2235,6 @@ workflows:
             - lint
             - python-security
             - terraform-formatter
-            - regula-lint
             - pytest
         when: << pipeline.parameters.run-ci >>
     run-create-and-destroy:
@@ -2382,38 +2335,6 @@ workflows:
             - azure-destroy-env:
                 requires:
                     - azure-test-service-http
-            - aws-generate-terraform-language-files:
-                requires:
-                    - build-opta-binary
-            - aws-tg-create-env:
-                requires:
-                    - aws-generate-terraform-language-files
-            - aws-tg-test-service-http:
-                requires:
-                    - aws-tg-create-env
-            - aws-tg-test-other-modules-plan:
-                requires:
-                    - aws-tg-create-env
-            - aws-tg-destroy-env:
-                requires:
-                    - aws-tg-test-service-http
-                    - aws-tg-test-other-modules-plan
-            - gcp-generate-terraform-language-files:
-                requires:
-                    - build-opta-binary
-            - gcp-tg-create-env:
-                requires:
-                    - gcp-generate-terraform-language-files
-            - gcp-tg-test-service-http:
-                requires:
-                    - gcp-tg-create-env
-            - gcp-tg-test-other-modules-plan:
-                requires:
-                    - gcp-tg-create-env
-            - gcp-tg-destroy-env:
-                requires:
-                    - gcp-tg-test-service-http
-                    - gcp-tg-test-other-modules-plan
         when: << pipeline.parameters.run-create-and-destroy >>
     run-create-and-destroy-aws:
         jobs:
