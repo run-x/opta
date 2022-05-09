@@ -1,0 +1,18 @@
+name: multi-region-primary
+environments:
+  - name: primary
+    path: "env-primary.yaml"
+modules:
+  - name: db
+    type: postgres
+    instance_class: "db.r5.large"
+    create_global_database: true
+  - type: k8s-service
+    name: primary
+    port:
+      http: 8000
+    image: AUTO
+    healthcheck_path: "/crud/crud_index"
+    public_uri: "/"
+    links:
+      - db

@@ -1,0 +1,5 @@
+Django==3.1.14
+django-cors-headers==3.5.0
+django-health-check==3.16.1
+djangorestframework==3.12.2
+psycopg2-binary==2.8.6

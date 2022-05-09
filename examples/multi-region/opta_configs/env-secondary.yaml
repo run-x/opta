@@ -1,0 +1,21 @@
+name: secondary
+org_name: my-org # A unique identifier for your organization
+providers:
+  aws:
+    region: <secondary_region> # Secondary Region for your environment.
+    account_id: 000000000000 # Your 12 digit AWS account id
+modules:
+  - type: base
+    total_ipv4_cidr_block: "10.1.0.0/16"
+    private_ipv4_cidr_blocks: [
+        "10.1.128.0/21",
+        "10.1.136.0/21",
+        "10.1.144.0/21"
+    ]
+    public_ipv4_cidr_blocks: [
+        "10.1.0.0/21",
+        "10.1.8.0/21",
+        "10.1.16.0/21"
+    ]
+  - type: k8s-cluster
+  - type: k8s-base
