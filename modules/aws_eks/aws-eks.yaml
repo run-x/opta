@@ -52,7 +52,7 @@ inputs:
     default: 20
   - name: node_instance_type
     user_facing: true
-    validator: str(required=False)
+    validator: str(required=False, matches='^((?!(micro)|(nano)).)*$')
     description: The [ec2 instance type](https://aws.amazon.com/ec2/instance-types/) for the nodes.
     default: "t3.medium"
   - name: k8s_version
