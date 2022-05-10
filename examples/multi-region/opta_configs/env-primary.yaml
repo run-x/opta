@@ -1,0 +1,10 @@
+name: primary
+org_name: my-org # A unique identifier for your organization
+providers:
+  aws:
+    region: <primary_region> # Primary Region for your environment.
+    account_id: 000000000000 # Your 12 digit AWS account id
+modules:
+  - type: base
+  - type: k8s-cluster
+  - type: k8s-base

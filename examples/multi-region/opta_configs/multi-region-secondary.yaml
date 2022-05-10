@@ -1,0 +1,24 @@
+name: multi-region-secondary
+environments:
+  - name: secondary
+    path: "env-secondary.yaml"
+input_variables:
+  - name: global_db_id
+modules:
+  - name: db
+    type: postgres
+    instance_class: "db.r5.large"
+    existing_global_database_id: "{vars.global_db_id}"
+  - type: k8s-service
+    name: secondary
+    port:
+      http: 8000
+    secrets:
+      - db_db_password
+      - db_db_user
+      - db_db_name
+    image: AUTO
+    healthcheck_path: "/crud/crud_index"
+    public_uri: "/"
+    links:
+      - db
