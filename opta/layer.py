@@ -527,6 +527,37 @@ class Layer:
         for name, values in providers.items():
             provider_hydration[name] = SimpleNamespace(**values)
 
+        region: Optional[str] = None
+        k8s_access_token = None
+        if self.cloud == "google":
+            gcp = GCP(self)
+            region = gcp.region
+            credentials = gcp.get_credentials()[0]
+            if isinstance(credentials, service_account.Credentials):
+                service_account_credentials: service_account.Credentials = (
+                    credentials.with_scopes(
+                        [
+                            "https://www.googleapis.com/auth/userinfo.email",
+                            "https://www.googleapis.com/auth/cloud-platform",
+                        ]
+                    )
+                )
+                service_account_credentials.refresh(
+                    google.auth.transport.requests.Request()
+                )
+                k8s_access_token = service_account_credentials.token
+            else:
+                k8s_access_token = credentials.token
+            if k8s_access_token is None:
+                raise Exception("Was unable to get GCP access token")
+        elif self.cloud == "aws":
+            aws = AWS(self)
+            region = aws.region
+        elif self.cloud == "azurerm":
+            region = self.root().providers["azurerm"]["location"]
+        elif self.cloud == "local":
+            pass
+
         return {
             "parent": parent,
             "vars": SimpleNamespace(**self.variables),
@@ -536,6 +567,8 @@ class Layer:
             "state_storage": self.state_storage(),
             "env": self.get_env(),
             "kubeconfig": KUBE_CONFIG_DEFAULT_LOCATION,
+            "k8s_access_token": k8s_access_token,
+            "region": region,
             **provider_hydration,
         }
 
@@ -606,36 +639,6 @@ class Layer:
 
     def gen_providers(self, module_idx: int, clean: bool = True) -> Dict[Any, Any]:
         ret: Dict[Any, Any] = {"provider": {}}
-        region: Optional[str] = None
-        k8s_access_token = None
-        if self.cloud == "google":
-            gcp = GCP(self)
-            region = gcp.region
-            credentials = gcp.get_credentials()[0]
-            if isinstance(credentials, service_account.Credentials):
-                service_account_credentials: service_account.Credentials = (
-                    credentials.with_scopes(
-                        [
-                            "https://www.googleapis.com/auth/userinfo.email",
-                            "https://www.googleapis.com/auth/cloud-platform",
-                        ]
-                    )
-                )
-                service_account_credentials.refresh(
-                    google.auth.transport.requests.Request()
-                )
-                k8s_access_token = service_account_credentials.token
-            else:
-                k8s_access_token = credentials.token
-            if k8s_access_token is None:
-                raise Exception("Was unable to get GCP access token")
-        elif self.cloud == "aws":
-            aws = AWS(self)
-            region = aws.region
-        elif self.cloud == "azurerm":
-            region = self.root().providers["azurerm"]["location"]
-        elif self.cloud == "local":
-            pass
 
         hydration = self.metadata_hydration()
         providers = self.providers
@@ -664,8 +667,8 @@ class Layer:
                                         "env": self.get_env(),
                                         "state_storage": self.state_storage(),
                                         "provider": self.parent.providers.get(cloud, {}),
-                                        "region": region,
-                                        "k8s_access_token": k8s_access_token,
+                                        "region": hydration["region"],
+                                        "k8s_access_token": hydration["k8s_access_token"],
                                     },
                                 ),
                             }
@@ -676,14 +679,20 @@ class Layer:
         ret = deep_merge(
             ret,
             DerivedProviders(self.parent, is_parent=True).gen_tf(
-                {"region": region, "k8s_access_token": k8s_access_token}
+                {
+                    "region": hydration["region"],
+                    "k8s_access_token": hydration["k8s_access_token"],
+                }
             ),
         )
         # Add derived providers like k8s from own modules
         ret = deep_merge(
             ret,
             DerivedProviders(self, is_parent=False).gen_tf(
-                {"region": region, "k8s_access_token": k8s_access_token},
+                {
+                    "region": hydration["region"],
+                    "k8s_access_token": hydration["k8s_access_token"],
+                },
                 module_idx=module_idx,
             ),
         )
