@@ -65,6 +65,8 @@ def logs(
         modules = layer.get_module_by_type("gcp-k8s-service")
     elif layer.cloud == "local":
         modules = layer.get_module_by_type("local-k8s-service")
+    elif layer.cloud == "helm":
+        modules = layer.get_module_by_type("local-k8s-service")
     else:
         raise Exception(f"Currently not handling logs for cloud {layer.cloud}")
     if len(modules) == 0:
