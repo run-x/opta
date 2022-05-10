@@ -891,9 +891,11 @@ jobs:
                 command: |
                     cd $HOME/generated-tf-files-aws
                     terraform init
-                    terraform refresh
-                    terraform state rm module.base.aws_ebs_default_kms_key.default
-                    terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base -target=module.k8scluster -target=module.k8sbase -destroy
+                    terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8sbase -destroy
+                    terraform apply -compact-warnings -auto-approve tf.plan
+                    terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8scluster -destroy
+                    terraform apply -compact-warnings -auto-approve tf.plan
+                    terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base -destroy
                     terraform apply -compact-warnings -auto-approve tf.plan
                 name: Destroy Terraform Generated Environment
             - store_artifacts:
@@ -2528,22 +2530,6 @@ workflows:
                 requires:
                     - aws-tg-test-service-http
                     - aws-tg-test-other-modules-plan
-            - gcp-generate-terraform-language-files:
-                requires:
-                    - build-opta-binary
-            - gcp-tg-create-env:
-                requires:
-                    - gcp-generate-terraform-language-files
-            - gcp-tg-test-service-http:
-                requires:
-                    - gcp-tg-create-env
-            - gcp-tg-test-other-modules-plan:
-                requires:
-                    - gcp-tg-create-env
-            - gcp-tg-destroy-env:
-                requires:
-                    - gcp-tg-test-service-http
-                    - gcp-tg-test-other-modules-plan
         when: << pipeline.parameters.run-opta-terraform-generate-test >>
     run-release-vs-stable:
         jobs:
