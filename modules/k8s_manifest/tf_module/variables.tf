@@ -28,3 +28,6 @@ variable "client_certificate" {}
 
 variable "client_key" {}
 
+variable "kubeconfig" {}
+
+variable "kubecontext" {}

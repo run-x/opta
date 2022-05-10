@@ -39,6 +39,14 @@ inputs:
     user_facing: false
     description: Kubernetes client key
     default: null
+  - name: kubeconfig
+    user_facing: false
+    description: Kubernetes config
+    default: null
+  - name: kubecontext
+    user_facing: false
+    description: Kubernetes context
+    default: null
 outputs: { }
 output_providers: { }
 output_data: { }

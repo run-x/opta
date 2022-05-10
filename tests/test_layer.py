@@ -71,6 +71,8 @@ class TestLayer:
             "state_storage": "opta-tf-state-opta-tests-dummy-parent-195d",
             "variables": SimpleNamespace(),
             "vars": SimpleNamespace(),
+            "k8s_access_token": None,
+            "region": "us-east-1",
         }
 
     def test_hydration_gcp(self, mocker: MockFixture):
@@ -110,6 +112,8 @@ class TestLayer:
             "state_storage": "opta-tf-state-opta-tests-gcp-dummy-parent",
             "variables": SimpleNamespace(),
             "vars": SimpleNamespace(),
+            "k8s_access_token": mocker.ANY,
+            "region": "us-central1",
         }
 
     def test_get_event_properties(self, mocker: MockFixture):
