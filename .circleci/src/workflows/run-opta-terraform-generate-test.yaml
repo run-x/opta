@@ -18,19 +18,19 @@ jobs:
       requires:
         - aws-tg-test-service-http
         - aws-tg-test-other-modules-plan
-#  - gcp-generate-terraform-language-files:
-#      requires:
-#        - build-opta-binary
-#  - gcp-tg-create-env:
-#      requires:
-#        - gcp-generate-terraform-language-files
-#  - gcp-tg-test-service-http:
-#      requires:
-#        - gcp-tg-create-env
-#  - gcp-tg-test-other-modules-plan:
-#      requires:
-#        - gcp-tg-create-env
-#  - gcp-tg-destroy-env:
-#      requires:
-#        - gcp-tg-test-service-http
-#        - gcp-tg-test-other-modules-plan
+  - gcp-generate-terraform-language-files:
+      requires:
+        - build-opta-binary
+  - gcp-tg-create-env:
+      requires:
+        - gcp-generate-terraform-language-files
+  - gcp-tg-test-service-http:
+      requires:
+        - gcp-tg-create-env
+  - gcp-tg-test-other-modules-plan:
+      requires:
+        - gcp-tg-create-env
+  - gcp-tg-destroy-env:
+      requires:
+        - gcp-tg-test-service-http
+        - gcp-tg-test-other-modules-plan
