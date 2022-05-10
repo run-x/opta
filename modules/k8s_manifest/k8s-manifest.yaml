@@ -19,18 +19,34 @@ inputs:
     validator: str(required=True)
     description: The Kubernetes manifest file in yaml format
     default: null
+  - name: host
+    user_facing: false
+    description: Kubernetes host
+    default: null
+  - name: token
+    user_facing: false
+    description: Kubernetes token
+    default: null
+  - name: cluster_ca_certificate
+    user_facing: false
+    description: Kubernetes cluster's CA
+    default: null
+  - name: client_certificate
+    user_facing: false
+    description: Kubernetes client cert
+    default: null
+  - name: client_key
+    user_facing: false
+    description: Kubernetes client key
+    default: null
   - name: kubeconfig
     user_facing: false
-    validator: str(required=False)
-    description: Kubernetes config path
+    description: Kubernetes config
     default: null
   - name: kubecontext
     user_facing: false
-    validator: str(required=False)
-    description: Kubernetes context to use
+    description: Kubernetes context
     default: null
-
-
 outputs: { }
 output_providers: { }
 output_data: { }

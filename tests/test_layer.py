@@ -71,6 +71,8 @@ class TestLayer:
             "state_storage": "opta-tf-state-opta-tests-dummy-parent-195d",
             "variables": SimpleNamespace(),
             "vars": SimpleNamespace(),
+            "k8s_access_token": None,
+            "region": "us-east-1",
         }
 
     def test_hydration_gcp(self, mocker: MockFixture):
@@ -82,6 +84,12 @@ class TestLayer:
             ),
             None,
         )
+        mocked_gcp_class = mocker.patch("opta.layer.GCP")
+        mocked_gcp = mocker.Mock()
+        mocked_gcp_class.return_value = mocked_gcp
+        mocked_credentials = mocker.Mock()
+        mocked_gcp.get_credentials.return_value = [mocked_credentials]
+        mocked_credentials.token = "blah"
         assert layer.metadata_hydration() == {
             "env": "gcp-dummy-parent",
             "kubeconfig": "~/.kube/config",
@@ -110,6 +118,8 @@ class TestLayer:
             "state_storage": "opta-tf-state-opta-tests-gcp-dummy-parent",
             "variables": SimpleNamespace(),
             "vars": SimpleNamespace(),
+            "k8s_access_token": "blah",
+            "region": mocker.ANY,
         }
 
     def test_get_event_properties(self, mocker: MockFixture):

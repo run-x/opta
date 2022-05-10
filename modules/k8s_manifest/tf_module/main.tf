@@ -1,7 +1,9 @@
 provider "kubernetes" {
-  config_path    = var.kubeconfig
-  config_context = var.kubecontext
-
+  host                   = var.host
+  token                  = var.token
+  cluster_ca_certificate = var.cluster_ca_certificate
+  client_certificate     = var.client_certificate
+  client_key             = var.client_key
 }
 
 resource "kubernetes_manifest" "manifest" {

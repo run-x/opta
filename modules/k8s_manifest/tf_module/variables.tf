@@ -18,13 +18,16 @@ variable "module_name" {
 }
 
 
-variable "kubeconfig" {
-  description = "Kubernetes config path"
-  type        = string
-}
-variable "kubecontext" {
-  description = "Kubernetes context"
-  type        = string
-}
+variable "host" {}
 
+variable "token" {}
 
+variable "cluster_ca_certificate" {}
+
+variable "client_certificate" {}
+
+variable "client_key" {}
+
+variable "kubeconfig" {}
+
+variable "kubecontext" {}
