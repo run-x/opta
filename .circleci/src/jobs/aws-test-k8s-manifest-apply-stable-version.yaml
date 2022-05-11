@@ -13,11 +13,6 @@ steps:
   - aws-cli/install
   - aws-cli/setup
   - run:
-      name: "Configure Kubectl"
-      command: |
-        $HOME/.opta/opta configure-kubectl \
-        --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
-  - run:
       name: "Apply K8s Manifest with Opta"
       command: |
         $HOME/.opta/opta apply \
