@@ -3,7 +3,7 @@ resource "helm_release" "remote_chart" {
   chart             = var.chart
   repository        = var.repository
   version           = var.chart_version
-  name              = var.release_name == null ? var.chart : var.release_name
+  name              = "${var.layer_name}-${var.module_name}"
   atomic            = var.atomic
   cleanup_on_fail   = var.cleanup_on_fail
   namespace         = var.namespace
@@ -13,9 +13,6 @@ resource "helm_release" "remote_chart" {
   dependency_update = var.dependency_update
   wait              = var.wait
   max_history       = var.max_history
-  lifecycle {
-    ignore_changes = [name]
-  }
 }
 
 

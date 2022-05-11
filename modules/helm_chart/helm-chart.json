@@ -21,10 +21,6 @@
       "description": "Create namespace as well.",
       "default": false
     },
-    "release_name": {
-      "type": "string",
-      "description": "The name the chart installation is to have."
-    },
     "atomic": {
       "type": "boolean",
       "description": "If set, installation process purges chart on fail. The wait flag will be set automatically if atomic is used.",

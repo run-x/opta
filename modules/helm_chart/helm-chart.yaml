@@ -22,11 +22,6 @@ inputs:
       Note that you don't need to use `<repo_name>/<chart_name>` - as repo is specified separately. Just do `<chart_name>`.
       If you're using a local chart, then this will be the path to the chart.
     default: null
-  - name: release_name
-    user_facing: true
-    validator: str(required=False)
-    description: The name the chart installation is to have.
-    default: null
   - name: repository
     user_facing: true
     validator: str(required=False)
