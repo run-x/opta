@@ -85,3 +85,5 @@ variable "dependency_update" {
 variable "max_history" {
   type = number
 }
+
+variable "release_name" {}
