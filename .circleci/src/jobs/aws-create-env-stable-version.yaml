@@ -15,7 +15,7 @@ steps:
   - run:
       name: "Deploy opta environment"
       command: |
-        yes | $HOME/.opta/opta apply \
+        $HOME/.opta/opta apply \
         --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml \
         --auto-approve \
         --refresh || if [[ $? -eq 141 ]]; then true; else exit $?; fi

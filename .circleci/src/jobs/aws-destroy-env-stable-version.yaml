@@ -15,6 +15,6 @@ steps:
   - run:
       name: "Destroy environment"
       command: |
-        yes | $HOME/.opta/opta destroy \
+        $HOME/.opta/opta destroy \
         --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml \
         --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi

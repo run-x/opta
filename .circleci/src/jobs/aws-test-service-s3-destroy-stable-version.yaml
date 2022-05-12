@@ -14,9 +14,6 @@ steps:
   - aws-cli/install
   - aws-cli/setup
   - run:
-      name: "Load test-service image"
-      command: docker load -i test-service-image
-  - run:
       name: "Destroy test-service-s3"
       command: |
         $HOME/.opta/opta destroy \
