@@ -1,4 +1,4 @@
-executor: python-docker
+executor: ubuntu-machine
 environment:
   OPTA_DISABLE_REPORTING: "true"
 steps:
@@ -19,9 +19,9 @@ steps:
       name: "Setting up gcp envar"
       command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
   - run:
-      name: "Deploy opta environment"
+      name: "Destroy test-service-redis"
       command: |
-        $HOME/.opta/opta apply \
-        --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml \
-        --auto-approve \
-        --refresh || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+        $HOME/.opta/opta destroy \
+        --env gcpenv-ci \
+        --config ./.circleci/ci-tests/create-and-destroy-gcp/service-redis.yml \
+        --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
