@@ -3158,7 +3158,7 @@ workflows:
                     - gcp-create-env-v2
                     - gcp-test-service-helm-apply-v1
             - gcp-test-service-redis-apply-stable-version:
-                name: aws-test-service-redis-apply-v2
+                name: gcp-test-service-redis-apply-v2
                 requires:
                     - gcp-create-env-v2
                     - gcp-test-service-redis-apply-v1
