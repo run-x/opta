@@ -79,7 +79,7 @@ class TestAWS:
             "- name: 111111111111_us-east-1_mocked_cluster_name\n"
             "  user:\n"
             "    exec:\n"
-            "      apiVersion: client.authentication.k8s.io/v1alpha1\n"
+            "      apiVersion: client.authentication.k8s.io/v1beta1\n"
             "      args: [--region, us-east-1, eks, get-token, --cluster-name, "
             "mocked_cluster_name]\n"
             "      command: aws\n"
