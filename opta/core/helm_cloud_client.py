@@ -1,11 +1,22 @@
-import os
+import base64
+import json
+from os.path import exists, expanduser
 from typing import TYPE_CHECKING, Dict, Optional
 
-from opta.constants import REGISTRY
+from kubernetes.client import CoreV1Api, V1Secret, V1SecretList
+from kubernetes.config.kube_config import ENV_KUBECONFIG_PATH_SEPARATOR
+
+import opta.constants as constants
 from opta.core.cloud_client import CloudClient
-from opta.exceptions import LocalNotImplemented
+from opta.core.kubernetes import (
+    check_if_secret_exists,
+    create_secret_if_not_exists,
+    load_opta_kube_config,
+    set_kube_config,
+)
+from opta.exceptions import LocalNotImplemented, UserErrors
 from opta.nice_subprocess import nice_run
-from opta.utils import logger
+from opta.utils import logger, yaml
 
 if TYPE_CHECKING:
     from opta.layer import Layer, StructuredConfig
@@ -16,39 +27,114 @@ class HelmCloudClient(CloudClient):
         super().__init__(layer)
 
     def get_remote_config(self) -> Optional["StructuredConfig"]:
-        return None
+        set_kube_config(self.layer)
+        load_opta_kube_config()
+        v1 = CoreV1Api()
+        secret_name = f"opta-config-{self.layer.state_storage()}"
+        secrets: V1SecretList = v1.list_namespaced_secret(
+            "default", field_selector=f"metadata.name={secret_name}"
+        )
+        if len(secrets.items) == 0:
+            return None
+        secret: V1Secret = secrets.items[0]
+        return json.loads(base64.b64decode(secret.data["config"]).decode("utf-8"))
 
     def upload_opta_config(self) -> None:
-        if "local" in REGISTRY[self.layer.cloud]["backend"]:
-            providers = self.layer.gen_providers(0)
-            local_path = providers["terraform"]["backend"]["local"]["path"]
-            real_path = os.path.dirname(os.path.realpath(local_path))
-            logger.warning(
-                f"The terraform state is stored locally, make sure to keep the files in {real_path}"
-            )
+        set_kube_config(self.layer)
+        load_opta_kube_config()
+        v1 = CoreV1Api()
+        secret_name = f"opta-config-{self.layer.state_storage()}"
+        create_secret_if_not_exists("default", secret_name)
+        current_secret_object: V1Secret = v1.read_namespaced_secret(
+            secret_name, "default"
+        )
+        current_secret_object.data = current_secret_object.data or {}
+        current_secret_object.data["config"] = base64.b64encode(
+            json.dumps(self.layer.structured_config()).encode("utf-8")
+        ).decode("utf-8")
+        v1.replace_namespaced_secret(secret_name, "default", current_secret_object)
+
         return None
 
     def delete_opta_config(self) -> None:
-        return None
+        set_kube_config(self.layer)
+        load_opta_kube_config()
+        v1 = CoreV1Api()
+        secret_name = f"opta-config-{self.layer.state_storage()}"
+        if check_if_secret_exists("default", secret_name):
+            v1.delete_namespaced_secret(secret_name, "default")
 
     def delete_remote_state(self) -> None:
-        return None
+        v1 = CoreV1Api()
+        secret_name = f"tfstate-default-{self.layer.state_storage()}"
+        if check_if_secret_exists("default", secret_name):
+            v1.delete_namespaced_secret(secret_name, "default")
 
     def get_terraform_lock_id(self) -> str:
         return ""
 
     def get_all_remote_configs(self) -> Dict[str, Dict[str, "StructuredConfig"]]:
         raise LocalNotImplemented(
-            "get_all_remote_configs: Feature Unsupported for the helm provider"
+            "get_all_remote_configs: Feature Unsupported for the BYO K8s feature"
         )
 
     def set_kube_config(self) -> None:
-        # do nothing, the user brings their own
-        pass
+        kube_config_file_name = self.layer.get_kube_config_file_name()
+        default_kube_config_filename = expanduser(
+            constants.DEFAULT_KUBECONFIG.split(ENV_KUBECONFIG_PATH_SEPARATOR)[0]
+        )
+        if not exists(default_kube_config_filename):
+            raise UserErrors(
+                "To use K8s-native provider, your must have your kubeconfig set"
+            )
+        logger.debug("Loading kube config file")
+        try:
+            default_kube_config = yaml.load(open(default_kube_config_filename))
+        except Exception:
+            raise UserErrors(
+                f"Could not load your kubeconfig file {default_kube_config_filename} as valid yaml"
+            )
+        current_context_name = default_kube_config["current-context"]
+        current_context = next(
+            context
+            for context in default_kube_config["contexts"]
+            if context["name"] == current_context_name
+        )
+        current_cluster_name = current_context["context"]["cluster"]
+        current_cluster = next(
+            cluster
+            for cluster in default_kube_config["clusters"]
+            if cluster["name"] == current_cluster_name
+        )
+        current_user_name = current_context["context"]["user"]
+        current_user = next(
+            user
+            for user in default_kube_config["users"]
+            if user["name"] == current_user_name
+        )
+
+        cluster_config = {
+            "apiVersion": "v1",
+            "kind": "Config",
+            "clusters": [current_cluster],
+            "contexts": [current_context],
+            "current-context": current_context_name,
+            "preferences": {},
+            "users": [current_user],
+        }
+        with open(kube_config_file_name, "w") as f:
+            yaml.dump(cluster_config, f)
+        constants.GENERATED_KUBE_CONFIG = kube_config_file_name
+        return
 
     def cluster_exist(self) -> bool:
         # "kubectl version" returns an error code if it can't connect to a cluster
-        nice_run(["kubectl", "version"], check=True)
+        try:
+            nice_run(["kubectl", "version"], check=True)
+        except Exception:
+            raise UserErrors(
+                "The current kubectl configuration must be valid if you wanna use the BYO K8s feature"
+            )
         return True
 
     def get_kube_context_name(self) -> str:

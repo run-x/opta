@@ -1,4 +1,6 @@
+import base64
 import errno
+import gzip
 import os
 import time
 from pathlib import Path
@@ -25,6 +27,7 @@ from google.cloud import storage  # type: ignore
 from google.cloud.exceptions import NotFound
 from googleapiclient import discovery
 from googleapiclient.errors import HttpError
+from kubernetes.client import CoreV1Api, V1Secret, V1SecretList
 from oauth2client.client import GoogleCredentials
 from packaging import version
 
@@ -33,6 +36,7 @@ from opta.core.aws import AWS
 from opta.core.azure import Azure
 from opta.core.cloud_client import CloudClient
 from opta.core.gcp import GCP
+from opta.core.kubernetes import load_opta_kube_config, set_kube_config
 from opta.core.local import Local
 from opta.exceptions import MissingState, UserErrors
 from opta.nice_subprocess import nice_run
@@ -392,15 +396,19 @@ class Terraform:
                 UserErrors(f"Could copy local state file to {state_file}")
 
         elif layer.cloud == "helm":
-            if "local" in providers["terraform"]["backend"]:
-                try:
-                    tf_file = providers["terraform"]["backend"]["local"]["path"]
-                    if os.path.exists(tf_file):
-                        copyfile(tf_file, state_file)
-                    else:
-                        return False
-                except Exception:
-                    UserErrors(f"Could not copy terraform state file to {state_file}")
+            set_kube_config(layer)
+            load_opta_kube_config()
+            v1 = CoreV1Api()
+            secret_name = f"tfstate-default-{layer.state_storage()}"
+            secrets: V1SecretList = v1.list_namespaced_secret(
+                "default", field_selector=f"metadata.name={secret_name}"
+            )
+            if len(secrets.items) == 0:
+                return False
+            secret: V1Secret = secrets.items[0]
+            decoded_secret = gzip.decompress(base64.b64decode(secret.data["tfstate"]))
+            with open(state_file, "wb") as file_obj:
+                file_obj.write(decoded_secret)
         else:
             raise UserErrors("Need to get state from S3 or GCS or Azure storage")
 

@@ -28,6 +28,9 @@ class Module:
         elif self.type in REGISTRY[layer.cloud]["modules"]:
             self.desc = REGISTRY[layer.cloud]["modules"][self.type].copy()
         else:
+            import pdb
+
+            pdb.set_trace()
             raise UserErrors(f"{self.type} is not a valid module type")
         self.layer_name = layer.name
         self.data: Dict[Any, Any] = data

@@ -611,6 +611,8 @@ class Layer:
             str2hash = (
                 provider["location"] + provider["tenant_id"] + provider["subscription_id"]
             )
+        elif self.cloud == "helm":
+            return "placeholder"
         else:
             return ""
         return hashlib.md5(str2hash.encode("utf-8")).hexdigest()[0:4]  # nosec
@@ -618,6 +620,8 @@ class Layer:
     def state_storage(self) -> str:
         if self.cloud == "local":
             return os.path.join(str(Path.home()), ".opta", "local", "tfstate")
+        elif self.cloud == "helm":
+            return f"{self.org_name}-{self.name}"
 
         if self.parent is not None:
             return self.parent.state_storage()
