@@ -125,7 +125,6 @@ class HelmCloudClient(CloudClient):
         with open(kube_config_file_name, "w") as f:
             yaml.dump(cluster_config, f)
         constants.GENERATED_KUBE_CONFIG = kube_config_file_name
-        return
 
     def cluster_exist(self) -> bool:
         # "kubectl version" returns an error code if it can't connect to a cluster
