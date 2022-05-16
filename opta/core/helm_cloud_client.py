@@ -1,6 +1,6 @@
 import base64
 import json
-from os.path import exists, expanduser
+from os.path import exists
 from typing import TYPE_CHECKING, Dict, Optional
 
 from kubernetes.client import CoreV1Api, V1Secret, V1SecretList
