@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Dict, Optional
 
 from kubernetes.client import CoreV1Api, V1Secret, V1SecretList
 from kubernetes.config.kube_config import ENV_KUBECONFIG_PATH_SEPARATOR
+from ruamel.yaml import YAMLError
 
 import opta.constants as constants
 from opta.core.cloud_client import CloudClient
@@ -91,28 +92,49 @@ class HelmCloudClient(CloudClient):
         try:
             with open(default_kube_config_filename) as f:
                 default_kube_config = yaml.load(f)
-        except Exception:
+        except YAMLError:
             raise UserErrors(
                 f"Could not load your kubeconfig file {default_kube_config_filename} as valid yaml"
             )
-        current_context_name = default_kube_config["current-context"]
-        current_context = next(
-            context
-            for context in default_kube_config["contexts"]
-            if context["name"] == current_context_name
-        )
+        except OSError:
+            raise UserErrors(
+                f"Could not open your kubeconfig file {default_kube_config_filename}."
+            )
+        current_context_name = default_kube_config.get("current-context")
+        if current_context_name in [None, ""]:
+            raise UserErrors("Could not determine current context of your kubeconfig")
+        try:
+            current_context = next(
+                context
+                for context in default_kube_config["contexts"]
+                if context["name"] == current_context_name
+            )
+        except StopIteration:
+            raise UserErrors(
+                f"Could not find the context {current_context_name} in your kubeconfig"
+            )
         current_cluster_name = current_context["context"]["cluster"]
-        current_cluster = next(
-            cluster
-            for cluster in default_kube_config["clusters"]
-            if cluster["name"] == current_cluster_name
-        )
+        try:
+            current_cluster = next(
+                cluster
+                for cluster in default_kube_config["clusters"]
+                if cluster["name"] == current_cluster_name
+            )
+        except StopIteration:
+            raise UserErrors(
+                f"Could not find the cluster {current_cluster_name} in your kubeconfig"
+            )
         current_user_name = current_context["context"]["user"]
-        current_user = next(
-            user
-            for user in default_kube_config["users"]
-            if user["name"] == current_user_name
-        )
+        try:
+            current_user = next(
+                user
+                for user in default_kube_config["users"]
+                if user["name"] == current_user_name
+            )
+        except StopIteration:
+            raise UserErrors(
+                f"Could not find the user {current_user_name} in your kubeconfig"
+            )
 
         cluster_config = {
             "apiVersion": "v1",
