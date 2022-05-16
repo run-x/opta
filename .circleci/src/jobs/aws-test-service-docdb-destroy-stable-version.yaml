@@ -1,8 +1,9 @@
-executor: python-docker
+executor: ubuntu-machine
 environment:
   OPTA_DISABLE_REPORTING: "true"
 steps:
   - checkout-opta
+  - install-python
   - when:
       condition: << pipeline.parameters.ci-use-diff-env >>
       steps:
@@ -13,8 +14,9 @@ steps:
   - aws-cli/install
   - aws-cli/setup
   - run:
-      name: "Destroy environment"
+      name: "Destroy test-service-redis"
       command: |
         $HOME/.opta/opta destroy \
-        --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml \
+        --env awsenv-ci \
+        --config ./.circleci/ci-tests/create-and-destroy-aws/service-docdb.yml \
         --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi

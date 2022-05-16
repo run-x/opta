@@ -13,8 +13,14 @@ steps:
   - aws-cli/install
   - aws-cli/setup
   - run:
-      name: "Destroy environment"
+      name: "Configure Kubectl"
+      command: |
+        $HOME/.opta/opta configure-kubectl \
+        --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
+  - run:
+      name: "Destroy K8s Manifest with Opta"
       command: |
         $HOME/.opta/opta destroy \
-        --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml \
+        --env awsenv-ci \
+        --config ./.circleci/ci-tests/create-and-destroy-aws/k8s-manifest.yaml \
         --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi

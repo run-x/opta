@@ -13,8 +13,9 @@ steps:
   - aws-cli/install
   - aws-cli/setup
   - run:
-      name: "Destroy environment"
+      name: "Destroy test-service-helm"
       command: |
         $HOME/.opta/opta destroy \
-        --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml \
+        --env awsenv-ci \
+        --config ./.circleci/ci-tests/create-and-destroy-aws/service-helm.yml \
         --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi

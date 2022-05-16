@@ -9,12 +9,15 @@ steps:
         - remake-environment-configs
   - attach_workspace:
       at: ~/
+  - attach_workspace:
+      at: ./
   - install-opta-dependencies
   - aws-cli/install
   - aws-cli/setup
   - run:
-      name: "Destroy environment"
+      name: "Deploy test-service-helm"
       command: |
-        $HOME/.opta/opta destroy \
-        --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml \
-        --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+        $HOME/.opta/opta apply \
+        --env awsenv-ci \
+        --config ./.circleci/ci-tests/create-and-destroy-aws/service-helm.yml \
+        --auto-approve

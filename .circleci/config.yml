@@ -194,7 +194,7 @@ jobs:
             - aws-cli/setup
             - run:
                 command: |-
-                    yes | $HOME/.opta/opta apply \
+                    $HOME/.opta/opta apply \
                     --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml \
                     --auto-approve \
                     --refresh || if [[ $? -eq 141 ]]; then true; else exit $?; fi
@@ -279,7 +279,7 @@ jobs:
             - aws-cli/setup
             - run:
                 command: |-
-                    yes | $HOME/.opta/opta destroy \
+                    $HOME/.opta/opta destroy \
                     --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml \
                     --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
                 name: Destroy environment
@@ -468,6 +468,56 @@ jobs:
                     --config ./.circleci/ci-tests/create-and-destroy-aws/service-cloudfront.yml \
                     --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
                 name: Destroy Cloudfront Service with Opta
+    aws-test-cloudfront-apply-stable-version:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ~/
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: |
+                    $HOME/.opta/opta apply \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/service-cloudfront.yml \
+                    --auto-approve
+                name: Apply Cloudfront Service with Opta
+            - run:
+                command: |
+                    sleep 20
+                    export HOST=`$HOME/.opta/opta output --env awsenv-ci --config ./.circleci/ci-tests/create-and-destroy-aws/service-cloudfront.yml | jq -r '.cloudfront_domain'`
+                    curl --fail https://${HOST}
+                name: Test Cloudfront curl
+    aws-test-cloudfront-destroy-stable-version:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ~/
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: |-
+                    $HOME/.opta/opta destroy \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/service-cloudfront.yml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy Cloudfront Service with Opta
     aws-test-k8s-manifest:
         environment:
             OPTA_DISABLE_REPORTING: "true"
@@ -510,6 +560,65 @@ jobs:
                     --config ./.circleci/ci-tests/create-and-destroy-aws/k8s-manifest.yaml \
                     --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
                 name: Destroy K8s Manifest with Opta
+    aws-test-k8s-manifest-apply-stable-version:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ~/
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: |
+                    $HOME/.opta/opta configure-kubectl \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
+                name: Configure Kubectl
+            - run:
+                command: |
+                    $HOME/.opta/opta apply \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/k8s-manifest.yaml \
+                    --auto-approve
+                name: Apply K8s Manifest with Opta
+            - run:
+                command: |-
+                    kubectl get pod -n default nginx
+                    exit $?
+                name: Test manifest pod creation
+    aws-test-k8s-manifest-destroy-stable-version:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ~/
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: |
+                    $HOME/.opta/opta configure-kubectl \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml
+                name: Configure Kubectl
+            - run:
+                command: |-
+                    $HOME/.opta/opta destroy \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/k8s-manifest.yaml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy K8s Manifest with Opta
     aws-test-lambda-function:
         environment:
             OPTA_DISABLE_REPORTING: "true"
@@ -543,6 +652,58 @@ jobs:
             - run:
                 command: |-
                     yes | ./dist/opta/opta destroy \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/service-lambda.yml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy Cloudfront Service with Opta
+    aws-test-lambda-function-apply-stable-version:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ~/
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: |
+                    $HOME/.opta/opta apply \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/service-lambda.yml \
+                    --auto-approve
+                name: Apply Cloudfront Service with Opta
+            - run:
+                command: |
+                    sleep 20
+                    export LAMBDA_NAME=`$HOME/.opta/opta output --env awsenv-ci --config ./.circleci/ci-tests/create-and-destroy-aws/service-lambda.yml | jq -r '.function_name'`
+                    export AWS_DEFAULT_REGION="us-east-2"
+                    aws lambda invoke --function-name $LAMBDA_NAME  ./.circleci/ci-tests/create-and-destroy-aws/service-lambda.txt
+                    export RESPONSE=`cat ./.circleci/ci-tests/create-and-destroy-aws/service-lambda.txt`
+                name: Test Lambda Invocation
+    aws-test-lambda-function-destroy-stable-version:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ~/
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: |-
+                    $HOME/.opta/opta destroy \
                     --env awsenv-ci \
                     --config ./.circleci/ci-tests/create-and-destroy-aws/service-lambda.yml \
                     --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
@@ -582,6 +743,59 @@ jobs:
                     --config ./.circleci/ci-tests/create-and-destroy-aws/service-docdb.yml \
                     --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
                 name: Destroy test-service-redis
+    aws-test-service-docdb-apply-stable-version:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: ubuntu-machine
+        steps:
+            - checkout-opta
+            - install-python
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ~/
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: docker load -i test-service-image
+                name: Load test-service image
+            - run:
+                command: |-
+                    $HOME/.opta/opta deploy \
+                    --image app:latest \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/service-docdb.yml \
+                    --tag $CIRCLE_SHA1 \
+                    --auto-approve
+                name: Deploy test-service-redis
+    aws-test-service-docdb-destroy-stable-version:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: ubuntu-machine
+        steps:
+            - checkout-opta
+            - install-python
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ~/
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: |-
+                    $HOME/.opta/opta destroy \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/service-docdb.yml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy test-service-redis
     aws-test-service-helm:
         environment:
             OPTA_DISABLE_REPORTING: "true"
@@ -607,6 +821,52 @@ jobs:
             - run:
                 command: |-
                     yes | ./dist/opta/opta destroy \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/service-helm.yml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy test-service-helm
+    aws-test-service-helm-apply-stable-version:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ~/
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: |
+                    $HOME/.opta/opta apply \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/service-helm.yml \
+                    --auto-approve
+                name: Deploy test-service-helm
+    aws-test-service-helm-destroy-stable-version:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ~/
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: |-
+                    $HOME/.opta/opta destroy \
                     --env awsenv-ci \
                     --config ./.circleci/ci-tests/create-and-destroy-aws/service-helm.yml \
                     --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
@@ -745,6 +1005,59 @@ jobs:
                     --config ./.circleci/ci-tests/create-and-destroy-aws/service-redis.yml \
                     --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
                 name: Destroy test-service-redis
+    aws-test-service-redis-apply-stable-version:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: ubuntu-machine
+        steps:
+            - checkout-opta
+            - install-python
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ~/
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: docker load -i test-service-image
+                name: Load test-service image
+            - run:
+                command: |-
+                    $HOME/.opta/opta deploy \
+                    --image app:latest \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/service-redis.yml \
+                    --tag $CIRCLE_SHA1 \
+                    --auto-approve
+                name: Deploy test-service-redis
+    aws-test-service-redis-destroy-stable-version:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: ubuntu-machine
+        steps:
+            - checkout-opta
+            - install-python
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ~/
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: |-
+                    $HOME/.opta/opta destroy \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/service-redis.yml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy test-service-redis
     aws-test-service-s3:
         environment:
             OPTA_DISABLE_REPORTING: "true"
@@ -776,6 +1089,59 @@ jobs:
             - run:
                 command: |-
                     yes | ./dist/opta/opta destroy \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/service-s3.yml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy test-service-s3
+    aws-test-service-s3-apply-stable-version:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: ubuntu-machine
+        steps:
+            - checkout-opta
+            - install-python
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ~/
+            - attach_workspace:
+                at: ./
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: docker load -i test-service-image
+                name: Load test-service image
+            - run:
+                command: |
+                    $HOME/.opta/opta deploy \
+                    --image app:latest \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/service-s3.yml \
+                    --tag $CIRCLE_SHA1 \
+                    --auto-approve
+                name: Deploy test-service-s3
+    aws-test-service-s3-destroy-stable-version:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: ubuntu-machine
+        steps:
+            - checkout-opta
+            - install-python
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ~/
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: |-
+                    $HOME/.opta/opta destroy \
                     --env awsenv-ci \
                     --config ./.circleci/ci-tests/create-and-destroy-aws/service-s3.yml \
                     --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
@@ -815,6 +1181,61 @@ jobs:
             - run:
                 command: |-
                     yes | ./dist/opta/opta destroy \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/websocket-service.yml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy Websocket Service with Opta
+    aws-test-websocket-apply-stable-version:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - install-python-dependencies
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ~/
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: |
+                    yes | $HOME/.opta/opta apply \
+                    --env awsenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-aws/websocket-service.yml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Apply Websocket Service with Stable Opta
+            - run:
+                command: |-
+                    sleep 20
+                    source $(pipenv --venv)/bin/activate
+                    DIRTY_HOST_NAME="{`$HOME/.opta/opta output --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml | grep load_balancer_raw_dns`\"\":\"\"}"
+                    export HOST=`echo $DIRTY_HOST_NAME | jq -r '.load_balancer_raw_dns'`
+                    python ./.circleci/ci-tests/create-and-destroy-aws/websocket-validate.py
+                    exit $?
+                name: Test Websocket
+    aws-test-websocket-destroy-stable-version:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - install-python-dependencies
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ~/
+            - install-opta-dependencies
+            - aws-cli/install
+            - aws-cli/setup
+            - run:
+                command: |-
+                    $HOME/.opta/opta destroy \
                     --env awsenv-ci \
                     --config ./.circleci/ci-tests/create-and-destroy-aws/websocket-service.yml \
                     --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
@@ -1149,6 +1570,31 @@ jobs:
                 paths:
                     - .opta
                 root: ~/
+    download-opta-version:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: ubuntu-machine
+        parameters:
+            opta-version:
+                type: string
+        steps:
+            - run:
+                command: |
+                    git config --global user.email "runx-ci@runx.dev"
+                    git config --global user.name "Runx CI"
+                name: Set git user
+            - run:
+                command: VERSION=<< parameters.opta-version >> /bin/bash -c "$(curl -fsSL https://docs.opta.dev/install.sh)"
+                name: Download Latest Opta Binary
+            - install-opta-dependencies
+            - run:
+                command: |
+                    $HOME/.opta/opta version
+                name: Check Opta Version
+            - persist_to_workspace:
+                paths:
+                    - .opta
+                root: ~/
     gcp-create-env:
         environment:
             OPTA_DISABLE_REPORTING: "true"
@@ -1188,11 +1634,12 @@ jobs:
         executor: python-docker
         steps:
             - checkout-opta
-            - install-python
             - when:
                 condition: << pipeline.parameters.ci-use-diff-env >>
                 steps:
                     - remake-environment-configs
+            - attach_workspace:
+                at: ./
             - attach_workspace:
                 at: ~/
             - install-opta-dependencies
@@ -1203,7 +1650,7 @@ jobs:
                 name: Setting up gcp envar
             - run:
                 command: |-
-                    yes | $HOME/.opta/opta apply \
+                    $HOME/.opta/opta apply \
                     --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml \
                     --auto-approve \
                     --refresh || if [[ $? -eq 141 ]]; then true; else exit $?; fi
@@ -1229,6 +1676,32 @@ jobs:
             - run:
                 command: |-
                     yes | ./dist/opta/opta destroy \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy environment
+    gcp-destroy-env-stable-version:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - attach_workspace:
+                at: ~/
+            - install-opta-dependencies
+            - gcp-cli/install
+            - gcp-cli/initialize
+            - run:
+                command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+                name: Setting up gcp envar
+            - run:
+                command: |-
+                    $HOME/.opta/opta destroy \
                     --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml \
                     --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
                 name: Destroy environment
@@ -1434,6 +1907,75 @@ jobs:
                     --config ./.circleci/ci-tests/create-and-destroy-gcp/k8s-manifest.yaml \
                     --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
                 name: Destroy K8s Manifest with Opta
+    gcp-test-k8s-manifest-apply-stable-version:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - attach_workspace:
+                at: ~/
+            - install-opta-dependencies
+            - gcp-cli/install
+            - gcp-cli/initialize
+            - run:
+                command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+                name: Setting up gcp envar
+            - run:
+                command: |
+                    $HOME/.opta/opta configure-kubectl \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml
+                name: Configure Kubectl
+            - run:
+                command: |
+                    $HOME/.opta/opta apply \
+                    --env gcpenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/k8s-manifest.yaml \
+                    --auto-approve
+                name: Apply K8s Manifest with Opta
+            - run:
+                command: |
+                    kubectl get pod -n default nginx
+                    exit $?
+                name: Test manifest pod creation
+    gcp-test-k8s-manifest-destroy-stable-version:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - attach_workspace:
+                at: ~/
+            - install-opta-dependencies
+            - gcp-cli/install
+            - gcp-cli/initialize
+            - run:
+                command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+                name: Setting up gcp envar
+            - run:
+                command: |
+                    $HOME/.opta/opta configure-kubectl \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/environment.yml
+                name: Configure Kubectl
+            - run:
+                command: |-
+                    $HOME/.opta/opta destroy \
+                    --env gcpenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/k8s-manifest.yaml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy K8s Manifest with Opta
     gcp-test-service-gcs:
         environment:
             OPTA_DISABLE_REPORTING: "true"
@@ -1472,6 +2014,67 @@ jobs:
                     --config ./.circleci/ci-tests/create-and-destroy-gcp/service-gcs.yml \
                     --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
                 name: Destroy test-service-gcs
+    gcp-test-service-gcs-apply-stable-version:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: ubuntu-machine
+        steps:
+            - checkout-opta
+            - install-python
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - attach_workspace:
+                at: ~/
+            - install-opta-dependencies
+            - gcp-cli/install
+            - gcp-cli/initialize
+            - run:
+                command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+                name: Setting up gcp envar
+            - run:
+                command: docker load -i test-service-image
+                name: Load test-service image
+            - run:
+                command: |
+                    $HOME/.opta/opta deploy \
+                    --image app:latest \
+                    --env gcpenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/service-gcs.yml \
+                    --tag $CIRCLE_SHA1 \
+                    --auto-approve
+                name: Deploy test-service-gcs
+    gcp-test-service-gcs-destroy-stable-version:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: ubuntu-machine
+        steps:
+            - checkout-opta
+            - install-python
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - attach_workspace:
+                at: ~/
+            - install-opta-dependencies
+            - gcp-cli/install
+            - gcp-cli/initialize
+            - run:
+                command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+                name: Setting up gcp envar
+            - run:
+                command: |-
+                    $HOME/.opta/opta destroy \
+                    --env gcpenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/service-gcs.yml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy test-service-gcs
     gcp-test-service-helm:
         environment:
             OPTA_DISABLE_REPORTING: "true"
@@ -1500,6 +2103,60 @@ jobs:
             - run:
                 command: |-
                     yes | ./dist/opta/opta destroy \
+                    --env gcpenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/service-helm.yml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy test-service-helm
+    gcp-test-service-helm-apply-stable-version:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - attach_workspace:
+                at: ~/
+            - install-opta-dependencies
+            - gcp-cli/install
+            - gcp-cli/initialize
+            - run:
+                command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+                name: Setting up gcp envar
+            - run:
+                command: |
+                    $HOME/.opta/opta apply \
+                    --env gcpenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/service-helm.yml \
+                    --auto-approve
+                name: Deploy test-service-helm
+    gcp-test-service-helm-destroy-stable-version:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: python-docker
+        steps:
+            - checkout-opta
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - attach_workspace:
+                at: ~/
+            - install-opta-dependencies
+            - gcp-cli/install
+            - gcp-cli/initialize
+            - run:
+                command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+                name: Setting up gcp envar
+            - run:
+                command: |-
+                    $HOME/.opta/opta destroy \
                     --env gcpenv-ci \
                     --config ./.circleci/ci-tests/create-and-destroy-gcp/service-helm.yml \
                     --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
@@ -1718,6 +2375,67 @@ jobs:
                     --config ./.circleci/ci-tests/create-and-destroy-gcp/service-redis.yml \
                     --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
                 name: Destroy test-service-redis
+    gcp-test-service-redis-apply-stable-version:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: ubuntu-machine
+        steps:
+            - checkout-opta
+            - install-python
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - attach_workspace:
+                at: ~/
+            - install-opta-dependencies
+            - gcp-cli/install
+            - gcp-cli/initialize
+            - run:
+                command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+                name: Setting up gcp envar
+            - run:
+                command: docker load -i test-service-image
+                name: Load test-service image
+            - run:
+                command: |
+                    $HOME/.opta/opta deploy \
+                    --image app:latest \
+                    --env gcpenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/service-redis.yml \
+                    --tag $CIRCLE_SHA1 \
+                    --auto-approve
+                name: Deploy test-service-redis
+    gcp-test-service-redis-destroy-stable-version:
+        environment:
+            OPTA_DISABLE_REPORTING: "true"
+        executor: ubuntu-machine
+        steps:
+            - checkout-opta
+            - install-python
+            - when:
+                condition: << pipeline.parameters.ci-use-diff-env >>
+                steps:
+                    - remake-environment-configs
+            - attach_workspace:
+                at: ./
+            - attach_workspace:
+                at: ~/
+            - install-opta-dependencies
+            - gcp-cli/install
+            - gcp-cli/initialize
+            - run:
+                command: echo 'export GOOGLE_APPLICATION_CREDENTIALS="/home/circleci/gcloud-service-key.json"' >> $BASH_ENV
+                name: Setting up gcp envar
+            - run:
+                command: |-
+                    $HOME/.opta/opta destroy \
+                    --env gcpenv-ci \
+                    --config ./.circleci/ci-tests/create-and-destroy-gcp/service-redis.yml \
+                    --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+                name: Destroy test-service-redis
     gcp-tg-create-env:
         executor: python-docker
         steps:
@@ -1852,25 +2570,33 @@ jobs:
         executor: ubuntu-machine
         steps:
             - run:
-                command: |-
-                    echo "run-create-and-destroy:     " << pipeline.parameters.run-create-and-destroy >>
-                    echo "run-create-and-destroy-azure:     " << pipeline.parameters.run-create-and-destroy-azure >>
-                    echo "run-destroy-gcp-env:        " << pipeline.parameters.run-destroy-gcp-env >>
-                    echo "run-destroy-aws-env:        " << pipeline.parameters.run-destroy-aws-env >>
-                    echo "run-destroy-all-envs:       " << pipeline.parameters.run-destroy-all-envs >>
-                    echo "run-ci:                     "  << pipeline.parameters.run-ci >>
-                    echo "run-create-destroy-local:   " << pipeline.parameters.run-create-destroy-local >>
-                    echo "run-service-mesh-e2e:       " << pipeline.parameters.run-service-mesh-e2e >>
-                    echo "test-aws-lambda:            " << pipeline.parameters.test-aws-lambda >>
-                    echo "run-release-vs-stable:      " << pipeline.parameters.run-release-vs-stable >>
-                    echo "test-aws-dns:               " << pipeline.parameters.test-aws-dns >>
-                    echo "run-destroy-aws-dns-false:  " << pipeline.parameters.run-destroy-aws-dns-false >>
-                    echo "run-destroy-aws-dns-true:   " << pipeline.parameters.run-destroy-aws-dns-true >>
-                    echo "ci-use-diff-env:            " << pipeline.parameters.ci-use-diff-env >>
-                    echo "ci-env-name:                " << pipeline.parameters.ci-env-name >>
-                    echo "ci-env-region-aws:          " << pipeline.parameters.ci-env-region-aws >>
-                    echo "ci-env-region-gcp:          " << pipeline.parameters.ci-env-region-gcp >>
-                    echo "run-opta-terraform-generate-test: " << pipeline.parameters.run-opta-terraform-generate-test >>
+                command: |
+                    echo "run-create-and-destroy:             " << pipeline.parameters.run-create-and-destroy >>
+                    echo "run-destroy-all-envs:               " << pipeline.parameters.run-destroy-all-envs >>
+                    echo "run-service-mesh-e2e:               " << pipeline.parameters.run-service-mesh-e2e >>
+                    echo "run-release-vs-stable:              " << pipeline.parameters.run-release-vs-stable >>
+                    echo "run-create-and-destroy-aws:         " << pipeline.parameters.run-create-and-destroy-aws >>
+                    echo "run-destroy-aws-env:                " << pipeline.parameters.run-destroy-aws-env >>
+                    echo "run-destroy-aws-dns-false:          " << pipeline.parameters.run-destroy-aws-dns-false >>
+                    echo "run-destroy-aws-dns-true:           " << pipeline.parameters.run-destroy-aws-dns-true >>
+                    echo "test-aws-lambda:                    " << pipeline.parameters.test-aws-lambda >>
+                    echo "test-aws-dns:                       " << pipeline.parameters.test-aws-dns >>
+                    echo "run-create-and-destroy-gcp:         " << pipeline.parameters.run-create-and-destroy-gcp >>
+                    echo "run-destroy-gcp-env:                " << pipeline.parameters.run-destroy-gcp-env >>
+                    echo "run-create-and-destroy-azure:       " << pipeline.parameters.run-create-and-destroy-azure >>
+                    echo "run-destroy-azure-env:              " << pipeline.parameters.run-destroy-azure-env >>
+                    echo "run-create-destroy-local:           " << pipeline.parameters.run-create-destroy-local >>
+                    echo "run-opta-terraform-generate-test:   " << pipeline.parameters.run-opta-terraform-generate-test >>
+                    echo "run-cnd-version-compare:            " << pipeline.parameters.run-cnd-version-compare >>
+                    echo "run-destroy-stable-version:         " << pipeline.parameters.run-destroy-stable-version >>
+                    echo "run-ci:                             " << pipeline.parameters.run-ci >>
+                    echo "test:                               " << pipeline.parameters.test >>
+                    echo "ci-use-diff-env:                    " << pipeline.parameters.ci-use-diff-env >>
+                    echo "ci-env-name:                        " << pipeline.parameters.ci-env-name >>
+                    echo "ci-env-region-aws:                  " << pipeline.parameters.ci-env-region-aws >>
+                    echo "ci-env-region-gcp:                  " << pipeline.parameters.ci-env-region-gcp >>
+                    echo "opta-version-v1:                    " << pipeline.parameters.opta-version-v1 >>
+                    echo "opta-version-v2:                    " << pipeline.parameters.opta-version-v2 >>
                 name: Get all parameter values.
     lint:
         executor: python-docker
@@ -2034,7 +2760,16 @@ parameters:
     ci-use-diff-env:
         default: false
         type: boolean
+    opta-version-v1:
+        default: ""
+        type: string
+    opta-version-v2:
+        default: ""
+        type: string
     run-ci:
+        default: false
+        type: boolean
+    run-cnd-version-compare:
         default: false
         type: boolean
     run-create-and-destroy:
@@ -2068,6 +2803,9 @@ parameters:
         default: false
         type: boolean
     run-destroy-gcp-env:
+        default: false
+        type: boolean
+    run-destroy-stable-version:
         default: false
         type: boolean
     run-opta-terraform-generate-test:
@@ -2237,6 +2975,212 @@ workflows:
             - terraform-formatter
             - pytest
         when: << pipeline.parameters.run-ci >>
+    run-cnd-version-compare:
+        jobs:
+            - get-all-parameter-values
+            - build-test-service-image
+            - download-opta-version:
+                name: download-opta-version-v1
+                opta-version: << pipeline.parameters.opta-version-v1 >>
+            - aws-create-env-stable-version:
+                name: aws-create-env-v1
+                requires:
+                    - build-test-service-image
+                    - download-opta-version-v1
+            - aws-test-k8s-manifest-apply-stable-version:
+                name: aws-test-k8s-manifest-apply-v1
+                requires:
+                    - aws-create-env-v1
+            - aws-test-cloudfront-apply-stable-version:
+                name: aws-test-cloudfront-apply-v1
+                requires:
+                    - aws-create-env-v1
+            - aws-test-lambda-function-apply-stable-version:
+                name: aws-test-lambda-function-apply-v1
+                requires:
+                    - aws-create-env-v1
+            - aws-test-service-helm-apply-stable-version:
+                name: aws-test-service-helm-apply-v1
+                requires:
+                    - aws-create-env-v1
+            - aws-test-service-redis-apply-stable-version:
+                name: aws-test-service-redis-apply-v1
+                requires:
+                    - aws-create-env-v1
+            - aws-test-service-docdb-apply-stable-version:
+                name: aws-test-service-docdb-apply-v1
+                requires:
+                    - aws-create-env-v1
+            - aws-test-service-s3-apply-stable-version:
+                name: aws-test-service-s3-apply-v1
+                requires:
+                    - aws-create-env-v1
+            - aws-test-websocket-apply-stable-version:
+                name: aws-test-websocket-apply-v1
+                requires:
+                    - aws-create-env-v1
+            - download-opta-version:
+                name: download-opta-version-v2
+                opta-version: << pipeline.parameters.opta-version-v2 >>
+                requires:
+                    - aws-test-k8s-manifest-apply-v1
+                    - aws-test-cloudfront-apply-v1
+                    - aws-test-lambda-function-apply-v1
+                    - aws-test-service-helm-apply-v1
+                    - aws-test-service-redis-apply-v1
+                    - aws-test-service-docdb-apply-v1
+                    - aws-test-service-s3-apply-v1
+                    - aws-test-websocket-apply-v1
+                    - gcp-test-k8s-manifest-apply-v1
+                    - gcp-test-service-gcs-apply-v1
+                    - gcp-test-service-helm-apply-v1
+                    - gcp-test-service-redis-apply-v1
+            - aws-create-env-stable-version:
+                name: aws-create-env-v2
+                requires:
+                    - aws-create-env-v1
+                    - download-opta-version-v2
+            - aws-test-k8s-manifest-apply-stable-version:
+                name: aws-test-k8s-manifest-apply-v2
+                requires:
+                    - aws-create-env-v2
+                    - aws-test-k8s-manifest-apply-v1
+            - aws-test-cloudfront-apply-stable-version:
+                name: aws-test-cloudfront-apply-v2
+                requires:
+                    - aws-create-env-v2
+                    - aws-test-cloudfront-apply-v1
+            - aws-test-lambda-function-apply-stable-version:
+                name: aws-test-lambda-function-apply-v2
+                requires:
+                    - aws-create-env-v2
+                    - aws-test-lambda-function-apply-v1
+            - aws-test-service-helm-apply-stable-version:
+                name: aws-test-service-helm-apply-v2
+                requires:
+                    - aws-create-env-v2
+                    - aws-test-service-helm-apply-v1
+            - aws-test-service-redis-apply-stable-version:
+                name: aws-test-service-redis-apply-v2
+                requires:
+                    - aws-create-env-v2
+                    - aws-test-service-redis-apply-v1
+            - aws-test-service-docdb-apply-stable-version:
+                name: aws-test-service-docdb-apply-v2
+                requires:
+                    - aws-create-env-v2
+                    - aws-test-service-docdb-apply-v1
+            - aws-test-service-s3-apply-stable-version:
+                name: aws-test-service-s3-apply-v2
+                requires:
+                    - aws-create-env-v2
+                    - aws-test-service-s3-apply-v1
+            - aws-test-websocket-apply-stable-version:
+                name: aws-test-websocket-apply-v2
+                requires:
+                    - aws-create-env-v2
+                    - aws-test-websocket-apply-v1
+            - aws-test-k8s-manifest-destroy-stable-version:
+                requires:
+                    - aws-test-k8s-manifest-apply-v2
+            - aws-test-cloudfront-destroy-stable-version:
+                requires:
+                    - aws-test-cloudfront-apply-v2
+            - aws-test-lambda-function-destroy-stable-version:
+                requires:
+                    - aws-test-lambda-function-apply-v2
+            - aws-test-service-helm-destroy-stable-version:
+                requires:
+                    - aws-test-service-helm-apply-v2
+            - aws-test-service-redis-destroy-stable-version:
+                requires:
+                    - aws-test-service-redis-apply-v2
+            - aws-test-service-docdb-destroy-stable-version:
+                requires:
+                    - aws-test-service-docdb-apply-v2
+            - aws-test-service-s3-destroy-stable-version:
+                requires:
+                    - aws-test-service-s3-apply-v2
+            - aws-test-websocket-destroy-stable-version:
+                requires:
+                    - aws-test-websocket-apply-v2
+            - aws-destroy-env-stable-version:
+                name: aws-destroy-env
+                requires:
+                    - aws-test-k8s-manifest-destroy-stable-version
+                    - aws-test-cloudfront-destroy-stable-version
+                    - aws-test-lambda-function-destroy-stable-version
+                    - aws-test-service-helm-destroy-stable-version
+                    - aws-test-service-redis-destroy-stable-version
+                    - aws-test-service-docdb-destroy-stable-version
+                    - aws-test-service-s3-destroy-stable-version
+                    - aws-test-websocket-destroy-stable-version
+            - gcp-create-env-stable-version:
+                name: gcp-create-env-v1
+                requires:
+                    - build-test-service-image
+                    - download-opta-version-v1
+            - gcp-test-k8s-manifest-apply-stable-version:
+                name: gcp-test-k8s-manifest-apply-v1
+                requires:
+                    - gcp-create-env-v1
+            - gcp-test-service-gcs-apply-stable-version:
+                name: gcp-test-service-gcs-apply-v1
+                requires:
+                    - gcp-create-env-v1
+            - gcp-test-service-helm-apply-stable-version:
+                name: gcp-test-service-helm-apply-v1
+                requires:
+                    - gcp-create-env-v1
+            - gcp-test-service-redis-apply-stable-version:
+                name: gcp-test-service-redis-apply-v1
+                requires:
+                    - gcp-create-env-v1
+            - gcp-create-env-stable-version:
+                name: gcp-create-env-v2
+                requires:
+                    - gcp-create-env-v1
+                    - download-opta-version-v2
+            - gcp-test-k8s-manifest-apply-stable-version:
+                name: gcp-test-k8s-manifest-apply-v2
+                requires:
+                    - gcp-create-env-v2
+                    - gcp-test-k8s-manifest-apply-v1
+            - gcp-test-service-gcs-apply-stable-version:
+                name: gcp-test-service-gcs-apply-v2
+                requires:
+                    - gcp-create-env-v2
+                    - gcp-test-service-gcs-apply-v1
+            - gcp-test-service-helm-apply-stable-version:
+                name: gcp-test-service-helm-apply-v2
+                requires:
+                    - gcp-create-env-v2
+                    - gcp-test-service-helm-apply-v1
+            - gcp-test-service-redis-apply-stable-version:
+                name: gcp-test-service-redis-apply-v2
+                requires:
+                    - gcp-create-env-v2
+                    - gcp-test-service-redis-apply-v1
+            - gcp-test-k8s-manifest-destroy-stable-version:
+                requires:
+                    - gcp-test-k8s-manifest-apply-v2
+            - gcp-test-service-gcs-destroy-stable-version:
+                requires:
+                    - gcp-test-service-gcs-apply-v2
+            - gcp-test-service-helm-destroy-stable-version:
+                requires:
+                    - gcp-test-service-helm-apply-v2
+            - gcp-test-service-redis-destroy-stable-version:
+                requires:
+                    - gcp-test-service-redis-apply-v2
+            - gcp-destroy-env-stable-version:
+                name: gcp-destroy-env
+                requires:
+                    - gcp-test-k8s-manifest-destroy-stable-version
+                    - gcp-test-service-gcs-destroy-stable-version
+                    - gcp-test-service-helm-destroy-stable-version
+                    - gcp-test-service-redis-destroy-stable-version
+        when: << pipeline.parameters.run-cnd-version-compare >>
     run-create-and-destroy:
         jobs:
             - get-all-parameter-values
@@ -2508,6 +3452,46 @@ workflows:
                 requires:
                     - build-opta-binary
         when: << pipeline.parameters.run-destroy-gcp-env >>
+    run-destroy-stable-version:
+        jobs:
+            - get-all-parameter-values
+            - download-opta-version:
+                opta-version: << pipeline.parameters.opta-version-v1 >>
+            - aws-test-k8s-manifest-destroy-stable-version:
+                requires:
+                    - download-opta-version
+            - aws-test-cloudfront-destroy-stable-version:
+                requires:
+                    - download-opta-version
+            - aws-test-lambda-function-destroy-stable-version:
+                requires:
+                    - download-opta-version
+            - aws-test-service-helm-destroy-stable-version:
+                requires:
+                    - download-opta-version
+            - aws-test-service-redis-destroy-stable-version:
+                requires:
+                    - download-opta-version
+            - aws-test-service-docdb-destroy-stable-version:
+                requires:
+                    - download-opta-version
+            - aws-test-service-s3-destroy-stable-version:
+                requires:
+                    - download-opta-version
+            - aws-test-websocket-destroy-stable-version:
+                requires:
+                    - download-opta-version
+            - aws-destroy-env-stable-version:
+                requires:
+                    - aws-test-k8s-manifest-destroy-stable-version
+                    - aws-test-cloudfront-destroy-stable-version
+                    - aws-test-lambda-function-destroy-stable-version
+                    - aws-test-service-helm-destroy-stable-version
+                    - aws-test-service-redis-destroy-stable-version
+                    - aws-test-service-docdb-destroy-stable-version
+                    - aws-test-service-s3-destroy-stable-version
+                    - aws-test-websocket-destroy-stable-version
+        when: << pipeline.parameters.run-destroy-stable-version >>
     run-opta-terraform-generate-test:
         jobs:
             - get-all-parameter-values
@@ -2625,5 +3609,22 @@ workflows:
                 requires:
                     - gcp-opta-example-destroy-svcs
         when: << pipeline.parameters.run-service-mesh-e2e >>
+    test:
+        jobs:
+            - download-opta-version:
+                name: download-opta-version-v1
+                opta-version: << pipeline.parameters.opta-version-v1 >>
+            - check-version:
+                requires:
+                    - download-opta-version-v1
+            - download-opta-version:
+                name: download-opta-version-v2
+                opta-version: << pipeline.parameters.opta-version-v2 >>
+                requires:
+                    - download-opta-version-v1
+            - check-version:
+                requires:
+                    - download-opta-version-v2
+        when: << pipeline.parameters.test >>
     version: 2
 

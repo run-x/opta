@@ -3,6 +3,7 @@ environment:
   OPTA_DISABLE_REPORTING: "true"
 steps:
   - checkout-opta
+  - install-python-dependencies
   - when:
       condition: << pipeline.parameters.ci-use-diff-env >>
       steps:
@@ -13,8 +14,9 @@ steps:
   - aws-cli/install
   - aws-cli/setup
   - run:
-      name: "Destroy environment"
+      name: "Destroy Websocket Service with Opta"
       command: |
         $HOME/.opta/opta destroy \
-        --config ./.circleci/ci-tests/create-and-destroy-aws/environment.yml \
+        --env awsenv-ci \
+        --config ./.circleci/ci-tests/create-and-destroy-aws/websocket-service.yml \
         --auto-approve || if [[ $? -eq 141 ]]; then true; else exit $?; fi
