@@ -152,7 +152,7 @@ class HelmCloudClient(CloudClient):
     def cluster_exist(self) -> bool:
         # "kubectl version" returns an error code if it can't connect to a cluster
         try:
-            nice_run(["kubectl", "version"], check=True)
+            nice_run(["kubectl", "version"], check=True, capture_output=True)
         except Exception:
             raise UserErrors(
                 "The current kubectl configuration must be valid if you wanna use the BYO K8s feature"
