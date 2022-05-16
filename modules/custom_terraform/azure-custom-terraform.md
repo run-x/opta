@@ -41,14 +41,7 @@ modules:
     name: vm1
     source: "./blah"
     terraform_inputs:
-      subnet_self_link: "{parent.private_subnet_self_link}"
-# You can call it multiple times if you like
-#  - type: custom-terraform
-#    name: vm2
-#    source: "./blah"
-#    terraform_inputs:
-#      hello: "world2"
-#      subnet_self_link: "{parent.private_subnet_self_link}"
+      env_name: "{env}"
 ```
 
 You can see that the path to your module is specified by `source` (you can use relative or absolute paths),
@@ -58,10 +51,6 @@ the outputs of the parent environment or other modules as input.
 Lastly, you can use the following as content to the main.tf file of the blah module to complete the example/demo:
 
 ```hcl
-variable "my_resource_group" {
-  type = string
-}
-
 variable "env_name" {
   type = string
 }
