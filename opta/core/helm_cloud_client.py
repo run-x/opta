@@ -89,7 +89,8 @@ class HelmCloudClient(CloudClient):
             )
         logger.debug("Loading kube config file")
         try:
-            default_kube_config = yaml.load(open(default_kube_config_filename))
+            with open(default_kube_config_filename) as f:
+                default_kube_config = yaml.load(f)
         except Exception:
             raise UserErrors(
                 f"Could not load your kubeconfig file {default_kube_config_filename} as valid yaml"
