@@ -610,7 +610,7 @@ class Layer:
             provider = self.providers["azurerm"]
             str2hash = (
                 provider["location"] + provider["tenant_id"] + provider["subscription_id"]
-            )"
+            )
         else:
             return ""
         return hashlib.md5(str2hash.encode("utf-8")).hexdigest()[0:4]  # nosec
