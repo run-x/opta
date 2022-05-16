@@ -80,7 +80,9 @@ class HelmCloudClient(CloudClient):
 
     def set_kube_config(self) -> None:
         kube_config_file_name = self.layer.get_kube_config_file_name()
-        default_kube_config_filename = constants.DEFAULT_KUBECONFIG.split(ENV_KUBECONFIG_PATH_SEPARATOR)[0]
+        default_kube_config_filename = constants.DEFAULT_KUBECONFIG.split(
+            ENV_KUBECONFIG_PATH_SEPARATOR
+        )[0]
         if not exists(default_kube_config_filename):
             raise UserErrors(
                 "To use K8s-native provider, your must have your kubeconfig set"
