@@ -112,7 +112,8 @@ def generate_terraform(
     try:
 
         # work in a temp directory until command is over, to prevent messing up existing files
-        tmp_dir = tempfile.TemporaryDirectory(prefix="opta-gen-tf").name
+        tmp_dir_obj = tempfile.TemporaryDirectory(prefix="opta-gen-tf")
+        tmp_dir = tmp_dir_obj.name
         output_dir = os.path.join(os.getcwd(), directory)
 
         # to keep consistent with what opta does - we could make this an option if opta tags are not desirable
@@ -165,7 +166,9 @@ def generate_terraform(
             REGISTRY[layer.cloud]["backend"] = original_backend
 
         # break down json file in multiple files
-        main_tf_json = json.load(open(TF_FILE_PATH))
+        with open(TF_FILE_PATH) as f:
+            main_tf_json = json.load(f)
+
         for key in ["provider", "data", "output", "terraform"]:
             # extract the relevant json
             main_tf_json, extracted_json = dicts.extract(main_tf_json, key)
@@ -177,7 +180,8 @@ def generate_terraform(
                 logger.debug(
                     f"Found existing terraform file: {prev_tf_file}, merging it with new values"
                 )
-                prev_json = json.load(open(prev_tf_file))
+                with open(prev_tf_file) as f:
+                    prev_json = json.load(f)
                 extracted_json = dicts.merge(extracted_json, prev_json)
 
             # save it as it's own file
@@ -267,6 +271,8 @@ def generate_terraform(
             amplitude_client.FINISH_GEN_TERRAFORM_EVENT,
             event_properties=event_properties,
         )
+
+        tmp_dir_obj.cleanup()
 
 
 def _write_json(data: dict, file_path: str) -> None:

@@ -28,7 +28,8 @@ class Local(CloudClient):
 
     def get_remote_config(self) -> Optional["StructuredConfig"]:
         try:
-            return json.load(open(self.config_file_path, "r"))
+            with open(self.config_file_path, "r") as f:
+                return json.load(f)
         except Exception:  # Backwards compatibility
             logger.debug(
                 "Could not successfully download and parse any pre-existing config"

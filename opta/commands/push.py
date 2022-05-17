@@ -140,7 +140,8 @@ def push_to_docker_local(
 #
 # If the config file has the "environments" field, then it is a child/service layer.
 def is_service_config(config: str) -> bool:
-    config_data = yaml.load(open(config))
+    with open(config) as f:
+        config_data = yaml.load(f)
     return "environments" in config_data
 
 

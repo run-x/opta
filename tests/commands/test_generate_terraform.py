@@ -22,10 +22,15 @@ def run_before_and_after_tests(mocker: MockFixture) -> Generator:
     mocked_load_kube_config = mocker.patch("opta.core.kubernetes.load_kube_config")
     mocked_set_kube_config = mocker.patch("opta.core.kubernetes.set_kube_config")
 
-    global tmp_dir
-    tmp_dir = tempfile.TemporaryDirectory(prefix="opta-gen-tf").name
+    directory = tempfile.TemporaryDirectory(prefix="opta-gen-tf")
 
-    yield  # this is where the testing happens
+    global tmp_dir
+    tmp_dir = directory.name
+
+    with directory:
+        yield  # this is where the testing happens
+
+    tmp_dir = ""
 
     # Teardown
     # no actual kubernetes/cloud needed
@@ -283,7 +288,11 @@ def test_generate_terraform_env_and_service(mocker: MockFixture) -> None:
     runner = CliRunner()
 
     # run for env
-    result = runner.invoke(cli, ["generate-terraform", "-c", env_file, "-d", tmp_dir])
+    result = runner.invoke(
+        cli, ["generate-terraform", "-c", env_file, "-d", tmp_dir, "--auto-approve"]
+    )
+    # if result.exception:
+    #     print(sys.exc_info()[2])
     assert result.exit_code == 0
     assert "Terraform files generated successfully" in result.output
 
@@ -544,7 +553,6 @@ def _check_file_not_exist(rel_path: str) -> None:
 
 def _random_file() -> str:
     "_random_file in current directory"
-    os.mkdir(tmp_dir)
     new_file = os.path.join(tmp_dir, str(uuid.uuid4()))
     with open(new_file, "w"):
         pass

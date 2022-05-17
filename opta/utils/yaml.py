@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import pathlib
 import warnings
 from typing import IO, Any, Iterable, Optional, Union
 
 import ruamel.yaml
 from ruamel.yaml import YAML as lib_YAML
 
-Loadable = Union[str, IO]
+Loadable = Union[str, pathlib.Path, IO]
 
 
 class YAML:

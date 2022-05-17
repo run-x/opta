@@ -48,9 +48,8 @@ class Markdown:
     @staticmethod
     def _write(path: str, content: str) -> None:
         """write to file"""
-        file = open(path, "w")
-        file.write(content)
-        file.close()
+        with open(path, "w") as f:
+            f.write(content)
 
 
 class Title1(Text):

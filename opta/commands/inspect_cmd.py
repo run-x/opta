@@ -137,13 +137,17 @@ class InspectCommand:
         return values
 
     def _get_aws_region(self) -> str:
-        tf_config = json.load(open(TF_FILE_PATH))
+        tf_config = self._read_tf_config()
         return tf_config["provider"]["aws"]["region"]
 
     def _get_gcp_region(self) -> str:
-        tf_config = json.load(open(TF_FILE_PATH))
+        tf_config = self._read_tf_config()
         return tf_config["provider"]["google"]["region"]
 
     def _get_gcp_project(self) -> str:
-        tf_config = json.load(open(TF_FILE_PATH))
+        tf_config = self._read_tf_config()
         return tf_config["provider"]["google"]["project"]
+
+    def _read_tf_config(self) -> dict:
+        with open(TF_FILE_PATH) as f:
+            return json.load(f)

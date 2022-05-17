@@ -40,22 +40,22 @@ def test_sensitive_formatter_on_gcp_yaml() -> None:
 
 
 def test_sensitive_formatter_on_aws_tfplan() -> None:
-    tfplan_text = open(
-        os.path.join(
-            os.getcwd(), "tests", "fixtures", "sample_tf_plan_files", "aws_tfplan"
-        )
-    ).read()
+    path = os.path.join(
+        os.getcwd(), "tests", "fixtures", "sample_tf_plan_files", "aws_tfplan"
+    )
+    with open(path) as f:
+        tfplan_text = f.read()
     formatted_tfplan = SensitiveFormatter.filter(tfplan_text)
     assert "111111111111" not in formatted_tfplan
     assert json.loads(formatted_tfplan)
 
 
 def test_sensitive_formatter_on_gcp_tfplan() -> None:
-    tfplan_text = open(
-        os.path.join(
-            os.getcwd(), "tests", "fixtures", "sample_tf_plan_files", "gcp_tfplan"
-        )
-    ).read()
+    path = os.path.join(
+        os.getcwd(), "tests", "fixtures", "sample_tf_plan_files", "gcp_tfplan"
+    )
+    with open(path) as f:
+        tfplan_text = f.read()
     formatted_tfplan = SensitiveFormatter.filter(tfplan_text)
     assert "my-gcp-project" not in formatted_tfplan
     assert json.loads(formatted_tfplan)

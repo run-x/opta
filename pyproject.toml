@@ -16,3 +16,9 @@ force_grid_wrap = 0
 use_parentheses = true
 line_length = 90
 skip_glob = ['**/migrations/**', '**/node_modules**']
+
+[tool.pytest.ini_options]
+# treat all warnings as errors
+filterwarnings = [
+    "error",
+]
