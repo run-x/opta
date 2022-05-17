@@ -31,16 +31,22 @@ class TestByok:
         # check that the helm provider is generated correctly
         assert layer.cloud == "helm"
         assert layer.providers == {
-            "helm": {"kubernetes": {"config_path": "{kubeconfig}"}}
+            "helm": {"kubernetes": {"config_path": "{kubeconfig}"}},
+            "kubernetes": {"config_path": "{kubeconfig}"},
         }
         os.environ["KUBECONFIG"] = "~/.kube/custom-config"
         gen_provider = layer.gen_providers(0)
         assert gen_provider["provider"] == {
-            "helm": {"kubernetes": {"config_path": "~/.kube/config"}}
+            "helm": {"kubernetes": {"config_path": "~/.kube/config"}},
+            "kubernetes": {"config_path": "~/.kube/config"},
         }
         assert gen_provider["terraform"]["required_providers"] == {
-            "helm": {"source": "hashicorp/helm", "version": "2.4.1"}
+            "helm": {"source": "hashicorp/helm", "version": "2.4.1"},
+            "kubernetes": {"source": "hashicorp/kubernetes", "version": "2.11.0"},
         }
         assert gen_provider["terraform"]["backend"] == {
-            "local": {"path": "./tfstate/hello.tfstate"}
+            "kubernetes": {
+                "config_p" "ath": "~/.kube/config",
+                "secret_suffix": "opta-tests-hello",
+            },
         }

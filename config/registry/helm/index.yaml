@@ -2,10 +2,13 @@ required_providers:
   helm:
     source: "hashicorp/helm"
     version: "2.4.1"
+  kubernetes:
+    source: "hashicorp/kubernetes"
+    version: "2.11.0"
 backend:
-  local:
-    # this is consistent with terraform generator
-    path: "./tfstate/{layer_name}.tfstate"
+  kubernetes:
+    secret_suffix: "{state_storage}"
+    config_path: "{kubeconfig}"
 validator:
   name: str()
   org_name: regex('^[a-z0-9-]{,15}$', name="Valid identifier, regex='[a-z0-9-]{,15}'")
@@ -22,3 +25,5 @@ output_providers:
   helm:
     kubernetes:
       config_path: "{kubeconfig}"
+  kubernetes:
+    config_path: "{kubeconfig}"

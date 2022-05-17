@@ -157,7 +157,7 @@ Instead of having to define a Helm chart folder for each service, you can define
   This step will:
     - Generate the helm chart for your service
     - Use the terraform helm provider to release the service
-    - Generate the terraform state files in `tfstate` - please commit these files after each apply.
+    - Store the state of the deployment in K8s as a secret.
 
 3. You can test that your service is deployed by using `kubectl` or `curl` to the public endpoint.
 ```shell

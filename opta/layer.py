@@ -618,6 +618,8 @@ class Layer:
     def state_storage(self) -> str:
         if self.cloud == "local":
             return os.path.join(str(Path.home()), ".opta", "local", "tfstate")
+        elif self.cloud == "helm":
+            return f"{self.org_name}-{self.name}"
 
         if self.parent is not None:
             return self.parent.state_storage()

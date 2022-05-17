@@ -50,6 +50,9 @@
             "$ref": "https://app.runx.dev/modules/azure-k8s-base"
           },
           {
+            "$ref": "https://app.runx.dev/modules/custom-terraform"
+          },
+          {
             "$ref": "https://app.runx.dev/modules/datadog"
           },
           {
