@@ -7,7 +7,7 @@ from typing import IO, Any, Iterable, Optional, Union
 import ruamel.yaml
 from ruamel.yaml import YAML as lib_YAML
 
-Loadable = Union[pathlib.Path, IO]
+Loadable = Union[str, pathlib.Path, IO]
 
 
 class YAML:

@@ -1,6 +1,4 @@
-import functools
 import os
-import sys
 import tempfile
 import uuid
 from typing import Generator, List
@@ -290,7 +288,9 @@ def test_generate_terraform_env_and_service(mocker: MockFixture) -> None:
     runner = CliRunner()
 
     # run for env
-    result = runner.invoke(cli, ["generate-terraform", "-c", env_file, "-d", tmp_dir, "--auto-approve"])
+    result = runner.invoke(
+        cli, ["generate-terraform", "-c", env_file, "-d", tmp_dir, "--auto-approve"]
+    )
     # if result.exception:
     #     print(sys.exc_info()[2])
     assert result.exit_code == 0
