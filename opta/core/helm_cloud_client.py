@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Dict, Optional
 
 from kubernetes.client import CoreV1Api, V1Secret, V1SecretList
 from kubernetes.config.kube_config import ENV_KUBECONFIG_PATH_SEPARATOR
-from ruamel.yaml import YAMLError
 
 import opta.constants as constants
 from opta.core.cloud_client import CloudClient
@@ -92,7 +91,7 @@ class HelmCloudClient(CloudClient):
         try:
             with open(default_kube_config_filename) as f:
                 default_kube_config = yaml.load(f)
-        except YAMLError:
+        except yaml.YAMLError:
             raise UserErrors(
                 f"Could not load your kubeconfig file {default_kube_config_filename} as valid yaml"
             )
