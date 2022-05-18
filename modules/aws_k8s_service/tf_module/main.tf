@@ -56,7 +56,7 @@ resource "helm_release" "k8s-service" {
       tolerations : var.tolerations
       cron_jobs : var.cron_jobs
       podAnnotations : var.pod_annotations
-      podLabels: var.pod_labels
+      podLabels : var.pod_labels
     })
   ]
   atomic          = true
