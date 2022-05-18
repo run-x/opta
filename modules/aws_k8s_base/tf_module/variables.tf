@@ -6,12 +6,12 @@ data "aws_eks_cluster" "current" {
 locals {
   target_ports    = var.cert_arn == "" && var.private_key == "" && !var.expose_self_signed_ssl ? { http : "http" } : { http : "http", https : "https" }
   container_ports = { http : 80, https : 443, healthcheck : 10254 }
-  nginx_tls_ports = var.cert_arn == "" && var.private_key == "" ? "" : join(",", compact(flatten([
+  nginx_tls_ports = var.cert_arn == "" && var.private_key == "" && !var.expose_self_signed_ssl ? "" : join(",", compact(flatten([
     ["https"],
     [for port in var.nginx_extra_tcp_ports_tls : "${port}-tcp"],
   ])))
 
-  config = merge((var.cert_arn == "" && var.private_key == "" && !var.expose_self_signed_ssl ? { ssl-redirect : false } : {
+  config = merge((var.cert_arn == "" && var.private_key == "" ? { ssl-redirect : false } : {
     ssl-redirect : true
     force-ssl-redirect : true
   }), var.nginx_config)

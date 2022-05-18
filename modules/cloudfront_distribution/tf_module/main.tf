@@ -21,7 +21,7 @@ resource "aws_cloudfront_distribution" "distribution" {
   enabled         = true
   is_ipv6_enabled = true
   price_class     = var.price_class
-  aliases         = var.acm_cert_arn == "" ? [] : var.domains
+  aliases         = var.acm_cert_arn == "" ? [] : concat(var.domains, formatlist("*.%s", var.domains))
 
   dynamic "logging_config" {
     for_each = var.s3_log_bucket_name == null ? [] : [1]
@@ -55,7 +55,7 @@ resource "aws_cloudfront_distribution" "distribution" {
       custom_origin_config {
         http_port              = 80
         https_port             = 443
-        origin_protocol_policy = "http-only"
+        origin_protocol_policy = var.forward_https? "https-only" : "http-only"
         origin_ssl_protocols   = ["TLSv1.2", "TLSv1.1", "TLSv1"]
       }
     }
@@ -81,7 +81,7 @@ resource "aws_cloudfront_distribution" "distribution" {
 
     forwarded_values {
       query_string = true
-      headers      = ["Origin", "Access-Control-Request-Headers", "Access-Control-Request-Method"]
+      headers      = ["Origin", "Access-Control-Request-Headers", "Access-Control-Request-Method", "Host"]
 
       cookies {
         forward = "none"

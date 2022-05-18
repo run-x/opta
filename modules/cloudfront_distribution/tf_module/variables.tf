@@ -83,6 +83,10 @@ variable "enable_auto_dns" {
   type = bool
 }
 
+variable "forward_https" {
+  type = bool
+}
+
 variable "zone_id" {
   type = string
 }
