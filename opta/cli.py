@@ -24,7 +24,6 @@ from opta.commands.push import push
 from opta.commands.secret import secret
 from opta.commands.shell import shell
 from opta.commands.show import show
-from opta.commands.ui import ui
 from opta.commands.upgrade import upgrade
 from opta.commands.validate import validate
 from opta.commands.version import version
@@ -51,7 +50,6 @@ cli.add_command(apply)
 cli.add_command(deploy)
 cli.add_command(destroy)
 cli.add_command(configure_kubectl)
-cli.add_command(ui)
 cli.add_command(inspect)
 cli.add_command(logs)
 cli.add_command(output)
