@@ -207,10 +207,10 @@ inputs:
     default: 25
 extra_validators:
   limits:
-    memory: any(int(min=1), regex('^[1-9][0-9]{0,4}$'), required=True)
+    memory: any(int(min=1), str(), required=True)
   resources:
-    cpu: any(int(min=1), regex('^[1-9][0-9]{0,4}$'), required=True)
-    memory: any(int(min=1), regex('^[1-9][0-9]{0,4}$'), required=True)
+    cpu: any(int(min=1), str(), required=True)
+    memory: any(int(min=1), str(), required=True)
   cron_job:
     commands: list(required=True)
     schedule: str(required=True)
