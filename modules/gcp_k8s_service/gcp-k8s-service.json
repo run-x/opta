@@ -205,7 +205,12 @@
     },
     "pod_annotations": {
       "type": "object",
-      "description": "These are extra annotations to add to k8s-service pod objects\n",
+      "description": "These are extra annotations to add to k8s-service pod objects / replace defaults\n",
+      "default": {}
+    },
+    "pod_labels": {
+      "type": "object",
+      "description": "These are extra labels to add to k8s-service pod objects / replace defaults\n",
       "default": {}
     },
     "port": {
