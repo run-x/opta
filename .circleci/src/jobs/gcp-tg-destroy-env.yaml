@@ -13,8 +13,11 @@ steps:
       command: |
         cd $HOME/generated-tf-files-gcp
         terraform init
-        terraform refresh
-        terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base -target=module.k8scluster -target=module.k8sbase -destroy
+        terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8sbase -destroy
+        terraform apply -compact-warnings -auto-approve tf.plan
+        terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8scluster -destroy
+        terraform apply -compact-warnings -auto-approve tf.plan
+        terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base -destroy
         terraform apply -compact-warnings -auto-approve tf.plan
   - store_artifacts:
       path: ~/generated-tf-files-gcp

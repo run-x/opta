@@ -11,9 +11,11 @@ steps:
       command: |
         cd $HOME/generated-tf-files-aws
         terraform init
-        terraform refresh
-        terraform state rm module.base.aws_ebs_default_kms_key.default
-        terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base -target=module.k8scluster -target=module.k8sbase -destroy
+        terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8sbase -destroy
+        terraform apply -compact-warnings -auto-approve tf.plan
+        terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.k8scluster -destroy
+        terraform apply -compact-warnings -auto-approve tf.plan
+        terraform plan -compact-warnings -lock=false -input=false -out=tf.plan -target=module.base -destroy
         terraform apply -compact-warnings -auto-approve tf.plan
   - store_artifacts:
       path: ~/generated-tf-files-aws
