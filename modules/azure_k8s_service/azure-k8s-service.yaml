@@ -87,17 +87,32 @@ inputs: # (what users see)
   - name: healthcheck_path
     user_facing: true
     validator: str(required=False)
-    description: See the See the [liveness/readiness](https://docs.opta.dev/reference/azurerm/modules/azure-k8s-service/#healthcheck-probe) section. Default `null` (i.e., no user-specified healthchecks)
+    description: See the See the [healthcheck probe](https://docs.opta.dev/reference/aws/modules/aws-k8s-service/#healthcheck-probe) section. Default `null` (i.e., no user-specified healthchecks)
     default: null
+  - name: healthcheck_command
+    user_facing: true
+    validator: list(str(), required=False)
+    description: See the See the [healthcheck probe](https://docs.opta.dev/reference/aws/modules/aws-k8s-service/#healthcheck-probe) section. Default `[]` (i.e., no user-specified healthchecks)
+    default: []
+  - name: liveness_probe_command
+    user_facing: true
+    validator: list(str(), required=False)
+    description: Use if using shell command liveness checks and liveness probe != readiness probe
+    default: []
+  - name: readiness_probe_command
+    user_facing: true
+    validator: list(str(), required=False)
+    description: Use if using shell command readiness checks and liveness probe != readiness probe
+    default: []
   - name: liveness_probe_path
     user_facing: true
     validator: str(required=False)
-    description: Use if liveness probe != readiness probe
+    description: Use if using http ping liveness checks and liveness probe != readiness probe
     default: null
   - name: readiness_probe_path
     user_facing: true
     validator: str(required=False)
-    description: Use if liveness probe != readiness probe
+    description: Use if using http ping readiness checks and liveness probe != readiness probe
     default: null
   - name: initial_liveness_delay
     user_facing: true

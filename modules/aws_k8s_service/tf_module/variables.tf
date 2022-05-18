@@ -219,3 +219,15 @@ variable "timeout" {
 variable "max_history" {
   type = number
 }
+
+variable "healthcheck_command" {
+  type = list(string)
+}
+
+variable "liveness_probe_command" {
+  type = list(string)
+}
+
+variable "readiness_probe_command" {
+  type = list(string)
+}

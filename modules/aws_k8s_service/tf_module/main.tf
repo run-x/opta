@@ -34,8 +34,10 @@ resource "helm_release" "k8s-service" {
       image : local.image
       version : var.tag == null ? "latest" : var.tag
       livenessProbePath : var.healthcheck_path == null || var.liveness_probe_path != null ? var.liveness_probe_path : var.healthcheck_path,
+      livenessProbeCommand : length(var.healthcheck_command) == 0 || length(var.liveness_probe_command) != 0 ? var.liveness_probe_command : var.healthcheck_command,
       initialLivenessDelay : var.initial_liveness_delay
       readinessProbePath : var.healthcheck_path == null || var.readiness_probe_path != null ? var.readiness_probe_path : var.healthcheck_path,
+      readinessProbeCommand : length(var.healthcheck_command) == 0 || length(var.readiness_probe_command) != 0 ? var.readiness_probe_command : var.healthcheck_command,
       initialReadinessDelay : var.initial_readiness_delay
       healthcheck_path : var.healthcheck_path,
       envVars : var.env_vars,

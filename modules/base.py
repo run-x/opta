@@ -255,6 +255,28 @@ class K8sServiceModuleProcessor(ModuleProcessor):
                     new_uris.append(public_uri)
             self.module.data["public_uri"] = new_uris
 
+        liveness_probe_command = self.module.data.get(
+            "healthcheck_command"
+        ) or self.module.data.get("liveness_probe_command")
+        liveness_probe_path = self.module.data.get(
+            "healthcheck_path"
+        ) or self.module.data.get("liveness_probe_path")
+        if liveness_probe_path is not None and liveness_probe_command is not None:
+            raise UserErrors(
+                "Invalid liveness probes: you can only specify a path for an http get request or a shell command to run, not both."
+            )
+
+        readiness_probe_command = self.module.data.get(
+            "healthcheck_command"
+        ) or self.module.data.get("readiness_probe_command")
+        readiness_probe_path = self.module.data.get(
+            "healthcheck_path"
+        ) or self.module.data.get("readiness_probe_path")
+        if readiness_probe_path is not None and readiness_probe_command is not None:
+            raise UserErrors(
+                "Invalid readiness probes: you can only specify a path for an http get request or a shell command to run, not both."
+            )
+
         super(K8sServiceModuleProcessor, self).process(module_idx)
 
     def get_event_properties(self) -> Dict[str, int]:

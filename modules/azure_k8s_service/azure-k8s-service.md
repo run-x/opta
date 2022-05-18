@@ -57,6 +57,21 @@ tl;dr An (optional) liveness probe determines whether your server should be rest
 be sent to a replica or be temporarily rerouted to other replicas. Essentially smart healthchecks. For websockets Opta
 just checks the tcp connection on the given port.
 
+Opta supports 2 types of possible health checks (please be advised that while they're not required, they're highly
+recommended):
+
+#### Option 1: Health Check HTTP Ping
+Quite straightforward, K8s does regular http get requests to your server under a specific given path. You can specify
+this by setting the `healthcheck_path` input, or alternatively the `liveness_probe_path` and/or the
+`readiness_probe_path` if you want different behavior for the liveness and readiness checks.
+
+#### Option 2: Health Check Command
+Also simple to understand, K8s regularly execute a shell command of your choosing and considers the
+server healthy if it has and exit code of 0. Commands should be passed in as a list of the different
+parts (e.g. ["echo", "hello"]). You can specify this by setting the `healthcheck_command` input, or alternatively the
+`liveness_probe_command` and/or the `readiness_probe_command` if you want different behavior for the liveness and
+readiness checks.
+
 ### Autoscaling
 
 As mentioned, autoscaling is available out of the box. We currently only support autoscaling

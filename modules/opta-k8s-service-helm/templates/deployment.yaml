@@ -71,6 +71,15 @@ spec:
           - secretRef:
               name: manual-secrets
               optional: true
+          {{ if ne (len .Values.livenessProbeCommand ) 0 }}
+          livenessProbe:
+            initialDelaySeconds: {{ .Values.initialLivenessDelay }}
+            exec:
+              command:
+              {{- range $item := .Values.livenessProbeCommand }}
+                 - {{ $item }}
+              {{- end }}
+          {{- end }}
           {{- if .Values.livenessProbePath }}
           livenessProbe:
             initialDelaySeconds: {{ .Values.initialLivenessDelay }}
@@ -95,6 +104,15 @@ spec:
               port: {{ .Values.probePort.name | quote }}
               path: {{ .Values.readinessProbePath }}
             {{- end }}
+          {{- end }}
+          {{- if ne (len .Values.readinessProbeCommand ) 0 }}
+          readinessProbe:
+            initialDelaySeconds: {{ .Values.initialReadinessDelay }}
+            exec:
+              command:
+                {{- range $item := .Values.readinessProbeCommand }}
+                - {{ $item }}
+                {{- end }}
           {{- end }}
           resources:
             limits:
