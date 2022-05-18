@@ -61,9 +61,11 @@ Opta supports 2 types of possible health checks (please be advised that while th
 recommended):
 
 #### Option 1: Health Check HTTP Ping
-Quite straightforward, K8s does regular http get requests to your server under a specific given path. You can specify
-this by setting the `healthcheck_path` input, or alternatively the `liveness_probe_path` and/or the
-`readiness_probe_path` if you want different behavior for the liveness and readiness checks.
+Quite straightforward, K8s does regular http get requests to your server under a specific given path.
+[Any code greater than or equal to 200 and less than 400 indicates success](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/).
+Any other code indicates failure. You can specify this by setting the `healthcheck_path` input, or alternatively the
+`liveness_probe_path` and/or the `readiness_probe_path` if you want different behavior for the liveness and readiness
+checks.
 
 #### Option 2: Health Check Command
 Also simple to understand, K8s regularly execute a shell command of your choosing and considers the
