@@ -189,7 +189,13 @@ inputs: # (what users see)
     validator: map(required=False)
     default: {}
     description: |
-      These are extra annotations to add to k8s-service pod objects
+      These are extra annotations to add to k8s-service pod objects / replace defaults
+  - name: pod_labels
+    user_facing: true
+    validator: map(required=False)
+    default: {}
+    description: |
+      These are extra labels to add to k8s-service pod objects / replace defaults
   - name: timeout
     user_facing: true
     validator: int(required=False)

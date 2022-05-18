@@ -220,3 +220,6 @@ variable "liveness_probe_command" {
 variable "readiness_probe_command" {
   type = list(string)
 }
+variable "pod_labels" {
+  type = map(string)
+}

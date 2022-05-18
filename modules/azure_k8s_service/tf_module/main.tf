@@ -53,6 +53,7 @@ resource "helm_release" "k8s-service" {
       persistentStorage : var.persistent_storage
       ingressExtraAnnotations : var.ingress_extra_annotations
       podAnnotations : var.pod_annotations
+      podLabels: var.pod_labels
     })
   ]
   atomic          = true
