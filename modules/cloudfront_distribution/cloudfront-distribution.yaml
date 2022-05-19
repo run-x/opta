@@ -94,6 +94,11 @@ inputs:
     validator: str(required=False)
     description: ID of Route53 hosted zone to add a record for. By default uses the one created by the DNS module if the module is found.
     default: ""
+  - name: forward_https
+    user_facing: true
+    validator: bool(required=False)
+    description: Should cloudformation forward to https port 443 instead of http port 80?
+    default: false
 extra_validators: { }
 outputs:
   - name: cloudfront_domain
