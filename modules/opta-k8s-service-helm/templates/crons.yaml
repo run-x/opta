@@ -24,9 +24,15 @@ spec:
             tags.datadoghq.com/version: {{ $.Values.version | quote }}
             {{- include "k8s-service.labels" $ | nindent 12 }}
             cronjob: "true"
+            {{- range $k, $v := $.Values.podLabels }}
+            {{ $k | quote }}: {{ $v | quote }}
+            {{- end }}
           annotations:
             # Disable linkerd because https://github.com/linkerd/linkerd2/issues/1869
             linkerd.io/inject: disabled
+            {{- range $k, $v := $.Values.podAnnotations }}
+            {{ $k | quote }}: {{ $v | quote }}
+            {{- end }}
         spec:
           restartPolicy: "Never"
           {{- if ne ( len $.Values.tolerations ) 0 }}
