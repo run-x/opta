@@ -24,4 +24,4 @@ steps:
       command: |
         sleep 20
         export HOST=`$HOME/.opta/opta output --env awsenv-ci --config ./.circleci/ci-tests/create-and-destroy-aws/service-cloudfront.yml | jq -r '.cloudfront_domain'`
-        curl --fail https://${HOST}
+        curl --fail http://${HOST}
