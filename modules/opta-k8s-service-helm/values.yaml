@@ -20,7 +20,13 @@ ingressExtraAnnotations: {}
 tolerations: []
 cron_jobs: []
 podAnnotations: {}
-
+version: ""
+livenessProbePath: null
+readinessProbePath: null
+initialLivenessDelay: null
+initialReadinessDelay: null
+livenessProbeCommand: []
+readinessProbeCommand: []
 serviceAccount:
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template

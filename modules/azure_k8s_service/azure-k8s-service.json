@@ -23,6 +23,21 @@
       "default": 3,
       "minimum": 0
     },
+    "healthcheck_command": {
+      "type": "array",
+      "description": "See the See the [healthcheck probe](https://docs.opta.dev/reference/aws/modules/aws-k8s-service/#healthcheck-probe) section. Default `[]` (i.e., no user-specified healthchecks)",
+      "default": []
+    },
+    "liveness_probe_command": {
+      "type": "array",
+      "description": "Use if using shell command liveness checks and liveness probe != readiness probe",
+      "default": []
+    },
+    "readiness_probe_command": {
+      "type": "array",
+      "description": "Use if using shell command readiness checks and liveness probe != readiness probe",
+      "default": []
+    },
     "max_history": {
       "type": "number",
       "description": "The max amount of helm revisions to keep track of (0 for infinite)",
@@ -62,11 +77,11 @@
     },
     "healthcheck_path": {
       "type": "string",
-      "description": "See the See the [liveness/readiness](https://docs.opta.dev/reference/azurerm/modules/azure-k8s-service/#healthcheck-probe) section. Default `null` (i.e., no user-specified healthchecks)"
+      "description": "See the See the [healthcheck probe](https://docs.opta.dev/reference/aws/modules/aws-k8s-service/#healthcheck-probe) section. Default `null` (i.e., no user-specified healthchecks)"
     },
     "liveness_probe_path": {
       "type": "string",
-      "description": "Use if liveness probe != readiness probe"
+      "description": "Use if using http ping liveness checks and liveness probe != readiness probe"
     },
     "initial_liveness_delay": {
       "type": "integer",
@@ -80,7 +95,7 @@
     },
     "readiness_probe_path": {
       "type": "string",
-      "description": "Use if liveness probe != readiness probe"
+      "description": "Use if using http ping readiness checks and liveness probe != readiness probe"
     },
     "consistent_hash": {
       "description": "Use [consistent hashing](https://www.nginx.com/resources/wiki/modules/consistent_hash/)",
