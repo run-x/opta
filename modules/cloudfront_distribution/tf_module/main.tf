@@ -10,7 +10,7 @@ data "aws_s3_bucket" "logging_bucket" {
 
 data "aws_lb" "ingress-nginx" {
   count = var.eks_load_balancer_enabled ? 1 : 0
-  arn       = var.load_balancer_arn
+  arn   = var.load_balancer_arn
 }
 
 
@@ -77,7 +77,7 @@ resource "aws_cloudfront_distribution" "distribution" {
   default_cache_behavior {
     allowed_methods        = var.allowed_methods
     cached_methods         = var.cached_methods
-    target_origin_id       =var.load_balancer_arn == "" ? local.s3_origin_id : local.lb_origin_id
+    target_origin_id       = var.load_balancer_arn == "" ? local.s3_origin_id : local.lb_origin_id
     viewer_protocol_policy = "redirect-to-https"
 
     forwarded_values {

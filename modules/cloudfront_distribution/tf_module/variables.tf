@@ -60,11 +60,11 @@ variable "load_balancer_arn" {
 }
 
 variable "eks_load_balancer_enabled" {
-  type    = bool
+  type = bool
 }
 
 variable "s3_load_balancer_enabled" {
-  type    = bool
+  type = bool
 }
 
 variable "allowed_methods" {
