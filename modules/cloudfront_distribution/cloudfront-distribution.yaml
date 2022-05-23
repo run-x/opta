@@ -16,15 +16,15 @@ inputs:
   - name: s3_log_bucket_name
     user_facing: false
     description: Name of the access log bucket
-    default: null
+    default: ""
   - name: s3_load_balancer_enabled
     user_facing: false
     description: Create S3 Cloudfront if set to true
     default: false
-  - name: load_balancer
+  - name: load_balancer_arn
     user_facing: false
-    description: Load Balancer URL
-    default: null
+    description: Arn of the loadbalancer to attach to Load Balancer
+    default: ""
   - name: eks_load_balancer_enabled
     user_facing: false
     description: Create LB Cloudfront if set to true
@@ -94,11 +94,6 @@ inputs:
     validator: str(required=False)
     description: ID of Route53 hosted zone to add a record for. By default uses the one created by the DNS module if the module is found.
     default: ""
-  - name: forward_https
-    user_facing: true
-    validator: bool(required=False)
-    description: Should cloudformation forward to https port 443 instead of http port 80?
-    default: false
 extra_validators: { }
 outputs:
   - name: cloudfront_domain
