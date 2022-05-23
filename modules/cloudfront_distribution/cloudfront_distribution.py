@@ -94,6 +94,6 @@ class CloudfrontDistributionProcessor(ModuleProcessor):
     def handle_k8s_base_link(self, linked_module: "Module") -> None:
         module_source = f"module.{linked_module.name}"
         self.module.data[
-            "load_balancer"
-        ] = f"${{{{{module_source}.load_balancer_raw_dns}}}}"
+            "load_balancer_arn"
+        ] = f"${{{{{module_source}.load_balancer_arn}}}}"
         self.module.data["eks_load_balancer_enabled"] = True

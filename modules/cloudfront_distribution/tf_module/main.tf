@@ -1,17 +1,18 @@
 data "aws_s3_bucket" "current_bucket" {
-  count  = local.s3_distribution_count
+  count  = var.s3_load_balancer_enabled ? 1 : 0
   bucket = var.bucket_name
 }
 
 data "aws_s3_bucket" "logging_bucket" {
-  count  = var.s3_log_bucket_name == null ? 0 : 1
+  count  = var.s3_log_bucket_name == "" ? 0 : 1
   bucket = var.s3_log_bucket_name
 }
 
-locals {
-  lb_distribution_count = var.eks_load_balancer_enabled == true ? 1 : 0
-  s3_distribution_count = var.s3_load_balancer_enabled == true ? 1 : 0
+data "aws_lb" "ingress-nginx" {
+  count = var.eks_load_balancer_enabled ? 1 : 0
+  arn   = var.load_balancer_arn
 }
+
 
 # This is optional, see Opta docs for this here: https://docs.opta.dev/reference/aws/modules/cloudfront-distribution/
 #tfsec:ignore:aws-cloudfront-enable-waf
@@ -50,12 +51,12 @@ resource "aws_cloudfront_distribution" "distribution" {
   dynamic "origin" {
     for_each = var.eks_load_balancer_enabled == true ? [1] : []
     content {
-      domain_name = var.load_balancer
+      domain_name = data.aws_lb.ingress-nginx[0].dns_name
       origin_id   = local.lb_origin_id
       custom_origin_config {
         http_port              = 80
         https_port             = 443
-        origin_protocol_policy = var.forward_https ? "https-only" : "http-only"
+        origin_protocol_policy = "http-only"
         origin_ssl_protocols   = ["TLSv1.2", "TLSv1.1", "TLSv1"]
       }
     }
@@ -76,7 +77,7 @@ resource "aws_cloudfront_distribution" "distribution" {
   default_cache_behavior {
     allowed_methods        = var.allowed_methods
     cached_methods         = var.cached_methods
-    target_origin_id       = var.eks_load_balancer_enabled == true ? local.lb_origin_id : local.s3_origin_id
+    target_origin_id       = var.load_balancer_arn == "" ? local.s3_origin_id : local.lb_origin_id
     viewer_protocol_policy = "redirect-to-https"
 
     forwarded_values {

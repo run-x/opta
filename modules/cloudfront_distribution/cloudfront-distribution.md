@@ -52,11 +52,7 @@ modules:
   - type: k8s-cluster
   - type: k8s-base
     name: testbase
-    cert_arn: "${{module.dns.cert_arn}}"
   - type: cloudfront-distribution
-    # Uncomment the following line if you want added security and are using a valid, non-self-signed ssl cert on the 
-    # load balancer (SSL certs created by opta when setting dns delegated true work fine). 
-    # forward_https: true
     links:
       - testbase
 ```

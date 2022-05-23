@@ -55,18 +55,16 @@ variable "links" {
   default = []
 }
 
-variable "load_balancer" {
+variable "load_balancer_arn" {
   type = string
 }
 
 variable "eks_load_balancer_enabled" {
-  type    = bool
-  default = false
+  type = bool
 }
 
 variable "s3_load_balancer_enabled" {
-  type    = bool
-  default = false
+  type = bool
 }
 
 variable "allowed_methods" {
@@ -80,10 +78,6 @@ variable "cached_methods" {
 }
 
 variable "enable_auto_dns" {
-  type = bool
-}
-
-variable "forward_https" {
   type = bool
 }
 
