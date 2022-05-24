@@ -94,6 +94,11 @@ inputs:
     validator: str(required=False)
     description: ID of Route53 hosted zone to add a record for. By default uses the one created by the DNS module if the module is found.
     default: ""
+  - name: web_acl_id
+    user_facing: true
+    validator: str(required=False)
+    description: The ID of the WAF ACL to add to cloudfront
+    default: null
 extra_validators: { }
 outputs:
   - name: cloudfront_domain

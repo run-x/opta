@@ -84,3 +84,7 @@ variable "enable_auto_dns" {
 variable "zone_id" {
   type = string
 }
+
+variable "web_acl_id" {
+  type = string
+}

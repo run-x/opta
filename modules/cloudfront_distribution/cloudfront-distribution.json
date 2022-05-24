@@ -22,6 +22,10 @@
       "type": "string",
       "description": "The name of the existing s3 object in your bucket which will serve as the 404 page."
     },
+    "web_acl_id": {
+      "type": "string",
+      "description": "The ID of the WAF ACL to add to cloudfront"
+    },
     "forward_https": {
       "type": "bool",
       "description": "Should cloudformation forward to https port 443 instead of http port 80?",
