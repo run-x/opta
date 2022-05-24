@@ -23,7 +23,7 @@ resource "aws_cloudfront_distribution" "distribution" {
   is_ipv6_enabled = true
   price_class     = var.price_class
   aliases         = var.acm_cert_arn == "" ? [] : concat(var.domains, formatlist("*.%s", var.domains))
-  web_acl_id = var.web_acl_id
+  web_acl_id      = var.web_acl_id
 
   dynamic "logging_config" {
     for_each = var.s3_log_bucket_name == null ? [] : [1]
