@@ -53,6 +53,8 @@ modules:
   - type: k8s-base
     name: testbase
   - type: cloudfront-distribution
+    # Uncomment to add an AWS WAF to your cloudfront distribution
+    # web_acl_id: "your_web_acl_id_or_arn"
     links:
       - testbase
 ```
@@ -114,3 +116,7 @@ The initial configuration of the WAF allows all traffic:
 </a>
 
 Finally, please [configure AWS WAF rules](https://docs.aws.amazon.com/waf/latest/developerguide/waf-chapter.html) for your specific application protection needs.
+
+
+Lastly, make sure to pass your new WAF to Opta by setting the `web_acl_id` input (if you're using WAFv2
+set it to the arn of the ACL created, if you used AWS WAF Classic, then use the ACL ID).
