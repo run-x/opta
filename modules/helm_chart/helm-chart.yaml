@@ -87,6 +87,11 @@ inputs:
     validator: bool(required=False)
     description: Will wait (for as long as timeout) until all resources are in a ready state before marking the release as successful.
     default: true
+  - name: wait_for_jobs
+    user_facing: true
+    validator: bool(required=False)
+    description: Will wait (for as long as timeout) until all Jobs have been completed before marking the release as successful.
+    default: false
   - name: max_history
     user_facing: true
     validator: int(required=False)

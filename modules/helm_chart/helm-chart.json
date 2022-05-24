@@ -76,6 +76,11 @@
       "description": "Will wait (for as long as timeout) until all resources are in a ready state before marking the release as successful.",
       "default": true
     },
+    "wait_for_jobs": {
+      "type": "boolean",
+      "description": "Will wait (for as long as timeout) until all Jobs have been completed before marking the release as successful.",
+      "default": false
+    },
     "type": {
       "description": "The name of this module",
       "enum": [
