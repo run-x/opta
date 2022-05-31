@@ -12,6 +12,7 @@ resource "helm_release" "remote_chart" {
   timeout           = var.timeout
   dependency_update = var.dependency_update
   wait              = var.wait
+  wait_for_jobs     = var.wait_for_jobs
   max_history       = var.max_history
   lifecycle {
     ignore_changes = [name]

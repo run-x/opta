@@ -33,6 +33,11 @@ variable "wait" {
   default = true
 }
 
+variable "wait_for_jobs" {
+  type    = bool
+  default = false
+}
+
 variable "cleanup_on_fail" {
   type    = bool
   default = true
