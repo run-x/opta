@@ -26,12 +26,6 @@ The best way to report a bug is to file an issue on GitHub. Please make sure the
 - Label the issue with `bug`
 - Remember that this is a volunteer-driven project, and that contributions are welcome :)
 
-**Bugfix resolution time expectations**
-
-- We will respond to all new issues within 24 hours
-- For any serious (production breaking) bug we will try to resolve ASAP and do a hotfix release
-- For other bugs we will try to resolve them within the next 2 releases (There is a release every 2 weeks).
-
 ### Submit Ideas or Feature Requests
 
 The best way is to file an issue on GitHub:
@@ -47,6 +41,13 @@ Opta could always use better documentation, so feel free to open a Pull Request 
 ### Ask Questions
 
 Please come and hangout in our [Slack](https://slack.opta.dev/).
+
+## Bugfix resolution time expectations
+
+- We will respond to all new issues within 24 hours
+- For any serious (production breaking) bug we will try to resolve ASAP and do a hotfix release
+- For other bugs we will try to resolve them within the next 2 releases (There is a release every 2 weeks).
+
 
 ## Pull Request Guidelines
 
