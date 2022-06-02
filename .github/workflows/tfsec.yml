@@ -17,7 +17,7 @@ jobs:
         with:
           path: modules/gcp_postgres
       - name: tfsec
-        uses: tfsec/tfsec-sarif-action@master
+        uses: tfsec/tfsec-sarif-action@v0.1.0
         with:
           sarif_file: tfsec.sarif
           tfsec_args: --force-all-dirs --exclude-path examples/ --exclude-path modules/azure_base --exclude-path modules/azure_k8s_base --exclude-path modules/azure_aks --exclude-path examples --minimum-severity  HIGH
@@ -27,4 +27,4 @@ jobs:
         uses: github/codeql-action/upload-sarif@v1
         with:
           # Path to SARIF file relative to the root of the repository
-          sarif_file: tfsec.sarif         
+          sarif_file: tfsec.sarif
