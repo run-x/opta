@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from os import remove
 from os.path import exists, getmtime
 from time import sleep, time
@@ -475,6 +476,12 @@ class AWS(CloudClient):
         cluster_ep = cluster["cluster"]["endpoint"]
         kube_context_name = self.get_kube_context_name()
 
+        # TODO: Remove this hotfix with a proper version check of awscli and kubectl
+        exec_credential_api_version = os.environ.get(
+            "OPTA_HOTFIX_EXEC_CREDENTIAL_VERSION",
+            "client.authentication.k8s.io/v1alpha1",
+        )
+
         cluster_config = {
             "apiVersion": "v1",
             "kind": "Config",
@@ -500,7 +507,7 @@ class AWS(CloudClient):
                     "name": kube_context_name,
                     "user": {
                         "exec": {
-                            "apiVersion": "client.authentication.k8s.io/v1alpha1",
+                            "apiVersion": exec_credential_api_version,
                             "command": "aws",
                             "args": [
                                 "--region",
