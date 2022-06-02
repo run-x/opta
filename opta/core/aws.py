@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from os import remove
 import os
+from os import remove
 from os.path import exists, getmtime
 from time import sleep, time
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, TypedDict
