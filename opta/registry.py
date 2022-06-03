@@ -171,6 +171,7 @@ def _make_module_validators(module_dict: Dict) -> List[Dict]:
     main_validator: Dict[Any, Any] = {
         "type": "str(required=True)",
         "name": "str(required=False)",
+        "depends_on": "list(str(), required=False)",
     }
     for input in module_dict["inputs"]:
         if not input["user_facing"]:
