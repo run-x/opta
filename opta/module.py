@@ -33,6 +33,7 @@ class Module:
         self.data: Dict[Any, Any] = data
         self.parent_layer = parent_layer
         self.name: str = data.get("name", self.type.replace("-", ""))
+        self.depends_on: List[str] = data.get("depends_on", [])
         if not Module.valid_name(self.name):
             raise UserErrors("Invalid module name, can only contain letters and numbers!")
         self.halt = REGISTRY[layer.cloud]["modules"][self.aliased_type or self.type].get(
@@ -84,7 +85,6 @@ class Module:
 
     def gen_tf(
         self,
-        depends_on: Optional[List[str]] = None,
         output_prefix: Optional[str] = None,
         existing_defaults: Optional[List["StructuredDefault"]] = None,
     ) -> Dict[Any, Any]:
@@ -134,8 +134,8 @@ class Module:
                     else f"{output_prefix}_{output_name}"
                 )
                 module_blk["output"].update({output_key: entry})
-        if depends_on is not None:
-            module_blk["module"][self.name]["depends_on"] = depends_on
+        if self.depends_on not in [None, []]:
+            module_blk["module"][self.name]["depends_on"] = self.depends_on
 
         # If there are no outputs, don't set the output key. Terraform doesn't like an
         # empty output block.
