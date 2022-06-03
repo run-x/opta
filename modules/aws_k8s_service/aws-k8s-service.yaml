@@ -271,7 +271,13 @@ outputs:
     description: The url of the docker repo created to host this app's images in this environment. Does not exist when using external images.
   - name: current_image
     export: true
-    description: The full name plus tag of the docker imge used by the deployment.
+    description: The full name of the docker image used by the deployment.
+  - name: current_tag
+    export: true
+    description: The tag of the docker image used by the deployment ("" if not using tags).
+  - name: current_digest
+    export: true
+    description: The digest of the docker image used by the deployment ("" if not using digests).
 output_providers: {}
 output_data: {}
 clouds:
