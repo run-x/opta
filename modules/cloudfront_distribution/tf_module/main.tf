@@ -87,10 +87,6 @@ resource "aws_cloudfront_distribution" "distribution" {
       cookies {
         forward = "all"
       }
-
-      cookies {
-        forward = "none"
-      }
     }
   }
 
