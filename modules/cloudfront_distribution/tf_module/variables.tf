@@ -88,3 +88,7 @@ variable "zone_id" {
 variable "web_acl_id" {
   type = string
 }
+
+variable "extra_headers" {
+  type = list(string)
+}
