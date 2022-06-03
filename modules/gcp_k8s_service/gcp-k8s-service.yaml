@@ -251,7 +251,13 @@ outputs:
     description: Url to the docker repository created for images to be deployed in this env
   - name: current_image
     export: true
-    description: The full name plus tag of the docker imge used by the deployment.
+    description: The full name of the docker image used by the deployment.
+  - name: current_tag
+    export: true
+    description: The tag of the docker image used by the deployment ("" if not using tags).
+  - name: current_digest
+    export: true
+    description: The digest of the docker image used by the deployment ("" if not using digests).
 output_providers: {}
 output_data: {}
 clouds:
