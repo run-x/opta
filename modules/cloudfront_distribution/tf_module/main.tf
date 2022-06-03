@@ -83,7 +83,10 @@ resource "aws_cloudfront_distribution" "distribution" {
 
     forwarded_values {
       query_string = true
-      headers      = ["Origin", "Access-Control-Request-Headers", "Access-Control-Request-Method", "Host"]
+      headers      = concat(["Origin", "Access-Control-Request-Headers", "Access-Control-Request-Method", "Host"], var.extra_headers)
+      cookies {
+        forward = "all"
+      }
 
       cookies {
         forward = "none"
