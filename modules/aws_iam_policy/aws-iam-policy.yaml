@@ -1,0 +1,34 @@
+halt: false
+environment_module: false
+inputs:
+  - name: env_name
+    user_facing: false
+    description: Opta Environment name
+    default: None
+  - name: layer_name
+    user_facing: false
+    description: Opta Layer name
+    default: None
+  - name: module_name
+    user_facing: false
+    description: Opta Module name
+    default: None
+  - name: file
+    user_facing: true
+    description: Json file path containing the Policy
+    default: ""
+    validator: str(required=True)
+outputs:
+  - name: policy_arn
+    export: true
+    description: The arn of the IAM policy
+  - name: policy_id
+    export: true
+    description: The id of the IAM policy
+  - name: policy_name
+    export: true
+    description: The name of the IAM policy
+output_providers: { }
+output_data: { }
+clouds:
+  - aws
