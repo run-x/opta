@@ -10,7 +10,7 @@ resource "helm_release" "opta-local-redis" {
   name             = "opta-local-redis"
   repository       = "https://charts.bitnami.com/bitnami"
   chart            = "redis"
-  version          = "15.3.2"
+  version          = "16.12.2"
   create_namespace = true
   namespace        = var.paasns
   set {

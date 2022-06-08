@@ -7,5 +7,5 @@ modules:
   - name: redishelm
     type: helm-chart
     chart: redis
-    chart_version: "15.3.2"
+    chart_version: "16.12.2"
     repository: "https://charts.bitnami.com/bitnami"
