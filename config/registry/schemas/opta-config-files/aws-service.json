@@ -22,6 +22,9 @@
             "$ref": "https://app.runx.dev/modules/aws-dynamodb"
           },
           {
+            "$ref": "https://app.runx.dev/modules/aws-iam-policy"
+          },
+          {
             "$ref": "https://app.runx.dev/modules/aws-iam-role"
           },
           {

@@ -1,0 +1,33 @@
+{
+  "$id": "https://app.runx.dev/modules/aws-iam-policy",
+  "description": "Creates an IAM Policy",
+  "type": "object",
+  "properties": {
+    "file": {
+      "$ref": "/common-types/links",
+      "description": "Json file path containing the Policy",
+      "default": ""
+    },
+    "type": {
+      "description": "The name of this module",
+      "enum": [
+        "aws-iam-policy"
+      ],
+      "default": "aws-iam-policy",
+      "type": "string"
+    }
+  },
+  "opta_metadata": {
+    "module_type": "service",
+    "clouds": [
+      "aws"
+    ],
+    "name": "aws-iam-policy",
+    "display_name": "aws-iam-policy",
+    "tags": []
+  },
+  "required": [
+    "file",
+    "type"
+  ]
+}
