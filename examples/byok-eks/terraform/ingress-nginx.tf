@@ -56,7 +56,7 @@ resource "helm_release" "ingress-nginx" {
             "service.beta.kubernetes.io/aws-load-balancer-name" : local.load_balancer_name
             "service.beta.kubernetes.io/aws-load-balancer-ssl-ports" : "https"
             # https://docs.aws.amazon.com/elasticloadbalancing/latest/application/create-https-listener.html#describe-ssl-policies.
-            "service.beta.kubernetes.io/aws-load-balancer-ssl-negotiation-policy" : "ELBSecurityPolicy-TLS-1-2-2017-01"
+            "service.beta.kubernetes.io/aws-load-balancer-ssl-negotiation-policy" : "ELBSecurityPolicy-TLS13-1-2-2021-06"
             "service.beta.kubernetes.io/aws-load-balancer-ssl-cert" : var.load_balancer_cert_arn
             "service.beta.kubernetes.io/aws-load-balancer-alpn-policy" : "HTTP2Preferred"
           }, var.nginx_extra_service_annotations)
