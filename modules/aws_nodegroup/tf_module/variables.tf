@@ -5,7 +5,11 @@ data "aws_eks_cluster" "main" {
 }
 
 locals {
-  default_labels = {
+  default_labels = var.ami_type == "AL2_x86_64_GPU" ? {
+    node_group_name = "opta-${var.layer_name}-${var.module_name}"
+    ami_type        = var.ami_type
+    gpu             = true
+    } : {
     node_group_name = "opta-${var.layer_name}-${var.module_name}"
     ami_type        = var.ami_type
   }
