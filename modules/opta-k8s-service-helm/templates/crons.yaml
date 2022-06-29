@@ -75,4 +75,5 @@ spec:
                   {{- toYaml $.Values.containerResourceLimits | nindent 18 }}
                 requests:
                   {{- toYaml $.Values.containerResourceRequests | nindent 18 }}
+---
 {{- end }}
