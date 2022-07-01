@@ -237,3 +237,11 @@ variable "readiness_probe_command" {
 variable "pod_labels" {
   type = map(string)
 }
+
+variable "commands" {
+  type = list(string)
+}
+
+variable "args" {
+  type = list(string)
+}

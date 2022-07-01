@@ -174,6 +174,16 @@ inputs:
     validator: int(required=False)
     description: The max amount of helm revisions to keep track of (0 for infinite)
     default: 25
+  - name: commands
+    user_facing: true
+    validator: list(required=False)
+    description: The commands override to execute in your container (corresponds to EntryPoint in docker)
+    default: []
+  - name: args
+    user_facing: true
+    validator: list(required=False)
+    description: The args override to pass to your container (corresponds to Cmd in docker)
+    default: []
 extra_validators:
   limits:
     memory: any(int(min=1), str(), required=True)
@@ -182,6 +192,7 @@ extra_validators:
     memory: any(int(min=1), str(), required=True)
   cron_job:
     commands: list(required=True)
+    args: list(required=False)
     schedule: str(required=True)
   toleration:
     key: str(required=True)
