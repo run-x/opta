@@ -199,3 +199,11 @@ variable "cron_jobs" {
 variable "max_history" {
   type = number
 }
+
+variable "commands" {
+  type = list(string)
+}
+
+variable "args" {
+  type = list(string)
+}

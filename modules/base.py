@@ -243,6 +243,10 @@ class K8sServiceModuleProcessor(ModuleProcessor):
         if isinstance(self.module.data.get("public_uri"), str):
             self.module.data["public_uri"] = [self.module.data["public_uri"]]
 
+        cron_jobs = self.module.data.get("cron_jobs", [])
+        for cron_job in cron_jobs:
+            cron_job["args"] = cron_job.get("args", [])
+
         if "public_uri" in self.module.data:
             new_uris: List[str] = []
             public_uri: str

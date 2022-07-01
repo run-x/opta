@@ -11,6 +11,24 @@
       "description": "Set to AUTO to create a private repo for your own images. Otherwises attempts to pull image from public dockerhub",
       "default": "AUTO"
     },
+    "commands": {
+      "type": "list",
+      "description": "The commands override to execute in your container (corresponds to EntryPoint in docker)",
+      "default": []
+    },
+    "args": {
+      "type": "list",
+      "description": "The args override to pass to your container (corresponds to Cmd in docker)",
+      "default": []
+    },
+    "cron_jobs": {
+      "type": "array",
+      "description": "A list of cronjobs to execute as part of this service",
+      "items": {
+        "$ref": "/common-types/cron-job"
+      },
+      "default": []
+    },
     "min_containers": {
       "type": "integer",
       "description": "The minimum number of replicas your app can autoscale to.",

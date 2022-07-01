@@ -148,3 +148,65 @@ underlying resource kind is being switched.
 _NOTE_ because of the nature of these disks, they will not be cleaned up automatically unless during a service
 destruction. If you wish to release the StandardSSD disks for whatever reason you will need to manually do so by 
 deleting the kubernetes persistent volume claims.
+
+### Tolerations
+
+Opta gives you the option of adding [taints](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/)
+to the nodes created in this nodepool, and thusly the ability to add _tolerations_ for said taints. The official
+documentation gives an excellent detailed summary, but in short one can use taints to stop workloads from running in
+said nodes unless they have a matching toleration. Simply provide a list of desired tolerations as inputs like so:
+```yaml
+  - name: app
+    type: k8s-service
+    image: AUTO
+    healthcheck_path: "/get"
+    port:
+      http: 80
+    tolerations:
+      - key: instancetype
+        value: memoryoptimized
+        effect: "NoExecute"
+      - key: team
+        value: booking
+        # Tolerates for default effect of NoSchedule
+      - key: highpriority
+        # Tolerates for default value of opta
+```
+
+Please refer to the taints specified in your environment Opta manifests to know what matching tolerations are right
+for you.
+
+### Cron Jobs
+
+Opta gives you the option of adding a list of cron jobs to run as part of this service. This is done via the `cron_jobs`
+field which a user can fill with entries for each con job in mind. Each entry must specify a command in array format
+(for most cases simply specify the shell you wish to use, the `-c` flag and the executable to run), as well as a
+schedule following the [Cron Syntax](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#cron-schedule-syntax).
+The cron jobs will use the same resource requests/limits as the servers.
+
+For example, here is a service which has a cron job that runs every minute and simply outputs "Hello world!" to stdout:
+
+```yaml
+  - name: app
+    type: k8s-service
+    image: AUTO
+    healthcheck_path: "/get"
+    port:
+      http: 80
+    cron_jobs:
+      - args: # Args is an optional field
+          - "-c"
+          - 'echo "Hello world!"'
+        commands:
+        - /bin/sh
+        schedule: "* * * * *"
+```
+
+{{% alert title="Pure Cron Jobs" color="info" %}}
+If a user wishes to just have a cron job and no service, then they could simply set the min/max containers to
+0.
+{{% /alert %}}
+
+{{% alert title="Warning" color="warning" %}}
+Cron Jobs are currently created outside the default linkerd service mesh.
+{{% /alert %}}

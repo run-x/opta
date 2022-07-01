@@ -51,6 +51,12 @@ spec:
               {{ range $command := $cron.commands }}
               - {{ $command | quote }}
               {{ end }}
+              {{- if ne (len $cron.args ) 0 }}
+              args:
+              {{ range $arg := $cron.args }}
+                - {{ $arg | quote }}
+              {{ end }}
+              {{- end }}
               env:
               - name: RDS_CA_PATH # This is the path to the public key for the docdb tls
                 value: "/config/rds_ca.pem"

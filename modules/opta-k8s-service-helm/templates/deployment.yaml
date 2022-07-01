@@ -117,6 +117,18 @@ spec:
                 - {{ $item }}
                 {{- end }}
           {{- end }}
+          {{- if ne (len .Values.args ) 0 }}
+          args:
+          {{ range $arg := .Values.args }}
+            - {{ $arg | quote }}
+          {{ end }}
+          {{- end }}
+          {{- if ne (len .Values.commands ) 0 }}
+          command:
+          {{ range $arg := .Values.commands }}
+            - {{ $arg | quote }}
+          {{ end }}
+          {{- end }}
           resources:
             limits:
               {{- toYaml .Values.containerResourceLimits | nindent 14 }}

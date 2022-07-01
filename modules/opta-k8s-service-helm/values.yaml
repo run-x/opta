@@ -28,6 +28,8 @@ initialReadinessDelay: null
 livenessProbeCommand: []
 readinessProbeCommand: []
 podLabels: {}
+commands: []
+args: []
 
 serviceAccount:
   # The name of the service account to use.

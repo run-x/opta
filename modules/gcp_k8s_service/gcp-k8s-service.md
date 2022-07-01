@@ -195,10 +195,11 @@ For example, here is a service which has a cron job that runs every minute and s
     port:
       http: 80
     cron_jobs:
-      - commands:
+      - args: # Args is an optional field
+          - "-c"
+          - 'echo "Hello world!"'
+        commands:
         - /bin/sh
-        - -c
-        - 'echo "Hello world!"'
         schedule: "* * * * *"
 ```
 

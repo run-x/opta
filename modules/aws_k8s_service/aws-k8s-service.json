@@ -14,6 +14,16 @@
       },
       "default": []
     },
+    "commands": {
+      "type": "list",
+      "description": "The commands override to execute in your container (corresponds to EntryPoint in docker)",
+      "default": []
+    },
+    "args": {
+      "type": "list",
+      "description": "The args override to pass to your container (corresponds to Cmd in docker)",
+      "default": []
+    },
     "ports": {
       "type": "array",
       "description": "Specifies which port(s) your app exposes.",
