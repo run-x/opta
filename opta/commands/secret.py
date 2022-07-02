@@ -124,7 +124,9 @@ def view(
     if local:
         config = local_setup(config, input_variables=var)
         env = "localopta"
-    layer = Layer.load_from_yaml(config, env, input_variables=var)
+    layer = Layer.load_from_yaml(
+        config, env, input_variables=var, strict_input_variables=False
+    )
     amplitude_client.send_event(
         amplitude_client.VIEW_SECRET_EVENT,
         event_properties={"org_name": layer.org_name, "layer_name": layer.name},
@@ -174,7 +176,9 @@ def list_command(
     if local:
         config = local_setup(config, input_variables=var)
         env = "localopta"
-    layer = Layer.load_from_yaml(config, env, input_variables=var)
+    layer = Layer.load_from_yaml(
+        config, env, input_variables=var, strict_input_variables=False
+    )
     amplitude_client.send_event(amplitude_client.LIST_SECRETS_EVENT)
     secret_name, namespace = get_secret_name_and_namespace(layer, module)
 
@@ -215,7 +219,9 @@ def update(
     if local:
         config = local_setup(config, input_variables=var)
         env = "localopta"
-    layer = Layer.load_from_yaml(config, env, input_variables=var)
+    layer = Layer.load_from_yaml(
+        config, env, input_variables=var, strict_input_variables=False
+    )
     secret_name, namespace = get_secret_name_and_namespace(layer, module)
 
     set_kube_config(layer)
@@ -255,7 +261,9 @@ def delete(
     if local:
         config = local_setup(config, input_variables=var)
         env = "localopta"
-    layer = Layer.load_from_yaml(config, env, input_variables=var)
+    layer = Layer.load_from_yaml(
+        config, env, input_variables=var, strict_input_variables=False
+    )
     secret_name, namespace = get_secret_name_and_namespace(layer, module)
 
     set_kube_config(layer)
@@ -296,7 +304,9 @@ def bulk_update(
     if local:
         config = local_setup(config, input_variables=var)
         env = "localopta"
-    layer = Layer.load_from_yaml(config, env, input_variables=var)
+    layer = Layer.load_from_yaml(
+        config, env, input_variables=var, strict_input_variables=False
+    )
     secret_name, namespace = get_secret_name_and_namespace(layer, module)
 
     set_kube_config(layer)

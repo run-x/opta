@@ -224,6 +224,7 @@ class Layer:
         json_schema: bool = False,
         stateless_mode: bool = False,
         input_variables: Optional[Dict[str, str]] = None,
+        strict_input_variables: bool = True,
     ) -> Layer:
         t = None
         if config.startswith("git@"):
@@ -264,7 +265,9 @@ class Layer:
         conf["original_spec"] = config_string
         conf["path"] = config_path
 
-        layer = cls.load_from_dict(conf, env, is_parent, stateless_mode, input_variables)
+        layer = cls.load_from_dict(
+            conf, env, is_parent, stateless_mode, input_variables, strict_input_variables
+        )
         if local:
             pass
         validate_yaml(config_path, layer.cloud, json_schema)
@@ -292,12 +295,13 @@ class Layer:
         is_parent: bool = False,
         stateless_mode: bool = False,
         input_variables: Optional[Dict[str, str]] = None,
+        strict_input_variables: bool = True,
     ) -> Layer:
         input_variables = input_variables or {}
         # Handle input variables
         expected_input_variables = multi_from_dict(InputVariable, conf, "input_variables")
         current_variables = InputVariable.render_dict(
-            expected_input_variables, input_variables
+            expected_input_variables, input_variables, strict_input_variables
         )
         modules_data = conf.get("modules", [])
         environments = conf.pop("environments", None)

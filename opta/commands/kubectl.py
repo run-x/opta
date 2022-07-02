@@ -38,7 +38,9 @@ def configure_kubectl(
         config = check_opta_file_exists(config)
         if local:
             config = local_setup(config, input_variables=var)
-        layer = Layer.load_from_yaml(config, env, input_variables=var)
+        layer = Layer.load_from_yaml(
+            config, env, input_variables=var, strict_input_variables=False
+        )
         amplitude_client.send_event(
             amplitude_client.CONFIGURE_KUBECTL_EVENT,
             event_properties={"org_name": layer.org_name, "layer_name": layer.name},
