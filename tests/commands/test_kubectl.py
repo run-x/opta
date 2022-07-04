@@ -32,7 +32,7 @@ def test_set_kube_config(mocker: MockFixture) -> None:
     result = runner.invoke(configure_kubectl, [])
     assert result.exit_code == 0
     mocked_layer_class.load_from_yaml.assert_called_with(
-        mocker.ANY, None, input_variables={}
+        mocker.ANY, None, input_variables={}, strict_input_variables=False
     )
     mocked_layer.verify_cloud_credentials.assert_called_once_with()
     mocked_configure.assert_called_once_with(mocked_layer)
