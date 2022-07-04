@@ -56,7 +56,7 @@ class TestSecretManager:
         mocked_create_namespace_if_not_exists.assert_called_once_with("dummy_layer")
         mocked_get_secrets.assert_called_once_with("dummy_layer", "manual-secrets")
         mocked_layer.assert_called_once_with(
-            "dummyconfig", "dummyenv", input_variables={}
+            "dummyconfig", "dummyenv", input_variables={}, strict_input_variables=False
         )
         mocked_amplitude_client.send_event.assert_called_once_with(
             amplitude_client.VIEW_SECRET_EVENT,
@@ -97,7 +97,7 @@ class TestSecretManager:
         mocked_create_namespace_if_not_exists.assert_called_once_with("dummy_layer")
         mocked_get_secrets.assert_called_once_with("dummy_layer", "manual-secrets")
         mocked_layer.assert_called_once_with(
-            "dummyconfig", "dummyenv", input_variables={}
+            "dummyconfig", "dummyenv", input_variables={}, strict_input_variables=False
         )
         mocked_amplitude_client.send_event.assert_called_once_with(
             amplitude_client.LIST_SECRETS_EVENT
@@ -144,7 +144,7 @@ class TestSecretManager:
             "dummy_layer", "manual-secrets", "dummysecret"
         )
         mocked_layer.assert_called_once_with(
-            "dummyconfig", "dummyenv", input_variables={}
+            "dummyconfig", "dummyenv", input_variables={}, strict_input_variables=False
         )
         mocked_amplitude_client.send_event.assert_called_once_with(
             amplitude_client.UPDATE_SECRET_EVENT
@@ -204,7 +204,7 @@ class TestSecretManager:
             "dummy_layer", "manual-secrets", {"dummysecret": "dummysecretvalue"}
         )
         mocked_layer.assert_called_once_with(
-            "dummyconfig", "dummyenv", input_variables={}
+            "dummyconfig", "dummyenv", input_variables={}, strict_input_variables=False
         )
         mocked_amplitude_client.send_event.assert_called_once_with(
             amplitude_client.UPDATE_SECRET_EVENT
@@ -256,7 +256,7 @@ class TestSecretManager:
         )
 
         mocked_layer.assert_called_once_with(
-            "dummyconfig", "dummyenv", input_variables={}
+            "dummyconfig", "dummyenv", input_variables={}, strict_input_variables=False
         )
         mocked_amplitude_event.assert_called_once_with(
             amplitude_client.UPDATE_BULK_SECRET_EVENT

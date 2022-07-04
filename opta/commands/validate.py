@@ -19,4 +19,6 @@ def validate(
 ) -> None:
     config = check_opta_file_exists(config)
 
-    Layer.load_from_yaml(config, env, json_schema, input_variables=var)
+    Layer.load_from_yaml(
+        config, env, json_schema, input_variables=var, strict_input_variables=False
+    )

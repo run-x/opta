@@ -57,7 +57,7 @@ def tf_state(config: str, env: Optional[str]) -> None:
     """
     Show terraform state
     """
-    layer = Layer.load_from_yaml(config, env)
+    layer = Layer.load_from_yaml(config, env, strict_input_variables=False)
     cloud_client = layer.get_cloud_client()
     x = cloud_client.get_remote_state()
     print(x)

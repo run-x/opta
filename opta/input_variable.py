@@ -51,7 +51,9 @@ class InputVariable:
 
     @staticmethod
     def render_dict(
-        input_variables: List[InputVariable], given_inputs: Dict[str, Any]
+        input_variables: List[InputVariable],
+        given_inputs: Dict[str, Any],
+        strict_input_variables: bool = True,
     ) -> Dict[str, Any]:
         output = {}
         for input_variable in input_variables:
@@ -59,7 +61,7 @@ class InputVariable:
                 output[input_variable.name] = given_inputs[input_variable.name]
             elif input_variable.default is not None:
                 output[input_variable.name] = input_variable.default
-            else:
+            elif strict_input_variables:
                 raise UserErrors(
                     f"Input variable {input_variable.name} was expected, but not given"
                 )

@@ -45,7 +45,9 @@ def force_unlock(
         if local:
             config = local_setup(config, input_variables=var)
         amplitude_client.send_event(amplitude_client.FORCE_UNLOCK_EVENT)
-        layer = Layer.load_from_yaml(config, env, input_variables=var)
+        layer = Layer.load_from_yaml(
+            config, env, input_variables=var, strict_input_variables=False
+        )
         layer.verify_cloud_credentials()
         modules = Terraform.get_existing_modules(layer)
         layer.modules = [x for x in layer.modules if x.name in modules]

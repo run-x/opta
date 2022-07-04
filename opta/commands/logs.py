@@ -50,7 +50,9 @@ def logs(
     if local:
         config = local_setup(config, input_variables=var)
     # Configure kubectl
-    layer = Layer.load_from_yaml(config, env, input_variables=var)
+    layer = Layer.load_from_yaml(
+        config, env, input_variables=var, strict_input_variables=False
+    )
     amplitude_client.send_event(
         amplitude_client.SHELL_EVENT,
         event_properties={"org_name": layer.org_name, "layer_name": layer.name},
