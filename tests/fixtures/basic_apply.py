@@ -51,6 +51,9 @@ BASIC_APPLY = (
             "s3_log_bucket_name": {"value": "${module.core.s3_log_bucket_name }"},
             "public_nat_ips": {"value": "${module.core.public_nat_ips }"},
             "state_storage": {"value": "opta-tf-state-test-dev1-98f2"},
+            "providers": {
+                "value": {"aws": {"account_id": "111111111111", "region": "us-east-1"}}
+            },
         },
     },
 )

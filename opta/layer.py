@@ -455,6 +455,8 @@ class Layer:
         module_idx = len(self.modules) - 1 if module_idx is None else module_idx
         for module in self.modules[0 : module_idx + 1]:
             ret += module.outputs()
+        if self.parent is None:
+            ret.append("providers")
         return ret
 
     def gen_tf(
@@ -482,6 +484,8 @@ class Layer:
                 ret,
             )
         ret["output"] = ret.get("output", {})
+        if self.parent is None:
+            ret["output"]["providers"] = {"value": self.providers}
         ret["output"]["state_storage"] = {"value": self.state_storage()}
 
         return hydrate(ret, self.metadata_hydration())
