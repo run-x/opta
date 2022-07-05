@@ -65,6 +65,11 @@ inputs:
     validator: bool(required=False)
     description: Enable the linkerd service mesh installation.
     default: true
+  - name: nginx_enabled
+    user_facing: true
+    validator: bool(required=False)
+    description: Enable the ingress nginx installation.
+    default: true
   - name: admin_arns
     user_facing: true
     validator: list(str(), required=False)

@@ -1,3 +1,4 @@
+{{- if .Values.nginxEnabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -46,3 +47,4 @@ spec:
               serviceName: opta-ingress-healthcheck
               servicePort: 80
         {{ end }}
+{{ end }}

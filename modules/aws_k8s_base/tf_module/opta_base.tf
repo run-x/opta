@@ -4,7 +4,8 @@ resource "helm_release" "opta_base" {
   namespace = "default"
   values = [
     yamlencode({
-      adminArns : var.admin_arns
+      adminArns   : var.admin_arns
+      nginxEnabled: var.nginx_enabled
     })
   ]
   depends_on = [

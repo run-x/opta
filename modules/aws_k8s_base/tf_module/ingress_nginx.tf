@@ -39,6 +39,7 @@ resource "aws_acm_certificate" "user_provided" {
 
 // NOTE: following this solution for http -> https redirect: https://github.com/kubernetes/ingress-nginx/issues/2724#issuecomment-593769295
 resource "helm_release" "ingress-nginx" {
+  count            = var.nginx_enabled ? 1 : 0
   chart            = "ingress-nginx"
   name             = "ingress-nginx"
   repository       = "https://kubernetes.github.io/ingress-nginx"
@@ -144,6 +145,7 @@ resource "helm_release" "ingress-nginx" {
 }
 
 data "aws_lb" "ingress-nginx" {
+  count            = var.nginx_enabled ? 1 : 0
   name       = local.load_balancer_name
   depends_on = [helm_release.ingress-nginx]
 }

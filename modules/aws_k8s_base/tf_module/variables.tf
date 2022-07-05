@@ -142,3 +142,7 @@ variable "domain" {
 variable "zone_id" {
   type = string
 }
+
+variable "nginx_enabled" {
+  type = bool
+}
