@@ -30,7 +30,9 @@ resource "aws_s3_bucket_lifecycle_configuration" "bucket" {
     }
 
     noncurrent_version_expiration {
-      noncurrent_days = 90
+      newer_noncurrent_versions = null
+      storage_class             = "GLACIER"
+      noncurrent_days           = 90
     }
   }
 
