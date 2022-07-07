@@ -14,13 +14,13 @@
 
 {{ if $.Capabilities.APIVersions.Has "networking.k8s.io/v1beta1/Ingress" }}
 {{ $old_ingress_convention = (lookup "networking.k8s.io/v1beta1" "Ingress" $namespace_name $ingress_name_old_convention) }}
-{{ end }}  
+{{ end }}
 
 {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
 apiVersion: networking.k8s.io/v1
 {{- else if $.Capabilities.APIVersions.Has "networking.k8s.io/v1beta1/Ingress" }}
 apiVersion: networking.k8s.io/v1beta1
-{{ end }}  
+{{ end }}
 kind: Ingress
 metadata:
   {{- if $old_ingress_convention }}
@@ -71,7 +71,7 @@ https://linkerd.io/2.9/tasks/using-ingress/#nginx
 spec:
   rules:
     - {{ if not (eq $val.domain "all" ) }}
-      host: {{ $val.domain }}
+      host: {{ $val.domain | quote }}
       {{ end }}
       http:
         paths:
@@ -81,7 +81,7 @@ spec:
             backend:
               service:
                 name: {{ include "k8s-service.serviceName" $ }}
-                port: 
+                port:
                   name: {{ $.Values.httpPort.name | quote }}
             {{- else if $.Capabilities.APIVersions.Has "networking.k8s.io/v1beta1/Ingress" }}
             backend:

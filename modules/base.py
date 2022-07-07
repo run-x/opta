@@ -251,6 +251,8 @@ class K8sServiceModuleProcessor(ModuleProcessor):
             new_uris: List[str] = []
             public_uri: str
             for public_uri in self.module.data["public_uri"]:
+                # BUG(RUNX-1312): Var subtitution is unresolved at this point,
+                # so these special cases won't be seen if public_uri is set via variable substitution.
                 if public_uri.startswith("/"):
                     new_uris.append(f"all{public_uri}")
                 elif public_uri.startswith("*"):

@@ -3,7 +3,8 @@ data "google_client_config" "current" {}
 
 
 locals {
-  uri_components = [for s in var.public_uri : {
+  # BUG(RUNX-1312): We apply `flatten` to var.public_uri in case variable subsitution has resulted in var.public_uri containing a nested list.
+  uri_components = [for s in flatten(var.public_uri) : {
     // We probably don't need the trim anymore but leaving this here for
     // potentional backwards compatibility
     domain : trim(split("/", s)[0], "."),
@@ -146,6 +147,7 @@ variable "env_vars" {
 }
 
 variable "public_uri" {
+  # BUG(RUNX-1312): type=list() instead of type=list(string) because public_uri might be a nested list if variable subsitution is used.
   type    = list(string)
   default = []
 }
