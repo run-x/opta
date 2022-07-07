@@ -96,7 +96,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "replica" {
     }
 
     noncurrent_version_expiration {
-      noncurrent_days = 90
+      newer_noncurrent_versions = null
+      noncurrent_days           = 90
     }
   }
 
