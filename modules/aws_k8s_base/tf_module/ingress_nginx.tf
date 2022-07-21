@@ -151,27 +151,27 @@ data "aws_lb" "ingress-nginx" {
 }
 
 resource "aws_route53_record" "domain" {
-  count           = var.domain == "" ? 0 : 1
+  count           = var.domain == "" || !var.nginx_enabled ? 0 : 1
   name            = var.domain
   type            = "A"
   zone_id         = var.zone_id
   allow_overwrite = true
   alias {
     evaluate_target_health = true
-    name                   = data.aws_lb.ingress-nginx.dns_name
-    zone_id                = data.aws_lb.ingress-nginx.zone_id
+    name                   = data.aws_lb.ingress-nginx[0].dns_name
+    zone_id                = data.aws_lb.ingress-nginx[0].zone_id
   }
 }
 
 resource "aws_route53_record" "sub_domain" {
-  count           = var.domain == "" ? 0 : 1
+  count           = var.domain == "" || var.nginx_enabled ? 0 : 1
   name            = "*.${var.domain}"
   type            = "A"
   zone_id         = var.zone_id
   allow_overwrite = true
   alias {
     evaluate_target_health = true
-    name                   = data.aws_lb.ingress-nginx.dns_name
-    zone_id                = data.aws_lb.ingress-nginx.zone_id
+    name                   = data.aws_lb.ingress-nginx[0].dns_name
+    zone_id                = data.aws_lb.ingress-nginx[0].zone_id
   }
 }
