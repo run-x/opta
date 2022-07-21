@@ -6,7 +6,6 @@ resource "tls_private_key" "self_signed" {
 
 resource "tls_self_signed_cert" "self_signed" {
   count           = var.expose_self_signed_ssl ? 1 : 0
-  key_algorithm   = "RSA"
   private_key_pem = tls_private_key.self_signed[0].private_key_pem
   dns_names       = ["*.elb.${data.aws_region.current.name}.amazonaws.com"]
 
