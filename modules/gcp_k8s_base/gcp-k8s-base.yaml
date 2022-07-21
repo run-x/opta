@@ -51,6 +51,11 @@ inputs:
     validator: bool(required=False)
     description: Deploy the nginx ingress in a high-availability configuration.
     default: false
+  - name: nginx_enabled
+    user_facing: true
+    validator: bool(required=False)
+    description: Enable the ingress nginx installation.
+    default: true
   - name: linkerd_high_availability
     user_facing: true
     validator: bool(required=False)
