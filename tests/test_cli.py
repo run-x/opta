@@ -1,6 +1,5 @@
 import os
 import os.path
-from unittest.mock import call
 
 from pytest_mock import MockFixture
 
