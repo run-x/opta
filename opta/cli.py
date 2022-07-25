@@ -7,7 +7,6 @@ import click
 from click_didyoumean import DYMGroup
 from colored import attr, fg
 
-import opta.sentry  # noqa: F401 This leads to initialization of sentry sdk
 from opta.cleanup_files import cleanup_files
 from opta.commands.apply import apply
 from opta.commands.deploy import deploy
@@ -31,7 +30,7 @@ from opta.core.upgrade import check_version_upgrade
 from opta.crash_reporter import CURRENT_CRASH_REPORTER
 from opta.exceptions import UserErrors
 from opta.one_time import one_time
-from opta.utils import dd_handler, dd_listener, logger
+from opta.utils import logger
 
 
 @click.group(cls=DYMGroup, context_settings=dict(help_option_names=["-h", "--help"]))
@@ -99,8 +98,5 @@ if __name__ == "__main__":
         # A quick glance at click documentation did not show why that is the case or any workarounds.
         # Therefore adding this version check in the finally clause for now.
         check_version_upgrade()
-
-        dd_listener.stop()
-        dd_handler.flush()
         if os.environ.get("OPTA_DEBUG") is None:
             cleanup_files()
