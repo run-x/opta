@@ -25,15 +25,12 @@ except ModuleNotFoundError:
 
 
 from opta.constants import DEV_VERSION, VERSION
-from opta.datadog_logging import DatadogLogHandler
 from opta.utils import ansi_scrub
 from opta.utils.runtee import run  # type: ignore
 
-# Datadog logging setup for nice subprocess
-dd_handler = DatadogLogHandler()
+# Logging setup for nice subprocess
 nice_logger = logging.getLogger(__name__)
 nice_logger.setLevel(logging.DEBUG)
-nice_logger.addHandler(dd_handler)
 nice_logger.propagate = False
 
 
@@ -42,11 +39,9 @@ def log_to_datadog(msg: str, severity: str) -> None:
         msg = ansi_scrub(msg)
         if hasattr(sys, "_called_from_test") or VERSION == DEV_VERSION or not VERSION:
             if os.environ.get("OPTA_DEBUG", "") == "DATADOG_LOCAL":
-                print("Would have logged this string to DD:\n")
                 print(">>>>>>>>>>>>>>>>>>>>Datadog log start")
                 print(msg)
                 print("<<<<<<<<<<<<<<<<<<<<Datadog log end")
-            dd_handler.setLevel(logging.CRITICAL)
 
         if severity == "ERROR":
             nice_logger.error(msg)

@@ -3,8 +3,6 @@ import os
 import re
 import sys
 from logging import Formatter, LogRecord
-from logging.handlers import QueueHandler, QueueListener
-from queue import Queue
 from shutil import which
 from textwrap import dedent
 from time import sleep
@@ -12,8 +10,6 @@ from typing import Any, Dict, Generator, List, Optional, Protocol, Tuple, Type, 
 
 import click
 
-from opta.constants import DEV_VERSION, VERSION
-from opta.datadog_logging import DatadogLogHandler
 from opta.exceptions import UserErrors
 from opta.special_formatter import PartialFormatter
 from opta.utils.logger import Logger
@@ -85,7 +81,7 @@ def ansi_scrub(text: str) -> str:
     return ansi_escape.sub("", text)
 
 
-def initialize_logger() -> Tuple[Logger, QueueListener, DatadogLogHandler]:
+def initialize_logger() -> Logger:
     ch = logging.StreamHandler(sys.stdout)
     if os.environ.get("OPTA_DEBUG") is None:
         ch.setLevel(logging.INFO)
@@ -93,25 +89,13 @@ def initialize_logger() -> Tuple[Logger, QueueListener, DatadogLogHandler]:
     else:
         ch.setLevel(logging.DEBUG)
         formatter = LogFormatMultiplexer()
-    dd_queue: Queue = Queue(-1)
-    queue_handler = QueueHandler(dd_queue)
-    queue_handler.setLevel(logging.DEBUG)
-    dd_handler = DatadogLogHandler()
-    dd_handler.setLevel(logging.DEBUG)
-    dd_handler.setFormatter(SensitiveFormatter())
-    dd_listener = QueueListener(dd_queue, dd_handler)
     ch.setFormatter(formatter)
     logger = Logger()
-    logger.addHandler(queue_handler)
     logger.addHandler(ch)
-    dd_listener.start()
-    return logger, dd_listener, dd_handler
+    return logger
 
 
-logger, dd_listener, dd_handler = initialize_logger()
-# Don't send logs to datadog during tests
-if hasattr(sys, "_called_from_test") or VERSION == DEV_VERSION:
-    dd_handler.setLevel(logging.CRITICAL)
+logger = initialize_logger()
 
 fmt = PartialFormatter("")
 
