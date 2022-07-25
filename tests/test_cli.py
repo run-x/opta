@@ -15,11 +15,6 @@ def test_cleanup() -> None:
     assert not os.path.exists(TF_FILE_PATH)
 
 
-def test_at_exit_callback_with_pending(mocker: MockFixture) -> None:
-    mocked_write = mocker.patch("opta.cli.sys.stderr.write")
-    mocked_write.assert_has_calls([call(mocker.ANY), call(mocker.ANY), call(mocker.ANY)])
-
-
 def test_at_exit_callback_without_pending(mocker: MockFixture) -> None:
     mocked_write = mocker.patch("opta.cli.sys.stderr.write")
     mocked_write.assert_not_called()
