@@ -1,7 +1,7 @@
 output "load_balancer_raw_dns" {
-  value = data.aws_lb.ingress-nginx.dns_name
+  value = var.nginx_enabled ? data.aws_lb.ingress-nginx[0].dns_name : "n/a"
 }
 
 output "load_balancer_arn" {
-  value = data.aws_lb.ingress-nginx.arn
+  value = var.nginx_enabled ? data.aws_lb.ingress-nginx[0].arn : "n/a"
 }

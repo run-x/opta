@@ -18,6 +18,11 @@
       "description": "Deploy the linkerd service mesh in a high-availability configuration for its control plane.",
       "default": false
     },
+    "nginx_enabled": {
+      "type": "boolean",
+      "description": "Enable the ingress nginx installation.",
+      "default": true
+    },
     "linkerd_enabled": {
       "type": "boolean",
       "description": "Enable the linkerd service mesh installation.",

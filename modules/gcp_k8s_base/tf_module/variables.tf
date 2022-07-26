@@ -109,3 +109,7 @@ variable "linkerd_values" {
 variable "ingress_nginx_values" {
   default = {}
 }
+
+variable "nginx_enabled" {
+  type = bool
+}

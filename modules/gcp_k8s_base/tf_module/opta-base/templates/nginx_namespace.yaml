@@ -1,3 +1,4 @@
+{{- if .Values.nginxEnabled }}
 {{- $existingNamespace := (lookup "v1" "Namespace" "" "ingress-nginx" ) -}}
 {{ $result := false }}
 {{- if  $existingNamespace }}
@@ -14,3 +15,4 @@ metadata:
   name: ingress-nginx
 {{- end }}
 ---
+{{- end }}

@@ -39,6 +39,7 @@ resource "aws_acm_certificate" "user_provided" {
 
 // NOTE: following this solution for http -> https redirect: https://github.com/kubernetes/ingress-nginx/issues/2724#issuecomment-593769295
 resource "helm_release" "ingress-nginx" {
+  count            = var.nginx_enabled ? 1 : 0
   chart            = "ingress-nginx"
   name             = "ingress-nginx"
   repository       = "https://kubernetes.github.io/ingress-nginx"
@@ -144,32 +145,33 @@ resource "helm_release" "ingress-nginx" {
 }
 
 data "aws_lb" "ingress-nginx" {
+  count      = var.nginx_enabled ? 1 : 0
   name       = local.load_balancer_name
   depends_on = [helm_release.ingress-nginx]
 }
 
 resource "aws_route53_record" "domain" {
-  count           = var.domain == "" ? 0 : 1
+  count           = var.domain == "" || !var.nginx_enabled ? 0 : 1
   name            = var.domain
   type            = "A"
   zone_id         = var.zone_id
   allow_overwrite = true
   alias {
     evaluate_target_health = true
-    name                   = data.aws_lb.ingress-nginx.dns_name
-    zone_id                = data.aws_lb.ingress-nginx.zone_id
+    name                   = data.aws_lb.ingress-nginx[0].dns_name
+    zone_id                = data.aws_lb.ingress-nginx[0].zone_id
   }
 }
 
 resource "aws_route53_record" "sub_domain" {
-  count           = var.domain == "" ? 0 : 1
+  count           = var.domain == "" || var.nginx_enabled ? 0 : 1
   name            = "*.${var.domain}"
   type            = "A"
   zone_id         = var.zone_id
   allow_overwrite = true
   alias {
     evaluate_target_health = true
-    name                   = data.aws_lb.ingress-nginx.dns_name
-    zone_id                = data.aws_lb.ingress-nginx.zone_id
+    name                   = data.aws_lb.ingress-nginx[0].dns_name
+    zone_id                = data.aws_lb.ingress-nginx[0].zone_id
   }
 }

@@ -1,3 +1,4 @@
 adminArns: []
 tls_crt: ""
 tls_key: ""
+nginxEnabled: true

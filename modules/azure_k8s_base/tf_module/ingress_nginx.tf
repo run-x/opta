@@ -1,4 +1,5 @@
 resource "azurerm_public_ip" "opta" {
+  count               = var.nginx_enabled ? 1 : 0
   name                = "opta-${var.env_name}-k8s-lb-public"
   resource_group_name = data.azurerm_resource_group.opta.name
   location            = data.azurerm_resource_group.opta.location
@@ -18,6 +19,7 @@ data "azurerm_network_security_group" "opta" {
 }
 
 resource "azurerm_network_security_rule" "allow_http_to_lb" {
+  count                       = var.nginx_enabled ? 1 : 0
   network_security_group_name = data.azurerm_network_security_group.opta.name
   resource_group_name         = data.azurerm_resource_group.opta.name
   name                        = "allowhttppublictolb"
@@ -34,6 +36,7 @@ resource "azurerm_network_security_rule" "allow_http_to_lb" {
 }
 
 resource "azurerm_network_security_rule" "allow_https_to_lb" {
+  count                       = var.nginx_enabled ? 1 : 0
   network_security_group_name = data.azurerm_network_security_group.opta.name
   resource_group_name         = data.azurerm_resource_group.opta.name
   name                        = "allowhttpspublictolb"
@@ -55,6 +58,7 @@ resource "random_id" "dns_label" {
 }
 
 resource "helm_release" "ingress-nginx" {
+  count            = var.nginx_enabled ? 1 : 0
   chart            = "ingress-nginx"
   name             = "ingress-nginx"
   repository       = "https://kubernetes.github.io/ingress-nginx"
@@ -121,7 +125,7 @@ resource "helm_release" "ingress-nginx" {
         }
         containerPort : local.container_ports
         service : {
-          loadBalancerIP : azurerm_public_ip.opta.ip_address
+          loadBalancerIP : azurerm_public_ip.opta[0].ip_address
           loadBalancerSourceRanges : ["0.0.0.0/0"]
           externalTrafficPolicy : "Local"
           enableHttps : true

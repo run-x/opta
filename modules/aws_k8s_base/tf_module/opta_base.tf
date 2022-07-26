@@ -5,6 +5,7 @@ resource "helm_release" "opta_base" {
   values = [
     yamlencode({
       adminArns : var.admin_arns
+      nginxEnabled : var.nginx_enabled
     })
   ]
   depends_on = [
