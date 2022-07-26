@@ -11,6 +11,7 @@ from opta.amplitude import amplitude_client
 from opta.commands.local_flag import _clean_folder, _clean_tf_folder
 from opta.constants import REGISTRY, TF_FILE_PATH, VERSION
 from opta.core.generator import gen, gen_opta_resource_tags
+from opta.exceptions import UserErrors
 from opta.layer import Layer
 from opta.module import Module
 from opta.pre_check import pre_check
@@ -26,11 +27,7 @@ from opta.utils.markdown import Code, Markdown, Text, Title1, Title2
 
 @click.command()
 @click.option(
-    "-d",
-    "--directory",
-    default="./generated-terraform",
-    help="Directory for output",
-    show_default=True,
+    "-d", "--directory", help="Directory for output", show_default=False,
 )
 @click.option(
     "--readme-format",
@@ -68,7 +65,7 @@ def generate_terraform(
     ctx: click.Context,
     config: str,
     env: Optional[str],
-    directory: str,
+    directory: Optional[str],
     readme_format: str,
     delete: bool,
     auto_approve: bool,
@@ -91,17 +88,23 @@ def generate_terraform(
         "If you have any error or suggestion, please let us know in our slack channel  https://slack.opta.dev\n"
     )
 
-    if directory.strip() == "":
-        raise click.UsageError("--directory can't be empty")
-
     config = check_opta_file_exists(config)
 
     pre_check()
     _clean_tf_folder()
 
     layer = Layer.load_from_yaml(config, env, stateless_mode=True, input_variables=var)
-
     layer.validate_required_path_dependencies()
+
+    if directory is None:
+        # generate the target directory
+        directory = f"gen-tf-{layer.name}"
+        if env is not None:
+            directory = f"{directory}-{env}"
+
+    if directory.strip() == "":
+        # the users sets it to empty
+        raise click.UsageError("--directory can't be empty")
 
     event_properties: Dict = layer.get_event_properties()
     event_properties["modules"] = ",".join([m.get_type() for m in layer.get_modules()])
@@ -111,10 +114,31 @@ def generate_terraform(
 
     try:
 
-        # work in a temp directory until command is over, to prevent messing up existing files
+        # work in a temp directory until command is over, to not leave a partially generated folder
         tmp_dir_obj = tempfile.TemporaryDirectory(prefix="opta-gen-tf")
         tmp_dir = tmp_dir_obj.name
+
+        # quick exit if directory already exists and not empty
         output_dir = os.path.join(os.getcwd(), directory)
+        if _dir_has_files(output_dir):
+            if not delete:
+                raise UserErrors(
+                    f"Error: Output directory already exists: '{output_dir}'. If you want to delete it, use the '--delete' option"
+                )
+            print(
+                f"Output directory {output_dir} already exists and --delete flag is on, deleting it"
+            )
+            if not auto_approve:
+                state_file_warning = (
+                    ", including terraform state files"
+                    if os.path.exists(os.path.join(output_dir, "tfstate"))
+                    else ""
+                )
+                click.confirm(
+                    f"The output directory will be deleted{state_file_warning}: {output_dir}.\n Do you approve?",
+                    abort=True,
+                )
+            _clean_folder(output_dir)
 
         # to keep consistent with what opta does - we could make this an option if opta tags are not desirable
         gen_opta_resource_tags(layer)
@@ -140,7 +164,7 @@ def generate_terraform(
                 # dynamically mark it as not exportable
                 module.desc["is_exportable"] = False
                 continue
-            rel_path = "./" + src_path[src_path.index("modules/") :]
+            rel_path = "./" + src_path[src_path.index("modules/"):]
             abs_path = os.path.join(tmp_dir, rel_path)
             logger.debug(f"Copying module from {module.get_type()} to {abs_path}")
             shutil.copytree(src_path, abs_path, dirs_exist_ok=True)
@@ -173,17 +197,6 @@ def generate_terraform(
             # extract the relevant json
             main_tf_json, extracted_json = dicts.extract(main_tf_json, key)
 
-            # if there was already a file for it, merge it
-            # ex: combine all the terraform "output" variables
-            prev_tf_file = os.path.join(output_dir, f"{key}.tf.json")
-            if os.path.exists(prev_tf_file):
-                logger.debug(
-                    f"Found existing terraform file: {prev_tf_file}, merging it with new values"
-                )
-                with open(prev_tf_file) as f:
-                    prev_json = json.load(f)
-                extracted_json = dicts.merge(extracted_json, prev_json)
-
             # save it as it's own file
             _write_json(extracted_json, os.path.join(tmp_dir, f"{key}.tf.json"))
 
@@ -206,31 +219,6 @@ def generate_terraform(
         readme_file = _generate_readme(
             layer, execution_plan, tmp_dir, readme_format, opta_cmd, backend
         )
-
-        # various warnings if the directory already exist
-        if os.path.exists(output_dir):
-            if delete:
-                print(
-                    f"Output directory {output_dir} already exists and --delete flag is on, deleting it"
-                )
-                if not auto_approve:
-                    state_file_warning = (
-                        ", including terraform state files"
-                        if os.path.exists(os.path.join(output_dir, "tfstate"))
-                        else ""
-                    )
-                    click.confirm(
-                        f"The output directory will be deleted{state_file_warning}: {output_dir}.\n Do you approve?",
-                        abort=True,
-                    )
-                _clean_folder(output_dir)
-            else:
-                print(f"Output directory {output_dir} already exists, using it.")
-                if not auto_approve:
-                    click.confirm(
-                        "The output directory will be updated.\n Do you approve?",
-                        abort=True,
-                    )
 
         # we have a service file but the env was not exported
         if layer.name != layer.root().name and not os.path.exists(
@@ -368,7 +356,7 @@ def _generate_readme(
                 else:
                     # first step for a service
                     readme >> Text(
-                        f"This step depends on the stack '{layer.parent.name}'."
+                        f"This step depends on the terraform stack '{layer.parent.name}'."
                     )
             else:
                 readme >> Text(
@@ -419,3 +407,10 @@ def _print_modules(
         prefix = prefix if len(list) <= 1 else f"{prefix}s"
         return f"{prefix} {list_str}"
     return list_str
+
+
+def _dir_has_files(path: str) -> bool:
+    if os.path.exists(path):
+        return len(os.listdir(path)) != 0
+    # not exist
+    return False
