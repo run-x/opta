@@ -164,7 +164,7 @@ def generate_terraform(
                 # dynamically mark it as not exportable
                 module.desc["is_exportable"] = False
                 continue
-            rel_path = "./" + src_path[src_path.index("modules/"):]
+            rel_path = "./" + src_path[src_path.index("modules/") :]
             abs_path = os.path.join(tmp_dir, rel_path)
             logger.debug(f"Copying module from {module.get_type()} to {abs_path}")
             shutil.copytree(src_path, abs_path, dirs_exist_ok=True)
