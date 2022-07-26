@@ -70,7 +70,7 @@ resource "helm_release" "opta_base" {
     yamlencode({
       tls_crt : var.nginx_enabled ? (var.private_key == "" && var.expose_self_signed_ssl ? base64encode(tls_locally_signed_cert.default_cert[0].cert_pem) : base64encode(join("\n", [var.certificate_body, var.certificate_chain]))) : ""
       tls_key : var.nginx_enabled ? (var.private_key == "" && var.expose_self_signed_ssl ? base64encode(tls_private_key.default[0].private_key_pem) : base64encode(var.private_key)) : "",
-      nginxEnabled: var.nginx_enabled
+      nginxEnabled : var.nginx_enabled
     })
   ]
 }

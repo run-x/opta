@@ -145,7 +145,7 @@ resource "helm_release" "ingress-nginx" {
 }
 
 data "aws_lb" "ingress-nginx" {
-  count            = var.nginx_enabled ? 1 : 0
+  count      = var.nginx_enabled ? 1 : 0
   name       = local.load_balancer_name
   depends_on = [helm_release.ingress-nginx]
 }

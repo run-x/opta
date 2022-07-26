@@ -1,5 +1,5 @@
 resource "azurerm_public_ip" "opta" {
-  count            = var.nginx_enabled ? 1 : 0
+  count               = var.nginx_enabled ? 1 : 0
   name                = "opta-${var.env_name}-k8s-lb-public"
   resource_group_name = data.azurerm_resource_group.opta.name
   location            = data.azurerm_resource_group.opta.location
@@ -19,7 +19,7 @@ data "azurerm_network_security_group" "opta" {
 }
 
 resource "azurerm_network_security_rule" "allow_http_to_lb" {
-  count            = var.nginx_enabled ? 1 : 0
+  count                       = var.nginx_enabled ? 1 : 0
   network_security_group_name = data.azurerm_network_security_group.opta.name
   resource_group_name         = data.azurerm_resource_group.opta.name
   name                        = "allowhttppublictolb"
@@ -36,7 +36,7 @@ resource "azurerm_network_security_rule" "allow_http_to_lb" {
 }
 
 resource "azurerm_network_security_rule" "allow_https_to_lb" {
-  count            = var.nginx_enabled ? 1 : 0
+  count                       = var.nginx_enabled ? 1 : 0
   network_security_group_name = data.azurerm_network_security_group.opta.name
   resource_group_name         = data.azurerm_resource_group.opta.name
   name                        = "allowhttpspublictolb"

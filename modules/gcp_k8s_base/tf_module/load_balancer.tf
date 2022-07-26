@@ -13,13 +13,13 @@ resource "google_compute_ssl_certificate" "default" {
 }
 
 resource "google_compute_global_address" "load_balancer" {
-  count            = var.nginx_enabled ? 1 : 0
-  name = "opta-${var.layer_name}"
+  count = var.nginx_enabled ? 1 : 0
+  name  = "opta-${var.layer_name}"
 }
 
 resource "google_compute_health_check" "healthcheck" {
-  count            = var.nginx_enabled ? 1 : 0
-  name = "opta-${var.layer_name}"
+  count = var.nginx_enabled ? 1 : 0
+  name  = "opta-${var.layer_name}"
   https_health_check {
     port_specification = "USE_SERVING_PORT"
     request_path       = "/healthz"
@@ -27,14 +27,14 @@ resource "google_compute_health_check" "healthcheck" {
 }
 
 resource "google_compute_ssl_policy" "policy" {
-  count            = var.nginx_enabled ? 1 : 0
+  count           = var.nginx_enabled ? 1 : 0
   name            = "opta-${var.layer_name}"
   profile         = "MODERN"
   min_tls_version = "TLS_1_2"
 }
 
 resource "google_compute_backend_service" "backend_service" {
-  count            = var.nginx_enabled ? 1 : 0
+  count     = var.nginx_enabled ? 1 : 0
   name      = "opta-${var.layer_name}"
   port_name = "https"
   protocol  = "HTTP2"
@@ -53,7 +53,7 @@ resource "google_compute_backend_service" "backend_service" {
 }
 
 resource "google_compute_url_map" "http" {
-  count            = var.nginx_enabled ? 1 : 0
+  count           = var.nginx_enabled ? 1 : 0
   name            = "opta-${var.layer_name}"
   default_service = var.delegated || var.private_key != "" ? null : google_compute_backend_service.backend_service[0].id
   dynamic "default_url_redirect" {
@@ -74,7 +74,7 @@ resource "google_compute_url_map" "https" {
 
 
 resource "google_compute_target_http_proxy" "proxy" {
-  count            = var.nginx_enabled ? 1 : 0
+  count   = var.nginx_enabled ? 1 : 0
   name    = "opta-${var.layer_name}"
   url_map = google_compute_url_map.http[0].name
 }
@@ -88,7 +88,7 @@ resource "google_compute_target_https_proxy" "proxy" {
 }
 
 resource "google_compute_global_forwarding_rule" "http" {
-  count            = var.nginx_enabled ? 1 : 0
+  count      = var.nginx_enabled ? 1 : 0
   name       = "opta-${var.layer_name}-http"
   target     = google_compute_target_http_proxy.proxy[0].self_link
   ip_address = google_compute_global_address.load_balancer[0].address
