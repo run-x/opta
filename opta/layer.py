@@ -492,7 +492,6 @@ class Layer:
         for module in self.modules[0 : module_idx + 1]:
             self.processor_for(module).post_hook(module_idx, exception)
 
-
     def post_delete(self, module_idx: int) -> None:
         module = self.modules[module_idx]
         logger.debug(f"Running post delete for module {module.name}")

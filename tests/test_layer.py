@@ -187,7 +187,7 @@ class TestLayer:
         assert layer.name == "dummy-parent"
         assert layer.parent is None
         assert layer == layer.root()
-        assert len(layer.modules) == 8
+        assert len(layer.modules) == 7
         assert layer.pre_hook(6) is None
         assert layer.post_hook(6, None) is None
         mocked_datadog_processor.assert_has_calls(
