@@ -26,11 +26,10 @@ def run_before_and_after_tests(mocker: MockFixture) -> Generator:
 
     global tmp_dir
     tmp_dir = directory.name
+    os.rmdir(tmp_dir)
 
     with directory:
         yield  # this is where the testing happens
-
-    tmp_dir = ""
 
     # Teardown
     # no actual kubernetes/cloud needed
@@ -38,14 +37,13 @@ def run_before_and_after_tests(mocker: MockFixture) -> Generator:
     mocked_boto_client2.assert_not_called()
     mocked_load_kube_config.assert_not_called()
     mocked_set_kube_config.assert_not_called()
+    tmp_dir = ""
 
 
 def test_generate_terraform_env(mocker: MockFixture) -> None:
     env_file = os.path.join(
         os.getcwd(), "tests", "fixtures", "dummy_data", "aws_env_getting_started.yaml"
     )
-
-    existing_file = _random_file()
 
     mocked_amplitude_client = mocker.patch(
         "opta.commands.generate_terraform.amplitude_client", spec=AmplitudeClient
@@ -73,9 +71,6 @@ def test_generate_terraform_env(mocker: MockFixture) -> None:
     )
     assert result.exit_code == 0
     assert "Terraform files generated successfully" in result.output
-
-    # check existing file was kept
-    _check_file_exist(existing_file)
 
     # check what was created
     _check_file_exist(
@@ -291,8 +286,6 @@ def test_generate_terraform_env_and_service(mocker: MockFixture) -> None:
     result = runner.invoke(
         cli, ["generate-terraform", "-c", env_file, "-d", tmp_dir, "--auto-approve"]
     )
-    # if result.exception:
-    #     print(sys.exc_info()[2])
     assert result.exit_code == 0
     assert "Terraform files generated successfully" in result.output
 
@@ -310,11 +303,25 @@ def test_generate_terraform_env_and_service(mocker: MockFixture) -> None:
             "--auto-approve",
         ],
     )
-    assert result.exit_code == 0
-    assert (
-        "the output directory doesn't include terraform files for the environment"
-        not in result.output
+    assert result.exit_code == 1
+    assert "Output directory already exists" in str(result.exception)
+
+    # run for service - same output directory using --delete
+    result = runner.invoke(
+        cli,
+        [
+            "generate-terraform",
+            "-c",
+            service_file,
+            "-d",
+            tmp_dir,
+            "--readme-format",
+            "none",
+            "--delete",
+            "--auto-approve",
+        ],
     )
+    assert result.exit_code == 0
 
     # check readme files were not created because `--readme-format none`
     _check_file_not_exist("staging.md")
@@ -334,11 +341,7 @@ def test_generate_terraform_env_and_service(mocker: MockFixture) -> None:
     _check_file_exist(
         "output.tf.json",
         [
-            # this file contains fields from env & service
-            "kms_account_key_arn",
-            "vpc_id",
-            "k8s_cluster_name",
-            "load_balancer_raw_dns",
+            # this file contains fields from service
             "docker_repo_url",
             "module.hello.docker_repo_url",
         ],
@@ -351,8 +354,8 @@ def test_generate_terraform_env_and_service(mocker: MockFixture) -> None:
         "terraform.tf.json",
         ["hashicorp/aws", "hashicorp/helm", "./tfstate/staging.tfstate"],
     )
-    _check_file_exist("modules/aws_base/")
-    _check_file_exist("modules/aws_eks/")
+    _check_file_not_exist("modules/aws_base/")
+    _check_file_not_exist("modules/aws_eks/")
     _check_file_exist("modules/aws_k8s_service/")
     _check_file_exist("modules/opta-k8s-service-helm/")
 
@@ -384,13 +387,12 @@ def test_generate_terraform_dir_already_exist(mocker: MockFixture) -> None:
     directory = tmp_dir
     _random_file()
 
-    # if --auto-aprove is not set, except a confirmation message
+    # except an error, even if--auto-aprove is not set,
     result = runner.invoke(
         cli, ["generate-terraform", "-c", service_file, "-d", directory]
     )
-    assert result.exit_code != 0
-    assert "The output directory will be updated" in result.output
-    assert "Do you approve?" in result.output
+    assert result.exit_code == 1
+    assert "Output directory already exists" in str(result.exception)
 
     # if --delete is set, except a confirmation message before deleting
     result = runner.invoke(
@@ -553,6 +555,7 @@ def _check_file_not_exist(rel_path: str) -> None:
 
 def _random_file() -> str:
     "_random_file in current directory"
+    os.mkdir(tmp_dir)
     new_file = os.path.join(tmp_dir, str(uuid.uuid4()))
     with open(new_file, "w"):
         pass
