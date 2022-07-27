@@ -24,7 +24,6 @@ from google.oauth2 import service_account
 from kubernetes.config.kube_config import KUBE_CONFIG_DEFAULT_LOCATION
 
 from modules.base import ModuleProcessor
-from modules.runx.runx import RunxProcessor
 from opta.constants import GENERATED_KUBE_CONFIG_DIR, REGISTRY, VERSION
 from opta.core.aws import AWS
 from opta.core.azure import Azure
@@ -59,7 +58,6 @@ PROCESSOR_DICT: Dict[str, str] = {
     "aws-dns": "AwsDnsProcessor",
     "aws-postgres": "AwsPostgresProcessor",
     "aws-documentdb": "AwsDocumentDbProcessor",
-    "runx": "RunxProcessor",
     "helm-chart": "HelmChartProcessor",
     "aws-iam-role": "AwsIamRoleProcessor",
     "aws-iam-user": "AwsIamUserProcessor",
@@ -466,10 +464,6 @@ class Layer:
         for module in self.modules[0 : module_idx + 1]:
             self.processor_for(module).process(module_idx)
 
-        if self.parent is not None and self.parent.get_module("runx") is not None:
-            RunxProcessor(self.parent.get_module("runx"), self).process(  # type:ignore
-                module_idx
-            )
         for module in self.modules[0 : module_idx + 1]:
             output_prefix = (
                 None if len(self.get_module_by_type(module.type)) == 1 else module.name
@@ -494,19 +488,10 @@ class Layer:
         for module in self.modules[0 : module_idx + 1]:
             self.processor_for(module).pre_hook(module_idx)
 
-        if self.parent is not None and self.parent.get_module("runx") is not None:
-            RunxProcessor(self.parent.get_module("runx"), self).pre_hook(  # type:ignore
-                module_idx
-            )
-
     def post_hook(self, module_idx: int, exception: Optional[Exception]) -> None:
         for module in self.modules[0 : module_idx + 1]:
             self.processor_for(module).post_hook(module_idx, exception)
 
-        if self.parent is not None and self.parent.get_module("runx") is not None:
-            RunxProcessor(self.parent.get_module("runx"), self).post_hook(  # type:ignore
-                module_idx, exception
-            )
 
     def post_delete(self, module_idx: int) -> None:
         module = self.modules[module_idx]
