@@ -2,10 +2,6 @@
 
 This is an example [opta](https://github.com/run-x/opta) configuration file to deploy [Sourcegraph](https://about.sourcegraph.com/) on AWS.
 
-You can also use this button to fill in the variable fields in the config.
-
-[![Deploy to AWS](https://raw.githubusercontent.com/run-x/opta/main/assets/deploy-to-aws-button.svg)](https://app.runx.dev/deploy-with-aws?url=https%3A%2F%2Fgithub.com%2Frun-x%2Fopta%2Fblob%2Fmain%2Fexamples%2Fsourcegraph%2Fsourcegraph.yaml&name=Sourcegraph)
-
 
 # What does this do?
 It deploys a single container version of sourcegraph on EKS in AWS. It uses AWS managed RDS instances and also sets up various other resources like VPCs, subnets, load balancers etc.

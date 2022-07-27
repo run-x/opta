@@ -2,9 +2,6 @@
 
 This is an example [Opta](https://github.com/run-x/opta) configuration file to deploy [NocoDB](https://github.com/nocodb/nocodb) on AWS.
 
-You can also use this button to fill in the variable fields in the config.
-
-[![Deploy](https://raw.githubusercontent.com/run-x/opta/main/assets/deploy-to-aws-button.svg)](https://app.runx.dev/deploy-with-aws?url=https%3A%2F%2Fgithub.com%2Frun-x%2Fopta%2Fblob%2Fmain%2Fexamples%2Fnocodb%2Fnocodb-aws.yaml&name=NocoDB)
 
 # What does this do?
 It deploys a horizontally scalable NocoDB deployment on EKS in AWS. It uses AWS managed the RDS mysql instance. It also sets up various other resources like VPCs, subnets, load balancers etc.
