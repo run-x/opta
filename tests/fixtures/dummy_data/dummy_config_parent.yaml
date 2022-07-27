@@ -13,7 +13,6 @@ modules:
     max_nodes: 6
   - type: k8s-base
   - type: datadog
-  - type: runx
   - type: aws-ses
   - type: custom-terraform
     name: custom1
