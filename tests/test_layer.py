@@ -153,7 +153,6 @@ class TestLayer:
         )
         mocked_eks_processor = mocker.patch("modules.aws_eks.aws_eks.AwsEksProcessor")
         mocked_dns_processor = mocker.patch("modules.aws_dns.aws_dns.AwsDnsProcessor")
-        mocked_runx_processor = mocker.patch("modules.runx.runx.RunxProcessor")
         mocked_aws_email_processor = mocker.patch(
             "modules.aws_ses.aws_ses.AwsEmailProcessor"
         )
@@ -169,7 +168,6 @@ class TestLayer:
             mock_dict["aws-k8s-base"] = mocked_k8s_base_processor
             mock_dict["aws-eks"] = mocked_eks_processor
             mock_dict["aws-dns"] = mocked_dns_processor
-            mock_dict["runx"] = mocked_runx_processor
             mock_dict["aws-ses"] = mocked_aws_email_processor
             mock_dict["aws-documentdb"] = mocked_aws_documentdb_processor
 
@@ -189,7 +187,7 @@ class TestLayer:
         assert layer.name == "dummy-parent"
         assert layer.parent is None
         assert layer == layer.root()
-        assert len(layer.modules) == 8
+        assert len(layer.modules) == 7
         assert layer.pre_hook(6) is None
         assert layer.post_hook(6, None) is None
         mocked_datadog_processor.assert_has_calls(
@@ -224,14 +222,6 @@ class TestLayer:
                 mocker.call().post_hook(6, None),
             ]
         )
-        mocked_runx_processor.assert_has_calls(
-            [
-                mocker.call(mocker.ANY, layer),
-                mocker.call().pre_hook(6),
-                mocker.call(mocker.ANY, layer),
-                mocker.call().post_hook(6, None),
-            ]
-        )
         mocked_aws_email_processor.assert_has_calls(
             [
                 mocker.call(mocker.ANY, layer),
@@ -258,8 +248,6 @@ class TestLayer:
         )
         mocked_eks_processor = mocker.patch("modules.aws_eks.aws_eks.AwsEksProcessor")
         mocked_dns_processor = mocker.patch("modules.aws_dns.aws_dns.AwsDnsProcessor")
-        # mocked_runx_processor = mocker.patch("modules.runx.runx.RunxProcessor")
-        mocked_runx_processor = mocker.patch("opta.layer.RunxProcessor")
         mocked_k8s_service_processor = mocker.patch(
             "modules.aws_k8s_service.aws_k8s_service.AwsK8sServiceProcessor"
         )
@@ -285,7 +273,6 @@ class TestLayer:
             mock_dict["aws-k8s-base"] = mocked_k8s_base_processor
             mock_dict["aws-eks"] = mocked_eks_processor
             mock_dict["aws-dns"] = mocked_dns_processor
-            mock_dict["runx"] = mocked_runx_processor
             mock_dict["aws-ses"] = mocked_aws_email_processor
             mock_dict["aws-documentdb"] = mocked_aws_documentdb_processor
             mock_dict["aws-k8s-service"] = mocked_k8s_service_processor
@@ -380,14 +367,6 @@ class TestLayer:
             ]
         )
         mocked_aws_sqs_processor.assert_has_calls(
-            [
-                mocker.call(mocker.ANY, layer),
-                mocker.call().pre_hook(13),
-                mocker.call(mocker.ANY, layer),
-                mocker.call().post_hook(13, None),
-            ]
-        )
-        mocked_runx_processor.assert_has_calls(
             [
                 mocker.call(mocker.ANY, layer),
                 mocker.call().pre_hook(13),

@@ -2,10 +2,6 @@
 
 This is an example [opta](https://github.com/run-x/opta) configuration file to deploy [Retool](https://retool.com/) on AWS.
 
-You can also use this button to fill in the variable fields in the config.
-
-[![Deploy to AWS](https://raw.githubusercontent.com/run-x/opta/main/assets/deploy-to-aws-button.svg)](https://app.runx.dev/deploy-with-aws?url=https%3A%2F%2Fgithub.com%2Frun-x%2Fopta%2Fblob%2Fmain%2Fexamples%2Fretool%2Fretool-aws.yaml&name=Retool)
-
 
 # What does this do?
 It deploys a single container version of retool on EKS in AWS. It uses AWS managed RDS instances and elasticcache. It also sets up various other resources like VPCs, subnets, load balancers etc.

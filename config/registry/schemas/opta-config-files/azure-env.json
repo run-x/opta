@@ -57,9 +57,6 @@
           },
           {
             "$ref": "https://app.runx.dev/modules/external-ssl-cert"
-          },
-          {
-            "$ref": "https://app.runx.dev/modules/runx"
           }
         ]
       }

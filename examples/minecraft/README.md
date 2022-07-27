@@ -5,9 +5,6 @@ This page describes how to run a [Minecraft](https://www.minecraft.net/en-us) se
 > We'll be using Opta to handle provisioning and deployment. Opta is an Infrastrucutre-as-code framework that packages
 all the best practices and provides you a robust cloud setup - without being an Infrastructure expert.
 
-If you're looking to just deploy and start playing, just click on this button:
-
-[![Deploy to AWS](https://raw.githubusercontent.com/run-x/opta/main/assets/deploy-to-aws-button.svg)](https://app.runx.dev/deploy-with-aws?url=https%3A%2F%2Fgithub.com%2Frun-x%2Fopta%2Fblob%2Fmain%2Fexamples%2Fminecraft%2Fminecraft-aws.yaml&name=Minecraft)
 
 **Make sure** to set the `OPS` env var to you minecraft user name. This is the field which
 controls who is an admin, so it is very important for this to be set correctly.

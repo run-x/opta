@@ -69,9 +69,6 @@
           },
           {
             "$ref": "https://app.runx.dev/modules/global-accelerator"
-          },
-          {
-            "$ref": "https://app.runx.dev/modules/runx"
           }
         ]
       }
