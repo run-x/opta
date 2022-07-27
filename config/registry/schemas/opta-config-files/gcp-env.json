@@ -38,7 +38,7 @@
           },
           {
             "$ref": "https://app.runx.dev/modules/gcp-nodepool"
-          },
+          }
         ]
       }
     }

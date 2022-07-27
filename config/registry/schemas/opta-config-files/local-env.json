@@ -32,7 +32,7 @@
           },
           {
             "$ref": "https://app.runx.dev/modules/local-base"
-          },
+          }
         ]
       }
     }
