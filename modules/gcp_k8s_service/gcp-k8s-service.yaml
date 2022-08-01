@@ -147,7 +147,7 @@ inputs:
     user_facing: true
     validator: any(include('limits'), required=False)
     description: |
-      See the [container resources]({{< relref "#container-resources" >}}) section.
+      See the [container resources]({{< relref "#resource-requests" >}}) section.
       Memory is in megabytes..
     default: null
   - name: public_uri
