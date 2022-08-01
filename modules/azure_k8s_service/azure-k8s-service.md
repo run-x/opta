@@ -39,7 +39,7 @@ environments:
 With this configuration, your container will get an env var named `API_KEY` with
 the value `value`!
 
-You can also use [Opta's interpolation variables]((/features/variables)) features to refer to other values.
+You can also use [Opta's interpolation variables](/features/variables) features to refer to other values.
 
 ### External/Internal Image
 
