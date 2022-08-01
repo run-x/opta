@@ -123,6 +123,14 @@ resource "aws_s3_bucket_public_access_block" "block" {
   depends_on              = [aws_s3_bucket_policy.policy]
 }
 
+resource "aws_s3_bucket_ownership_controls" "ownership_controls" {
+  bucket = aws_s3_bucket.bucket.id
+
+  rule {
+    object_ownership = "BucketOwnerEnforced"
+  }
+}
+
 resource "aws_s3_bucket_policy" "policy" {
   bucket = aws_s3_bucket.bucket.id
   policy = data.aws_iam_policy_document.s3_policy.json
