@@ -57,7 +57,7 @@ SHELLS_ALLOWED: Final = ("bash", "sh")
 
 REDS: Final = (1, 9, 124, 160, 196)
 
-OPTA_INSTALL_URL: Final = "http://run-x.github.io/install.sh"
+OPTA_INSTALL_URL: Final = "https://docs.opta.dev/install.sh"
 successfull_upgrade: Final = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), ".successfull_upgrade"
 )

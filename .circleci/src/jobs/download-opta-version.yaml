@@ -12,7 +12,7 @@ steps:
         git config --global user.name "Runx CI"
   - run:
       name: "Download Latest Opta Binary"
-      command: VERSION=<< parameters.opta-version >> /bin/bash -c "$(curl -fsSL http://run-x.github.io/install.sh)"
+      command: VERSION=<< parameters.opta-version >> /bin/bash -c "$(curl -fsSL https://docs.opta.dev/install.sh)"
   - install-opta-dependencies
   - run:
       name: "Check Opta Version"
