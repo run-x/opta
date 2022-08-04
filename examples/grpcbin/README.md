@@ -13,7 +13,7 @@ This directory contains:
     └── grpcbin.yaml      # opta service file
 
 **NOTE**: Typically, the first step of the example would be to demonstrate how one may deploy the application locally
-but currently GRPC with opta does not function locally, and requires [TLS set up](http://run-x.github.io/tutorials/ingress/#setting-the-domain-for-an-environment-via-domain-delegation)
+but currently GRPC with opta does not function locally, and requires [TLS set up](https://docs.opta.dev/tutorials/ingress/#setting-the-domain-for-an-environment-via-domain-delegation)
 in the cloud environments to function. If you have pressing need for this feature, please let us know in our
 [slack channel](https://slack.opta.dev)
 
@@ -33,7 +33,7 @@ in the cloud environments to function. If you have pressing need for this featur
     # when done, find load_balancer_raw_dns or load_balancer_raw_ip in the output and save it
     export load_balancer=[Value from output]
     ```
-3. Complete the [TLS and domain set up](http://run-x.github.io/tutorials/ingress/#setting-the-domain-for-an-environment-via-domain-delegation)
+3. Complete the [TLS and domain set up](https://docs.opta.dev/tutorials/ingress/#setting-the-domain-for-an-environment-via-domain-delegation)
 4. Deploy the service: push the image and deploy it to Kubernetes
     ```bash
     opta apply --config grpcbin.yaml --auto-approve --env $ENV
@@ -54,6 +54,6 @@ in the cloud environments to function. If you have pressing need for this featur
 **NOTE**: We are using `opta apply` as `opta deploy` is only needed when the image is set to AUTO
 
 # References
-* [Opta docs](http://run-x.github.io)
+* [Opta docs](https://docs.opta.dev)
 
 For more guidance, please reach out to us in our [slack channel](https://slack.opta.dev).

@@ -13,7 +13,7 @@ UPGRADE_CHECK_PROBABILITY: float = float(
     os.environ.get("OPTA_UPGRADE_CHECK_PROBABILITY", "0.2")
 )
 # TODO: Change this to the actual upgrade URL.
-UPGRADE_INSTRUCTIONS_URL = "http://run-x.github.io/installation/"
+UPGRADE_INSTRUCTIONS_URL = "https://docs.opta.dev/installation/"
 
 
 def _should_check_for_version_upgrade() -> bool:

@@ -119,7 +119,7 @@ class Terraform:
     def validate_version(cls) -> None:
         ensure_installed("terraform")
 
-        pre_req_link = "Check http://run-x.github.io/installation/#prerequisites"
+        pre_req_link = "Check https://docs.opta.dev/installation/#prerequisites"
 
         current_version = Terraform.get_version()
         current_parsed = version.parse(current_version)

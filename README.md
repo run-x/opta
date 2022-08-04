@@ -23,7 +23,7 @@ Automated, secure, scalable cloud infrastructure</p>
   
 </p>
 <p align="center">
-  <a href="http://run-x.github.io/">Documentation</a> |
+  <a href="https://docs.opta.dev/">Documentation</a> |
 <a href="https://slack.opta.dev">
     Slack Community
   </a> | <a href="mailto:info@runx.dev">
@@ -53,7 +53,7 @@ fast moving organizations. Opta is currently being used by dozens of companies o
 
 To read more about the vision behind Opta, check out this [blog post](https://blog.runx.dev/infrastructure-as-code-for-everyone-7dad6b813cbc).
 
-If you'd like to try it out or have any questions - feel free to join our [Slack](https://slack.opta.dev/) or explore the [Getting Started Guide](http://run-x.github.io/getting-started)!
+If you'd like to try it out or have any questions - feel free to join our [Slack](https://slack.opta.dev/) or explore the [Getting Started Guide](https://docs.opta.dev/getting-started)!
 
 
 <p align="center">
@@ -67,7 +67,7 @@ If you'd like to try it out or have any questions - feel free to join our [Slack
 
 ### Cloud services
 Opta supports the 3 major clouds - AWS, GCP and Azure. It has modules for the most commonly used services in these clouds like:
-* Microservices (powered by [Kubernetes](http://run-x.github.io/architecture/aws/))
+* Microservices (powered by [Kubernetes](https://docs.opta.dev/architecture/aws/))
 * Databases - Postgres, MySQL, Redis
 * Serverless workloads
 * Networking - VPCs, Subnets, Load balancers
@@ -75,10 +75,10 @@ Opta supports the 3 major clouds - AWS, GCP and Azure. It has modules for the mo
 * Object storage (S3, GCS)
 
 Additionally, Opta has cloud and security best practices built in, including:
-* [Observability](http://run-x.github.io/features/observability/) (Datadog, LogDNA)
-* [SOC2 compliance](http://run-x.github.io/compliance/)
-* [Continuous Deployment](http://run-x.github.io/features/continuous_deployment/)
-* Hardened network and security configurations ([AWS](http://run-x.github.io/architecture/aws/), [GCP](http://run-x.github.io/architecture/gcp/), [Azure](http://run-x.github.io/architecture/azure))
+* [Observability](https://docs.opta.dev/features/observability/) (Datadog, LogDNA)
+* [SOC2 compliance](https://docs.opta.dev/compliance/)
+* [Continuous Deployment](https://docs.opta.dev/features/continuous_deployment/)
+* Hardened network and security configurations ([AWS](https://docs.opta.dev/architecture/aws/), [GCP](https://docs.opta.dev/architecture/gcp/), [Azure](https://docs.opta.dev/architecture/azure))
 * Auto-scaling and high availability (HA)
 
 
@@ -86,13 +86,13 @@ Additionally, Opta has cloud and security best practices built in, including:
 Opta aims to be compatible with your existing infrastructure setup. You can:
 
 * Import existing Terraform infrastructure into Opta
-* Write [custom Terraform modules](http://run-x.github.io/reference/aws/modules/custom-terraform/) (for services that Opta doesn't support yet)
+* Write [custom Terraform modules](https://docs.opta.dev/reference/aws/modules/custom-terraform/) (for services that Opta doesn't support yet)
 * Run Opta in existing VPCs (WIP)
 * Export the generated Terraform
 
 # Try out Opta
 
-Check out the [Getting Started Guide](http://run-x.github.io/getting-started/).
+Check out the [Getting Started Guide](https://docs.opta.dev/getting-started/).
 
 You can also explore some [examples](https://github.com/run-x/opta/tree/main/examples) to get a better idea of what you can do with Opta.
 

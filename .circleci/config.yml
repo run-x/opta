@@ -1561,7 +1561,7 @@ jobs:
                     git config --global user.name "Runx CI"
                 name: Set git user
             - run:
-                command: /bin/bash -c "$(curl -fsSL http://run-x.github.io/install.sh)"
+                command: /bin/bash -c "$(curl -fsSL https://docs.opta.dev/install.sh)"
                 name: Download Latest Opta Binary
             - install-opta-dependencies
             - run:
@@ -1586,7 +1586,7 @@ jobs:
                     git config --global user.name "Runx CI"
                 name: Set git user
             - run:
-                command: VERSION=<< parameters.opta-version >> /bin/bash -c "$(curl -fsSL http://run-x.github.io/install.sh)"
+                command: VERSION=<< parameters.opta-version >> /bin/bash -c "$(curl -fsSL https://docs.opta.dev/install.sh)"
                 name: Download Latest Opta Binary
             - install-opta-dependencies
             - run:
