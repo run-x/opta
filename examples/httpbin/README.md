@@ -69,6 +69,6 @@ This directory contains:
     ```
 
 # References
-* [Opta docs](http://run-x.github.io)
+* [Opta docs](https://docs.opta.dev)
 
 For more guidance, please reach out to us in our [slack channel](https://slack.opta.dev).
