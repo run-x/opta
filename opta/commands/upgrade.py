@@ -48,7 +48,7 @@ def _upgrade() -> None:
     except Exception:
         logger.error(
             "\nUnable to install latest version of Opta."
-            "\nPlease follow the instructions on http://run-x.gihub.io/installation"
+            "\nPlease follow the instructions on http://run-x.github.io/installation"
         )
     finally:
         _cleanup_installation_file()

@@ -59,7 +59,7 @@ class TestTerraform:
 
         assert (
             str(e.value)
-            == "Invalid terraform version 0.14.9 -- must be at least 0.15.0. Check http://run-x.gihub.io/installation/#prerequisites"
+            == "Invalid terraform version 0.14.9 -- must be at least 0.15.0. Check http://run-x.github.io/installation/#prerequisites"
         )
         get_version.assert_called_once()
 
@@ -73,7 +73,7 @@ class TestTerraform:
 
         assert (
             str(e.value)
-            == "Invalid terraform version 2.0.0 -- must be less than 2.0.0. Check http://run-x.gihub.io/installation/#prerequisites"
+            == "Invalid terraform version 2.0.0 -- must be less than 2.0.0. Check http://run-x.github.io/installation/#prerequisites"
         )
         get_version.assert_called_once()
 

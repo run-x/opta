@@ -4,7 +4,7 @@ This is an example of using [Opta](https://github.com/run-x/opta) with an existi
 
 # What does this do?
 
-This example provides Terraform files to configure Linkerd and Ingress Nginx controller in your EKS cluster to have the target [Network Architecture](http://run-x.gihub.io/features/networking/network_overview/).  
+This example provides Terraform files to configure Linkerd and Ingress Nginx controller in your EKS cluster to have the target [Network Architecture](http://run-x.github.io/features/networking/network_overview/).  
 Once EKS is configured, you will be able to use Opta to deploy your service to Kubernetes.  
 Opta will generate the Terraform files and Helm chart for you, you only need to maintain the Opta file.
 
@@ -14,7 +14,7 @@ Opta will generate the Terraform files and Helm chart for you, you only need to 
 # When to use this instead of full Opta?
 
 - Use this guide if you already have an EKS cluster, and would like to use Opta to deploy your Kubernetes services.
-- If you don't have an EKS cluser, Opta can create it, check [Getting Started](http://run-x.gihub.io/getting-started/) instead.
+- If you don't have an EKS cluser, Opta can create it, check [Getting Started](http://run-x.github.io/getting-started/) instead.
 
 
 # What is included?

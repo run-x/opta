@@ -38,7 +38,7 @@
     },
     "healthcheck_command": {
       "type": "array",
-      "description": "See the See the [healthcheck probe](http://run-x.gihub.io/reference/aws/modules/aws-k8s-service/#healthcheck-probe) section. Default `[]` (i.e., no user-specified healthchecks)",
+      "description": "See the See the [healthcheck probe](http://run-x.github.io/reference/aws/modules/aws-k8s-service/#healthcheck-probe) section. Default `[]` (i.e., no user-specified healthchecks)",
       "default": []
     },
     "liveness_probe_command": {
@@ -77,14 +77,14 @@
     },
     "autoscaling_target_cpu_percentage": {
       "type": "integer",
-      "description": "See the [autoscaling](http://run-x.gihub.io/reference/google/modules/gcp-k8s-service/#autoscaling) section.",
+      "description": "See the [autoscaling](http://run-x.github.io/reference/google/modules/gcp-k8s-service/#autoscaling) section.",
       "default": 80,
       "minimum": 0,
       "maximum": 100
     },
     "autoscaling_target_mem_percentage": {
       "type": "integer",
-      "description": "See the [autoscaling](http://run-x.gihub.io/reference/google/modules/gcp-k8s-service/#autoscaling) section.",
+      "description": "See the [autoscaling](http://run-x.github.io/reference/google/modules/gcp-k8s-service/#autoscaling) section.",
       "default": 80,
       "minimum": 0,
       "maximum": 100
@@ -104,7 +104,7 @@
     },
     "healthcheck_path": {
       "type": "string",
-      "description": "See the See the [healthcheck probe](http://run-x.gihub.io/reference/aws/modules/aws-k8s-service/#healthcheck-probe) section. Default `null` (i.e., no user-specified healthchecks)"
+      "description": "See the See the [healthcheck probe](http://run-x.github.io/reference/aws/modules/aws-k8s-service/#healthcheck-probe) section. Default `null` (i.e., no user-specified healthchecks)"
     },
     "liveness_probe_path": {
       "type": "string",
@@ -139,7 +139,7 @@
       "default": 86400
     },
     "resource_request": {
-      "description": "See the [container resources](http://run-x.gihub.io/reference/google/modules/gcp-k8s-service/#container-resources) section.\nCPU is given in millicores, and Memory is in megabytes.\n",
+      "description": "See the [container resources](http://run-x.github.io/reference/google/modules/gcp-k8s-service/#container-resources) section.\nCPU is given in millicores, and Memory is in megabytes.\n",
       "type": "object",
       "properties": {
         "cpu": {

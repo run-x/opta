@@ -8,7 +8,7 @@ modules:
   - type: base
   - type: dns
     domain: <domain::string::The dns domain for your NocoDB deployment>>
-    delegated: false # set to true once ready http://run-x.gihub.io/miscellaneous/ingress/
+    delegated: false # set to true once ready http://run-x.github.io/miscellaneous/ingress/
   - type: k8s-cluster
   - type: k8s-base
     name: k8sbase

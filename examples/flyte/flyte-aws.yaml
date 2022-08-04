@@ -8,7 +8,7 @@ modules:
   - type: base
   - type: dns
     domain: <<domain::string::The dns domain for your Flyte deployment>>
-    delegated: false # set to true once ready http://run-x.gihub.io/miscellaneous/ingress/
+    delegated: false # set to true once ready http://run-x.github.io/miscellaneous/ingress/
   - type: k8s-cluster
     max_nodes: 15
   - type: k8s-base
