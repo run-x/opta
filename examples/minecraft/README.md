@@ -37,7 +37,7 @@ this by modifying the `env_vars` field of the k8s-service module of the deployme
 # Multiple Minecraft Servers
 If you wish to host multiple minecraft servers/worlds in the same environment, do the following steps:
 
-* Create a new [Opta Service](https://docs.opta.dev/getting-started/aws/#service-creation) yaml manifest holding a new
+* Create a new [Opta Service](http://run-x.github.io/getting-started/aws/#service-creation) yaml manifest holding a new
   k8s-service module instance under the modules list (**WARNING**: this is needed because Opta currently only allows
   one k8s service per yaml manifest).
 * In your new service manifest, update the `service_port` field set to 25565 to a new value (typically just increment
@@ -105,7 +105,7 @@ name_servers = tolist([
 * Your minecraft server should now be accessible under your domain-- go ahead and update your minecraft client config
   to point to this new domain instead of the load balancer directly.
 
-For more information, checkout this [this tutorial](https://docs.opta.dev/tutorials/ingress/) and follow the dns
+For more information, checkout this [this tutorial](http://run-x.github.io/tutorials/ingress/) and follow the dns
 delegation steps.
 
 # [FAQ](../FAQ.md)

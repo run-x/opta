@@ -13,7 +13,7 @@ jobs:
     steps:
       - name: validate version
         run: |
-          /bin/bash -c "$(curl -fsSL https://docs.opta.dev/install.sh)"
+          /bin/bash -c "$(curl -fsSL http://run-x.github.io/install.sh)"
           export VERSION_FOUND=$(/home/runner/.opta/opta version | head -n 1)
           if [ "$VERSION" = "$VERSION_FOUND" ]; then
               echo "Valid version"
