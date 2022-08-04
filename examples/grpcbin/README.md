@@ -54,6 +54,6 @@ in the cloud environments to function. If you have pressing need for this featur
 **NOTE**: We are using `opta apply` as `opta deploy` is only needed when the image is set to AUTO
 
 # References
-* [Opta docs](https://docs.opta.dev)
+* [Opta docs](http://run-x.github.io)
 
 For more guidance, please reach out to us in our [slack channel](https://slack.opta.dev).
