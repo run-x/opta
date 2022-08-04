@@ -127,7 +127,7 @@ opta destroy --config full-stack-example/providers/aws.yaml --auto-approve
 
 # Further Reading
 
-Visit [Opta Documentation](https://docs.opta.dev/)  to learn more.
+Visit [Opta Documentation](http://run-x.gihub.io/)  to learn more.
 
 # Credits
 

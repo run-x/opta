@@ -76,12 +76,12 @@ inputs:
   - name: autoscaling_target_cpu_percentage
     user_facing: true
     validator: any(str(), int(), required=False)
-    description: See the [autoscaling](https://docs.opta.dev/reference/aws/modules/aws-k8s-service/#autoscaling) section.
+    description: See the [autoscaling](http://run-x.gihub.io/reference/aws/modules/aws-k8s-service/#autoscaling) section.
     default: 80
   - name: autoscaling_target_mem_percentage
     user_facing: true
     validator: any(str(), int(), required=False)
-    description: See the [autoscaling](https://docs.opta.dev/reference/aws/modules/aws-k8s-service/#autoscaling) section.
+    description: See the [autoscaling](http://run-x.gihub.io/reference/aws/modules/aws-k8s-service/#autoscaling) section.
     default: 80
   - name: secrets
     user_facing: true
@@ -101,12 +101,12 @@ inputs:
   - name: healthcheck_path
     user_facing: true
     validator: str(required=False)
-    description: See the See the [healthcheck probe](https://docs.opta.dev/reference/aws/modules/aws-k8s-service/#healthcheck-probe) section. Default `null` (i.e., no user-specified healthchecks)
+    description: See the See the [healthcheck probe](http://run-x.gihub.io/reference/aws/modules/aws-k8s-service/#healthcheck-probe) section. Default `null` (i.e., no user-specified healthchecks)
     default: null
   - name: healthcheck_command
     user_facing: true
     validator: list(str(), required=False)
-    description: See the See the [healthcheck probe](https://docs.opta.dev/reference/aws/modules/aws-k8s-service/#healthcheck-probe) section. Default `[]` (i.e., no user-specified healthchecks)
+    description: See the See the [healthcheck probe](http://run-x.gihub.io/reference/aws/modules/aws-k8s-service/#healthcheck-probe) section. Default `[]` (i.e., no user-specified healthchecks)
     default: []
   - name: liveness_probe_command
     user_facing: true
@@ -157,7 +157,7 @@ inputs:
     user_facing: true
     validator: any(include('resources'), required=False)
     description: |
-      See the [container resources](https://docs.opta.dev/reference/aws/modules/aws-k8s-service/#resource-requests) section.
+      See the [container resources](http://run-x.gihub.io/reference/aws/modules/aws-k8s-service/#resource-requests) section.
       CPU is given in millicores, and Memory is in megabytes.
     default:
       cpu: 100

@@ -14,7 +14,7 @@ data "aws_lb" "ingress-nginx" {
 }
 
 
-# This is optional, see Opta docs for this here: https://docs.opta.dev/reference/aws/modules/cloudfront-distribution/
+# This is optional, see Opta docs for this here: http://run-x.gihub.io/reference/aws/modules/cloudfront-distribution/
 #tfsec:ignore:aws-cloudfront-enable-waf
 resource "aws_cloudfront_distribution" "distribution" {
 

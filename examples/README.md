@@ -1,6 +1,6 @@
 # opta-examples
 This directory holds a compiled list of advanced, standalone, usages of Opta, most beyond the basic tutorials on the 
-[docs](https://docs.opta.dev/)
+[docs](http://run-x.gihub.io/)
 
 - [airflow](/examples/airflow): Deploy Apache Airflow on AWS
 - [aws-lambda](/examples/aws-lambda): Deploy Apache Airflow on AWS

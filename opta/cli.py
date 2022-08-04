@@ -39,7 +39,7 @@ def cli() -> None:
 
     Github: https://github.com/run-x/opta
 
-    Documentation: https://docs.opta.dev/
+    Documentation: http://run-x.gihub.io/
     """
     pass
 

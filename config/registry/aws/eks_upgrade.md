@@ -97,7 +97,7 @@ To do so, set the `k8s_version` field in the `k8s-cluster` block of your environ
 
 **NOTE**: The `k8s_version` field may not be currently specified in your yaml as it comes with a default. Opta 
 continuously updates this default but in order to not force downtime on the users the changes in the default do not
-affect existing clusters, only new ones. Please refer to [here](https://docs.opta.dev/reference/aws/modules/aws-eks/)
+affect existing clusters, only new ones. Please refer to [here](http://run-x.gihub.io/reference/aws/modules/aws-eks/)
 for more details of the `k8s-cluster` block.
 
 For example, if you just upgraded to kubernetes version 1.21, then your environment yaml may change from looking like 

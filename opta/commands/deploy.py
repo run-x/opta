@@ -74,7 +74,7 @@ def deploy(
 
     opta deploy -c my-service.yaml -i my-image:latest --local
 
-    Documentation: https://docs.opta.dev/features/custom_image/
+    Documentation: http://run-x.gihub.io/features/custom_image/
 
     """
 
@@ -92,7 +92,7 @@ def deploy(
                 fmt_msg(
                     """
                 Opta deploy can only run on service yaml files. This is an environment yaml file.
-                ~See https://docs.opta.dev/getting-started/ for more details.
+                ~See http://run-x.gihub.io/getting-started/ for more details.
                 ~
                 ~(We think that this is an environment yaml file, because service yaml must
                 ~specify the "environments" field).

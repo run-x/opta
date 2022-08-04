@@ -93,7 +93,7 @@ def secret() -> None:
 
     opta secret view -c my-service.yaml "MY_SECRET_1"
 
-    Documentation: https://docs.opta.dev/features/secrets/
+    Documentation: http://run-x.gihub.io/features/secrets/
     """
     pass
 
