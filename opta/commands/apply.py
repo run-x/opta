@@ -14,7 +14,6 @@ from colored import attr, fg
 from opta.amplitude import amplitude_client
 from opta.cleanup_files import cleanup_files
 from opta.commands.local_flag import _clean_tf_folder, _handle_local_flag
-from opta.commands.upgrade import _upgrade
 from opta.constants import DEV_VERSION, TF_PLAN_PATH, UPGRADE_WARNINGS, VERSION
 from opta.core.aws import AWS
 from opta.core.azure import Azure
@@ -334,16 +333,9 @@ def _verify_semver(
     old_semver = semver.VersionInfo.parse(old_semver_string)
     current_semver = semver.VersionInfo.parse(current_semver_string)
     if old_semver > current_semver:
-        logger.warning(
-            f"You're trying to run an older version ({current_semver}) of opta (last run with version {old_semver})."
+        raise Exception(
+            f"You're trying to run an older version ({current_semver}) of opta (last run with version {old_semver}). Please upgrade before re-running"
         )
-        if not auto_approve:
-            click.confirm(
-                "Do you wish to upgrade to the latest version of Opta?", abort=True,
-            )
-        _upgrade()
-        logger.info("Please rerun the command if the upgrade was successful.")
-        exit(0)
 
     present_modules = [k.aliased_type or k.type for k in layer.modules]
 
