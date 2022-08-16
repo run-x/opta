@@ -30,9 +30,6 @@ jobs:
         run: |
           if [ -z "$VERSION" ]; then export VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/v||'); fi
           make build-binary
-      - name: Upload to S3
-        run: |
-          if [ -z "$VERSION" ]; then export VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/v||'); fi
           cd dist/opta
           zip -r opta.zip ./*
       - name: Upload Linux Release
@@ -70,6 +67,8 @@ jobs:
           scl enable rh-python38 - << \EOF
           if [ -z "$VERSION" ]; then export VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/v||'); fi
           make build-binary
+          cd dist/opta
+          zip -r opta.zip ./*
           EOF
       - name: Upload CentOS Release
         uses: actions/upload-release-asset@v1
@@ -101,6 +100,8 @@ jobs:
         run: |
           if [ -z "$VERSION" ]; then export VERSION=$(echo "$GITHUB_REF" | sed 's|refs/tags/v||'); fi
           make build-binary
+          cd dist/opta
+          zip -r opta.zip ./*
       - name: Upload Mac Release
         uses: actions/upload-release-asset@v1
         env:
