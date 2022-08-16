@@ -213,13 +213,6 @@ def test_verify_semver_all_good(mocker: MockFixture, mocked_layer: Any) -> None:
     _verify_semver("0.1.0", "0.2.0", mocked_layer)
 
 
-def test_verify_semver_older_version(mocker: MockFixture, mocked_layer: Any) -> None:
-    mock_upgrade = mocker.patch("opta.commands.apply._upgrade")
-    with pytest.raises(SystemExit):
-        _verify_semver("0.2.0", "0.1.0", mocked_layer, True)
-    mock_upgrade.assert_called_once()
-
-
 def test_verify_semver_upgrade_warning(mocker: MockFixture, mocked_layer: Any) -> None:
     mocked_logger = mocker.patch("opta.commands.apply.logger")
     mocked_click = mocker.patch("opta.commands.apply.click")

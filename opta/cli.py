@@ -23,10 +23,8 @@ from opta.commands.push import push
 from opta.commands.secret import secret
 from opta.commands.shell import shell
 from opta.commands.show import show
-from opta.commands.upgrade import upgrade
 from opta.commands.validate import validate
 from opta.commands.version import version
-from opta.core.upgrade import check_version_upgrade
 from opta.crash_reporter import CURRENT_CRASH_REPORTER
 from opta.exceptions import UserErrors
 from opta.one_time import one_time
@@ -59,7 +57,6 @@ cli.add_command(validate)
 cli.add_command(version)
 cli.add_command(events)
 cli.add_command(force_unlock)
-cli.add_command(upgrade)
 cli.add_command(generate_terraform)
 cli.add_command(help)
 cli.add_command(show)
@@ -97,6 +94,5 @@ if __name__ == "__main__":
         # NOTE: Statements after the cli() invocation in the try clause are not executed.
         # A quick glance at click documentation did not show why that is the case or any workarounds.
         # Therefore adding this version check in the finally clause for now.
-        check_version_upgrade()
         if os.environ.get("OPTA_DEBUG") is None:
             cleanup_files()
