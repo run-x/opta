@@ -57,7 +57,7 @@ inputs:
     default: "t3.medium"
   - name: k8s_version
     user_facing: true
-    validator: enum("1.19", "1.20", "1.21", "1.22", required=False)
+    validator: enum("1.19", "1.20", "1.21", "1.22", "1.23", required=False)
     description: The Kubernetes version for the cluster. Must be [supported by EKS](https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html)
     default: "1.21"
   - name: control_plane_security_groups

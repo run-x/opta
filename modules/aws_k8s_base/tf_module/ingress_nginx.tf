@@ -37,13 +37,13 @@ resource "aws_acm_certificate" "user_provided" {
   certificate_body = join("\n", [var.certificate_body, var.certificate_chain])
 }
 
-// NOTE: following this solution for http -> https redirect: https://github.com/kubernetes/ingress-nginx/issues/2724#issuecomment-593769295
+// NOTE: following this solution for http -> https redirect: https://github.com/kubernetes/ingress-nginx/issues/3724#issuecomment-593769295
 resource "helm_release" "ingress-nginx" {
   count            = var.nginx_enabled ? 1 : 0
   chart            = "ingress-nginx"
   name             = "ingress-nginx"
   repository       = "https://kubernetes.github.io/ingress-nginx"
-  version          = contains(["1.19", "1.20", "1.21", "1.22"], var.k8s_version) ? "4.1.4" : "3.40.0"
+  version          = contains(["1.19", "1.20", "1.21", "1.22", "1.23"], var.k8s_version) ? "4.1.4" : "3.40.0"
   namespace        = "ingress-nginx"
   create_namespace = true
   atomic           = true
