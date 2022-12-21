@@ -32,12 +32,22 @@ jobs:
           make build-binary
           cd dist/opta
           zip -r opta.zip ./*
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.CI_BOT_PAT }}
+        with:
+          tag_name: ${{ inputs.version }}-linux
+          release_name: Release  ${{ inputs.version }}-linux
+          draft: false
+          prerelease: false
       - name: Upload Linux Release
         uses: actions/upload-release-asset@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.ALL_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.CI_BOT_PAT }}
         with:
-          upload_url: ${{ github.event.release.upload_url }}
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: dist/opta/opta.zip
           asset_name: opta_linux.zip
           asset_content_type: application/zip
@@ -70,12 +80,22 @@ jobs:
           cd dist/opta
           zip -r opta.zip ./*
           EOF
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.CI_BOT_PAT }}
+        with:
+          tag_name: ${{ inputs.version }}-centos
+          release_name: Release  ${{ inputs.version }}-centos
+          draft: false
+          prerelease: false
       - name: Upload CentOS Release
         uses: actions/upload-release-asset@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.ALL_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.CI_BOT_PAT }}
         with:
-          upload_url: ${{ github.event.release.upload_url }}
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: dist/opta/opta.zip
           asset_name: opta_centos.zip
           asset_content_type: application/zip
@@ -102,12 +122,22 @@ jobs:
           make build-binary
           cd dist/opta
           zip -r opta.zip ./*
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.CI_BOT_PAT }}
+        with:
+          tag_name: ${{ inputs.version }}-mac
+          release_name: Release ${{ inputs.version }}-mac
+          draft: false
+          prerelease: false
       - name: Upload Mac Release
         uses: actions/upload-release-asset@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.ALL_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.CI_BOT_PAT }}
         with:
-          upload_url: ${{ github.event.release.upload_url }}
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: dist/opta/opta.zip
           asset_name: opta_mac.zip
           asset_content_type: application/zip
