@@ -39,7 +39,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.CI_BOT_PAT }}
         with:
           tag_name: ${{ VERSION }}-linux
-          release_name: Release  ${{ VERSION }-linux
+          release_name: Release  ${{ VERSION }}-linux
           draft: false
           prerelease: false
       - name: Upload Linux Release
@@ -87,7 +87,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.CI_BOT_PAT }}
         with:
           tag_name: ${{ VERSION }}-centos
-          release_name: Release  ${{ VERSION }-centos
+          release_name: Release  ${{ VERSION }}-centos
           draft: false
           prerelease: false
       - name: Upload CentOS Release
@@ -129,7 +129,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.CI_BOT_PAT }}
         with:
           tag_name: ${{ VERSION }}-mac
-          release_name: Release  ${{ VERSION }-mac
+          release_name: Release  ${{ VERSION }}-mac
           draft: false
           prerelease: false
       - name: Upload Mac Release
