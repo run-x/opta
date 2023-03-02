@@ -1,4 +1,4 @@
-# Contributing 
+# Contributing
 
 First off, thanks for taking the time!
 If you are interested in contributing to Opta, we'd love to hear from you! Drop us a line in our [Slack](https://slack.opta.dev/).
