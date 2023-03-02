@@ -17,7 +17,6 @@ resource "helm_release" "metrics_server" {
       apiService : {
         create : true
       }
-      args : ["--metric-resolution=15s"]
     })
   ]
 }
