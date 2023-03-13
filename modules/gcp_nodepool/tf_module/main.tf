@@ -101,10 +101,10 @@ resource "google_container_node_pool" "node_pool" {
     }
 
     dynamic "guest_accelerator" {
-      for_each = var.guest_accelerators
+      for_each = var.guest_accelerator_count > 0 ? [1] : []
       content {
-        type  = guest_accelerator.value["type"]
-        count = guest_accelerator.value["count"]
+        type  = var.guest_accelerator_type
+        count = var.guest_accelerator_count
       }
     }
   }

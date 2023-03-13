@@ -14,7 +14,7 @@ class GcpNodePoolProcessor(ModuleProcessor):
         super(GcpNodePoolProcessor, self).__init__(module, layer)
 
     def process(self, module_idx: int) -> None:
-        if "guest_accelerators" in self.module.data:
+        if self.module.data.get("guest_accelerator_count", 0):
             gcp_gke_module = None
             for module in self.layer.modules:
                 if (module.aliased_type or module.type) == "gcp-gke":
@@ -25,15 +25,12 @@ class GcpNodePoolProcessor(ModuleProcessor):
                     "The gcp-nodepool module needs to be run on the same yaml as gcp-gke"
                 )
             gcp_gke_node_zone_names = set(gcp_gke_module.data["node_zone_names"])
-            guest_accelerator_types = [
-                ga["type"] for ga in self.module.data["guest_accelerators"]
-            ]
             # Identify the intersection of the GKE cluster's node locations, and zones
             # where the desired guest accelerators are available.
             gcp_nodepool_node_zone_names = sorted(
                 set(
-                    GCP(self.layer).get_zones_for_accelerator_types(
-                        *guest_accelerator_types
+                    GCP(self.layer).get_zones_for_accelerator_type(
+                        self.module.data["guest_accelerator_type"]
                     )
                 )
                 & gcp_gke_node_zone_names

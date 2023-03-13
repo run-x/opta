@@ -70,11 +70,16 @@ inputs:
     validator: list(include('taint'), required=False)
     description: Taints to add to the nodes in this nodegroup.
     default: []
-  - name: guest_accelerators
+  - name: guest_accelerator_type
     user_facing: true
-    validator: list(include('guest_accelerator'), required=False)
-    description: GPU accelerators to add to the nodes in this nodegroup.
-    default: []
+    validator: str(required=False)
+    description: Guest accelerator type to add to the nodes in this nodegroup.
+    default: "nvidia-tesla-t4"
+  - name: guest_accelerator_count
+    user_facing: true
+    validator: int(required=False)
+    description: Number of guest accelerators to add to the nodes in this nodegroup.
+    default: 0
 outputs: []
 output_providers: {}
 output_data: {}
@@ -83,8 +88,5 @@ extra_validators:
     key: str(required=True)
     value: str(required=False)
     effect: str(required=False)
-  guest_accelerator:
-    type: str(required=True)
-    count: int(required=False)
 clouds:
   - gcp

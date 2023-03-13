@@ -71,10 +71,12 @@ variable "taints" {
   default = []
 }
 
-variable "guest_accelerators" {
-  type = list(object({
-    type  = string
-    count = number
-  }))
-  default = []
+variable "guest_accelerator_type" {
+  type = string
+  default = ""
+}
+
+variable "guest_accelerator_count" {
+  type = number
+  default = 0
 }

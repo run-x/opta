@@ -310,16 +310,15 @@ class GCP(CloudClient):
             raise MissingState("TF state does not exist.")
         return json.dumps(tf_state, indent=4)
 
-    def get_zones_for_accelerator_types(self, *accelerator_type: str) -> List[str]:
+    def get_zones_for_accelerator_type(self, accelerator_type: str) -> List[str]:
         credentials, project_id = self.get_credentials()
         service = discovery.build(
             "compute", "v1", credentials=credentials, static_discovery=False
         )
-        concat_accelerator_types = "|".join(accelerator_type)
         request = service.acceleratorTypes().aggregatedList(
             project=project_id,
             filter=(
-                f'(name eq "{concat_accelerator_types}") '
+                f'(name eq "{accelerator_type}") '
                 f'(zone eq "https://www.googleapis.com/compute/v1/projects/{project_id}/zones/{self.region}-.*")'
             ),
         )
@@ -328,8 +327,6 @@ class GCP(CloudClient):
             [
                 k.replace("zones/", "")
                 for k, v in response.get("items", {}).items()
-                if set(accelerator_type).issubset(
-                    i["name"] for i in v.get("acceleratorTypes", [])
-                )
+                if "acceleratorTypes" in v
             ]
         )
