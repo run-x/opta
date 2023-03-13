@@ -113,3 +113,7 @@ variable "ingress_nginx_values" {
 variable "nginx_enabled" {
   type = bool
 }
+
+variable "use_latest_nvidia_gpu_driver" {
+  type = bool
+}

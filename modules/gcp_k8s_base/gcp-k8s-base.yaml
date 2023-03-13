@@ -91,6 +91,11 @@ inputs:
     validator: any(required=False)
     description: Ingress Nginx helm chart additional values. [Available options](https://artifacthub.io/packages/helm/ingress-nginx/ingress-nginx?modal=values)
     default: {}
+  - name: use_latest_nvidia_gpu_driver
+    user_facing: true
+    validator: bool(required=False)
+    description: Install latest Nvidia GPU driver version.
+    default: false
 outputs:
   - name: load_balancer_raw_ip
     export: bool

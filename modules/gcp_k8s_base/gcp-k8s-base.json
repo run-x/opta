@@ -48,6 +48,11 @@
       "description": "Ingress Nginx helm chart additional values. [Available options](https://artifacthub.io/packages/helm/ingress-nginx/ingress-nginx?modal=values)",
       "default": {}
     },
+    "use_latest_nvidia_gpu_driver": {
+      "type": "boolean",
+      "description": "Install latest Nvidia GPU driver version.",
+      "default": false
+    },
     "type": {
       "description": "The name of this module",
       "enum": [
