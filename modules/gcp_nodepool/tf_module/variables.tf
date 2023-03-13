@@ -70,3 +70,11 @@ variable "taints" {
   type    = list(map(string))
   default = []
 }
+
+variable "gpu_accelerators" {
+  type = list(object({
+    type  = string
+    count = number
+  }))
+  default = []
+}
