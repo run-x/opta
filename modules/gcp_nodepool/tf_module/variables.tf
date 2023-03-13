@@ -71,7 +71,7 @@ variable "taints" {
   default = []
 }
 
-variable "gpu_accelerators" {
+variable "guest_accelerators" {
   type = list(object({
     type  = string
     count = number
