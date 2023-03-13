@@ -41,7 +41,7 @@ class GcpNodePoolProcessor(ModuleProcessor):
             # just throw an error is an overlap cannot be determined.
             if not gcp_nodepool_node_zone_names:
                 raise UserErrors(
-                    f"Desired guest accelerators not available in cluster node locations: {', '.join(gcp_gke_node_zone_names)}"
+                    f"Desired guest accelerator is not available in cluster node locations: {', '.join(gcp_gke_node_zone_names)}"
                 )
             self.module.data["node_zone_names"] = gcp_nodepool_node_zone_names
         super(GcpNodePoolProcessor, self).process(module_idx)
