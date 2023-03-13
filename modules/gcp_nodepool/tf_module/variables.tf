@@ -72,11 +72,11 @@ variable "taints" {
 }
 
 variable "guest_accelerator_type" {
-  type = string
+  type    = string
   default = ""
 }
 
 variable "guest_accelerator_count" {
-  type = number
+  type    = number
   default = 0
 }
