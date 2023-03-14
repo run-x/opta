@@ -114,6 +114,7 @@ variable "nginx_enabled" {
   type = bool
 }
 
-variable "use_latest_nvidia_gpu_driver" {
-  type = bool
+variable "nvidia_gpu_driver_version" {
+  type = string
+  default = "DEFAULT"
 }

@@ -4,7 +4,7 @@ resource "helm_release" "nvidia_driver_installer" {
   namespace = "kube-system"
   values = [
     yamlencode({
-      use_latest_version : var.use_latest_nvidia_gpu_driver
+      use_latest_version : var.nvidia_gpu_driver_version == "LATEST"
     })
   ]
 }

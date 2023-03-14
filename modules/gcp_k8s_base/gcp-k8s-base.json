@@ -48,10 +48,10 @@
       "description": "Ingress Nginx helm chart additional values. [Available options](https://artifacthub.io/packages/helm/ingress-nginx/ingress-nginx?modal=values)",
       "default": {}
     },
-    "use_latest_nvidia_gpu_driver": {
-      "type": "boolean",
-      "description": "Opt-in to [latest](https://cloud.google.com/kubernetes-engine/docs/how-to/gpus#installing_drivers) Nvidia GPU driver version.",
-      "default": false
+    "nvidia_gpu_driver_version": {
+      "type": "string",
+      "description": "Nvidia GPU driver version. Use one of DEFAULT or LATEST. See https://cloud.google.com/kubernetes-engine/docs/how-to/gpus#installing_drivers",
+      "default": "DEFAULT"
     },
     "type": {
       "description": "The name of this module",
