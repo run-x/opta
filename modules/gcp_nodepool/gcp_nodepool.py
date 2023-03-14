@@ -14,7 +14,7 @@ class GcpNodePoolProcessor(ModuleProcessor):
         super(GcpNodePoolProcessor, self).__init__(module, layer)
 
     def process(self, module_idx: int) -> None:
-        if self.module.data.get("guest_accelerator_count", 0):
+        if self.module.data.get("guest_accelerator_count", 0) > 0:
             gcp_gke_module = None
             for module in self.layer.modules:
                 if (module.aliased_type or module.type) == "gcp-gke":
