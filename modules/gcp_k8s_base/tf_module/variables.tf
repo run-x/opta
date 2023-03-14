@@ -115,6 +115,6 @@ variable "nginx_enabled" {
 }
 
 variable "nvidia_gpu_driver_version" {
-  type = string
+  type    = string
   default = "DEFAULT"
 }
