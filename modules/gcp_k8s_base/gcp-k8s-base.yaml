@@ -91,6 +91,11 @@ inputs:
     validator: any(required=False)
     description: Ingress Nginx helm chart additional values. [Available options](https://artifacthub.io/packages/helm/ingress-nginx/ingress-nginx?modal=values)
     default: {}
+  - name: nvidia_gpu_driver_version
+    user_facing: true
+    validator: enum("DEFAULT", "LATEST", required=False)
+    description: Nvidia GPU driver version. Use one of DEFAULT or LATEST. See https://cloud.google.com/kubernetes-engine/docs/how-to/gpus#installing_drivers
+    default: "DEFAULT"
 outputs:
   - name: load_balancer_raw_ip
     export: bool

@@ -70,3 +70,13 @@ variable "taints" {
   type    = list(map(string))
   default = []
 }
+
+variable "guest_accelerator_type" {
+  type    = string
+  default = ""
+}
+
+variable "guest_accelerator_count" {
+  type    = number
+  default = 0
+}

@@ -1,0 +1,5 @@
+{{- if .Values.use_latest_version }}
+{{- $.Files.Get "fixtures/daemonset-preloaded-latest.yaml" }}
+{{- else }}
+{{- $.Files.Get "fixtures/daemonset-preloaded.yaml" }}
+{{- end }}

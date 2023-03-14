@@ -55,6 +55,7 @@ PROCESSOR_DICT: Dict[str, str] = {
     "gcp-k8s-base": "GcpK8sBaseProcessor",
     "gcp-k8s-service": "GcpK8sServiceProcessor",
     "gcp-gke": "GcpGkeProcessor",
+    "gcp-nodepool": "GcpNodePoolProcessor",
     "aws-dns": "AwsDnsProcessor",
     "aws-postgres": "AwsPostgresProcessor",
     "aws-documentdb": "AwsDocumentDbProcessor",

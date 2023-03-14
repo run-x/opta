@@ -1,0 +1,6 @@
+apiVersion: v2
+name: nvidia-driver-installer
+description: A Helm chart for injecting Nvidia device drivers into GKE GPU-enabled nodes.
+type: application
+version: 0.0.0
+appVersion: 0.0.0

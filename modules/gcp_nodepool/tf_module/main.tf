@@ -56,6 +56,7 @@ resource "google_container_node_pool" "node_pool" {
   name               = "opta-${var.layer_name}-${random_string.node_pool_id.id}"
   cluster            = data.google_container_cluster.main.name
   location           = data.google_client_config.current.region
+  node_locations     = var.node_zone_names
   initial_node_count = var.min_nodes
 
   autoscaling {
@@ -96,6 +97,14 @@ resource "google_container_node_pool" "node_pool" {
         key    = taint.value["key"]
         effect = lookup(taint.value, "effect", "NO_SCHEDULE")
         value  = lookup(taint.value, "value", "opta")
+      }
+    }
+
+    dynamic "guest_accelerator" {
+      for_each = var.guest_accelerator_count > 0 ? [1] : []
+      content {
+        type  = var.guest_accelerator_type
+        count = var.guest_accelerator_count
       }
     }
   }

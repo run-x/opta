@@ -309,3 +309,24 @@ class GCP(CloudClient):
         if tf_state is None:
             raise MissingState("TF state does not exist.")
         return json.dumps(tf_state, indent=4)
+
+    def get_zones_for_accelerator_type(self, accelerator_type: str) -> List[str]:
+        credentials, project_id = self.get_credentials()
+        service = discovery.build(
+            "compute", "v1", credentials=credentials, static_discovery=False
+        )
+        request = service.acceleratorTypes().aggregatedList(
+            project=project_id,
+            filter=(
+                f'(name eq "{accelerator_type}") '
+                f'(zone eq "https://www.googleapis.com/compute/v1/projects/{project_id}/zones/{self.region}-.*")'
+            ),
+        )
+        response: Dict = request.execute()
+        return sorted(
+            [
+                k.replace("zones/", "")
+                for k, v in response.get("items", {}).items()
+                if "acceleratorTypes" in v
+            ]
+        )
