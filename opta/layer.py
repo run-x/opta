@@ -18,7 +18,6 @@ import google.auth.transport.requests
 from azure.core.exceptions import ClientAuthenticationError
 from azure.identity import DefaultAzureCredential
 from botocore.exceptions import ClientError, NoCredentialsError
-from google.auth import default
 from google.auth.exceptions import DefaultCredentialsError
 from google.oauth2 import service_account
 from kubernetes.config.kube_config import KUBE_CONFIG_DEFAULT_LOCATION
@@ -579,7 +578,6 @@ class Layer:
 
     @lru_cache(maxsize=None)
     def bucket_exists(self, bucket_name: str) -> bool:
-
         if self.is_stateless_mode() is True:
             return False
 
@@ -592,7 +590,6 @@ class Layer:
             return False
 
     def _get_unique_hash(self) -> str:
-
         if self.cloud == "aws":
             provider = self.providers["aws"]
             str2hash = provider["region"] + provider["account_id"]
@@ -750,7 +747,7 @@ class Layer:
 
     def _verify_gcp_cloud_credentials(self) -> None:
         try:
-            _, configured_project_id = default()
+            _, configured_project_id = GCP.get_credentials()
             required_project_id = self.root().providers["google"]["project"]
             if required_project_id != configured_project_id:
                 raise UserErrors(

@@ -2,7 +2,7 @@ from typing import List
 
 import pytest
 from botocore.exceptions import ClientError
-from google.api_core.exceptions import ClientError as GoogleClientError
+from google.api_core.exceptions import NotFound
 from pytest_mock import MockFixture
 
 from opta.core.terraform import Terraform, fetch_terraform_state_resources
@@ -357,24 +357,15 @@ class TestTerraform:
         }
         mocked_gcp = mocker.patch("opta.core.terraform.GCP")
         mocked_credentials = mocker.Mock()
-        mocked_gcp.get_credentials.return_value = tuple(
-            [mocked_credentials, "dummy-project"]
-        )
+        mocked_gcp.get_credentials.return_value = (mocked_credentials, "dummy-project")
         mocked_storage = mocker.patch("opta.core.terraform.storage")
         mocked_storage_client = mocker.Mock()
         mocked_storage.Client.return_value = mocked_storage_client
-        get_bucket_error = GoogleClientError(message="blah")
-        get_bucket_error.code = 404
-        mocked_storage_client.get_bucket.side_effect = get_bucket_error
+        mocked_storage_client.get_bucket.side_effect = NotFound("not found")  # type: ignore
         mocked_bucket = mocker.Mock()
         mocked_bucket.project_number = "123"
         mocked_storage_client.create_bucket.return_value = mocked_bucket
 
-        mocked_google_credentials = mocker.patch("opta.core.terraform.GoogleCredentials")
-        mocked_api_credentials = mocker.Mock()
-        mocked_google_credentials.get_application_default.return_value = (
-            mocked_api_credentials
-        )
         mocked_discovery = mocker.patch("opta.core.terraform.discovery")
         mocked_service = mocker.Mock()
         mocked_cloudresourcemanager = mocker.Mock()
@@ -401,7 +392,6 @@ class TestTerraform:
         )
 
         Terraform.create_state_storage(layer)
-        mocked_gcp.get_credentials.assert_called_once_with()
         mocked_storage.Client.assert_called_once_with(
             project="dummy-project", credentials=mocked_credentials
         )
@@ -411,19 +401,18 @@ class TestTerraform:
         mocked_storage_client.create_bucket.assert_called_once_with(
             "opta-tf-state-test-dev1", location="us-central1"
         )
-        mocked_google_credentials.get_application_default.assert_called_once_with()
         mocked_discovery.build.assert_has_calls(
             [
                 mocker.call(
                     "serviceusage",
                     "v1",
-                    credentials=mocked_api_credentials,
+                    credentials=mocked_credentials,
                     static_discovery=False,
                 ),
                 mocker.call(
                     "cloudresourcemanager",
                     "v1",
-                    credentials=mocked_api_credentials,
+                    credentials=mocked_credentials,
                     static_discovery=False,
                 ),
             ]
