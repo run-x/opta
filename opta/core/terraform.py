@@ -28,7 +28,6 @@ from google.cloud.exceptions import NotFound
 from googleapiclient import discovery
 from googleapiclient.errors import HttpError
 from kubernetes.client import CoreV1Api, V1Secret, V1SecretList
-from oauth2client.client import GoogleCredentials
 from packaging import version
 
 from opta.constants import MAX_TERRAFORM_VERSION, MIN_TERRAFORM_VERSION
@@ -648,7 +647,7 @@ class Terraform:
                 )
 
         # Enable the APIs
-        credentials = GoogleCredentials.get_application_default()
+        credentials, _ = GCP.get_credentials()
         service = discovery.build(
             "serviceusage", "v1", credentials=credentials, static_discovery=False
         )
@@ -862,7 +861,6 @@ class Terraform:
 
         # If this is the env layer, delete the state bucket & dynamo table as well.
         if layer.name == layer.root().name:
-
             logger.info(f"Deleting the state storage for {layer.name}...")
             if layer.cloud == "aws":
                 cls._aws_delete_state_storage(layer)

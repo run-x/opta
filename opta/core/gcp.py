@@ -26,6 +26,8 @@ from opta.utils.dependencies import ensure_installed
 if TYPE_CHECKING:
     from opta.layer import Layer, StructuredConfig
 
+DEFAULT_SCOPES = ["https://www.googleapis.com/auth/cloud-platform"]
+
 
 class GCP(CloudClient):
     project_id: Optional[str] = None
@@ -41,7 +43,7 @@ class GCP(CloudClient):
     def get_credentials(cls) -> Tuple[Credentials, str]:
         if cls.project_id is None or cls.credentials is None:
             try:
-                cls.credentials, cls.project_id = default()
+                cls.credentials, cls.project_id = default(default_scopes=DEFAULT_SCOPES)
             except DefaultCredentialsError:
                 raise UserErrors(
                     "Couldn't find default google credentials to use, pls run "
