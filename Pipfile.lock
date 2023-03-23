@@ -1078,11 +1078,11 @@
         },
         "pyinstaller-hooks-contrib": {
             "hashes": [
-                "sha256:7605e440ccb55904cb2a87d72e83642ef176fb7030c77e52ac4d9679bb3d1537",
-                "sha256:ab1d14fe053016fff7b0c6aea51d980bac6d02114b04063b46ef7dac70c70e1e"
+                "sha256:ab56c192e7cd4472ff6b840cda4fc42bceccc7fb4234f064fc834a3248c0afdd",
+                "sha256:d2ea40a7105651aa525bfe5fe309aa264d4d9bb49f839b862243dcf0a56c34cd"
             ],
-            "markers": "python_version >= '3.7'",
-            "version": "==2022.2"
+            "index": "pypi",
+            "version": "==2023.1"
         },
         "pyjwt": {
             "extras": [
