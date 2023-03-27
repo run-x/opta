@@ -17,7 +17,10 @@ resource "helm_release" "metrics_server" {
       apiService : {
         create : true
       }
-      args : ["--metric-resolution=15s"]
+      args : [
+        "--secure-port=8443",
+        "--metric-resolution=15s"
+      ]
     })
   ]
 }
